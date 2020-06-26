@@ -1,0 +1,23 @@
+{
+    "@timestamp": "${ts?number_to_datetime?iso_utc_ms}",
+    "start_ts": "${((ts - 100)/1000)?c}",
+    "expiration_ts": "${((ts + 1000)/1000)?c}",
+    "ip_protocol_version": 4,
+    "protocol": 6,
+    "src_ip": "${utils.randomIP('192.168.0.0/24')}",
+    "src_port": ${utils.randomInt(1024,65535)?c},
+    "dst_ip": "${utils.randomIP()}",
+    "dst_port": 53,
+    "direction": "R2R",
+    "src_pkts": 1,
+    "src_bytes": 59,
+    "dst_pkts": 1,
+    "dst_bytes": 120,
+    "tcp_flags": 0,
+    "dns_query": "yt3.ggpht.com",
+    "dns_query_type": "A",
+    "dns_ret_code": "NOERROR",
+    "http_host": "",
+    "http_url": "",
+    "probe_hostname": "${utils.randomChoice('nf1.internal', 'nf2.internal', 'nf3.internal')}"
+}

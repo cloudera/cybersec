@@ -1,0 +1,26 @@
+<#assign src_pkts= utils.randomInt(1,5000)>
+<#assign dst_pkts= utils.randomInt(1,5000)>
+{
+    "@timestamp": "${ts?number_to_datetime?iso_utc_ms}",
+    "start_ts": "${((ts - 100)/1000)?c}",
+    "expiration_ts": "${((ts + 1000)/1000)?c}",
+    "ip_protocol_version": 4,
+    "protocol": 6,
+    "src_ip": "${utils.randomIP()}",
+    "src_port": ${utils.randomInt(1024,65535)?c},
+    "dst_ip": "${utils.randomIP()}",
+    "dst_port": 80,
+    "direction": "R2R",
+    "src_pkts": ${src_pkts?c},
+    "src_bytes": ${(src_pkts * utils.randomInt(100,1500))?c},
+    "dst_pkts": ${dst_pkts?c},
+    "dst_bytes": ${(dst_pkts * utils.randomInt(100,1500))?c},
+    "tcp_flags": 27,
+    "l7_protocol_name": "HTTP",
+    "dns_query": "",
+    "dns_query_type": "0",
+    "dns_ret_code": "0",
+    "http_host": "${utils.randomHost()}",
+    "http_url": "${utils.randomUrlPath()}",
+    "probe_hostname": "${utils.randomChoice('nf1.internal', 'nf2.internal', 'nf3.internal')}"
+}

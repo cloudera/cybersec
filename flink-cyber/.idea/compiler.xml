@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="flink-cyber-api" />
+        <module name="flink-web" />
+        <module name="flink-parser" />
+        <module name="flink-enrichment" />
+        <module name="caracal-generator" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>

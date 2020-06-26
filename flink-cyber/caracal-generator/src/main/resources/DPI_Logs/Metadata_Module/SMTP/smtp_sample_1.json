@@ -1,0 +1,27 @@
+{
+    "smtp-stream": {
+        "flow_id": ${utils.randomInt(100000000,500000000)?c},
+        "probe-id": "dpi1",
+        "start_ts": "${((ts - 100)/1000)?c}",
+        "ip_clt": "${utils.randomIP()}",
+        "ip_srv": "${utils.randomIP()}",
+        "smtp.email": [
+            {
+                "smtp.sender_entry": [
+                    {
+                        "smtp.sender": "\"${utils.randomName()}\" ${utils.randomEmail()}"
+                    }
+                ],
+                "smtp.receiver_entry": [
+                    {
+                        "smtp.receiver": "${utils.randomEmail()}"
+                    }
+                ],
+                "smtp.subject": "${utils.randomSubject()}",
+                "smtp.date": "{$(ts - utils.randomInt(10000,1000000))}}"
+            }
+        ],
+        "expiration_ts": "${((ts + 1000)/1000)?c}",
+        "path": "base.eth.ip.tcp.smtp"
+    }
+}

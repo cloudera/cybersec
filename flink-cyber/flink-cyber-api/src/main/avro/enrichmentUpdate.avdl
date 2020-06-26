@@ -1,0 +1,25 @@
+@namespace("com.cloudera.cyber")
+protocol EnrichmentUpdate {
+  enum UpdateCommand {
+    SET, GET, DELETE
+  }
+  record EnrichmentEntry {
+    string key;
+    map<string> entries;
+  }
+
+  record EnrichmentUpdateCommand {
+    UpdateCommand command;
+
+    string name;
+    array<EnrichmentEntry> entry;
+  }
+
+  record EnrichmentUpdateResponse {
+    UpdateCommand command;
+    string name;
+    array<EnrichmentEntry> entry;
+    boolean success;
+  }
+
+}

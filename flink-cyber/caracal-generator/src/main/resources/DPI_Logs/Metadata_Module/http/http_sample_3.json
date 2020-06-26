@@ -1,0 +1,57 @@
+{
+    "http-stream": {
+        "flow_id": 1391032925,
+        "probe-id": "dpi1",
+        "start_ts": "1549772542.287634",
+        "ip_clt": "1.2.3.4",
+        "ip_srv": "5.6.7.8",
+        "port_clt": 36311,
+        "port_srv": 80,
+        "http.request": [
+            {
+                "http.index": "1",
+                "http.method": "GET",
+                "http.uri": "/pkiops/crl/Microsoft%20Update%20Signing%20CA%202.3.crl",
+                "http.user_agent": "Microsoft-CryptoAPI/6.1",
+                "http.host": "www.microsoft.com"
+            },
+            {
+                "http.index": "1",
+                "http.code": "304",
+                "http.content_type": "application/octet-stream",
+                "http.mime_type": "application/octet-stream",
+                "http.date": "Sun, 10 Feb 2019 04:25:25 GMT"
+            },
+            {
+                "http.index": "2",
+                "http.method": "GET",
+                "http.uri": "/pkiops/crl/Microsoft%20Update%20Signing%20CA%201.1.crl",
+                "http.user_agent": "Microsoft-CryptoAPI/6.1",
+                "http.host": "www.microsoft.com"
+            },
+            {
+                "http.index": "2",
+                "http.code": "304",
+                "http.content_type": "application/octet-stream",
+                "http.mime_type": "application/octet-stream",
+                "http.date": "Sun, 10 Feb 2019 04:25:25 GMT"
+            },
+            {
+                "http.index": "3",
+                "http.method": "GET",
+                "http.uri": "/pkiops/crl/Microsoft%20Update%20Secure%20Server%20CA%202.1.crl",
+                "http.user_agent": "Microsoft-CryptoAPI/6.1",
+                "http.host": "www.microsoft.com"
+            },
+            {
+                "http.index": "3",
+                "http.code": "304",
+                "http.content_type": "application/octet-stream",
+                "http.mime_type": "application/octet-stream",
+                "http.date": "Sun, 10 Feb 2019 04:25:26 GMT"
+            }
+        ],
+        "expiration_ts": "1549772668.4128",
+        "path": "base.eth.ip.tcp.http.microsoft"
+    }
+}

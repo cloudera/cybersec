@@ -1,0 +1,14 @@
+@namespace("com.cloudera.cyber")
+protocol EnrichmentLookupSources {
+  record EnrichmentEntry {
+    string key;
+    map<string> entries;
+  }
+
+  record EnrichmentLookupSource {
+    string name;
+  }
+
+  array<EnrichmentLookupSource> listSources();
+  array<EnrichmentEntry> allEntries(EnrichmentLookupSource source);
+}

@@ -1,0 +1,27 @@
+{
+    "radius-stream": {
+        "flow_id": ${utils.randomInt(100000000,500000000)?c},
+        "probe-id": "dpi1",
+        "start_ts": "${((ts - 100)/1000)?c}",
+        "ip_clt": "${utils.randomIP('192.168.0.0/22')}",
+        "ip_srv": "${utils.randomIP('172.16.0.0/23')}",
+        "port_clt": ${utils.randomInt(1024,65535)?c},
+        "port_srv": 1813,
+        "radius.request": [
+            {
+                "radius.code": "4",
+                "radius.login": "${utils.randomUser()}",
+                "radius.status": "STOP",
+                "radius.nas_ip": "${utils.randomIP('172.16.0.0/23')}",
+                "radius.framed_ip": "${utils.randomIP('172.16.0.0/23')}",
+                "radius.calling_station_id": "20:20:20:20:20:20",
+                "radius.nas_id": "SSG400-1"
+            },
+            {
+                "radius.code": "5"
+            }
+        ],
+        "expiration_ts": "${((ts + 1000)/1000)?c}",
+        "path": "base.eth.ip.udp.radius"
+    }
+}
