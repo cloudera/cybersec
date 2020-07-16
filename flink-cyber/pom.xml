@@ -14,6 +14,9 @@
         <module>flink-parser</module>
         <module>flink-web</module>
         <module>caracal-generator</module>
+        <module>flink-sessions</module>
+        <module>flink-common</module>
+        <module>flink-dedupe</module>
     </modules>
 
     <properties>
@@ -138,6 +141,13 @@
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest</artifactId>
                 <version>2.2</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-test-utils_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
                 <scope>test</scope>
             </dependency>
 

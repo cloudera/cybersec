@@ -7,10 +7,13 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="flink-cyber-api" />
-        <module name="flink-web" />
+        <module name="caracal-generator" />
+        <module name="flink-common" />
+        <module name="flink-dedupe" />
+        <module name="flink-sessions" />
         <module name="flink-parser" />
         <module name="flink-enrichment" />
-        <module name="caracal-generator" />
+        <module name="flink-web" />
       </profile>
     </annotationProcessing>
   </component>
