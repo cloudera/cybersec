@@ -21,12 +21,25 @@
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>schema</goal>
+
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
+                            <customConversions>org.apache.avro.Conversions$UUIDConversion</customConversions>
+                            <imports>
+                                <import>${project.basedir}/src/main/avro/message.avsc</import>
+                            </imports>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>protocols</id>
+                        <phase>generate-sources</phase>
+                        <goals>
                             <goal>protocol</goal>
                             <goal>idl-protocol</goal>
                         </goals>
                         <configuration>
                             <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
-
                         </configuration>
                     </execution>
                 </executions>
@@ -34,7 +47,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-
             </plugin>
         </plugins>
     </build>

@@ -1,7 +1,7 @@
 @namespace("com.cloudera.cyber")
 protocol EnrichmentUpdate {
   enum UpdateCommand {
-    SET, GET, DELETE
+    SET, DELETE
   }
   record EnrichmentEntry {
     string key;
