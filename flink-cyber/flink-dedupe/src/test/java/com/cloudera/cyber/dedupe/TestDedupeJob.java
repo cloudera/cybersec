@@ -101,7 +101,7 @@ public class TestDedupeJob extends DedupeJob {
                             .ts((long) (Math.ceil(m.getTs() / 1000) * 1000 + 1000))
                             .build();
                 }));
-        
+
         List<DedupeMessage> output = new ArrayList<>();
 
         for (int i = 0; i < 10; i++) {
@@ -162,3 +162,6 @@ public class TestDedupeJob extends DedupeJob {
         return source.getDataStream();
     }
 }
+
+
+

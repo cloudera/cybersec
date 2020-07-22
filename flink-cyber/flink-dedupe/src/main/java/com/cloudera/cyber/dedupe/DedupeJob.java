@@ -34,7 +34,7 @@ public abstract class DedupeJob {
     protected static final String PARAM_DEDUPE_MAX_COUNT = "dedupe.limit.count";
     private static final long DEFAULT_SESSION_TIME = 1000;
 
-    public StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
+    protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
