@@ -100,6 +100,11 @@ public class FlinkDataFlowYarn implements FlinkDataFlow {
         return false;
     }
 
+
+    public void start() throws Exception {
+        this.start(null);
+    }
+
     public void start(String savepoint) throws Exception {
         List<String> flinkArgs = new ArrayList<String>();
 
@@ -113,6 +118,9 @@ public class FlinkDataFlowYarn implements FlinkDataFlow {
         flinkYarnCmd(FlinkCommand.START, flinkArgs);
     }
 
+    public void stop() throws Exception {
+        this.stop(null);
+    }
     public void stop(String savepoint) throws Exception {
         List<String> flinkArgs = new ArrayList<String>();
 

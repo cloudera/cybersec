@@ -1,0 +1,11 @@
+kafka:
+  bootstrap-servers: localhost:9092
+  consumer:
+    groupId: flink-cyber
+  producer:
+    clientId: flink-cyber
+
+scoring:
+  command:
+    output: scoring.output
+    input: scoring.input

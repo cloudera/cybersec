@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 @Builder(toBuilder = true)
-public class GroupedMessage implements IdentifiedMessage {
+public class GroupedMessage implements IdentifiedMessage, Timestamped {
     protected UUID id;
     protected List<Message> messages;
 
@@ -20,7 +20,7 @@ public class GroupedMessage implements IdentifiedMessage {
             _startTs = getMessages().stream().map(Message::getTs).min(Long::compareTo).get();
         return _startTs;
     }
-    public Long getTs() {
+    public long getTs() {
         if (_ts == null) _ts = getMessages().stream().map(Message::getTs).max(Long::compareTo).get();
         return _ts;
     }

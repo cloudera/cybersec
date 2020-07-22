@@ -19,13 +19,14 @@ package com.cloudera.cyber.ui;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScans;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
 @EnableAutoConfiguration
-@ComponentScan
+@ComponentScan(basePackages = {"com.cloudera.cyber.ui", "com.cloudera.cyber.rest"})
 @EnableGlobalMethodSecurity(securedEnabled = true)
-public class WebApplication  {
-	public static void main(String[] args) throws Exception {
-		new SpringApplicationBuilder(WebApplication.class).run(args);
-	}
+public class WebApplication {
+    public static void main(String[] args) throws Exception {
+        new SpringApplicationBuilder(WebApplication.class).run(args);
+    }
 }

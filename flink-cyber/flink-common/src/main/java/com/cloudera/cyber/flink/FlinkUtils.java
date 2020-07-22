@@ -21,7 +21,7 @@ import static com.cloudera.cyber.flink.Utils.*;
 import static org.apache.flink.streaming.api.windowing.time.Time.*;
 
 public class FlinkUtils<T extends IdentifiedMessage> {
-    private static final long DEFAULT_MAX_LATENESS = 1000;
+    public static final long DEFAULT_MAX_LATENESS = 1000;
 
     public static void setupEnv(StreamExecutionEnvironment env, ParameterTool params) {
 

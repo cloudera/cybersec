@@ -10,13 +10,21 @@
     <version>0.0.1-SNAPSHOT</version>
     <modules>
         <module>flink-cyber-api</module>
-        <module>flink-enrichment</module>
+        <module>flink-common</module>
         <module>flink-parser</module>
+        <module>flink-enrichment</module>
+        <module>flink-alert-scoring</module>
+        <module>flink-profiler-sql</module>
+        <module>flink-profiler-java</module>
+        <module>flink-profiler</module>
+        <module>flink-sessions</module>
+        <module>flink-dedupe</module>
         <module>flink-web</module>
         <module>caracal-generator</module>
-        <module>flink-sessions</module>
-        <module>flink-common</module>
-        <module>flink-dedupe</module>
+        <module>cyber-functions</module>
+        <module>flink-rules</module>
+        <module>flink-alert-scoring-api</module>
+
     </modules>
 
     <properties>
@@ -42,6 +50,13 @@
     <dependencyManagement>
         <dependencies>
             <!-- Flink Dependencies -->
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-core</artifactId>
+                <version>${flink.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-java</artifactId>
@@ -75,6 +90,28 @@
                 <version>${flink.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-table-api-java</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-table-planner_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-state-processor-api_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
             <!-- Avro -->
             <dependency>
                 <groupId>org.apache.avro</groupId>
@@ -102,12 +139,25 @@
                 <version>${kafka.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.hortonworks.registries</groupId>
+                <artifactId>schema-registry-serdes</artifactId>
+                <version>0.9.0</version>
+            </dependency>
+
             <!-- Utilities -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
                 <scope>provided</scope>
+            </dependency>
+
+            <!-- Caching -->
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>2.5.5</version>
             </dependency>
 
             <!-- Logging and Metrics -->
@@ -140,6 +190,13 @@
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest</artifactId>
+                <version>2.2</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-core</artifactId>
                 <version>2.2</version>
                 <scope>test</scope>
             </dependency>

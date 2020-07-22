@@ -2,18 +2,26 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
       <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="flink-cyber-api" />
-        <module name="caracal-generator" />
-        <module name="flink-common" />
-        <module name="flink-dedupe" />
-        <module name="flink-sessions" />
         <module name="flink-parser" />
-        <module name="flink-enrichment" />
+        <module name="flink-alert-scoring-api" />
+        <module name="flink-alert-scoring" />
         <module name="flink-web" />
+        <module name="flink-enrichment" />
+        <module name="flink-sessions" />
+        <module name="flink-dedupe" />
+        <module name="flink-rules" />
+        <module name="cyber-functions" />
+        <module name="caracal-generator" />
+        <module name="flink-cyber-api" />
+        <module name="flink-profiler" />
+        <module name="flink-profiler-java" />
+        <module name="flink-profiler-sql" />
+        <module name="flink-common" />
       </profile>
     </annotationProcessing>
   </component>
