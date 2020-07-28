@@ -1,6 +1,7 @@
 package com.cloudera.cyber.dedupe;
 
 import com.cloudera.cyber.IdentifiedMessage;
+import com.cloudera.cyber.Timestamped;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,7 +13,7 @@ import java.util.UUID;
 public class DedupeMessage implements IdentifiedMessage {
     private UUID id;
     private Map<String, String> fields;
-    private Long ts;
+    private long ts;
     private Long startTs;
     private Long count;
     private boolean late = false;

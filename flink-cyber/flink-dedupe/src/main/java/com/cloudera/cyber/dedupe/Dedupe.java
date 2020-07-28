@@ -4,6 +4,7 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.dedupe.impl.CreateKeyFromMessage;
 import com.cloudera.cyber.dedupe.impl.EventTimeAndCountTrigger;
 import com.cloudera.cyber.dedupe.impl.SumAndMaxTs;
+import com.cloudera.cyber.flink.TimedBoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -14,8 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 public class Dedupe {
-    public static SingleOutputStreamOperator<DedupeMessage> dedupe(DataStream<Message> source, List<String> sessionKey, Long maxTime, Long maxCount, OutputTag<DedupeMessage> lateData) {
+    public static SingleOutputStreamOperator<DedupeMessage> dedupe(DataStream<Message> source, List<String> sessionKey, Long maxTime, Long maxCount, OutputTag<DedupeMessage> lateData, Time allowedLateness) {
         return source
+                .assignTimestampsAndWatermarks(new TimedBoundedOutOfOrdernessTimestampExtractor<>(allowedLateness))
                 .map(new CreateKeyFromMessage(sessionKey))
                 .keyBy(new KeySelector<DedupeMessage, Map<String, String>>() {
                     @Override
@@ -24,7 +26,8 @@ public class Dedupe {
                     }
                 })
                 .timeWindow(Time.milliseconds(maxTime))
-                .sideOutputLateData(lateData)
+                .allowedLateness(Time.milliseconds(10000))
+                //.sideOutputLateData(lateData)
                 .trigger(EventTimeAndCountTrigger.of(maxCount))
                 .aggregate(new SumAndMaxTs());
     }

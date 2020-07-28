@@ -1,10 +1,13 @@
 package com.cloudera.cyber.dedupe.impl;
 
 import com.cloudera.cyber.dedupe.DedupeMessage;
+import jdk.nashorn.internal.runtime.logging.Logger;
 import org.apache.flink.api.common.functions.AggregateFunction;
 
 import java.util.UUID;
+import lombok.extern.java.Log;
 
+@Log
 public class SumAndMaxTs implements AggregateFunction<DedupeMessage, SumAndMax, DedupeMessage> {
 
     @Override
@@ -31,13 +34,16 @@ public class SumAndMaxTs implements AggregateFunction<DedupeMessage, SumAndMax, 
 
     @Override
     public DedupeMessage getResult(SumAndMax sumAndMax) {
-        return DedupeMessage.builder()
+        DedupeMessage result = DedupeMessage.builder()
                 .id(UUID.randomUUID())
                 .fields(sumAndMax.getFields())
                 .ts(sumAndMax.getMaxTs())
                 .startTs(sumAndMax.getMinTs())
                 .count(sumAndMax.getSum())
                 .build();
+        log.info(String.format("Message from acc result %s", result.toString()));
+
+        return result;
     }
 
     @Override

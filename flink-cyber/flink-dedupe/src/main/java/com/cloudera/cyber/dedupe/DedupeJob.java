@@ -6,6 +6,7 @@ import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.OutputTag;
 
 import java.util.Arrays;
@@ -32,11 +33,14 @@ public abstract class DedupeJob {
     protected static final String PARAM_DEDUPE_KEY = "dedupe.keys";
     protected static final String PARAM_DEDUPE_MAX_TIME = "dedupe.limit.time";
     protected static final String PARAM_DEDUPE_MAX_COUNT = "dedupe.limit.count";
+    protected static final String PARAM_DEDUPE_LATENESS = "dedupe.lateness";
     private static final long DEFAULT_SESSION_TIME = 1000;
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+
+        env.setParallelism(1);
 
         List<String> key = Arrays.asList(params.get(PARAM_DEDUPE_KEY).split(","));
         Long maxTime = params.getLong(PARAM_DEDUPE_MAX_TIME, DEFAULT_SESSION_TIME);
@@ -44,13 +48,19 @@ public abstract class DedupeJob {
 
         DataStream<Message> source = createSource(env, params, key, maxTime);
         final OutputTag<DedupeMessage> lateData = new OutputTag<DedupeMessage>("late-data"){};
-        SingleOutputStreamOperator<DedupeMessage> results = dedupe(source, key, maxTime, maxCount, lateData);
+        Time allowedLateness  = Time.milliseconds(params.getLong(PARAM_DEDUPE_LATENESS, 0L));
+        SingleOutputStreamOperator<DedupeMessage> results = dedupe(source, key, maxTime, maxCount, lateData, allowedLateness);
         writeResults(params, results);
+        printResults(results);
 
         // capture and publish any late results without counts, i.e. fail safe
-        writeResults(params, results.getSideOutput(lateData).map(d -> d.toBuilder().late(true).build()));
+        //writeResults(params, results.getSideOutput(lateData).map(d -> d.toBuilder().late(true).build()));
 
         return env;
+    }
+
+    private void printResults(SingleOutputStreamOperator<DedupeMessage> results) {
+        results.print();
     }
 
     protected abstract void writeResults(ParameterTool params, DataStream<DedupeMessage> results);
