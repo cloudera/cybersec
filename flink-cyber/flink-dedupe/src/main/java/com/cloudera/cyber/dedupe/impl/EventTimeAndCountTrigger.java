@@ -23,7 +23,7 @@ public class EventTimeAndCountTrigger extends Trigger<Object, TimeWindow> {
     public TriggerResult onElement(Object element, long timestamp, TimeWindow window, TriggerContext ctx) throws Exception {
         ReducingState<Long> count = (ReducingState)ctx.getPartitionedState(this.stateDesc);
         count.add(1L);
-        log.info(String.format("onElement: %s count: %d, timestamp %s, maxTime: %s, watermark: %d", element, count.get(), timestamp, window.maxTimestamp(), ctx.getCurrentWatermark()));
+        log.finest(String.format("onElement: %s count: %d, timestamp %s, maxTime: %s, watermark: %d", element, count.get(), timestamp, window.maxTimestamp(), ctx.getCurrentWatermark()));
         if ((Long)count.get() >= this.maxCount || window.maxTimestamp() <= ctx.getCurrentWatermark()) {
             count.clear();
             //ctx.registerEventTimeTimer(window.maxTimestamp());
@@ -36,19 +36,12 @@ public class EventTimeAndCountTrigger extends Trigger<Object, TimeWindow> {
 
     public TriggerResult onEventTime(long timestamp, TimeWindow window, TriggerContext ctx) {
         try {
-            log.info(String.format("onEventTime: count: %d, timestamp %d, maxTime: %d, watermark: %d", ctx.getPartitionedState(this.stateDesc).get(), timestamp, window.maxTimestamp(), ctx.getCurrentWatermark()));
-
+            log.finest(String.format("onEventTime: count: %d, timestamp %d, maxTime: %d, watermark: %d", ctx.getPartitionedState(this.stateDesc).get(), timestamp, window.maxTimestamp(), ctx.getCurrentWatermark()));
         } catch (Exception e) {
-            e.printStackTrace();
         }
 
         if (timestamp == window.maxTimestamp()) {
             ReducingState<Long> count = (ReducingState)ctx.getPartitionedState(this.stateDesc);
-            try {
-                log.info(String.format("count: %d", count.get()));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             count.clear();
             return TriggerResult.FIRE_AND_PURGE;
         } else {

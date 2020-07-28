@@ -17,7 +17,6 @@ import java.util.Map;
 public class Dedupe {
     public static SingleOutputStreamOperator<DedupeMessage> dedupe(DataStream<Message> source, List<String> sessionKey, Long maxTime, Long maxCount, OutputTag<DedupeMessage> lateData, Time allowedLateness) {
         return source
-                .assignTimestampsAndWatermarks(new TimedBoundedOutOfOrdernessTimestampExtractor<>(allowedLateness))
                 .map(new CreateKeyFromMessage(sessionKey))
                 .keyBy(new KeySelector<DedupeMessage, Map<String, String>>() {
                     @Override
@@ -26,8 +25,7 @@ public class Dedupe {
                     }
                 })
                 .timeWindow(Time.milliseconds(maxTime))
-                .allowedLateness(Time.milliseconds(10000))
-                //.sideOutputLateData(lateData)
+                .sideOutputLateData(lateData)
                 .trigger(EventTimeAndCountTrigger.of(maxCount))
                 .aggregate(new SumAndMaxTs());
     }

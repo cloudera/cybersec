@@ -51,10 +51,10 @@ public abstract class DedupeJob {
         Time allowedLateness  = Time.milliseconds(params.getLong(PARAM_DEDUPE_LATENESS, 0L));
         SingleOutputStreamOperator<DedupeMessage> results = dedupe(source, key, maxTime, maxCount, lateData, allowedLateness);
         writeResults(params, results);
-        printResults(results);
+        //printResults(results);
 
         // capture and publish any late results without counts, i.e. fail safe
-        //writeResults(params, results.getSideOutput(lateData).map(d -> d.toBuilder().late(true).build()));
+        writeResults(params, results.getSideOutput(lateData).map(d -> d.toBuilder().late(true).build()));
 
         return env;
     }

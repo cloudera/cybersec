@@ -41,8 +41,6 @@ public class SumAndMaxTs implements AggregateFunction<DedupeMessage, SumAndMax, 
                 .startTs(sumAndMax.getMinTs())
                 .count(sumAndMax.getSum())
                 .build();
-        log.info(String.format("Message from acc result %s", result.toString()));
-
         return result;
     }
 
