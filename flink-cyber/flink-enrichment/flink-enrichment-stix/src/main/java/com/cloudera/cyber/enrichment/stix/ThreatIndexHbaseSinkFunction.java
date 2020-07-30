@@ -24,7 +24,9 @@ public class ThreatIndexHbaseSinkFunction extends HBaseSinkFunction<ThreatIntell
     public void executeMutations(ThreatIntelligence threatIntelligence, SinkFunction.Context context, BufferedMutator bufferedMutator) throws Exception {
         // key by the indicator value - note that this should really be salted to avoid hotspots
 
-        Put put = new Put(threatIntelligence.getObservable().getBytes(StandardCharsets.UTF_8));
+        Put put = new Put((threatIntelligence.getObservableType() + ":" + threatIntelligence.getObservable()).getBytes(StandardCharsets.UTF_8));
+
+        // TODO allow for multi-value
         put.addColumn(cf, id, UUIDUtils.asBytes(threatIntelligence.getId()));
 
         // put in all the fields
