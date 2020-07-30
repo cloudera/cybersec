@@ -1,7 +1,10 @@
 package com.cloudera.cyber.rules;
 
 import com.cloudera.cyber.Message;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;

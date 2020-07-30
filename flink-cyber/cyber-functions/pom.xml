@@ -31,13 +31,18 @@
         </dependency>
 
         <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.atteo.classindex</groupId>
             <artifactId>classindex</artifactId>
             <version>3.4</version>
         </dependency>
 
         <dependency>
-        <groupId>com.github.ben-manes.caffeine</groupId>
+            <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
         </dependency>
         <dependency>

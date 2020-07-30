@@ -1,6 +1,5 @@
-package com.cloudera.cyber.profiler.sql.types;
+package com.cloudera.cyber.profiler.sql.catalog;
 
-import com.cloudera.cyber.profiler.sql.ProfileSourceCatalog;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.factories.CatalogFactory;
 

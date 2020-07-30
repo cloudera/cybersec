@@ -1,0 +1,21 @@
+# Main configuration entry point for the application
+
+server:
+  servlet:
+    context-path: /
+  tomcat:
+    accesslog:
+      enabled: true
+
+# Enable/disable and expose/hide web enpoints for Actuator admin services
+management.endpoints.web:
+  exposure.include: info, health
+
+# main application logging
+logging:
+  level:
+    root: WARN
+    org:
+      apache:
+        tomcat: INFO
+        catalina: INFO

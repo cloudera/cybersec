@@ -1,11 +1,10 @@
 package com.cloudera.cyber.dedupe.impl;
 
 import com.cloudera.cyber.dedupe.DedupeMessage;
-import jdk.nashorn.internal.runtime.logging.Logger;
+import lombok.extern.java.Log;
 import org.apache.flink.api.common.functions.AggregateFunction;
 
 import java.util.UUID;
-import lombok.extern.java.Log;
 
 @Log
 public class SumAndMaxTs implements AggregateFunction<DedupeMessage, SumAndMax, DedupeMessage> {

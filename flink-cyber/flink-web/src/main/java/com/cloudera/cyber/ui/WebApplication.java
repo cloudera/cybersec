@@ -19,7 +19,6 @@ package com.cloudera.cyber.ui;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.ComponentScans;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
 @EnableAutoConfiguration

@@ -1,0 +1,3 @@
+com.cloudera.cyber.nifi.CDPDCCyberConnectionService
+com.cloudera.cyber.nifi.CDPCyberConnectionService
+com.cloudera.cyber.nifi.records.ChainParserRecordReader

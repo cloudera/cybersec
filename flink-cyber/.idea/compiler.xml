@@ -7,22 +7,33 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="flink-parser" />
-        <module name="flink-alert-scoring-api" />
+        <module name="nifi-parser-processors" />
+        <module name="flink-sessions" />
+        <module name="flink-enrichment-stix" />
+        <module name="nifi-parser-nar" />
         <module name="flink-alert-scoring" />
         <module name="flink-web" />
-        <module name="flink-enrichment" />
-        <module name="flink-sessions" />
-        <module name="flink-dedupe" />
-        <module name="flink-rules" />
-        <module name="cyber-functions" />
-        <module name="caracal-generator" />
         <module name="flink-cyber-api" />
+        <module name="flink-rules" />
+        <module name="flink-dedupe" />
+        <module name="nifi-parser-services" />
+        <module name="nifi-parser-api" />
+        <module name="parser-chains-core" />
+        <module name="cyber-functions" />
+        <module name="parser-chains-flink" />
+        <module name="caracal-generator" />
+        <module name="flink-alert-scoring-api" />
+        <module name="parser-chains-parsers" />
         <module name="flink-profiler" />
+        <module name="taxii-service" />
         <module name="flink-profiler-java" />
         <module name="flink-profiler-sql" />
+        <module name="parser-chains-config-service" />
         <module name="flink-common" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="flink-parser" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

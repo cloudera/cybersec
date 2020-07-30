@@ -6,34 +6,37 @@
 
     <groupId>com.cloudera.cyber</groupId>
     <artifactId>flink-cyber</artifactId>
-    <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
     <modules>
         <module>flink-cyber-api</module>
+        <module>cyber-functions</module>
         <module>flink-common</module>
-        <module>flink-parser</module>
         <module>flink-enrichment</module>
-        <module>flink-alert-scoring</module>
+        <module>flink-sessions</module>
+        <module>flink-dedupe</module>
         <module>flink-profiler-sql</module>
         <module>flink-profiler-java</module>
         <module>flink-profiler</module>
-        <module>flink-sessions</module>
-        <module>flink-dedupe</module>
-        <module>flink-web</module>
-        <module>caracal-generator</module>
-        <module>cyber-functions</module>
         <module>flink-rules</module>
         <module>flink-alert-scoring-api</module>
-
+        <module>flink-alert-scoring</module>
+        <module>flink-web</module>
+        <module>caracal-generator</module>
+        <module>taxii-service</module>
+        <module>parser-chain</module>
+        <module>nifi-parser-bundle</module>
     </modules>
 
     <properties>
-        <lombok.version>1.18.10</lombok.version>
+        <lombok.version>1.18.12</lombok.version>
         <flink.version>1.10.0-csa1.2.0.0</flink.version>
+        <guava.verison>20.0</guava.verison>
         <avro.version>1.9.2</avro.version>
         <log4j.kafka.version>2.4.1.7.1.1.0-565</log4j.kafka.version>
         <scala.binary.version>2.11</scala.binary.version>
         <kafka.version>2.4.1.7.1.1.0-565</kafka.version>
+        <nifi.version>1.11.4</nifi.version>
     </properties>
 
     <repositories>
@@ -112,6 +115,12 @@
                 <version>${flink.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-hbase_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
             <!-- Avro -->
             <dependency>
                 <groupId>org.apache.avro</groupId>
@@ -153,6 +162,19 @@
                 <scope>provided</scope>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.10</version>
+                <scope>compile</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.verison}</version>
+            </dependency>
+
             <!-- Caching -->
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
@@ -179,7 +201,6 @@
                 <version>${log4j.kafka.version}</version>
             </dependency>
 
-
             <!-- Test -->
             <dependency>
                 <groupId>junit</groupId>
@@ -193,11 +214,17 @@
                 <version>2.2</version>
                 <scope>test</scope>
             </dependency>
-
             <dependency>
                 <groupId>org.hamcrest</groupId>
                 <artifactId>hamcrest-core</artifactId>
                 <version>2.2</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>3.3.3</version>
                 <scope>test</scope>
             </dependency>
 
@@ -208,12 +235,28 @@
                 <scope>test</scope>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-runtime_${scala.binary.version}</artifactId>
+                <scope>test</scope>
+                <classifier>tests</classifier>
+                <version>${flink.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
+                <scope>test</scope>
+                <classifier>tests</classifier>
+                <version>${flink.version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
     <build>
         <pluginManagement>
             <plugins>
+                <!-- Java Compiler -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -221,6 +264,36 @@
                     <configuration>
                         <source>1.8</source>
                         <target>1.8</target>
+                    </configuration>
+                </plugin>
+
+                <!-- Dependency copy -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.1.2</version>
+                    <executions>
+                        <execution>
+                            <id>copy-dependencies</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>copy-dependencies</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>jars</outputDirectory>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <!-- NiFi Nar Builder -->
+                <plugin>
+                    <groupId>org.apache.nifi</groupId>
+                    <artifactId>nifi-nar-maven-plugin</artifactId>
+                    <version>${nifi.version}</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <enforceDocGeneration>true</enforceDocGeneration>
                     </configuration>
                 </plugin>
             </plugins>
