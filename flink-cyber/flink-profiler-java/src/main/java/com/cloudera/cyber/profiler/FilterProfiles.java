@@ -6,4 +6,9 @@ import org.apache.flink.api.common.functions.FilterFunction;
 public class FilterProfiles implements FilterFunction<Message> {
     public FilterProfiles(String filter) {
     }
+
+    @Override
+    public boolean filter(Message message) throws Exception {
+        return false;
+    }
 }

@@ -1,7 +1,6 @@
 package com.cloudera.cyber.dedupe;
 
 import com.cloudera.cyber.IdentifiedMessage;
-import com.cloudera.cyber.Timestamped;
 import lombok.Builder;
 import lombok.Data;
 

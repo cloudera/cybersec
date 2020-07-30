@@ -5,7 +5,6 @@ import com.cloudera.cyber.libs.AbstractStringScalarFunction;
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import org.apache.commons.net.util.SubnetUtils;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.xbill.DNS.Lookup;
@@ -15,7 +14,6 @@ import org.xbill.DNS.Type;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
-import java.net.InetAddress;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -23,6 +21,7 @@ import java.util.stream.Stream;
 
 @CyberFunction("nslookup")
 public class NsLookup extends AbstractStringScalarFunction {
+
     private LoadingCache<NsLookupQuery, List<NsLookupRecord>> cache = Caffeine.newBuilder()
             .expireAfterAccess(60, TimeUnit.SECONDS)
             .maximumSize(1000)

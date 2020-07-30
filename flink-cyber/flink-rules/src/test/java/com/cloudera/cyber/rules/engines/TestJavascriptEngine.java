@@ -8,7 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
 
 public class TestJavascriptEngine {
     private static final String scoreScript = "return { local: ip_local(message.local), remote: ip_local(message.remote) }";
@@ -26,7 +27,7 @@ public class TestJavascriptEngine {
         );
 
         assertThat("Results are produced", results, hasKey("score"));
-        assertThat("Results are correct", results.get("score"), equalTo(3.0));
+        assertThat("Results are correct", Double.valueOf(results.get("score").toString()), equalTo(3.0));
     }
 
     @Test

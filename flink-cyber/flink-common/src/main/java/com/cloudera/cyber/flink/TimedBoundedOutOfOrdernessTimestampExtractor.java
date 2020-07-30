@@ -1,7 +1,6 @@
 package com.cloudera.cyber.flink;
 
 import com.cloudera.cyber.Timestamped;
-import com.sun.tools.corba.se.idl.constExpr.Times;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 

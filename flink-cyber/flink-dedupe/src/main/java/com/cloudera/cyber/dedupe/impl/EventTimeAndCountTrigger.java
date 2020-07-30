@@ -1,5 +1,6 @@
 package com.cloudera.cyber.dedupe.impl;
 
+import lombok.extern.java.Log;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.api.common.state.ReducingState;
 import org.apache.flink.api.common.state.ReducingStateDescriptor;
@@ -7,7 +8,6 @@ import org.apache.flink.api.common.typeutils.base.LongSerializer;
 import org.apache.flink.streaming.api.windowing.triggers.Trigger;
 import org.apache.flink.streaming.api.windowing.triggers.TriggerResult;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-import lombok.extern.java.Log;
 
 @Log
 public class EventTimeAndCountTrigger extends Trigger<Object, TimeWindow> {

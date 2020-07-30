@@ -1,6 +1,9 @@
 package com.cloudera.cyber;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -17,6 +20,8 @@ public class Message implements IdentifiedMessage, Timestamped {
     protected long ts;
     protected String originalSource;
     protected Map<String, Object> fields;
+
+    protected Map<String, List<ThreatIntelligence>> threats;
 
     public Object get(String field) {
         return fields.get(field);

@@ -18,13 +18,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 @Data
 @RequiredArgsConstructor
 @Log
 public class JavaScriptEngine implements RuleEngine {
-    private static final String ENGINE_NAME = "nashorn";
+    private static final String ENGINE_NAME = "javascript";
 
     private static final String SCORE_FUNCTION = "score";
 
@@ -56,7 +55,7 @@ public class JavaScriptEngine implements RuleEngine {
                     .filter(f -> f != null)
                     .map(e -> {
                         engine.getBindings(ScriptContext.GLOBAL_SCOPE).put("_" + e.getKey(), e.getValue().getLeft());
-                        log.info(String.format("Registering %s as %s", e.getValue().getClass(), e.getKey()));
+                        log.info(String.format("Registering %s as %s", e.getValue().getLeft().getClass(), e.getKey()));
 
                         Parameter[] params = e.getRight().getRight();
                         String paramNames = Stream.of(params).map(p -> p.getName()).collect(Collectors.joining(","));
