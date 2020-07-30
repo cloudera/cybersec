@@ -32,7 +32,6 @@ public class ThreatIntelligenceBroadcastProcessFunction extends BroadcastProcess
         collector.collect(message.toBuilder().threats(fieldToType.entrySet().stream()
                 .collect(Collectors.toMap(f -> f.getKey(), f -> {
                     String value = message.get(f.getKey()).toString();
-                    System.out.println(String.format("Testing message %s, value: %s, f: %s", message, value, f));
                     return f.getValue().stream().map(tiType -> tiType + ":" + value)
                             .flatMap(id -> getForKey(readOnlyContext, id))
                             .collect(Collectors.toList());
@@ -40,6 +39,14 @@ public class ThreatIntelligenceBroadcastProcessFunction extends BroadcastProcess
         ).build());
     }
 
+    /**
+     * TODO - should we store a bloomfilter instead of actual threats?
+     *
+     * @param threatIntelligence
+     * @param context
+     * @param collector
+     * @throws Exception
+     */
     @Override
     public void processBroadcastElement(ThreatIntelligence threatIntelligence, Context context, Collector<Message> collector) throws Exception {
         BroadcastState<String, List<ThreatIntelligence>> state = context.getBroadcastState(descriptor);
