@@ -76,7 +76,6 @@ public class JavaScriptEngine implements RuleEngine {
                 ScriptException e) {
             throw new RuntimeException("Script invalid", e);
         }
-
     }
 
     private String getFunctionName() {
@@ -98,7 +97,6 @@ public class JavaScriptEngine implements RuleEngine {
     public Map<String, Object> feed(Message message) {
         if (!initialized) open();
         try {
-
             return (Map<String, Object>) ((Invocable) engine).invokeFunction(getFunctionName(), extractMessage(message));
         } catch (ScriptException e) {
             throw new RuntimeException("Javascript Engine function failed", e);
