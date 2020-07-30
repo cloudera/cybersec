@@ -45,7 +45,7 @@ public class ChainParserMapFunction extends RichFlatMapFunction<MessageToParse, 
             }
         }));
 
-        chainRunner = new DefaultChainRunner();
+        chainRunner = new NonRecordingChainRunner();
     }
 
     /**
