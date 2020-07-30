@@ -4,7 +4,6 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.dedupe.impl.CreateKeyFromMessage;
 import com.cloudera.cyber.dedupe.impl.EventTimeAndCountTrigger;
 import com.cloudera.cyber.dedupe.impl.SumAndMaxTs;
-import com.cloudera.cyber.flink.TimedBoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;

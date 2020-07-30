@@ -8,7 +8,6 @@ import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.state.api.functions.BroadcastStateBootstrapFunction;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -21,17 +20,20 @@ import java.util.List;
  * A job that will score alerts based on a set of dynamic rules stored in the state engine
  */
 public abstract class ScoringJob {
-    protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    protected StreamExecutionEnvironment createPipeline(final ParameterTool params) throws Exception {
+        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-        DataStream<ScoringRuleCommand> ruleCommands = createRulesSource(env, params);
-        DataStream<Message> data = createSource(env, params);
+        final DataStream<ScoringRuleCommand> ruleCommands = createRulesSource(env, params);
+        final DataStream<Message> data = createSource(env, params);
 
-        SingleOutputStreamOperator<ScoredMessage> results = Scoring.score(data, ruleCommands, Descriptors.rulesResultSink, Descriptors.rulesState).name("Process Rules").uid("process-rules");;
+        final SingleOutputStreamOperator<ScoredMessage> results = Scoring
+                .score(data, ruleCommands, Descriptors.rulesResultSink, Descriptors.rulesState).name("Process Rules")
+                .uid("process-rules");
+        ;
 
         // output the results of the rules commands
-        DataStream<DynamicRuleCommandResult<ScoringRule>> rulesCommandResponse =
+        final DataStream<DynamicRuleCommandResult<ScoringRule>> rulesCommandResponse =
                 results.getSideOutput(Descriptors.rulesResultSink);
 
         writeResults(params, results);

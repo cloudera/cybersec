@@ -1,5 +1,7 @@
-package com.cloudera.cyber.profiler.sql;
+package com.cloudera.cyber.profiler.sql.catalog;
 
+import com.cloudera.cyber.CyberFunction;
+import com.cloudera.cyber.libs.CyberFunctionUtils;
 import com.hortonworks.registries.schemaregistry.SchemaVersionInfo;
 import com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient;
 import com.hortonworks.registries.schemaregistry.errors.SchemaNotFoundException;
@@ -38,7 +40,10 @@ public class ProfileSourceCatalog extends AbstractReadOnlyCatalog {
     private AdminClient kafkaClient;
     private final SchemaRegistryClient registryClient;
 
-    public ProfileSourceCatalog(Map<String, String> properties) {
+    // Function repository
+    private Map<String, CatalogFunction> functions;
+
+    public ProfileSourceCatalog(Map<String,String> properties) {
         super(CATALOG_NAME, SOURCE_DATABASE);
         this.properties = properties;
         registryClient = ClouderaRegistryTableConfigurator
@@ -102,6 +107,11 @@ public class ProfileSourceCatalog extends AbstractReadOnlyCatalog {
     @Override
     public void open() throws CatalogException {
         kafkaClient = KafkaAdminClient.create(readKafkaProperties(properties, true));
+
+        // initialise the functions
+        CyberFunctionUtils.findAll().forEach(c -> {
+            functions.put(c.getAnnotation(CyberFunction.class).value(), new CatalogFunctionImpl(c.getCanonicalName()));
+        });
     }
 
     @Override
@@ -229,20 +239,19 @@ public class ProfileSourceCatalog extends AbstractReadOnlyCatalog {
     public List<String> listFunctions(String databaseName) throws DatabaseNotExistException, CatalogException {
         if (!databaseExists(databaseName))
             throw new DatabaseNotExistException(CATALOG_NAME, databaseName);
-
-        // setup all the profiler udfs here
-
-        return Collections.emptyList();
+        return new ArrayList<>(functions.keySet());
     }
 
     @Override
     public CatalogFunction getFunction(ObjectPath objectPath) throws FunctionNotExistException, CatalogException {
-        throw new FunctionNotExistException(CATALOG_NAME, objectPath);
+        if (!functions.containsKey(objectPath.getObjectName()))
+            throw new FunctionNotExistException(CATALOG_NAME, objectPath);
+        return functions.get(objectPath.getObjectName());
     }
 
     @Override
     public boolean functionExists(ObjectPath objectPath) throws CatalogException {
-        return false;
+        return databaseExists(objectPath.getDatabaseName()) && functions.containsKey(objectPath.getObjectName());
     }
 
     /**

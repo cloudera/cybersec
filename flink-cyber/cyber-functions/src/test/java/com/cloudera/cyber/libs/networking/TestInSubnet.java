@@ -2,10 +2,8 @@ package com.cloudera.cyber.libs.networking;
 
 import org.junit.Test;
 
-import java.sql.Types;
-
-import static org.hamcrest.Matchers.isA;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class TestInSubnet {
 

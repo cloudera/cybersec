@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CaracalGeneratorFlinkJob {
+    public static final String PARAMS_RECORDS_LIMIT = "generator.count";
+
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
             throw new RuntimeException("Path to the properties file is expected as the only argument.");
@@ -44,7 +46,7 @@ public class CaracalGeneratorFlinkJob {
 
 
         SingleOutputStreamOperator<Tuple2<String, String>> generatedInput =
-                env.addSource(new FreemarkerTemplateSource(outputs)).name("Weighted Data Source");
+                env.addSource(new FreemarkerTemplateSource(outputs, params.getLong(PARAMS_RECORDS_LIMIT, -1))).name("Weighted Data Source");
 
         FlinkKafkaProducer<Tuple2<String, String>> kafkaSink = new FlinkKafkaProducer<Tuple2<String, String>>(
                 "generator.output",

@@ -40,8 +40,6 @@ public abstract class DedupeJob {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-        env.setParallelism(1);
-
         List<String> key = Arrays.asList(params.get(PARAM_DEDUPE_KEY).split(","));
         Long maxTime = params.getLong(PARAM_DEDUPE_MAX_TIME, DEFAULT_SESSION_TIME);
         Long maxCount = params.getLong(PARAM_DEDUPE_MAX_COUNT, 0);
