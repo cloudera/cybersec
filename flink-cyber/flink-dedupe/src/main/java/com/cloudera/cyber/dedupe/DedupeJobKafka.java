@@ -22,7 +22,7 @@ public class DedupeJobKafka extends DedupeJob {
         ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
         new DedupeJobKafka()
             .createPipeline(params)
-            .execute("Flink Sessionizer");
+            .execute("Flink Deduplicator");
     }
 
     /**
