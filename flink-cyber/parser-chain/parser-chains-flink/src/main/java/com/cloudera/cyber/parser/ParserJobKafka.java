@@ -2,36 +2,32 @@ package com.cloudera.cyber.parser;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
-import com.cloudera.cyber.flink.TimedBoundedOutOfOrdernessTimestampExtractor;
-import com.cloudera.parserchains.core.Regex;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.formats.avro.registry.cloudera.ClouderaRegistryKafkaDeserializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
-import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_ALLOWED_LATENESS;
-import static com.cloudera.cyber.flink.FlinkUtils.createKafkaSource;
 import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
-import static com.cloudera.cyber.flink.Utils.readSchemaRegistryProperties;
-import static org.apache.flink.streaming.api.windowing.time.Time.milliseconds;
 
 public class ParserJobKafka extends ParserJob {
-    private static final String PARAM_LATENESS = "lateness";
 
+    public static void main(String[] args) throws Exception {
+        if (args.length != 1) {
+            throw new RuntimeException("Path to the properties file is expected as the only argument.");
+        }
+        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        new ParserJobKafka()
+                .createPipeline(params)
+                .execute("Flink Parser - " + params.get("name"));
+    }
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
         FlinkKafkaProducer<Message> sink = new FlinkUtils<Message>().createKafkaSink(
