@@ -22,10 +22,11 @@
         <module>flink-alert-scoring-api</module>
         <module>flink-alert-scoring</module>
         <module>flink-web</module>
-        <module>caracal-generator</module>
         <module>taxii-service</module>
         <module>parser-chain</module>
         <module>nifi-parser-bundle</module>
+        <module>caracal-generator</module>
+        <module>caracal-parser</module>
     </modules>
 
     <properties>

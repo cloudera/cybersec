@@ -10,6 +10,8 @@
     <option name="ignoredFiles">
       <set>
         <option value="$PROJECT_DIR$/flink-parser/pom.xml" />
+        <option value="$PROJECT_DIR$/parser-chain/parser-split-flink/pom.xml" />
+        <option value="$PROJECT_DIR$/parser-split/pom.xml" />
       </set>
     </option>
   </component>
