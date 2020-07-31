@@ -201,6 +201,12 @@
                 <version>${log4j.kafka.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>net.logstash.log4j</groupId>
+                <artifactId>jsonevent-layout</artifactId>
+                <version>1.7</version>
+            </dependency>
+
             <!-- Test -->
             <dependency>
                 <groupId>junit</groupId>
