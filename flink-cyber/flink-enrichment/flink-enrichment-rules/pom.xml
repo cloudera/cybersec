@@ -3,19 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>flink-cyber</artifactId>
+        <artifactId>flink-enrichment</artifactId>
         <groupId>com.cloudera.cyber</groupId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>flink-enrichment</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>flink-enrichment-rules</artifactId>
 
-    <modules>
-        <module>flink-enrichment-lookup</module>
-        <module>flink-enrichment-stix</module>
-        <module>flink-enrichment-rules</module>
-    </modules>
 
 </project>
