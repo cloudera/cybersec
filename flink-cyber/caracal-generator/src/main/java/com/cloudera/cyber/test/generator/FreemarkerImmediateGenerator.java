@@ -21,7 +21,8 @@ public class FreemarkerImmediateGenerator {
     public void configureTemplate() throws URISyntaxException, IOException {
         URL url = ClassLoader.getSystemResource("");
         File templateLocation = new File(url.toURI());
-        cfg.setDirectoryForTemplateLoading(templateLocation);
+        //cfg.setDirectoryForTemplateLoading(templateLocation);
+        cfg.setClassLoaderForTemplateLoading(Thread.currentThread().getContextClassLoader(), "");
         cfg.setCacheStorage(new freemarker.cache.MruCacheStorage(50,150));
         cfg.setTemplateUpdateDelayMilliseconds(3600*24*1000);
     }

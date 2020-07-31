@@ -46,9 +46,10 @@ public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<S
     public void run(SourceContext<Tuple2<String,String>> sourceContext) throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_30);
 
-        URL url = ClassLoader.getSystemResource("");
-        File templateLocation = new File(url.toURI());
-        cfg.setDirectoryForTemplateLoading(templateLocation);
+        //URL url = ClassLoader.getSystemResource("");
+        //File templateLocation = new File(url.toURI());
+        //cfg.setDirectoryForTemplateLoading(templateLocation);
+        cfg.setClassLoaderForTemplateLoading(Thread.currentThread().getContextClassLoader(), "");
         cfg.setCacheStorage(new freemarker.cache.MruCacheStorage(50,50));
         cfg.setTemplateUpdateDelayMilliseconds(3600*24*1000);
 
