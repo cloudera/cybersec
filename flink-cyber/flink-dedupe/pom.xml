@@ -27,6 +27,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.hortonworks.smm</groupId>
+            <artifactId>monitoring-interceptors</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-avro-cloudera-registry</artifactId>
         </dependency>

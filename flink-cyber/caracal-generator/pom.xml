@@ -26,6 +26,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.hortonworks.smm</groupId>
+            <artifactId>monitoring-interceptors</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>commons-net</groupId>
             <artifactId>commons-net</artifactId>
             <version>3.6</version>

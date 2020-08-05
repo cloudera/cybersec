@@ -7,6 +7,8 @@ import org.apache.flink.client.cli.CliFrontend;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.encrypttool.EncryptTool;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 
 import java.io.IOException;
 import java.net.URL;
@@ -33,6 +35,7 @@ public class Utils {
     public static final String K_KEYSTORE_PASSWORD = "keyStorePassword";
 
     public static final String K_PROPERTIES_FILE = "properties.file";
+
     private static Properties readProperties(Properties properties, String prefix) {
         Properties targetProperties = new Properties();
         for (String key : properties.stringPropertyNames()) {
@@ -43,7 +46,7 @@ public class Utils {
         return targetProperties;
     }
 
-    private static Properties readProperties(Map<String,String> properties, String prefix) {
+    private static Properties readProperties(Map<String, String> properties, String prefix) {
         Properties targetProperties = new Properties();
         for (String key : properties.keySet()) {
             if (key.startsWith(prefix)) {
@@ -54,16 +57,34 @@ public class Utils {
     }
 
     public static Properties readKafkaProperties(Properties properties, boolean consumer) {
-        return readProperties(properties, KAFKA_PREFIX);
-    }
-    public static Properties readKafkaProperties(Map<String,String> properties, boolean consumer) {
-        return readProperties(properties, KAFKA_PREFIX);
-    }
-    public static Properties readKafkaProperties(ParameterTool params, boolean consumer) {
-        return readProperties(params.getProperties(), KAFKA_PREFIX);
+        Properties kafkaProperties = readProperties(properties, KAFKA_PREFIX);
+        kafkaProperties.put(consumer ? ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG : ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
+                consumer ?
+                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringConsumerInterceptor" :
+                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringProducerInterceptor");
+        return kafkaProperties;
     }
 
-    public static Map<String,String> readSchemaRegistryProperties(Map<String, String> params) {
+    public static Properties readKafkaProperties(Map<String, String> properties, boolean consumer) {
+        Properties kafkaProperties = readProperties(properties, KAFKA_PREFIX);
+        kafkaProperties.put(consumer ? ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG : ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
+                consumer ?
+                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringConsumerInterceptor" :
+                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringProducerInterceptor");
+        return kafkaProperties;
+    }
+
+    public static Properties readKafkaProperties(ParameterTool params, boolean consumer) {
+        Properties kafkaProperties = readProperties(params.getProperties(), KAFKA_PREFIX);
+        kafkaProperties.put(consumer ? ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG : ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
+                consumer ?
+                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringConsumerInterceptor" :
+                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringProducerInterceptor");
+        return kafkaProperties;
+
+    }
+
+    public static Map<String, String> readSchemaRegistryProperties(Map<String, String> params) {
         Map<String, String> schemaRegistryConf = new HashMap<>();
         schemaRegistryConf.put(K_SCHEMA_REG_URL, params.get(K_SCHEMA_REG_URL));
 
@@ -84,7 +105,7 @@ public class Utils {
         return schemaRegistryConf;
     }
 
-    public static Map<String,Object> readSchemaRegistryProperties(ParameterTool params) {
+    public static Map<String, Object> readSchemaRegistryProperties(ParameterTool params) {
         Map<String, Object> schemaRegistryConf = new HashMap<>();
         schemaRegistryConf.put(K_SCHEMA_REG_URL, params.getRequired(K_SCHEMA_REG_URL));
 
