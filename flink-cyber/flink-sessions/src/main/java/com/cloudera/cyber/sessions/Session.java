@@ -21,7 +21,7 @@ public class Session {
                     public Map<String, String> getKey(Message message) throws Exception {
                         return sessionKey.stream().collect(Collectors.toMap(
                                 f -> f.toString(),
-                                f -> message.get(f).toString()));
+                                f -> message.getExtensions().get(f).toString()));
                     }
                 })
                 .window(EventTimeSessionWindows.withGap(Time.milliseconds(sessionTimeout)))

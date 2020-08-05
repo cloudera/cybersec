@@ -7,11 +7,14 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.JobTester;
 import org.hamcrest.collection.IsCollectionWithSize;
 import org.hamcrest.collection.IsMapContaining;
+import org.joda.time.Instant;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.UUID;
 
 import static com.cloudera.cyber.flink.Utils.getResourceAsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -39,7 +42,12 @@ public class TestStixJobWithMessages extends TestStixJob {
 
         source.sendWatermark(1000L);
 
-        messageSource.sendRecord(Message.builder().ts(0L).put("ip", "192.168.0.1").build(), 1500L);
+        messageSource.sendRecord(Message.newBuilder()
+                .setId(UUID.randomUUID().toString())
+                .setTs(Instant.ofEpochMilli(0L).toDateTime())
+                .setOriginalSource("")
+                .setExtensions(Collections.singletonMap("ip", "192.168.0.1"))
+                .build(), 1500L);
 
         JobTester.stopTest();
 

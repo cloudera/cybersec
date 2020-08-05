@@ -13,8 +13,8 @@ public class TestSample extends AbstractStixParserTest {
     @Test
     public void testSample() throws Exception {
         doTest("sample.xml", parsedThreatIntelligence -> {
-            assertThat(parsedThreatIntelligence.threatIntelligence.getObservableType(), Matchers.notNullValue());
-            assertThat(parsedThreatIntelligence.threatIntelligence.getStixReference(), Matchers.notNullValue());
+            assertThat(parsedThreatIntelligence.getThreatIntelligence().getObservableType(), Matchers.notNullValue());
+            assertThat(parsedThreatIntelligence.getThreatIntelligence().getStixReference(), Matchers.notNullValue());
         }, all -> {
             assertThat("All observables output an entry", all.size(), equalTo(3));
             assertThat("All outputs are linked back to a common indicator reference",

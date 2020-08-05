@@ -30,4 +30,9 @@ public class UnimplementedEngine implements RuleEngine {
     public void eval(String script) throws ScriptException {
         throw new RuntimeException("RuleEngine not implemented yet");
     }
+
+    @Override
+    public Object invokeFunction(String function, Object... args) {
+        throw new RuntimeException("RuleEngine not implemented yet");
+    }
 }

@@ -1,8 +1,9 @@
 package com.cloudera.cyber.dedupe.impl;
 
-import com.cloudera.cyber.dedupe.DedupeMessage;
+import com.cloudera.cyber.DedupeMessage;
 import lombok.extern.java.Log;
 import org.apache.flink.api.common.functions.AggregateFunction;
+import org.joda.time.Instant;
 
 import java.util.UUID;
 
@@ -25,20 +26,20 @@ public class SumAndMaxTs implements AggregateFunction<DedupeMessage, SumAndMax, 
         }
         return SumAndMax.builder()
                 .fields(dedupeMessage.getFields())
-                .maxTs(Math.max(dedupeMessage.getTs(), sumAndMax.getMaxTs()))
-                .minTs(Math.min(dedupeMessage.getTs(), sumAndMax.getMinTs()))
+                .maxTs(Math.max(dedupeMessage.getTs().getMillis(), sumAndMax.getMaxTs()))
+                .minTs(Math.min(dedupeMessage.getTs().getMillis(), sumAndMax.getMinTs()))
                 .sum(dedupeMessage.getCount() + sumAndMax.getSum())
                 .build();
     }
 
     @Override
     public DedupeMessage getResult(SumAndMax sumAndMax) {
-        DedupeMessage result = DedupeMessage.builder()
-                .id(UUID.randomUUID())
-                .fields(sumAndMax.getFields())
-                .ts(sumAndMax.getMaxTs())
-                .startTs(sumAndMax.getMinTs())
-                .count(sumAndMax.getSum())
+        DedupeMessage result = DedupeMessage.newBuilder()
+                .setId(UUID.randomUUID().toString())
+                .setFields(sumAndMax.getFields())
+                .setTs(Instant.ofEpochMilli(sumAndMax.getMaxTs()).toDateTime())
+                .setStartTs(Instant.ofEpochMilli(sumAndMax.getMinTs()).toDateTime())
+                .setCount(sumAndMax.getSum())
                 .build();
         return result;
     }

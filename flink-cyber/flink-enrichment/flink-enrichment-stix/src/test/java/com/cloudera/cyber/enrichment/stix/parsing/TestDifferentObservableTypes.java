@@ -12,9 +12,9 @@ public class TestDifferentObservableTypes extends AbstractStixParserTest {
     @Test
     public void testDomain() throws Exception {
         doTest("domain.xml", parsedThreatIntelligence -> {
-            assertThat(parsedThreatIntelligence.threatIntelligence.getObservableType(), equalTo("URIObject:URIObjectType"));
-            assertThat(parsedThreatIntelligence.threatIntelligence.getObservable(), notNullValue());
-            assertThat(parsedThreatIntelligence.threatIntelligence.getStixReference(), notNullValue());
+            assertThat(parsedThreatIntelligence.getThreatIntelligence().getObservableType(), equalTo("URIObject:URIObjectType"));
+            assertThat(parsedThreatIntelligence.getThreatIntelligence().getObservable(), notNullValue());
+            assertThat(parsedThreatIntelligence.getThreatIntelligence().getStixReference(), notNullValue());
         }, all -> {
             assertThat("All observables output an entry", all.size(), equalTo(3));
             assertThat("All outputs are linked back to a common indicator reference",
@@ -29,9 +29,9 @@ public class TestDifferentObservableTypes extends AbstractStixParserTest {
     @Test
     public void testDomain2() throws Exception {
         doTest("domain2.xml", parsedThreatIntelligence -> {
-            assertThat(parsedThreatIntelligence.threatIntelligence.getObservableType(), equalTo("DomainNameObj:FQDN"));
-            assertThat(parsedThreatIntelligence.threatIntelligence.getObservable(), notNullValue());
-            assertThat(parsedThreatIntelligence.threatIntelligence.getStixReference(), notNullValue());
+            assertThat(parsedThreatIntelligence.getThreatIntelligence().getObservableType(), equalTo("DomainNameObj:FQDN"));
+            assertThat(parsedThreatIntelligence.getThreatIntelligence().getObservable(), notNullValue());
+            assertThat(parsedThreatIntelligence.getThreatIntelligence().getStixReference(), notNullValue());
         }, all -> {
             assertThat("All observables output an entry", all.size(), equalTo(3));
             assertThat("All outputs are linked back to a common indicator reference",
@@ -45,9 +45,9 @@ public class TestDifferentObservableTypes extends AbstractStixParserTest {
     @Test
     public void testDomainIp() throws Exception {
         doTest("ip.xml", parsedThreatIntelligence -> {
-            assertThat(parsedThreatIntelligence.threatIntelligence.getObservableType(), equalTo("Address:ipv4-addr"));
-            assertThat(parsedThreatIntelligence.threatIntelligence.getObservable(), notNullValue());
-            assertThat(parsedThreatIntelligence.threatIntelligence.getStixReference(), notNullValue());
+            assertThat(parsedThreatIntelligence.getThreatIntelligence().getObservableType(), equalTo("Address:ipv4-addr"));
+            assertThat(parsedThreatIntelligence.getThreatIntelligence().getObservable(), notNullValue());
+            assertThat(parsedThreatIntelligence.getThreatIntelligence().getStixReference(), notNullValue());
         }, all -> {
             assertThat("All observables output an entry", all.size(), equalTo(1));
             assertThat("All outputs are linked back to a common indicator reference",

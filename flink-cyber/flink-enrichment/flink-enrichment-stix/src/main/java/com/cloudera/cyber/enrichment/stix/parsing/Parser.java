@@ -7,22 +7,27 @@ import com.google.common.base.Splitter;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
+import org.joda.time.DateTime;
 import org.mitre.cybox.common_2.BaseObjectPropertyType;
 import org.mitre.cybox.common_2.ConditionApplicationEnum;
 import org.mitre.cybox.common_2.ConditionTypeEnum;
 import org.mitre.cybox.common_2.ObjectPropertiesType;
+import org.mitre.cybox.cybox_2.ObjectType;
 import org.mitre.cybox.cybox_2.Observable;
 import org.mitre.cybox.cybox_2.Observables;
 import org.mitre.stix.indicator_2.Indicator;
 import org.mitre.stix.stix_1.IndicatorsType;
 import org.mitre.stix.stix_1.STIXPackage;
 
+import javax.xml.datatype.XMLGregorianCalendar;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Stream;
 
+@SuppressWarnings("rawtypes")
 public class Parser extends RichFlatMapFunction<String, ParsedThreatIntelligence> {
 
     private Configuration config;
@@ -34,7 +39,7 @@ public class Parser extends RichFlatMapFunction<String, ParsedThreatIntelligence
     }
 
     @Override
-    public void flatMap(String s, Collector<ParsedThreatIntelligence> collector) throws Exception {
+    public void flatMap(String s, Collector<ParsedThreatIntelligence> collector) {
         STIXPackage stixPackage = STIXPackage.fromXMLString(s);
 
         Observables observables = stixPackage.getObservables();
@@ -43,18 +48,17 @@ public class Parser extends RichFlatMapFunction<String, ParsedThreatIntelligence
 
         if (observables != null) {
             observables.getObservables().stream()
-                    .map(o -> o.getObject())
-                    .map(o -> o.getProperties())
+                    .map(Observable::getObject)
+                    .map(ObjectType::getProperties)
                     .flatMap(p -> {
                         ObjectTypeHandler handler = ObjectTypeHandlers.getHandlerByInstance(p);
-                        Stream<ThreatIntelligence.ThreatIntelligenceBuilder> extract = handler.extract(p, config.toMap());
-                        return extract
-                                .map(b -> b.ts(Instant.now().toEpochMilli()));
+                        Stream<ThreatIntelligence.Builder> extract = handler.extract(p, config.toMap());
+                        return extract.map(b -> b.setTs(DateTime.now()));
                     })
                     .forEach(t -> collector.collect(
-                            ParsedThreatIntelligence.builder()
-                                    .source(s)
-                                    .threatIntelligence(t.build())
+                            ParsedThreatIntelligence.newBuilder()
+                                    .setSource(s)
+                                    .setThreatIntelligence(t.build())
                                     .build()));
         }
         if (indicators != null) {
@@ -64,15 +68,23 @@ public class Parser extends RichFlatMapFunction<String, ParsedThreatIntelligence
                         Observable observable = indicator.getObservable();
                         ObjectPropertiesType p = observable.getObject().getProperties();
                         ObjectTypeHandler handler = ObjectTypeHandlers.getHandlerByInstance(p);
-                        Stream<ThreatIntelligence.ThreatIntelligenceBuilder> out = handler.extract(p, config.toMap());
-                        Stream<ThreatIntelligence.ThreatIntelligenceBuilder> threatIntelligenceBuilderStream = out.map(t -> t.stixReference(indicator.getId().toString()));
-                        return threatIntelligenceBuilderStream;
+                        Stream<ThreatIntelligence.Builder> out = handler.extract(p, config.toMap());
+
+                        XMLGregorianCalendar time = i.getTimestamp();
+
+                        Instant timestamp = time == null ?
+                                Instant.now() :
+                                i.getTimestamp().toGregorianCalendar().toZonedDateTime().toInstant();
+
+                        return out.map(t -> t
+                                .setStixReference(indicator.getId().toString())
+                                .setTs(org.joda.time.Instant.ofEpochMilli(timestamp.toEpochMilli()).toDateTime()));
                     })
                     .filter(Objects::nonNull)
                     .forEach(t -> collector.collect(
-                            ParsedThreatIntelligence.builder()
-                                    .source(s)
-                                    .threatIntelligence(t.build())
+                            ParsedThreatIntelligence.newBuilder()
+                                    .setSource(s)
+                                    .setThreatIntelligence(t.setId(UUID.randomUUID().toString()).build())
                                     .build()));
         }
     }

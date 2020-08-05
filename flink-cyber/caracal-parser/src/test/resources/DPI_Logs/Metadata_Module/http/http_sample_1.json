@@ -1,0 +1,22 @@
+{
+    "http-stream": {
+        "flow_id": 1393745309,
+        "probe-id": "dpi1",
+        "start_ts": "1549772662.270048",
+        "ip_clt": "1.2.3.4",
+        "ip_srv": "5.6.7.8",
+        "port_clt": 38829,
+        "port_srv": 80,
+        "http.request": [
+            {
+                "http.index": "1",
+                "http.method": "GET",
+                "http.uri": "/vi/OsiU-5Y41qQ/mqdefault.jpg",
+                "http.user_agent": "Dalvik/1.6.0 (Linux; U; Android 4.4.4; SM-T561 Build/KTU84P)",
+                "http.host": "i4.ytimg.com"
+            }
+        ],
+        "expiration_ts": "1549772668.2040",
+        "path": "base.eth.ip.tcp.http.google_gen.youtube"
+    }
+}

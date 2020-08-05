@@ -1,6 +1,9 @@
 package com.cloudera.cyber.enrichment.stix.parsing.types;
 
+import com.cloudera.cyber.ThreatIntelligence;
 import org.mitre.cybox.common_2.ObjectPropertiesType;
+
+import java.util.function.Function;
 
 /**
  *
@@ -22,4 +25,13 @@ public abstract class AbstractObjectTypeHandler<T extends ObjectPropertiesType> 
     public String getType() {
         return getTypeClass().getSimpleName();
     }
+
+    protected Function<String, ThreatIntelligence.Builder> mapToThreatIntelligence(String type) {
+        return value -> {
+            return ThreatIntelligence.newBuilder()
+                    .setObservable(value)
+                    .setObservableType(type);
+        };
+    }
+
 }

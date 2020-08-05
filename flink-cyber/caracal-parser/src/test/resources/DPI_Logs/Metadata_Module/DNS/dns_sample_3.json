@@ -1,0 +1,37 @@
+{
+    "dns-stream": {
+        "flow_id": 1392792838,
+        "probe-id": "dpi1",
+        "start_ts": "1549772619.967013",
+        "ip_clt": "1.2.3.4",
+        "ip_srv": "5.6.7.8",
+        "port_clt": 52609,
+        "port_srv": 53,
+        "dns.dns_query": [
+            {
+                "dns.message_type": "QUERY",
+                "dns.query": "time.nist.gov",
+                "dns.query_type": "Host address"
+            },
+            {
+                "dns.message_type": "RESPONSE",
+                "dns.query": "time.nist.gov",
+                "dns.query_type": "Host address",
+                "dns.dns_entry": [
+                    {
+                        "dns.name": "time.nist.gov",
+                        "dns.host_type": "canonical name",
+                        "dns.host": "ntp1.glb.nist.gov"
+                    },
+                    {
+                        "dns.name": "ntp1.glb.nist.gov",
+                        "dns.host_addr": "132.163.97.2",
+                        "dns.host_type": "IP address"
+                    }
+                ]
+            }
+        ],
+        "expiration_ts": "1549772679.6104",
+        "path": "base.eth.ip.udp.dns"
+    }
+}

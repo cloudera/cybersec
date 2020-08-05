@@ -162,9 +162,17 @@ public class Utils {
     }
 
 
-    public static String getResourceAsString(String file) throws IOException {
+    public static String getResourceAsString(String file) {
         URL url = Resources.getResource(file);
-        return Resources.toString(url, StandardCharsets.UTF_8);
+        try {
+            return Resources.toString(url, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
+
+    public static String readFile(String path) throws IOException {
+        return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
+    }
 }

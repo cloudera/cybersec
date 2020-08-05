@@ -8,23 +8,25 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="parser-split-flink" />
-        <module name="nifi-parser-processors" />
+        <module name="nifi-parser-services" />
+        <module name="kafka-sample" />
+        <module name="nifi-parser-api" />
         <module name="flink-enrichment-lookup" />
         <module name="flink-alert-scoring-api" />
         <module name="nifi-parser-nar" />
         <module name="flink-alert-scoring" />
         <module name="flink-web" />
-        <module name="flink-dedupe" />
         <module name="caracal-parser" />
+        <module name="flink-logging" />
         <module name="flink-rules" />
         <module name="parser-chains-config-service" />
         <module name="flink-sessions" />
-        <module name="nifi-parser-api" />
+        <module name="flink-dedupe" />
         <module name="parser-chains-core" />
         <module name="cyber-functions" />
+        <module name="nifi-parser-processors" />
         <module name="flink-enrichment-stix" />
         <module name="flink-enrichment-rules" />
-        <module name="nifi-parser-services" />
         <module name="caracal-generator" />
         <module name="parser-chains-flink" />
         <module name="flink-cyber-api" />
@@ -38,6 +40,11 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="flink-parser" target="1.8" />
+      <module name="nifi-parser-api" target="11" />
+      <module name="nifi-parser-bundle" target="11" />
+      <module name="nifi-parser-nar" target="11" />
+      <module name="nifi-parser-processors" target="11" />
+      <module name="nifi-parser-services" target="11" />
       <module name="parser-split-flink" target="1.8" />
     </bytecodeTargetLevel>
   </component>

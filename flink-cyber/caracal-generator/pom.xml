@@ -53,9 +53,13 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+
+
         <dependency>
-            <groupId>net.logstash.log4j</groupId>
-            <artifactId>jsonevent-layout</artifactId>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-logging</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
