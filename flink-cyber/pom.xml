@@ -43,6 +43,7 @@
         <kafka.version>2.4.1.7.1.1.0-565</kafka.version>
         <nifi.version>1.11.4</nifi.version>
         <jackson.version>2.11.0</jackson.version>
+        <smm.intercepter.version>2.1.0.7.1.2.0-96</smm.intercepter.version>
     </properties>
 
     <repositories>
@@ -103,6 +104,12 @@
                         <artifactId>avro</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>com.hortonworks.smm</groupId>
+                <artifactId>monitoring-interceptors</artifactId>
+                <version>${smm.intercepter.version}</version>
             </dependency>
 
             <dependency>
