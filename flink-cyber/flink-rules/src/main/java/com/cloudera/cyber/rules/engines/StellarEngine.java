@@ -34,4 +34,9 @@ public class StellarEngine implements RuleEngine {
     public void eval(String script) throws ScriptException {
 
     }
+
+    @Override
+    public Object invokeFunction(String function, Object... args) {
+        throw new RuntimeException("RuleEngine not implemented yet");
+    }
 }

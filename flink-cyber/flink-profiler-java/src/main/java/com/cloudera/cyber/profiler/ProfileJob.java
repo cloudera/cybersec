@@ -1,7 +1,7 @@
 package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.flink.TimedBoundedOutOfOrdernessTimestampExtractor;
+import com.cloudera.cyber.flink.MessageBoundedOutOfOrder;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -74,6 +74,6 @@ public abstract class ProfileJob {
 
     private SingleOutputStreamOperator<Message> sourceFrom(StreamExecutionEnvironment env, ParameterTool params, ProfileConfigGroup config) {
         return createSource(env, params, config.getSource())
-                .assignTimestampsAndWatermarks(new TimedBoundedOutOfOrdernessTimestampExtractor<>(Time.milliseconds(config.getLatenessTolerance()))).name("Profile Source").uid("profile-source");
+                .assignTimestampsAndWatermarks(new MessageBoundedOutOfOrder(Time.milliseconds(config.getLatenessTolerance()))).name("Profile Source").uid("profile-source");
     }
 }

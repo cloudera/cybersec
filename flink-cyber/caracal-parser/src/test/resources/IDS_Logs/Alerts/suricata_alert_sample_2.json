@@ -1,0 +1,30 @@
+{
+    "timestamp": "2019-02-02T04:36:05.301894+0400",
+    "flow_id": 474477422966542,
+    "in_iface": "em1",
+    "event_type": "alert",
+    "src_ip": "1.2.3.4",
+    "src_port": 6882,
+    "dest_ip": "5.6.7.8",
+    "dest_port": 55712,
+    "proto": "TCP",
+    "alert": {
+        "action": "allowed",
+        "gid": 1,
+        "signature_id": 10000014,
+        "rev": 0,
+        "signature": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        "category": "",
+        "severity": 3
+    },
+    "app_proto": "failed",
+    "flow": {
+        "pkts_toserver": 2252,
+        "pkts_toclient": 1454,
+        "bytes_toserver": 2861000,
+        "bytes_toclient": 108630,
+        "start": "2019-02-02T04:20:15.587534+0400"
+    },
+    "payload": "VGhpcyBpcyBhIHNhbXBsZQpUaGlzIGlzIGEgc2FtcGxlClRoaXMgaXMgYSBzYW1wbGUKVGhpcyBpcyBhIHNhbXBsZQ=",
+    "stream": 0
+}

@@ -21,17 +21,13 @@ public class DomainHandler extends AbstractObjectTypeHandler<DomainName> {
     }
 
     @Override
-    public Stream<ThreatIntelligence.ThreatIntelligenceBuilder> extract(DomainName type, Map<String, Object> config) {
+    public Stream<ThreatIntelligence.Builder> extract(DomainName type, Map<String, Object> config) {
         final DomainNameTypeEnum domainType = type.getType();
         List<ThreatIntelligence> output = new ArrayList<>();
         if (domainType == null || SUPPORTED_TYPES.contains(domainType)) {
             StringObjectPropertyType value = type.getValue();
             return StreamSupport.stream(Parser.split(value).spliterator(), false)
-                    .map(token -> ThreatIntelligence.builder()
-                            // TODO - extract a proper time for the indicator
-                            .observable(token)
-                            .observableType("DomainNameObj" + ":" + DomainNameTypeEnum.FQDN)
-                            );
+                    .map(mapToThreatIntelligence("DomainNameObj" + ":" + DomainNameTypeEnum.FQDN));
         }
         return Stream.empty();
     }

@@ -1,0 +1,16 @@
+[
+    {
+        "timestamp": 1549772874.000001,
+        "key": "generic_flow",
+        "probe-id": "dpi1",
+        "path": "base.eth.ip.tcp.whatsapp",
+        "ip_srv": "1.2.3.4",
+        "ip_clt": "5.6.7.8",
+        "port_srv": 443,
+        "cts_packet_count": 58,
+        "stc_packet_count": 46,
+        "volume": 19676,
+        "cts_volume": 7598,
+        "stc_volume": 12078
+    }
+]

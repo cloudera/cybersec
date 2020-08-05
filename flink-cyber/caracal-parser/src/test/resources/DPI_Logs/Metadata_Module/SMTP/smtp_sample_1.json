@@ -1,0 +1,27 @@
+{
+    "smtp-stream": {
+        "flow_id": 125077456,
+        "probe-id": "dpi1",
+        "start_ts": "1549778765.342662",
+        "ip_clt": "1.2.3.4",
+        "ip_srv": "5.6.7.8",
+        "smtp.email": [
+            {
+                "smtp.sender_entry": [
+                    {
+                        "smtp.sender": "\"Spare Parts Muscat\" <contact.yyyyy@xxxxxx.com>"
+                    }
+                ],
+                "smtp.receiver_entry": [
+                    {
+                        "smtp.receiver": "<mmmmmm@dddddd.com>"
+                    }
+                ],
+                "smtp.subject": "Read: Dozer Items",
+                "smtp.date": "Sun, 10 Feb 2019 10:09:08 +0400"
+            }
+        ],
+        "expiration_ts": "1549778776.1996",
+        "path": "base.eth.ip.tcp.smtp"
+    }
+}

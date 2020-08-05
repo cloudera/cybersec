@@ -29,14 +29,14 @@ public class ThreatIntelligenceBroadcastProcessFunction extends BroadcastProcess
     public void processElement(Message message, ReadOnlyContext readOnlyContext, Collector<Message> collector) throws Exception {
         log.info("processElement %s", message.getId());
 
-        collector.collect(message.toBuilder().threats(fieldToType.entrySet().stream()
+        Map<String, List<ThreatIntelligence>> threats = fieldToType.entrySet().stream()
                 .collect(Collectors.toMap(f -> f.getKey(), f -> {
                     String value = message.get(f.getKey()).toString();
                     return f.getValue().stream().map(tiType -> tiType + ":" + value)
                             .flatMap(id -> getForKey(readOnlyContext, id))
                             .collect(Collectors.toList());
-                }))
-        ).build());
+                }));
+        collector.collect(Message.newBuilder(message).setThreats(threats).build());
     }
 
     /**
@@ -54,8 +54,7 @@ public class ThreatIntelligenceBroadcastProcessFunction extends BroadcastProcess
         String tiKey = threatIntelligence.getObservableType() + ":" + threatIntelligence.getObservable();
         List<ThreatIntelligence> oldThreatIntelligences = state.get(tiKey);
 
-        log.info("processBroadcastElement [%d], %s, tiKey: %s, oldCount: %d", Thread.currentThread().getId(), threatIntelligence.toString(), tiKey, oldThreatIntelligences == null ? -1: oldThreatIntelligences.size());
-        System.out.println(String.format("processBroadcastElement [%d], %s, tiKey: %s, oldCount: %d", Thread.currentThread().getId(), threatIntelligence.toString(), tiKey, oldThreatIntelligences == null ? -1: oldThreatIntelligences.size()));
+        log.info(String.format("processBroadcastElement [%d], %s, tiKey: %s, oldCount: %d", Thread.currentThread().getId(), threatIntelligence.toString(), tiKey, oldThreatIntelligences == null ? -1: oldThreatIntelligences.size()));
         if (oldThreatIntelligences != null) {
             Set<ThreatIntelligence> threatIntelligences = new HashSet(oldThreatIntelligences);
             threatIntelligences.add(threatIntelligence);

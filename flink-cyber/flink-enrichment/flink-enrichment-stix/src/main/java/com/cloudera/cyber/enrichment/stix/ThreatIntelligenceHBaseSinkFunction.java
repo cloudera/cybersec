@@ -8,6 +8,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 public class ThreatIntelligenceHBaseSinkFunction extends HBaseSinkFunction<ThreatIntelligence> {
 
@@ -21,7 +22,7 @@ public class ThreatIntelligenceHBaseSinkFunction extends HBaseSinkFunction<Threa
 
     @Override
     public void executeMutations(ThreatIntelligence threatIntelligence, Context context, BufferedMutator bufferedMutator) throws Exception {
-        Put put = new Put(UUIDUtils.asBytes(threatIntelligence.getId()));
+        Put put = new Put(UUIDUtils.asBytes(UUID.fromString(threatIntelligence.getId())));
 
         put.addColumn(cf, indicator, threatIntelligence.getObservable().getBytes(StandardCharsets.UTF_8));
         put.addColumn(cf, indicatorType, threatIntelligence.getObservableType().getBytes(StandardCharsets.UTF_8));

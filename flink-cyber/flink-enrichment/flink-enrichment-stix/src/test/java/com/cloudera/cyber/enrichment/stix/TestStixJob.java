@@ -2,7 +2,7 @@ package com.cloudera.cyber.enrichment.stix;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.ThreatIntelligence;
-import com.google.common.io.Resources;
+import com.cloudera.cyber.enrichment.stix.parsing.ThreatIntelligenceDetails;
 import lombok.extern.java.Log;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -15,9 +15,7 @@ import org.apache.flink.test.util.ManualSource;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 
 import static com.cloudera.cyber.flink.Utils.getResourceAsString;
@@ -29,15 +27,18 @@ public class TestStixJob extends StixJob {
     protected CollectingSink<ThreatIntelligence> sink = new CollectingSink<>();
     protected CollectingSink<ThreatIntelligenceDetails> sinkDetails = new CollectingSink<>();
 
-
     protected ManualSource<Message> messageSource;
     protected CollectingSink<Message> resultsSink = new CollectingSink<>();
 
 
     @Test
     public void testStream() throws Exception {
-        JobTester.startTest(createPipeline(ParameterTool.fromMap(new HashMap<String, String>() {{
-        }})));
+        StreamExecutionEnvironment env = createPipeline(ParameterTool.fromMap(new HashMap<String, String>() {{
+        }}));
+
+        JobTester.startTest(env);
+
+        //SpecificData.get().addLogicalTypeConversion(new Conversions.UUIDConversion());
 
         source.sendRecord(getResourceAsString("domain.xml"));
         source.sendRecord(getResourceAsString("domain2.xml"));
@@ -46,8 +47,9 @@ public class TestStixJob extends StixJob {
 
         JobTester.stopTest();
 
+        Thread.sleep(1000);
         for (int i = 0; i < 10; i++) {
-            ThreatIntelligence out = sink.poll();
+            ThreatIntelligence out = sink.poll(Duration.ofMillis(10000));
             assertThat(String.format("Got a response for %d", i), out, Matchers.notNullValue());
             log.info(String.format("Response %d: %s", i, out));
         }
@@ -56,12 +58,7 @@ public class TestStixJob extends StixJob {
 
     @Override
     protected MapFunction<Message, Message> getLongTermLookupFunction() {
-        return new MapFunction<Message, Message>() {
-            @Override
-            public Message map(Message message) throws Exception {
-                return message;
-            }
-        };
+        return (MapFunction<Message, Message>) message -> message;
     }
 
     @Override

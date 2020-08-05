@@ -47,6 +47,11 @@
             <artifactId>flink-alert-scoring-api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-logging</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>

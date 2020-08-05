@@ -4,6 +4,8 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.ThreatIntelligence;
 import com.cloudera.cyber.enrichment.stix.parsing.ParsedThreatIntelligence;
 import com.cloudera.cyber.enrichment.stix.parsing.Parser;
+import com.cloudera.cyber.enrichment.stix.parsing.ThreatIntelligenceDetails;
+import com.cloudera.cyber.flink.FlinkUtils;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.ListUtils;
 import org.apache.flink.annotation.VisibleForTesting;
@@ -34,6 +36,7 @@ public abstract class StixJob {
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+        FlinkUtils.setupEnv(env, params);
 
         DataStream<String> stixSource = createStixSource(env, params);
         SingleOutputStreamOperator<ParsedThreatIntelligence> stixResults = stixSource.flatMap(new Parser());
@@ -57,9 +60,9 @@ public abstract class StixJob {
         writeResults(params, results);
 
         writeStixResults(params, threats);
-        writeDetails(params, stixResults.map(t -> ThreatIntelligenceDetails.builder()
-                .id(t.getId())
-                .stixSource(t.getSource())
+        writeDetails(params, stixResults.map(t -> ThreatIntelligenceDetails.newBuilder()
+                .setId(t.getThreatIntelligence().getId())
+                .setStixSource(t.getSource())
                 .build()));
 
         return env;

@@ -1,0 +1,6 @@
+{
+    "type": "map",
+    "name": "ThreatIntelligenceIndex",
+    "namespace": "com.cloudera.cyber.enrichment.stix.parsing",
+    "values": "com.cloudera.cyber.ThreatIntelligence"
+}

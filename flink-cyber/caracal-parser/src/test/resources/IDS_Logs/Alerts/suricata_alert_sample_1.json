@@ -1,0 +1,38 @@
+{
+    "timestamp": "2019-01-10T14:14:00.005489+0400",
+    "flow_id": 1194935513047115,
+    "in_iface": "em1",
+    "event_type": "alert",
+    "src_ip": "1.2.3.4",
+    "src_port": 43609,
+    "dest_ip": "5.6.7.8",
+    "dest_port": 3478,
+    "proto": "UDP",
+    "alert": {
+        "action": "allowed",
+        "gid": 1,
+        "signature_id": 2016149,
+        "rev": 2,
+        "signature": "ET INFO Session Traversal Utilities for NAT (STUN Binding Request)",
+        "category": "Attempted User Privilege Gain",
+        "severity": 1,
+        "metadata": {
+            "updated_at": [
+                "2013_01_04"
+            ],
+            "created_at": [
+                "2013_01_04"
+            ]
+        }
+    },
+    "app_proto": "failed",
+    "flow": {
+        "pkts_toserver": 26,
+        "pkts_toclient": 0,
+        "bytes_toserver": 1612,
+        "bytes_toclient": 0,
+        "start": "2019-01-10T14:13:28.254027+0400"
+    },
+    "payload": "VGhpcyBpcyBhIHNhbXBsZQpUaGlzIGlzIGEgc2FtcGxlClRoaXMgaXMgYSBzYW1wbGUKVGhpcyBpcyBhIHNhbXBsZQ==",
+    "stream": 0
+}

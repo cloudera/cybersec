@@ -123,11 +123,11 @@ public class TestParserJob extends ParserJob {
 
         Message out = sink.poll(Duration.ofMillis(1000));
         assertThat("Output not null", out, notNullValue());
-        assertThat("Original String is moved", out.getFields(), not(hasKey(DEFAULT_INPUT_FIELD)));
-        assertThat("Timestamp is moved", out.getFields(), not(hasKey("timestamp")));
+        assertThat("Original String is moved", out.getExtensions(), not(hasKey(DEFAULT_INPUT_FIELD)));
+        assertThat("Timestamp is moved", out.getExtensions(), not(hasKey("timestamp")));
 
         // all other fields present and correct
-        assertThat("name correct", out.getFields(), hasEntry(equalTo("name"), equalTo(nameField)));
+        assertThat("name correct", out.getExtensions(), hasEntry(equalTo("name"), equalTo(nameField)));
     }
 
     @Override

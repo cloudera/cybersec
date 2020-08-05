@@ -1,5 +1,6 @@
 package com.cloudera.cyber.dedupe;
 
+import com.cloudera.cyber.DedupeMessage;
 import com.cloudera.cyber.Message;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -52,7 +53,7 @@ public abstract class DedupeJob {
         //printResults(results);
 
         // capture and publish any late results without counts, i.e. fail safe
-        writeResults(params, results.getSideOutput(lateData).map(d -> d.toBuilder().late(true).build()));
+        writeResults(params, results.getSideOutput(lateData).map(d -> DedupeMessage.newBuilder(d).setLate(true).build()));
 
         return env;
     }

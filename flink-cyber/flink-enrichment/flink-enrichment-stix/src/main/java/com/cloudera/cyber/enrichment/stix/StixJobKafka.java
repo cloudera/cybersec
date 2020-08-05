@@ -2,6 +2,7 @@ package com.cloudera.cyber.enrichment.stix;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.ThreatIntelligence;
+import com.cloudera.cyber.enrichment.stix.parsing.ThreatIntelligenceDetails;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
 import org.apache.flink.addons.hbase.HBaseWriteOptions;
@@ -14,6 +15,7 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import static com.cloudera.cyber.flink.FlinkUtils.createKafkaSource;
 
@@ -93,7 +95,7 @@ public class StixJobKafka extends StixJob {
 
     @Override
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        String inputTopic = params.getRequired("topic.input");
+        Pattern inputTopic = Pattern.compile(params.getRequired("topic.input"));
         String groupId = "cyber-stix";
         return env.addSource(createKafkaSource(inputTopic,
                 params,

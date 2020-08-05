@@ -1,5 +1,4 @@
 package com.cloudera.cyber.profiler;
-
 import com.cloudera.cyber.Message;
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction;
 

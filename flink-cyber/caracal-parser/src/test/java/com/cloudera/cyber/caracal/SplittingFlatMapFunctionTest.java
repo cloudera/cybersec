@@ -4,7 +4,6 @@ import com.cloudera.cyber.Message;
 import org.apache.flink.util.Collector;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,13 +19,19 @@ public class SplittingFlatMapFunctionTest {
     public void testSplittingWithHeader() throws Exception {
         List<Message> results = new ArrayList<>();
 
-        SplittingFlatMapFunction splittingFlatMapFunction = new SplittingFlatMapFunction("$.http-stream['http.request'][*]", "$.http-stream", "start_ts", SplittingFlatMapFunction.TimestampSource.HEADER);
+        SplittingFlatMapFunction splittingFlatMapFunction = new SplittingFlatMapFunction(SplitConfig.builder()
+                .splitPath("$.http-stream['http.request'][*]")
+                .headerPath("$.http-stream")
+                .timestampField("start_ts")
+                .timestampSource(SplittingFlatMapFunction.TimestampSource.HEADER)
+                .timestampFunction("Math.round(parseFloat(ts)*1000,0)")
+                .build());
         splittingFlatMapFunction.flatMap(testInput, new Collector<Message>() {
             @Override
             public void collect(Message message) {
                 results.add(message);
-                assertThat("Header fields present", message.getFields(), hasKey("start_ts"));
-                assertThat("Part fields present", message.getFields(), hasKey("http.uri"));
+                assertThat("Header fields present", message.getExtensions(), hasKey("start_ts"));
+                assertThat("Part fields present", message.getExtensions(), hasKey("http.uri"));
             }
 
             @Override
@@ -36,6 +41,5 @@ public class SplittingFlatMapFunctionTest {
         });
 
         assertThat("All splits returned", results, hasSize(4));
-
     }
 }
