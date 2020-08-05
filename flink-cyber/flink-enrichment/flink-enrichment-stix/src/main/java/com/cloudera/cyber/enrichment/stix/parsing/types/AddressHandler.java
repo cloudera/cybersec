@@ -26,7 +26,7 @@ public class AddressHandler extends AbstractObjectTypeHandler<Address> {
     }
 
     @Override
-    public Stream<ThreatIntelligence.ThreatIntelligenceBuilder> extract(Address type, Map<String, Object> config) {
+    public Stream<ThreatIntelligence.Builder> extract(Address type, Map<String, Object> config) {
         StringObjectPropertyType value = type.getAddressValue();
         final CategoryTypeEnum category = type.getCategory();
         String typeStr = getType();
@@ -36,11 +36,7 @@ public class AddressHandler extends AbstractObjectTypeHandler<Address> {
         }
 
         return StreamSupport.stream(Parser.split(value).spliterator(), false)
-                .map(token -> ThreatIntelligence.builder()
-                        // TODO - extract a proper time for the indicator
-                        .observable(token)
-                        .observableType(typeStr + ":" + category.value())
-                );
+                .map(mapToThreatIntelligence(typeStr + ":" + category.value()));
     }
 
     @Override

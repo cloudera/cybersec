@@ -112,8 +112,13 @@ public class JavaScriptEngine implements RuleEngine {
         engine.eval(script);
     }
 
+    @Override
+    public Object invokeFunction(String function, Object... args) throws ScriptException, NoSuchMethodException {
+        return ((Invocable) engine).invokeFunction(function, args);
+    }
+
     private HashMap<String, Object> extractMessage(Message message) {
-        HashMap<String, Object> flat = new HashMap<>(message.getFields());
+        HashMap<String, Object> flat = new HashMap<>(message.getExtensions());
         flat.put("ts", message.getTs());
         flat.put("id", message.getId());
         return flat;

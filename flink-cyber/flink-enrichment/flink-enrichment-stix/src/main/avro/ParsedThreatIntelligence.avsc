@@ -1,0 +1,15 @@
+{
+    "type": "record",
+    "name": "ParsedThreatIntelligence",
+    "namespace": "com.cloudera.cyber.enrichment.stix.parsing",
+    "fields": [
+        {
+            "name": "source",
+            "type": "string"
+        },
+        {
+            "name": "threatIntelligence",
+            "type": "com.cloudera.cyber.ThreatIntelligence"
+        }
+    ]
+}

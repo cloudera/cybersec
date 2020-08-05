@@ -1,7 +1,5 @@
 package com.cloudera.cyber.profiler;
-
 import com.cloudera.cyber.Message;
-
 public class ProfileAccumulator {
     public ProfileAccumulator add(Message message) {
         return null;

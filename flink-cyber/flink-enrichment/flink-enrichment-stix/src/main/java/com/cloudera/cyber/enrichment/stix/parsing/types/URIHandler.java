@@ -18,15 +18,11 @@ public class URIHandler extends AbstractObjectTypeHandler<URIObjectType> {
     }
 
     @Override
-    public Stream<ThreatIntelligence.ThreatIntelligenceBuilder> extract(URIObjectType type, Map<String, Object> config) {
+    public Stream<ThreatIntelligence.Builder> extract(URIObjectType type, Map<String, Object> config) {
         AnyURIObjectPropertyType value = type.getValue();
 
         return StreamSupport.stream(Parser.split(value).spliterator(), false)
-                .map(token -> ThreatIntelligence.builder()
-                        // TODO - extract a proper time for the indicator
-                        .observable(token)
-                        .observableType("URIObject:URIObjectType")
-                );
+                .map(mapToThreatIntelligence("URIObject:URIObjectType"));
     }
 
     @Override

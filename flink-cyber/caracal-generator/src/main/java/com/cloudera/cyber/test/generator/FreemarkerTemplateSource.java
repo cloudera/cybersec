@@ -8,10 +8,8 @@ import org.apache.commons.math3.util.Pair;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.functions.source.ParallelSourceFunction;
 
-import java.io.File;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;

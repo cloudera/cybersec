@@ -14,6 +14,7 @@ import org.apache.flink.test.util.ManualSource;
 import org.junit.Test;
 
 import java.time.Duration;
+import org.joda.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
 
@@ -37,30 +38,30 @@ public class TestSessionizer extends SessionJob {
 
         // send a bunch of session results
 
-        UUID user1 = UUID.randomUUID();
-        UUID user2 = UUID.randomUUID();
+        String user1 = UUID.randomUUID().toString();
+        String user2 = UUID.randomUUID().toString();
 
         // session 1
-        sendRecord(Message.builder()
-                .fields(createFields(user1))
-                .ts(ts + 0L));
-        sendRecord(Message.builder()
-                .fields(createFields(user1))
-                .ts(ts + 1000L),true);
-        sendRecord(Message.builder()
-                .fields(createFields(user1))
-                .ts(ts + 2000L),true);
-        sendRecord(Message.builder()
-                .fields(createFields(user1))
-                .ts(ts + 9000L),true);
+        sendRecord(Message.newBuilder()
+                .setExtensions(createFields(user1))
+                .setTs(Instant.ofEpochMilli(ts + 0L).toDateTime()));
+        sendRecord(Message.newBuilder()
+                .setExtensions(createFields(user1))
+                .setTs(Instant.ofEpochMilli(ts + 1000L).toDateTime()),true);
+        sendRecord(Message.newBuilder()
+                .setExtensions(createFields(user1))
+                .setTs(Instant.ofEpochMilli(ts + 2000L).toDateTime()),true);
+        sendRecord(Message.newBuilder()
+                .setExtensions(createFields(user1))
+                .setTs(Instant.ofEpochMilli(ts + 9000L).toDateTime()),true);
 
         // session 2
-        sendRecord(Message.builder()
-                .fields(createFields(user1))
-                .ts(ts + 20000L),true);
-        sendRecord(Message.builder()
-                .fields(createFields(user1))
-                .ts(ts + 21000L),true);
+        sendRecord(Message.newBuilder()
+                .setExtensions(createFields(user1))
+                .setTs(Instant.ofEpochMilli(ts + 20000L).toDateTime()),true);
+        sendRecord(Message.newBuilder()
+                .setExtensions(createFields(user1))
+                .setTs(Instant.ofEpochMilli(ts + 21000L).toDateTime()),true);
 
         source.sendWatermark(50000L);
 
@@ -84,18 +85,19 @@ public class TestSessionizer extends SessionJob {
         assertThat("Group has an id", groupedMessage.getId(), notNullValue());
     }
 
-    private void sendRecord(Message.MessageBuilder builder) {
+    private void sendRecord(Message.Builder builder) {
         sendRecord(builder, false);
     }
-    private void sendRecord(Message.MessageBuilder builder, boolean watermark) {
-        builder.id(UUID.randomUUID());
+    private void sendRecord(Message.Builder builder, boolean watermark) {
+        builder.setId(UUID.randomUUID().toString());
+        builder.setOriginalSource("");
         Message message = builder.build();
-        source.sendRecord(message, message.getTs());
-        if (watermark) source.sendWatermark(message.getTs());
+        source.sendRecord(message, message.getTs().getMillis());
+        if (watermark) source.sendWatermark(message.getTs().getMillis());
         recordLog.add(message);
     }
 
-    private Map<String, Object> createFields(UUID user) {
+    private HashMap<String, Object> createFields(String user) {
         return new HashMap<String, Object>(){{
                 put("user", user);
             }};

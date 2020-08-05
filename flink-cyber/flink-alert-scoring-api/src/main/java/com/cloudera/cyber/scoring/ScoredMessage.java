@@ -8,7 +8,6 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @EqualsAndHashCode
@@ -20,12 +19,12 @@ public class ScoredMessage implements IdentifiedMessage {
     private List<ScoringRule> rules;
 
     @Override
-    public UUID getId() {
+    public String getId() {
         return message.getId();
     }
 
     @Override
     public long getTs() {
-        return message.getTs();
+        return message.getTs().getMillis();
     }
 }

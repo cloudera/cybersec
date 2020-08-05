@@ -1,6 +1,6 @@
 package com.cloudera.cyber.dedupe;
 
-
+import com.cloudera.cyber.DedupeMessage;
 import com.cloudera.cyber.Message;
 import lombok.extern.java.Log;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -10,6 +10,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
+import org.joda.time.Instant;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -46,14 +47,14 @@ public class TestDedupeJob extends DedupeJob {
 
         createMessages(ts);
 
-        assertThat(this.recordLog.stream().map(m -> m.getTs()).max(Long::compareTo).get(), lessThan(ts + 3000));
+        assertThat(this.recordLog.stream().map(m -> m.getTs().getMillis()).max(Long::compareTo).get(), lessThan(ts + 3000));
 
         Map<GroupKey, Integer> expected = this.recordLog.stream()
                 .collect(Collectors.groupingBy(m -> {
                     return GroupKey.builder()
-                            .a(m.getFields().get("a").toString())
-                            .b(m.getFields().get("b").toString())
-                            .ts((long) (Math.ceil(m.getTs() / 1000) * 1000 + 1000))
+                            .a(m.getExtensions().get("a").toString())
+                            .b(m.getExtensions().get("b").toString())
+                            .ts((long) (Math.ceil(m.getTs().getMillis() / 1000) * 1000 + 1000))
                             .build();
                 }))
                 .entrySet().stream()
@@ -75,7 +76,7 @@ public class TestDedupeJob extends DedupeJob {
         output.forEach(this::checkResult);
         // note that the size will be 1 greater than expected due to the max count emitter which breaks
         // one of the 3 duplicates into a 2 and a 1.
-        List<DedupeMessage> lateMessages = output.stream().filter(m -> m.isLate()).collect(Collectors.toList());
+        List<DedupeMessage> lateMessages = output.stream().filter(m -> m.getLate()).collect(Collectors.toList());
 
         log.info(String.format("Output: %s; lateMessages: %s", output, lateMessages));
         assertThat("All messages were processed", output.parallelStream()
@@ -90,51 +91,51 @@ public class TestDedupeJob extends DedupeJob {
     }
 
     public void createMessages(long ts) throws TimeoutException {
-        Message.MessageBuilder MESSAGE_A = Message.builder()
-                .fields(new HashMap<String, Object>() {{
+        Message.Builder MESSAGE_A = Message.newBuilder()
+                .setExtensions(new HashMap<String, Object>() {{
                     put("a", "test");
                     put("b", "test");
                 }});
-        Message.MessageBuilder MESSAGE_B = Message.builder()
-                .fields(new HashMap<String, Object>() {{
+        Message.Builder MESSAGE_B = Message.newBuilder()
+                .setExtensions(new HashMap<String, Object>() {{
                     put("a", "test2");
                     put("b", "test2");
                 }});
-        Message.MessageBuilder MESSAGE_C = Message.builder()
-                .fields(new HashMap<String, Object>() {{
+        Message.Builder MESSAGE_C = Message.newBuilder()
+                .setExtensions(new HashMap<String, Object>() {{
                     put("a", "test3");
                     put("b", "test3");
                     put("c", "test3");
                 }});
 
-        sendRecord(MESSAGE_A.ts(ts + 0));
-        sendRecord(MESSAGE_A.ts(ts + 100));
-        sendRecord(MESSAGE_A.ts(ts + 200));
-        sendRecord(MESSAGE_B.ts(ts + 200));
-        sendRecord(MESSAGE_C.ts(ts + 200));
+        sendRecord(MESSAGE_A.setTs(Instant.ofEpochMilli(ts + 0).toDateTime()));
+        sendRecord(MESSAGE_A.setTs(Instant.ofEpochMilli(ts + 100).toDateTime()));
+        sendRecord(MESSAGE_A.setTs(Instant.ofEpochMilli(ts + 200).toDateTime()));
+        sendRecord(MESSAGE_B.setTs(Instant.ofEpochMilli(ts + 200).toDateTime()));
+        sendRecord(MESSAGE_C.setTs(Instant.ofEpochMilli(ts + 200).toDateTime()));
 
         source.sendWatermark(ts + 1000);
 
         // insert late message
-        sendRecord(MESSAGE_A.ts(ts + 500));
+        sendRecord(MESSAGE_A.setTs(Instant.ofEpochMilli(ts + 500).toDateTime()));
 
-        sendRecord(MESSAGE_A.ts(ts + 1100));
-        sendRecord(MESSAGE_A.ts(ts + 1200));
-        sendRecord(MESSAGE_B.ts(ts + 1300));
-        sendRecord(MESSAGE_B.ts(ts + 1400));
-        sendRecord(MESSAGE_C.ts(ts + 1500));
+        sendRecord(MESSAGE_A.setTs(Instant.ofEpochMilli(ts + 1100).toDateTime()));
+        sendRecord(MESSAGE_A.setTs(Instant.ofEpochMilli(ts + 1200).toDateTime()));
+        sendRecord(MESSAGE_B.setTs(Instant.ofEpochMilli(ts + 1300).toDateTime()));
+        sendRecord(MESSAGE_B.setTs(Instant.ofEpochMilli(ts + 1400).toDateTime()));
+        sendRecord(MESSAGE_C.setTs(Instant.ofEpochMilli(ts + 1500).toDateTime()));
 
         source.sendWatermark(ts + 2000);
 
         // insert extremely late
-        sendRecord(MESSAGE_A.ts(ts + 150));
+        sendRecord(MESSAGE_A.setTs(Instant.ofEpochMilli(ts + 150).toDateTime()));
 
         source.markFinished();
     }
 
-    private void sendRecord(Message.MessageBuilder d) {
-        Message r = d.id(UUID.randomUUID()).build();
-        this.source.sendRecord(r, r.getTs());
+    private void sendRecord(Message.Builder d) {
+        Message r = d.setId(UUID.randomUUID().toString()).build();
+        this.source.sendRecord(r, r.getTs().getMillis());
         this.recordLog.add(r);
     }
 
@@ -150,16 +151,16 @@ public class TestDedupeJob extends DedupeJob {
                 createFields(Arrays.asList("a", "b"), "test2"),
                 createFields(Arrays.asList("a", "b", "c'"), "test3")
         ).map(fields ->
-                Message.builder()
-                        .id(UUID.randomUUID())
-                        .ts(ts)
-                        .fields(fields)
+                Message.newBuilder()
+                        .setId(UUID.randomUUID().toString())
+                        .setTs(Instant.ofEpochMilli(ts).toDateTime())
+                        .setExtensions(fields)
                         .build()
         ).collect(Collectors.toList());
 
     }
 
-    private Map<String, Object> createFields(List<String> fields, String value) {
+    private HashMap<String, Object> createFields(List<String> fields, String value) {
         return new HashMap<String, Object>() {{
             fields.forEach(f -> put(f, value));
         }};

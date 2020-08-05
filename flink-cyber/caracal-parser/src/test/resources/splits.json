@@ -1,0 +1,30 @@
+[
+  {
+    "topic": "dpi_http",
+    "splitPath": "$.http-stream['http.request'][*]",
+    "headerPath": "$.http-stream",
+    "timestampField" : "start_ts",
+    "timestampFunction": "Math.round(parseFloat(ts)*1000,0)"
+  },
+  {
+    "topic": "dpi_dns",
+    "splitPath": "$.dns-stream['dns.dns_query'][*]",
+    "headerPath": "$.dns-stream",
+    "timestampField" : "start_ts",
+    "timestampFunction": "Math.round(parseFloat(ts)*1000,0)"
+  },
+  {
+    "topic": "dpi_radius",
+    "splitPath": "$.radius-stream['radius.request'][*]",
+    "headerPath": "$.radius-stream",
+    "timestampField" : "start_ts",
+    "timestampFunction": "Math.round(parseFloat(ts)*1000,0)"
+  },
+  {
+    "topic": "dpi_smtp",
+    "splitPath": "$.smtp-stream['smtp.email'][*]",
+    "headerPath": "$.smtp-stream",
+    "timestampField" : "start_ts",
+    "timestampFunction": "Math.round(parseFloat(ts)*1000,0)"
+  }
+]

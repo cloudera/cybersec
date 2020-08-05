@@ -1,0 +1,55 @@
+{
+    "http-stream": {
+        "flow_id": 1393427817,
+        "probe-id": "dpi1",
+        "start_ts": "1549772648.819997",
+        "ip_clt": "1.2.3.4",
+        "ip_srv": "5.6.7.8",
+        "port_clt": 56073,
+        "port_srv": 80,
+        "http.request": [
+            {
+                "http.index": "1",
+                "http.method": "POST",
+                "http.uri": "/collect?zip=gzip&app=4e897fce05ff&uuid=null&vno=1549772832099&chk=5b0c5cfe",
+                "http.content_type": "application/octet-stream",
+                "http.mime_type": "application/octet-stream",
+                "http.user_agent": "Dalvik/2.1.0 (Linux; U; Android 8.0.0; SM-G611F Build/R16NW)",
+                "http.host": "gj.applog.uc.cn",
+                "http.content_len": "222"
+            },
+            {
+                "http.index": "2",
+                "http.method": "POST",
+                "http.uri": "/collect?zip=gzip&app=4e897fce05ff&uuid=null&vno=1549772832099&chk=5b0c5cfe",
+                "http.content_type": "application/octet-stream",
+                "http.mime_type": "application/octet-stream",
+                "http.user_agent": "Dalvik/2.1.0 (Linux; U; Android 8.0.0; SM-G611F Build/R16NW)",
+                "http.host": "gj.applog.uc.cn",
+                "http.content_len": "222"
+            },
+            {
+                "http.index": "3",
+                "http.method": "POST",
+                "http.uri": "/collect?zip=gzip&app=4e897fce05ff&uuid=null&vno=1549772832099&chk=5b0c5cfe",
+                "http.content_type": "application/octet-stream",
+                "http.mime_type": "application/octet-stream",
+                "http.user_agent": "Dalvik/2.1.0 (Linux; U; Android 8.0.0; SM-G611F Build/R16NW)",
+                "http.host": "gj.applog.uc.cn",
+                "http.content_len": "222"
+            },
+            {
+                "http.index": "4",
+                "http.method": "POST",
+                "http.uri": "/collect?zip=gzip&app=4e897fce05ff&uuid=null&vno=1549772832099&chk=5b0c5cfe",
+                "http.content_type": "application/octet-stream",
+                "http.mime_type": "application/octet-stream",
+                "http.user_agent": "Dalvik/2.1.0 (Linux; U; Android 8.0.0; SM-G611F Build/R16NW)",
+                "http.host": "gj.applog.uc.cn",
+                "http.content_len": "222"
+            }
+        ],
+        "expiration_ts": "1549772669.6",
+        "path": "base.eth.ip.tcp.http.uc_browser"
+    }
+}

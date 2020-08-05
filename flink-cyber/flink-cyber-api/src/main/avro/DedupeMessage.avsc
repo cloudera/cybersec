@@ -1,0 +1,47 @@
+{
+    "type": "record",
+    "name": "DedupeMessage",
+    "namespace": "com.cloudera.cyber",
+    "fields": [
+        {
+            "name": "id",
+            "type": {
+                "type": "string",
+                "logicalType": "uuid"
+            }
+        },
+        {
+            "name": "ts",
+            "type": {
+                "type": "long",
+                "logicalType": "timestamp-millis"
+            }
+        },
+        {
+            "name": "startTs",
+            "type": {
+                "type": "long",
+                "logicalType": "timestamp-millis"
+            }
+        },
+        {
+            "name": "count",
+            "type": "long"
+        },
+        {
+            "name": "late",
+            "type": "boolean"
+        },
+        {
+            "name": "fields",
+            "type": [
+                "null",
+                {
+                    "type": "map",
+                    "values": "string"
+                }
+            ],
+            "default": null
+        }
+    ]
+}

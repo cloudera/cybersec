@@ -1,11 +1,13 @@
 package com.cloudera.cyber.dedupe;
 
+import com.cloudera.cyber.DedupeMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
-import com.cloudera.cyber.flink.TimedBoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 
@@ -53,10 +55,16 @@ public class DedupeJobKafka extends DedupeJob {
         String inputTopic = params.getRequired("topic.input");
         String groupId = createGroupId(inputTopic, sessionKey, sessionTimeout);
         Time allowedLateness = Time.milliseconds(params.getLong(PARAM_DEDUPE_LATENESS, 0L));
+        AssignerWithPeriodicWatermarks<Message> assigner = new BoundedOutOfOrdernessTimestampExtractor<Message>(allowedLateness) {
+            @Override
+            public long extractTimestamp(Message message) {
+                return message.getTs().getMillis();
+            }
+        };
         return env.addSource(createKafkaSource(inputTopic,
                         params,
                         groupId))
-                .assignTimestampsAndWatermarks(new TimedBoundedOutOfOrdernessTimestampExtractor<>(allowedLateness))
+                .assignTimestampsAndWatermarks(assigner)
                         .name("Kafka Source")
                         .uid("kafka.input");
     }

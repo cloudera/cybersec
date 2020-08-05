@@ -1,0 +1,31 @@
+{
+    "http-stream": {
+        "flow_id": 1393754601,
+        "probe-id": "dpi1",
+        "start_ts": "1549772662.705198",
+        "ip_clt": "1.2.3.4",
+        "ip_srv": "5.6.7.8",
+        "port_clt": 60944,
+        "port_srv": 80,
+        "http.request": [
+            {
+                "http.index": "1",
+                "http.method": "GET",
+                "http.uri": "/",
+                "http.user_agent": "Dalvik/2.1.0 (Linux; U; Android 8.1.0; INE-LX1 Build/HUAWEIINE-LX1)",
+                "http.host": "www.google.com"
+            },
+            {
+                "http.index": "1",
+                "http.code": "200",
+                "http.content_type": "text/html; charset=ISO-8859-1",
+                "http.mime_type": "text/html",
+                "http.date": "Sun, 10 Feb 2019 04:27:26 GMT",
+                "http.server_agent": "gws",
+                "http.content_len": "40602"
+            }
+        ],
+        "expiration_ts": "1549772668.2040",
+        "path": "base.eth.ip.tcp.http.google_gen"
+    }
+}

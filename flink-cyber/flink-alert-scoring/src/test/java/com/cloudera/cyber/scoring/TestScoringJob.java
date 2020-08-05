@@ -1,13 +1,14 @@
 package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.flink.TimedBoundedOutOfOrdernessTimestampExtractor;
+import com.cloudera.cyber.flink.MessageBoundedOutOfOrder;
 import com.cloudera.cyber.rules.DynamicRuleCommandResult;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
@@ -15,7 +16,6 @@ import org.apache.flink.test.util.ManualSource;
 import org.junit.Test;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +60,7 @@ public class TestScoringJob extends ScoringJob {
                         .ruleScript("return { score: 1.0, reason: message.test }")
                         .enabled(true)
                         .build())
-                .ts(Instant.ofEpochMilli(1))
+                .ts(1L)
                 .id(UUID.randomUUID())
                 .build());
 
@@ -68,7 +68,11 @@ public class TestScoringJob extends ScoringJob {
         assertThat("Command succeed", poll.isSuccess());
 
         // send a message and get score
-        sendRecord(Message.builder().ts(100l).put("test", "test-value").originalSource("test-value").build());
+        sendRecord(Message.newBuilder()
+                .setId(UUID.randomUUID().toString())
+                .setTs(org.joda.time.Instant.ofEpochMilli(100l).toDateTime())
+                .setExtensions(Collections.singletonMap("test", "test-value"))
+                .setOriginalSource("test-value").build());
 
         source.sendWatermark(100l);
         querySource.sendWatermark(100l);
@@ -77,7 +81,7 @@ public class TestScoringJob extends ScoringJob {
         assertThat("message got scored", message.getScores(), hasSize(1));
 
         sendRule(ScoringRuleCommand.builder()
-                .type(LIST).ts(Instant.ofEpochMilli(900)).id(UUID.randomUUID()).build());
+                .type(LIST).ts(900).id(UUID.randomUUID()).build());
 
         DynamicRuleCommandResult<ScoringRule> poll1 = queryResponse.poll(Duration.ofMillis(1000));
         assertThat(poll1.getRule(), hasProperty("name", equalTo("test-rule")));
@@ -85,7 +89,7 @@ public class TestScoringJob extends ScoringJob {
 
         sendRule(ScoringRuleCommand.builder()
                 .type(DELETE)
-                .ts(Instant.ofEpochMilli(1000l))
+                .ts(1000l)
                 .id(UUID.randomUUID())
                 .ruleId(ruleId).build());
 
@@ -93,7 +97,11 @@ public class TestScoringJob extends ScoringJob {
 
         Thread.sleep(100);
 
-        sendRecord(Message.builder().put("test", "test-value2").ts(2000l).originalSource("test-value2").build());
+        sendRecord(Message.newBuilder()
+                .setId(UUID.randomUUID().toString())
+                .setExtensions(Collections.singletonMap("test", "test-value2"))
+                .setTs(org.joda.time.Instant.ofEpochMilli(2000l).toDateTime())
+                .setOriginalSource("test-value2").build());
 
         ScoredMessage message1 = sink.poll(Duration.ofMillis(5000));
         assertThat("message got scored", message1.getScores(), nullValue());
@@ -103,7 +111,7 @@ public class TestScoringJob extends ScoringJob {
     }
 
     private void sendRecord(Message d) {
-        this.source.sendRecord(d, d.getTs());
+        this.source.sendRecord(d, d.getTs().getMillis());
         this.recordLog.add(d);
     }
 
@@ -121,7 +129,7 @@ public class TestScoringJob extends ScoringJob {
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         source = JobTester.createManualSource(env, TypeInformation.of(Message.class));
         return source.getDataStream()
-                .assignTimestampsAndWatermarks(new TimedBoundedOutOfOrdernessTimestampExtractor<>(Time.milliseconds(1000)))
+                .assignTimestampsAndWatermarks(new MessageBoundedOutOfOrder(Time.milliseconds(1000)))
                 .setParallelism(1);
     }
 
@@ -130,7 +138,12 @@ public class TestScoringJob extends ScoringJob {
         querySource = JobTester.createManualSource(env, TypeInformation.of(ScoringRuleCommand.class));
 
         return querySource.getDataStream()
-                .assignTimestampsAndWatermarks(new TimedBoundedOutOfOrdernessTimestampExtractor<>(Time.milliseconds(1000)))
+                .assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<ScoringRuleCommand>(Time.milliseconds(1000)) {
+                    @Override
+                    public long extractTimestamp(ScoringRuleCommand scoringRuleCommand) {
+                        return scoringRuleCommand.getTs();
+                    }
+                })
                 .setParallelism(1);
     }
 

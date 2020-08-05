@@ -1,6 +1,9 @@
 package com.cloudera.cyber.parser;
 
-import com.cloudera.parserchains.core.*;
+import com.cloudera.parserchains.core.ChainLink;
+import com.cloudera.parserchains.core.DefaultChainRunner;
+import com.cloudera.parserchains.core.LinkName;
+import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.model.define.ParserName;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

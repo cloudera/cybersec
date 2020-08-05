@@ -1,0 +1,290 @@
+[
+    {
+        "module": "input",
+        "type": "dpdk",
+        "ports": [
+            {
+                "id": 0,
+                "rx_packet_count": 8675429054,
+                "rx_bytes": 5131492782926,
+                "rx_packet_count_diff": 49642946,
+                "rx_bytes_diff": 29237444733,
+                "rx_missed": 0,
+                "rx_errors": 24,
+                "rx_nombuf": 0
+            }
+        ],
+        "workers": [
+            {
+                "id": 0,
+                "type": "dispatcher",
+                "packet": 8555461248,
+                "freed packet": 1859034,
+                "cpu load": 36,
+                "dispatched packet": 8553602214,
+                "skipped packet": 1,
+                "ring dropped packet": 1859033,
+                "rx_queue_count_peak": 36
+            },
+            {
+                "id": 1,
+                "type": "worker",
+                "packet": 536738699,
+                "freed packet": 536738689,
+                "cpu load": 63,
+                "ring_fill": 99
+            },
+            {
+                "id": 2,
+                "type": "worker",
+                "packet": 340327251,
+                "freed packet": 340327251,
+                "cpu load": 40,
+                "ring_fill": 4
+            },
+            {
+                "id": 3,
+                "type": "worker",
+                "packet": 342826615,
+                "freed packet": 342826615,
+                "cpu load": 46,
+                "ring_fill": 7
+            },
+            {
+                "id": 4,
+                "type": "worker",
+                "packet": 253981179,
+                "freed packet": 253981179,
+                "cpu load": 35,
+                "ring_fill": 4
+            },
+            {
+                "id": 5,
+                "type": "worker",
+                "packet": 260929603,
+                "freed packet": 260929602,
+                "cpu load": 39,
+                "ring_fill": 17
+            },
+            {
+                "id": 6,
+                "type": "worker",
+                "packet": 246143779,
+                "freed packet": 246143779,
+                "cpu load": 37,
+                "ring_fill": 99
+            },
+            {
+                "id": 7,
+                "type": "worker",
+                "packet": 246994831,
+                "freed packet": 246994831,
+                "cpu load": 34,
+                "ring_fill": 3
+            },
+            {
+                "id": 8,
+                "type": "worker",
+                "packet": 264369239,
+                "freed packet": 264369239,
+                "cpu load": 34,
+                "ring_fill": 9
+            },
+            {
+                "id": 9,
+                "type": "worker",
+                "packet": 257161959,
+                "freed packet": 257161959,
+                "cpu load": 35,
+                "ring_fill": 14
+            },
+            {
+                "id": 10,
+                "type": "worker",
+                "packet": 249832742,
+                "freed packet": 249832742,
+                "cpu load": 36,
+                "ring_fill": 8
+            },
+            {
+                "id": 11,
+                "type": "worker",
+                "packet": 252446517,
+                "freed packet": 252446517,
+                "cpu load": 35,
+                "ring_fill": 2
+            },
+            {
+                "id": 12,
+                "type": "worker",
+                "packet": 235810460,
+                "freed packet": 235810460,
+                "cpu load": 35,
+                "ring_fill": 1
+            },
+            {
+                "id": 13,
+                "type": "worker",
+                "packet": 266872236,
+                "freed packet": 266872236,
+                "cpu load": 34,
+                "ring_fill": 49
+            },
+            {
+                "id": 14,
+                "type": "worker",
+                "packet": 258326839,
+                "freed packet": 258326839,
+                "cpu load": 38,
+                "ring_fill": 15
+            },
+            {
+                "id": 15,
+                "type": "worker",
+                "packet": 249440784,
+                "freed packet": 249440757,
+                "cpu load": 38,
+                "ring_fill": 4
+            },
+            {
+                "id": 16,
+                "type": "worker",
+                "packet": 238676167,
+                "freed packet": 238676167,
+                "cpu load": 29,
+                "ring_fill": 67
+            },
+            {
+                "id": 17,
+                "type": "worker",
+                "packet": 251456811,
+                "freed packet": 251456810,
+                "cpu load": 34,
+                "ring_fill": 84
+            },
+            {
+                "id": 18,
+                "type": "worker",
+                "packet": 235780785,
+                "freed packet": 235780785,
+                "cpu load": 34,
+                "ring_fill": 48
+            },
+            {
+                "id": 19,
+                "type": "worker",
+                "packet": 227031488,
+                "freed packet": 227031487,
+                "cpu load": 33,
+                "ring_fill": 29
+            },
+            {
+                "id": 20,
+                "type": "worker",
+                "packet": 254421297,
+                "freed packet": 254421297,
+                "cpu load": 36,
+                "ring_fill": 3
+            },
+            {
+                "id": 21,
+                "type": "worker",
+                "packet": 240154170,
+                "freed packet": 240154170,
+                "cpu load": 52,
+                "ring_fill": 99
+            },
+            {
+                "id": 22,
+                "type": "worker",
+                "packet": 276158232,
+                "freed packet": 276158232,
+                "cpu load": 38,
+                "ring_fill": 2
+            },
+            {
+                "id": 23,
+                "type": "worker",
+                "packet": 239895546,
+                "freed packet": 239895546,
+                "cpu load": 32,
+                "ring_fill": 40
+            },
+            {
+                "id": 24,
+                "type": "worker",
+                "packet": 234340219,
+                "freed packet": 234340219,
+                "cpu load": 39,
+                "ring_fill": 4
+            },
+            {
+                "id": 25,
+                "type": "worker",
+                "packet": 284449327,
+                "freed packet": 284449327,
+                "cpu load": 49,
+                "ring_fill": 22
+            },
+            {
+                "id": 26,
+                "type": "worker",
+                "packet": 232071985,
+                "freed packet": 232071985,
+                "cpu load": 33,
+                "ring_fill": 2
+            },
+            {
+                "id": 27,
+                "type": "worker",
+                "packet": 227299051,
+                "freed packet": 227299051,
+                "cpu load": 33,
+                "ring_fill": 17
+            },
+            {
+                "id": 28,
+                "type": "worker",
+                "packet": 301292094,
+                "freed packet": 301292094,
+                "cpu load": 38,
+                "ring_fill": 4
+            },
+            {
+                "id": 29,
+                "type": "worker",
+                "packet": 227097183,
+                "freed packet": 227097182,
+                "cpu load": 33,
+                "ring_fill": 1
+            },
+            {
+                "id": 30,
+                "type": "worker",
+                "packet": 260820929,
+                "freed packet": 260820929,
+                "cpu load": 35,
+                "ring_fill": 2
+            },
+            {
+                "id": 31,
+                "type": "worker",
+                "packet": 304835437,
+                "freed packet": 304835437,
+                "cpu load": 41,
+                "ring_fill": 37
+            },
+            {
+                "id": 32,
+                "type": "worker",
+                "packet": 255613856,
+                "freed packet": 255613856,
+                "cpu load": 35,
+                "ring_fill": 15
+            }
+        ],
+        "key": "monitoring",
+        "timestamp": 1549779229,
+        "probe_id": "dpi1"
+    }
+]

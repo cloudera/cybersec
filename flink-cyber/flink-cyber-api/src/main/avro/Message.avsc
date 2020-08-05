@@ -1,0 +1,149 @@
+{
+    "type": "record",
+    "name": "Message",
+    "namespace": "com.cloudera.cyber",
+    "fields": [
+        {
+            "name": "id",
+            "type": {
+                "type": "string",
+                "logicalType": "uuid"
+            }
+        },
+        {
+            "name": "ts",
+            "type": {
+                "type": "long",
+                "logicalType": "timestamp-millis"
+            }
+        },
+        {
+            "name": "originalSource",
+            "type": "string",
+            "default": ""
+        },
+        {
+            "name": "message",
+            "type": [
+                "null",
+                "string"
+            ],
+            "default": null
+        },
+        {
+            "name": "threats",
+            "type": [
+                "null",
+                {
+                    "type": "map",
+                    "values": {
+                        "type": "array",
+                        "items": "com.cloudera.cyber.ThreatIntelligence"
+                    }
+                }
+            ],
+            "default": null
+        },
+        {
+            "name": "extensions",
+            "type": [
+                "null",
+                {
+                    "type": "map",
+                    "values": [
+                        "float",
+                        "string",
+                        "int",
+                        "bytes",
+                        "boolean",
+                        {
+                            "type": "array",
+                            "items": {
+                                "type": "map",
+                                "values": [
+                                    "float",
+                                    "string",
+                                    "int",
+                                    "bytes",
+                                    "boolean",
+                                    {
+                                        "type": "map",
+                                        "values": [
+                                            "float",
+                                            "string",
+                                            "int",
+                                            "bytes",
+                                            "boolean",
+                                            {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "map",
+                                                    "values": [
+                                                        "float",
+                                                        "string",
+                                                        "int",
+                                                        "bytes",
+                                                        "boolean"
+                                                    ]
+                                                }
+                                            },
+                                            {
+                                                "type": "map",
+                                                "values": [
+                                                    "float",
+                                                    "string",
+                                                    "int",
+                                                    "bytes",
+                                                    "boolean"
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "map",
+                            "values": [
+                                "float",
+                                "string",
+                                "int",
+                                "bytes",
+                                "boolean",
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "map",
+                                        "values": [
+                                            "float",
+                                            "string",
+                                            "int",
+                                            "bytes",
+                                            "boolean"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "type": "map",
+                                    "values": [
+                                        "float",
+                                        "string",
+                                        "int",
+                                        "bytes",
+                                        "boolean"
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "default": null
+        },
+        {
+            "name": "source",
+            "type": "string",
+            "default": ""
+        }
+    ]
+}

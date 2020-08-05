@@ -1,8 +1,6 @@
 package com.cloudera.cyber;
 
-import java.util.UUID;
-
 public interface IdentifiedMessage extends Timestamped{
-    UUID getId();
+    String getId();
     long getTs();
 }

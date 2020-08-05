@@ -4,18 +4,13 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Properties;
-import java.util.regex.Pattern;
 
-import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
+import static com.cloudera.cyber.flink.FlinkUtils.createRawKafkaSource;
 
 public class ParserJobKafka extends ParserJob {
 
@@ -38,20 +33,7 @@ public class ParserJobKafka extends ParserJob {
 
     @Override
     protected DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        String inputTopic = params.get("topic.input");
-        String pattern = params.get("topic.pattern");
-        String groupId = createGroupId(inputTopic);
-
-        Properties kafkaProperties = readKafkaProperties(params, true);
-        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-
-        DataStreamSource<MessageToParse> source = (pattern != null) ?
-                env.addSource(new FlinkKafkaConsumer<MessageToParse>(Pattern.compile(pattern), new MessageToParseDeserializer(), kafkaProperties)) :
-                env.addSource(new FlinkKafkaConsumer<MessageToParse>(inputTopic, new MessageToParseDeserializer(), kafkaProperties));
-
-        return source
-                .name("Kafka Source")
-                .uid("kafka.input");
+        return createRawKafkaSource(env, params, createGroupId(params.get("topic.input")));
     }
 
     private String createGroupId(String inputTopic) {

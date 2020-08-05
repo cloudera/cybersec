@@ -2,6 +2,7 @@ package com.cloudera.cyber.caracal;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.parser.MessageToParse;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -9,64 +10,59 @@ import org.apache.flink.streaming.api.datastream.BroadcastStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.co.KeyedBroadcastProcessFunction;
-import org.apache.flink.util.Collector;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+@Slf4j
 public abstract class SplitJob {
 
+    private static final String PARAMS_CONFIG_JSON = "config.json";
+    private static final String PARAM_CHECKPOINT_INTERVAL = "checkpoint.interval.ms";
+    protected String configJson;
+
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
+        List<SplitConfig> configs = parseConfig();
+        Map<String, SplitConfig> configMap = configs.stream().collect(Collectors.toMap(k -> k.getTopic(), v->v));
+
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-        DataStream<MessageToParse> source = createSource(env, params);
-
-        List<SplitConfig> configs = parseConfig("");
+        DataStream<MessageToParse> source = createSource(env, params, configMap.keySet());
 
         BroadcastStream<SplitConfig> configStream =
                 env.fromCollection(configs)
-                        .keyBy(k -> k.getTopic())
                         .broadcast(Descriptors.broadcastState);
 
-        results = source
+        SingleOutputStreamOperator<Message> results = source
                 .keyBy(k -> k.getTopic())
                 .connect(configStream)
-                .process(new KeyedBroadcastProcessFunction<String, MessageToParse, SplitConfig, Message>() {
+                .process(new SplitBroadcastProcessFunction(configMap));
 
-                    @Override
-                    public void processElement(MessageToParse messageToParse, ReadOnlyContext readOnlyContext, Collector<Message> collector) throws Exception {
-                        messageToParse.getOriginalSource();
-                    }
-
-                    @Override
-                    public void processBroadcastElement(SplitConfig splitConfig, Context context, Collector<Message> collector) throws Exception {
-                        // add the config
-                    }
-                })
-
-/*                .flatMap(new SplittingFlatMapFunction(config.getSplitPath(), config.getHeaderPath(), config.getTimestampField(), SplittingFlatMapFunction.TimestampSource.HEADER));
         writeResults(params, results);
-*/
-
-
-        //printResults(results);
 
         return env;
     }
 
     protected static class Descriptors {
-        public static MapStateDescriptor<?, ?> broadcastState = new MapStateDescriptor<String, SplitConfig>("configs", String.class, SplitConfig.class);
+        public static MapStateDescriptor<String, SplitConfig> broadcastState = new MapStateDescriptor<String, SplitConfig>("configs", String.class, SplitConfig.class);
     }
 
-    protected abstract List<SplitConfig> parseConfig(String s);
-
-    private void printResults(SingleOutputStreamOperator<Message> results) {
-        results.print();
+    protected List<SplitConfig> parseConfig() throws IllegalArgumentException, IOException {
+        try {
+            return new ObjectMapper().readValue(configJson, new TypeReference<List<SplitConfig>>() {
+            });
+        } catch (Exception e) {
+            log.error(String.format("Failed to read split config %s", configJson));
+            throw new IllegalArgumentException("Config could not be read for splits", e);
+        }
     }
 
     protected abstract void writeResults(ParameterTool params, DataStream<Message> results);
 
-    protected abstract DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params);
+    protected abstract DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params, Iterable<String> topics);
 }

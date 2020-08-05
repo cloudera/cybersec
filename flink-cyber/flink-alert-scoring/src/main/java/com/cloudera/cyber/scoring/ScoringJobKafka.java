@@ -2,13 +2,14 @@ package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
-import com.cloudera.cyber.flink.TimedBoundedOutOfOrdernessTimestampExtractor;
+import com.cloudera.cyber.flink.MessageBoundedOutOfOrder;
 import com.cloudera.cyber.rules.DynamicRuleCommandResult;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.formats.avro.registry.cloudera.ClouderaRegistryKafkaDeserializationSchema;
 import org.apache.flink.formats.avro.registry.cloudera.ClouderaRegistryKafkaSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
@@ -16,6 +17,7 @@ import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_ALLOWED_LATENESS;
 import static com.cloudera.cyber.flink.ConfigConstants.PARAM_REGISTRY_ADDRESS;
@@ -46,14 +48,14 @@ public class ScoringJobKafka extends ScoringJob {
 
     @Override
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        String inputTopic = params.getRequired("topic.input");
+        Pattern inputTopic = Pattern.compile(params.getRequired("topic.pattern"));
         String groupId = "scoring";
 
         Time lateness = milliseconds(params.getLong(PARAMS_ALLOWED_LATENESS, FlinkUtils.DEFAULT_MAX_LATENESS));
         return env.addSource(createKafkaSource(inputTopic,
                 params,
                 groupId))
-                .assignTimestampsAndWatermarks(new TimedBoundedOutOfOrdernessTimestampExtractor<>(lateness))
+                .assignTimestampsAndWatermarks(new MessageBoundedOutOfOrder(lateness))
                 .name("Kafka Source")
                 .uid("kafka.input");
     }
@@ -74,7 +76,13 @@ public class ScoringJobKafka extends ScoringJob {
 
         Time lateness = milliseconds(params.getLong(PARAMS_ALLOWED_LATENESS, FlinkUtils.DEFAULT_MAX_LATENESS));
 
-        source.assignTimestampsAndWatermarks(new TimedBoundedOutOfOrdernessTimestampExtractor<ScoringRuleCommand>(lateness));
+        source.assignTimestampsAndWatermarks(new
+                                                     BoundedOutOfOrdernessTimestampExtractor<ScoringRuleCommand>(lateness) {
+                                                         @Override
+                                                         public long extractTimestamp(ScoringRuleCommand scoringRuleCommand) {
+                                                             return scoringRuleCommand.getTs();
+                                                         }
+                                                     });
 
         return env.addSource(source)
                 .name("Kafka Source")

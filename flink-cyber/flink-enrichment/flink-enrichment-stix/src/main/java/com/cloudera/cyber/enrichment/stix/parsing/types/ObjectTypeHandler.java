@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public interface ObjectTypeHandler<T extends ObjectPropertiesType> {
-    Stream<ThreatIntelligence.ThreatIntelligenceBuilder> extract(T type, Map<String, Object> config);
+    Stream<ThreatIntelligence.Builder> extract(T type, Map<String, Object> config);
 
     Class<T> getTypeClass();
 

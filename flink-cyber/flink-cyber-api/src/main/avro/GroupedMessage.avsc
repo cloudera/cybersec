@@ -1,0 +1,21 @@
+{
+    "type": "record",
+    "name": "GroupedMessage",
+    "namespace": "com.cloudera.cyber",
+    "fields": [
+        {
+            "name": "id",
+            "type": {
+                "type": "string",
+                "logicalType": "uuid"
+            }
+        },
+        {
+            "name": "messages",
+            "type": {
+                "type": "array",
+                "items": "com.cloudera.cyber.Message"
+            }
+        }
+    ]
+}

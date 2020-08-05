@@ -1,8 +1,0 @@
-[
-  {
-    "topic": "dpi_http",
-    "splitPath": "$.http-stream['http.request'][*]",
-    "headerPath": "$.http-stream",
-    "timestampField" : "start_ts"
-  }
-]

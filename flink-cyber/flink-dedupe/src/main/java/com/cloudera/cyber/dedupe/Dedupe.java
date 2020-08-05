@@ -1,5 +1,6 @@
 package com.cloudera.cyber.dedupe;
 
+import com.cloudera.cyber.DedupeMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.dedupe.impl.CreateKeyFromMessage;
 import com.cloudera.cyber.dedupe.impl.EventTimeAndCountTrigger;

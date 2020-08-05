@@ -9,11 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
+import org.joda.time.Instant;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
@@ -69,13 +67,14 @@ public class ChainParserMapFunction extends RichFlatMapFunction<MessageToParse, 
             log.warn("Timestamp missing from message on chain %s", message.getTopic());
             throw new IllegalStateException("Timestamp not present");
         }
-        collector.collect(Message.builder().fields(fieldsFromChain(m.getFields()))
-                        .ts(Long.valueOf(timestamp.get().get()))
-                        .originalSource((m.getField(FieldName.of(DEFAULT_INPUT_FIELD)).get().get()))
+        collector.collect(Message.newBuilder().setExtensions(fieldsFromChain(m.getFields()))
+                        .setTs(Instant.ofEpochMilli(Long.valueOf(timestamp.get().get())).toDateTime())
+                        .setOriginalSource(m.getField(FieldName.of(DEFAULT_INPUT_FIELD)).get().get())
+                        .setId(UUID.randomUUID().toString())
                         .build());
     }
 
-    private static Map<String, Object> fieldsFromChain(Map<FieldName, FieldValue> fields) {
+    private static HashMap<String, Object> fieldsFromChain(Map<FieldName, FieldValue> fields) {
         return new HashMap<String, Object>() {{
             fields.entrySet().stream().forEach(e -> {
                 String key = e.getKey().get();

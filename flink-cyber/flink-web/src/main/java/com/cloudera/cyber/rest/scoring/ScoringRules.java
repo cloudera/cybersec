@@ -65,7 +65,7 @@ public class ScoringRules {
 
     private DynamicRuleCommandResult<ScoringRule> sendCommand(ScoringRuleCommand.ScoringRuleCommandBuilder type) throws ExecutionException, InterruptedException {
         UUID cmdId = UUID.randomUUID();
-        ScoringRuleCommand command = (ScoringRuleCommand) type.id(cmdId).ts(Instant.now()).build();
+        ScoringRuleCommand command = (ScoringRuleCommand) type.id(cmdId).ts(Instant.now().toEpochMilli()).build();
 
         ProducerRecord<UUID, ScoringRuleCommand> record = new ProducerRecord<UUID, ScoringRuleCommand>(commandTopic, cmdId, command);
         record.headers().add(new RecordHeader(KafkaHeaders.REPLY_TOPIC, requestReplyTopic.getBytes()));

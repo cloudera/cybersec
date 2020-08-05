@@ -9,6 +9,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 public class ThreatIndexHbaseSinkFunction extends HBaseSinkFunction<ThreatIntelligence> {
 
@@ -27,7 +28,7 @@ public class ThreatIndexHbaseSinkFunction extends HBaseSinkFunction<ThreatIntell
         Put put = new Put((threatIntelligence.getObservableType() + ":" + threatIntelligence.getObservable()).getBytes(StandardCharsets.UTF_8));
 
         // TODO allow for multi-value
-        put.addColumn(cf, id, UUIDUtils.asBytes(threatIntelligence.getId()));
+        put.addColumn(cf, id, UUIDUtils.asBytes(UUID.fromString(threatIntelligence.getId())));
 
         // put in all the fields
         threatIntelligence.getFields().entrySet().stream().forEach(

@@ -1,0 +1,116 @@
+{
+    "dns-stream": {
+      "flow_id": 1392651325,
+      "probe-id": "dpi1",
+      "start_ts": "1549772613.662996",
+      "ip_clt": "1.2.3.4",
+      "ip_srv": "5.6.7.8",
+      "port_clt": 37539,
+      "port_srv": 53,
+      "dns.dns_query": [
+        {
+          "dns.message_type": "QUERY",
+          "dns.query": "bolt.dropbox.com",
+          "dns.query_type": "Host address"
+        },
+        {
+          "dns.message_type": "RESPONSE",
+          "dns.query": "bolt.dropbox.com",
+          "dns.query_type": "Host address",
+          "dns.dns_entry": [
+            {
+              "dns.name": "bolt.dropbox.com",
+              "dns.host_type": "canonical name",
+              "dns.host": "bolt.v.dropbox.com"
+            },
+            {
+              "dns.name": "bolt.v.dropbox.com",
+              "dns.host_addr": "162.125.18.133",
+              "dns.host_type": "IP address"
+            }
+          ]
+        },
+        {
+          "dns.message_type": "QUERY",
+          "dns.query": "ipv6.msftncsi.com",
+          "dns.query_type": "Host address"
+        },
+        {
+          "dns.message_type": "RESPONSE",
+          "dns.query": "ipv6.msftncsi.com",
+          "dns.query_type": "Host address",
+          "dns.dns_entry": [
+            {
+              "dns.name": "ipv6.msftncsi.com",
+              "dns.host_type": "canonical name",
+              "dns.host": "ipv6.msftncsi.com.edgesuite.net"
+            },
+            {
+              "dns.name": "ipv6.msftncsi.com.edgesuite.net",
+              "dns.host_type": "canonical name",
+              "dns.host": "a978.i6g1.akamai.net"
+            },
+            {
+              "dns.name": "i6g1.akamai.net",
+              "dns.host_type": "primary name server",
+              "dns.host": "n0i6g1.akamai.net"
+            }
+          ]
+        },
+        {
+          "dns.message_type": "QUERY",
+          "dns.query": "dl-debug.dropbox.com",
+          "dns.query_type": "Host address"
+        },
+        {
+          "dns.message_type": "RESPONSE",
+          "dns.query": "dl-debug.dropbox.com",
+          "dns.query_type": "Host address",
+          "dns.dns_entry": [
+            {
+              "dns.name": "dl-debug.dropbox.com",
+              "dns.host_type": "canonical name",
+              "dns.host": "block-debug.x.dropbox.com"
+            },
+            {
+              "dns.name": "block-debug.x.dropbox.com",
+              "dns.host_addr": "52.73.93.105",
+              "dns.host_type": "IP address"
+            },
+            {
+              "dns.name": "block-debug.x.dropbox.com",
+              "dns.host_addr": "54.156.212.69",
+              "dns.host_type": "IP address"
+            },
+            {
+              "dns.name": "block-debug.x.dropbox.com",
+              "dns.host_addr": "34.195.170.150",
+              "dns.host_type": "IP address"
+            },
+            {
+              "dns.name": "block-debug.x.dropbox.com",
+              "dns.host_addr": "54.210.107.85",
+              "dns.host_type": "IP address"
+            },
+            {
+              "dns.name": "block-debug.x.dropbox.com",
+              "dns.host_addr": "54.236.121.227",
+              "dns.host_type": "IP address"
+            },
+            {
+              "dns.name": "block-debug.x.dropbox.com",
+              "dns.host_addr": "52.87.68.161",
+              "dns.host_type": "IP address"
+            },
+            {
+              "dns.name": "block-debug.x.dropbox.com",
+              "dns.host_addr": "52.71.228.72",
+              "dns.host_type": "IP address"
+            }
+          ]
+        }
+      ],
+      "expiration_ts": "1549772679.4339",
+      "path": "base.eth.ip.udp.dns"
+    }
+  } 
