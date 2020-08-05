@@ -30,6 +30,11 @@ public abstract class CaracalGeneratorFlinkJob {
         outputs.put(new GenerationSource("DPI_Logs/Metadata_Module/http/http_sample_3.json","dpi_http"), 1.0);
         outputs.put(new GenerationSource("DPI_Logs/Metadata_Module/http/http_sample_4.json","dpi_http"), 1.0);
 
+        outputs.put(new GenerationSource("DPI_Logs/Metadata_Module/DNS/dns_sample_1.json","dpi_dns"), 1.0);
+        outputs.put(new GenerationSource("DPI_Logs/Metadata_Module/DNS/dns_sample_2.json","dpi_dns"), 1.0);
+        outputs.put(new GenerationSource("DPI_Logs/Metadata_Module/DNS/dns_sample_3.json","dpi_dns"), 1.0);
+
+        outputs.put(new GenerationSource("DPI_Logs/Metadata_Module/SMTP/smtp_sample_1.json","dpi_smtp"), 1.0);
 
         SingleOutputStreamOperator<Tuple2<String, String>> generatedInput =
                 env.addSource(new FreemarkerTemplateSource(outputs, params.getLong(PARAMS_RECORDS_LIMIT, -1))).name("Weighted Data Source");
