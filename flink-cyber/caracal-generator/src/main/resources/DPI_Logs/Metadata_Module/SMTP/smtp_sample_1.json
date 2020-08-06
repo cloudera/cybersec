@@ -18,7 +18,7 @@
                     }
                 ],
                 "smtp.subject": "${utils.randomSubject()}",
-                "smtp.date": "{$(ts - utils.randomInt(10000,1000000))}}"
+                "smtp.date": "${(ts + - utils.randomInt(10000,1000000))?c}"
             }
         ],
         "expiration_ts": "${((ts + 1000)/1000)?c}",
