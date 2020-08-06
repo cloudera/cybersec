@@ -56,32 +56,32 @@ public class Utils {
         return targetProperties;
     }
 
-    public static Properties readKafkaProperties(Properties properties, boolean consumer) {
-        Properties kafkaProperties = readProperties(properties, KAFKA_PREFIX);
-        kafkaProperties.put(consumer ? ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG : ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
-                consumer ?
-                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringConsumerInterceptor" :
-                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringProducerInterceptor");
+    private static Properties kafkaDefaultSettings(Properties kafkaProperties, boolean consumer) {
+        // interceptor currently unable to work with flink transactional kafka
+        // https://docs.google.com/document/d/19jIN_POJvZPV466V5DolBKJxlqWOxYz-2gJV4e5cYtE/edit
+
+//        kafkaProperties.put(consumer ? ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG : ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
+//                consumer ?
+//                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringConsumerInterceptor" :
+//                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringProducerInterceptor");
+
+        if (!consumer && !kafkaProperties.containsKey(ProducerConfig.ACKS_CONFIG)) {
+            kafkaProperties.put(ProducerConfig.ACKS_CONFIG, "all");
+        }
+        log.info(String.format("Kafka Properties: %s", kafkaProperties));
         return kafkaProperties;
+    }
+
+    public static Properties readKafkaProperties(Properties properties, boolean consumer) {
+        return kafkaDefaultSettings(readProperties(properties, KAFKA_PREFIX), consumer);
     }
 
     public static Properties readKafkaProperties(Map<String, String> properties, boolean consumer) {
-        Properties kafkaProperties = readProperties(properties, KAFKA_PREFIX);
-        kafkaProperties.put(consumer ? ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG : ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
-                consumer ?
-                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringConsumerInterceptor" :
-                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringProducerInterceptor");
-        return kafkaProperties;
+        return kafkaDefaultSettings(readProperties(properties, KAFKA_PREFIX), consumer);
     }
 
     public static Properties readKafkaProperties(ParameterTool params, boolean consumer) {
-        Properties kafkaProperties = readProperties(params.getProperties(), KAFKA_PREFIX);
-        kafkaProperties.put(consumer ? ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG : ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
-                consumer ?
-                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringConsumerInterceptor" :
-                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringProducerInterceptor");
-        return kafkaProperties;
-
+        return kafkaDefaultSettings(readProperties(params.getProperties(), KAFKA_PREFIX), consumer);
     }
 
     public static Map<String, String> readSchemaRegistryProperties(Map<String, String> params) {

@@ -75,7 +75,7 @@ public class TestMessageSerializer {
                 .compatibility(SchemaCompatibility.FORWARD).build();
         byte[] serialize = avroSnapshotSerializer.serialize(test, schemaMetadata);
 
-        assertThat("Bytes are made", serialize.length, equalTo(70));
+        assertThat("Bytes are made", serialize.length, equalTo(71));
     }
 
     @Test

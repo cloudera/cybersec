@@ -18,6 +18,8 @@ import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerConfig;
 
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -48,6 +50,7 @@ public class FlinkUtils<T> {
         Preconditions.checkNotNull(topic, "Must specific output topic");
 
         Properties kafkaProperties = readKafkaProperties(params, false);
+        log.info(String.format("Creating Kafka Sink for %s, using %s", topic, kafkaProperties));
         KafkaSerializationSchema<T> schema = ClouderaRegistryKafkaSerializationSchema
                 .<T>builder(topic)
                 .setRegistryAddress(params.getRequired(PARAM_REGISTRY_ADDRESS))
@@ -63,11 +66,15 @@ public class FlinkUtils<T> {
         Preconditions.checkNotNull(groupId, "Must specific group id");
 
         Properties kafkaProperties = readKafkaProperties(params, true);
+        log.info(String.format("Creating Kafka Source for %s, using %s", topic, kafkaProperties));
         KafkaDeserializationSchema<Message> schema = ClouderaRegistryKafkaDeserializationSchema
                 .builder(Message.class)
                 .setConfig(readSchemaRegistryProperties(params))
                 .build();
         kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        // for the SMM interceptor
+        kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
+
         FlinkKafkaConsumer<Message> source = new FlinkKafkaConsumer<>(topic, schema, kafkaProperties);
 
         Time lateness = milliseconds(params.getLong(PARAMS_ALLOWED_LATENESS, DEFAULT_MAX_LATENESS));
@@ -84,8 +91,10 @@ public class FlinkUtils<T> {
                 .setConfig(readSchemaRegistryProperties(params))
                 .build();
         kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        FlinkKafkaConsumer<Message> source = new FlinkKafkaConsumer<>(topic, schema, kafkaProperties);
+        // for the SMM interceptor
+        kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
 
+        FlinkKafkaConsumer<Message> source = new FlinkKafkaConsumer<>(topic, schema, kafkaProperties);
         Time lateness = milliseconds(params.getLong(PARAMS_ALLOWED_LATENESS, DEFAULT_MAX_LATENESS));
         source.assignTimestampsAndWatermarks(new MessageBoundedOutOfOrder(lateness));
         return source;
