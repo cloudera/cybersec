@@ -10,6 +10,7 @@ import org.apache.flink.streaming.api.functions.source.ParallelSourceFunction;
 
 import java.io.StringWriter;
 import java.io.Writer;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -27,7 +28,9 @@ public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<S
     private final long maxRecords;
     private long count = 0;
 
-    public FreemarkerTemplateSource(Map<GenerationSource, Double> files, long maxRecords) {
+    private int eps;
+
+    public FreemarkerTemplateSource(Map<GenerationSource, Double> files, long maxRecords, int eps) {
         // normalise weights
         Double total = files.entrySet().stream().collect(Collectors.summingDouble(v -> v.getValue()));
         List<Pair<GenerationSource, Double>> weights = files.entrySet().stream()
@@ -38,18 +41,31 @@ public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<S
         this.files = new EnumeratedDistribution<GenerationSource>(weights);
 
         this.maxRecords = maxRecords;
+
+        this.eps = eps;
+
     }
 
     @Override
     public void run(SourceContext<Tuple2<String,String>> sourceContext) throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_30);
 
-        //URL url = ClassLoader.getSystemResource("");
-        //File templateLocation = new File(url.toURI());
-        //cfg.setDirectoryForTemplateLoading(templateLocation);
         cfg.setClassLoaderForTemplateLoading(Thread.currentThread().getContextClassLoader(), "");
         cfg.setCacheStorage(new freemarker.cache.MruCacheStorage(50,50));
         cfg.setTemplateUpdateDelayMilliseconds(3600*24*1000);
+
+        int ms;
+        int ns;
+        if (eps > 1000) {
+            // send a batch per sleep
+            ms = 0;
+            ns = 1000000 / eps;
+        } else {
+            ms = 1000/eps;
+            ns = 0;
+        }
+
+        Instant startTime = Instant.now();
 
         while (isRunning && (this.maxRecords == -1 || this.count < this.maxRecords)) {
             this.count++;
@@ -66,10 +82,15 @@ public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<S
             temp.process(entry, out);
 
             if (count % 100 == 0) {
-                log.info(String.format("Produced %d records on %s", count, file.getFile().toString()));
+                Instant endTime = Instant.now();
+                log.info(String.format("Produced %d records on %s from: %s to: %s", count, file.getFile().toString(), startTime, endTime));
+                startTime = endTime;
             }
 
             sourceContext.collect(Tuple2.of(file.getTopic(), out.toString()));
+            if (eps > 0) {
+                Thread.sleep(ms, ns);
+            }
         }
 
     }
