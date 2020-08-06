@@ -3,15 +3,22 @@ package com.cloudera.cyber.test;
 import com.cloudera.cyber.test.generator.FreemarkerImmediateGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
+import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsMapContaining.hasEntry;
+import static org.hamcrest.collection.IsMapContaining.hasKey;
+import static org.hamcrest.text.MatchesPattern.matchesPattern;
 
 public class GeneratorTests {
 
@@ -23,7 +30,7 @@ public class GeneratorTests {
 
         String result = generator.generateEntry("Netflow/netflow_sample_1.json");
 
-        assertNotNull(result);
+        assertThat("Result is not null", result, notNullValue());
     }
 
     @Test
@@ -34,13 +41,13 @@ public class GeneratorTests {
 
         String result = generator.generateEntry("Netflow/netflow_sample_2.json");
 
-        assertNotNull(result);
+        assertThat("Result is not null", result, notNullValue());
 
         ObjectMapper mapper = new ObjectMapper();
         HashMap output = mapper.readValue(result, HashMap.class);
 
-        assertEquals(Integer.valueOf(443), (Integer) output.get("dst_port"));
-        assertNotNull(output.get("dst_bytes"));
+        assertThat("port", (Integer) output.get("dst_port"), equalTo(443));
+        assertThat("dst_bytes is not null", result, notNullValue());
     }
 
     @Test
@@ -50,13 +57,13 @@ public class GeneratorTests {
 
         String result = generator.generateEntry("Netflow/netflow_sample_3.json");
 
-        assertNotNull(result);
+        assertThat("Result is not null", result, notNullValue());
 
         ObjectMapper mapper = new ObjectMapper();
         HashMap output = mapper.readValue(result, HashMap.class);
 
-        assertEquals(Integer.valueOf(80), (Integer) output.get("dst_port"));
-        assertNotNull(output.get("dst_bytes"));
+        assertThat("port", (Integer) output.get("dst_port"), equalTo(80));
+        assertThat("dst_bytes is not null", result, notNullValue());
     }
 
 
@@ -96,6 +103,10 @@ public class GeneratorTests {
 
     @Test
     public void testSMTP() throws TemplateException, IOException, URISyntaxException {
-        testFile("DPI_Logs/Metadata_Module/SMTP/smtp_sample_1.json");
+        HashMap<String, Object> hashMap = testFile("DPI_Logs/Metadata_Module/SMTP/smtp_sample_1.json");
+        List<Map<String, Object>> email = (List<Map<String, Object>>) ((Map<String, Object>) hashMap.get("smtp-stream")).get("smtp.email");
+
+        assertThat("SMTP date exists", email.get(0), hasKey("smtp.date"));
+        assertThat("SMTP date good", (String) email.get(0).get("smtp.date"), matchesPattern("^[0-9]*$"));
     }
 }
