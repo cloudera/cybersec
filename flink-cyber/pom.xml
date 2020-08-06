@@ -24,7 +24,7 @@
         <module>flink-alert-scoring</module>
         <module>flink-web</module>
         <module>taxii-service</module>
-        <module>parser-chain</module><!--
+        <module>metron-parser-chain</module><!--
         <module>nifi-parser-bundle</module>-->
         <module>caracal-generator</module>
         <module>caracal-parser</module>
@@ -54,6 +54,14 @@
         <repository>
             <id>hortonworks</id>
             <url>https://repo.hortonworks.com/content/repositories/releases/</url>
+        </repository>
+
+        <repository>
+            <id>multiline-release-repo</id>
+            <url>https://raw.github.com/benelog/multiline/master/maven-repository</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
     </repositories>
 

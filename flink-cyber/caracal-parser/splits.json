@@ -1,30 +1,154 @@
 [
-  {
-    "topic": "dpi_http",
-    "splitPath": "$.http-stream['http.request'][*]",
-    "headerPath": "$.http-stream",
-    "timestampField" : "start_ts",
-    "timestampFunction": "Math.round(parseFloat(ts)*1000,0)"
-  },
-  {
-    "topic": "dpi_dns",
-    "splitPath": "$.dns-stream['dns.dns_query'][*]",
-    "headerPath": "$.dns-stream",
-    "timestampField" : "start_ts",
-    "timestampFunction": "Math.round(parseFloat(ts)*1000,0)"
-  },
-  {
-    "topic": "dpi_radius",
-    "splitPath": "$.radius-stream['radius.request'][*]",
-    "headerPath": "$.radius-stream",
-    "timestampField" : "start_ts",
-    "timestampFunction": "Math.round(parseFloat(ts)*1000,0)"
-  },
-  {
-    "topic": "dpi_smtp",
-    "splitPath": "$.smtp-stream['smtp.email'][*]",
-    "headerPath": "$.smtp-stream",
-    "timestampField" : "start_ts",
-    "timestampFunction": "Math.round(parseFloat(ts)*1000,0)"
-  }
+    {
+        "topic": "dpi_http",
+        "splitPath": "$.http-stream['http.request'][]",
+        "headerPath": "$.http-stream",
+        "timestampField": "start_ts",
+        "timestampFunction": "Math.round(parseFloat(ts)1000,0)",
+        "chainSchema": {
+            "id": "f7335354-c210-4706-8520-e0294324b3b0",
+            "name": "dpi_http_parser",
+            "parsers": [
+                {
+                    "id": "cf14a4ac-abda-4a41-94f6-4dd1e8753c63",
+                    "name": "Rename Field",
+                    "type": "com.cloudera.parserchains.parsers.RenameFieldParser",
+                    "config": {
+                        "fieldToRename": [
+                            {
+                                "from": "port_clt",
+                                "to": "ip_src_port"
+                            },
+                            {
+                                "from": "port_srv",
+                                "to": "ip_dst_port"
+                            },
+                            {
+                                "from": "ip_clt",
+                                "to": "ip_src_addr"
+                            },
+                            {
+                                "from": "ip_srv",
+                                "to": "ip_dst_addr"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "topic": "dpi_dns",
+        "splitPath": "$.dns-stream['dns.dns_query'][]",
+        "headerPath": "$.dns-stream",
+        "timestampField": "start_ts",
+        "timestampFunction": "Math.round(parseFloat(ts)1000,0)",
+        "chainSchema": {
+            "id": "e4c114df-f8a0-4c34-b542-350541e91900",
+            "name": "dpi_dns_parser",
+            "parsers": [
+                {
+                    "id": "467aa476-aac7-478e-a719-a6e3876a2360",
+                    "name": "Rename Field",
+                    "type": "com.cloudera.parserchains.parsers.RenameFieldParser",
+                    "config": {
+                        "fieldToRename": [
+                            {
+                                "from": "port_clt",
+                                "to": "ip_src_port"
+                            },
+                            {
+                                "from": "port_srv",
+                                "to": "ip_dst_port"
+                            },
+                            {
+                                "from": "ip_clt",
+                                "to": "ip_src_addr"
+                            },
+                            {
+                                "from": "ip_srv",
+                                "to": "ip_dst_addr"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "topic": "dpi_radius",
+        "splitPath": "$.radius-stream['radius.request'][]",
+        "headerPath": "$.radius-stream",
+        "timestampField": "start_ts",
+        "timestampFunction": "Math.round(parseFloat(ts)1000,0)",
+        "chainSchema": {
+            "id": "646a2eef-e618-483f-a02e-3b716518525b",
+            "name": "dpi_radius_parser",
+            "parsers": [
+                {
+                    "id": "f3eee0f3-c5e5-48c7-b9e6-1a0ecb42c976",
+                    "name": "Rename Field",
+                    "type": "com.cloudera.parserchains.parsers.RenameFieldParser",
+                    "config": {
+                        "fieldToRename": [
+                            {
+                                "from": "port_clt",
+                                "to": "ip_src_port"
+                            },
+                            {
+                                "from": "port_srv",
+                                "to": "ip_dst_port"
+                            },
+                            {
+                                "from": "ip_clt",
+                                "to": "ip_src_addr"
+                            },
+                            {
+                                "from": "ip_srv",
+                                "to": "ip_dst_addr"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "topic": "dpi_smtp",
+        "splitPath": "$.smtp-stream['smtp.email'][]",
+        "headerPath": "$.smtp-stream",
+        "timestampField": "start_ts",
+        "timestampFunction": "Math.round(parseFloat(ts)1000,0)",
+        "chainSchema": {
+            "id": "62631de4-cfb6-4f3b-98b6-db8d1e0e3c99",
+            "name": "dpi_smtp_parser",
+            "parsers": [
+                {
+                    "id": "f8a39b34-0329-4e74-834d-37fa0c9427c7",
+                    "name": "Rename Field",
+                    "type": "com.cloudera.parserchains.parsers.RenameFieldParser",
+                    "config": {
+                        "fieldToRename": [
+                            {
+                                "from": "port_clt",
+                                "to": "ip_src_port"
+                            },
+                            {
+                                "from": "port_srv",
+                                "to": "ip_dst_port"
+                            },
+                            {
+                                "from": "ip_clt",
+                                "to": "ip_src_addr"
+                            },
+                            {
+                                "from": "ip_srv",
+                                "to": "ip_dst_addr"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    }
 ]
