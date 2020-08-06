@@ -2,6 +2,8 @@ package com.cloudera.cyber.caracal;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.parser.MessageToParse;
+import com.cloudera.parserchains.core.utils.JSONUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -9,8 +11,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -79,7 +79,7 @@ public class TestSplitJob extends SplitJob {
 
     @Override
     protected List<SplitConfig> parseConfig() throws IllegalArgumentException, IOException {
-        return new ObjectMapper().readValue(getResourceAsString("splits.json"), new TypeReference<List<SplitConfig>>(){});
+        return JSONUtils.INSTANCE.getMapper().readValue(getResourceAsString("splits.json"), new TypeReference<List<SplitConfig>>() {});
     }
 
     @Override
