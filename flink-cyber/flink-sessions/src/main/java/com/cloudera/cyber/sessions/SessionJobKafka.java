@@ -43,7 +43,7 @@ public class SessionJobKafka extends SessionJob {
 
     @Override
     protected void writeResults(ParameterTool params, SingleOutputStreamOperator<GroupedMessage> results) {
-        FlinkKafkaProducer<GroupedMessage> sink = new FlinkUtils<GroupedMessage>().createKafkaSink(
+        FlinkKafkaProducer<GroupedMessage> sink = new FlinkUtils<>(GroupedMessage.class).createKafkaSink(
                 params.getRequired("topic.enrichment"),
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
