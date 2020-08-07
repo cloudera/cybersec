@@ -41,5 +41,6 @@ public abstract class ParserJob {
     }
 
     protected abstract void writeResults(ParameterTool params, DataStream<Message> results);
+    protected abstract void writeOriginalsResults(ParameterTool params, DataStream<MessageToParse> results);
     protected abstract DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params);
 }

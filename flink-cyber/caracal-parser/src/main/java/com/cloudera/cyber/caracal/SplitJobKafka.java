@@ -4,18 +4,31 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.parser.MessageToParse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.core.fs.Path;
+import org.apache.flink.formats.parquet.avro.ParquetAvroWriters;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.sink.filesystem.OutputFileConfig;
+import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink;
+import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
+import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Properties;
 
 import static com.cloudera.cyber.flink.FlinkUtils.PARAMS_TOPIC_PATTERN;
 import static com.cloudera.cyber.flink.FlinkUtils.createRawKafkaSource;
+import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
+import static com.cloudera.cyber.parser.ParserJobKafka.*;
 
 @Slf4j
 public class SplitJobKafka extends SplitJob {
@@ -47,11 +60,53 @@ public class SplitJobKafka extends SplitJob {
     }
 
     @Override
+    protected DataStream<SplitConfig> createConfigSource(StreamExecutionEnvironment env, ParameterTool params) {
+        Properties kafkaProperties = readKafkaProperties(params, true);
+        String groupId = createGroupId(params.get("topic.input", "") + params.get("topic.pattern", ""));
+
+        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
+
+        FlinkKafkaConsumer<String> source =
+                new FlinkKafkaConsumer<String>(params.getRequired(PARAMS_CONFIG_TOPIC),  new SimpleStringSchema(), kafkaProperties);
+
+        return env.addSource(source)
+                .map(new SplitConfigJsonParserMap())
+                .name("Config Source").uid("config.source");
+    }
+
+    @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
-        FlinkKafkaProducer<Message> sink = new FlinkUtils<Message>().createKafkaSink(
+        FlinkKafkaProducer<Message> sink = new FlinkUtils<Message>(Message.class).createKafkaSink(
                 params.getRequired(PARAMS_TOPIC_OUTPUT),
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
+    }
+
+    @Override
+    protected void writeOriginalsResults(ParameterTool params, DataStream<MessageToParse> results) {
+        if (!params.getBoolean(PARAMS_ORIGINAL_ENABLED, true)) return;
+
+        // write the original sources to HDFS files
+        Path path = new Path(params.getRequired(PARAMS_ORIGINAL_LOGS_PATH));
+
+        DefaultRollingPolicy<MessageToParse, String> defaultRollingPolicy = DefaultRollingPolicy.builder()
+                .withInactivityInterval(params.getLong(PARAMS_ROLL_INACTIVITY, DEFAULT_ROLL_INACTIVITY))
+                .withMaxPartSize(params.getLong(PARAMS_ROLL_PART_SIZE, DEFAULT_ROLL_PART_SIZE))
+                .withRolloverInterval(params.getLong(PARAMS_ROLL_INTERVAL, DEFAULT_ROLL_INTERVAL))
+                .build();
+
+        StreamingFileSink<MessageToParse> sink = StreamingFileSink
+                .forBulkFormat(path, ParquetAvroWriters.forSpecificRecord(MessageToParse.class))
+                .withRollingPolicy(OnCheckpointRollingPolicy.build())
+                .withOutputFileConfig(OutputFileConfig
+                        .builder()
+                        .withPartPrefix("logs")
+                        .withPartSuffix(".parquet")
+                        .build())
+                .build();
+
+        results.addSink(sink).name("Original Archiver").uid("original.archiver");
     }
 
     @Override
@@ -59,7 +114,12 @@ public class SplitJobKafka extends SplitJob {
         log.info(params.mergeWith(ParameterTool.fromMap(Collections.singletonMap(PARAMS_TOPIC_PATTERN, String.join("|", topics)))).toMap().toString());
         return createRawKafkaSource(env,
                 params.mergeWith(ParameterTool.fromMap(Collections.singletonMap(PARAMS_TOPIC_PATTERN, String.join("|", topics)))),
-                "caracal-splitter");
+                createGroupId(params.get("topic.input", "") + params.get("topic.pattern", "")));
     }
+
+    private String createGroupId(String inputTopic) {
+        return "cyber-split-parser-" + DigestUtils.md5DigestAsHex(inputTopic.getBytes(StandardCharsets.UTF_8));
+    }
+
 
 }

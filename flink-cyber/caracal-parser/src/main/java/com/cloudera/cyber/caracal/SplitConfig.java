@@ -1,6 +1,5 @@
 package com.cloudera.cyber.caracal;
 
-import com.cloudera.cyber.parser.ParserChainMap;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import lombok.*;
 
@@ -26,4 +25,5 @@ public class SplitConfig implements Serializable {
     private String timestampFunction = "";
 
     private SplittingFlatMapFunction.TimestampSource timestampSource;
+
 }

@@ -2,6 +2,7 @@
     "type": "record",
     "name": "Message",
     "namespace": "com.cloudera.cyber",
+    "imports": "./ThreatIntelligence.avsc",
     "fields": [
         {
             "name": "id",
