@@ -36,8 +36,8 @@ public abstract class SplitJob {
 
         DataStream<MessageToParse> source = createSource(env, params, configMap.keySet());
 
-        BroadcastStream<SplitConfig> configStream =
-                env.fromCollection(configs)
+        BroadcastStream<SplitConfig> configStream = env.fromCollection(configs)
+                        .union(createConfigSource(env, params))
                         .broadcast(Descriptors.broadcastState);
 
         SingleOutputStreamOperator<Message> results = source
@@ -45,15 +45,15 @@ public abstract class SplitJob {
                 .connect(configStream)
                 .process(new SplitBroadcastProcessFunction(configMap));
 
-        @NonNull ParserChainMap chainMap = new ParserChainMap() {{
+        writeOriginalsResults(params, source);
 
-        }};
         SingleOutputStreamOperator<Message> parsed = results.map(new ParserChainMapFunction(configMap));
 
         writeResults(params, parsed);
 
         return env;
     }
+
 
     protected static class Descriptors {
         public static MapStateDescriptor<String, SplitConfig> broadcastState = new MapStateDescriptor<String, SplitConfig>("configs", String.class, SplitConfig.class);
@@ -68,7 +68,8 @@ public abstract class SplitJob {
         }
     }
 
+    protected abstract DataStream<SplitConfig> createConfigSource(StreamExecutionEnvironment env, ParameterTool params);
     protected abstract void writeResults(ParameterTool params, DataStream<Message> results);
-
+    protected abstract void writeOriginalsResults(ParameterTool params, DataStream<MessageToParse> results);
     protected abstract DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params, Iterable<String> topics);
 }

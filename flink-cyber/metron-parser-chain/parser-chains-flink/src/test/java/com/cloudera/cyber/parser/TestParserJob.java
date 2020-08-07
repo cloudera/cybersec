@@ -118,7 +118,12 @@ public class TestParserJob extends ParserJob {
 
         JobTester.startTest(env);
 
-        source.sendRecord(MessageToParse.builder().topic("test").originalSource(input).build());
+        source.sendRecord(MessageToParse.newBuilder()
+                .setTopic("test")
+                .setOriginalSource(input)
+                .setPartition(1)
+                .setOffset(1)
+                .build());
         JobTester.stopTest();
 
         Message out = sink.poll(Duration.ofMillis(1000));
@@ -134,6 +139,9 @@ public class TestParserJob extends ParserJob {
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
         results.addSink(sink);
     }
+
+    @Override
+    protected void writeOriginalsResults(ParameterTool params, DataStream<MessageToParse> results) { }
 
     @Override
     protected DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params) {
