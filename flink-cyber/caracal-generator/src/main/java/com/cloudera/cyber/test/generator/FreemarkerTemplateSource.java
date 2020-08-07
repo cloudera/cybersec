@@ -54,15 +54,15 @@ public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<S
         cfg.setCacheStorage(new freemarker.cache.MruCacheStorage(50,50));
         cfg.setTemplateUpdateDelayMilliseconds(3600*24*1000);
 
-        int ms;
-        int ns;
-        if (eps > 1000) {
-            // send a batch per sleep
-            ms = 0;
-            ns = 1000000 / eps;
-        } else {
-            ms = 1000/eps;
-            ns = 0;
+        int ms = 0;
+        int ns = 0;
+        if (eps != 0) {
+            if (eps > 1000) {
+                // send a batch per sleep
+                ns = 1000000 / eps;
+            } else {
+                ms = 1000 / eps;
+            }
         }
 
         Instant startTime = Instant.now();
