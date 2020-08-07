@@ -11,6 +11,7 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
@@ -18,8 +19,6 @@ import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerConfig;
 
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -41,6 +40,12 @@ public class FlinkUtils<T> {
     private static final String PARAMS_PARALLELISM = "parallelism";
     private static final int DEFAULT_PARALLELISM = 2;
 
+    private final Class<T> type;
+
+    public FlinkUtils(Class<T> type) {
+        this.type = type;
+    }
+
     public static void setupEnv(StreamExecutionEnvironment env, ParameterTool params) {
         env.enableCheckpointing(params.getInt(PARAMS_CHECKPOINT_INTERVAL, DEFAULT_CHECKPOINT_INTERVAL), CheckpointingMode.EXACTLY_ONCE);
         env.setParallelism(params.getInt(PARAMS_PARALLELISM, DEFAULT_PARALLELISM));
@@ -59,6 +64,25 @@ public class FlinkUtils<T> {
                 schema,
                 kafkaProperties,
                 FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
+    }
+
+    public FlinkKafkaConsumer<T> createKafkaGenericSource(String topic, ParameterTool params, String groupId) {
+        Preconditions.checkNotNull(topic, "Must specific input topic");
+        Preconditions.checkNotNull(groupId, "Must specific group id");
+
+        Properties kafkaProperties = readKafkaProperties(params, true);
+        log.info(String.format("Creating Kafka Source for %s, using %s", topic, kafkaProperties));
+        KafkaDeserializationSchema<T> schema = ClouderaRegistryKafkaDeserializationSchema
+                .builder(type)
+                .setConfig(readSchemaRegistryProperties(params))
+                .build();
+        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        // for the SMM interceptor
+        kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
+
+        FlinkKafkaConsumer<T> source = new FlinkKafkaConsumer<T>(topic, schema, kafkaProperties);
+
+        return source;
     }
 
     public static FlinkKafkaConsumer<Message> createKafkaSource(String topic, ParameterTool params, String groupId) {
@@ -101,17 +125,17 @@ public class FlinkUtils<T> {
     }
 
     public static DataStream<MessageToParse> createRawKafkaSource(StreamExecutionEnvironment env, ParameterTool params, String groupId) {
-        Preconditions.checkNotNull(groupId, "Must specific group id");
-
         String inputTopic = params.get(PARAMS_TOPIC_INPUT,"");
         String pattern = params.get(PARAMS_TOPIC_PATTERN, "");
+
         log.info(String.format("createRawKafkaSource topic: '%s', pattern: '%s', good: %b", inputTopic, pattern, !(inputTopic.isEmpty() && pattern.isEmpty())));
 
         Preconditions.checkArgument(!(inputTopic.isEmpty() && pattern.isEmpty()),
                 String.format("Must specify at least one of %s or %s", PARAMS_TOPIC_INPUT, PARAMS_TOPIC_PATTERN));
 
         Properties kafkaProperties = readKafkaProperties(params, true);
-        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+
+        kafkaProperties.putIfAbsent(ConsumerConfig.GROUP_ID_CONFIG, groupId);
 
         DataStreamSource<MessageToParse> source = (pattern != null) ?
                 env.addSource(new FlinkKafkaConsumer<MessageToParse>(Pattern.compile(pattern), new MessageToParseDeserializer(), kafkaProperties)) :

@@ -39,7 +39,7 @@ public class ScoringJobKafka extends ScoringJob {
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<ScoredMessage> results) {
-        FlinkKafkaProducer<ScoredMessage> sink = new FlinkUtils<ScoredMessage>().createKafkaSink(
+        FlinkKafkaProducer<ScoredMessage> sink = new FlinkUtils<>(ScoredMessage.class).createKafkaSink(
                 params.getRequired("topic.output"),
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");

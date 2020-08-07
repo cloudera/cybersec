@@ -44,7 +44,7 @@ public class DedupeJobKafka extends DedupeJob {
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<DedupeMessage> results) {
-        FlinkKafkaProducer<DedupeMessage> sink = new FlinkUtils<DedupeMessage>().createKafkaSink(
+        FlinkKafkaProducer<DedupeMessage> sink = new FlinkUtils<>(DedupeMessage.class).createKafkaSink(
                 params.getRequired("topic.enrichment"),
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
