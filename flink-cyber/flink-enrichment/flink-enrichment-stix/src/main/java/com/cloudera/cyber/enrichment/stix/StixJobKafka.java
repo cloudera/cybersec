@@ -38,7 +38,7 @@ public class StixJobKafka extends StixJob {
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
-        FlinkKafkaProducer<Message> sink = new FlinkUtils<Message>().createKafkaSink(
+        FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
                 params.getRequired(PARAM_MARKED_OUTPUT_TOPIC),
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
@@ -46,7 +46,7 @@ public class StixJobKafka extends StixJob {
 
     @Override
     protected void writeStixResults(ParameterTool params, DataStream<ThreatIntelligence> results) {
-        FlinkKafkaProducer<ThreatIntelligence> sink = new FlinkUtils<ThreatIntelligence>().createKafkaSink(
+        FlinkKafkaProducer<ThreatIntelligence> sink = new FlinkUtils<>(ThreatIntelligence.class).createKafkaSink(
                 params.getRequired(PARAM_OUTPUT_TOPIC),
                 params);
         results.addSink(sink).name("Kafka Stix Results").uid("kafka.results.stix");
