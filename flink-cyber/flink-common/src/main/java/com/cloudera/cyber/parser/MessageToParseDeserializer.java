@@ -1,5 +1,6 @@
 package com.cloudera.cyber.parser;
 
+import com.cloudera.cyber.parser.MessageToParse;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -15,9 +16,11 @@ public class MessageToParseDeserializer implements KafkaDeserializationSchema<Me
 
     @Override
     public MessageToParse deserialize(ConsumerRecord<byte[], byte[]> consumerRecord) throws Exception {
-        return MessageToParse.builder()
-                .originalSource(new String(consumerRecord.value(), StandardCharsets.UTF_8))
-                .topic(consumerRecord.topic())
+        return MessageToParse.newBuilder()
+                .setOriginalSource(new String(consumerRecord.value(), StandardCharsets.UTF_8))
+                .setTopic(consumerRecord.topic())
+                .setOffset(consumerRecord.offset())
+                .setPartition(consumerRecord.partition())
                 .build();
     }
 
