@@ -21,7 +21,6 @@
                     <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
                     <stringType>String</stringType>
                     <createSetters>true</createSetters>
-
                 </configuration>
                 <executions>
                     <execution>
@@ -31,11 +30,11 @@
                         </goals>
                         <configuration>
                             <imports>
+                                <import>${project.basedir}/src/main/avro/MessageToParse.avsc</import>
                                 <import>${project.basedir}/src/main/avro/ThreatIntelligence.avsc</import>
                                 <import>${project.basedir}/src/main/avro/Message.avsc</import>
                                 <import>${project.basedir}/src/main/avro/GroupedMessage.avsc</import>
                                 <import>${project.basedir}/src/main/avro/DedupeMessage.avsc</import>
-
                             </imports>
                         </configuration>
                     </execution>

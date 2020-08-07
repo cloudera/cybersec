@@ -74,7 +74,21 @@ public class TestSplitJob extends SplitJob {
     }
 
     private MessageToParse resourceToMessage(String topic, String file) {
-        return MessageToParse.builder().originalSource(getResourceAsString(file)).topic(topic).build();
+        return MessageToParse.newBuilder()
+                .setOriginalSource(getResourceAsString(file))
+                .setTopic(topic)
+                .setOffset(0)
+                .setPartition(0)
+                .build();
+    }
+
+    @Override
+    protected DataStream<SplitConfig> createConfigSource(StreamExecutionEnvironment env, ParameterTool params) {
+        try {
+            return env.fromCollection(parseConfig());
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     @Override
@@ -85,6 +99,11 @@ public class TestSplitJob extends SplitJob {
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
         results.addSink(sink);
+    }
+
+    @Override
+    protected void writeOriginalsResults(ParameterTool params, DataStream<MessageToParse> results) {
+
     }
 
     @Override
