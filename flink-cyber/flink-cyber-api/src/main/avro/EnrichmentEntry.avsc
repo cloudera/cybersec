@@ -1,0 +1,29 @@
+{
+    "type": "record",
+    "name": "EnrichmentEntry",
+    "namespace": "com.cloudera.cyber",
+    "javaAnnotation": "org.apache.flink.api.common.typeinfo.TypeInfo(com.cloudera.cyber.EnrichmentEntryTypeFactory.class)",
+    "fields": [
+        {
+            "name": "key",
+            "type": "string"
+        },
+        {
+            "name": "type",
+            "type": "string"
+        },
+        {
+            "name": "ts",
+            "type": {
+                "type": "long"
+            }
+        },
+        {
+            "name": "entries",
+            "type": {
+                "type": "map",
+                "values": "string"
+            }
+        }
+    ]
+}

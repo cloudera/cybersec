@@ -30,6 +30,7 @@
                         </goals>
                         <configuration>
                             <imports>
+                                <import>${project.basedir}/src/main/avro/EnrichmentEntry.avsc</import>
                                 <import>${project.basedir}/src/main/avro/MessageToParse.avsc</import>
                                 <import>${project.basedir}/src/main/avro/ThreatIntelligence.avsc</import>
                                 <import>${project.basedir}/src/main/avro/Message.avsc</import>
@@ -38,7 +39,7 @@
                             </imports>
                         </configuration>
                     </execution>
-                    <execution>
+                    <!--<execution>
                         <id>protocols</id>
                         <phase>generate-sources</phase>
                         <goals>
@@ -47,8 +48,9 @@
                         </goals>
                         <configuration>
                             <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
+
                         </configuration>
-                    </execution>
+                    </execution>-->
                 </executions>
             </plugin>
             <plugin>
@@ -62,6 +64,15 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-avro</artifactId>
         </dependency>
 
         <dependency>

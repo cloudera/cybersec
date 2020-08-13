@@ -12,15 +12,13 @@
         {
             "name": "ts",
             "type": {
-                "type": "long",
-                "logicalType": "timestamp-millis"
+                "type": "long"
             }
         },
         {
             "name": "startTs",
             "type": {
-                "type": "long",
-                "logicalType": "timestamp-millis"
+                "type": "long"
             }
         },
         {
