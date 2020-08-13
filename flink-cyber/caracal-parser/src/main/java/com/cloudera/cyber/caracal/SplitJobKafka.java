@@ -25,7 +25,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Properties;
 
-import static com.cloudera.cyber.flink.FlinkUtils.PARAMS_TOPIC_PATTERN;
+import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_PATTERN;
 import static com.cloudera.cyber.flink.FlinkUtils.createRawKafkaSource;
 import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
 import static com.cloudera.cyber.parser.ParserJobKafka.*;
@@ -62,7 +62,7 @@ public class SplitJobKafka extends SplitJob {
     @Override
     protected DataStream<SplitConfig> createConfigSource(StreamExecutionEnvironment env, ParameterTool params) {
         Properties kafkaProperties = readKafkaProperties(params, true);
-        String groupId = createGroupId(params.get("topic.input", "") + params.get("topic.pattern", ""));
+        String groupId = createGroupId(params.get("topic.input", "") + params.get("topic.pattern", ""), "cyber-split-parser-config-");
 
         kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
@@ -71,8 +71,11 @@ public class SplitJobKafka extends SplitJob {
                 new FlinkKafkaConsumer<String>(params.getRequired(PARAMS_CONFIG_TOPIC),  new SimpleStringSchema(), kafkaProperties);
 
         return env.addSource(source)
+                .name("Config Kafka Feed").uid("config.source.kafka").setParallelism(1).setMaxParallelism(1)
+
                 .map(new SplitConfigJsonParserMap())
-                .name("Config Source").uid("config.source");
+                .name("Config Source").uid("config.source").setMaxParallelism(1).setParallelism(1);
+
     }
 
     @Override
@@ -96,8 +99,10 @@ public class SplitJobKafka extends SplitJob {
                 .withRolloverInterval(params.getLong(PARAMS_ROLL_INTERVAL, DEFAULT_ROLL_INTERVAL))
                 .build();
 
+        // TODO - add the message id
+        // TOOD - add filtering (might not care about all raws)
         StreamingFileSink<MessageToParse> sink = StreamingFileSink
-                .forBulkFormat(path, ParquetAvroWriters.forSpecificRecord(MessageToParse.class))
+                .forBulkFormat(path, ParquetAvroWriters.forReflectRecord(MessageToParse.class))
                 .withRollingPolicy(OnCheckpointRollingPolicy.build())
                 .withOutputFileConfig(OutputFileConfig
                         .builder()
@@ -114,11 +119,11 @@ public class SplitJobKafka extends SplitJob {
         log.info(params.mergeWith(ParameterTool.fromMap(Collections.singletonMap(PARAMS_TOPIC_PATTERN, String.join("|", topics)))).toMap().toString());
         return createRawKafkaSource(env,
                 params.mergeWith(ParameterTool.fromMap(Collections.singletonMap(PARAMS_TOPIC_PATTERN, String.join("|", topics)))),
-                createGroupId(params.get("topic.input", "") + params.get("topic.pattern", "")));
+                createGroupId(params.get("topic.input", "") + params.get("topic.pattern", ""), "cyber-split-parser-"));
     }
 
-    private String createGroupId(String inputTopic) {
-        return "cyber-split-parser-" + DigestUtils.md5DigestAsHex(inputTopic.getBytes(StandardCharsets.UTF_8));
+    private String createGroupId(String inputTopic, String prefix) {
+        return prefix + DigestUtils.md5DigestAsHex(inputTopic.getBytes(StandardCharsets.UTF_8));
     }
 
 

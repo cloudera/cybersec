@@ -1,9 +1,15 @@
 package com.cloudera.cyber.caracal;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.TestUtils;
+import com.cloudera.cyber.parser.MessageToParse;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
 import org.junit.Test;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,14 +25,27 @@ public class SplittingFlatMapFunctionTest {
     public void testSplittingWithHeader() throws Exception {
         List<Message> results = new ArrayList<>();
 
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "SunRsaSign");
+        gen.initialize(1024, new SecureRandom());
+        KeyPair pair = gen.generateKeyPair();
+
         SplittingFlatMapFunction splittingFlatMapFunction = new SplittingFlatMapFunction(SplitConfig.builder()
                 .splitPath("$.http-stream['http.request'][*]")
                 .headerPath("$.http-stream")
                 .timestampField("start_ts")
                 .timestampSource(SplittingFlatMapFunction.TimestampSource.HEADER)
                 .timestampFunction("Math.round(parseFloat(ts)*1000,0)")
-                .build());
-        splittingFlatMapFunction.flatMap(testInput, new Collector<Message>() {
+                .build(), pair.getPrivate());
+
+        splittingFlatMapFunction.open(new Configuration());
+
+        splittingFlatMapFunction.flatMap(MessageToParse.newBuilder()
+                        .setOriginalSource(testInput)
+                        .setTopic("test")
+                        .setPartition(0)
+                        .setOffset(0)
+                        .build(),
+                new Collector<Message>() {
             @Override
             public void collect(Message message) {
                 results.add(message);
