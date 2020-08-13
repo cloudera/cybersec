@@ -2,8 +2,6 @@ package com.cloudera.cyber.caracal;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.parserchains.core.utils.JSONUtils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import lombok.NonNull;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.flink.api.java.utils.ParameterTool;
