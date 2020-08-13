@@ -5,6 +5,7 @@ import org.joda.time.DateTime;
 import org.junit.Test;
 
 import javax.script.ScriptException;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -27,7 +28,7 @@ public class TestJavascriptEngine {
         Map<String, Object> results = engine.feed(
                 Message.newBuilder()
                         .setId(UUID.randomUUID().toString())
-                        .setTs(DateTime.now())
+                        .setTs(Instant.now().toEpochMilli())
                         .setExtensions(new HashMap<String, Object>() {{
                             put("a", 1.0);
                             put("b", 2.0);
@@ -58,7 +59,7 @@ public class TestJavascriptEngine {
         Map<String, Object> results = engine.feed(
                 Message.newBuilder()
                         .setId(UUID.randomUUID().toString())
-                        .setTs(DateTime.now())
+                        .setTs(Instant.now().toEpochMilli())
                         .setExtensions(new HashMap<String, Object>() {{
                     put("local", "192.168.0.1");
                     put("remote", "8.8.8.8");
@@ -81,7 +82,7 @@ public class TestJavascriptEngine {
         Map<String, Object> results = engine.feed(
                 Message.newBuilder()
                         .setId(UUID.randomUUID().toString())
-                        .setTs(DateTime.now())
+                        .setTs(Instant.now().toEpochMilli())
                         .setExtensions(new HashMap<String, Object>() {{
                             put("local", "192.168.0.1");
                             put("remote", "8.8.8.8");
@@ -103,7 +104,7 @@ public class TestJavascriptEngine {
             Map<String, Object> results = engine.feed(
                     Message.newBuilder()
                             .setId(UUID.randomUUID().toString())
-                            .setTs(DateTime.now())
+                            .setTs(Instant.now().toEpochMilli())
                             .setExtensions(new HashMap<String, Object>() {{
                                 put("local", "192.168.0.1");
 

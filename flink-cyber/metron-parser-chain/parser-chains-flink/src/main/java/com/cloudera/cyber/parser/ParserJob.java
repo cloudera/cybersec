@@ -8,6 +8,11 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,6 +22,7 @@ import java.util.Map;
 public abstract class ParserJob {
 
     protected static final String PARAM_CHAIN_CONFIG = "chain";
+    private static final String PARAM_PRIVATE_KEY_FILE = "key.private.file";
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -30,7 +36,13 @@ public abstract class ParserJob {
 
         DataStream<MessageToParse> source = createSource(env, params);
 
-        SingleOutputStreamOperator<Message> results = source.flatMap(new ChainParserMapFunction(chainSchema, topicMap));
+
+        byte[] privKeyBytes = Files.readAllBytes(Paths.get(params.getRequired(PARAM_PRIVATE_KEY_FILE)));
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privKeyBytes);
+        PrivateKey privateKey = keyFactory.generatePrivate(privSpec);
+
+        SingleOutputStreamOperator<Message> results = source.flatMap(new ChainParserMapFunction(chainSchema, topicMap, privateKey));
         writeResults(params, results);
 
         return env;

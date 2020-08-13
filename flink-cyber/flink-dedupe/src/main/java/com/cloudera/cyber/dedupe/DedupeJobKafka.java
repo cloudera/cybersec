@@ -58,7 +58,7 @@ public class DedupeJobKafka extends DedupeJob {
         AssignerWithPeriodicWatermarks<Message> assigner = new BoundedOutOfOrdernessTimestampExtractor<Message>(allowedLateness) {
             @Override
             public long extractTimestamp(Message message) {
-                return message.getTs().getMillis();
+                return message.getTs();
             }
         };
         return env.addSource(createKafkaSource(inputTopic,

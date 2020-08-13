@@ -7,7 +7,6 @@ import org.apache.flink.client.cli.CliFrontend;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.encrypttool.EncryptTool;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 
 import java.io.IOException;
@@ -15,6 +14,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -196,4 +196,21 @@ public class Utils {
     public static String readFile(String path) throws IOException {
         return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
     }
+
+
+    public static byte[] sign(String s, PrivateKey key) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        Signature sig = Signature.getInstance("SHA1WithRSA");
+        sig.initSign(key);
+        sig.update(s.getBytes(StandardCharsets.UTF_8));
+        return sig.sign();
+    }
+
+    public static boolean verify(String s, byte[] signature, PublicKey key) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        Signature sig = Signature.getInstance("SHA1WithRSA");
+        sig.initVerify(key);
+        sig.update(s.getBytes(StandardCharsets.UTF_8));
+        return sig.verify(signature);
+    }
+
+
 }

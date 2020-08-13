@@ -40,7 +40,7 @@ public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
                     }
                 },
                 Utils.readKafkaProperties(params, false),
-                FlinkKafkaProducer.Semantic.AT_LEAST_ONCE);
+                FlinkKafkaProducer.Semantic.NONE);
         metrics.addSink(metricsSink).name("Metrics Sink");
     }
 

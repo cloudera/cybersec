@@ -2,7 +2,9 @@ package com.cloudera.cyber.session;
 
 import com.cloudera.cyber.GroupedMessage;
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.SignedSourceKey;
 import com.cloudera.cyber.sessions.SessionJob;
+import com.cloudera.cyber.sha1;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -28,6 +30,7 @@ public class TestSessionizer extends SessionJob {
     private ManualSource<Message> source;
     private CollectingSink<GroupedMessage> sink = new CollectingSink<>();
     private List<Message> recordLog = new ArrayList<>();
+    private int offset = 0;
 
     @Test
     public void testSingleUserTwoSessions() throws Exception {
@@ -47,24 +50,24 @@ public class TestSessionizer extends SessionJob {
         // session 1
         sendRecord(Message.newBuilder()
                 .setExtensions(createFields(user1))
-                .setTs(Instant.ofEpochMilli(ts + 0L).toDateTime()));
+                .setTs(ts + 0L));
         sendRecord(Message.newBuilder()
                 .setExtensions(createFields(user1))
-                .setTs(Instant.ofEpochMilli(ts + 1000L).toDateTime()),true);
+                .setTs(ts + 1000L),true);
         sendRecord(Message.newBuilder()
                 .setExtensions(createFields(user1))
-                .setTs(Instant.ofEpochMilli(ts + 2000L).toDateTime()),true);
+                .setTs(ts + 2000L),true);
         sendRecord(Message.newBuilder()
                 .setExtensions(createFields(user1))
-                .setTs(Instant.ofEpochMilli(ts + 9000L).toDateTime()),true);
+                .setTs(ts + 9000L),true);
 
         // session 2
         sendRecord(Message.newBuilder()
                 .setExtensions(createFields(user1))
-                .setTs(Instant.ofEpochMilli(ts + 20000L).toDateTime()),true);
+                .setTs(ts + 20000L),true);
         sendRecord(Message.newBuilder()
                 .setExtensions(createFields(user1))
-                .setTs(Instant.ofEpochMilli(ts + 21000L).toDateTime()),true);
+                .setTs(ts + 21000L),true);
 
         source.sendWatermark(50000L);
 
@@ -93,10 +96,15 @@ public class TestSessionizer extends SessionJob {
     }
     private void sendRecord(Message.Builder builder, boolean watermark) {
         builder.setId(UUID.randomUUID().toString());
-        builder.setOriginalSource("");
+        builder.setOriginalSource(SignedSourceKey.newBuilder()
+                .setTopic("test")
+                .setPartition(0)
+                .setOffset(offset++)
+                .setSignature(new sha1(String.valueOf(offset).getBytes()))
+                .build());
         Message message = builder.build();
-        source.sendRecord(message, message.getTs().getMillis());
-        if (watermark) source.sendWatermark(message.getTs().getMillis());
+        source.sendRecord(message, message.getTs());
+        if (watermark) source.sendWatermark(message.getTs());
         recordLog.add(message);
     }
 

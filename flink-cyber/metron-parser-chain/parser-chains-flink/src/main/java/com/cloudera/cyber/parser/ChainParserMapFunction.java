@@ -1,6 +1,9 @@
 package com.cloudera.cyber.parser;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.SignedSourceKey;
+import com.cloudera.cyber.flink.Utils;
+import com.cloudera.cyber.sha1;
 import com.cloudera.parserchains.core.*;
 import com.cloudera.parserchains.core.catalog.ClassIndexParserCatalog;
 import lombok.NonNull;
@@ -11,6 +14,9 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
 import org.joda.time.Instant;
 
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.security.Signature;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,12 +27,16 @@ import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
 public class ChainParserMapFunction extends RichFlatMapFunction<MessageToParse, Message> {
 
     @NonNull
-    private ParserChainMap chainConfig;
+    private final ParserChainMap chainConfig;
     @NonNull
-    private Map<String, String> topicMap;
+    private final Map<String, String> topicMap;
 
-    private ChainRunner chainRunner;
-    private Map<String, ChainLink> chains;
+    @NonNull
+    private final PrivateKey signKey;
+
+    private transient ChainRunner chainRunner;
+    private transient Map<String, ChainLink> chains;
+    private transient Signature signature;
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -46,6 +56,9 @@ public class ChainParserMapFunction extends RichFlatMapFunction<MessageToParse, 
                 }));
 
         chainRunner = new DefaultChainRunner();
+
+        signature = Signature.getInstance("SHA1WithRSA");
+        signature.initSign(signKey);
     }
 
     /**
@@ -69,9 +82,20 @@ public class ChainParserMapFunction extends RichFlatMapFunction<MessageToParse, 
             log.warn("Timestamp missing from message on chain %s", message.getTopic());
             throw new IllegalStateException("Timestamp not present");
         }
+        String originalInput
+                = m.getField(FieldName.of(DEFAULT_INPUT_FIELD)).get().get();
+
+        signature.update(originalInput.getBytes(StandardCharsets.UTF_8));
+        byte[] sig = signature.sign();
+
         collector.collect(Message.newBuilder().setExtensions(fieldsFromChain(m.getFields()))
-                .setTs(Instant.ofEpochMilli(Long.valueOf(timestamp.get().get())).toDateTime())
-                .setOriginalSource(m.getField(FieldName.of(DEFAULT_INPUT_FIELD)).get().get())
+                .setOriginalSource(SignedSourceKey.newBuilder()
+                        .setTopic(message.getTopic())
+                        .setPartition(message.getPartition())
+                        .setOffset(message.getOffset())
+                        .setSignature(new sha1(sig))
+                        .build())
+                .setTs(Long.valueOf(timestamp.get().get()))
                 .setId(UUID.randomUUID().toString())
                 .build());
     }
