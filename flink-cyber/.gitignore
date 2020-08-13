@@ -95,6 +95,10 @@ local.properties
 .loadpath
 .recommenders
 
+.classpath
+.project
+.factorypath
+
 # External tool builders
 .externalToolBuilders/
 
