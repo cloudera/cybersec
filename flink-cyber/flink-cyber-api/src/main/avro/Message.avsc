@@ -3,6 +3,7 @@
     "name": "Message",
     "namespace": "com.cloudera.cyber",
     "imports": "./ThreatIntelligence.avsc",
+    "javaAnnotation": "org.apache.flink.api.common.typeinfo.TypeInfo(com.cloudera.cyber.MessageTypeFactory.class)",
     "fields": [
         {
             "name": "id",
@@ -13,14 +14,42 @@
         {
             "name": "ts",
             "type": {
-                "type": "long",
-                "logicalType": "timestamp-millis"
+                "type": "long"
             }
         },
         {
             "name": "originalSource",
-            "type": "string",
-            "default": ""
+            "type": {
+                "name": "SignedSourceKey",
+                "namespace": "com.cloudera.cyber",
+                "type": "record",
+                "fields": [
+                    {
+                        "name": "topic",
+                        "type": "string"
+                    },
+                    {
+                        "name": "partition",
+                        "type": "int"
+                    },
+                    {
+                        "name": "offset",
+                        "type": "long"
+                    },
+                    {
+                        "name": "signature",
+                        "type": [
+                            "null",
+                            {
+                                "name": "sha1",
+                                "type": "fixed",
+                                "size": 128
+                            }
+                        ],
+                        "default": null
+                    }
+                ]
+            }
         },
         {
             "name": "message",
@@ -36,6 +65,7 @@
                 "null",
                 {
                     "type": "map",
+                    "javaAnnotation": "org.apache.flink.api.common.typeinfo.TypeInfo(org.apache.flink.api.common.typeinfo.MapTypeInfo.class)",
                     "values": {
                         "type": "array",
                         "items": "com.cloudera.cyber.ThreatIntelligence"
@@ -50,38 +80,50 @@
                 "null",
                 {
                     "type": "map",
+                    "javaAnnotation": "org.apache.flink.api.common.typeinfo.TypeInfo(org.apache.flink.api.common.typeinfo.MapTypeInfo.class)",
                     "values": [
                         "float",
+                        "double",
                         "string",
                         "int",
+                        "long",
                         "bytes",
                         "boolean",
                         {
                             "type": "array",
                             "items": {
                                 "type": "map",
+                                "javaAnnotation": "org.apache.flink.api.common.typeinfo.TypeInfo(org.apache.flink.api.common.typeinfo.MapTypeInfo.class)",
                                 "values": [
                                     "float",
+                                    "double",
                                     "string",
                                     "int",
+                                    "long",
                                     "bytes",
                                     "boolean",
                                     {
                                         "type": "map",
+                                        "javaAnnotation": "org.apache.flink.api.common.typeinfo.TypeInfo(org.apache.flink.api.common.typeinfo.MapTypeInfo.class)",
                                         "values": [
                                             "float",
+                                            "double",
                                             "string",
                                             "int",
+                                            "long",
                                             "bytes",
                                             "boolean",
                                             {
                                                 "type": "array",
                                                 "items": {
                                                     "type": "map",
+                                                    "javaAnnotation": "org.apache.flink.api.common.typeinfo.TypeInfo(org.apache.flink.api.common.typeinfo.MapTypeInfo.class)",
                                                     "values": [
                                                         "float",
+                                                        "double",
                                                         "string",
                                                         "int",
+                                                        "long",
                                                         "bytes",
                                                         "boolean"
                                                     ]
@@ -89,10 +131,13 @@
                                             },
                                             {
                                                 "type": "map",
+                                                "javaAnnotation": "org.apache.flink.api.common.typeinfo.TypeInfo(org.apache.flink.api.common.typeinfo.MapTypeInfo.class)",
                                                 "values": [
                                                     "float",
+                                                    "double",
                                                     "string",
                                                     "int",
+                                                    "long",
                                                     "bytes",
                                                     "boolean"
                                                 ]
@@ -104,20 +149,26 @@
                         },
                         {
                             "type": "map",
+                            "javaAnnotation": "org.apache.flink.api.common.typeinfo.TypeInfo(org.apache.flink.api.common.typeinfo.MapTypeInfo.class)",
                             "values": [
                                 "float",
+                                "double",
                                 "string",
                                 "int",
+                                "long",
                                 "bytes",
                                 "boolean",
                                 {
                                     "type": "array",
                                     "items": {
                                         "type": "map",
+                                        "javaAnnotation": "org.apache.flink.api.common.typeinfo.TypeInfo(org.apache.flink.api.common.typeinfo.MapTypeInfo.class)",
                                         "values": [
                                             "float",
+                                            "double",
                                             "string",
                                             "int",
+                                            "long",
                                             "bytes",
                                             "boolean"
                                         ]
@@ -125,10 +176,13 @@
                                 },
                                 {
                                     "type": "map",
+                                    "javaAnnotation": "org.apache.flink.api.common.typeinfo.TypeInfo(org.apache.flink.api.common.typeinfo.MapTypeInfo.class)",
                                     "values": [
                                         "float",
+                                        "double",
                                         "string",
                                         "int",
+                                        "long",
                                         "bytes",
                                         "boolean"
                                     ]
