@@ -1,14 +1,11 @@
 @namespace("com.cloudera.cyber")
 protocol EnrichmentLookupSources {
-  record EnrichmentEntry {
-    string key;
-    map<string> entries;
-  }
+  import schema EnrichmentEntry.avsc
 
   record EnrichmentLookupSource {
     string name;
   }
 
   array<EnrichmentLookupSource> listSources();
-  array<EnrichmentEntry> allEntries(EnrichmentLookupSource source);
+  array<com.cloudera.cyber.EnrichmentEntry> allEntries(EnrichmentLookupSource source);
 }
