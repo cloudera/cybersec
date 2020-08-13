@@ -11,7 +11,6 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
@@ -33,10 +32,8 @@ import static org.apache.flink.streaming.api.windowing.time.Time.milliseconds;
 public class FlinkUtils<T> {
     public static final long DEFAULT_MAX_LATENESS = 1000;
 
-    public static final String PARAMS_TOPIC_INPUT = "topic.input";
-    public static final String PARAMS_TOPIC_PATTERN = "topic.pattern";
     private static final String PARAMS_CHECKPOINT_INTERVAL = "checkpoint.interval.ms";
-    private static final int DEFAULT_CHECKPOINT_INTERVAL = 10000;
+    private static final int DEFAULT_CHECKPOINT_INTERVAL = 60000;
     private static final String PARAMS_PARALLELISM = "parallelism";
     private static final int DEFAULT_PARALLELISM = 2;
 
@@ -49,13 +46,14 @@ public class FlinkUtils<T> {
     public static void setupEnv(StreamExecutionEnvironment env, ParameterTool params) {
         env.enableCheckpointing(params.getInt(PARAMS_CHECKPOINT_INTERVAL, DEFAULT_CHECKPOINT_INTERVAL), CheckpointingMode.EXACTLY_ONCE);
         env.setParallelism(params.getInt(PARAMS_PARALLELISM, DEFAULT_PARALLELISM));
+        env.getConfig().setGlobalJobParameters(params);
     }
 
     public FlinkKafkaProducer<T> createKafkaSink(final String topic, final ParameterTool params) {
         Preconditions.checkNotNull(topic, "Must specific output topic");
 
         Properties kafkaProperties = readKafkaProperties(params, false);
-        log.info(String.format("Creating Kafka Sink for %s, using %s", topic, kafkaProperties));
+        log.info("Creating Kafka Sink for {}, using {}", topic, kafkaProperties);
         KafkaSerializationSchema<T> schema = ClouderaRegistryKafkaSerializationSchema
                 .<T>builder(topic)
                 .setRegistryAddress(params.getRequired(PARAM_REGISTRY_ADDRESS))
@@ -63,7 +61,7 @@ public class FlinkUtils<T> {
         return new FlinkKafkaProducer<T>(topic,
                 schema,
                 kafkaProperties,
-                FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
+                FlinkKafkaProducer.Semantic.AT_LEAST_ONCE);
     }
 
     public FlinkKafkaConsumer<T> createKafkaGenericSource(String topic, ParameterTool params, String groupId) {
@@ -125,13 +123,13 @@ public class FlinkUtils<T> {
     }
 
     public static DataStream<MessageToParse> createRawKafkaSource(StreamExecutionEnvironment env, ParameterTool params, String groupId) {
-        String inputTopic = params.get(PARAMS_TOPIC_INPUT,"");
-        String pattern = params.get(PARAMS_TOPIC_PATTERN, "");
+        String inputTopic = params.get(ConfigConstants.PARAMS_TOPIC_INPUT,"");
+        String pattern = params.get(ConfigConstants.PARAMS_TOPIC_PATTERN, "");
 
         log.info(String.format("createRawKafkaSource topic: '%s', pattern: '%s', good: %b", inputTopic, pattern, !(inputTopic.isEmpty() && pattern.isEmpty())));
 
         Preconditions.checkArgument(!(inputTopic.isEmpty() && pattern.isEmpty()),
-                String.format("Must specify at least one of %s or %s", PARAMS_TOPIC_INPUT, PARAMS_TOPIC_PATTERN));
+                String.format("Must specify at least one of %s or %s", ConfigConstants.PARAMS_TOPIC_INPUT, ConfigConstants.PARAMS_TOPIC_PATTERN));
 
         Properties kafkaProperties = readKafkaProperties(params, true);
 

@@ -13,9 +13,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>flink-enrichment-lookup</module>
+        <module>flink-enrichment-lookup-sql</module>
         <module>flink-enrichment-stix</module>
         <module>flink-enrichment-rules</module>
+        <module>flink-enrichment-lookup-raw</module>
     </modules>
 
 </project>

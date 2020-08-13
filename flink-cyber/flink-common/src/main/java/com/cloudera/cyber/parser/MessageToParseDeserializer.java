@@ -1,6 +1,5 @@
 package com.cloudera.cyber.parser;
 
-import com.cloudera.cyber.parser.MessageToParse;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 import org.apache.kafka.clients.consumer.ConsumerRecord;

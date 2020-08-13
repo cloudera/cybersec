@@ -11,7 +11,7 @@ public class MessageBoundedOutOfOrder extends BoundedOutOfOrdernessTimestampExtr
 
     @Override
     public long extractTimestamp(Message message) {
-        return message.getTs().getMillis();
+        return message.getTs();
     }
 }
 

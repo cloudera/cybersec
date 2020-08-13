@@ -49,7 +49,8 @@
         <lombok.version>1.18.12</lombok.version>
         <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
         <evo-inflector.version>1.2.2</evo-inflector.version>
-        <log4j2.version>2.13.0</log4j2.version>
+        <slf4j.version>1.7.15</slf4j.version>
+        <log4j2.version>2.12.1</log4j2.version>
         <commons-io.version>2.6</commons-io.version>
         <commons-lang3.version>3.9</commons-lang3.version>
         <commons-collections4.version>4.4</commons-collections4.version>
@@ -97,18 +98,6 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>1.7.7</version>
-                <scope>runtime</scope>
-            </dependency>
-            <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>1.2.17</version>
-                <scope>runtime</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-hateoas</artifactId>
                 <version>${spring-boot.version}</version>
@@ -127,19 +116,19 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
-                <version>1.7.7</version>
+                <version>${slf4j.version}</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>log4j</groupId>
                 <artifactId>log4j</artifactId>
-                <version>1.2.17</version>
+                <version>${log4j2.version}</version>
                 <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.30</version>
+                <version>${slf4j.version}</version>
             </dependency>
 
             <dependency>
