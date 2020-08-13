@@ -3,7 +3,6 @@ package com.cloudera.cyber.test;
 import com.cloudera.cyber.test.generator.FreemarkerImmediateGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import freemarker.template.TemplateException;
-import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -16,7 +15,6 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.hamcrest.collection.IsMapContaining.hasKey;
 import static org.hamcrest.text.MatchesPattern.matchesPattern;
 

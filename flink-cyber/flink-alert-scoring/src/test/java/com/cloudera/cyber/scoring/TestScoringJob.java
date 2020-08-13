@@ -1,8 +1,11 @@
 package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.SignedSourceKey;
+import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.flink.MessageBoundedOutOfOrder;
 import com.cloudera.cyber.rules.DynamicRuleCommandResult;
+import com.cloudera.cyber.sha1;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -72,7 +75,8 @@ public class TestScoringJob extends ScoringJob {
                 .setId(UUID.randomUUID().toString())
                 .setTs(org.joda.time.Instant.ofEpochMilli(100l).toDateTime())
                 .setExtensions(Collections.singletonMap("test", "test-value"))
-                .setOriginalSource("test-value").build());
+                .setOriginalSource(TestUtils.source("test", 0, 0))
+                .build());
 
         source.sendWatermark(100l);
         querySource.sendWatermark(100l);
@@ -101,7 +105,8 @@ public class TestScoringJob extends ScoringJob {
                 .setId(UUID.randomUUID().toString())
                 .setExtensions(Collections.singletonMap("test", "test-value2"))
                 .setTs(org.joda.time.Instant.ofEpochMilli(2000l).toDateTime())
-                .setOriginalSource("test-value2").build());
+                .setOriginalSource(TestUtils.source("test", 0, 0))
+                .build());
 
         ScoredMessage message1 = sink.poll(Duration.ofMillis(5000));
         assertThat("message got scored", message1.getScores(), nullValue());

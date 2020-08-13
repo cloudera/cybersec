@@ -10,11 +10,11 @@ import com.hortonworks.registries.schemaregistry.errors.SchemaNotFoundException;
 import com.hortonworks.registries.schemaregistry.serdes.avro.AvroSnapshotSerializer;
 import com.hortonworks.registries.schemaregistry.serdes.avro.AvroUtils;
 import org.apache.avro.Schema;
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.UUID;
 
@@ -33,8 +33,13 @@ public class TestMessageSerializer {
     private Message testMessage() {
         return Message.newBuilder()
                 .setId(UUID.randomUUID().toString())
-                .setTs(DateTime.now())
-                .setOriginalSource("test")
+                .setTs(Instant.now().toEpochMilli())
+                .setOriginalSource(SignedSourceKey.newBuilder()
+                        .setTopic("test")
+                        .setPartition(0)
+                        .setOffset(0)
+                        .setSignature(new sha1(new byte[128]))
+                        .build())
                 .setExtensions(Collections.singletonMap("test", "value"))
                 .build();
     }
@@ -42,7 +47,7 @@ public class TestMessageSerializer {
     private ThreatIntelligence testTi() {
         return ThreatIntelligence.newBuilder()
                 .setId(UUID.randomUUID().toString())
-                .setTs(DateTime.now())
+                .setTs(Instant.now().toEpochMilli())
                 .setFields(Collections.singletonMap("test", "value"))
                 .setObservableType("testType")
                 .setObservable("testObservable")
@@ -75,7 +80,7 @@ public class TestMessageSerializer {
                 .compatibility(SchemaCompatibility.FORWARD).build();
         byte[] serialize = avroSnapshotSerializer.serialize(test, schemaMetadata);
 
-        assertThat("Bytes are made", serialize.length, equalTo(71));
+        assertThat("Bytes are made", serialize.length, equalTo(203));
     }
 
     @Test
