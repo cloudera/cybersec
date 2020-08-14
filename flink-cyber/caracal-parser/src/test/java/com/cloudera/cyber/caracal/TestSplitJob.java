@@ -14,13 +14,18 @@ import org.apache.flink.test.util.ManualSource;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import static com.cloudera.cyber.flink.Utils.getResourceAsString;
+import static com.cloudera.cyber.parser.ParserJob.PARAM_PRIVATE_KEY;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,9 +39,14 @@ public class TestSplitJob extends SplitJob {
 
     @Test
     public void testSplitJob() throws Exception {
-        ParameterTool params = ParameterTool.fromMap(new HashMap<String, String>(){{
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "SunRsaSign");
+        gen.initialize(1024, new SecureRandom());
+        KeyPair pair = gen.generateKeyPair();
 
+        ParameterTool params = ParameterTool.fromMap(new HashMap<String,String>() {{
+            put(PARAM_PRIVATE_KEY, Base64.getEncoder().encodeToString(pair.getPrivate().getEncoded()));
         }});
+
         StreamExecutionEnvironment env = createPipeline(params);
         JobTester.startTest(env);
 
@@ -70,7 +80,6 @@ public class TestSplitJob extends SplitJob {
             assertThat("Message has timestamp", m.getTs(), allOf(notNullValue(), greaterThan(10000000L)));
             assertThat("Message has source", m.getExtensions(), hasKey("source"));
         });
-
     }
 
     private MessageToParse resourceToMessage(String topic, String file) {

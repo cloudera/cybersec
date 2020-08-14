@@ -1,19 +1,22 @@
 package com.cloudera.cyber.caracal;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.SignedSourceKey;
+import com.cloudera.cyber.sha1;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import lombok.NonNull;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.junit.Test;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.cloudera.cyber.parser.ParserJob.PARAM_PRIVATE_KEY;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.not;
@@ -59,7 +62,12 @@ public class ParserChainMapFunctionTest {
 
     @Test
     public void testParserChain() throws Exception {
-        ParameterTool params = ParameterTool.fromMap(new HashMap<String, String>(){{
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "SunRsaSign");
+        gen.initialize(1024, new SecureRandom());
+        KeyPair pair = gen.generateKeyPair();
+
+        ParameterTool params = ParameterTool.fromMap(new HashMap<String,String>() {{
+            put(PARAM_PRIVATE_KEY, Base64.getEncoder().encodeToString(pair.getPrivate().getEncoded()));
         }});
 
         @NonNull List<SplitConfig> splitConfig = JSONUtils.INSTANCE.getMapper().readValue(splitConfigString, new com.fasterxml.jackson.core.type.TypeReference<List<SplitConfig>>() {});
@@ -76,6 +84,12 @@ public class ParserChainMapFunctionTest {
                 .setId(UUID.randomUUID().toString())
                 .setTs(Instant.now().toEpochMilli())
                 .setSource("test")
+                .setOriginalSource(SignedSourceKey.newBuilder()
+                        .setTopic("topic")
+                        .setPartition(0)
+                        .setOffset(0)
+                        .setSignature(new sha1(new byte[128]))
+                        .build())
                 .setExtensions(createFields()).build();
     }
 
