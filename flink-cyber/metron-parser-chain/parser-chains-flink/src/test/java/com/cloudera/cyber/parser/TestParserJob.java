@@ -12,8 +12,12 @@ import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
 import org.junit.Test;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.TimeZone;
 
@@ -110,8 +114,13 @@ public class TestParserJob extends ParserJob {
 
     @Test
     public void testParser() throws Exception {
+        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "SunRsaSign");
+        gen.initialize(1024, new SecureRandom());
+        KeyPair pair = gen.generateKeyPair();
+
         ParameterTool params = ParameterTool.fromMap(new HashMap<String,String>() {{
             put(PARAM_CHAIN_CONFIG,chainWithRouting);
+            put(PARAM_PRIVATE_KEY, Base64.getEncoder().encodeToString(pair.getPrivate().getEncoded()));
         }});
 
         StreamExecutionEnvironment env = createPipeline(params);
