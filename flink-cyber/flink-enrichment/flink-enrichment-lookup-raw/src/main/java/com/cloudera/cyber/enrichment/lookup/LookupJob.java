@@ -7,6 +7,7 @@ import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentField;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
 import com.cloudera.cyber.flink.CyberJob;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.state.ReadOnlyBroadcastState;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -34,6 +35,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 
+@Slf4j
 public abstract class LookupJob implements CyberJob {
 
     protected static final String PARAMS_CONFIG_FILE = "config.file";
@@ -48,6 +50,7 @@ public abstract class LookupJob implements CyberJob {
                 .keyBy(e -> EnrichmentKey.builder()
                         .type(e.getType())
                         .key(e.getKey())
+                        .build()
                 );
 
         byte[] configJson = Files.readAllBytes(Paths.get(params.getRequired(PARAMS_CONFIG_FILE)));
@@ -111,16 +114,21 @@ public abstract class LookupJob implements CyberJob {
                                 @Override
                                 public void processElement(Message message, ReadOnlyContext readOnlyContext, Collector<Message> collector) throws Exception {
                                     ReadOnlyBroadcastState<String, Map<String, String>> bc = readOnlyContext.getBroadcastState(broadcastDescriptors.get(type));
-
-                                    HashMap<String, String> hm = new HashMap<>();
-                                    for (String field : fields) {
-                                        hm.putAll(bc.get(field).entrySet().stream().collect(Collectors.toMap(
-                                                k -> field + "_" + k.getKey(),
-                                                v -> v.getValue()
-                                        )));
+                                    if (bc != null) {
+                                        HashMap<String, String> hm = new HashMap<>();
+                                        for (String field : fields) {
+                                            Object value = message.getExtensions().get(field);
+                                            if (value != null && bc.contains(value.toString())){
+                                                hm.putAll(bc.get(value.toString()).entrySet().stream().collect(Collectors.toMap(
+                                                        k -> field + "_" + k.getKey(),
+                                                        v -> v.getValue()
+                                                )));
+                                            }
+                                        }
+                                        collector.collect(MessageUtils.addFields(message, hm));
+                                    } else {
+                                        log.warn("Failed to find broadcast lookup for %s", type);
                                     }
-
-                                    collector.collect(MessageUtils.addFields(message, hm));
                                 }
 
                                 @Override
