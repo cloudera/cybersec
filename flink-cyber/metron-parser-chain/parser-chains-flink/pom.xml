@@ -13,7 +13,6 @@
     <name>Parser Chains Flink</name>
 
     <dependencies>
-
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
@@ -49,23 +48,7 @@
             <artifactId>flink-test-utils_${scala.binary.version}</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-runtime_${scala.binary.version}</artifactId>
-            <scope>test</scope>
-            <classifier>tests</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
-            <scope>test</scope>
-            <classifier>tests</classifier>
-        </dependency>
 
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-sequence-file</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-parquet_${scala.binary.version}</artifactId>
@@ -87,6 +70,12 @@
         <dependency>
             <groupId>org.adrianwalker</groupId>
             <artifactId>multiline-string</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
 
