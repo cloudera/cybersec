@@ -72,7 +72,6 @@ public class SplitJobKafka extends SplitJob {
 
         return env.addSource(source)
                 .name("Config Kafka Feed").uid("config.source.kafka").setParallelism(1).setMaxParallelism(1)
-
                 .map(new SplitConfigJsonParserMap())
                 .name("Config Source").uid("config.source").setMaxParallelism(1).setParallelism(1);
 
@@ -100,7 +99,8 @@ public class SplitJobKafka extends SplitJob {
                 .build();
 
         // TODO - add the message id
-        // TOOD - add filtering (might not care about all raws)
+        // TODO - add filtering (might not care about all raws)
+        // TODO - change the factory to support compression
         StreamingFileSink<MessageToParse> sink = StreamingFileSink
                 .forBulkFormat(path, ParquetAvroWriters.forReflectRecord(MessageToParse.class))
                 .withRollingPolicy(OnCheckpointRollingPolicy.build())
