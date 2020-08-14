@@ -7,18 +7,21 @@ import com.cloudera.cyber.rules.engines.JavascriptEngineBuilder;
 import com.cloudera.cyber.rules.engines.RuleEngine;
 import com.cloudera.cyber.sha1;
 import com.google.common.collect.Streams;
-import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
-import org.joda.time.Instant;
+import org.apache.flink.util.Preconditions;
 
 import javax.script.ScriptException;
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Signature;
 import java.util.*;
@@ -27,52 +30,40 @@ import java.util.stream.Collectors;
 /**
  * Splits up JSON array based on a configured path and dupes 'header' in to multiple messages
  */
+@Slf4j
 public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse, Message> {
-    private final String topic;
-    private final JsonPath headerPath;
-    private final String tsField;
-    private final TimestampSource timestampSource;
-
-    private transient MapFunction<String, Long> timestampFunction;
-    private transient final RuleEngine engine;
-
+    @NonNull
+    private final SplitConfig config;
     @NonNull
     private final PrivateKey signKey;
 
-    private transient Signature signature;
+    private transient String topic;
+    private transient JsonPath headerPath;
+    private transient String tsField;
+    private transient TimestampSource timestampSource;
 
+    private transient MapFunction<String, Long> timestampFunction;
+    private transient RuleEngine engine;
+
+    private transient Signature signature;
 
     public enum TimestampSource {
         HEADER, SPLIT
     }
     private JsonPath jsonPath;
 
-    private static final Configuration STRICT_PROVIDER_CONFIGURATION = Configuration.builder().jsonProvider(new JacksonJsonProvider()).build();
+    private static final com.jayway.jsonpath.Configuration STRICT_PROVIDER_CONFIGURATION =
+            com.jayway.jsonpath.Configuration.builder().jsonProvider(new JacksonJsonProvider()).build();
 
     public SplittingFlatMapFunction(SplitConfig config, PrivateKey signKey) {
-        this.topic = config.getTopic();
-        this.jsonPath = JsonPath.compile(config.getSplitPath());
-        this.headerPath = JsonPath.compile(config.getHeaderPath());
-        this.tsField = config.getTimestampField();
-        this.timestampSource = config.getTimestampSource();
+        Preconditions.checkNotNull(signKey, "Must supply signing key");
+        Preconditions.checkNotNull(config, "Must supply split config");
+
+        this.config = config;
         this.signKey = signKey;
-
-
-        if(config.getTimestampFunction() != null & !config.getTimestampFunction().isEmpty()) {
-            this.engine = new JavascriptEngineBuilder()
-                    .script("")
-                    .build();
-
-            this.setTimestampFunctionn(config.getTimestampFunction());
-        } else {
-            this.engine = null;
-            this.timestampFunction = (String s) -> {
-                return Long.valueOf(s);
-            };
-        }
     }
 
-    private void setTimestampFunctionn(String timestampFunction) {
+    private void setTimestampFunction(String timestampFunction) {
         String fn = UUID.randomUUID().toString().replace("-", "");
         try {
             this.engine.eval("function transform" + fn + "(ts) { return " + timestampFunction + "}");
@@ -86,11 +77,35 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
     }
 
     @Override
-    public void open(org.apache.flink.configuration.Configuration parameters) throws Exception {
+    public void open(Configuration parameters) throws Exception {
         super.open(parameters);
 
-        signature = Signature.getInstance("SHA1WithRSA");
-        signature.initSign(signKey);
+        this.topic = config.getTopic();
+        this.jsonPath = JsonPath.compile(config.getSplitPath());
+        this.headerPath = JsonPath.compile(config.getHeaderPath());
+        this.tsField = config.getTimestampField();
+        this.timestampSource = config.getTimestampSource();
+
+        try {
+            this.signature = Signature.getInstance("SHA1WithRSA");
+            this.signature.initSign(signKey);
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            log.error("Failed to initialise signing", e);
+        }
+
+        if(config.getTimestampFunction() != null & !config.getTimestampFunction().isEmpty()) {
+            this.engine = new JavascriptEngineBuilder()
+                    .script("")
+                    .build();
+
+            this.setTimestampFunction(config.getTimestampFunction());
+        } else {
+            this.engine = null;
+            this.timestampFunction = (String s) -> {
+                return Long.valueOf(s);
+            };
+        }
+
     }
 
     @Override
