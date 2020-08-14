@@ -73,7 +73,7 @@ public class TestScoringJob extends ScoringJob {
         // send a message and get score
         sendRecord(Message.newBuilder()
                 .setId(UUID.randomUUID().toString())
-                .setTs(org.joda.time.Instant.ofEpochMilli(100l).toDateTime())
+                .setTs(100l)
                 .setExtensions(Collections.singletonMap("test", "test-value"))
                 .setOriginalSource(TestUtils.source("test", 0, 0))
                 .build());
@@ -104,7 +104,7 @@ public class TestScoringJob extends ScoringJob {
         sendRecord(Message.newBuilder()
                 .setId(UUID.randomUUID().toString())
                 .setExtensions(Collections.singletonMap("test", "test-value2"))
-                .setTs(org.joda.time.Instant.ofEpochMilli(2000l).toDateTime())
+                .setTs(2000l)
                 .setOriginalSource(TestUtils.source("test", 0, 0))
                 .build());
 
@@ -116,7 +116,7 @@ public class TestScoringJob extends ScoringJob {
     }
 
     private void sendRecord(Message d) {
-        this.source.sendRecord(d, d.getTs().getMillis());
+        this.source.sendRecord(d, d.getTs());
         this.recordLog.add(d);
     }
 

@@ -25,6 +25,6 @@ public class ScoredMessage implements IdentifiedMessage {
 
     @Override
     public long getTs() {
-        return message.getTs().getMillis();
+        return message.getTs();
     }
 }
