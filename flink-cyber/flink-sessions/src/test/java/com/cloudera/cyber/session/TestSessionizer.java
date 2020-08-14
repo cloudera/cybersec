@@ -13,7 +13,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
-import org.joda.time.Instant;
 import org.junit.Test;
 
 import java.time.Duration;
@@ -38,7 +37,7 @@ public class TestSessionizer extends SessionJob {
 
         JobTester.startTest(createPipeline(ParameterTool.fromMap(new HashMap<String, String>() {{
             put(PARAM_SESSION_KEY,"user");
-            put(PARAM_SESSION_TIMEOUT,"10000");
+            put(PARAM_SESSION_TIMEOUT,"7000");
             put(PARAM_SESSION_LIMIT,"20000");
         }})));
 
@@ -71,10 +70,12 @@ public class TestSessionizer extends SessionJob {
 
         source.sendWatermark(50000L);
 
+        JobTester.stopTest();
+
         List<GroupedMessage> output = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             try{
-                output.add(sink.poll(Duration.ofMillis(30000)));
+                output.add(sink.poll(Duration.ofMillis(1000)));
             } catch(TimeoutException e){
                 break;
             }
@@ -83,7 +84,7 @@ public class TestSessionizer extends SessionJob {
 
         assertThat("Output has all sessions", output, hasSize(2));
 
-        JobTester.stopTest();
+
     }
 
     private void checkResult(GroupedMessage groupedMessage) {
@@ -100,8 +101,10 @@ public class TestSessionizer extends SessionJob {
                 .setTopic("test")
                 .setPartition(0)
                 .setOffset(offset++)
-                .setSignature(new sha1(String.valueOf(offset).getBytes()))
+                .setSignature(new sha1(new byte[128]))
                 .build());
+        builder.setMessage("Test Message");
+        builder.setSource("test");
         Message message = builder.build();
         source.sendRecord(message, message.getTs());
         if (watermark) source.sendWatermark(message.getTs());

@@ -1,7 +1,8 @@
 package com.cloudera.cyber.rules.engines;
 
 import com.cloudera.cyber.Message;
-import org.joda.time.DateTime;
+import com.cloudera.cyber.SignedSourceKey;
+import com.cloudera.cyber.sha1;
 import org.junit.Test;
 
 import javax.script.ScriptException;
@@ -26,13 +27,13 @@ public class TestJavascriptEngine {
         sleep(10);
 
         Map<String, Object> results = engine.feed(
-                Message.newBuilder()
+                createMessage(Message.newBuilder()
                         .setId(UUID.randomUUID().toString())
                         .setTs(Instant.now().toEpochMilli())
                         .setExtensions(new HashMap<String, Object>() {{
                             put("a", 1.0);
                             put("b", 2.0);
-                        }}).build()
+                        }}))
         );
 
         assertThat("Results are produced", results, hasKey("score"));
@@ -57,13 +58,13 @@ public class TestJavascriptEngine {
         sleep(10);
 
         Map<String, Object> results = engine.feed(
-                Message.newBuilder()
+                createMessage(Message.newBuilder()
                         .setId(UUID.randomUUID().toString())
                         .setTs(Instant.now().toEpochMilli())
                         .setExtensions(new HashMap<String, Object>() {{
-                    put("local", "192.168.0.1");
-                    put("remote", "8.8.8.8");
-                }}).build()
+                            put("local", "192.168.0.1");
+                            put("remote", "8.8.8.8");
+                        }}))
         );
 
         assertThat("Results are produced", results, hasKey("local"));
@@ -80,13 +81,13 @@ public class TestJavascriptEngine {
         sleep(10);
 
         Map<String, Object> results = engine.feed(
-                Message.newBuilder()
+                createMessage(Message.newBuilder()
                         .setId(UUID.randomUUID().toString())
                         .setTs(Instant.now().toEpochMilli())
                         .setExtensions(new HashMap<String, Object>() {{
                             put("local", "192.168.0.1");
                             put("remote", "8.8.8.8");
-                        }}).build()
+                        }}))
         );
 
         assertThat("Results are produced", results, hasKey("local"));
@@ -102,14 +103,26 @@ public class TestJavascriptEngine {
 
         for (int i = 0; i < 3; i++) {
             Map<String, Object> results = engine.feed(
-                    Message.newBuilder()
+                    createMessage(Message.newBuilder()
                             .setId(UUID.randomUUID().toString())
                             .setTs(Instant.now().toEpochMilli())
                             .setExtensions(new HashMap<String, Object>() {{
                                 put("local", "192.168.0.1");
-
-                            }}).build()
+                            }}))
             );
         }
+    }
+
+    private Message createMessage(Message.Builder builder) {
+        return builder
+                .setMessage("")
+                .setSource("test")
+                .setOriginalSource(SignedSourceKey.newBuilder()
+                        .setTopic("test")
+                        .setPartition(0)
+                        .setOffset(0)
+                        .setSignature(new sha1(new byte[128]))
+                        .build())
+                .build();
     }
 }
