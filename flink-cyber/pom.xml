@@ -13,6 +13,7 @@
         <module>flink-cyber-api</module>
         <module>cyber-functions</module>
         <module>flink-common</module>
+        <module>flink-indexing</module>
         <module>flink-enrichment</module>
         <module>flink-sessions</module>
         <module>flink-dedupe</module>
@@ -22,13 +23,13 @@
         <module>flink-rules</module>
         <module>flink-alert-scoring-api</module>
         <module>flink-alert-scoring</module>
-        <module>flink-web</module>
-        <module>taxii-service</module>
         <module>metron-parser-chain</module><!--
         <module>nifi-parser-bundle</module>-->
         <module>caracal-generator</module>
         <module>caracal-parser</module>
-        <module>kafka-sample</module>
+        <!--<module>taxii-service</module>-->
+        <!--<module>flink-web</module>-->
+
     </modules>
 
     <properties>
@@ -44,6 +45,10 @@
         <nifi.version>1.11.4</nifi.version>
         <jackson.version>2.11.0</jackson.version>
         <smm.intercepter.version>2.1.0.7.1.2.0-96</smm.intercepter.version>
+        <flink.format.parquet.version>1.10.0</flink.format.parquet.version>
+        <slf4j.version>1.7.15</slf4j.version>
+        <log4j.version>2.12.1</log4j.version>
+        <testcontainers.version>1.14.3</testcontainers.version>
     </properties>
 
     <repositories>
@@ -104,6 +109,49 @@
 
             <dependency>
                 <groupId>org.apache.flink</groupId>
+                <artifactId>flink-connector-filesystem_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-sequence-file</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-avro</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-json</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-csv</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-orc_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-parquet_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>org.apache.flink</groupId>
                 <artifactId>flink-avro-cloudera-registry</artifactId>
                 <version>${flink.version}</version>
                 <exclusions>
@@ -127,9 +175,10 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.flink</groupId>
-                <artifactId>flink-table-planner_${scala.binary.version}</artifactId>
+                <artifactId>flink-table-api-java-bridge_${scala.binary.version}</artifactId>
                 <version>${flink.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
@@ -153,6 +202,16 @@
                 <groupId>org.apache.avro</groupId>
                 <artifactId>avro</artifactId>
                 <version>${avro.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.hadoop</groupId>
+                        <artifactId>hadoop-client</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>it.unimi.dsi</groupId>
+                        <artifactId>fastutil</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -226,16 +285,35 @@
             <!-- Logging and Metrics -->
             <dependency>
                 <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-log4j12</artifactId>
-                <version>1.7.7</version>
-                <scope>runtime</scope>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
             </dependency>
+
             <dependency>
-                <groupId>log4j</groupId>
-                <artifactId>log4j</artifactId>
-                <version>1.2.17</version>
-                <scope>runtime</scope>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j-impl</artifactId>
+                <version>${log4j.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <!-- API bridge between log4j 1 and 2 -->
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-1.2-api</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-log4j-appender</artifactId>

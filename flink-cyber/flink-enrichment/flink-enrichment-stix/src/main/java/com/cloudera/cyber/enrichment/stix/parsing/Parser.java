@@ -7,7 +7,6 @@ import com.google.common.base.Splitter;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
-import org.joda.time.DateTime;
 import org.mitre.cybox.common_2.BaseObjectPropertyType;
 import org.mitre.cybox.common_2.ConditionApplicationEnum;
 import org.mitre.cybox.common_2.ConditionTypeEnum;
@@ -53,7 +52,7 @@ public class Parser extends RichFlatMapFunction<String, ParsedThreatIntelligence
                     .flatMap(p -> {
                         ObjectTypeHandler handler = ObjectTypeHandlers.getHandlerByInstance(p);
                         Stream<ThreatIntelligence.Builder> extract = handler.extract(p, config.toMap());
-                        return extract.map(b -> b.setTs(DateTime.now()));
+                        return extract.map(b -> b.setTs(Instant.now().toEpochMilli()));
                     })
                     .forEach(t -> collector.collect(
                             ParsedThreatIntelligence.newBuilder()
@@ -78,7 +77,7 @@ public class Parser extends RichFlatMapFunction<String, ParsedThreatIntelligence
 
                         return out.map(t -> t
                                 .setStixReference(indicator.getId().toString())
-                                .setTs(org.joda.time.Instant.ofEpochMilli(timestamp.toEpochMilli()).toDateTime()));
+                                .setTs(timestamp.toEpochMilli()));
                     })
                     .filter(Objects::nonNull)
                     .forEach(t -> collector.collect(

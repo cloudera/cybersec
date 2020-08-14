@@ -26,8 +26,8 @@ public class SumAndMaxTs implements AggregateFunction<DedupeMessage, SumAndMax, 
         }
         return SumAndMax.builder()
                 .fields(dedupeMessage.getFields())
-                .maxTs(Math.max(dedupeMessage.getTs().getMillis(), sumAndMax.getMaxTs()))
-                .minTs(Math.min(dedupeMessage.getTs().getMillis(), sumAndMax.getMinTs()))
+                .maxTs(Math.max(dedupeMessage.getTs(), sumAndMax.getMaxTs()))
+                .minTs(Math.min(dedupeMessage.getTs(), sumAndMax.getMinTs()))
                 .sum(dedupeMessage.getCount() + sumAndMax.getSum())
                 .build();
     }
@@ -37,8 +37,8 @@ public class SumAndMaxTs implements AggregateFunction<DedupeMessage, SumAndMax, 
         DedupeMessage result = DedupeMessage.newBuilder()
                 .setId(UUID.randomUUID().toString())
                 .setFields(sumAndMax.getFields())
-                .setTs(Instant.ofEpochMilli(sumAndMax.getMaxTs()).toDateTime())
-                .setStartTs(Instant.ofEpochMilli(sumAndMax.getMinTs()).toDateTime())
+                .setTs(sumAndMax.getMaxTs())
+                .setStartTs(sumAndMax.getMinTs())
                 .setCount(sumAndMax.getSum())
                 .build();
         return result;

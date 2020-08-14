@@ -159,28 +159,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.avro</groupId>
-                <artifactId>avro-maven-plugin</artifactId>
-                <version>${avro.version}</version>
-                <configuration>
-                    <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
-                    <stringType>String</stringType>
-                    <createSetters>true</createSetters>
-                    <imports>
-                        <import>${project.basedir}/src/main/avro/ThreatIntelligence.avsc</import>
-                        <import>${project.basedir}/src/main/avro/ParsedThreatIntelligence.avsc</import>
-                    </imports>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>schema</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
