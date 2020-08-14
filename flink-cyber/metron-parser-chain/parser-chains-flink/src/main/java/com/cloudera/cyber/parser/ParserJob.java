@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +23,8 @@ import java.util.Map;
 public abstract class ParserJob {
 
     protected static final String PARAM_CHAIN_CONFIG = "chain";
-    private static final String PARAM_PRIVATE_KEY_FILE = "key.private.file";
+    public static final String PARAM_PRIVATE_KEY_FILE = "key.private.file";
+    public static final String PARAM_PRIVATE_KEY = "key.private.base64";
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -32,12 +34,15 @@ public abstract class ParserJob {
 
         ParserChainMap chainSchema = JSONUtils.INSTANCE.load(chainConfig, ParserChainMap.class);
 
-        Map<String,String> topicMap = new HashMap<>();
+        Map<String, String> topicMap = new HashMap<>();
 
         DataStream<MessageToParse> source = createSource(env, params);
 
 
-        byte[] privKeyBytes = Files.readAllBytes(Paths.get(params.getRequired(PARAM_PRIVATE_KEY_FILE)));
+        byte[] privKeyBytes = params.has(PARAM_PRIVATE_KEY_FILE) ?
+                Files.readAllBytes(Paths.get(params.get(PARAM_PRIVATE_KEY_FILE))) :
+                Base64.getDecoder().decode(params.getRequired(PARAM_PRIVATE_KEY));
+
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privKeyBytes);
         PrivateKey privateKey = keyFactory.generatePrivate(privSpec);
@@ -53,6 +58,8 @@ public abstract class ParserJob {
     }
 
     protected abstract void writeResults(ParameterTool params, DataStream<Message> results);
+
     protected abstract void writeOriginalsResults(ParameterTool params, DataStream<MessageToParse> results);
+
     protected abstract DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params);
 }
