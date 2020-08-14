@@ -21,9 +21,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.cloudera.cyber.parser.ParserJob.PARAM_PRIVATE_KEY;
+import static com.cloudera.cyber.parser.ParserJob.PARAM_PRIVATE_KEY_FILE;
 
 @Slf4j
 public abstract class SplitJob {
@@ -45,7 +49,14 @@ public abstract class SplitJob {
         BroadcastStream<SplitConfig> configStream = createConfigSource(env, params)
                         .broadcast(Descriptors.broadcastState);
 
-        PrivateKey signKey = loadKey(params.getRequired(PARAMS_SIGN_KEY_PRIVATE_FILE));
+        byte[] privKeyBytes = params.has(PARAM_PRIVATE_KEY_FILE) ?
+                Files.readAllBytes(Paths.get(params.get(PARAM_PRIVATE_KEY_FILE))) :
+                Base64.getDecoder().decode(params.getRequired(PARAM_PRIVATE_KEY));
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privKeyBytes);
+        PrivateKey signKey = keyFactory.generatePrivate(privSpec);
+
         SingleOutputStreamOperator<Message> results = source
                 .keyBy(k -> k.getTopic())
                 .connect(configStream)
@@ -59,15 +70,6 @@ public abstract class SplitJob {
 
         return env;
     }
-
-    private PrivateKey loadKey(String filename) throws NoSuchAlgorithmException, IOException, InvalidKeySpecException {
-        byte[] keyBytes = Files.readAllBytes(Paths.get(filename));
-
-        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        return kf.generatePrivate(spec);
-    }
-
 
     protected static class Descriptors {
         public static MapStateDescriptor<String, SplitConfig> broadcastState = new MapStateDescriptor<String, SplitConfig>("configs", String.class, SplitConfig.class);
