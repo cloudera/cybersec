@@ -2,7 +2,6 @@ package com.cloudera.cyber.parser;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.SignedSourceKey;
-import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.sha1;
 import com.cloudera.parserchains.core.*;
 import com.cloudera.parserchains.core.catalog.ClassIndexParserCatalog;
@@ -12,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
-import org.joda.time.Instant;
 
 import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
