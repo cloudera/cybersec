@@ -67,7 +67,7 @@ public class TestSplitJob extends SplitJob {
         assertThat("All results found", results, hasSize(expectedMessages));
 
         results.stream().forEach(m -> {
-            assertThat("Message has timestamp", m.getTs().getMillis(), allOf(notNullValue(), greaterThan(10000000L)));
+            assertThat("Message has timestamp", m.getTs(), allOf(notNullValue(), greaterThan(10000000L)));
             assertThat("Message has source", m.getExtensions(), hasKey("source"));
         });
 

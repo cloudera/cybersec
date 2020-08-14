@@ -5,9 +5,9 @@ import com.cloudera.parserchains.core.utils.JSONUtils;
 import lombok.NonNull;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.joda.time.DateTime;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +74,7 @@ public class ParserChainMapFunctionTest {
     private Message createInput() {
         return Message.newBuilder()
                 .setId(UUID.randomUUID().toString())
-                .setTs(DateTime.now())
+                .setTs(Instant.now().toEpochMilli())
                 .setSource("test")
                 .setExtensions(createFields()).build();
     }
