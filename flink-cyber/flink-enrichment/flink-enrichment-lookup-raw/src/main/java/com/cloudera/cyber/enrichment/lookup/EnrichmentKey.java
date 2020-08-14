@@ -10,5 +10,4 @@ import java.io.Serializable;
 public class EnrichmentKey implements Serializable  {
     private String type;
     private String key;
-
 }
