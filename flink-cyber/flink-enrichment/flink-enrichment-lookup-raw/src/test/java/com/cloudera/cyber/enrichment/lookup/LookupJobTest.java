@@ -12,15 +12,18 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
+import org.hamcrest.collection.IsMapWithSize;
 import org.junit.Test;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
 
+import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.collection.IsMapWithSize.aMapWithSize;
 
 public class LookupJobTest extends LookupJob {
 
@@ -47,13 +50,13 @@ public class LookupJobTest extends LookupJob {
             put("location", "office");
         }});
 
-        // make up some enrichable messages
-        sendMessage("one enrichment", Collections.singletonMap("ip_src_addr", "10.0.0.1"), 100);
-        sendMessage("enrichment on two fields", new HashMap<String, Object>(2) {{
+        // make up some enrichable messages, use the message attr to express expected field count after enrichment
+        sendMessage("2", Collections.singletonMap("ip_src_addr", "10.0.0.1"), 100);
+        sendMessage("4", new HashMap<String, Object>(2) {{
             put("ip_src_addr", "10.0.0.1");
             put("ip_dst_addr", "192.168.0.1");
         }}, 150);
-        sendMessage("no enrichment hit", Collections.singletonMap("ip_src_addr", "10.0.0.2"), 200);
+        sendMessage("1", Collections.singletonMap("ip_src_addr", "10.0.0.2"), 200);
 
         JobTester.stopTest();
 
@@ -64,13 +67,14 @@ public class LookupJobTest extends LookupJob {
             try {
                 Message message = sink.poll(Duration.ofMillis(100));
                 assertThat("message is not null", message, notNullValue());
+                assertThat("Message had the correct field count", message.getExtensions(), aMapWithSize(Integer.valueOf(message.getMessage())));
                 results.add(message);
             } catch (TimeoutException e) {
                 running = false;
             }
         }
         assertThat("All message received", results, hasSize(3));
-
+        assertThat("Message has been enriched", results, hasSize(3));
     }
 
     @Override
