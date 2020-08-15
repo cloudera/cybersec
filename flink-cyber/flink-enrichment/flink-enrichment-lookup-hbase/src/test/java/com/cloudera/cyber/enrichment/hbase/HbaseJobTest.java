@@ -30,6 +30,11 @@ public class HbaseJobTest extends HbaseJob {
     }
 
     @Override
+    protected void writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentEntry> enrichmentSource) {
+        // usually this would send to hbase
+    }
+
+    @Override
     protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> results) {
         results.addSink(sink);
     }
