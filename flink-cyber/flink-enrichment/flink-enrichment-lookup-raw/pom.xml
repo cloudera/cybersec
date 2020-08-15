@@ -11,11 +11,14 @@
 
     <artifactId>flink-enrichment-lookup-raw</artifactId>
 
-
     <dependencies>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-api-java-bridge_2.11</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -34,6 +37,7 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-avro-cloudera-registry</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-cyber-api</artifactId>
@@ -47,12 +51,8 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-table-api-java-bridge_2.11</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.cloudera.cyber</groupId>
-            <artifactId>flink-enrichment-lookup</artifactId>
+            <artifactId>flink-enrichment-lookup-common</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
