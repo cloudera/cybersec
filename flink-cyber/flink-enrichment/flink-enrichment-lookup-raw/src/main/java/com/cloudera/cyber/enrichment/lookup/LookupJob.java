@@ -23,6 +23,7 @@ import org.apache.flink.util.Collector;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -32,13 +33,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.cloudera.cyber.enrichment.ConfigUtils.*;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
 
 @Slf4j
 public abstract class LookupJob implements CyberJob {
-
-    protected static final String PARAMS_CONFIG_FILE = "config.file";
 
     @Override
     public StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
@@ -54,20 +54,8 @@ public abstract class LookupJob implements CyberJob {
                 );
 
         byte[] configJson = Files.readAllBytes(Paths.get(params.getRequired(PARAMS_CONFIG_FILE)));
-        List<EnrichmentConfig> allConfigs = new ObjectMapper().readValue(
-                configJson,
-                new TypeReference<List<EnrichmentConfig>>() {
-                });
-
-        List<EnrichmentConfig> configs = allConfigs.stream()
-                .filter(f -> f.getKind() == EnrichmentKind.LOCAL)
-                .collect(Collectors.toList());
-
-        // store the enrichments in a keyed broadcast state
-
-        // make a broadcast for each enrichmentType
-
-        Set<String> enrichmentTypes = configs.stream().flatMap(s -> s.getFields().stream().map(m -> m.getEnrichmentType())).collect(Collectors.toSet());
+        Map<String, List<String>> typeToFields = typeToFields(allConfigs(configJson), EnrichmentKind.LOCAL);
+        Set<String> enrichmentTypes = enrichmentTypes(allConfigs(configJson), EnrichmentKind.LOCAL);
 
         Map<String, MapStateDescriptor<String, Map<String, String>>> broadcastDescriptors = enrichmentTypes.stream().collect(Collectors.toMap(
                 v -> v,
@@ -80,32 +68,13 @@ public abstract class LookupJob implements CyberJob {
                 )
                 .collect(Collectors.toMap(v -> v.f0, k -> k.f1));
 
-        DataStream<Message> messages = createSource(env, params);
-
-
-        Map<String, List<String>> typeToFields = configs.stream()
-                .filter(c -> c.getKind() == EnrichmentKind.LOCAL)
-                .flatMap(c -> c.getFields().stream()
-                        .collect(groupingBy(EnrichmentField::getEnrichmentType,
-                                mapping(EnrichmentField::getName, Collectors.toList())))
-                        .entrySet().stream()
-                )
-                .collect(Collectors.toMap(k -> k.getKey(), v -> v.getValue(), (a, b) ->
-                        Stream.of(a, b)
-                                .flatMap(x -> x.stream())
-                                .collect(Collectors.toList())
-                ));
-        ;
-
-        //
-
         /**
          * Apply all the configs as a series of broadcast connections that the messages pass through
          *
          * Note this is done as a reduction to ensure a single pipeline graph is built and a broadcast processor
          * is created for each relevant message key
          */
-        DataStream<Message> pipeline = typeToFields.entrySet().stream().reduce(messages,
+        DataStream<Message> pipeline = typeToFields.entrySet().stream().reduce(source,
                 (m, entry) -> {
                     List<String> fields = entry.getValue();
                     String type = entry.getKey();
@@ -118,7 +87,7 @@ public abstract class LookupJob implements CyberJob {
                                         HashMap<String, String> hm = new HashMap<>();
                                         for (String field : fields) {
                                             Object value = message.getExtensions().get(field);
-                                            if (value != null && bc.contains(value.toString())){
+                                            if (value != null && bc.contains(value.toString())) {
                                                 hm.putAll(bc.get(value.toString()).entrySet().stream().collect(Collectors.toMap(
                                                         k -> field + "_" + k.getKey(),
                                                         v -> v.getValue()
@@ -140,7 +109,7 @@ public abstract class LookupJob implements CyberJob {
                                                     enrichmentEntry.getEntries()
                                             );
                                 }
-                            });
+                            }).name("BroadcastProcess: " + type).uid("broadcast-process-" + type);
                 }, (a, b) -> a); // TODO - does the combiner really make sense?
 
         writeResults(env, params, pipeline);
