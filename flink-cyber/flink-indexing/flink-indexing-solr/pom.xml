@@ -11,6 +11,30 @@
 
     <artifactId>flink-indexing-solr</artifactId>
 
+    <properties>
+        <main.class>com.cloudera.cyber.indexer.SolrJobKafka</main.class>
+        <java.version>1.8</java.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-cyber-api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
+        </dependency>
+    </dependencies>
 
 
     <build>
