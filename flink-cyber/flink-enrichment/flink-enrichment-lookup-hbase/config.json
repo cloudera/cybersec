@@ -1,0 +1,25 @@
+[
+  {
+    "source": "test",
+    "kind": "LOCAL",
+    "fields": [
+      {
+        "name": "ip_src_addr",
+        "enrichmentType": "ip_whitelist"
+      },
+      {
+        "name": "ip_dst_addr",
+        "enrichmentType": "ip_whitelist"
+      }
+    ]
+  }, {
+    "source": "test",
+    "kind": "HBASE",
+    "fields": [
+      {
+        "name": "hostname",
+        "enrichmentType": "domain_rep"
+      }
+    ]
+  }
+]
