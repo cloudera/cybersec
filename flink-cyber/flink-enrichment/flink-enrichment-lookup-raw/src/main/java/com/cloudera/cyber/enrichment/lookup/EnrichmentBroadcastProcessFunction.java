@@ -26,7 +26,7 @@ public class EnrichmentBroadcastProcessFunction extends BroadcastProcessFunction
     public void processElement(Message message, ReadOnlyContext readOnlyContext, Collector<Message> collector) throws Exception {
         ReadOnlyBroadcastState<String, Map<String, String>> bc = readOnlyContext.getBroadcastState(broadcastDescriptors.get(type));
         if (bc != null) {
-            HashMap<String, String> hm = new HashMap<>();
+            HashMap<String, Object> hm = new HashMap<>();
             for (String field : fields) {
                 Object value = message.getExtensions().get(field);
                 if (value != null && bc.contains(value.toString())) {

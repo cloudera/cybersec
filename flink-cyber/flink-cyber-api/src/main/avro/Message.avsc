@@ -198,6 +198,44 @@
             "name": "source",
             "type": "string",
             "default": ""
+        },
+        {
+            "name": "data_quality_messages",
+            "type": ["null",
+               {
+                 "type": "array",
+                 "items":
+                     {
+                       "name": "DataQualityMessage",
+                       "namespace": "com.cloudera.cyber.data.quality",
+                       "type": "record",
+                       "fields" : [
+                            {
+                                "name": "level",
+                                "type": {
+                                     "type": "enum",
+                                     "name": "MessageLevel",
+                                     "symbols": ["ERROR", "WARNING", "INFO"]
+                                }
+                            },
+                            {
+                                "name": "feature",
+                                "type": "string"
+                            },
+                            {
+                                "name": "field",
+                                "type": ["null", "string"],
+                                "default": null
+                            },
+                            {
+                                "name": "message_text",
+                                "type": "string"
+                            }
+                       ]
+                    }
+               }
+            ],
+            "default": null
         }
     ]
 }
