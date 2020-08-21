@@ -153,7 +153,7 @@ public abstract class LookupJob implements CyberJob, MessageProcessingJob {
                     public void flatMap(Row r, Collector<Message> c) throws Exception {
                         Message m = MessageUtils.addFields(
                                 Message.getDecoder().decode(new ByteArrayInputStream((byte[]) r.getField(0))),
-                                (Map<String, String>) r.getField(1)
+                                (Map<String, Object>) r.getField(1)
                         );
                         c.collect(m);
 
@@ -170,7 +170,7 @@ public abstract class LookupJob implements CyberJob, MessageProcessingJob {
                         if (r.f0) {
                             Message m = MessageUtils.addFields(
                                     Message.getDecoder().decode(new ByteArrayInputStream((byte[]) r.f1.getField(0))),
-                                    (Map<String, String>) r.f1.getField(1)
+                                    (Map<String, Object>) r.f1.getField(1)
                             );
                             c.collect(m);
                         }
