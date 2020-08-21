@@ -27,7 +27,7 @@ public class IpGeoJobTest extends IpGeoJob {
     private ManualSource<Message> source;
     private final CollectingSink<Message> sink = new CollectingSink<>();
     private final List<Message> recordLog = new ArrayList<>();
-    private final List<Map<String, Object>> expectedExtensions = new ArrayList<>();
+    private final Map<Long, Map<String, Object>> expectedExtensions = new HashMap<>();
 
     @Test
     public void testIpGeoPipeline() throws Exception {
@@ -81,7 +81,8 @@ public class IpGeoJobTest extends IpGeoJob {
         for(Message.Builder nextBuilder: messages) {
             Map<String, Object> inputFields = nextBuilder.getExtensions();
             Map<String, Object> expectedExtension = new HashMap<>(inputFields);
-            expectedExtensions.add(expectedExtension);
+            long nextTimestamp = ts + offset;
+            expectedExtensions.put(nextTimestamp, expectedExtension);
             inputFields.forEach((field, value) -> IpGeoTestData.getExpectedEnrichmentValues(expectedExtension, field, value));
             sendRecord(nextBuilder.setTs(ts + offset));
             offset += 100;
@@ -100,10 +101,9 @@ public class IpGeoJobTest extends IpGeoJob {
     }
 
     private void checkResults(List<Message> results) {
-        int index = 0;
+
         for(Message result : results) {
-            assertThat(String.format("extension fields match - index %d", index), result.getExtensions(), Matchers.equalTo(expectedExtensions.get(index)));
-            index += 1;
+            assertThat(String.format("extension fields match - index %d", result.getTs()), result.getExtensions(), Matchers.equalTo(expectedExtensions.get(result.getTs())));
         }
         assertThat("expected number of results returned", expectedExtensions.size(), Matchers.equalTo(results.size()));
 
