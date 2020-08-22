@@ -13,9 +13,7 @@
     <groupId>com.cloudera.parserchains</groupId>
     <artifactId>metron-parser-chain</artifactId>
     <version>1.0-SNAPSHOT</version>
-
-
-
+    
     <name>Parser Chains Parent</name>
     <packaging>pom</packaging>
     <description>Top level project</description>
