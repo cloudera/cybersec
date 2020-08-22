@@ -3,7 +3,6 @@ package com.cloudera.cyber.dedupe.impl;
 import com.cloudera.cyber.DedupeMessage;
 import lombok.extern.java.Log;
 import org.apache.flink.api.common.functions.AggregateFunction;
-import org.joda.time.Instant;
 
 import java.util.UUID;
 

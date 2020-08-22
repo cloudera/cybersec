@@ -11,7 +11,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
-import org.joda.time.Instant;
 import org.junit.Ignore;
 import org.junit.Test;
 
