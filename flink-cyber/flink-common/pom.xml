@@ -42,7 +42,7 @@
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-cyber-api</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -74,7 +74,7 @@
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>cyber-functions</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
