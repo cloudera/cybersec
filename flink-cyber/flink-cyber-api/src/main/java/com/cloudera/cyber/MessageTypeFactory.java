@@ -1,6 +1,5 @@
 package com.cloudera.cyber;
 
-import com.cloudera.cyber.Message;
 import org.apache.flink.api.common.typeinfo.TypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;

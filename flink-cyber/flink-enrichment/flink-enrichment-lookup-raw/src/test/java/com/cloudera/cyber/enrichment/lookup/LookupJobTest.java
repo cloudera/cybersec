@@ -12,7 +12,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
-import org.hamcrest.collection.IsMapWithSize;
 import org.junit.Test;
 
 import java.time.Duration;

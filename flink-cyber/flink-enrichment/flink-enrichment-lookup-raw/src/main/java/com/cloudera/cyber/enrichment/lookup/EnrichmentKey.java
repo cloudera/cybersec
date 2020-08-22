@@ -1,7 +1,7 @@
 package com.cloudera.cyber.enrichment.lookup;
 
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
 
 import java.io.Serializable;
 

@@ -2,7 +2,6 @@ package com.cloudera.cyber;
 
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.codehaus.jackson.type.TypeReference;
 import org.junit.Test;
 
 import java.util.Map;

@@ -1,11 +1,9 @@
 package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.SignedSourceKey;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.flink.MessageBoundedOutOfOrder;
 import com.cloudera.cyber.rules.DynamicRuleCommandResult;
-import com.cloudera.cyber.sha1;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;

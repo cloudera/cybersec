@@ -17,7 +17,8 @@ import org.springframework.util.DigestUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-import static com.cloudera.cyber.flink.ConfigConstants.*;
+import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
+import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_PATTERN;
 import static com.cloudera.cyber.flink.FlinkUtils.createRawKafkaSource;
 
 public class ParserJobKafka extends ParserJob {

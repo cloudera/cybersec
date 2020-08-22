@@ -3,8 +3,6 @@ package com.cloudera.cyber.enrichment.lookup;
 import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
-import com.cloudera.cyber.enrichment.lookup.config.EnrichmentField;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
 import com.cloudera.cyber.flink.CyberJob;
 import lombok.extern.slf4j.Slf4j;
@@ -20,10 +18,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.co.BroadcastProcessFunction;
 import org.apache.flink.util.Collector;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -31,11 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.cloudera.cyber.enrichment.ConfigUtils.*;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
 
 @Slf4j
 public abstract class LookupJob implements CyberJob {

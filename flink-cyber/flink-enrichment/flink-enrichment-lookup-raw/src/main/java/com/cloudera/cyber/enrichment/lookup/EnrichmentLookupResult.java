@@ -1,8 +1,8 @@
 package com.cloudera.cyber.enrichment.lookup;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
 
 import java.util.Map;
 

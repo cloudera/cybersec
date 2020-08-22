@@ -1,7 +1,7 @@
 package com.cloudera.cyber.indexer;
 
-import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.flink.FlinkUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.formats.parquet.avro.ParquetAvroWriters;
