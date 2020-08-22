@@ -24,7 +24,6 @@
         <module>parser-chains-core</module>
         <module>parser-chains-parsers</module>
         <module>parser-chains-config-service</module>
-        <module>parser-chains-flink</module>
     </modules>
 
     <properties>
