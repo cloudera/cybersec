@@ -25,7 +25,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Properties;
 
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_PATTERN;
+import static com.cloudera.cyber.flink.ConfigConstants.*;
 import static com.cloudera.cyber.flink.FlinkUtils.createRawKafkaSource;
 import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
 import static com.cloudera.cyber.parser.ParserJobKafka.*;
@@ -33,7 +33,6 @@ import static com.cloudera.cyber.parser.ParserJobKafka.*;
 @Slf4j
 public class SplitJobKafka extends SplitJob {
 
-    private static final String PARAMS_TOPIC_OUTPUT = "topic.output";
     private static final String PARAMS_CONFIG_FILE = "config.file";
     private static final String DEFAULT_CONFIG_FILE = "splits.json";
 
@@ -62,7 +61,7 @@ public class SplitJobKafka extends SplitJob {
     @Override
     protected DataStream<SplitConfig> createConfigSource(StreamExecutionEnvironment env, ParameterTool params) {
         Properties kafkaProperties = readKafkaProperties(params, true);
-        String groupId = createGroupId(params.get("topic.input", "") + params.get("topic.pattern", ""), "cyber-split-parser-config-");
+        String groupId = createGroupId(params.get(PARAMS_TOPIC_INPUT, "") + params.get(PARAMS_TOPIC_PATTERN, ""), "cyber-split-parser-config-");
 
         kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
