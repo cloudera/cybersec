@@ -57,7 +57,7 @@ For example, to process data in a json form in a topic called `netflow` would ru
 The job properties file would be of the form: 
 
 ```
-kafka.bootstrap.servers=metronreduxx-1.cdsw.eng.cloudera.com:9092,metronreduxx-2.cdsw.eng.cloudera.com:9092
+kafka.bootstrap.servers=kafka.bootstrap.servers=<bootstrap>
 kafka.client.id=parser-chain
 kafka.group.id=parswr-chain
 kafka.auto.offset.reset=latest
