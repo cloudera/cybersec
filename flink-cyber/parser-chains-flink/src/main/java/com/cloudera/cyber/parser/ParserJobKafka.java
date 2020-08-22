@@ -17,6 +17,7 @@ import org.springframework.util.DigestUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
+import static com.cloudera.cyber.flink.ConfigConstants.*;
 import static com.cloudera.cyber.flink.FlinkUtils.createRawKafkaSource;
 
 public class ParserJobKafka extends ParserJob {
@@ -30,7 +31,6 @@ public class ParserJobKafka extends ParserJob {
     public static final long DEFAULT_ROLL_INACTIVITY = TimeUnit.MINUTES.toMicros(5);
     public static final String PARAMS_ORIGINAL_ENABLED = "original.enabled";
     public static final String PARAMS_CONFIG_TOPIC = "config.topic";
-    ;
 
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
@@ -44,7 +44,7 @@ public class ParserJobKafka extends ParserJob {
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
         FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
-                params.getRequired("topic.output"),
+                params.getRequired(PARAMS_TOPIC_INPUT),
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
     }
@@ -77,7 +77,7 @@ public class ParserJobKafka extends ParserJob {
 
     @Override
     protected DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        return createRawKafkaSource(env, params, createGroupId(params.get("topic.input", "") + params.get("topic.pattern", "")));
+        return createRawKafkaSource(env, params, createGroupId(params.get(PARAMS_TOPIC_INPUT, "") + params.get(PARAMS_TOPIC_PATTERN, "")));
     }
 
     private String createGroupId(String inputTopic) {

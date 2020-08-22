@@ -32,6 +32,8 @@ import static org.apache.flink.streaming.api.windowing.time.Time.milliseconds;
 public class FlinkUtils<T> {
     public static final long DEFAULT_MAX_LATENESS = 1000;
 
+    private static final String PARAMS_TOPIC_INPUT = "topic.input";
+    private static final String PARAMS_TOPIC_OUTPUT = "topic.output";
     private static final String PARAMS_CHECKPOINT_INTERVAL = "checkpoint.interval.ms";
     private static final int DEFAULT_CHECKPOINT_INTERVAL = 60000;
     private static final String PARAMS_PARALLELISM = "parallelism";

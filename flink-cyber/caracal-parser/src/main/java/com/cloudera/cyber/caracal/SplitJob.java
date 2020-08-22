@@ -33,8 +33,6 @@ import static com.cloudera.cyber.parser.ParserJob.PARAM_PRIVATE_KEY_FILE;
 public abstract class SplitJob {
 
     private static final String PARAMS_CONFIG_JSON = "config.json";
-    private static final String PARAM_CHECKPOINT_INTERVAL = "checkpoint.interval.ms";
-    private static final String PARAMS_SIGN_KEY_PRIVATE_FILE = "sign.key.private";
     protected String configJson;
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
