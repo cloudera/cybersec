@@ -3,21 +3,13 @@ package com.cloudera.cyber.parser;
 import com.cloudera.cyber.Message;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
-import org.apache.flink.test.util.ManualSource;
 import org.junit.Test;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.TimeZone;
 
@@ -25,7 +17,7 @@ import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-public class TestParserJob extends ParserJob {
+public class TestParserJob extends AbstractParserJobTest {
     /**
      * { "test": {
      *   "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
@@ -109,18 +101,12 @@ public class TestParserJob extends ParserJob {
     final String input = StringUtils.join(new String[] { nameField, addressField, phoneField, String.valueOf(timestamp), timezone }, ",");
 
 
-    private ManualSource<MessageToParse> source;
-    private CollectingSink<Message> sink = new CollectingSink<>();
-
+    @Override
     @Test
     public void testParser() throws Exception {
-        KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "SunRsaSign");
-        gen.initialize(1024, new SecureRandom());
-        KeyPair pair = gen.generateKeyPair();
-
         ParameterTool params = ParameterTool.fromMap(new HashMap<String,String>() {{
             put(PARAM_CHAIN_CONFIG,chainWithRouting);
-            put(PARAM_PRIVATE_KEY, Base64.getEncoder().encodeToString(pair.getPrivate().getEncoded()));
+            put(PARAM_PRIVATE_KEY, getKeyBase64());
         }});
 
         StreamExecutionEnvironment env = createPipeline(params);
@@ -142,19 +128,5 @@ public class TestParserJob extends ParserJob {
 
         // all other fields present and correct
         assertThat("name correct", out.getExtensions(), hasEntry(equalTo("name"), equalTo(nameField)));
-    }
-
-    @Override
-    protected void writeResults(ParameterTool params, DataStream<Message> results) {
-        results.addSink(sink);
-    }
-
-    @Override
-    protected void writeOriginalsResults(ParameterTool params, DataStream<MessageToParse> results) { }
-
-    @Override
-    protected DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        source = JobTester.createManualSource(env, TypeInformation.of(MessageToParse.class));
-        return source.getDataStream();
     }
 }
