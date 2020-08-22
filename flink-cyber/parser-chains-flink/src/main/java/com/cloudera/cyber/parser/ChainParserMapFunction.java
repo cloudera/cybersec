@@ -41,17 +41,25 @@ public class ChainParserMapFunction extends RichFlatMapFunction<MessageToParse, 
         super.open(parameters);
         ChainBuilder chainBuilder = new DefaultChainBuilder(new ReflectiveParserBuilder(),
                 new ClassIndexParserCatalog());
-        chains = chainConfig.entrySet().stream().collect(Collectors.toMap(
-                e -> e.getKey(),
-                v ->
-                {
-                    try {
-                        return chainBuilder.build(v.getValue());
-                    } catch (InvalidParserException e) {
-                        log.error("Cannot build parser chain", e);
-                        return null;
-                    }
-                }));
+        ArrayList<InvalidParserException> errors = new ArrayList<>();
+        try {
+            chains = chainConfig.entrySet().stream().collect(Collectors.toMap(
+                    e -> e.getKey(),
+                    v ->
+                    {
+                        try {
+                            return chainBuilder.build(v.getValue());
+                        } catch (InvalidParserException e) {
+                            log.error("Cannot build parser chain", e);
+                            errors.add(e);
+                            return null;
+                        }
+                    }));
+        } catch (NullPointerException e) {
+            if (errors.size() > 0) {
+                throw errors.get(0);
+            }
+        }
 
         chainRunner = new DefaultChainRunner();
 

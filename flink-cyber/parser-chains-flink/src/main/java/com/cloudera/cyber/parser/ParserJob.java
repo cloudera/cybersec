@@ -8,6 +8,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
@@ -23,6 +24,7 @@ import java.util.Map;
 public abstract class ParserJob {
 
     protected static final String PARAM_CHAIN_CONFIG = "chain";
+    protected static final String PARAM_CHAIN_CONFIG_FILE = "chain.file";
     public static final String PARAM_PRIVATE_KEY_FILE = "key.private.file";
     public static final String PARAM_PRIVATE_KEY = "key.private.base64";
 
@@ -30,7 +32,10 @@ public abstract class ParserJob {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
-        String chainConfig = params.getRequired(PARAM_CHAIN_CONFIG);
+
+        String chainConfig = params.has(PARAM_CHAIN_CONFIG_FILE) ?
+                new String(Files.readAllBytes(Paths.get(params.getRequired(PARAM_CHAIN_CONFIG_FILE))), StandardCharsets.UTF_8):
+                params.getRequired(PARAM_CHAIN_CONFIG);
 
         ParserChainMap chainSchema = JSONUtils.INSTANCE.load(chainConfig, ParserChainMap.class);
 

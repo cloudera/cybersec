@@ -23,13 +23,10 @@
         <module>flink-rules</module>
         <module>flink-alert-scoring-api</module>
         <module>flink-alert-scoring</module>
-        <module>metron-parser-chain</module><!--
-        <module>nifi-parser-bundle</module>-->
+        <module>metron-parser-chain</module>
+        <module>parser-chains-flink</module>
         <module>caracal-generator</module>
         <module>caracal-parser</module>
-        <!--<module>taxii-service</module>-->
-        <!--<module>flink-web</module>-->
-
     </modules>
 
     <properties>
@@ -48,7 +45,9 @@
         <flink.format.parquet.version>1.10.0</flink.format.parquet.version>
         <slf4j.version>1.7.15</slf4j.version>
         <log4j.version>2.12.1</log4j.version>
+        <multiline-string.version>0.1.2</multiline-string.version>
         <testcontainers.version>1.14.3</testcontainers.version>
+        <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
     </properties>
 
     <repositories>
@@ -398,6 +397,12 @@
                 <version>${flink.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.adrianwalker</groupId>
+                <artifactId>multiline-string</artifactId>
+                <version>${multiline-string.version}</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
