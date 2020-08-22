@@ -2,7 +2,6 @@ package com.cloudera.cyber.enrichment.lookup;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.api.java.typeutils.MapTypeInfo;
 import org.apache.flink.table.functions.AggregateFunction;
 
 import java.util.HashMap;

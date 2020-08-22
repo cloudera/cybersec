@@ -3,7 +3,6 @@ package com.cloudera.cyber.enrichment.lookup;
 import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
-import com.google.common.collect.ImmutableMap;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;

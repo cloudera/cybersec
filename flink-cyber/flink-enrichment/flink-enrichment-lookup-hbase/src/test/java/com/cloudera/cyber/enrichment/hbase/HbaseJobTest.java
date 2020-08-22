@@ -2,7 +2,6 @@ package com.cloudera.cyber.enrichment.hbase;
 
 import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
-
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
