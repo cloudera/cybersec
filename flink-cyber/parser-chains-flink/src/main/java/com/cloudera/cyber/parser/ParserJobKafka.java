@@ -17,8 +17,7 @@ import org.springframework.util.DigestUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_PATTERN;
+import static com.cloudera.cyber.flink.ConfigConstants.*;
 import static com.cloudera.cyber.flink.FlinkUtils.createRawKafkaSource;
 
 public class ParserJobKafka extends ParserJob {
@@ -40,12 +39,12 @@ public class ParserJobKafka extends ParserJob {
         ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
         new ParserJobKafka()
                 .createPipeline(params)
-                .execute("Flink Parser - " + params.get("name"));
+                .execute("Flink Parser - " + params.get("name", "Default"));
     }
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
         FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
-                params.getRequired(PARAMS_TOPIC_INPUT),
+                params.getRequired(PARAMS_TOPIC_OUTPUT),
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
     }
