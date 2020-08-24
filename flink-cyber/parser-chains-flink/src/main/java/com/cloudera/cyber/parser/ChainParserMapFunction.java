@@ -85,7 +85,7 @@ public class ChainParserMapFunction extends RichFlatMapFunction<MessageToParse, 
         Optional<FieldValue> timestamp = m.getField(FieldName.of("timestamp"));
 
         if (!timestamp.isPresent()) {
-            log.warn("Timestamp missing from message on chain %s", message.getTopic());
+            log.warn(String.format("Timestamp missing from message on chain %s", message.getTopic()));
             throw new IllegalStateException("Timestamp not present");
         }
         String originalInput
