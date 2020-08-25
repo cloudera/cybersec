@@ -1,0 +1,11 @@
+{
+  "netflow": {
+    "fields": [{
+      "f": "ip_src", "type": "ip",
+      "f": "ip_dst", "name": "ip_dst_addr", "type": "ip"
+
+    }],
+    "filter": "",
+    "storeUnknown": true
+  }
+}
