@@ -20,8 +20,8 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_ALLOWED_LATENESS;
-import static com.cloudera.cyber.flink.ConfigConstants.PARAM_REGISTRY_ADDRESS;
 import static com.cloudera.cyber.flink.FlinkUtils.createKafkaSource;
+import static com.cloudera.cyber.flink.Utils.K_SCHEMA_REG_URL;
 import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
 import static org.apache.flink.streaming.api.windowing.time.Time.milliseconds;
 
@@ -69,7 +69,7 @@ public class ScoringJobKafka extends ScoringJob {
 
         KafkaDeserializationSchema<ScoringRuleCommand> schema = ClouderaRegistryKafkaDeserializationSchema
                 .builder(ScoringRuleCommand.class)
-                .setRegistryAddress(params.getRequired(PARAM_REGISTRY_ADDRESS))
+                .setRegistryAddress(params.getRequired(K_SCHEMA_REG_URL))
                 .build();
         kafkaProperties.put("group.id", groupId);
         FlinkKafkaConsumer<ScoringRuleCommand> source = new FlinkKafkaConsumer<>(topic, schema, kafkaProperties);
@@ -95,7 +95,7 @@ public class ScoringJobKafka extends ScoringJob {
         Properties kafkaProperties = readKafkaProperties(params, false);
         KafkaSerializationSchema<DynamicRuleCommandResult<ScoringRule>> schema = ClouderaRegistryKafkaSerializationSchema
                 .<DynamicRuleCommandResult<ScoringRule>>builder(topic)
-                .setRegistryAddress(params.getRequired(PARAM_REGISTRY_ADDRESS))
+                .setRegistryAddress(params.getRequired(K_SCHEMA_REG_URL))
                 .build();
         FlinkKafkaProducer<DynamicRuleCommandResult<ScoringRule>> sink = new FlinkKafkaProducer<>(topic,
                 schema,
