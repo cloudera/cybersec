@@ -3,6 +3,7 @@ package com.cloudera.cyber.enrichment.hbase;
 import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
+import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -24,6 +25,31 @@ import java.util.Set;
 import static com.cloudera.cyber.enrichment.ConfigUtils.*;
 
 public abstract class HbaseJob {
+
+    public static DataStream<Message> enrich(DataStream<Message> source, StreamExecutionEnvironment env, List<EnrichmentConfig> configs) {
+        StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, EnvironmentSettings
+                .newInstance()
+                .useBlinkPlanner()
+                .inStreamingMode()
+                .build());
+
+        Map<String, List<String>> typeToFields = typeToFields(configs, EnrichmentKind.HBASE);
+        Set<String> enrichmentTypes = enrichmentTypes(configs, EnrichmentKind.HBASE);
+
+        tableEnv.createTemporaryView("messages", source.map(m -> Row.of(m.toByteBuffer().array(), null /* TODO add the fields required for enrichment */)));
+
+        // output table should return original message in avro encoded bytes and the map of additional fields
+        Table results = tableEnv.sqlQuery("");
+
+        return tableEnv.toAppendStream(results,
+                Types.ROW(Types.OBJECT_ARRAY(Types.BYTE), Types.MAP(Types.STRING, Types.STRING)))
+                .map(r ->
+                        MessageUtils.addFields(
+                                Message.getDecoder().decode((byte[]) r.getField(0)),
+                                (Map<String, String>) r.getField(1)
+                        )
+                );
+    }
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws IOException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
@@ -32,30 +58,8 @@ public abstract class HbaseJob {
         DataStream<EnrichmentEntry> enrichmentSource = createEnrichmentSource(env, params);
 
         byte[] configJson = Files.readAllBytes(Paths.get(params.getRequired(PARAMS_CONFIG_FILE)));
-        Map<String, List<String>> typeToFields = typeToFields(allConfigs(configJson), EnrichmentKind.HBASE);
-        Set<String> enrichmentTypes = enrichmentTypes(allConfigs(configJson), EnrichmentKind.HBASE);
 
-        StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, EnvironmentSettings
-                .newInstance()
-                .useBlinkPlanner()
-                .inStreamingMode()
-                .build());
-
-        tableEnv.createTemporaryView("messages", source.map(m -> Row.of(m.toByteBuffer().array(), null /* TODO add the fields required for enrichment */)));
-
-        // output table should return original message in avro encoded bytes and the map of additional fields
-        Table results = tableEnv.sqlQuery("");
-
-
-        DataStream<Message> result = tableEnv.toAppendStream(results,
-                Types.ROW(Types.OBJECT_ARRAY(Types.BYTE), Types.MAP(Types.STRING, Types.STRING)))
-                .map(r ->
-                        MessageUtils.addFields(
-                                Message.getDecoder().decode((byte[]) r.getField(0)),
-                                (Map<String, String>) r.getField(1)
-                        )
-                );
-
+        DataStream<Message> result = enrich(source, env, allConfigs(configJson));
         writeResults(env, params, result);
         writeEnrichments(env, params, enrichmentSource);
 
