@@ -23,9 +23,7 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_ALLOWED_LATENESS;
-import static com.cloudera.cyber.flink.ConfigConstants.PARAM_REGISTRY_ADDRESS;
-import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
-import static com.cloudera.cyber.flink.Utils.readSchemaRegistryProperties;
+import static com.cloudera.cyber.flink.Utils.*;
 import static org.apache.flink.streaming.api.windowing.time.Time.milliseconds;
 
 @Slf4j
@@ -58,7 +56,7 @@ public class FlinkUtils<T> {
         log.info("Creating Kafka Sink for {}, using {}", topic, kafkaProperties);
         KafkaSerializationSchema<T> schema = ClouderaRegistryKafkaSerializationSchema
                 .<T>builder(topic)
-                .setRegistryAddress(params.getRequired(PARAM_REGISTRY_ADDRESS))
+                .setRegistryAddress(params.getRequired(K_SCHEMA_REG_URL))
                 .build();
         return new FlinkKafkaProducer<T>(topic,
                 schema,
@@ -138,8 +136,8 @@ public class FlinkUtils<T> {
         kafkaProperties.putIfAbsent(ConsumerConfig.GROUP_ID_CONFIG, groupId);
 
         DataStreamSource<MessageToParse> source = (pattern != null) ?
-                env.addSource(new FlinkKafkaConsumer<MessageToParse>(Pattern.compile(pattern), new MessageToParseDeserializer(), kafkaProperties)) :
-                env.addSource(new FlinkKafkaConsumer<MessageToParse>(inputTopic, new MessageToParseDeserializer(), kafkaProperties));
+                env.addSource(new FlinkKafkaConsumer<>(Pattern.compile(pattern), new MessageToParseDeserializer(), kafkaProperties)) :
+                env.addSource(new FlinkKafkaConsumer<>(inputTopic, new MessageToParseDeserializer(), kafkaProperties));
 
         return source
                 .name("Kafka Source")
