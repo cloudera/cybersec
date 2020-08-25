@@ -1,6 +1,7 @@
 package com.cloudera.cyber.parser;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -31,7 +32,7 @@ public abstract class ParserJob {
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-
+        FlinkUtils.setupEnv(env, params);
 
         String chainConfig = params.has(PARAM_CHAIN_CONFIG_FILE) ?
                 new String(Files.readAllBytes(Paths.get(params.getRequired(PARAM_CHAIN_CONFIG_FILE))), StandardCharsets.UTF_8):
@@ -43,7 +44,6 @@ public abstract class ParserJob {
 
         DataStream<MessageToParse> source = createSource(env, params);
 
-
         byte[] privKeyBytes = params.has(PARAM_PRIVATE_KEY_FILE) ?
                 Files.readAllBytes(Paths.get(params.get(PARAM_PRIVATE_KEY_FILE))) :
                 Base64.getDecoder().decode(params.getRequired(PARAM_PRIVATE_KEY));
@@ -52,7 +52,9 @@ public abstract class ParserJob {
         PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privKeyBytes);
         PrivateKey privateKey = keyFactory.generatePrivate(privSpec);
 
-        SingleOutputStreamOperator<Message> results = source.flatMap(new ChainParserMapFunction(chainSchema, topicMap, privateKey));
+        SingleOutputStreamOperator<Message> results =
+                source.flatMap(new ChainParserMapFunction(chainSchema, topicMap, privateKey))
+                .name("Parser").uid("parser");
         writeResults(params, results);
 
         return env;
