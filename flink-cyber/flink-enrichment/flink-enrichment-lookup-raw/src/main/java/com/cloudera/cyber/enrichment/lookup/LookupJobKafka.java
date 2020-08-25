@@ -17,25 +17,26 @@ public class LookupJobKafka extends LookupJob {
 
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        new LookupJobKafka().createPipeline(ParameterTool.fromArgs(args)).execute("Enrichments - Local Lookup");
+        new LookupJobKafka().createPipeline(ParameterTool.fromPropertiesFile(args[0])).execute("Enrichments - Local Lookup");
     }
 
     @Override
     protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> reduction) {
-        reduction.addSink(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), params));
+        reduction.addSink(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), params))
+        .name("Kafka Sink").uid("kafka-sink");
     }
 
     @Override
     public DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.addSource(
                 new FlinkUtils(Message.class).createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, "enrichment-lookups-local")
-        );
+        ).name("Kafka Source").uid("kafka-source");
     }
 
     @Override
     protected DataStream<EnrichmentEntry> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.addSource(
                 new FlinkUtils(EnrichmentEntry.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, "enrichment-lookups-local")
-        );
+        ).name("Kafka Enrichments").uid("kafka-enrichment-source");
     }
 }
