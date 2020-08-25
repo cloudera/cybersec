@@ -1,14 +1,14 @@
 [
   {
-    "source": "test",
+    "source": "netflow",
     "kind": "LOCAL",
     "fields": [
       {
-        "name": "ip_src_addr",
+        "name": "src_ip",
         "enrichmentType": "ip_whitelist"
       },
       {
-        "name": "ip_dst_addr",
+        "name": "dst_ip",
         "enrichmentType": "ip_whitelist"
       }
     ]
