@@ -1,6 +1,7 @@
 package com.cloudera.cyber.indexing.elastic;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.indexing.IndexEntry;
 import com.cloudera.cyber.indexing.SearchIndexJob;
 import com.google.common.collect.Streams;
 import org.apache.flink.api.common.functions.RuntimeContext;
@@ -33,22 +34,14 @@ public abstract class ElasticJob extends SearchIndexJob {
     private static final String PARAMS_RETRY_TIMEOUT = "es.retry.timeout";
     private RestHighLevelClient client;
 
-    private static HttpHost urlToHost(String in) {
-        try {
-            URL url = new URL(in);
-            return new HttpHost(url.getHost(), url.getPort(), url.getProtocol());
-        } catch (MalformedURLException e) {
-            return null;
-        }
-    }
-
-
     public ElasticJob(ParameterTool params) {
-        client = new RestHighLevelClient(RestClient.builder(new HttpHost(params.getRequired("es.host"), 9200, "http")));
+        HttpHost[] hosts = (HttpHost[]) Arrays.stream(params.getRequired("es.host").split(","))
+                .map(HttpHost::create).toArray();
+        this.client = new RestHighLevelClient(RestClient.builder(hosts));
     }
 
     @Override
-    protected Map<String, Set<String>> loadFieldsFromIndex(ParameterTool params) throws IOException {
+    protected final Map<String, Set<String>> loadFieldsFromIndex(ParameterTool params) throws IOException {
         GetIndexTemplatesResponse response = client.indices()
                 .getIndexTemplate(new GetIndexTemplatesRequest(), RequestOptions.DEFAULT);
         return response.getIndexTemplates().stream().collect(toMap(it -> it.name(),
@@ -56,29 +49,22 @@ public abstract class ElasticJob extends SearchIndexJob {
     }
 
     @Override
-    protected void writeResults(DataStream<Message> results, ParameterTool params) throws IOException {
+    protected final void writeResults(DataStream<IndexEntry> results, ParameterTool params) throws IOException {
         List<HttpHost> httpHosts = Arrays.stream(params.getRequired(PARAMS_ES_HOSTS).split(","))
-                .map(ElasticJob::urlToHost).collect(toList());
-        Map<String, Set<String>> fields = loadFieldsFromIndex(params);
-        ElasticsearchSink.Builder<Message> esSinkBuilder = new ElasticsearchSink.Builder<Message>(
+                .map(HttpHost::create).collect(toList());
+        ElasticsearchSink.Builder<IndexEntry> esSinkBuilder = new ElasticsearchSink.Builder<>(
                 httpHosts,
-                new ElasticsearchSinkFunction<Message>() {
-                    public IndexRequest createIndexRequest(Message element) {
-                        Stream<Map.Entry<String, ?>> source = Streams.concat(
-                                element.getExtensions().entrySet().stream()
-                                        .filter(e ->fields.get(element.getSource()).contains(e.getKey())),
-                                Collections.singletonMap("ts", element.getTs()).entrySet().stream()
-                        );
-
+                new ElasticsearchSinkFunction<IndexEntry>() {
+                    public IndexRequest createIndexRequest(IndexEntry element) {
                         return Requests.indexRequest()
-                                .index(element.getSource())
+                                .index(element.getIndex())
                                 .id(element.getId())
-                                .source(source.collect(toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                                .source(element.getFields());
 
                     }
 
                     @Override
-                    public void process(Message element, RuntimeContext ctx, RequestIndexer indexer) {
+                    public void process(IndexEntry element, RuntimeContext ctx, RequestIndexer indexer) {
                         indexer.add(createIndexRequest(element));
                     }
                 }
