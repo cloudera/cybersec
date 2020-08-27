@@ -1,4 +1,4 @@
-package com.cloudera.cyber.dedupe.impl;
+package com.cloudera.cyber.flink;
 
 import lombok.extern.java.Log;
 import org.apache.flink.api.common.functions.ReduceFunction;
