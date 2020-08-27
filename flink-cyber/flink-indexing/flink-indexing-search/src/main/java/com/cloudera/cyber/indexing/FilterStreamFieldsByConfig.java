@@ -1,11 +1,16 @@
 package com.cloudera.cyber.indexing;
 
 import com.cloudera.cyber.Message;
+import com.google.common.collect.Lists;
 import org.apache.flink.api.common.state.MapState;
+import org.apache.flink.api.common.state.MapStateDescriptor;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.co.KeyedCoProcessFunction;
 import org.apache.flink.util.Collector;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -13,12 +18,24 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toMap;
 
 public class FilterStreamFieldsByConfig extends KeyedCoProcessFunction<String, Message, Map.Entry<String, Set<String>>, IndexEntry> {
-    private MapState<String, Set<String>> fieldsRequiredMap = null;
+
+    private MapState<String, List<String>> fieldsRequiredMap = null;
+
+    @Override
+    public void open(Configuration parameters) throws Exception {
+        super.open(parameters);
+        MapStateDescriptor<String, List<String>> descriptor =
+                new MapStateDescriptor<>(
+                        "fieldsByIndex",
+                        Types.STRING,
+                        Types.LIST(Types.STRING)
+                );
+        fieldsRequiredMap = getRuntimeContext().getMapState(descriptor);
+    }
 
     @Override
     public void processElement1(Message message, Context context, Collector<IndexEntry> collector) throws Exception {
-        Map<String, Set<String>> fieldsRequiredMap = null;
-        Set<String> fieldsRequired = fieldsRequiredMap.get(message.getSource());
+        List<String> fieldsRequired = fieldsRequiredMap.get(message.getSource());
 
         Stream<Tuple2<String, String>> messageFields = message.getExtensions().entrySet().stream()
                 .filter(f -> fieldsRequired.contains(f.getKey()))
@@ -55,6 +72,6 @@ public class FilterStreamFieldsByConfig extends KeyedCoProcessFunction<String, M
 
     @Override
     public void processElement2(Map.Entry<String, Set<String>> stringListEntry, Context context, Collector<IndexEntry> collector) throws Exception {
-        fieldsRequiredMap.put(stringListEntry.getKey(), stringListEntry.getValue());
+        fieldsRequiredMap.put(stringListEntry.getKey(), Lists.newArrayList(stringListEntry.getValue()));
     }
 }
