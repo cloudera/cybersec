@@ -3,7 +3,7 @@ package com.cloudera.cyber.dedupe;
 import com.cloudera.cyber.DedupeMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.dedupe.impl.CreateKeyFromMessage;
-import com.cloudera.cyber.dedupe.impl.EventTimeAndCountTrigger;
+import com.cloudera.cyber.flink.EventTimeAndCountTrigger;
 import com.cloudera.cyber.dedupe.impl.SumAndMaxTs;
 import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.streaming.api.datastream.DataStream;
