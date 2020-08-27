@@ -10,9 +10,14 @@ import org.apache.flink.util.Preconditions;
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
 
 public class ElasticJobKafka extends ElasticJob {
+    public ElasticJobKafka(ParameterTool params) {
+        super(params);
+    }
+
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        new ElasticJobKafka().createPipeline(ParameterTool.fromPropertiesFile(args[0])).execute("Indexing - Parquet");
+        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        new ElasticJobKafka(params).createPipeline(params).execute("Indexing - Parquet");
     }
 
     @Override
