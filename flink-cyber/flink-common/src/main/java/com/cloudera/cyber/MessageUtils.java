@@ -86,5 +86,10 @@ public class MessageUtils {
     public static long getCurrentTimestamp() {
         return Instant.now().toEpochMilli();
     }
+<<<<<<< HEAD
 }
 
+=======
+
+}
+>>>>>>> Incorporate code review suggestions
