@@ -2,6 +2,7 @@ package com.cloudera.cyber.enrichment.geocode;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
+import com.cloudera.cyber.enrichment.geocode.impl.IpGeoEnrichment;
 import lombok.extern.java.Log;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -44,7 +45,8 @@ public class IpGeoJobTest extends IpGeoJob {
 
         List<Message> output = new ArrayList<>();
 
-        for (int i = 0; i < 10; i++) {
+        int recordCount = recordLog.size();
+        for (int i = 0; i < recordCount; i++) {
             try {
                 output.add(sink.poll(Duration.ofMillis(100)));
             } catch (TimeoutException e) {
@@ -63,7 +65,7 @@ public class IpGeoJobTest extends IpGeoJob {
                 .setExtensions(new HashMap<String, Object>() {{
                     put(STRING_IP_FIELD_NAME, IpGeoTestData.COUNTRY_ONLY_IPv6);
                 }}));
-         messages.add(Message.newBuilder()
+        messages.add(Message.newBuilder()
                 .setExtensions(new HashMap<String, Object>() {{
                     put(STRING_IP_FIELD_NAME, IpGeoTestData.ALL_FIELDS_IPv4);
                 }}));

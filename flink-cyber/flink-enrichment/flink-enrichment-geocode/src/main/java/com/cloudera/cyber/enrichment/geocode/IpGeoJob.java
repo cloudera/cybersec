@@ -28,10 +28,6 @@ public abstract class IpGeoJob {
         return env;
     }
 
-    private void printResults(SingleOutputStreamOperator<Message> results) {
-        results.print();
-    }
-
     protected abstract void writeResults(ParameterTool params, DataStream<Message> results);
 
     protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> ipFields);
