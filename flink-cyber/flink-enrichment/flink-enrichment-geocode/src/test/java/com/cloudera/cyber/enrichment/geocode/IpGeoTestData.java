@@ -53,13 +53,12 @@ public class IpGeoTestData {
         expectedGeos.forEach((field, value) -> expectedEnrichments.put(String.join(".", enrichmentFieldName, GEOCODE_FEATURE, field.getSingularName()), value));
     }
 
-    public static void getExpectedEnrichmentValues(Map<String, Object> expectedEnrichments, String enrichmentFieldName, List<Object> ipAddresses) {
+    public static void getExpectedEnrichmentValues(Map<String, Object> expectedEnrichments, String enrichmentFieldName, List<Object> ipAddresses, List<IpGeoEnrichment.GeoEnrichmentFields> expectedGeoEnrichments) {
         for(Object ipAddress : ipAddresses) {
             if (ipAddress instanceof String) {
                 Map<IpGeoEnrichment.GeoEnrichmentFields, Object> expectedGeos = getExpectedGeoEnrichments((String) ipAddress);
                 expectedGeos.forEach((field, value) -> {
-                    if (value instanceof String && (field.equals(IpGeoEnrichment.GeoEnrichmentFields.COUNTRY) ||
-                            field.equals(IpGeoEnrichment.GeoEnrichmentFields.CITY))) {
+                    if (expectedGeoEnrichments.contains(field)) {
                         String qualifiedEnrichmentName = String.join(".", enrichmentFieldName, GEOCODE_FEATURE, field.getPluralName());
                         expectedEnrichments.putIfAbsent(qualifiedEnrichmentName, new HashSet<>());
                         //noinspection unchecked
@@ -70,12 +69,21 @@ public class IpGeoTestData {
         }
     }
 
-    public static void getExpectedEnrichmentValues(Map<String, Object> expectedEnrichments, String enrichmentFieldName, Object enrichmentValue) {
+    public static void getExpectedEnrichmentValues(Map<String, Object> expectedEnrichments, String enrichmentFieldName, Object enrichmentValue, List<IpGeoEnrichment.GeoEnrichmentFields> expectedGeoEnrichments) {
         if (enrichmentValue instanceof String) {
             getExpectedEnrichmentValues(expectedEnrichments, enrichmentFieldName, (String) enrichmentValue);
-        } else {
+        } else if (enrichmentValue instanceof List){
             //noinspection unchecked
-            getExpectedEnrichmentValues(expectedEnrichments, enrichmentFieldName, (List<Object>) enrichmentValue);
+            getExpectedEnrichmentValues(expectedEnrichments, enrichmentFieldName, (List<Object>) enrichmentValue, expectedGeoEnrichments);
+        }
+    }
+
+    public static void getExpectedEnrichmentValues(Map<String, Object> expectedEnrichments, String enrichmentFieldName, Object enrichmentValue) {
+        if (enrichmentValue instanceof String) {
+            getExpectedEnrichmentValues(expectedEnrichments, enrichmentFieldName, enrichmentValue, Arrays.asList(IpGeoMap.ALL_GEO_FIELDS));
+        } else if (enrichmentValue instanceof List){
+            //noinspection unchecked
+            getExpectedEnrichmentValues(expectedEnrichments, enrichmentFieldName, (List<Object>) enrichmentValue, Arrays.asList(IpGeoMap.AGGREGATE_GEO_FIELDS));
         }
     }
 }
