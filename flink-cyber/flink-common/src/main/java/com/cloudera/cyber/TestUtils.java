@@ -1,6 +1,6 @@
 package com.cloudera.cyber;
 
-import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class TestUtils {
@@ -14,17 +14,18 @@ public class TestUtils {
                 .build();
     }
 
-    public static Message createMessage() {
+    public static Message createMessage(Map<String, Object> extensions) {
         return Message.newBuilder()
                 .setId(UUID.randomUUID().toString())
                 .setTs(MessageUtils.getCurrentTimestamp())
                 .setSource("test")
-                .setOriginalSource(SignedSourceKey.newBuilder()
-                        .setTopic("topic")
-                        .setPartition(0)
-                        .setOffset(0)
-                        .setSignature(new sha1(new byte[128]))
-                        .build())
-                .setExtensions(new HashMap<>()).build();
+                .setExtensions(extensions)
+                .setOriginalSource(
+                        source("topic", 0, 0)).
+                        build();
+    }
+
+    public static Message createMessage() {
+        return createMessage(null);
     }
 }
