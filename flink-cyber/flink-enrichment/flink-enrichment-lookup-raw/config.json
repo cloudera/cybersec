@@ -4,11 +4,11 @@
     "kind": "LOCAL",
     "fields": [
       {
-        "name": "src_ip",
+        "name": "ip_src_addr",
         "enrichmentType": "ip_whitelist"
       },
       {
-        "name": "dst_ip",
+        "name": "ip_dst_addr",
         "enrichmentType": "ip_whitelist"
       }
     ]

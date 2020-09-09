@@ -30,12 +30,12 @@ public abstract class EnrichmentJob {
         List<RestEnrichmentConfig> restConfig = RestLookupJob.parseConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_REST_CONFIG_FILE))));
         List<EnrichmentConfig> enrichmentConfigs = ConfigUtils.allConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_LOOKUPS_CONFIG_FILE))));
 
-        DataStream<Message> rested = RestLookupJob.enrich(messages, restConfig);
-        DataStream<Message> enriched = LookupJob.enrich(enrichments, rested, enrichmentConfigs);
+        DataStream<Message> enriched = LookupJob.enrich(enrichments, messages, enrichmentConfigs);
+        DataStream<Message> rested = RestLookupJob.enrich(enriched, restConfig);
         //DataStream<Message> hbased = HbaseJob.enrich(enriched, env, enrichmentConfigs);
 
         // TODO - apply the rules based enrichments
-        DataStream<Message> ruled = enriched;
+        DataStream<Message> ruled = rested;
 
         writeResults(env, params, ruled);
         return env;
