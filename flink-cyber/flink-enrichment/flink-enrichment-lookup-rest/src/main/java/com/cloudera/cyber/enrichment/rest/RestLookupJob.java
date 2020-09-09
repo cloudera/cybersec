@@ -22,6 +22,7 @@ import static org.apache.commons.codec.digest.DigestUtils.md5;
 public abstract class RestLookupJob {
 
     public static DataStream<Message> enrich(DataStream<Message> source, List<RestEnrichmentConfig> configs) {
+        // TODO - Gate the enrichments, based on some predicate eg. don't enrich if previous match on whitelist.
         return configs.stream().reduce(source, (in, config) -> {
             AsyncHttpRequest asyncHttpRequest = new AsyncHttpRequest(config);
             String processId = "rest-" + md5(source + config.getEndpointTemplate());
@@ -29,6 +30,8 @@ public abstract class RestLookupJob {
             DataStream<Message> messages = in.filter(m -> m.getSource().equals(config.getSource()))
                     .name("Filter - " + config.getEndpointTemplate() + " " + config.getSource())
                     .uid("filter-" + processId);
+
+            // TODO - pass through the non-matched messages
 
             return AsyncDataStream.unorderedWait(
                     messages,
