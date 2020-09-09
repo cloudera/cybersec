@@ -36,4 +36,9 @@ public class ParquetJobKafka extends ParquetJob {
                 .build();
         results.addSink(sink).name("Parquet Sink").uid("parquet-sink");
     }
+
+    @Override
+    protected void writeTabularResults(DataStream<Message> results, String path, ParameterTool params) {
+
+    }
 }

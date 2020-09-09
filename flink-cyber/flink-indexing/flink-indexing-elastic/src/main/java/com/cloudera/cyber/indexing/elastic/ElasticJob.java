@@ -1,9 +1,7 @@
 package com.cloudera.cyber.indexing.elastic;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.indexing.IndexEntry;
 import com.cloudera.cyber.indexing.SearchIndexJob;
-import com.google.common.collect.Streams;
 import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -20,11 +18,11 @@ import org.elasticsearch.client.indices.GetIndexTemplatesRequest;
 import org.elasticsearch.client.indices.GetIndexTemplatesResponse;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -34,14 +32,12 @@ public abstract class ElasticJob extends SearchIndexJob {
     private static final String PARAMS_RETRY_TIMEOUT = "es.retry.timeout";
     private RestHighLevelClient client;
 
-    public ElasticJob(ParameterTool params) {
+    @Override
+    protected final Map<String, Set<String>> loadFieldsFromIndex(ParameterTool params) throws IOException {
         HttpHost[] hosts = (HttpHost[]) Arrays.stream(params.getRequired("es.host").split(","))
                 .map(HttpHost::create).toArray();
         this.client = new RestHighLevelClient(RestClient.builder(hosts));
-    }
 
-    @Override
-    protected final Map<String, Set<String>> loadFieldsFromIndex(ParameterTool params) throws IOException {
         GetIndexTemplatesResponse response = client.indices()
                 .getIndexTemplate(new GetIndexTemplatesRequest(), RequestOptions.DEFAULT);
         return response.getIndexTemplates().stream().collect(toMap(it -> it.name(),
@@ -50,6 +46,7 @@ public abstract class ElasticJob extends SearchIndexJob {
 
     @Override
     protected final void writeResults(DataStream<IndexEntry> results, ParameterTool params) throws IOException {
+
         List<HttpHost> httpHosts = Arrays.stream(params.getRequired(PARAMS_ES_HOSTS).split(","))
                 .map(HttpHost::create).collect(toList());
         ElasticsearchSink.Builder<IndexEntry> esSinkBuilder = new ElasticsearchSink.Builder<>(
