@@ -21,7 +21,7 @@ public class IpGeoMapTest {
     private IpGeoMap geoMap;
 
     @Before
-    public void createGeoMap() throws Exception {
+    public void createGeoMap() {
         geoMap = new IpGeoMap(IpGeoTestData.GEOCODE_DATABASE_PATH, ENRICH_FIELD_NAMES, null);
         geoMap.open(new Configuration());
     }
@@ -72,7 +72,7 @@ public class IpGeoMapTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testThrowsCityDatabaseDoesNotExist() throws Exception {
+    public void testThrowsCityDatabaseDoesNotExist() {
         String doesntExistPath = "./src/test/resources/geolite/doesntexist";
         File databaseFile = new File(doesntExistPath);
         Assert.assertFalse(databaseFile.exists());
@@ -81,12 +81,19 @@ public class IpGeoMapTest {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void testThrowsCityDatabaseEmptyFile() throws Exception {
+    public void testThrowsCityDatabaseEmptyFile() {
         String emptyFilePath = "./src/test/resources/geolite/invalid_maxmind_db";
         File databaseFile = new File(emptyFilePath);
         Assert.assertTrue(databaseFile.exists());
         Assert.assertTrue(databaseFile.length() > 0);
-        IpGeoMap map = new IpGeoMap("./src/test/resources/geolite/invalid_maxmind_db", ENRICH_FIELD_NAMES, null);
+        IpGeoMap map = new IpGeoMap(emptyFilePath, ENRICH_FIELD_NAMES, null);
+        map.open(new Configuration());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testThrowsBadFilesystem() {
+        String badFilesystemPath = "bad:/src/test/resources/geolite/invalid_maxmind_db";
+        IpGeoMap map = new IpGeoMap(badFilesystemPath, ENRICH_FIELD_NAMES, null);
         map.open(new Configuration());
     }
 
