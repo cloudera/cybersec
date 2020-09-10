@@ -56,7 +56,7 @@ public class IpGeoEnrichment  {
         private final String singularName;
 
         /**
-         * Enrichment naem when used on a list of IPs.
+         * Enrichment name when used on a list of IPs.
          */
         @Getter
         private final String pluralName;
