@@ -19,8 +19,8 @@ public abstract class IpGeoJob {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         FlinkUtils.setupEnv(env, params);
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-        List<String> ipFields = Arrays.asList(params.get(PARAM_GEO_FIELDS).split(","));
-        String geoDatabasePath = params.get(PARAM_GEO_DATABASE_PATH);
+        List<String> ipFields = Arrays.asList(params.getRequired(PARAM_GEO_FIELDS).split(","));
+        String geoDatabasePath = params.getRequired(PARAM_GEO_DATABASE_PATH);
 
         DataStream<Message> source = createSource(env, params, ipFields);
 
