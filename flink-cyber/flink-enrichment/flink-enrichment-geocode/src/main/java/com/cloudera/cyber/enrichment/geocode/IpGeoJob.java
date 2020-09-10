@@ -1,6 +1,7 @@
 package com.cloudera.cyber.enrichment.geocode;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.flink.FlinkUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -16,6 +17,7 @@ public abstract class IpGeoJob {
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        FlinkUtils.setupEnv(env, params);
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         List<String> ipFields = Arrays.asList(params.get(PARAM_GEO_FIELDS).split(","));
         String geoDatabasePath = params.get(PARAM_GEO_DATABASE_PATH);
