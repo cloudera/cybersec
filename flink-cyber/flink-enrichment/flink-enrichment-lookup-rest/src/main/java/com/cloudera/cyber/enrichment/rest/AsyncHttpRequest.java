@@ -28,7 +28,7 @@ import java.util.function.Supplier;
 @Slf4j
 public class AsyncHttpRequest extends RichAsyncFunction<Message, Message> {
 
-    private @NonNull RestEnrichmentConfig config;
+    private final @NonNull RestEnrichmentConfig config;
 
     private final transient CloseableHttpClient client;
 
@@ -94,7 +94,7 @@ public class AsyncHttpRequest extends RichAsyncFunction<Message, Message> {
                 }
             }
         }).thenAccept((Map<String, String> fields) -> {
-            resultFuture.complete(Collections.singleton(MessageUtils.addFields(message, fields)));
+            resultFuture.complete(Collections.singleton(MessageUtils.addFields(message, fields, config.getPrefix() + ".")));
         });
     }
 }
