@@ -39,4 +39,9 @@ public class RestEnrichmentConfig {
     @Builder.Default
     private int cacheSize = 10000;
 
+    /**
+     * Prefix for results added to the message, e.g. "modelName"
+     */
+    private String prefix;
+
 }
