@@ -93,13 +93,8 @@ public class AsyncHttpRequest extends RichAsyncFunction<Message, Message> {
                     return null;
                 }
             }
-<<<<<<< HEAD
-        }).thenAccept((Map<String, String> fields) -> {
-            resultFuture.complete(Collections.singleton(MessageUtils.addFields(message, fields, config.getPrefix() + ".")));
-=======
         }).thenAccept((Map<String, Object> fields) -> {
-            resultFuture.complete(Collections.singleton(MessageUtils.addFields(message, fields)));
->>>>>>> Incorporate code review suggestions
+            resultFuture.complete(Collections.singleton(MessageUtils.addFields(message, fields, config.getPrefix() + ".")));
         });
     }
 }
