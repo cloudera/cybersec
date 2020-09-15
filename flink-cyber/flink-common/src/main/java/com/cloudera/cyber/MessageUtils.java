@@ -30,7 +30,7 @@ public class MessageUtils {
         }
     }
 
-    public static Message addFields(Message message, Map<String, String> field, String prefix) {
+    public static Message addFields(Message message, Map<String, Object> field, String prefix) {
         if (!field.isEmpty()) {
             return Message.newBuilder(message)
                     .setExtensions(Stream.concat(
@@ -43,7 +43,7 @@ public class MessageUtils {
         }
     }
 
-    private static Stream<Map.Entry<String,String>> prefixMap(Map<String, String> field, String prefix) {
+    private static Stream<Map.Entry<String,Object>> prefixMap(Map<String, Object> field, String prefix) {
         return field.entrySet().stream().collect(toMap(k -> prefix + k, Map.Entry::getValue)).entrySet().stream();
     }
 
@@ -86,10 +86,5 @@ public class MessageUtils {
     public static long getCurrentTimestamp() {
         return Instant.now().toEpochMilli();
     }
-<<<<<<< HEAD
-}
-
-=======
 
 }
->>>>>>> Incorporate code review suggestions
