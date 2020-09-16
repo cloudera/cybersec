@@ -91,7 +91,15 @@
                         "boolean",
                         {
                             "type": "array",
-                            "items": {
+                            "items": [
+                                 "float",
+                                 "double",
+                                 "string",
+                                 "int",
+                                 "long",
+                                 "bytes",
+                                 "boolean",
+                                 {
                                 "type": "map",
                                 "javaAnnotation": "org.apache.flink.api.common.typeinfo.TypeInfo(org.apache.flink.api.common.typeinfo.MapTypeInfo.class)",
                                 "values": [
@@ -145,7 +153,7 @@
                                         ]
                                     }
                                 ]
-                            }
+                            }]
                         },
                         {
                             "type": "map",
@@ -198,6 +206,44 @@
             "name": "source",
             "type": "string",
             "default": ""
+        },
+        {
+            "name": "data_quality_messages",
+            "type": ["null",
+               {
+                 "type": "array",
+                 "items":
+                     {
+                       "name": "DataQualityMessage",
+                       "namespace": "com.cloudera.cyber",
+                       "type": "record",
+                       "fields" : [
+                            {
+                                "name": "level",
+                                "type": {
+                                     "type": "enum",
+                                     "name": "DataQualityMessageLevel",
+                                     "symbols": ["ERROR", "WARNING", "INFO"]
+                                }
+                            },
+                            {
+                                "name": "feature",
+                                "type": "string"
+                            },
+                            {
+                                "name": "field",
+                                "type": ["null", "string"],
+                                "default": null
+                            },
+                            {
+                                "name": "message_text",
+                                "type": "string"
+                            }
+                       ]
+                    }
+               }
+            ],
+            "default": null
         }
     ]
 }
