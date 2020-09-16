@@ -46,7 +46,7 @@ public abstract class HbaseJob {
                 .map(r ->
                         MessageUtils.addFields(
                                 Message.getDecoder().decode((byte[]) r.getField(0)),
-                                (Map<String, String>) r.getField(1)
+                                (Map<String, Object>) r.getField(1)
                         )
                 );
     }

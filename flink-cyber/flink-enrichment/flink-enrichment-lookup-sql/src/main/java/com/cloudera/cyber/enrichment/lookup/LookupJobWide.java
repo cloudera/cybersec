@@ -128,11 +128,11 @@ public abstract class LookupJobWide implements CyberJob, MessageProcessingJob {
         DataStream<Message> results = tableEnv.toAppendStream(tableEnv.sqlQuery(sql), Row.class).map(
                 r -> {
                     Message old = Message.getDecoder().decode((byte[]) r.getField(0));
-                    HashMap<String, String> fields = new HashMap<String, String>();
+                    HashMap<String, Object> fields = new HashMap<>();
                     for (int i = 1; i < r.getArity(); i++) {
-                        Map<String, String> entries = (Map<String, String>) r.getField(i);
+                        Map<String, Object> entries = (Map<String,Object>) r.getField(i);
                         final int finalI = i;
-                        Map<String, String> output = entries.entrySet().stream().collect(
+                        Map<String, Object> output = entries.entrySet().stream().collect(
                                 Collectors.toMap(k -> fieldNames[finalI] + "_" + k.getKey(),
                                         v -> v.getValue())
                         );
@@ -182,7 +182,7 @@ public abstract class LookupJobWide implements CyberJob, MessageProcessingJob {
                     public void flatMap(Row r, Collector<Message> c) throws Exception {
                         Message m = MessageUtils.addFields(
                                 Message.getDecoder().decode(new ByteArrayInputStream((byte[]) r.getField(0))),
-                                (Map<String, String>) r.getField(1)
+                                (Map<String, Object>) r.getField(1)
                         );
                         c.collect(m);
 
@@ -199,7 +199,7 @@ public abstract class LookupJobWide implements CyberJob, MessageProcessingJob {
                         if (r.f0) {
                             Message m = MessageUtils.addFields(
                                     Message.getDecoder().decode(new ByteArrayInputStream((byte[]) r.f1.getField(0))),
-                                    (Map<String, String>) r.f1.getField(1)
+                                    (Map<String, Object>) r.f1.getField(1)
                             );
                             c.collect(m);
                         }
