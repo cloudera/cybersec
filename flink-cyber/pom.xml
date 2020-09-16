@@ -47,8 +47,9 @@
         <log4j.version>2.12.1</log4j.version>
         <multiline-string.version>0.1.2</multiline-string.version>
         <testcontainers.version>1.14.3</testcontainers.version>
-        <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
+        <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
         <solr.version>8.4.1.7.1.2.0-96</solr.version>
+        <maxmind.version>2.13.1</maxmind.version>
     </properties>
 
     <repositories>
@@ -312,6 +313,12 @@
                 <artifactId>jackson-annotations</artifactId>
                 <scope>compile</scope>
                 <version>2.11.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-validator</groupId>
+                <artifactId>commons-validator</artifactId>
+                <version>1.6</version>
             </dependency>
 
             <!-- Libraries -->

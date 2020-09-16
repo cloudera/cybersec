@@ -21,6 +21,7 @@
         <module>flink-enrichment-rules</module>
         <module>flink-enrichment-lookup-common</module>
         <module>flink-enrichment-combined</module>
+        <module>flink-enrichment-geocode</module>
     </modules>
 
 </project>
