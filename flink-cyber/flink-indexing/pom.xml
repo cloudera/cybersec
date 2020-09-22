@@ -17,6 +17,7 @@
         <module>flink-indexing-solr</module>
         <module>flink-indexing-elastic</module>
         <module>flink-indexing-search</module>
+        <module>flink-indexing-hive</module>
     </modules>
 
 </project>
