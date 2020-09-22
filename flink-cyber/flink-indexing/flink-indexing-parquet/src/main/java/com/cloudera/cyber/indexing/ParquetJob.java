@@ -1,4 +1,4 @@
-package com.cloudera.cyber.indexer;
+package com.cloudera.cyber.indexing;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;

@@ -1,6 +1,5 @@
-package com.cloudera.cyber.indexer;
+package com.cloudera.cyber.indexing;
 
-import com.cloudera.cyber.indexing.IndexEntry;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;

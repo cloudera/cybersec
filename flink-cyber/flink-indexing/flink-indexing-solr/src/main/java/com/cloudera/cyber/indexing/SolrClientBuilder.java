@@ -1,4 +1,4 @@
-package com.cloudera.cyber.indexer;
+package com.cloudera.cyber.indexing;
 
 import lombok.Data;
 import lombok.Builder;
