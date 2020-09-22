@@ -1,8 +1,6 @@
-package com.cloudera.cyber.indexer;
+package com.cloudera.cyber.indexing;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.indexing.IndexEntry;
-import com.cloudera.cyber.indexing.MessageRetry;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
