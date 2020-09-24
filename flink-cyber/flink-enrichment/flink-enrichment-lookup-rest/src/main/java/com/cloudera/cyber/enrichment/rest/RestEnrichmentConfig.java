@@ -44,4 +44,9 @@ public class RestEnrichmentConfig {
      */
     private String prefix;
 
+    /**
+     * An expression to determine whether the enrichment should run at all
+     */
+    private String filterExpression;
+
 }
