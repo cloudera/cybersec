@@ -2,6 +2,7 @@ package com.cloudera.cyber.enrichment;
 
 import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.enrichment.hbase.HbaseJob;
 import com.cloudera.cyber.enrichment.lookup.LookupJob;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.rest.RestEnrichmentConfig;
@@ -31,8 +32,8 @@ public abstract class EnrichmentJob {
         List<EnrichmentConfig> enrichmentConfigs = ConfigUtils.allConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_LOOKUPS_CONFIG_FILE))));
 
         DataStream<Message> enriched = LookupJob.enrich(enrichments, messages, enrichmentConfigs);
-        DataStream<Message> rested = RestLookupJob.enrich(enriched, restConfig);
-        //DataStream<Message> hbased = HbaseJob.enrich(enriched, env, enrichmentConfigs);
+        DataStream<Message> hbased = HbaseJob.enrich(enriched, env, enrichmentConfigs);
+        DataStream<Message> rested = RestLookupJob.enrich(hbased, restConfig);
 
         // TODO - apply the rules based enrichments
         DataStream<Message> ruled = rested;
