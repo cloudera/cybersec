@@ -12,8 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class IpGeoJob {
-    protected static final String PARAM_GEO_FIELDS = "geo.ip_fields";
-    protected static final String PARAM_GEO_DATABASE_PATH = "geo.database_path";
+    public static final String PARAM_GEO_FIELDS = "geo.ip_fields";
+    public static final String PARAM_GEO_DATABASE_PATH = "geo.database_path";
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();

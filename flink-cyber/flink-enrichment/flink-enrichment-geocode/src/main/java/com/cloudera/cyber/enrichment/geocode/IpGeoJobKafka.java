@@ -10,7 +10,7 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import java.util.Arrays;
 import java.util.List;
 
-public class    IpGeoJobKafka extends IpGeoJob {
+public class IpGeoJobKafka extends IpGeoJob {
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
             throw new RuntimeException("Path to the properties file is expected as the only argument.");
