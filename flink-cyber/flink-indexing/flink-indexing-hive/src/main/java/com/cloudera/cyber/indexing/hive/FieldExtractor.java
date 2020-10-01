@@ -1,7 +1,6 @@
 package com.cloudera.cyber.indexing.hive;
 
 import com.cloudera.cyber.Message;
-import com.google.common.collect.Streams;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
