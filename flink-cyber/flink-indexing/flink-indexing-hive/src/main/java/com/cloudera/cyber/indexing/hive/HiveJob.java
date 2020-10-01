@@ -20,6 +20,8 @@ import java.util.List;
 
 @Slf4j
 public abstract class HiveJob {
+    private static final String PARAMS_HIVE_CONF = "hive.confdir";
+    private static final String DEFAULT_HIVE_CONF = "/etc/hive/conf/";
     private static final String PARAMS_HIVE_TABLE = "hive.table";
     private static final String DEFAULT_HIVE_TABLE = "events";
     private static final String PARAMS_HIVE_CATALOG = "hive.catalog";
@@ -38,8 +40,7 @@ public abstract class HiveJob {
                 .build();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 
-        String hiveConfDir = "/etc/hive/conf/";
-
+        String hiveConfDir = params.get(PARAMS_HIVE_CONF, DEFAULT_HIVE_CONF);
         String catalog = params.get(PARAMS_HIVE_CATALOG, DEFAULT_HIVE_CATALOG);
         String schema = params.get(PARAMS_HIVE_SCHEMA, DEFAULT_HIVE_SCHEMA);
         String table = params.get(PARAMS_HIVE_TABLE, DEFAULT_HIVE_TABLE);
