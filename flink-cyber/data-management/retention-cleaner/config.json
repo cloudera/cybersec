@@ -1,0 +1,9 @@
+{
+  "originalLocation": "/data/originals/",
+  "logsLocation": "/data/logs/",
+  "eventsTable": "events",
+  "originalsMaxAge": 10,
+  "logsMaxAge": 10,
+  "eventsMaxAge": 10,
+  "datePattern": "yyyy-MM-dd'-''-'HH"
+}
