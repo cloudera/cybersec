@@ -3,11 +3,14 @@ package com.cloudera.cyber.indexing.hive;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.table.descriptors.*;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
+import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.ObjectPath;
@@ -17,26 +20,29 @@ import org.apache.flink.types.Row;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
+
+import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
 
 @Slf4j
 public abstract class HiveJob {
-    private static final String PARAMS_HIVE_CONF = "hive.confdir";
-    private static final String DEFAULT_HIVE_CONF = "/etc/hive/conf/";
-    private static final String PARAMS_HIVE_TABLE = "hive.table";
-    private static final String DEFAULT_HIVE_TABLE = "events";
-    private static final String PARAMS_HIVE_CATALOG = "hive.catalog";
-    private static final String DEFAULT_HIVE_CATALOG = "default";
-    private static final String PARAMS_HIVE_SCHEMA = "hive.schema";
-    private static final String DEFAULT_HIVE_SCHEMA = "cyber";
+    protected static final String PARAMS_HIVE_CONF = "hive.confdir";
+    protected static final String DEFAULT_HIVE_CONF = "/etc/hive/conf/";
+    protected static final String PARAMS_HIVE_TABLE = "hive.table";
+    protected static final String DEFAULT_HIVE_TABLE = "events";
+    protected static final String PARAMS_HIVE_CATALOG = "hive.catalog";
+    protected static final String DEFAULT_HIVE_CATALOG = "default";
+    protected static final String PARAMS_HIVE_SCHEMA = "hive.schema";
+    protected static final String DEFAULT_HIVE_SCHEMA = "cyber";
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws TableNotExistException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+        env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
         FlinkUtils.setupEnv(env, params);
 
         EnvironmentSettings settings = EnvironmentSettings.newInstance()
                 .inStreamingMode()
-                .useBlinkPlanner()
+                .useOldPlanner()
                 .build();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 
@@ -56,13 +62,26 @@ public abstract class HiveJob {
         List<String> fields = Arrays.asList(schemaDetail.getFieldNames());
         FieldExtractor fieldExtractor = new FieldExtractor(fields);
 
-        DataStream<Row> output = source
-                // TODO - apply any filtering and index projection logic here
+        SingleOutputStreamOperator<Row> output = source
+                // TODO - apply any filtering here
                 // map the input messages to the hive schema
-                .map(fieldExtractor).returns(fieldExtractor.type());
+                .map(fieldExtractor)
+                .returns(fieldExtractor.type());
+
+        tableEnv.createTemporaryView("input", output);
+
+        ConnectTableDescriptor outputTableDescriptor = tableEnv
+                .connect(new HiveStreamingConnector(schema, table))
+                .withSchema(new Schema().schema(schemaDetail))
+                .inAppendMode();
+
+        log.info(outputTableDescriptor.toProperties().toString());
+
+        outputTableDescriptor.createTemporaryTable("outputTable");
 
         // write the hive entry
-        tableEnv.insertInto(table, tableEnv.fromDataStream(output));
+        tableEnv.sqlUpdate("insert into outputTable select * from input");
+
         return env;
     }
 

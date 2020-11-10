@@ -4,7 +4,7 @@ This job takes Message objects from a Kafka Topic and translates them to fit int
 
 The process reads the structure of the hive table and extracts the fields required to populate it from the message. It also expects a minimum set of fields in the hive table, and a column which accepts a map to contain any non-extracted fields.
 
-For example, the following hive table schema could be used as a destination:
+For example, the following hive table schema could be used as a destination if you are using the partitioning sink mode:
 ```SQL
 CREATE TABLE `events`(                    
    `id` string,                                     
@@ -15,9 +15,20 @@ CREATE TABLE `events`(
    `ip_dst_addr` string,                            
    `ip_src_port` string,                          
    `ip_dst_port` string)
-PARTITIONED BY (source string) 
-STORED AS ORC;
+PARTITIONED BY (source string, dt string, hr string) 
+STORED AS ORC
+TBLPROPERTIES (
+  'partition.time-extractor.timestamp-pattern'='$dt $hr:00:00',
+  'sink.partition-commit.trigger'='partition-time',
+  'sink.partition-commit.delay'='30 s',
+  'sink.partition-commit.policy.kind'='metastore,success-file',
+  'transactional'='true',
+  'transactional_properties'='insert_only'
+);
+
 ```
+
+There is also a mode which uses Hive Streaming.
 
 | parameter | default | explanation |
 | --- | --- | --- |
