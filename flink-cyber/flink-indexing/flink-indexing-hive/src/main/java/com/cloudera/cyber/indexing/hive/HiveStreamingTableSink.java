@@ -36,16 +36,11 @@ public class HiveStreamingTableSink implements AppendStreamTableSink<Row> {
 
     @Override
     public void emitDataStream(DataStream<Row> dataStream) {
-    }
-
-    @Override
-    public DataStreamSink<Row> consumeDataStream(DataStream<Row> dataStream) {
         long batchTime = 1000;
         long maxEvents = 10000;
         dataStream.windowAll(TumblingProcessingTimeWindows.of(Time.milliseconds(batchTime)))
                 .trigger(EventTimeAndCountTrigger.of(maxEvents))
                 .process(new HiveStreamingTransactionProcess());
-        return null;
     }
 
     @Override

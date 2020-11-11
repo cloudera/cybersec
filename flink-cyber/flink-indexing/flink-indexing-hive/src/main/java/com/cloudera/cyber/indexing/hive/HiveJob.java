@@ -3,26 +3,23 @@ package com.cloudera.cyber.indexing.hive;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.table.descriptors.*;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.ObjectPath;
 import org.apache.flink.table.catalog.exceptions.TableNotExistException;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
+import org.apache.flink.table.descriptors.ConnectTableDescriptor;
+import org.apache.flink.table.descriptors.Schema;
 import org.apache.flink.types.Row;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
-
-import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
 
 @Slf4j
 public abstract class HiveJob {
