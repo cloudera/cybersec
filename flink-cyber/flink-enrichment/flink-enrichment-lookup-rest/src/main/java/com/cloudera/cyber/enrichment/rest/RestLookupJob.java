@@ -2,35 +2,53 @@ package com.cloudera.cyber.enrichment.rest;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
+import org.apache.flink.util.Preconditions;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
 
+@Slf4j
 public abstract class RestLookupJob {
 
+    protected static ObjectMapper getConfigObjectMapper() {
+        return new ObjectMapper()
+            .activateDefaultTyping(BasicPolymorphicTypeValidator.builder().
+                allowIfSubType(Map.class).
+                allowIfSubType(List.class).
+                allowIfBaseType(EndpointAuthorizationConfig.class).
+                build())
+            .enable(SerializationFeature.INDENT_OUTPUT);
+    }
+
     public static DataStream<Message> enrich(DataStream<Message> source, List<RestEnrichmentConfig> configs) {
-        // TODO - Gate the enrichments, based on some predicate eg. don't enrich if previous match on whitelist.
         return configs.stream().reduce(source, (in, config) -> {
-            AsyncHttpRequest asyncHttpRequest = new AsyncHttpRequest(config, m -> m.getSource().equals(config.getSource()));
+            Preconditions.checkNotNull(config.getSources(),"specify a list of source names or ANY to match any source");
+            Preconditions.checkArgument(!config.getSources().isEmpty(), "specify a list of source names or ANY to match any source");
+            AsyncHttpRequest asyncHttpRequest = new AsyncHttpRequest(config);
             String processId = "rest-" + md5(source + config.getEndpointTemplate());
 
             return AsyncDataStream.unorderedWait(
                     in,
-                    asyncHttpRequest, config.getTimeout(), TimeUnit.MILLISECONDS, config.getCapacity())
-                    .name("REST - " + config.getEndpointTemplate() + " " + config.getSource())
+                    asyncHttpRequest, config.getTimeoutMillis(), TimeUnit.MILLISECONDS, config.getCapacity())
+                    .name("REST - " + config.getEndpointTemplate() + " " + config.getSources())
                     .uid("rest-" + processId);
         }, (a, b) -> a); // TODO - does the combiner really make sense?);
     }
@@ -38,6 +56,7 @@ public abstract class RestLookupJob {
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws IOException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+        env.enableCheckpointing(5000);
         FlinkUtils.setupEnv(env, params);
 
         DataStream<Message> source = createSource(env, params);
@@ -50,9 +69,9 @@ public abstract class RestLookupJob {
     }
 
     public static List<RestEnrichmentConfig> parseConfigs(byte[] configJson) throws IOException {
-        return new ObjectMapper().readValue(
+        return getConfigObjectMapper().readValue(
                 configJson,
-                new TypeReference<List<RestEnrichmentConfig>>() {
+                new TypeReference<ArrayList<RestEnrichmentConfig>>() {
                 });
     }
 
