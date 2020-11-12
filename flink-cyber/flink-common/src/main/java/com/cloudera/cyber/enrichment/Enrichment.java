@@ -23,7 +23,7 @@ public abstract class Enrichment {
         return String.join(".", prefix, enrichmentName);
     }
 
-    public void addQualityMessage(List<DataQualityMessage> messages, DataQualityMessageLevel level, String message) {
+    public List<DataQualityMessage> addQualityMessage(List<DataQualityMessage> messages, DataQualityMessageLevel level, String message) {
         Optional<DataQualityMessage> duplicate = messages.stream().
                 filter(m -> m.getLevel().equals(level) && m.getField().equals(fieldName) && m.getFeature().equals(feature) && m.getMessage().equals(message)).findFirst();
         if (!duplicate.isPresent()) {
@@ -33,6 +33,7 @@ public abstract class Enrichment {
                     .field(fieldName)
                     .message(message).build());
         }
+        return messages;
     }
 
     public abstract void enrich(Map<String, String> extensions, String enrichmentName, Object enrichmentValue);
