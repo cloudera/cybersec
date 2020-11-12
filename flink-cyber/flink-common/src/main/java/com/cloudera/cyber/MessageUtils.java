@@ -1,5 +1,7 @@
 package com.cloudera.cyber;
 
+import avro.shaded.com.google.common.base.Joiner;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +12,7 @@ import static java.util.stream.Collectors.toMap;
 
 public class MessageUtils {
 
+    public static final String MESSAGE_FIELD_DELIMITER = ".";
     /**
      * Returns a new message combining the fields from the first message with the fields passed in.
      *
@@ -44,15 +47,19 @@ public class MessageUtils {
     }
 
     private static Stream<Map.Entry<String,String>> prefixMap(Map<String, String> field, String prefix) {
-        return field.entrySet().stream().collect(toMap(k -> prefix + k, Map.Entry::getValue)).entrySet().stream();
+        return field.entrySet().stream().collect(toMap(k -> Joiner.on(MESSAGE_FIELD_DELIMITER).skipNulls().join(prefix, k.getKey()), Map.Entry::getValue)).entrySet().stream();
     }
 
     public static Message enrich(Message message, Map<String, String> enrichmentExtensions, List<DataQualityMessage> dataQualityMessages) {
+        return enrich(message, enrichmentExtensions, null, dataQualityMessages);
+    }
+
+    public static Message enrich(Message message, Map<String, String> enrichmentExtensions, String prefix, List<DataQualityMessage> dataQualityMessages) {
         if (!enrichmentExtensions.isEmpty() || !dataQualityMessages.isEmpty()) {
             return message.toBuilder()
                     .extensions(Stream.concat(
                             streamExtensions(message),
-                            enrichmentExtensions.entrySet().stream()
+                            prefixMap(enrichmentExtensions, prefix)
                     ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
                     .dataQualityMessages(Stream.concat(
                             streamDataQualityMessages(message),

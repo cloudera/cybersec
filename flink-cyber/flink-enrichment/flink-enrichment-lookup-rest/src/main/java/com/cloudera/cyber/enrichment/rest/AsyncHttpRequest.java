@@ -1,111 +1,97 @@
 package com.cloudera.cyber.enrichment.rest;
 
+import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
+import com.cloudera.cyber.enrichment.SingleValueEnrichment;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.text.StringSubstitutor;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.type.TypeReference;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.streaming.api.functions.async.ResultFuture;
 import org.apache.flink.streaming.api.functions.async.RichAsyncFunction;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.List;
+
+import static com.cloudera.cyber.DataQualityMessageLevel.ERROR;
 
 @Slf4j
 public class AsyncHttpRequest extends RichAsyncFunction<Message, Message> {
 
+    public static final String REST_ENRICHMENT_FEATURE = "rest";
+    public static final String REST_REQUEST_FAILED_QUALITY_MESSAGE = "Rest request url='%s' entity='%s' failed '%s'";
+    public static final String ANY_SOURCE_NAME = "ANY";
+
     private final @NonNull RestEnrichmentConfig config;
+    private final boolean matchAnySource;
 
-    private final transient CloseableHttpClient client;
+    private transient SingleValueEnrichment enrichment;
 
-    private transient AsyncLoadingCache<String, Map<String, String>> cache;
+    /**
+     * Asynchronously loads rest maps into cache.
+     */
+    private transient RestRequest request;
 
-    private transient ObjectMapper om = new ObjectMapper();
-
-    private final Predicate<Message> applicable;
-
-    public AsyncHttpRequest(@NonNull RestEnrichmentConfig config, Predicate<Message> applicable) {
+    public AsyncHttpRequest(@NonNull RestEnrichmentConfig config) {
         this.config = config;
-
-        this.applicable = applicable;
-
-        // setup the client
-        this.client = HttpClientBuilder.create()
-                // add proxy and auth support
-                .build();
-
-        this.cache = Caffeine.newBuilder().maximumSize(config.getCacheSize())
-                .buildAsync((u) -> {
-                    HttpGet httpget = new HttpGet(u);
-                    try {
-                        CloseableHttpResponse execute = client.execute(httpget);
-                        Map<String, String> results = om.readValue(
-                                execute.getEntity().getContent(),
-                                new TypeReference<Map<String, String>>() {
-                                });
-                        return results;
-                    } catch (IOException e) {
-                        // TODO - add error handling
-                        log.error("HTTP request failed", e);
-                        return null;
-                    }
-                });
+        this.matchAnySource = config.getSources().contains(ANY_SOURCE_NAME);
     }
 
     @Override
     public void open(Configuration parameters) throws Exception {
-
+        super.open(parameters);
+        log.debug("Opening AsyncHttpRequest {}", config.toString());
+        // setup the client
+        request = config.createRestEnrichmentRequest();
+        enrichment = new SingleValueEnrichment(config.getPrefix(), REST_ENRICHMENT_FEATURE);
     }
 
     @Override
-    public void close() throws Exception {
-
-    }
-
-    @Override
-    public void asyncInvoke(Message message, ResultFuture<Message> resultFuture) throws Exception {
-        // short circuit option for unenriched messages
-        // TODO - investigate ways of keeping these messages outside of the async stream
-        if (!applicable.test(message)) {
-            resultFuture.complete(Collections.singleton(message));
-        } else {
-            // issue the asynchronous request, receive a future for result
-            StringSubstitutor sub = new StringSubstitutor(message.getExtensions());
-            String url = sub.replace(config.getEndpointTemplate());
-
-            log.debug(String.format("Fetching enrichment from url %s", url));
-            final Future<Map<String, String>> result = this.cache.get(url);
-
-            // set the callback to be executed once the request by the client is complete
-            // the callback simply forwards the result to the result future
-            CompletableFuture.supplyAsync(new Supplier<Map<String, String>>() {
-                @Override
-                public Map<String, String> get() {
-                    try {
-                        return result.get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        // Normally handled explicitly.
-                        return null;
-                    }
-                }
-            }).thenAccept((Map<String, String> fields) -> {
-                resultFuture.complete(Collections.singleton(MessageUtils.addFields(message, fields, config.getPrefix() + ".")));
-            });
+    public void close() {
+        if (request != null) {
+            try {
+                request.close();
+            } catch (IOException e) {
+                log.error("Exception while closing rest request.", e);
+            }
         }
     }
+
+    private List<DataQualityMessage> createDataQualityMessages(List<String> errorMessages) {
+        if (!errorMessages.isEmpty()) {
+            List<DataQualityMessage> dataQualityMessages = new ArrayList<>();
+            errorMessages.forEach((errorMessage) -> enrichment.addQualityMessage(dataQualityMessages, ERROR, errorMessage));
+            return dataQualityMessages;
+         } else {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public void asyncInvoke(Message message, ResultFuture<Message> resultFuture) {
+        List<String> configSource = config.getSources();
+        String messageSource = message.getSource();
+        if (matchAnySource || configSource.contains(messageSource)) {
+            request.getResult(!matchAnySource, message.getExtensions()).handleAsync((RestRequestResult restRequestResult, Throwable e) -> {
+                if (restRequestResult == null) {
+                    restRequestResult = new RestRequestResult();
+                }
+                if (e != null) {
+                    restRequestResult.getErrors().add(e.getMessage());
+                }
+                Collection<Message> result = Collections.singleton(MessageUtils.enrich(message, restRequestResult.getExtensions(), config.getPrefix(), createDataQualityMessages(restRequestResult.getErrors())));
+                log.debug("Returned model result {}", result);
+                resultFuture.complete(result);
+                return restRequestResult;
+            });
+        } else {
+            // enrichment not relevant for this source - pass message through
+            log.debug("predicate returned false or event source {} does not match rest source {}", messageSource, configSource);
+            resultFuture.complete(Collections.singleton(message));
+        }
+   }
 }
