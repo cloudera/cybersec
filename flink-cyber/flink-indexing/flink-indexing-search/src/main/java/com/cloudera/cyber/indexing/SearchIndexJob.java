@@ -2,27 +2,25 @@ package com.cloudera.cyber.indexing;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.state.MapStateDescriptor;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
+import org.apache.flink.streaming.api.datastream.BroadcastStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
-import org.apache.flink.streaming.api.functions.windowing.ProcessWindowFunction;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-import org.apache.flink.util.Collector;
 
-import javax.swing.*;
 import java.io.IOException;
-import java.time.Instant;
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 import java.util.regex.Pattern;
 
+@Slf4j
 public abstract class SearchIndexJob {
+    protected static final String PARAMS_SCHEMA_REFRESH_INTERVAL = "schema.refresh";
+    protected static final long DEFAULT_SCHEMA_REFRESH_INTERVAL = 5 * 60 * 1000;
+    protected static final String PARAMS_TOPIC_CONFIG_LOG = "topic.config.log";
 
     private static final long DEFAULT_RETRY_WINDOW = 5 * 60000;
     private static final String PARAMS_RETRY_WINDOW = "retry.window";
@@ -43,12 +41,13 @@ public abstract class SearchIndexJob {
             messages = source;
         }
 
-        // load the relevant index templates from search backend, and use to build field filters
-        Map<String, Set<String>> fieldsBySource = loadFieldsFromIndex(params);
-        KeyedStream<Map.Entry<String, Set<String>>, String> entryStringKeyedStream = env.fromCollection(fieldsBySource.entrySet()).keyBy(Map.Entry::getKey);
-        final Set<String> indicesAvailable = fieldsBySource.keySet();
+        DataStream<CollectionField> configSource = createConfigSource(env, params);
+        logConfig(configSource, params);
+        BroadcastStream<CollectionField> entryStringKeyedStream = configSource
+                .broadcast(Descriptors.broadcastState);
 
         // TODO - apply any row filtering logic here
+        // or at least you would be able to if that didn't rely on the broadcast state for config
         /*
          * Current plan is to pivot to table api, apply user configured where statement, if the statement is
          * applied before index entry transformation (better for performance; filter early to avoid extra work)
@@ -58,48 +57,10 @@ public abstract class SearchIndexJob {
 
         // only process messages that we have a collection for, and extract only the fields that are accounted for in target index
         DataStream<IndexEntry> output = messages
-                .filter(message -> indicesAvailable.contains(message.getSource()))
                 .keyBy(Message::getSource)
                 .connect(entryStringKeyedStream)
                 .process(new FilterStreamFieldsByConfig())
                 .name("Index Entry Extractor").uid("index-entry-extract");
-
-        DataStream<MessageRetry> unindexed = messages
-                .filter(message -> !indicesAvailable.contains(message.getSource()))
-                .map(m -> MessageRetry.builder()
-                        .message(m)
-                        // TODO - this should be set to the actual Flink processing time really
-                        .lastTry(Instant.now().toEpochMilli())
-                        .retry(0)
-                        .build())
-                .name("Messages not indexed").uid("warn-not-indexed");
-        writeRetryResults(unindexed, params);
-
-        // TODO work out retry logic with windowing to insert time delays
-//        createRetrySource(env, params)
-//                .assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<MessageRetry>(Time.milliseconds(DEFAULT_RETRY_WINDOW)) {
-//                    private static final long RETRY_INTERVAL = 60000;
-//
-//                    @Override
-//                    public long extractTimestamp(MessageRetry messageRetry) {
-//                        return messageRetry.getLastTry() + RETRY_INTERVAL;
-//                    }
-//                })
-//                .keyBy(m -> m.getMessage().getSource())
-//                .timeWindow(Time.milliseconds(params.getLong(PARAMS_RETRY_WINDOW, DEFAULT_RETRY_WINDOW)))
-//                .allowedLateness(Time.milliseconds(DEFAULT_RETRY_WINDOW))
-//                .process(new ProcessWindowFunction<MessageRetry, Message, String, TimeWindow>() {
-//                    @Override
-//                    public void process(String key, Context context, Iterable<MessageRetry> iterable, Collector<Message> collector) throws Exception {
-//                        iterable.forEach(i -> collector.collect(i.getMessage()));
-//                    }
-//                }).name("Retry Window").uid("retry-window-process")
-//
-//                .keyBy(Message::getSource)
-//                .connect(entryStringKeyedStream.keyBy(e -> e.getKey()))
-//                .process(new FilterStreamFieldsByConfig())
-//                .name("Retry processing").uid("index-entry-extract-retry");
-
 
         // now add the correctly formed version for tables
 
@@ -111,10 +72,17 @@ public abstract class SearchIndexJob {
         return env;
     }
 
-    protected abstract Map<String, Set<String>> loadFieldsFromIndex(ParameterTool params) throws IOException;
-    protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
-    protected abstract DataStream<MessageRetry> createRetrySource(StreamExecutionEnvironment env, ParameterTool params);
-    protected abstract void writeResults(DataStream<IndexEntry> results, ParameterTool params) throws IOException;
-    protected abstract void writeRetryResults(DataStream<MessageRetry> retries, ParameterTool params) throws IOException;
 
+    protected static class Descriptors {
+        public static final MapStateDescriptor<String, List<String>> broadcastState = new MapStateDescriptor<>(
+                "fieldsByIndex",
+                Types.STRING,
+                Types.LIST(Types.STRING)
+        );
+
+    }
+    protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
+    protected abstract DataStream<CollectionField> createConfigSource(StreamExecutionEnvironment env, ParameterTool params);
+    protected abstract void writeResults(DataStream<IndexEntry> results, ParameterTool params) throws IOException;
+    protected abstract void logConfig(DataStream<CollectionField> configSource, ParameterTool params);
 }
