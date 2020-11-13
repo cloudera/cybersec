@@ -38,7 +38,8 @@ public class EnrichmentBroadcastProcessFunction extends BroadcastProcessFunction
             }
             collector.collect(MessageUtils.addFields(message, hm));
         } else {
-            log.warn("Failed to find broadcast lookup for %s", type);
+            log.debug("No broadcast lookup for %s, passthrough message", type);
+            collector.collect(message);
         }
     }
 
