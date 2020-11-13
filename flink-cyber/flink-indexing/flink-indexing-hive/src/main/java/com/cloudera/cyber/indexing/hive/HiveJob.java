@@ -6,9 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.EnvironmentSettings;
+import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.ObjectPath;
@@ -19,7 +22,10 @@ import org.apache.flink.table.descriptors.Schema;
 import org.apache.flink.types.Row;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class HiveJob {
@@ -38,8 +44,8 @@ public abstract class HiveJob {
         FlinkUtils.setupEnv(env, params);
 
         EnvironmentSettings settings = EnvironmentSettings.newInstance()
+                .useBlinkPlanner()
                 .inStreamingMode()
-                .useOldPlanner()
                 .build();
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, settings);
 
@@ -50,13 +56,12 @@ public abstract class HiveJob {
 
         HiveCatalog hive = new HiveCatalog(catalog, schema, hiveConfDir, "3.1.2");
         tableEnv.registerCatalog("hive", hive);
-        tableEnv.useCatalog("hive");
 
         DataStream<Message> source = createSource(env, params);
 
         // get the schema of the hive table
-        TableSchema schemaDetail = hive.getTable(new ObjectPath(schema, table)).getSchema();
-        List<String> fields = Arrays.asList(schemaDetail.getFieldNames());
+        TableSchema tableSchema = hive.getTable(new ObjectPath(schema, table)).getSchema();
+        List<String> fields = Arrays.asList(tableSchema.getFieldNames());
         FieldExtractor fieldExtractor = new FieldExtractor(fields);
 
         SingleOutputStreamOperator<Row> output = source
@@ -64,20 +69,19 @@ public abstract class HiveJob {
                 // map the input messages to the hive schema
                 .map(fieldExtractor)
                 .returns(fieldExtractor.type());
-
         tableEnv.createTemporaryView("input", output);
 
         ConnectTableDescriptor outputTableDescriptor = tableEnv
                 .connect(new HiveStreamingConnector(schema, table))
-                .withSchema(new Schema().schema(schemaDetail))
+                .withSchema(new Schema().schema(tableSchema))
                 .inAppendMode();
-
-        log.info(outputTableDescriptor.toProperties().toString());
 
         outputTableDescriptor.createTemporaryTable("outputTable");
 
+        String fieldNames = fieldExtractor.fieldNames().stream().collect(Collectors.joining(","));
+        String sql = String.format("insert into outputTable (%s) select %s from input", fieldNames, fieldNames);
         // write the hive entry
-        tableEnv.sqlUpdate("insert into outputTable select * from input");
+        tableEnv.sqlUpdate(sql);
 
         return env;
     }
