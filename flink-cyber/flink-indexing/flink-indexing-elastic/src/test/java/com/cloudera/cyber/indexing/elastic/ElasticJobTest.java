@@ -1,6 +1,7 @@
 package com.cloudera.cyber.indexing.elastic;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.indexing.CollectionField;
 import com.cloudera.cyber.indexing.MessageRetry;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -19,7 +20,7 @@ import static org.junit.Assert.fail;
 public class ElasticJobTest extends ElasticJob {
 
     private ManualSource<Message> source;
-    private CollectingSink<MessageRetry> retrySink = new CollectingSink<>();
+    private ManualSource<CollectionField> configSource;
 
     @Rule
     public ElasticsearchContainer container = new ElasticsearchContainer();
@@ -41,14 +42,14 @@ public class ElasticJobTest extends ElasticJob {
     }
 
     @Override
-    protected DataStream<MessageRetry> createRetrySource(StreamExecutionEnvironment env, ParameterTool params) {
-        return null;
-    }
-    @Override
-    protected void writeRetryResults(DataStream<MessageRetry> retries, ParameterTool params) throws IOException {
-        retries.addSink(retrySink);
+    protected DataStream<CollectionField> createConfigSource(StreamExecutionEnvironment env, ParameterTool params) {
+        configSource = JobTester.createManualSource(env, TypeInformation.of(CollectionField.class));
+        return configSource.getDataStream();
     }
 
+    @Override
+    protected void logConfig(DataStream<CollectionField> configSource, ParameterTool params) {
+    }
 
     @Test
     @Ignore
