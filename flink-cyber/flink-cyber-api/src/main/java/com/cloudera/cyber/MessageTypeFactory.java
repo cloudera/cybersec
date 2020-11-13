@@ -25,6 +25,6 @@ public class MessageTypeFactory extends TypeInfoFactory<Message> {
                                         avroOut.getTypeAt(e))
                 ).collect(Collectors.toList());
 
-        return new PojoTypeInfo<Message>(Message.class, fields);
+        return new PojoTypeInfo<>(Message.class, fields);
     }
 }
