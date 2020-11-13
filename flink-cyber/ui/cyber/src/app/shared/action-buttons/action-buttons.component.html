@@ -1,0 +1,8 @@
+<button nz-button 
+  *ngFor="let action of actions" 
+  nzType="default"
+  [disabled]="disabled(action)"
+  [nzDanger]="action.danger"
+  (click)="onClick(action)">
+  {{ action.name}}
+</button>
