@@ -15,21 +15,19 @@
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-rules</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>
-
-
         <dependency>
-            <groupId>com.cloudera.parserchains</groupId>
+            <groupId>com.cloudera.cyber</groupId>
             <artifactId>parser-chains-flink</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -38,7 +36,6 @@
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
-
 
         <dependency>
             <groupId>com.hortonworks.smm</groupId>
@@ -61,13 +58,14 @@
                     <artifactId>logback-classic</artifactId>
                 </exclusion>
             </exclusions>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-logging</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
+            <version>${project.parent.version}</version>
+            <scope>provided</scope>
         </dependency>
 
 
