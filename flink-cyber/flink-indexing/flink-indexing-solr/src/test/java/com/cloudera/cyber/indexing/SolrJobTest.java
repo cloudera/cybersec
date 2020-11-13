@@ -4,6 +4,7 @@ import com.cloudera.cyber.Message;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
@@ -23,9 +24,10 @@ public class SolrJobTest extends SolrJob {
     }
 
     @Override
-    protected DataStream<MessageRetry> createRetrySource(StreamExecutionEnvironment env, ParameterTool params) {
+    protected KeyedStream<CollectionField, String> createConfigSource(StreamExecutionEnvironment env, ParameterTool params) {
         return null;
     }
+
 
     @Override
     protected void writeResults(DataStream<IndexEntry> results, ParameterTool params) {
@@ -33,7 +35,7 @@ public class SolrJobTest extends SolrJob {
     }
 
     @Override
-    protected void writeRetryResults(DataStream<MessageRetry> retries, ParameterTool params) throws IOException {
-        retries.addSink(retrySink);
+    protected void logConfig(DataStream<CollectionField> configSource, ParameterTool params) {
     }
+
 }
