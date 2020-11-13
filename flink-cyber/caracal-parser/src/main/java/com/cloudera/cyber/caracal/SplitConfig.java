@@ -17,7 +17,6 @@ public class SplitConfig implements Serializable {
     private String timestampField;
     @Builder.Default private ParserChainSchema chainSchema = new ParserChainSchema();
 
-
     /**
      * An optional function (javascript to apply to the timestamp)
      */

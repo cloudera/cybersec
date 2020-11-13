@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.metrics.MetricGroup;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.Preconditions;
 
@@ -26,6 +27,9 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toMap;
 
 /**
  * Splits up JSON array based on a configured path and dupes 'header' in to multiple messages
@@ -105,7 +109,6 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
                 return Long.valueOf(s);
             };
         }
-
     }
 
     @Override
@@ -122,12 +125,10 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
         Map<String, Object> headerFields = header instanceof Map ?
                 ((Map<String, Object>) header).entrySet().stream()
                     .filter(e -> isScalar(e.getValue()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)) :
-                Collections.emptyMap();
+                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)) :
+                emptyMap();
 
         Object jsonPathResult = documentContext.read(jsonPath);
-
-        List resultList = (List) jsonPathResult;
 
         ((List) jsonPathResult).forEach(part -> {
             Map<String, Object> fields = (Map<String, Object>) part;
@@ -146,6 +147,10 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
                 }
             }
 
+            // Add metrics
+            /*MetricGroup metricGroup = getRuntimeContext().getMetricGroup();
+            metricGroup.addGroup("parser." + input.getTopic()).counter(1);*/
+
             collector.collect(Message.newBuilder()
                     .setId(UUID.randomUUID().toString())
                     .setOriginalSource(
@@ -156,9 +161,9 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
                                     .setSignature(sig)
                                     .build()
                     )
-                    .setSource(this.topic)
+                    .setSource(input.getTopic())
                     .setTs(ts)
-                    .setExtensions(childPlusHeader(topic, fields, headerFields)).build());
+                    .setExtensions(childPlusHeader(fields, headerFields)).build());
         });
         
     }
@@ -167,14 +172,10 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
         return !(value instanceof Map || value instanceof List);
     }
 
-    private Map<String, Object> childPlusHeader(String topic, Map<String, Object> part, Map<String, Object> header) {
+    private Map<String, Object> childPlusHeader(Map<String, Object> part, Map<String, Object> header) {
         Map<String, Object> result = Streams.concat(header.entrySet().stream(), part.entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b));
-        result.put("source", topic);
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b));
         return result;
     }
 
-    private Map<String,String> mapStringObjectToString(Map<String, Object> part) {
-        return part.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue().toString()));
-    }
 }
