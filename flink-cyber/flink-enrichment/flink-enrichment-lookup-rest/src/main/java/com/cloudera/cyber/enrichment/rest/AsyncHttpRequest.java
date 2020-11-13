@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 @Slf4j
@@ -36,8 +37,12 @@ public class AsyncHttpRequest extends RichAsyncFunction<Message, Message> {
 
     private transient ObjectMapper om = new ObjectMapper();
 
-    public AsyncHttpRequest(@NonNull RestEnrichmentConfig config) {
+    private final Predicate<Message> applicable;
+
+    public AsyncHttpRequest(@NonNull RestEnrichmentConfig config, Predicate<Message> applicable) {
         this.config = config;
+
+        this.applicable = applicable;
 
         // setup the client
         this.client = HttpClientBuilder.create()
@@ -74,27 +79,33 @@ public class AsyncHttpRequest extends RichAsyncFunction<Message, Message> {
 
     @Override
     public void asyncInvoke(Message message, ResultFuture<Message> resultFuture) throws Exception {
-        // issue the asynchronous request, receive a future for result
-        StringSubstitutor sub = new StringSubstitutor(message.getExtensions());
-        String url = sub.replace(config.getEndpointTemplate());
+        // short circuit option for unenriched messages
+        // TODO - investigate ways of keeping these messages outside of the async stream
+        if (!applicable.test(message)) {
+            resultFuture.complete(Collections.singleton(message));
+        } else {
+            // issue the asynchronous request, receive a future for result
+            StringSubstitutor sub = new StringSubstitutor(message.getExtensions());
+            String url = sub.replace(config.getEndpointTemplate());
 
-        log.debug(String.format("Fetching enrichment from url %s", url));
-        final Future<Map<String, Object>> result = this.cache.get(url);
+            log.debug(String.format("Fetching enrichment from url %s", url));
+            final Future<Map<String, Object>> result = this.cache.get(url);
 
-        // set the callback to be executed once the request by the client is complete
-        // the callback simply forwards the result to the result future
-        CompletableFuture.supplyAsync(new Supplier<Map<String, Object>>() {
-            @Override
-            public Map<String, Object> get() {
-                try {
-                    return result.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    // Normally handled explicitly.
-                    return null;
+            // set the callback to be executed once the request by the client is complete
+            // the callback simply forwards the result to the result future
+            CompletableFuture.supplyAsync(new Supplier<Map<String, Object>>() {
+                @Override
+                public Map<String, Object> get() {
+                    try {
+                        return result.get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        // Normally handled explicitly.
+                        return null;
+                    }
                 }
-            }
-        }).thenAccept((Map<String, Object> fields) -> {
-            resultFuture.complete(Collections.singleton(MessageUtils.addFields(message, fields, config.getPrefix() + ".")));
-        });
+            }).thenAccept((Map<String, Object> fields) -> {
+                resultFuture.complete(Collections.singleton(MessageUtils.addFields(message, fields, config.getPrefix() + ".")));
+            });
+        }
     }
 }
