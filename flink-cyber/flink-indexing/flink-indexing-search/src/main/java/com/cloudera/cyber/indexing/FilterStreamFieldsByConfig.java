@@ -1,66 +1,66 @@
 package com.cloudera.cyber.indexing;
 
 import com.cloudera.cyber.Message;
-import com.google.common.collect.Lists;
-import org.apache.flink.api.common.state.MapState;
-import org.apache.flink.api.common.state.MapStateDescriptor;
-import org.apache.flink.api.common.typeinfo.Types;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.streaming.api.functions.co.KeyedCoProcessFunction;
+import org.apache.flink.streaming.api.functions.co.KeyedBroadcastProcessFunction;
 import org.apache.flink.util.Collector;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.cloudera.cyber.indexing.SearchIndexJob.Descriptors.broadcastState;
 import static java.util.stream.Collectors.toMap;
 
-public class FilterStreamFieldsByConfig extends KeyedCoProcessFunction<String, Message, Map.Entry<String, Set<String>>, IndexEntry> {
-
-    private MapState<String, List<String>> fieldsRequiredMap = null;
+@Slf4j
+public class FilterStreamFieldsByConfig extends KeyedBroadcastProcessFunction<String, Message, CollectionField, IndexEntry> {
 
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        MapStateDescriptor<String, List<String>> descriptor =
-                new MapStateDescriptor<>(
-                        "fieldsByIndex",
-                        Types.STRING,
-                        Types.LIST(Types.STRING)
-                );
-        fieldsRequiredMap = getRuntimeContext().getMapState(descriptor);
     }
 
     @Override
-    public void processElement1(Message message, Context context, Collector<IndexEntry> collector) throws Exception {
-        List<String> fieldsRequired = fieldsRequiredMap.get(message.getSource());
+    public void processElement(Message message, ReadOnlyContext readOnlyContext, Collector<IndexEntry> collector) throws Exception {
+        if (!readOnlyContext.getBroadcastState(broadcastState).contains(message.getSource())) {
+            return;
+        }
 
-        Stream<Tuple2<String, String>> messageFields = message.getExtensions().entrySet().stream()
-                .filter(f -> fieldsRequired.contains(f.getKey()))
-                .map(e -> Tuple2.of(e.getKey(), e.getValue().toString()));
+        List<String> fieldsRequired = readOnlyContext.getBroadcastState(broadcastState).get(message.getSource());
 
-        Stream<Tuple2<String, String>> threatFields = message.getThreats().entrySet().stream().flatMap(e ->
-                e.getValue().stream().flatMap(l ->
-                        l.getFields().entrySet().stream().map(le -> Tuple2.of(
-                                String.join(".", new String[]{e.getKey(), l.getObservableType(), l.getObservable(), e.getKey()}),
-                                le.getValue())
+        Stream<Tuple2<String, String>> messageFields = message.getExtensions() == null ? Stream.empty() :
+                message.getExtensions().entrySet().stream()
+                        .filter(f -> f.getKey() != "ts")
+                        .filter(f -> fieldsRequired.contains(f.getKey()))
+                        .map(e -> Tuple2.of(e.getKey(), e.getValue().toString()));
+
+        Stream<Tuple2<String, String>> threatFields = message.getThreats() == null ? Stream.empty() :
+                message.getThreats().entrySet().stream().flatMap(e ->
+                        e.getValue().stream().flatMap(l ->
+                                l.getFields().entrySet().stream().map(le -> Tuple2.of(
+                                        String.join(".", new String[]{e.getKey(), l.getObservableType(), l.getObservable(), e.getKey()}),
+                                        le.getValue())
+                                )
                         )
-                )
-        );
+                );
         Stream<Tuple2<String, String>> baseFields = Stream.of(
-                Tuple2.of("message", message.getMessage()),
-                Tuple2.of("timestamp", message.getTs().toString())
+                Tuple2.of("message", message.getMessage())
         );
 
         Stream<Tuple2<String, String>> allFields = Stream.of(
                 baseFields,
                 messageFields,
-                threatFields
-        ).flatMap(s->s);
+                threatFields)
+                .flatMap(s->s)
+                .filter(r -> r != null && r.f1 != null);
 
-        Map<String, String> fields = allFields.collect(toMap(e -> e.f0, e -> e.f1));
+        Map<String, String> fields = allFields.collect(toMap(
+                e -> e.f0,
+                e -> e.f1)
+        );
 
         collector.collect(IndexEntry.builder()
                 .index(message.getSource())
@@ -71,7 +71,7 @@ public class FilterStreamFieldsByConfig extends KeyedCoProcessFunction<String, M
     }
 
     @Override
-    public void processElement2(Map.Entry<String, Set<String>> stringListEntry, Context context, Collector<IndexEntry> collector) throws Exception {
-        fieldsRequiredMap.put(stringListEntry.getKey(), Lists.newArrayList(stringListEntry.getValue()));
+    public void processBroadcastElement(CollectionField collectionFields, Context context, Collector<IndexEntry> collector) throws Exception {
+        context.getBroadcastState(broadcastState).put(collectionFields.getKey(), new ArrayList<>(collectionFields.getValues()));
     }
 }

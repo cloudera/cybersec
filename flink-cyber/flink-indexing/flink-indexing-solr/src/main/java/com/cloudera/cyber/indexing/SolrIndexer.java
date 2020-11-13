@@ -25,13 +25,11 @@ import static java.util.stream.Collectors.groupingBy;
 public class SolrIndexer extends RichWindowFunction<IndexEntry, UpdateResponse, String, TimeWindow> {
 
     public static final String SOLR_URLS_KEY = "solr.urls";
-    public static final String SOLR_COLLECTION_KEY = "solr.collection";
 
     public static final String SOLR_SSL_LOCATION_KEY = "solr.ssl.truststore.location";
     public static final String SOLR_SSL_PWD_KEY = "solr.ssl.truststore.password";
 
     private final List<String> solrUrls;
-    private final String solrCollection;
     private final String trustStorePath;
     private final String trustStorePassword;
 
@@ -39,14 +37,15 @@ public class SolrIndexer extends RichWindowFunction<IndexEntry, UpdateResponse, 
 
     public SolrIndexer(ParameterTool params) {
         solrUrls = Lists.newArrayList(params.getRequired(SOLR_URLS_KEY).split(","));
-        solrCollection = params.getRequired(SOLR_COLLECTION_KEY);
         trustStorePath = params.get(SOLR_SSL_LOCATION_KEY);
         trustStorePassword = params.get(SOLR_SSL_PWD_KEY);
     }
 
     @Override
     public void apply(String k, TimeWindow w, Iterable<IndexEntry> logs, Collector<UpdateResponse> output) throws Exception {
-        Map<String, List<IndexEntry>> collect = StreamSupport.stream(logs.spliterator(), false).collect(groupingBy(IndexEntry::getIndex));
+        Map<String, List<IndexEntry>> collect = StreamSupport
+                .stream(logs.spliterator(), false)
+                .collect(groupingBy(IndexEntry::getIndex));
         // TODO - account for all the errors, not just the last
         AtomicReference<Exception> lastError = new AtomicReference<>();
         collect.forEach((collection, entries) -> {
@@ -67,7 +66,7 @@ public class SolrIndexer extends RichWindowFunction<IndexEntry, UpdateResponse, 
         for (IndexEntry entry : logs) {
             SolrInputDocument doc = new SolrInputDocument();
             entry.getFields().forEach(doc::addField);
-            doc.addField("timestamp", entry.getTimestamp());
+            doc.addField("ts", entry.getTimestamp());
             doc.addField("id", entry.getId());
             docs.add(doc);
         }
