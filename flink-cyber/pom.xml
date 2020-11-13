@@ -27,12 +27,16 @@
         <module>parser-chains-flink</module>
         <module>caracal-generator</module>
         <module>caracal-parser</module>
+        <module>data-management</module>
+        <!--<module>flink-web</module>
+        <module>cyber-control</module>-->
     </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.verion>1.8</java.verion>
         <lombok.version>1.18.12</lombok.version>
+        <lombok.plugin.version>1.18.12.0</lombok.plugin.version>
         <flink.version>1.10.0-csa1.2.0.0</flink.version>
         <guava.verison>20.0</guava.verison>
         <avro.version>1.8.2</avro.version>
@@ -50,6 +54,7 @@
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
         <solr.version>8.4.1.7.1.2.0-96</solr.version>
         <maxmind.version>2.13.1</maxmind.version>
+        <hadoop.version>3.1.1.7.1.1.0-567</hadoop.version>
     </properties>
 
     <repositories>
@@ -243,6 +248,19 @@
                 </exclusions>
             </dependency>
 
+            <!-- Hadoop -->
+            <dependency>
+                <groupId>org.apache.hadoop</groupId>
+                <artifactId>hadoop-common</artifactId>
+                <version>${hadoop.version}</version>
+                <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
             <!-- Avro -->
             <dependency>

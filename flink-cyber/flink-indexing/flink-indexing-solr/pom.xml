@@ -20,19 +20,19 @@
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-cyber-api</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-indexing-search</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>
 
@@ -68,15 +68,11 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.cloudera.cyber</groupId>
-            <artifactId>flink-dedupe</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
+
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-test-utils_2.11</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
