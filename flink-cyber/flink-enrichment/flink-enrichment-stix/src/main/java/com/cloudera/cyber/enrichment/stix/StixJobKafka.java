@@ -13,6 +13,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.flink.util.Preconditions;
 
 import java.util.Properties;
 import java.util.regex.Pattern;
@@ -21,10 +22,15 @@ import static com.cloudera.cyber.flink.FlinkUtils.createKafkaSource;
 
 public class StixJobKafka extends StixJob {
     private static final String GROUP_ID = "cyber-stix";
-    private static final String PARAM_INPUT_TOPIC = "stix.input.topic";
-    private static final String PARAM_OUTPUT_TOPIC = "stix.output.topic";
+    public static final String PARAM_INPUT_TOPIC = "stix.input.topic";
+    public static final String PARAM_STIX_OUTPUT_TOPIC = "stix.output.topic";
     private static final String DEFAULT_INPUT_TOPIC = "stix";
     private static final String PARAM_MARKED_OUTPUT_TOPIC = "output.topic";
+
+    public static void main(String[] args) throws Exception {
+        Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
+        new StixJobKafka().createPipeline(ParameterTool.fromPropertiesFile(args[0])).execute("Stix");
+    }
 
     /**
      * This function is used to lookup threat intelligence that is not in the near term cache
@@ -47,7 +53,7 @@ public class StixJobKafka extends StixJob {
     @Override
     protected void writeStixResults(ParameterTool params, DataStream<ThreatIntelligence> results) {
         FlinkKafkaProducer<ThreatIntelligence> sink = new FlinkUtils<>(ThreatIntelligence.class).createKafkaSink(
-                params.getRequired(PARAM_OUTPUT_TOPIC),
+                params.getRequired(PARAM_STIX_OUTPUT_TOPIC),
                 params);
         results.addSink(sink).name("Kafka Stix Results").uid("kafka.results.stix");
 
