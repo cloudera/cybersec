@@ -26,12 +26,5 @@
     "headerPath": "$.smtp-stream",
     "timestampField" : "start_ts",
     "timestampFunction": "Math.round(parseFloat(ts)*1000,0)"
-  },
-  {
-    "topic": "dpi_http",
-    "splitPath": "$.http-stream['http.request'][*]",
-    "headerPath": "$.http-stream",
-    "timestampField" : "start_ts",
-    "timestampFunction": "Math.round(parseFloat(ts)*1000,0)"
   }
 ]
