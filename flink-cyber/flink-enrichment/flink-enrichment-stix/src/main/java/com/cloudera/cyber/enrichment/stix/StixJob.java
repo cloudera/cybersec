@@ -19,7 +19,6 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.BroadcastStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.util.Arrays;
@@ -32,15 +31,29 @@ public abstract class StixJob {
     private static final String CONFIG_PREFIX = "threatIntelligence";
     private static final int CONFIG_PREFIX_LENGTH = CONFIG_PREFIX.length();
 
-
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         FlinkUtils.setupEnv(env, params);
 
+        DataStream<Message> source = createSource(env, params);
         DataStream<String> stixSource = createStixSource(env, params);
-        SingleOutputStreamOperator<ParsedThreatIntelligence> stixResults = stixSource.flatMap(new Parser());
-        SingleOutputStreamOperator<ThreatIntelligence> threats = stixResults.map(t -> t.getThreatIntelligence());
+
+        StixResults output = enrich(source, stixSource, getLongTermLookupFunction(), params);
+
+        writeResults(params, output.getResults());
+        writeStixResults(params, output.getThreats());
+        writeDetails(params, output.getDetails());
+
+        return env;
+    }
+
+    public static StixResults enrich(DataStream<Message> source,
+                                     DataStream<String> stixSource,
+                                     MapFunction<Message, Message> longTermLookupFunction,
+                                     ParameterTool params) {
+        DataStream<ParsedThreatIntelligence> stixResults = stixSource.flatMap(new Parser());
+        DataStream<ThreatIntelligence> threats = stixResults.map(t -> t.getThreatIntelligence());
 
         MapStateDescriptor<String, List<ThreatIntelligence>> threatIntelligenceState =
                 new MapStateDescriptor<String, List<ThreatIntelligence>>("threatIntelligence",
@@ -49,23 +62,28 @@ public abstract class StixJob {
 
         // Broadcast version is for short term and includes most recent TI
         BroadcastStream<ThreatIntelligence> broadcast = threats.broadcast(threatIntelligenceState);
-        DataStream<Message> source = createSource(env, params);
 
         Map<String, List<String>> fieldsToType = getFieldsMappings(params);
 
-        SingleOutputStreamOperator<Message> results = source.connect(broadcast)
-                .process(new ThreatIntelligenceBroadcastProcessFunction(threatIntelligenceState, fieldsToType))
-                .map(getLongTermLookupFunction());
+        DataStream<Message> results = source.connect(broadcast)
+                .process(new ThreatIntelligenceBroadcastProcessFunction(threatIntelligenceState, fieldsToType));
 
-        writeResults(params, results);
+        // optionally fall back to a long term store to lookup threat details
+        if (longTermLookupFunction != null) {
+            results = results.map(longTermLookupFunction).name("Long Term Store Lookup").uid("long-term");
+        }
 
-        writeStixResults(params, threats);
-        writeDetails(params, stixResults.map(t -> ThreatIntelligenceDetails.newBuilder()
+        // add side results for the parsed stix for long term storage
+        DataStream<ThreatIntelligenceDetails> details = stixResults.map(t -> ThreatIntelligenceDetails.newBuilder()
                 .setId(t.getThreatIntelligence().getId())
                 .setStixSource(t.getSource())
-                .build()));
+                .build());
 
-        return env;
+        return StixResults.builder()
+                .results(results)
+                .threats(threats)
+                .details(details)
+                .build();
     }
 
     /**
@@ -83,7 +101,7 @@ public abstract class StixJob {
                 .collect(Collectors.toMap(
                         p -> p.size() == 1 ? p.get(0) : String.join(".", p.subList(0, p.size() - 1)),
                         v -> Lists.newArrayList(params.get(CONFIG_PREFIX + "." + String.join(".", v))),
-                        (l1, l2) -> ListUtils.union(l1,l2)
+                        (l1, l2) -> ListUtils.union(l1, l2)
                 ));
     }
 
