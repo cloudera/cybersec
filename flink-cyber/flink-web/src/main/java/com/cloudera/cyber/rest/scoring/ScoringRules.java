@@ -34,32 +34,32 @@ public class ScoringRules {
 
     @GetMapping("/scoring/{id}")
     public DynamicRuleCommandResult<ScoringRule> get(@PathVariable UUID id) throws ExecutionException, InterruptedException {
-        return sendCommand((ScoringRuleCommand.ScoringRuleCommandBuilder<?, ?>) ScoringRuleCommand.builder().ruleId(id).type(DynamicRuleCommandType.GET));
+        return sendCommand(ScoringRuleCommand.builder().ruleId(id).type(DynamicRuleCommandType.GET));
     }
 
     @DeleteMapping("/scoring/{id}")
     public void delete(@PathVariable UUID id) throws ExecutionException, InterruptedException {
-        sendCommand((ScoringRuleCommand.ScoringRuleCommandBuilder<?, ?>) ScoringRuleCommand.builder().ruleId(id).type(DynamicRuleCommandType.DELETE));
+        sendCommand(ScoringRuleCommand.builder().ruleId(id).type(DynamicRuleCommandType.DELETE));
     }
 
     @PutMapping("/scoring/{id}")
     public DynamicRuleCommandResult<ScoringRule> put(@RequestBody ScoringRule rule) throws ExecutionException, InterruptedException {
-        return sendCommand((ScoringRuleCommand.ScoringRuleCommandBuilder<?, ?>) ScoringRuleCommand.builder().rule(rule).ruleId(rule.getId()).type(DynamicRuleCommandType.UPSERT));
+        return sendCommand(ScoringRuleCommand.builder().rule(rule).ruleId(rule.getId()).type(DynamicRuleCommandType.UPSERT));
     }
 
     @PutMapping("/scoring/{id}/enable")
     public DynamicRuleCommandResult<ScoringRule> enable(@PathVariable UUID id) throws ExecutionException, InterruptedException {
-        return sendCommand((ScoringRuleCommand.ScoringRuleCommandBuilder<?, ?>) ScoringRuleCommand.builder().ruleId(id).type(DynamicRuleCommandType.ENABLE));
+        return sendCommand(ScoringRuleCommand.builder().ruleId(id).type(DynamicRuleCommandType.ENABLE));
     }
 
     @PutMapping("/scoring/{id}/disable")
     public DynamicRuleCommandResult<ScoringRule> disable(@PathVariable UUID id) throws ExecutionException, InterruptedException {
-        return sendCommand((ScoringRuleCommand.ScoringRuleCommandBuilder<?, ?>) ScoringRuleCommand.builder().ruleId(id).type(DynamicRuleCommandType.DISABLE));
+        return sendCommand(ScoringRuleCommand.builder().ruleId(id).type(DynamicRuleCommandType.DISABLE));
     }
 
     @GetMapping("/scoring")
     public List<ScoringRule> list() throws ExecutionException, InterruptedException {
-        sendCommand((ScoringRuleCommand.ScoringRuleCommandBuilder<?, ?>) ScoringRuleCommand.builder().type(DynamicRuleCommandType.LIST));
+        sendCommand(ScoringRuleCommand.builder().type(DynamicRuleCommandType.LIST));
         return Collections.emptyList();
     }
 
