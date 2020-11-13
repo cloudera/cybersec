@@ -4,22 +4,17 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.formats.avro.registry.cloudera.ClouderaRegistryKafkaDeserializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
-import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 import org.apache.flink.util.Preconditions;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-
-import java.util.Properties;
 
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
-import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
-import static com.cloudera.cyber.flink.Utils.readSchemaRegistryProperties;
 
 @Slf4j
 public class HiveJobKakfa extends HiveJob {
+
+    private static final String PARAMS_GROUP_ID = "group.id";
+    private static final String DEFAULT_GROUP_ID = "indexer-hive";
 
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
@@ -28,24 +23,8 @@ public class HiveJobKakfa extends HiveJob {
 
     @Override
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        String topic = params.getRequired(PARAMS_TOPIC_INPUT);
-        String groupId = "indexer-hive";
-
-
-        Properties kafkaProperties = readKafkaProperties(params, true);
-        log.info(String.format("Creating Kafka Source for %s, using %s", topic, kafkaProperties));
-        KafkaDeserializationSchema<Message> schema = ClouderaRegistryKafkaDeserializationSchema
-                .builder(Message.class)
-                .setConfig(readSchemaRegistryProperties(params))
-                .build();
-        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        // for the SMM interceptor
-        kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
-
-        FlinkKafkaConsumer<Message> source = new FlinkKafkaConsumer<>(topic, schema, kafkaProperties);
-        return env.addSource(source).name("Kafka Source").uid("kafka-source");
-
- /*       return env.addSource(FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, "indexer-hive"))
-                ;*/
+        return env.addSource(
+                new FlinkUtils(Message.class).createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
+        ).name("Kafka Source").uid("kafka-source");
     }
 }

@@ -42,11 +42,12 @@ public class FieldExtractor extends RichMapFunction<Message, Row> {
     public Row map(Message m) {
         LocalTime time = Instant.ofEpochMilli(m.getTs()).atOffset(ZoneOffset.UTC)
                 .toLocalTime();
-        return Row.of(Stream.of(
-                Stream.of(m.getId(), m.getTs(), m.getMessage(), flattenToStrings(m.getExtensions(), listFields)),
+        Row output = Row.of(Stream.of(
+                Stream.of(m.getId(), m.getMessage(), flattenToStrings(m.getExtensions(), listFields)),
                 listFields.stream().map(field -> m.getExtensions().get(field)),
                 Stream.of(m.getSource(), date(time), hour(time))
         ).flatMap(s->s).toArray());
+        return output;
     }
 
     private String hour(LocalTime time) {
@@ -78,7 +79,7 @@ public class FieldExtractor extends RichMapFunction<Message, Row> {
 
         TypeInformation<?>[] baseTypes = {
                 Types.STRING, // id
-                Types.SQL_TIMESTAMP, // ts
+                Types.LONG, // ts
                 Types.STRING, // message
                 Types.MAP(Types.STRING, Types.STRING) //fields
         };
