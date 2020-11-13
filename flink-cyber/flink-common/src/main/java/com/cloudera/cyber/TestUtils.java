@@ -20,6 +20,7 @@ public class TestUtils {
                 .setTs(MessageUtils.getCurrentTimestamp())
                 .setSource("test")
                 .setExtensions(extensions)
+                .setMessage("")
                 .setOriginalSource(
                         source("topic", 0, 0)).
                         build();
