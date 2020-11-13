@@ -89,7 +89,7 @@
             <artifactId>flink-avro</artifactId>
             <scope>provided</scope>
         </dependency>
-        
+
         <!-- Hive dependencies -->
         <dependency>
             <groupId>org.apache.hive</groupId>
