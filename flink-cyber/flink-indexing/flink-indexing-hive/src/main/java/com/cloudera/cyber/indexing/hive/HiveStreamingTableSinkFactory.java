@@ -30,8 +30,8 @@ public class HiveStreamingTableSinkFactory implements StreamTableSinkFactory<Row
         Map<String, String> context = new HashMap();
         context.put("connector.type", "hive-cyber");
         context.put("connector.property-version", "1");
-        context.put("format.type", "hive-cyber");
-        context.put("format.property-version", "1");
+        //context.put("format.type", "hive-cyber");
+        //context.put("format.property-version", "1");
         context.put("update-mode", "append");
         return context;
 

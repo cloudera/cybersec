@@ -21,7 +21,6 @@ public class HiveStreamingConnector extends ConnectorDescriptor {
     @Override
     protected Map<String, String> toConnectorProperties() {
         Map<String, String> properties = new HashMap<>();
-        properties.put("format.type", "hive-cyber");
         properties.put("hive.schema", this.hiveSchema);
         properties.put("hive.table", this.hiveTable);
 

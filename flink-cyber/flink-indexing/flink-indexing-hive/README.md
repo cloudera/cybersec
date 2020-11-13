@@ -6,9 +6,11 @@ The process reads the structure of the hive table and extracts the fields requir
 
 For example, the following hive table schema could be used as a destination if you are using the partitioning sink mode:
 ```SQL
+SET hive.txn.manager=org.apache.hadoop.hive.ql.lockmgr.DbTxnManager;
+
 CREATE TABLE `events`(                    
    `id` string,                                     
-   `ts` timestamp,                                  
+   `ts` bigint,                                  
    `message` string,                                
    `fields` map<string,string>,                     
    `ip_src_addr` string,                            
