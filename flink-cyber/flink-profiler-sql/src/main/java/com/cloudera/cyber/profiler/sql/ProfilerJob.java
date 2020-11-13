@@ -1,5 +1,6 @@
 package com.cloudera.cyber.profiler.sql;
 
+import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.profiler.sql.aggregates.Hll;
 import com.cloudera.cyber.profiler.sql.catalog.ProfileSourceCatalog;
 import org.apache.commons.text.StringSubstitutor;
@@ -25,6 +26,7 @@ public class ProfilerJob {
         }
         ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
         StreamExecutionEnvironment env = new ProfilerJob().createPipeline(params);
+        FlinkUtils.setupEnv(env, params);
         env.execute("Flink Sessionizer");
     }
 
