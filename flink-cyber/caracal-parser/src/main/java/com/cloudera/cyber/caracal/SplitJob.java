@@ -5,13 +5,16 @@ import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.state.MapStateDescriptor;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.BroadcastStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.time.Time;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -31,11 +34,13 @@ import static com.cloudera.cyber.parser.ParserJob.PARAM_PRIVATE_KEY_FILE;
 public abstract class SplitJob {
 
     private static final String PARAMS_CONFIG_JSON = "config.json";
+    private static final String PARAM_COUNT_INTERVAL = "count.interval";
+    private static final long DEFAULT_COUNT_INTERVAL = 5 * 60 * 1000;
     protected String configJson;
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
         List<SplitConfig> configs = parseConfig();
-        Map<String, SplitConfig> configMap = configs.stream().collect(Collectors.toMap(k -> k.getTopic(), v->v));
+        Map<String, SplitConfig> configMap = configs.stream().collect(Collectors.toMap(k -> k.getTopic(), v -> v));
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
@@ -43,7 +48,7 @@ public abstract class SplitJob {
         DataStream<MessageToParse> source = createSource(env, params, configMap.keySet());
 
         BroadcastStream<SplitConfig> configStream = createConfigSource(env, params)
-                        .broadcast(Descriptors.broadcastState);
+                .broadcast(Descriptors.broadcastState);
 
         byte[] privKeyBytes = params.has(PARAM_PRIVATE_KEY_FILE) ?
                 Files.readAllBytes(Paths.get(params.get(PARAM_PRIVATE_KEY_FILE))) :
@@ -62,6 +67,20 @@ public abstract class SplitJob {
 
         SingleOutputStreamOperator<Message> parsed = results.map(new ParserChainMapFunction(configMap));
 
+
+        DataStream<Tuple2<String, Long>> counts = parsed.map(new MapFunction<Message, Tuple2<String, Long>>() {
+            @Override
+            public Tuple2<String, Long> map(Message message) throws Exception {
+                return Tuple2.of(message.getSource(), 1L);
+            }
+        })
+                .keyBy(0)
+                .timeWindow(Time.milliseconds(params.getLong(PARAM_COUNT_INTERVAL, DEFAULT_COUNT_INTERVAL)))
+                .allowedLateness(Time.milliseconds(0))
+                .sum(1);
+        writeCounts(params, counts);
+
+
         writeResults(params, parsed);
 
         return env;
@@ -73,7 +92,8 @@ public abstract class SplitJob {
 
     protected List<SplitConfig> parseConfig() throws IllegalArgumentException, IOException {
         try {
-            return JSONUtils.INSTANCE.getMapper().readValue(configJson, new TypeReference<List<SplitConfig>>() {});
+            return JSONUtils.INSTANCE.getMapper().readValue(configJson, new TypeReference<List<SplitConfig>>() {
+            });
         } catch (Exception e) {
             log.error(String.format("Failed to read split config %s", configJson));
             throw new IllegalArgumentException("Config could not be read for splits", e);
@@ -81,7 +101,12 @@ public abstract class SplitJob {
     }
 
     protected abstract DataStream<SplitConfig> createConfigSource(StreamExecutionEnvironment env, ParameterTool params);
+
     protected abstract void writeResults(ParameterTool params, DataStream<Message> results);
+
     protected abstract void writeOriginalsResults(ParameterTool params, DataStream<MessageToParse> results);
+
+    protected abstract void writeCounts(ParameterTool params, DataStream<Tuple2<String, Long>> sums);
+
     protected abstract DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params, Iterable<String> topics);
 }

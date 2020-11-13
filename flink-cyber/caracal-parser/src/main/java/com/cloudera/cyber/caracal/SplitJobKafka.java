@@ -5,6 +5,7 @@ import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.parser.MessageToParse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.formats.parquet.avro.ParquetAvroWriters;
@@ -16,7 +17,9 @@ import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -35,6 +38,8 @@ public class SplitJobKafka extends SplitJob {
 
     private static final String PARAMS_CONFIG_FILE = "config.file";
     private static final String DEFAULT_CONFIG_FILE = "splits.json";
+    private static final String PARAM_COUNT_TOPIC = "count.topic";
+    private static final String DEFAULT_COUNT_TOPIC = "parser.counts";
 
     public SplitJobKafka(String configJson) {
         this.configJson = configJson;
@@ -111,6 +116,19 @@ public class SplitJobKafka extends SplitJob {
                 .build();
 
         results.addSink(sink).name("Original Archiver").uid("original.archiver");
+    }
+
+    @Override
+    protected void writeCounts(ParameterTool params, DataStream<Tuple2<String, Long>> sums) {
+        Properties kafkaProperties = readKafkaProperties(params, false);
+        String topic = params.get(PARAM_COUNT_TOPIC, DEFAULT_COUNT_TOPIC);
+
+        sums.addSink(new FlinkKafkaProducer<>(topic,
+                (KafkaSerializationSchema<Tuple2<String, Long>>) (e, time) ->
+                        new ProducerRecord<>(topic, null, time, e.f0.getBytes(), e.f1.toString().getBytes()),
+                kafkaProperties,
+                FlinkKafkaProducer.Semantic.AT_LEAST_ONCE)
+        ).name("Count Results").uid("count.results");
     }
 
     @Override

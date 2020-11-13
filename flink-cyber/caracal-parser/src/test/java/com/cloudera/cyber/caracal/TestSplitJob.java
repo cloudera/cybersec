@@ -5,6 +5,7 @@ import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -78,7 +79,7 @@ public class TestSplitJob extends SplitJob {
 
         results.stream().forEach(m -> {
             assertThat("Message has timestamp", m.getTs(), allOf(notNullValue(), greaterThan(10000000L)));
-            assertThat("Message has source", m.getExtensions(), hasKey("source"));
+            assertThat("Message has source", m.getSource(), notNullValue());
         });
     }
 
@@ -98,6 +99,11 @@ public class TestSplitJob extends SplitJob {
         } catch (IOException e) {
             return null;
         }
+    }
+
+    @Override
+    protected void writeCounts(ParameterTool params, DataStream<Tuple2<String, Long>> sums) {
+
     }
 
     @Override
