@@ -1,0 +1,3 @@
+[submodule "flink-solr-log-indexer"]
+	path = flink-solr-log-indexer
+	url = https://github.com/simonellistonball/flink-solr-log-indexer.git
