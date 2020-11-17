@@ -1,10 +1,8 @@
 package com.cloudera.cyber.enrichment.geocode.impl;
 
-import avro.shaded.com.google.common.base.Preconditions;
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.enrichment.Enrichment;
-import com.cloudera.cyber.enrichment.MultiValueEnrichment;
 import com.cloudera.cyber.enrichment.SingleValueEnrichment;
 import com.maxmind.geoip2.DatabaseProvider;
 import com.maxmind.geoip2.model.CityResponse;
@@ -13,11 +11,8 @@ import com.maxmind.geoip2.record.Location;
 import com.maxmind.geoip2.record.Subdivision;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.validator.routines.InetAddressValidator;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -26,11 +21,13 @@ import java.util.stream.Stream;
  * Looks up the locations of IPv4 or IPv6 addresses in MaxMind GeoLite2 city database and returns
  * the locations for that IP.
  */
-public class IpGeoEnrichment  {
+public class IpGeoEnrichment extends MaxMindBase {
     public static final String GEOCODE_FEATURE = "geo";
-    public static final String FIELD_VALUE_IS_NOT_A_STRING = "'%s' is not a String.";
-    public static final String FIELD_VALUE_IS_NOT_A_VALID_IP_ADDRESS = "'%s' is not a valid IP address.";
     public static final String GEOCODE_FAILED_MESSAGE = "Geocode failed '%s'";
+
+    public IpGeoEnrichment(DatabaseProvider database) {
+        super(database);
+    }
 
     /**
      * All geocode enrichments that could be returned for an IP.
@@ -60,17 +57,6 @@ public class IpGeoEnrichment  {
          */
         @Getter
         private final String pluralName;
-    }
-
-
-    /**
-     * Parsed and cached Maxmind city database.
-     */
-    private final DatabaseProvider cityDatabase;
-
-    public IpGeoEnrichment(DatabaseProvider cityDatabase) {
-        Preconditions.checkNotNull(cityDatabase);
-        this.cityDatabase = cityDatabase;
     }
 
     private static Object getCity(CityResponse cityResponse) {
@@ -115,39 +101,6 @@ public class IpGeoEnrichment  {
         return longitude;
     }
 
-    private static String convertEmptyToNull(String str) {
-        return StringUtils.isBlank(str) ? null : str;
-    }
-
-    private InetAddress convertToIpAddress(Enrichment enrichment, Object ipValueObject, List<DataQualityMessage> qualityMessages) {
-        InetAddress inetAddress = null;
-        if (ipValueObject instanceof String) {
-            String ipValue = (String) ipValueObject;
-            if (InetAddressValidator.getInstance().isValid(ipValue)) {
-                try {
-                    inetAddress = InetAddress.getByName(ipValue);
-                    if (inetAddress.isSiteLocalAddress() ||
-                            inetAddress.isAnyLocalAddress()  ||
-                            inetAddress.isLinkLocalAddress() ||
-                            inetAddress.isLoopbackAddress() ||
-                            inetAddress.isMulticastAddress()) {
-                        // internal network addresses won't have geo info so stop here
-                        inetAddress = null;
-                    }
-                } catch (UnknownHostException e) {
-                    // this should not happen - checks for valid IP prior to call
-                    enrichment.addQualityMessage(qualityMessages, DataQualityMessageLevel.INFO, String.format(GEOCODE_FAILED_MESSAGE, e.getMessage()));
-                }
-            } else {
-                enrichment.addQualityMessage(qualityMessages, DataQualityMessageLevel.INFO, String.format(FIELD_VALUE_IS_NOT_A_VALID_IP_ADDRESS, ipValue));
-            }
-        } else {
-            enrichment.addQualityMessage(qualityMessages, DataQualityMessageLevel.INFO, String.format(FIELD_VALUE_IS_NOT_A_STRING, ipValueObject.toString()));
-        }
-
-        return inetAddress;
-    }
-
     /**
      * Lookup the IP in the city database and return the geo location enrichment fields.
      *
@@ -155,12 +108,12 @@ public class IpGeoEnrichment  {
      * @param geoFieldSet Only Geocoding fields specified are returned.
      *                    For example if the IP has a city in the database but city is not included in this set, the city will not be returned.
      */
-    private void lookup(Enrichment enrichment, Function<GeoEnrichmentFields, String> nameFunction, Object ipFieldValue, GeoEnrichmentFields[] geoFieldSet, Map<String, Object> geoEnrichments, List<DataQualityMessage> qualityMessages) {
+    private void lookup(Enrichment enrichment, Function<GeoEnrichmentFields, String> nameFunction, Object ipFieldValue, GeoEnrichmentFields[] geoFieldSet, Map<String, String> geoEnrichments, List<DataQualityMessage> qualityMessages) {
 
         InetAddress ipAddress = convertToIpAddress(enrichment, ipFieldValue, qualityMessages);
         if (ipAddress != null) {
             try {
-                Optional<CityResponse> response = cityDatabase.tryCity(ipAddress);
+                Optional<CityResponse> response = database.tryCity(ipAddress);
                 response.ifPresent(cityResponse -> Stream.of(geoFieldSet).map(field -> new AbstractMap.SimpleEntry<>(nameFunction.apply(field), field.getFunction().apply(cityResponse))).
                         filter(entry -> Objects.nonNull(entry.getValue())).
                         forEach(entry -> enrichment.enrich(geoEnrichments, entry.getKey(), entry.getValue())));
@@ -170,9 +123,9 @@ public class IpGeoEnrichment  {
         }
     }
 
-    public void lookup(String fieldName, Object ipFieldValue, GeoEnrichmentFields[] geoFieldSet, Map<String, Object> geoEnrichments, List<DataQualityMessage> qualityMessages) {
+    public void lookup(String fieldName, Object ipFieldValue, GeoEnrichmentFields[] geoFieldSet, Map<String, String> geoEnrichments, List<DataQualityMessage> qualityMessages) {
         if (ipFieldValue instanceof Collection) {
-            Enrichment enrichment = new MultiValueEnrichment(fieldName, GEOCODE_FEATURE);
+            Enrichment enrichment = new SingleValueEnrichment(fieldName, GEOCODE_FEATURE);
             //noinspection unchecked
             ((Collection<Object>) ipFieldValue).forEach(ip -> lookup(enrichment, GeoEnrichmentFields::getPluralName, ip, geoFieldSet, geoEnrichments, qualityMessages));
         } else if (ipFieldValue != null) {

@@ -9,8 +9,6 @@ import org.apache.flink.addons.hbase.HBaseWriteOptions;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
-import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.flink.util.Preconditions;
 import org.apache.hadoop.hbase.client.BufferedMutator;
 import org.apache.hadoop.hbase.client.Put;
@@ -20,8 +18,8 @@ import static com.cloudera.cyber.enrichment.EnrichmentUtils.*;
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_OUTPUT;
 
-public class HbaseJobKafka extends HbaseJob {
-    private static final String PARAMS_ENRICHMENT_TABLE = "enrichments";
+public class HbaseJobRawKafka extends HbaseJobRaw {
+    private static final String PARAMS_ENRICHMENT_TABLE = "enrichments.table";
     private static final String PARAMS_TOPIC_ENRICHMENT_INPUT = "enrichment.topic.input";
     private static final String DEFAULT_GROUP_ID = "enrichment-lookups-hbase";
 
@@ -31,7 +29,7 @@ public class HbaseJobKafka extends HbaseJob {
     }
 
     @Override
-    protected void writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentEntry> enrichmentSource) {
+    public void writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentEntry> enrichmentSource) {
         HBaseSinkFunction<EnrichmentEntry> hbaseSink = new HBaseSinkFunction<EnrichmentEntry>(params.getRequired(PARAMS_ENRICHMENT_TABLE)) {
             @Override
             public void executeMutations(EnrichmentEntry enrichmentEntry, Context context, BufferedMutator mutator) throws Exception {
@@ -68,5 +66,4 @@ public class HbaseJobKafka extends HbaseJob {
                 new FlinkUtils(EnrichmentEntry.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, DEFAULT_GROUP_ID)
         );
     }
-
 }
