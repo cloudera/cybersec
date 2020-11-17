@@ -8,10 +8,13 @@ import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.avro.util.Utf8;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
 
+import java.sql.Types;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.cloudera.cyber.AvroTypes.toListOf;
+import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
 import static java.util.stream.Collectors.toMap;
 
 @Data
@@ -37,7 +40,7 @@ public class Message extends SpecificRecordBase implements SpecificRecord, Ident
             .requiredLong("ts")
             .name("originalSource").type(SignedSourceKey.SCHEMA$).noDefault()
             .requiredString("message")
-            .name("threats").type().optional().type(SchemaBuilder.map().values(ThreatIntelligence.SCHEMA$))
+            .name("threats").type().optional().type(SchemaBuilder.map().values(SchemaBuilder.array().items(ThreatIntelligence.SCHEMA$)))
             .name("extensions").type(Schema.createMap(Schema.create(Schema.Type.STRING))).noDefault()
             .requiredString("source")
             .name("dataQualityMessages").type().optional().type(Schema.createArray(DataQualityMessage.SCHEMA$))
@@ -76,14 +79,20 @@ public class Message extends SpecificRecordBase implements SpecificRecord, Ident
             case 3:
                 message = value$.toString();
                 break;
-            case 4: threats = (java.util.Map<java.lang.String,java.util.List<com.cloudera.cyber.ThreatIntelligence>>)value$; break;
-            case 5: extensions = ((Map<Utf8,Utf8>)value$).entrySet().stream().collect(toMap(
-                    k->k.getKey().toString(),
-                    k->k.getValue().toString()
-            )); break;
+            case 4: threats = toTiMap(value$); break;
+            case 5: extensions = utf8toStringMap(value$); break;
             case 6: source = value$.toString(); break;
-            case 7: dataQualityMessages = (java.util.List<com.cloudera.cyber.DataQualityMessage>)value$; break;
+            case 7: dataQualityMessages = toListOf(DataQualityMessage.class, value$); break;
             default: throw new org.apache.avro.AvroRuntimeException("Bad index");
         }
+    }
+
+    private Map<String, List<ThreatIntelligence>> toTiMap(Object value$) {
+        if(value$ == null) return null;
+        Map<Utf8, List<Object>> o = (Map<Utf8, List<Object>>) value$;
+        return o.entrySet().stream().collect(toMap(
+                k -> k.getKey().toString(),
+                v -> toListOf(ThreatIntelligence.class, v.getValue())
+        ));
     }
 }
