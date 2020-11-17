@@ -3,6 +3,9 @@ package com.cloudera.cyber.indexing;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
+import org.apache.flink.formats.avro.typeutils.AvroTypeInfo;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.solr.client.solrj.SolrClient;
@@ -18,7 +21,7 @@ import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @RequiredArgsConstructor
-public class SolrCollectionFieldsSource extends RichParallelSourceFunction<CollectionField> {
+public class SolrCollectionFieldsSource extends RichParallelSourceFunction<CollectionField> implements ResultTypeQueryable<CollectionField> {
 
     @NonNull private List<String> solrUrls;
     @NonNull private long delay;
@@ -79,5 +82,10 @@ public class SolrCollectionFieldsSource extends RichParallelSourceFunction<Colle
     @Override
     public void cancel() {
         isRunning = false;
+    }
+
+    @Override
+    public TypeInformation<CollectionField> getProducedType() {
+        return new AvroTypeInfo(CollectionField.class);
     }
 }
