@@ -74,9 +74,9 @@ public abstract class StixJob {
         }
 
         // add side results for the parsed stix for long term storage
-        DataStream<ThreatIntelligenceDetails> details = stixResults.map(t -> ThreatIntelligenceDetails.newBuilder()
-                .setId(t.getThreatIntelligence().getId())
-                .setStixSource(t.getSource())
+        DataStream<ThreatIntelligenceDetails> details = stixResults.map(t -> ThreatIntelligenceDetails.builder()
+                .id(t.getThreatIntelligence().getId())
+                .stixSource(t.getSource())
                 .build());
 
         return StixResults.builder()

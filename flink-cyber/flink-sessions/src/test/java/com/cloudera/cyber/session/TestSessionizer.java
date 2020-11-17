@@ -4,7 +4,6 @@ import com.cloudera.cyber.GroupedMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.SignedSourceKey;
 import com.cloudera.cyber.sessions.SessionJob;
-import com.cloudera.cyber.sha1;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -47,26 +46,26 @@ public class TestSessionizer extends SessionJob {
         String user2 = UUID.randomUUID().toString();
 
         // session 1
-        sendRecord(Message.newBuilder()
-                .setExtensions(createFields(user1))
-                .setTs(ts + 0L));
-        sendRecord(Message.newBuilder()
-                .setExtensions(createFields(user1))
-                .setTs(ts + 1000L),true);
-        sendRecord(Message.newBuilder()
-                .setExtensions(createFields(user1))
-                .setTs(ts + 2000L),true);
-        sendRecord(Message.newBuilder()
-                .setExtensions(createFields(user1))
-                .setTs(ts + 9000L),true);
+        sendRecord(Message.builder()
+                .extensions(createFields(user1))
+                .ts(ts + 0L));
+        sendRecord(Message.builder()
+                .extensions(createFields(user1))
+                .ts(ts + 1000L),true);
+        sendRecord(Message.builder()
+                .extensions(createFields(user1))
+                .ts(ts + 2000L),true);
+        sendRecord(Message.builder()
+                .extensions(createFields(user1))
+                .ts(ts + 9000L),true);
 
         // session 2
-        sendRecord(Message.newBuilder()
-                .setExtensions(createFields(user1))
-                .setTs(ts + 20000L),true);
-        sendRecord(Message.newBuilder()
-                .setExtensions(createFields(user1))
-                .setTs(ts + 21000L),true);
+        sendRecord(Message.builder()
+                .extensions(createFields(user1))
+                .ts(ts + 20000L),true);
+        sendRecord(Message.builder()
+                .extensions(createFields(user1))
+                .ts(ts + 21000L),true);
 
         source.sendWatermark(50000L);
 
@@ -92,27 +91,26 @@ public class TestSessionizer extends SessionJob {
         assertThat("Group has an id", groupedMessage.getId(), notNullValue());
     }
 
-    private void sendRecord(Message.Builder builder) {
+    private void sendRecord(Message.MessageBuilder builder) {
         sendRecord(builder, false);
     }
-    private void sendRecord(Message.Builder builder, boolean watermark) {
-        builder.setId(UUID.randomUUID().toString());
-        builder.setOriginalSource(SignedSourceKey.newBuilder()
-                .setTopic("test")
-                .setPartition(0)
-                .setOffset(offset++)
-                .setSignature(new sha1(new byte[128]))
+    private void sendRecord(Message.MessageBuilder builder, boolean watermark) {
+        builder.originalSource(SignedSourceKey.builder()
+                .topic("test")
+                .partition(0)
+                .offset(offset++)
+                .signature(new byte[128])
                 .build());
-        builder.setMessage("Test Message");
-        builder.setSource("test");
+        builder.message("Test Message");
+        builder.source("test");
         Message message = builder.build();
         source.sendRecord(message, message.getTs());
         if (watermark) source.sendWatermark(message.getTs());
         recordLog.add(message);
     }
 
-    private HashMap<String, Object> createFields(String user) {
-        return new HashMap<String, Object>(){{
+    private HashMap<String, String> createFields(String user) {
+        return new HashMap<String, String>(){{
                 put("user", user);
             }};
     }

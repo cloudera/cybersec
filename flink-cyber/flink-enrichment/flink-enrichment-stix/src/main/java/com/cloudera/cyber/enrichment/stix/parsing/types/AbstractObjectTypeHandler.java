@@ -26,12 +26,10 @@ public abstract class AbstractObjectTypeHandler<T extends ObjectPropertiesType> 
         return getTypeClass().getSimpleName();
     }
 
-    protected Function<String, ThreatIntelligence.Builder> mapToThreatIntelligence(String type) {
-        return value -> {
-            return ThreatIntelligence.newBuilder()
-                    .setObservable(value)
-                    .setObservableType(type);
-        };
+    protected Function<String, ThreatIntelligence.ThreatIntelligenceBuilder> mapToThreatIntelligence(String type) {
+        return value -> ThreatIntelligence.builder()
+                .observable(value)
+                .observableType(type);
     }
 
 }

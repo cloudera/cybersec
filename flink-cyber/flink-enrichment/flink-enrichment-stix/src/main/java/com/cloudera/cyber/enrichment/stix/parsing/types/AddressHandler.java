@@ -26,7 +26,7 @@ public class AddressHandler extends AbstractObjectTypeHandler<Address> {
     }
 
     @Override
-    public Stream<ThreatIntelligence.Builder> extract(Address type, Map<String, Object> config) {
+    public Stream<ThreatIntelligence.ThreatIntelligenceBuilder> extract(Address type, Map<String, Object> config) {
         StringObjectPropertyType value = type.getAddressValue();
         final CategoryTypeEnum category = type.getCategory();
         String typeStr = getType();

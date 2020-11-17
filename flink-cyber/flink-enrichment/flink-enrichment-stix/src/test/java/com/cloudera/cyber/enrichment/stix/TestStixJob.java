@@ -3,7 +3,7 @@ package com.cloudera.cyber.enrichment.stix;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.ThreatIntelligence;
 import com.cloudera.cyber.enrichment.stix.parsing.ThreatIntelligenceDetails;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -21,7 +21,7 @@ import java.util.HashMap;
 import static com.cloudera.cyber.flink.Utils.getResourceAsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-@Log
+@Slf4j
 public class TestStixJob extends StixJob {
     protected ManualSource<String> source;
     protected CollectingSink<ThreatIntelligence> sink = new CollectingSink<>();

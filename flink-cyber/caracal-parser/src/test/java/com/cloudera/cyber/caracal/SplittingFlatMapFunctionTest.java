@@ -1,6 +1,7 @@
 package com.cloudera.cyber.caracal;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.parser.MessageToParse;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
@@ -38,12 +39,8 @@ public class SplittingFlatMapFunctionTest {
 
         splittingFlatMapFunction.open(new Configuration());
 
-        splittingFlatMapFunction.flatMap(MessageToParse.newBuilder()
-                        .setOriginalSource(testInput)
-                        .setTopic("test")
-                        .setPartition(0)
-                        .setOffset(0)
-                        .build(),
+        splittingFlatMapFunction.flatMap(
+                TestUtils.createMessageToParse(getResourceAsString(testInput)).topic("test").build(),
                 new Collector<Message>() {
             @Override
             public void collect(Message message) {

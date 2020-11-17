@@ -13,10 +13,8 @@ import org.apache.avro.Schema;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -27,36 +25,35 @@ import static org.mockito.Mockito.when;
 public class TestMessageSerializer {
 
     private AvroSnapshotSerializer avroSnapshotSerializer;
-    private ISchemaRegistryClient testClient;
 
     private Message testMessage() {
-        return Message.newBuilder()
-                .setId(UUID.randomUUID().toString())
-                .setTs(Instant.now().toEpochMilli())
-                .setOriginalSource(SignedSourceKey.newBuilder()
-                        .setTopic("test")
-                        .setPartition(0)
-                        .setOffset(0)
-                        .setSignature(new sha1(new byte[128]))
+        return Message.builder()
+                .ts(Instant.now().toEpochMilli())
+                .originalSource(SignedSourceKey.builder()
+                        .topic("test")
+                        .partition(0)
+                        .offset(0)
+                        .signature(new byte[128])
                         .build())
-                .setExtensions(Collections.singletonMap("test", "value"))
+                .extensions(Collections.singletonMap("test", "value"))
+                .message("")
+                .source("test")
                 .build();
     }
 
     private ThreatIntelligence testTi() {
-        return ThreatIntelligence.newBuilder()
-                .setId(UUID.randomUUID().toString())
-                .setTs(Instant.now().toEpochMilli())
-                .setFields(Collections.singletonMap("test", "value"))
-                .setObservableType("testType")
-                .setObservable("testObservable")
-                .setStixReference("stix")
+        return ThreatIntelligence.builder()
+                .ts(Instant.now().toEpochMilli())
+                .fields(Collections.singletonMap("test", "value"))
+                .observableType("testType")
+                .observable("testObservable")
+                .stixReference("stix")
                 .build();
     }
 
     @Before
     public void init() throws SchemaNotFoundException, InvalidSchemaException, IncompatibleSchemaException {
-        testClient = mock(ISchemaRegistryClient.class);
+        ISchemaRegistryClient testClient = mock(ISchemaRegistryClient.class);
         when(testClient.uploadSchemaVersion(any(),any(),any(),any()))
                 .thenReturn(new SchemaIdVersion(1L, 1));
 
@@ -101,7 +98,7 @@ public class TestMessageSerializer {
     }
 
     @Test
-    public void testTIMessageSerializer() throws IOException {
+    public void testTIMessageSerializer() {
         ThreatIntelligence test = testTi();
 
         SchemaMetadata schemaMetadata = new SchemaMetadata.Builder("test")
@@ -112,7 +109,6 @@ public class TestMessageSerializer {
 
 
         byte[] serialize = avroSnapshotSerializer.serialize(test, schemaMetadata);
-        assertThat("Bytes are made", serialize.length, equalTo(92));
-
+        assertThat("Bytes are made", serialize.length, equalTo(91));
     }
 }

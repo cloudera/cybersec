@@ -33,12 +33,11 @@ public class SumAndMaxTs implements AggregateFunction<DedupeMessage, SumAndMax, 
 
     @Override
     public DedupeMessage getResult(SumAndMax sumAndMax) {
-        DedupeMessage result = DedupeMessage.newBuilder()
-                .setId(UUID.randomUUID().toString())
-                .setFields(sumAndMax.getFields())
-                .setTs(sumAndMax.getMaxTs())
-                .setStartTs(sumAndMax.getMinTs())
-                .setCount(sumAndMax.getSum())
+        DedupeMessage result = DedupeMessage.builder()
+                .fields(sumAndMax.getFields())
+                .ts(sumAndMax.getMaxTs())
+                .startTs(sumAndMax.getMinTs())
+                .count(sumAndMax.getSum())
                 .build();
         return result;
     }

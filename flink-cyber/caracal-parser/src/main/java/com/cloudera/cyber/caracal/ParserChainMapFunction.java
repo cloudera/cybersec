@@ -63,7 +63,7 @@ public class ParserChainMapFunction extends RichMapFunction<Message, Message> {
         List<com.cloudera.parserchains.core.Message> out = chainRunner.run(builder.build(), chains.get(source), results);
         com.cloudera.parserchains.core.Message lastMessage = out.get(out.size() - 1);
 
-        return Message.newBuilder(message).setExtensions(lastMessage.getFields().entrySet().stream()
+        return message.toBuilder().extensions(lastMessage.getFields().entrySet().stream()
                 .collect(Collectors.toMap(k -> k.getKey().get(), v->v.getValue().get())))
                 .build();
     }

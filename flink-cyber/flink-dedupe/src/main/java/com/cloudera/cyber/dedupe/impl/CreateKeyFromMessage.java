@@ -16,15 +16,14 @@ public class CreateKeyFromMessage extends RichMapFunction<Message, DedupeMessage
 
     @Override
     public DedupeMessage map(Message message) {
-        return DedupeMessage.newBuilder()
-                .setCount(1L)
-                .setFields(key.stream()
+        return DedupeMessage.builder()
+                .count(1L)
+                .fields(key.stream()
                         .collect(Collectors.toMap(
                                 f -> f,
                                 f->message.get(f).toString()))
                 )
-                .setTs(message.getTs())
-                .setId(message.getId())
+                .ts(message.getTs())
                 .build();
     }
 }

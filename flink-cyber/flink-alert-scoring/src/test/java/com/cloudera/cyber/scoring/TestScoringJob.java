@@ -69,11 +69,10 @@ public class TestScoringJob extends ScoringJob {
         assertThat("Command succeed", poll.isSuccess());
 
         // send a message and get score
-        sendRecord(Message.newBuilder()
-                .setId(UUID.randomUUID().toString())
-                .setTs(100l)
-                .setExtensions(Collections.singletonMap("test", "test-value"))
-                .setOriginalSource(TestUtils.source("test", 0, 0))
+        sendRecord(Message.builder()
+                .ts(100l)
+                .extensions(Collections.singletonMap("test", "test-value"))
+                .originalSource(TestUtils.source("test", 0, 0))
                 .build());
 
         source.sendWatermark(100l);
@@ -99,11 +98,10 @@ public class TestScoringJob extends ScoringJob {
 
         Thread.sleep(100);
 
-        sendRecord(Message.newBuilder()
-                .setId(UUID.randomUUID().toString())
-                .setExtensions(Collections.singletonMap("test", "test-value2"))
-                .setTs(2000l)
-                .setOriginalSource(TestUtils.source("test", 0, 0))
+        sendRecord(Message.builder()
+                .extensions(Collections.singletonMap("test", "test-value2"))
+                .ts(2000l)
+                .originalSource(TestUtils.source("test", 0, 0))
                 .build());
 
         ScoredMessage message1 = sink.poll(Duration.ofMillis(5000));

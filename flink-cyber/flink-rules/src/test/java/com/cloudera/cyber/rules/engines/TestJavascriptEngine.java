@@ -2,7 +2,7 @@ package com.cloudera.cyber.rules.engines;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.SignedSourceKey;
-import com.cloudera.cyber.sha1;
+import com.cloudera.cyber.TestUtils;
 import org.junit.Test;
 
 import javax.script.ScriptException;
@@ -27,12 +27,11 @@ public class TestJavascriptEngine {
         sleep(10);
 
         Map<String, Object> results = engine.feed(
-                createMessage(Message.newBuilder()
-                        .setId(UUID.randomUUID().toString())
-                        .setTs(Instant.now().toEpochMilli())
-                        .setExtensions(new HashMap<String, Object>() {{
-                            put("a", 1.0);
-                            put("b", 2.0);
+                createMessage(Message.builder()
+                        .ts(Instant.now().toEpochMilli())
+                        .extensions(new HashMap<String, String>() {{
+                            put("a", "1.0");
+                            put("b", "2.0");
                         }}))
         );
 
@@ -58,10 +57,9 @@ public class TestJavascriptEngine {
         sleep(10);
 
         Map<String, Object> results = engine.feed(
-                createMessage(Message.newBuilder()
-                        .setId(UUID.randomUUID().toString())
-                        .setTs(Instant.now().toEpochMilli())
-                        .setExtensions(new HashMap<String, Object>() {{
+                createMessage(Message.builder()
+                        .ts(Instant.now().toEpochMilli())
+                        .extensions(new HashMap<String, String>() {{
                             put("local", "192.168.0.1");
                             put("remote", "8.8.8.8");
                         }}))
@@ -81,10 +79,9 @@ public class TestJavascriptEngine {
         sleep(10);
 
         Map<String, Object> results = engine.feed(
-                createMessage(Message.newBuilder()
-                        .setId(UUID.randomUUID().toString())
-                        .setTs(Instant.now().toEpochMilli())
-                        .setExtensions(new HashMap<String, Object>() {{
+                createMessage(Message.builder()
+                        .ts(Instant.now().toEpochMilli())
+                        .extensions(new HashMap<String, String>() {{
                             put("local", "192.168.0.1");
                             put("remote", "8.8.8.8");
                         }}))
@@ -103,26 +100,20 @@ public class TestJavascriptEngine {
 
         for (int i = 0; i < 3; i++) {
             Map<String, Object> results = engine.feed(
-                    createMessage(Message.newBuilder()
-                            .setId(UUID.randomUUID().toString())
-                            .setTs(Instant.now().toEpochMilli())
-                            .setExtensions(new HashMap<String, Object>() {{
+                    createMessage(Message.builder()
+                            .ts(Instant.now().toEpochMilli())
+                            .extensions(new HashMap<String, String>() {{
                                 put("local", "192.168.0.1");
                             }}))
             );
         }
     }
 
-    private Message createMessage(Message.Builder builder) {
+    private Message createMessage(Message.MessageBuilder builder) {
         return builder
-                .setMessage("")
-                .setSource("test")
-                .setOriginalSource(SignedSourceKey.newBuilder()
-                        .setTopic("test")
-                        .setPartition(0)
-                        .setOffset(0)
-                        .setSignature(new sha1(new byte[128]))
-                        .build())
+                .message("")
+                .source("test")
+                .originalSource(TestUtils.source())
                 .build();
     }
 }

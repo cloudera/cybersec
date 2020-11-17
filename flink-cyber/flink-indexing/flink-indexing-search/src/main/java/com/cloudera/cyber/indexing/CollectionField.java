@@ -1,10 +1,9 @@
 package com.cloudera.cyber.indexing;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
+import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 
 import java.util.List;
@@ -12,17 +11,24 @@ import java.util.List;
 @Data
 @EqualsAndHashCode
 @Builder
-public class CollectionField extends SpecificRecordBase {
+@NoArgsConstructor
+@AllArgsConstructor
+public class CollectionField extends SpecificRecordBase implements SpecificRecord {
     private String key;
     private List<String> values;
 
+    private static final Schema SCHEMA$ = SchemaBuilder
+            .record(CollectionField.class.getName())
+            .namespace(CollectionField.class.getPackage().getName())
+            .fields()
+            .requiredString("key")
+            .name("values")
+            .type(SchemaBuilder.array().items().stringType()).noDefault()
+            .endRecord();
+
     @Override
     public Schema getSchema() {
-        return SchemaBuilder.record("CollectionField").fields()
-                .requiredString("key")
-                .name("values")
-                .type(SchemaBuilder.array().items().stringType()).noDefault()
-                .endRecord();
+        return SCHEMA$;
     }
 
     @Override
@@ -41,7 +47,7 @@ public class CollectionField extends SpecificRecordBase {
     public void put(int field, Object value) {
         switch (field) {
             case 0:
-                this.key = (String) value;
+                this.key = value.toString();
                 break;
             case 1:
                 this.values = (List<String>) value;

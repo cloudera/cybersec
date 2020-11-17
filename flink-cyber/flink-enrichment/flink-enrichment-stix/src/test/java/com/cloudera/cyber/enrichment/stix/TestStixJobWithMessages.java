@@ -2,7 +2,7 @@ package com.cloudera.cyber.enrichment.stix;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.SignedSourceKey;
-import com.cloudera.cyber.sha1;
+import com.cloudera.cyber.TestUtils;
 import lombok.extern.log4j.Log4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -43,16 +43,10 @@ public class TestStixJobWithMessages extends TestStixJob {
 
         source.sendWatermark(1000L);
 
-        messageSource.sendRecord(Message.newBuilder()
-                .setId(UUID.randomUUID().toString())
-                .setTs(0L)
-                .setOriginalSource(SignedSourceKey.newBuilder()
-                        .setTopic("test")
-                        .setPartition(0)
-                        .setOffset(0)
-                        .setSignature(new sha1("".getBytes()))
-                        .build())
-                .setExtensions(Collections.singletonMap("ip", "192.168.0.1"))
+        messageSource.sendRecord(Message.builder()
+                .ts(0L)
+                .originalSource(TestUtils.createOriginal())
+                .extensions(Collections.singletonMap("ip", "192.168.0.1"))
                 .build(), 1500L);
 
         JobTester.stopTest();

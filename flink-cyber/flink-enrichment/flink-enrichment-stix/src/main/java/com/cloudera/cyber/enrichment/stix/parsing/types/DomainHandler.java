@@ -21,7 +21,7 @@ public class DomainHandler extends AbstractObjectTypeHandler<DomainName> {
     }
 
     @Override
-    public Stream<ThreatIntelligence.Builder> extract(DomainName type, Map<String, Object> config) {
+    public Stream<ThreatIntelligence.ThreatIntelligenceBuilder> extract(DomainName type, Map<String, Object> config) {
         final DomainNameTypeEnum domainType = type.getType();
         List<ThreatIntelligence> output = new ArrayList<>();
         if (domainType == null || SUPPORTED_TYPES.contains(domainType)) {

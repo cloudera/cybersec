@@ -12,6 +12,7 @@
     <properties>
         <main.class>com.cloudera.cyber.pruner.Pruner</main.class>
         <junit5.version>5.7.0</junit5.version>
+        <java.version>1.8</java.version>
     </properties>
 
     <artifactId>retention-cleaner</artifactId>

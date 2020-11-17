@@ -23,13 +23,17 @@ public abstract class Enrichment {
         return String.join(".", prefix, enrichmentName);
     }
 
-    public void addQualityMessage(List<DataQualityMessage> messages, DataQualityMessageLevel level, String messageText) {
+    public void addQualityMessage(List<DataQualityMessage> messages, DataQualityMessageLevel level, String message) {
         Optional<DataQualityMessage> duplicate = messages.stream().
-                filter(m -> m.getLevel().equals(level) && m.getField().equals(fieldName) && m.getFeature().equals(feature) && m.getMessageText().equals(messageText)).findFirst();
+                filter(m -> m.getLevel().equals(level) && m.getField().equals(fieldName) && m.getFeature().equals(feature) && m.getMessage().equals(message)).findFirst();
         if (!duplicate.isPresent()) {
-            messages.add(new DataQualityMessage(level, feature, fieldName, messageText));
+            messages.add(DataQualityMessage.builder()
+                    .level(level.name())
+                    .feature(feature)
+                    .field(fieldName)
+                    .message(message).build());
         }
     }
 
-    public abstract void enrich(Map<String, Object> extensions, String enrichmentName, Object enrichmentValue);
+    public abstract void enrich(Map<String, String> extensions, String enrichmentName, Object enrichmentValue);
 }

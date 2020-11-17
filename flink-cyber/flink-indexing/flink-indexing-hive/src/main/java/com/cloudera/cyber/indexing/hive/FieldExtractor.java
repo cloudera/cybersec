@@ -7,7 +7,7 @@ import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.types.Row;
 
 import java.time.Instant;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -40,21 +40,21 @@ public class FieldExtractor extends RichMapFunction<Message, Row> {
 
     @Override
     public Row map(Message m) {
-        LocalTime time = Instant.ofEpochMilli(m.getTs()).atOffset(ZoneOffset.UTC)
-                .toLocalTime();
+        LocalDateTime time = Instant.ofEpochMilli(m.getTs()).atOffset(ZoneOffset.UTC)
+                .toLocalDateTime();
         Row output = Row.of(Stream.of(
-                Stream.of(m.getId(), m.getMessage(), flattenToStrings(m.getExtensions(), listFields)),
+                Stream.of(m.getId(), m.getTs(), m.getMessage(), flattenToStrings(m.getExtensions(), listFields)),
                 listFields.stream().map(field -> m.getExtensions().get(field)),
                 Stream.of(m.getSource(), date(time), hour(time))
         ).flatMap(s->s).toArray());
         return output;
     }
 
-    private String hour(LocalTime time) {
+    private String hour(LocalDateTime time) {
         return String.valueOf(time.getHour());
     }
 
-    private String date(LocalTime time) {
+    String date(LocalDateTime time) {
         return time.format(DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
@@ -65,11 +65,11 @@ public class FieldExtractor extends RichMapFunction<Message, Row> {
      * @param filter
      * @return
      */
-    private static Map<String, String> flattenToStrings(Map<String, Object> extensions, List<String> filter) {
+    private static Map<String, String> flattenToStrings(Map<String, String> extensions, List<String> filter) {
         return extensions.entrySet().stream()
-                .filter(e -> !filter.contains(e.getKey()))
+                .filter(e -> !filter.contains(e.getKey().toString()))
                 .collect(toMap(
-                        k -> k.getKey(),
+                        k -> k.getKey().toString(),
                         v -> v.getValue().toString())
                 );
     }

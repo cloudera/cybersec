@@ -15,7 +15,7 @@ public class HostnameHandler extends AbstractObjectTypeHandler<Hostname> {
     }
 
     @Override
-    public Stream<ThreatIntelligence.Builder> extract(Hostname type, Map<String, Object> config) {
+    public Stream<ThreatIntelligence.ThreatIntelligenceBuilder> extract(Hostname type, Map<String, Object> config) {
         return null;
     }
 

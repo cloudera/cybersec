@@ -2,7 +2,6 @@ package com.cloudera.cyber.caracal;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.SignedSourceKey;
-import com.cloudera.cyber.sha1;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import lombok.NonNull;
 import org.adrianwalker.multilinestring.Multiline;
@@ -13,7 +12,10 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.cloudera.cyber.parser.ParserJob.PARAM_PRIVATE_KEY;
@@ -80,21 +82,20 @@ public class ParserChainMapFunctionTest {
     }
 
     private Message createInput() {
-        return Message.newBuilder()
-                .setId(UUID.randomUUID().toString())
-                .setTs(Instant.now().toEpochMilli())
-                .setSource("test")
-                .setOriginalSource(SignedSourceKey.newBuilder()
-                        .setTopic("topic")
-                        .setPartition(0)
-                        .setOffset(0)
-                        .setSignature(new sha1(new byte[128]))
+        return Message.builder()
+                .ts(Instant.now().toEpochMilli())
+                .source("test")
+                .originalSource(SignedSourceKey.builder()
+                        .topic("topic")
+                        .partition(0)
+                        .offset(0)
+                        .signature(new byte[128])
                         .build())
-                .setExtensions(createFields()).build();
+                .extensions(createFields()).build();
     }
 
-    private Map<String, Object> createFields() {
-        return new HashMap<String, Object>(){{
+    private Map<String, String> createFields() {
+        return new HashMap<String, String>(){{
             put("test", "value");
             put("ip_src", "192.168.0.1");
             put("ip_dst", "8.8.8.8");

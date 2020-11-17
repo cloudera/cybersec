@@ -24,8 +24,7 @@ TBLPROPERTIES (
   'sink.partition-commit.trigger'='partition-time',
   'sink.partition-commit.delay'='30 s',
   'sink.partition-commit.policy.kind'='metastore,success-file',
-  'transactional'='true',
-  'transactional_properties'='insert_only'
+  'transactional'='true'
 );
 
 ```
