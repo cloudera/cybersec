@@ -10,13 +10,11 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
-import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 
 import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
 import static org.apache.commons.codec.digest.DigestUtils.md5;
