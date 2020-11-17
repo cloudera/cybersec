@@ -15,6 +15,9 @@ public abstract class IpGeoJob {
     public static final String PARAM_GEO_FIELDS = "geo.ip_fields";
     public static final String PARAM_GEO_DATABASE_PATH = "geo.database_path";
 
+    public static final String PARAM_ASN_FIELDS = "asn.ip_fields";;
+    public static final String PARAM_ASN_DATABASE_PATH = "asn.database_path";
+
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         FlinkUtils.setupEnv(env, params);

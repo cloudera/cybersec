@@ -14,7 +14,6 @@
 
     <modules>
         <module>flink-enrichment-lookup-raw</module>
-        <module>flink-enrichment-lookup-sql</module>
         <module>flink-enrichment-lookup-hbase</module>
         <module>flink-enrichment-lookup-rest</module>
         <module>flink-enrichment-stix</module>

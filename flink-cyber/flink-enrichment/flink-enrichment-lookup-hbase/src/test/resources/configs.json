@@ -13,13 +13,13 @@
       }
     ]
   }, {
-    "source": "test",
-    "kind": "HBASE",
-    "fields": [
-      {
-        "name": "hostname",
-        "enrichmentType": "domain_rep"
-      }
-    ]
-  }
+  "source": "test",
+  "kind": "HBASE",
+  "fields": [
+    {
+      "name": "hostname",
+      "enrichmentType": "domain_rep"
+    }
+  ]
+}
 ]

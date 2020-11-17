@@ -2,25 +2,24 @@ package com.cloudera.cyber.enrichment.hbase;
 
 import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.MessageUtils;
+import com.cloudera.cyber.MessageTypeFactory;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
-import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
-import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
-import org.apache.flink.types.Row;
+import org.apache.flink.table.functions.ScalarFunction;
 
+import javax.sound.midi.SysexMessage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static com.cloudera.cyber.enrichment.ConfigUtils.*;
 
@@ -33,23 +32,36 @@ public abstract class HbaseJob {
                 .inStreamingMode()
                 .build());
 
-        Map<String, List<String>> typeToFields = typeToFields(configs, EnrichmentKind.HBASE);
-        Set<String> enrichmentTypes = enrichmentTypes(configs, EnrichmentKind.HBASE);
+        tableEnv.createTemporaryView("messages", source);
 
-        tableEnv.createTemporaryView("messages", source.map(m -> Row.of(m.toByteBuffer().array(), null /* TODO add the fields required for enrichment */)));
+        tableEnv.registerFunction("MAP_MERGE", new MapMergeFunction());
+        tableEnv.registerFunction("MAP_PREFIX", new PrefixMapFunction());
+        tableEnv.registerFunction("HBASE_ENRICHMENT", new HbaseEnrichmentFunction());
+        String sql = HbaseSQL.buildSql(configs);
 
-        // output table should return original message in avro encoded bytes and the map of additional fields
-        Table results = tableEnv.sqlQuery("");
+        //Table results = tableEnv.sqlQuery(sql);
 
-        return tableEnv.toAppendStream(results,
-                Types.ROW(Types.OBJECT_ARRAY(Types.BYTE), Types.MAP(Types.STRING, Types.STRING)))
-                .map(r ->
-                        MessageUtils.addFields(
-                                Message.getDecoder().decode((byte[]) r.getField(0)),
-                                (Map<String, Object>) r.getField(1)
-                        )
-                );
+        Table results = tableEnv.sqlQuery("select * from messages");
+
+        System.out.println("Source Type");
+        System.out.println(source.getType().toString());
+        TableSchema schema = results.getSchema();
+        System.out.println("Schema");
+        System.out.println(schema.toString());
+
+        System.out.println("Schema row data type");
+        System.out.println(schema.toRowDataType().toString());
+
+        System.out.println("Message Type");
+        System.out.println(TypeInformation.of(Message.class).toString());
+        return tableEnv.toAppendStream(results, Message.class);
+        /*return tableEnv.toAppendStream(results, TypeInformation.of(Row.class)).map(r -> {
+            // TODO - map Row to Message
+            // rowToMessage(r)
+            Message.builder().build()
+        });*/
     }
+
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws IOException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
@@ -73,6 +85,5 @@ public abstract class HbaseJob {
     protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
 
     protected abstract DataStream<EnrichmentEntry> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
-
-    protected abstract void createTable(StreamTableEnvironment tableEnvironment, ParameterTool params);
 }
+
