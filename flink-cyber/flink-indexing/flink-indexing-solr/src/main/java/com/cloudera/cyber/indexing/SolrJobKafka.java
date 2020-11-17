@@ -4,6 +4,7 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.formats.avro.registry.cloudera.ClouderaRegistryKafkaSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -20,6 +21,7 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
+import static com.cloudera.cyber.flink.Utils.K_SCHEMA_REG_URL;
 import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
 
 @Slf4j
@@ -55,18 +57,14 @@ public class SolrJobKafka extends SolrJob {
         String topic = params.get(PARAMS_TOPIC_CONFIG_LOG, DEFAULT_TOPIC_CONFIG_LOG);
         Properties kafkaProperties = readKafkaProperties(params, false);
         log.info("Creating Kafka Sink for {}, using {}", topic, kafkaProperties);
+        KafkaSerializationSchema<CollectionField> schema = ClouderaRegistryKafkaSerializationSchema
+                .<CollectionField>builder(topic)
+                .setRegistryAddress(params.getRequired(K_SCHEMA_REG_URL))
+                .build();
         FlinkKafkaProducer<CollectionField> kafkaSink = new FlinkKafkaProducer<>(topic,
-                (KafkaSerializationSchema<CollectionField>) (collectionField, aLong) -> {
-                    ObjectMapper om = new ObjectMapper();
-                    try {
-                        return new ProducerRecord<>(topic, null, Instant.now().toEpochMilli(), collectionField.getKey().getBytes(), om.writeValueAsBytes(collectionField));
-                    } catch (IOException e) {
-                        return new ProducerRecord<>(topic, null, Instant.now().toEpochMilli(), collectionField.getKey().getBytes(), e.getMessage().getBytes());
-                    }
-                },
+                schema,
                 kafkaProperties,
                 FlinkKafkaProducer.Semantic.AT_LEAST_ONCE);
-
         configSource.addSink(kafkaSink).name("Schema Log").uid("schema-log")
                 .setParallelism(1);
     }
