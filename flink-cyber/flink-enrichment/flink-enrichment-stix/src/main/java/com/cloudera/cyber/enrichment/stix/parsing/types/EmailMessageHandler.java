@@ -18,7 +18,7 @@ public class EmailMessageHandler extends AbstractObjectTypeHandler<EmailMessage>
     }
 
     @Override
-    public Stream<ThreatIntelligence.Builder> extract(EmailMessage type, Map<String, Object> config) {
+    public Stream<ThreatIntelligence.ThreatIntelligenceBuilder> extract(EmailMessage type, Map<String, Object> config) {
         List<Address> tos = type.getHeader().getTo().getRecipients();
         List<Address> cc = type.getHeader().getCC().getRecipients();
         List<Address> bcc = type.getHeader().getBCC().getRecipients();

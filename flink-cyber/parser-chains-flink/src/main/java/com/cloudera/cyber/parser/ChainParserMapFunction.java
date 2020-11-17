@@ -2,7 +2,6 @@ package com.cloudera.cyber.parser;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.SignedSourceKey;
-import com.cloudera.cyber.sha1;
 import com.cloudera.parserchains.core.*;
 import com.cloudera.parserchains.core.catalog.ClassIndexParserCatalog;
 import lombok.NonNull;
@@ -94,20 +93,19 @@ public class ChainParserMapFunction extends RichFlatMapFunction<MessageToParse, 
         signature.update(originalInput.getBytes(StandardCharsets.UTF_8));
         byte[] sig = signature.sign();
 
-        collector.collect(Message.newBuilder().setExtensions(fieldsFromChain(m.getFields()))
-                .setOriginalSource(SignedSourceKey.newBuilder()
-                        .setTopic(message.getTopic())
-                        .setPartition(message.getPartition())
-                        .setOffset(message.getOffset())
-                        .setSignature(new sha1(sig))
+        collector.collect(Message.builder().extensions(fieldsFromChain(m.getFields()))
+                .originalSource(SignedSourceKey.builder()
+                        .topic(message.getTopic())
+                        .partition(message.getPartition())
+                        .offset(message.getOffset())
+                        .signature(sig)
                         .build())
-                .setTs(Long.valueOf(timestamp.get().get()))
-                .setId(UUID.randomUUID().toString())
+                .ts(Long.valueOf(timestamp.get().get()))
                 .build());
     }
 
-    private static HashMap<String, Object> fieldsFromChain(Map<FieldName, FieldValue> fields) {
-        return new HashMap<String, Object>() {{
+    private static HashMap<String, String> fieldsFromChain(Map<FieldName, FieldValue> fields) {
+        return new HashMap<String, String>() {{
             fields.entrySet().stream().forEach(e -> {
                 String key = e.getKey().get();
                 if (key.equals(DEFAULT_INPUT_FIELD) || key.equals("timestamp")) {

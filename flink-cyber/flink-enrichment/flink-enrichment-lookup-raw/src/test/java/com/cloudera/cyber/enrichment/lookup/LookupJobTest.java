@@ -2,8 +2,7 @@ package com.cloudera.cyber.enrichment.lookup;
 
 import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.SignedSourceKey;
-import com.cloudera.cyber.sha1;
+import com.cloudera.cyber.TestUtils;
 import com.google.common.collect.ImmutableMap;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -51,7 +50,7 @@ public class LookupJobTest extends LookupJob {
 
         // make up some enrichable messages, use the message attr to express expected field count after enrichment
         sendMessage("2", Collections.singletonMap("ip_src_addr", "10.0.0.1"), 100);
-        sendMessage("4", new HashMap<String, Object>(2) {{
+        sendMessage("4", new HashMap<String, String>(2) {{
             put("ip_src_addr", "10.0.0.1");
             put("ip_dst_addr", "192.168.0.1");
         }}, 150);
@@ -94,11 +93,11 @@ public class LookupJobTest extends LookupJob {
     }
 
     private EnrichmentEntry enrichment(String type, String key, Map<String, String> entries) {
-        return EnrichmentEntry.newBuilder()
-                .setType(type)
-                .setKey(key)
-                .setEntries(entries)
-                .setTs(0)
+        return EnrichmentEntry.builder()
+                .type(type)
+                .key(key)
+                .entries(entries)
+                .ts(0)
                 .build();
     }
 
@@ -106,22 +105,17 @@ public class LookupJobTest extends LookupJob {
         enrichmentSource.sendRecord(enrichment(type, key, entries), 0);
     }
 
-    private Message message(String message, Map<String, Object> extensions, long ts) {
-        return Message.newBuilder()
-                .setOriginalSource(SignedSourceKey.newBuilder()
-                        .setTopic("test")
-                        .setPartition(0)
-                        .setOffset(0)
-                        .setSignature(new sha1(new byte[128])).build())
-                .setId(UUID.randomUUID().toString())
-                .setTs(ts)
-                .setMessage(message)
-                .setSource("test")
-                .setExtensions(extensions)
+    private Message message(String message, Map<String, String> extensions, long ts) {
+        return Message.builder()
+                .originalSource(TestUtils.createOriginal())
+                .ts(ts)
+                .message(message)
+                .source("test")
+                .extensions(extensions)
                 .build();
     }
 
-    private void sendMessage(String message, Map<String, Object> extensions, long ts) {
+    private void sendMessage(String message, Map<String, String> extensions, long ts) {
         source.sendRecord(message(message, extensions, ts), ts);
     }
 }

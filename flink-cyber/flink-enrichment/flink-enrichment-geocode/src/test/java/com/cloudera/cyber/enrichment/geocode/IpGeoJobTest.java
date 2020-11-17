@@ -28,7 +28,7 @@ public class IpGeoJobTest extends IpGeoJob {
     private ManualSource<Message> source;
     private final CollectingSink<Message> sink = new CollectingSink<>();
     private final List<Message> recordLog = new ArrayList<>();
-    private final Map<Long, Map<String, Object>> expectedExtensions = new HashMap<>();
+    private final Map<Long, Map<String, String>> expectedExtensions = new HashMap<>();
 
     @Test
     public void testIpGeoPipeline() throws Exception {
@@ -60,33 +60,24 @@ public class IpGeoJobTest extends IpGeoJob {
     private void createMessages(long ts) {
 
         List<String> ipList = Arrays.asList(IpGeoTestData.LOCAL_IP,IpGeoTestData.ALL_FIELDS_IPv4, IpGeoTestData.ALL_FIELDS_IPv4, IpGeoTestData.UNKNOWN_HOST_IP, IpGeoTestData.COUNTRY_ONLY_IPv6);
-        List<Message.Builder>  messages = new ArrayList<>();
-        messages.add(Message.newBuilder()
-                .setExtensions(new HashMap<String, Object>() {{
+        List<Message.MessageBuilder>  messages = new ArrayList<>();
+        messages.add(Message.builder()
+                .extensions(new HashMap<String, String>() {{
                     put(STRING_IP_FIELD_NAME, IpGeoTestData.COUNTRY_ONLY_IPv6);
                 }}));
-        messages.add(Message.newBuilder()
-                .setExtensions(new HashMap<String, Object>() {{
+        messages.add(Message.builder()
+                .extensions(new HashMap<String, String>() {{
                     put(STRING_IP_FIELD_NAME, IpGeoTestData.ALL_FIELDS_IPv4);
-                }}));
-        messages.add(Message.newBuilder()
-                .setExtensions(new HashMap<String, Object>() {{
-                    put(LIST_IP_FIELD_NAME, ipList);
-                }}));
-        messages.add(Message.newBuilder()
-                .setExtensions(new HashMap<String, Object>() {{
-                    put(STRING_IP_FIELD_NAME, IpGeoTestData.ALL_FIELDS_IPv4);
-                    put(LIST_IP_FIELD_NAME, ipList);
                 }}));
 
         long offset = 100;
-        for(Message.Builder nextBuilder: messages) {
-            Map<String, Object> inputFields = nextBuilder.getExtensions();
-            Map<String, Object> expectedExtension = new HashMap<>(inputFields);
+        for(Message.MessageBuilder nextBuilder: messages) {
+            Map<String, String> inputFields = nextBuilder.build().getExtensions();
+            Map<String, String> expectedExtension = new HashMap<>(inputFields);
             long nextTimestamp = ts + offset;
             expectedExtensions.put(nextTimestamp, expectedExtension);
             inputFields.forEach((field, value) -> IpGeoTestData.getExpectedEnrichmentValues(expectedExtension, field, value));
-            sendRecord(nextBuilder.setTs(ts + offset));
+            sendRecord(nextBuilder.ts(ts + offset));
             offset += 100;
         }
 
@@ -94,9 +85,9 @@ public class IpGeoJobTest extends IpGeoJob {
         source.markFinished();
     }
 
-    private void sendRecord(Message.Builder d) {
-        Message r = d.setId(UUID.randomUUID().toString())
-                .setOriginalSource(TestUtils.source("test", 0, 0))
+    private void sendRecord(Message.MessageBuilder d) {
+        Message r = d.id(UUID.randomUUID().toString())
+                .originalSource(TestUtils.source("test", 0, 0))
                 .build();
         this.source.sendRecord(r, r.getTs());
         this.recordLog.add(r);

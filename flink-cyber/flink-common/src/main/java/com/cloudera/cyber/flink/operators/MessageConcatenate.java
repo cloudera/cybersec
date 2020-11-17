@@ -24,7 +24,7 @@ public class MessageConcatenate implements AggregateFunction<Message, List<Messa
 
     @Override
     public GroupedMessage getResult(List<Message> messageList) {
-        return GroupedMessage.newBuilder().setMessages(messageList).setId(UUID.randomUUID().toString()).build();
+        return GroupedMessage.builder().messages(messageList).build();
     }
 
     @Override

@@ -27,7 +27,7 @@ public class IpGeoEnrichmentTest {
         ipGeoEnrichment = new IpGeoEnrichment(new DatabaseReader.Builder(new File(IpGeoTestData.GEOCODE_DATABASE_PATH)).build());
     }
 
-    @Test(expected=NullPointerException.class)
+    @Test(expected = NullPointerException.class)
     public void throwsWithNullCityDatabase() {
         new IpGeoEnrichment(null);
     }
@@ -54,25 +54,13 @@ public class IpGeoEnrichmentTest {
     }
 
     @Test
-    public void testIpNotString() {
-        int notAString = 400;
-        testGeoEnrichment(400, DataQualityMessageLevel.INFO, String.format(IpGeoEnrichment.FIELD_VALUE_IS_NOT_A_STRING, notAString), ipGeoEnrichment);
-    }
-
-    @Test
     public void testNullEnrichmentValue() {
-        Map<String, Object> emptyEnrichments = new HashMap<>();
+        Map<String, String> emptyEnrichments = new HashMap<>();
         List<DataQualityMessage> emptyMessages = new ArrayList<>();
 
         ipGeoEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, null, IpGeoEnrichment.GeoEnrichmentFields.values(), emptyEnrichments, emptyMessages);
         Assert.assertTrue(emptyEnrichments.isEmpty());
         Assert.assertTrue(emptyMessages.isEmpty());
-    }
-
-    @Test
-    public void testListEnrichmentValue() {
-        List<String> ipList = Arrays.asList(IpGeoTestData.LOCAL_IP, IpGeoTestData.COUNTRY_ONLY_IPv6, IpGeoTestData.COUNTRY_ONLY_IPv6, IpGeoTestData.UNKNOWN_HOST_IP, IpGeoTestData.ALL_FIELDS_IPv4);
-        testGeoEnrichment(ipList, DataQualityMessageLevel.INFO, String.format(IpGeoEnrichment.FIELD_VALUE_IS_NOT_A_VALID_IP_ADDRESS, IpGeoTestData.UNKNOWN_HOST_IP), ipGeoEnrichment);
     }
 
     @Test
@@ -83,21 +71,21 @@ public class IpGeoEnrichmentTest {
                 .thenThrow(new GeoIp2Exception(testExceptionMessage), new RuntimeException());
 
         // use non-local ip to test throwing path
-        testGeoEnrichment("100.200.200.1",DataQualityMessageLevel.ERROR, String.format(IpGeoEnrichment.GEOCODE_FAILED_MESSAGE, testExceptionMessage), new IpGeoEnrichment(throwingMaxmind));
+        testGeoEnrichment("100.200.200.1", DataQualityMessageLevel.ERROR, String.format(IpGeoEnrichment.GEOCODE_FAILED_MESSAGE, testExceptionMessage), new IpGeoEnrichment(throwingMaxmind));
     }
 
-    private void testGeoEnrichment(Object ipAddress) {
+    private void testGeoEnrichment(String ipAddress) {
         testGeoEnrichment(ipAddress, null, null, ipGeoEnrichment);
     }
 
-    private void testGeoEnrichment(Object ipAddress, DataQualityMessageLevel level, String messageText, IpGeoEnrichment testIpGeoEnrichment) {
+    private void testGeoEnrichment(String ipAddress, DataQualityMessageLevel level, String messageText, IpGeoEnrichment testIpGeoEnrichment) {
 
         List<DataQualityMessage> expectedQualityMessages = createExpectedDataQualityMessages(level, messageText);
 
-        Map<String, Object> expectedExtensions = new HashMap<>();
+        Map<String, String> expectedExtensions = new HashMap<>();
         com.cloudera.cyber.enrichment.geocode.IpGeoTestData.getExpectedEnrichmentValues(expectedExtensions, TEST_ENRICHMENT_FIELD_NAME, ipAddress, Arrays.asList(IpGeoEnrichment.GeoEnrichmentFields.values()));
 
-        Map<String, Object> actualExtensions = new HashMap<>();
+        Map<String, String> actualExtensions = new HashMap<>();
         List<DataQualityMessage> actualQualityMessages = new ArrayList<>();
         testIpGeoEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, ipAddress, IpGeoEnrichment.GeoEnrichmentFields.values(), actualExtensions, actualQualityMessages);
         Assert.assertEquals(expectedExtensions, actualExtensions);
@@ -105,9 +93,13 @@ public class IpGeoEnrichmentTest {
     }
 
     private List<DataQualityMessage> createExpectedDataQualityMessages(DataQualityMessageLevel level, String messageText) {
-        List<DataQualityMessage>   dataQualityMessages = new ArrayList<>();
+        List<DataQualityMessage> dataQualityMessages = new ArrayList<>();
         if (messageText != null) {
-            dataQualityMessages.add(new DataQualityMessage(level, IpGeoEnrichment.GEOCODE_FEATURE, IpGeoEnrichmentTest.TEST_ENRICHMENT_FIELD_NAME, messageText));
+            dataQualityMessages.add(DataQualityMessage.builder()
+                    .level(level.name())
+                    .feature(IpGeoEnrichment.GEOCODE_FEATURE)
+                    .field(IpGeoEnrichmentTest.TEST_ENRICHMENT_FIELD_NAME)
+                    .message(messageText).build());
         }
         return dataQualityMessages;
     }

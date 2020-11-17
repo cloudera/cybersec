@@ -76,7 +76,7 @@ public class TestDedupeJob extends DedupeJob {
         output.forEach(this::checkResult);
         // note that the size will be 1 greater than expected due to the max count emitter which breaks
         // one of the 3 duplicates into a 2 and a 1.
-        List<DedupeMessage> lateMessages = output.stream().filter(m -> m.getLate()).collect(Collectors.toList());
+        List<DedupeMessage> lateMessages = output.stream().filter(m -> m.isLate()).collect(Collectors.toList());
 
         log.info(String.format("Output: %s; lateMessages: %s", output, lateMessages));
         assertThat("All messages were processed", output.parallelStream()
@@ -91,51 +91,51 @@ public class TestDedupeJob extends DedupeJob {
     }
 
     public void createMessages(long ts) throws TimeoutException {
-        Message.Builder MESSAGE_A = Message.newBuilder()
-                .setExtensions(new HashMap<String, Object>() {{
+        Message.MessageBuilder MESSAGE_A = Message.builder()
+                .extensions(new HashMap<String, String>() {{
                     put("a", "test");
                     put("b", "test");
                 }});
-        Message.Builder MESSAGE_B = Message.newBuilder()
-                .setExtensions(new HashMap<String, Object>() {{
+        Message.MessageBuilder MESSAGE_B = Message.builder()
+                .extensions(new HashMap<String, String>() {{
                     put("a", "test2");
                     put("b", "test2");
                 }});
-        Message.Builder MESSAGE_C = Message.newBuilder()
-                .setExtensions(new HashMap<String, Object>() {{
+        Message.MessageBuilder MESSAGE_C = Message.builder()
+                .extensions(new HashMap<String, String>() {{
                     put("a", "test3");
                     put("b", "test3");
                     put("c", "test3");
                 }});
 
-        sendRecord(MESSAGE_A.setTs(ts + 0));
-        sendRecord(MESSAGE_A.setTs(ts + 100));
-        sendRecord(MESSAGE_A.setTs(ts + 200));
-        sendRecord(MESSAGE_B.setTs(ts + 200));
-        sendRecord(MESSAGE_C.setTs(ts + 200));
+        sendRecord(MESSAGE_A.ts(ts + 0));
+        sendRecord(MESSAGE_A.ts(ts + 100));
+        sendRecord(MESSAGE_A.ts(ts + 200));
+        sendRecord(MESSAGE_B.ts(ts + 200));
+        sendRecord(MESSAGE_C.ts(ts + 200));
 
         source.sendWatermark(ts + 1000);
 
         // insert late message
-        sendRecord(MESSAGE_A.setTs(ts + 500));
+        sendRecord(MESSAGE_A.ts(ts + 500));
 
-        sendRecord(MESSAGE_A.setTs(ts + 1100));
-        sendRecord(MESSAGE_A.setTs(ts + 1200));
-        sendRecord(MESSAGE_B.setTs(ts + 1300));
-        sendRecord(MESSAGE_B.setTs(ts + 1400));
-        sendRecord(MESSAGE_C.setTs(ts + 1500));
+        sendRecord(MESSAGE_A.ts(ts + 1100));
+        sendRecord(MESSAGE_A.ts(ts + 1200));
+        sendRecord(MESSAGE_B.ts(ts + 1300));
+        sendRecord(MESSAGE_B.ts(ts + 1400));
+        sendRecord(MESSAGE_C.ts(ts + 1500));
 
         source.sendWatermark(ts + 2000);
 
         // insert extremely late
-        sendRecord(MESSAGE_A.setTs(ts + 150));
+        sendRecord(MESSAGE_A.ts(ts + 150));
 
         source.markFinished();
     }
 
-    private void sendRecord(Message.Builder d) {
-        Message r = d.setId(UUID.randomUUID().toString())
-                .setOriginalSource(TestUtils.source("test", 0, 0))
+    private void sendRecord(Message.MessageBuilder d) {
+        Message r = d.id(UUID.randomUUID().toString())
+                .originalSource(TestUtils.source("test", 0, 0))
                 .build();
         this.source.sendRecord(r, r.getTs());
         this.recordLog.add(r);
@@ -153,17 +153,16 @@ public class TestDedupeJob extends DedupeJob {
                 createFields(Arrays.asList("a", "b"), "test2"),
                 createFields(Arrays.asList("a", "b", "c'"), "test3")
         ).map(fields ->
-                Message.newBuilder()
-                        .setId(UUID.randomUUID().toString())
-                        .setTs(ts)
-                        .setExtensions(fields)
+                Message.builder()
+                        .ts(ts)
+                        .extensions(fields)
                         .build()
         ).collect(Collectors.toList());
 
     }
 
-    private HashMap<String, Object> createFields(List<String> fields, String value) {
-        return new HashMap<String, Object>() {{
+    private HashMap<String, String> createFields(List<String> fields, String value) {
+        return new HashMap<String, String>() {{
             fields.forEach(f -> put(f, value));
         }};
     }

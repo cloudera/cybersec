@@ -33,9 +33,9 @@ public class FilterStreamFieldsByConfig extends KeyedBroadcastProcessFunction<St
 
         Stream<Tuple2<String, String>> messageFields = message.getExtensions() == null ? Stream.empty() :
                 message.getExtensions().entrySet().stream()
-                        .filter(f -> f.getKey() != "ts")
+                        .filter(f -> !f.getKey().equals("ts"))
                         .filter(f -> fieldsRequired.contains(f.getKey()))
-                        .map(e -> Tuple2.of(e.getKey(), e.getValue().toString()));
+                        .map(e -> Tuple2.of(e.getKey(), e.getValue()));
 
         Stream<Tuple2<String, String>> threatFields = message.getThreats() == null ? Stream.empty() :
                 message.getThreats().entrySet().stream().flatMap(e ->
