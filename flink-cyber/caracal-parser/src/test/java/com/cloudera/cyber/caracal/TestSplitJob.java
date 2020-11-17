@@ -1,6 +1,7 @@
 package com.cloudera.cyber.caracal;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -69,7 +70,7 @@ public class TestSplitJob extends SplitJob {
         List<Message> results = new ArrayList<>();
         for (int i = 0; i < expectedMessages; i++) {
             try {
-                results.add(sink.poll(Duration.ofMillis(100)));
+                results.add(sink.poll());
             } catch (TimeoutException e ){
                 break;
             }
@@ -84,12 +85,7 @@ public class TestSplitJob extends SplitJob {
     }
 
     private MessageToParse resourceToMessage(String topic, String file) {
-        return MessageToParse.newBuilder()
-                .setOriginalSource(getResourceAsString(file))
-                .setTopic(topic)
-                .setOffset(0)
-                .setPartition(0)
-                .build();
+        return TestUtils.createMessageToParse(getResourceAsString(file)).topic(topic).build();
     }
 
     @Override
