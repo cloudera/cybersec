@@ -36,11 +36,11 @@ public class IpGeoMap extends RichMapFunction<Message, Message> {
 
     @Override
     public Message map(Message message) {
-        Map<String, Object> messageFields = message.getExtensions();
+        Map<String, String> messageFields = message.getExtensions();
         Message newMessage = message;
         List<DataQualityMessage> qualityMessages = new ArrayList<>();
         if (messageFields != null && !ipFieldNames.isEmpty()) {
-            Map<String, Object> geoExtensions = new HashMap<>();
+            Map<String, String> geoExtensions = new HashMap<>();
             for (String ipFieldName : ipFieldNames) {
                 Object ipFieldValue = messageFields.get(ipFieldName);
                 geoEnrichment.lookup(ipFieldName, ipFieldValue, getGeoFieldSet(ipFieldValue), geoExtensions, qualityMessages);

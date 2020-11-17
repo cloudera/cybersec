@@ -12,4 +12,9 @@ public class IpGeo {
         return source
                 .map(new IpGeoMap(geoDatabasePath, ipFields, null));
     }
+
+    public static DataStream<Message> asn(DataStream<Message> source, List<String> ipFields, String asnDatabasePath) {
+        return source
+                .map(new IpAsnMap(asnDatabasePath, ipFields, null));
+    }
 }
