@@ -8,10 +8,10 @@ public class SingleValueEnrichment extends Enrichment {
     }
 
     @Override
-    public void enrich(Map<String, Object> extensions, String enrichmentName, Object enrichmentValue) {
+    public void enrich(Map<String, String> extensions, String enrichmentName, Object enrichmentValue) {
         if (enrichmentValue != null) {
             String extensionName = getName(enrichmentName);
-            extensions.put(extensionName, enrichmentValue);
+            extensions.put(extensionName, enrichmentValue.toString());
         }
     }
 }
