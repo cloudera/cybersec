@@ -1,6 +1,7 @@
 package com.cloudera.cyber.parser;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.TestUtils;
 import com.google.common.io.Resources;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -64,8 +65,8 @@ public class TestNetflowParser extends AbstractParserJobTest {
     @Override
     @Test
     public void testParser() throws Exception {
-        ParameterTool params = ParameterTool.fromMap(new HashMap<String,String>() {{
-            put(PARAM_CHAIN_CONFIG,config);
+        ParameterTool params = ParameterTool.fromMap(new HashMap<String, String>() {{
+            put(PARAM_CHAIN_CONFIG, config);
             put(PARAM_PRIVATE_KEY, getKeyBase64());
         }});
 
@@ -73,11 +74,11 @@ public class TestNetflowParser extends AbstractParserJobTest {
 
         JobTester.startTest(env);
 
-        source.sendRecord(MessageToParse.newBuilder()
-                .setTopic("netflow")
-                .setOriginalSource(Resources.toString(Resources.getResource("netflow.json"), StandardCharsets.UTF_8))
-                .setPartition(1)
-                .setOffset(1)
+        source.sendRecord(TestUtils
+                .createMessageToParse(
+                        Resources.toString(Resources.getResource("netflow.json"), StandardCharsets.UTF_8)
+                )
+                .topic("netflow")
                 .build());
         JobTester.stopTest();
 

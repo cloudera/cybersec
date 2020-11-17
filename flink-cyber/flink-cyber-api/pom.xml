@@ -14,46 +14,6 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.avro</groupId>
-                <artifactId>avro-maven-plugin</artifactId>
-                <version>${avro.version}</version>
-                <configuration>
-                    <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
-                    <stringType>String</stringType>
-                    <createSetters>true</createSetters>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>schema</goal>
-                        </goals>
-                        <configuration>
-                            <imports>
-                                <import>${project.basedir}/src/main/avro/EnrichmentEntry.avsc</import>
-                                <import>${project.basedir}/src/main/avro/MessageToParse.avsc</import>
-                                <import>${project.basedir}/src/main/avro/ThreatIntelligence.avsc</import>
-                                <import>${project.basedir}/src/main/avro/Message.avsc</import>
-                                <import>${project.basedir}/src/main/avro/GroupedMessage.avsc</import>
-                                <import>${project.basedir}/src/main/avro/DedupeMessage.avsc</import>
-                            </imports>
-                        </configuration>
-                    </execution>
-                    <!--<execution>
-                        <id>protocols</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>protocol</goal>
-                            <goal>idl-protocol</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
-
-                        </configuration>
-                    </execution>-->
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>

@@ -15,11 +15,11 @@ public class MessageToParseDeserializer implements KafkaDeserializationSchema<Me
 
     @Override
     public MessageToParse deserialize(ConsumerRecord<byte[], byte[]> consumerRecord) throws Exception {
-        return MessageToParse.newBuilder()
-                .setOriginalSource(new String(consumerRecord.value(), StandardCharsets.UTF_8))
-                .setTopic(consumerRecord.topic())
-                .setOffset(consumerRecord.offset())
-                .setPartition(consumerRecord.partition())
+        return MessageToParse.builder()
+                .originalSource(new String(consumerRecord.value(), StandardCharsets.UTF_8))
+                .topic(consumerRecord.topic())
+                .offset(consumerRecord.offset())
+                .partition(consumerRecord.partition())
                 .build();
     }
 

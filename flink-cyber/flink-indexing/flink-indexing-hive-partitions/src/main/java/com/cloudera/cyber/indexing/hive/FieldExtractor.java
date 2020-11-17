@@ -64,12 +64,12 @@ public class FieldExtractor extends RichMapFunction<Message, Row> {
      * @param filter
      * @return
      */
-    private static Map<String, String> flattenToStrings(Map<String, Object> extensions, List<String> filter) {
+    private static Map<String, String> flattenToStrings(Map<String, String> extensions, List<String> filter) {
         return extensions.entrySet().stream()
                 .filter(e -> !filter.contains(e.getKey()))
                 .collect(toMap(
                         k -> k.getKey(),
-                        v -> v.getValue().toString())
+                        v -> v.getValue())
                 );
     }
 

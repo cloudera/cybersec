@@ -53,7 +53,7 @@ public abstract class DedupeJob {
         //printResults(results);
 
         // capture and publish any late results without counts, i.e. fail safe
-        writeResults(params, results.getSideOutput(lateData).map(d -> DedupeMessage.newBuilder(d).setLate(true).build()));
+        writeResults(params, results.getSideOutput(lateData).map(d -> d.toBuilder().late(true).build()));
 
         return env;
     }

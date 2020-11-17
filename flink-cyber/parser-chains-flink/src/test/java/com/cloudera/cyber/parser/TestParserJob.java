@@ -1,6 +1,7 @@
 package com.cloudera.cyber.parser;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.TestUtils;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -112,13 +113,7 @@ public class TestParserJob extends AbstractParserJobTest {
         StreamExecutionEnvironment env = createPipeline(params);
 
         JobTester.startTest(env);
-
-        source.sendRecord(MessageToParse.newBuilder()
-                .setTopic("test")
-                .setOriginalSource(input)
-                .setPartition(1)
-                .setOffset(1)
-                .build());
+        source.sendRecord(TestUtils.createMessageToParse(input).build());
         JobTester.stopTest();
 
         Message out = sink.poll(Duration.ofMillis(1000));

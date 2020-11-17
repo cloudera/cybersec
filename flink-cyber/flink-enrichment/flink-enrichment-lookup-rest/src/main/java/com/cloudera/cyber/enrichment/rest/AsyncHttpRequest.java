@@ -33,7 +33,7 @@ public class AsyncHttpRequest extends RichAsyncFunction<Message, Message> {
 
     private final transient CloseableHttpClient client;
 
-    private transient AsyncLoadingCache<String, Map<String, Object>> cache;
+    private transient AsyncLoadingCache<String, Map<String, String>> cache;
 
     private transient ObjectMapper om = new ObjectMapper();
 
@@ -54,9 +54,9 @@ public class AsyncHttpRequest extends RichAsyncFunction<Message, Message> {
                     HttpGet httpget = new HttpGet(u);
                     try {
                         CloseableHttpResponse execute = client.execute(httpget);
-                        Map<String, Object> results = om.readValue(
+                        Map<String, String> results = om.readValue(
                                 execute.getEntity().getContent(),
-                                new TypeReference<Map<String, Object>>() {
+                                new TypeReference<Map<String, String>>() {
                                 });
                         return results;
                     } catch (IOException e) {
@@ -89,13 +89,13 @@ public class AsyncHttpRequest extends RichAsyncFunction<Message, Message> {
             String url = sub.replace(config.getEndpointTemplate());
 
             log.debug(String.format("Fetching enrichment from url %s", url));
-            final Future<Map<String, Object>> result = this.cache.get(url);
+            final Future<Map<String, String>> result = this.cache.get(url);
 
             // set the callback to be executed once the request by the client is complete
             // the callback simply forwards the result to the result future
-            CompletableFuture.supplyAsync(new Supplier<Map<String, Object>>() {
+            CompletableFuture.supplyAsync(new Supplier<Map<String, String>>() {
                 @Override
-                public Map<String, Object> get() {
+                public Map<String, String> get() {
                     try {
                         return result.get();
                     } catch (InterruptedException | ExecutionException e) {
@@ -103,7 +103,7 @@ public class AsyncHttpRequest extends RichAsyncFunction<Message, Message> {
                         return null;
                     }
                 }
-            }).thenAccept((Map<String, Object> fields) -> {
+            }).thenAccept((Map<String, String> fields) -> {
                 resultFuture.complete(Collections.singleton(MessageUtils.addFields(message, fields, config.getPrefix() + ".")));
             });
         }

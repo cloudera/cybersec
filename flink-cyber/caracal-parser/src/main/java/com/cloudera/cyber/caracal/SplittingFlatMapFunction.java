@@ -5,7 +5,6 @@ import com.cloudera.cyber.SignedSourceKey;
 import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.cyber.rules.engines.JavascriptEngineBuilder;
 import com.cloudera.cyber.rules.engines.RuleEngine;
-import com.cloudera.cyber.sha1;
 import com.google.common.collect.Streams;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -15,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.metrics.MetricGroup;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.Preconditions;
 
@@ -25,8 +23,10 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Signature;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toMap;
@@ -115,7 +115,7 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
     public void flatMap(MessageToParse input, Collector<Message> collector) throws Exception {
         // sign the source content
         signature.update(input.getOriginalSource().getBytes(StandardCharsets.UTF_8));
-        final sha1 sig = new sha1(signature.sign());
+        final byte[] sig = signature.sign();
 
         DocumentContext documentContext = JsonPath.using(STRICT_PROVIDER_CONFIGURATION).parse(input.getOriginalSource());
 
@@ -151,19 +151,18 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
             /*MetricGroup metricGroup = getRuntimeContext().getMetricGroup();
             metricGroup.addGroup("parser." + input.getTopic()).counter(1);*/
 
-            collector.collect(Message.newBuilder()
-                    .setId(UUID.randomUUID().toString())
-                    .setOriginalSource(
-                            SignedSourceKey.newBuilder()
-                                    .setTopic(input.getTopic())
-                                    .setPartition(input.getPartition())
-                                    .setOffset(input.getOffset())
-                                    .setSignature(sig)
+            collector.collect(Message.builder()
+                    .originalSource(
+                            SignedSourceKey.builder()
+                                    .topic(input.getTopic())
+                                    .partition(input.getPartition())
+                                    .offset(input.getOffset())
+                                    .signature(sig)
                                     .build()
                     )
-                    .setSource(input.getTopic())
-                    .setTs(ts)
-                    .setExtensions(childPlusHeader(fields, headerFields)).build());
+                    .source(input.getTopic())
+                    .ts(ts)
+                    .extensions(childPlusHeader(fields, headerFields)).build());
         });
         
     }
@@ -172,9 +171,9 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
         return !(value instanceof Map || value instanceof List);
     }
 
-    private Map<String, Object> childPlusHeader(Map<String, Object> part, Map<String, Object> header) {
-        Map<String, Object> result = Streams.concat(header.entrySet().stream(), part.entrySet().stream())
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b));
+    private Map<String, String> childPlusHeader(Map<String, Object> part, Map<String, Object> header) {
+        Map<String, String> result = Streams.concat(header.entrySet().stream(), part.entrySet().stream())
+                .collect(toMap(Map.Entry::getKey, v -> v.getValue().toString(), (a, b) -> b));
         return result;
     }
 

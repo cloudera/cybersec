@@ -17,10 +17,10 @@ public class MessageUtils {
      * @param field   Fields to add to the output message.
      * @return Message with fields from the original message and the fields passed in.  If fields is empty, return original unmodified message.
      */
-    public static Message addFields(Message message, Map<String, Object> field) {
+    public static Message addFields(Message message, Map<String, String> field) {
         if (!field.isEmpty()) {
-            return Message.newBuilder(message)
-                    .setExtensions(Stream.concat(
+            return message.toBuilder()
+                    .extensions(Stream.concat(
                             streamExtensions(message),
                             field.entrySet().stream()
                     ).collect(toMap(Map.Entry::getKey, Map.Entry::getValue)))
@@ -30,10 +30,10 @@ public class MessageUtils {
         }
     }
 
-    public static Message addFields(Message message, Map<String, Object> field, String prefix) {
+    public static Message addFields(Message message, Map<String, String> field, String prefix) {
         if (!field.isEmpty()) {
-            return Message.newBuilder(message)
-                    .setExtensions(Stream.concat(
+            return message.toBuilder()
+                    .extensions(Stream.concat(
                             message.getExtensions().entrySet().stream(),
                             prefixMap(field, prefix)
                     ).collect(toMap(Map.Entry::getKey, Map.Entry::getValue)))
@@ -43,18 +43,18 @@ public class MessageUtils {
         }
     }
 
-    private static Stream<Map.Entry<String,Object>> prefixMap(Map<String, Object> field, String prefix) {
+    private static Stream<Map.Entry<String,String>> prefixMap(Map<String, String> field, String prefix) {
         return field.entrySet().stream().collect(toMap(k -> prefix + k, Map.Entry::getValue)).entrySet().stream();
     }
 
-    public static Message enrich(Message message, Map<String, Object> enrichmentExtensions, List<DataQualityMessage> dataQualityMessages) {
+    public static Message enrich(Message message, Map<String, String> enrichmentExtensions, List<DataQualityMessage> dataQualityMessages) {
         if (!enrichmentExtensions.isEmpty() || !dataQualityMessages.isEmpty()) {
-            return Message.newBuilder(message)
-                    .setExtensions(Stream.concat(
+            return message.toBuilder()
+                    .extensions(Stream.concat(
                             streamExtensions(message),
                             enrichmentExtensions.entrySet().stream()
                     ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
-                    .setDataQualityMessages(Stream.concat(
+                    .dataQualityMessages(Stream.concat(
                             streamDataQualityMessages(message),
                             dataQualityMessages.stream()
                     ).distinct().collect(Collectors.toList()))
@@ -65,8 +65,8 @@ public class MessageUtils {
         }
     }
 
-    public static Stream<Map.Entry<String, Object>> streamExtensions(Message message) {
-        Map<String, Object> extensions = message.getExtensions();
+    public static Stream<Map.Entry<String, String>> streamExtensions(Message message) {
+        Map<String, String> extensions = message.getExtensions();
         if (extensions == null) {
             return Stream.empty();
         } else {

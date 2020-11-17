@@ -51,13 +51,13 @@ public class Parser extends RichFlatMapFunction<String, ParsedThreatIntelligence
                     .map(ObjectType::getProperties)
                     .flatMap(p -> {
                         ObjectTypeHandler handler = ObjectTypeHandlers.getHandlerByInstance(p);
-                        Stream<ThreatIntelligence.Builder> extract = handler.extract(p, config.toMap());
-                        return extract.map(b -> b.setTs(Instant.now().toEpochMilli()));
+                        Stream<ThreatIntelligence.ThreatIntelligenceBuilder> extract = handler.extract(p, config.toMap());
+                        return extract.map(b -> b.ts(Instant.now().toEpochMilli()));
                     })
                     .forEach(t -> collector.collect(
-                            ParsedThreatIntelligence.newBuilder()
-                                    .setSource(s)
-                                    .setThreatIntelligence(t.build())
+                            ParsedThreatIntelligence.builder()
+                                    .source(s)
+                                    .threatIntelligence(t.build())
                                     .build()));
         }
         if (indicators != null) {
@@ -67,7 +67,7 @@ public class Parser extends RichFlatMapFunction<String, ParsedThreatIntelligence
                         Observable observable = indicator.getObservable();
                         ObjectPropertiesType p = observable.getObject().getProperties();
                         ObjectTypeHandler handler = ObjectTypeHandlers.getHandlerByInstance(p);
-                        Stream<ThreatIntelligence.Builder> out = handler.extract(p, config.toMap());
+                        Stream<ThreatIntelligence.ThreatIntelligenceBuilder> out = handler.extract(p, config.toMap());
 
                         XMLGregorianCalendar time = i.getTimestamp();
 
@@ -76,14 +76,14 @@ public class Parser extends RichFlatMapFunction<String, ParsedThreatIntelligence
                                 i.getTimestamp().toGregorianCalendar().toZonedDateTime().toInstant();
 
                         return out.map(t -> t
-                                .setStixReference(indicator.getId().toString())
-                                .setTs(timestamp.toEpochMilli()));
+                                .stixReference(indicator.getId().toString())
+                                .ts(timestamp.toEpochMilli()));
                     })
                     .filter(Objects::nonNull)
                     .forEach(t -> collector.collect(
-                            ParsedThreatIntelligence.newBuilder()
-                                    .setSource(s)
-                                    .setThreatIntelligence(t.setId(UUID.randomUUID().toString()).build())
+                            ParsedThreatIntelligence.builder()
+                                    .source(s)
+                                    .threatIntelligence(t.id(UUID.randomUUID().toString()).build())
                                     .build()));
         }
     }

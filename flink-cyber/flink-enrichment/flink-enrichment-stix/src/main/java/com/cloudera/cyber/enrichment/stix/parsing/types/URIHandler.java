@@ -18,7 +18,7 @@ public class URIHandler extends AbstractObjectTypeHandler<URIObjectType> {
     }
 
     @Override
-    public Stream<ThreatIntelligence.Builder> extract(URIObjectType type, Map<String, Object> config) {
+    public Stream<ThreatIntelligence.ThreatIntelligenceBuilder> extract(URIObjectType type, Map<String, Object> config) {
         AnyURIObjectPropertyType value = type.getValue();
 
         return StreamSupport.stream(Parser.split(value).spliterator(), false)
