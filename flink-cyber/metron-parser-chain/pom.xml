@@ -242,6 +242,15 @@
                             <configuration>
                                 <shadedArtifactAttached>true</shadedArtifactAttached>
                                 <shadedClassifierName>uber</shadedClassifierName>
+                                <artifactSet>
+                                <excludes>
+                                    <exclude>org.apache.flink:force-shading</exclude>
+                                    <exclude>com.google.code.findbugs:jsr305</exclude>
+                                    <exclude>org.slf4j:*</exclude>
+                                    <exclude>log4j:*</exclude>
+                                    <exclude>org.apache.logging.log4j:*</exclude>
+                                </excludes>
+                            </artifactSet>
                                 <filters>
                                     <filter>
                                         <artifact>*:*</artifact>
