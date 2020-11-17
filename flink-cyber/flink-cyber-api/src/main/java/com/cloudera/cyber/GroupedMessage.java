@@ -13,6 +13,8 @@ import org.apache.avro.specific.SpecificRecordBase;
 import java.util.List;
 import java.util.UUID;
 
+import static com.cloudera.cyber.AvroTypes.toListOf;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -49,7 +51,7 @@ public class GroupedMessage extends SpecificRecordBase implements SpecificRecord
     public void put(int field$, Object value$) {
         switch (field$) {
             case 0: id = value$.toString(); break;
-            case 1: messages = (List<Message>)value$; break;
+            case 1: messages = toListOf(Message.class, value$); break;
             default: throw new AvroRuntimeException("Bad index");
         }
     }

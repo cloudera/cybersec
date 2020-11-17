@@ -9,8 +9,12 @@ import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
+import org.apache.avro.util.Utf8;
 
 import java.util.Map;
+
+import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
+import static java.util.stream.Collectors.toMap;
 
 @Data
 @Builder
@@ -54,7 +58,7 @@ public class EnrichmentEntry extends SpecificRecordBase implements SpecificRecor
             case 0: key = value$.toString(); break;
             case 1: type = value$.toString(); break;
             case 2: ts = (Long)value$; break;
-            case 3: entries = (Map<String,String>)value$; break;
+            case 3: entries = utf8toStringMap(value$); break;
             default: throw new org.apache.avro.AvroRuntimeException("Bad index");
         }
     }
