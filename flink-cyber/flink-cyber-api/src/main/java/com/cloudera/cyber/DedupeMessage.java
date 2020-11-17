@@ -12,6 +12,8 @@ import org.apache.avro.specific.SpecificRecordBase;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
+
 @Data
 @Builder(toBuilder=true)
 @NoArgsConstructor
@@ -61,7 +63,7 @@ public class DedupeMessage extends SpecificRecordBase implements SpecificRecord,
             case 2: startTs = (java.lang.Long)value$; break;
             case 3: count = (java.lang.Long)value$; break;
             case 4: late = (java.lang.Boolean)value$; break;
-            case 5: fields = (java.util.Map<java.lang.String,java.lang.String>)value$; break;
+            case 5: fields = utf8toStringMap(value$); break;
             default: throw new org.apache.avro.AvroRuntimeException("Bad index");
         }
     }

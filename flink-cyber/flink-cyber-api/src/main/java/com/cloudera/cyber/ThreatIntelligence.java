@@ -16,6 +16,8 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import java.util.Map;
 import java.util.UUID;
 
+import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -68,7 +70,7 @@ public class ThreatIntelligence extends SpecificRecordBase implements SpecificRe
             case 2: observable = value$.toString(); break;
             case 3: observableType = value$.toString(); break;
             case 4: stixReference = value$.toString(); break;
-            case 5: fields = (Map<String,String>)value$; break;
+            case 5: fields = utf8toStringMap(value$); break;
             default: throw new AvroRuntimeException("Bad index");
         }
     }
