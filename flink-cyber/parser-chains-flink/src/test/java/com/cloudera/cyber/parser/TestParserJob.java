@@ -101,12 +101,11 @@ public class TestParserJob extends AbstractParserJobTest {
     final String timezone = TimeZone.getTimeZone("EST").getID();
     final String input = StringUtils.join(new String[] { nameField, addressField, phoneField, String.valueOf(timestamp), timezone }, ",");
 
-
     @Override
     @Test
     public void testParser() throws Exception {
         ParameterTool params = ParameterTool.fromMap(new HashMap<String,String>() {{
-            put(PARAM_CHAIN_CONFIG,chainWithRouting);
+            put(PARAM_CHAIN_CONFIG, chainWithRouting);
             put(PARAM_PRIVATE_KEY, getKeyBase64());
         }});
 
@@ -116,7 +115,7 @@ public class TestParserJob extends AbstractParserJobTest {
         source.sendRecord(TestUtils.createMessageToParse(input).build());
         JobTester.stopTest();
 
-        Message out = sink.poll(Duration.ofMillis(1000));
+        Message out = sink.poll();
         assertThat("Output not null", out, notNullValue());
         assertThat("Original String is moved", out.getExtensions(), not(hasKey(DEFAULT_INPUT_FIELD)));
         assertThat("Timestamp is moved", out.getExtensions(), not(hasKey("timestamp")));
