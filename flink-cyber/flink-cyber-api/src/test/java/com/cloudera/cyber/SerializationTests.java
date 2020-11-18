@@ -87,7 +87,7 @@ public class SerializationTests {
                 .build());
     }
 
-    public <T extends SpecificRecordBase> T test(T obj) throws IOException {
+    public static <T extends SpecificRecordBase> T test(T obj) throws IOException {
         Class cls = obj.getClass();
         AvroTypeInfo<T> ti = new AvroTypeInfo<T>(cls);
         TypeSerializer<T> serializer = ti.createSerializer(new ExecutionConfig());
