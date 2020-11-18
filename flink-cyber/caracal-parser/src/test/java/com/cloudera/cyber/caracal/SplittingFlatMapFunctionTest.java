@@ -40,7 +40,7 @@ public class SplittingFlatMapFunctionTest {
         splittingFlatMapFunction.open(new Configuration());
 
         splittingFlatMapFunction.flatMap(
-                TestUtils.createMessageToParse(getResourceAsString(testInput)).topic("test").build(),
+                TestUtils.createMessageToParse(testInput).topic("test").build(),
                 new Collector<Message>() {
             @Override
             public void collect(Message message) {
