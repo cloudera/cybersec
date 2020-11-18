@@ -94,6 +94,7 @@ public class ChainParserMapFunction extends RichFlatMapFunction<MessageToParse, 
         byte[] sig = signature.sign();
 
         collector.collect(Message.builder().extensions(fieldsFromChain(m.getFields()))
+                .source(message.getTopic())
                 .originalSource(SignedSourceKey.builder()
                         .topic(message.getTopic())
                         .partition(message.getPartition())
