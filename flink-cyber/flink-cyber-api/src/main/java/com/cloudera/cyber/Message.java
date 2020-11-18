@@ -8,7 +8,7 @@ import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.avro.util.Utf8;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
 
-import java.sql.Types;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.toMap;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@TypeInfo(MessageTypeFactory.class)
+//@TypeInfo(MessageTypeFactory.class)
 public class Message extends SpecificRecordBase implements SpecificRecord, IdentifiedMessage, Timestamped {
     @Builder.Default
     @NonNull private String id = UUID.randomUUID().toString();
@@ -64,7 +64,7 @@ public class Message extends SpecificRecordBase implements SpecificRecord, Ident
             case 4: return threats;
             case 5: return extensions;
             case 6: return source;
-            case 7: return dataQualityMessages;
+            case 7: return dataQualityMessages == null ? null : dataQualityMessages instanceof List ? dataQualityMessages : Arrays.asList(dataQualityMessages);
             default: throw new org.apache.avro.AvroRuntimeException("Bad index");
         }
     }

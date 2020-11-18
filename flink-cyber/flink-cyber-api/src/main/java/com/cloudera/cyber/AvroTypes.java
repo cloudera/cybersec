@@ -30,13 +30,18 @@ public class AvroTypes {
     }
 
     public static Map<String, String> utf8toStringMap(Object value$) {
-        return ((Map<Utf8,Utf8>)value$).entrySet().stream().collect(toMap(
-                k->k.getKey().toString(),
-                k->k.getValue().toString()
-        ));
+        if (value$ == null) return null;
+        try {
+            return ((Map<Utf8, Utf8>) value$).entrySet().stream().collect(toMap(
+                    k -> k.getKey().toString(),
+                    k -> k.getValue().toString()
+            ));
+        } catch (ClassCastException e) {
+            return (Map<String, String>) value$;
+        }
     }
 
-    public static  <T> List<T> toListOf(Class<T> cls, Object value$) {
+    public static <T> List<T> toListOf(Class<T> cls, Object value$) {
         // TODO - ensure the serialization of the contained object is correct
         if (value$ == null) return null;
         return ((List<Object>) value$).stream()
