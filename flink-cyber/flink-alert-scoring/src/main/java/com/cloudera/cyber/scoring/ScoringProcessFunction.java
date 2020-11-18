@@ -31,7 +31,7 @@ public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRu
                 .map(r -> {
                     Map<String, Object> results = r.apply(message);
                     return Scores.builder()
-                            .ruleId(UUID.fromString(r.getId().toString()))
+                            .ruleId(r.getId())
                             .score((Double) results.get(RESULT_SCORE))
                             .reason((String) results.get(RESULT_REASON))
                             .build();
