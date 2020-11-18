@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 public class JavascriptEngineBuilder extends RuleEngineBuilder<JavaScriptEngine> {
     @Override
     public JavaScriptEngine build() {
