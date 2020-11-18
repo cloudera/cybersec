@@ -10,6 +10,7 @@ import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.table.api.TableSchema;
@@ -48,26 +49,17 @@ public class HiveStreamingTableSink implements AppendStreamTableSink<Row> {
         long batchTime = 1000;
         long maxEvents = 10000;
 
-        return dataStream.windowAll(TumblingEventTimeWindows.of(Time.milliseconds(batchTime)))
+        return dataStream.windowAll(TumblingProcessingTimeWindows.of(Time.milliseconds(batchTime)))
                 .trigger(EventTimeAndCountTrigger.of(maxEvents))
-                .process(process)
-                .map(e -> e.row)
+                .process(process).name("Hive Stream Process")
+                .map(e -> e.row).name("Error Mapper")
                 .addSink(new SinkFunction<Row>() {
                     @Override
                     public void invoke(Row value, Context context) throws Exception {
-                        log.debug(value.toString());
+                        log.error(value.toString());
                     }
-                });
+                }).name("Error handler");
     }
-
-//    @Override
-//    public void emitDataStream(DataStream<Row> dataStream) {
-//        long batchTime = 1000;
-//        long maxEvents = 10000;
-//        dataStream.windowAll(TumblingProcessingTimeWindows.of(Time.milliseconds(batchTime)))
-//                .trigger(EventTimeAndCountTrigger.of(maxEvents))
-//                .process(new HiveStreamingTransactionProcess());
-//    }
 
     @Override
     public TableSink<Row> configure(String[] fieldNames, TypeInformation<?>[] fieldTypes) {
