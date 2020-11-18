@@ -20,9 +20,9 @@
         <module>flink-profiler-sql</module>
         <module>flink-profiler-java</module>
         <module>flink-profiler</module>
-        <module>flink-rules</module>
+        <!--<module>flink-rules</module>
         <module>flink-alert-scoring-api</module>
-        <module>flink-alert-scoring</module>
+        <module>flink-alert-scoring</module>-->
         <module>metron-parser-chain</module>
         <module>parser-chains-flink</module>
         <module>caracal-generator</module>
@@ -55,6 +55,7 @@
         <solr.version>8.4.1.7.1.2.0-96</solr.version>
         <maxmind.version>2.13.1</maxmind.version>
         <hadoop.version>3.1.1.7.1.1.0-567</hadoop.version>
+        <mockito.version>3.6.0</mockito.version>
     </properties>
 
     <repositories>
