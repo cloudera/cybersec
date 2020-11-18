@@ -1,12 +1,15 @@
 package com.cloudera.cyber.enrichment.threatq;
 
+import com.cloudera.cyber.EnrichmentEntry;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,10 +17,8 @@ import java.util.Map;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ThreatQEntry {
-    /*
-    {'indicator': '91.189.114.7', 'tq_sources': ['TQ 2 TQ'], 'tq_created_at': '2020-10-16 15:19:37', 'tq_score': '0', 'tq_type': 'IP Address', 'tq_saved_search': 'ip_search', 'tq_updated_at': '2020-10-16 15:19:37', 'tq_touched_at': '2020-11-03 17:58:38', 'tq_id': 89022, 'tq_attributes': {'Confidence': 'High', 'Severity': 'Unknown', 'Reference': 'https://investigate.umbrella.com/ip-view/91.189.114.7', 'Share': 'Yes', 'Added to Infoblox RPZ': 'threatqrpz', 'Priority': '90', 'Disposition': 'Unknown', 'CTR Module': 'Umbrella'}, 'tq_status': 'Active', 'tq_tags': None, 'tq_url': 'https://10.13.0.159/indicators/89022/details'}
-     */
     private String indicator;
     private List<String> tq_sources;
     @JsonFormat
@@ -36,6 +37,29 @@ public class ThreatQEntry {
     private Long tq_id;
     private Map<String, String> tq_attributes;
     private String tq_status;
+    private String tq_url;
     private List<String> tq_tags;
 
+    public static EnrichmentEntry toEnrichmentEntry(ThreatQEntry threatQEntry) {
+        return EnrichmentEntry.builder()
+                .ts(threatQEntry.tq_updated_at.getTime())
+                .key(threatQEntry.getIndicator())
+                .type("threatq")
+                .entries(new HashMap<String,String>() {{
+                    putAll(threatQEntry.getTq_attributes());
+                    put("tq_id", threatQEntry.getTq_id().toString());
+                    put("tq_status", threatQEntry.getTq_status());
+                    put("tq_url", threatQEntry.getTq_url());
+                    if (threatQEntry.getTq_tags() != null && threatQEntry.getTq_tags().size() > 0) {
+                        put("tq_tags", threatQEntry.getTq_tags().toString());
+                    }
+                    put("tq_type", threatQEntry.getTq_type());
+                    put("tq_saved_search", threatQEntry.getTq_saved_search());
+                    if (threatQEntry.getTq_sources() != null && threatQEntry.getTq_sources().size() > 0) {
+                        put("tq_sources", threatQEntry.getTq_sources().toString());
+                    }
+                    put("tq_score", threatQEntry.getTq_score().toString());
+                }})
+                .build();
+    }
 }

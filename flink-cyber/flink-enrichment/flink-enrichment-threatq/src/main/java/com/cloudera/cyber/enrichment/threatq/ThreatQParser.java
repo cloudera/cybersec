@@ -18,7 +18,7 @@ public class ThreatQParser {
     private static DateFormat df = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
     private static ObjectMapper om;
 
-    {
+    static {
         om = new ObjectMapper();
         om.setDateFormat(df);
     }
