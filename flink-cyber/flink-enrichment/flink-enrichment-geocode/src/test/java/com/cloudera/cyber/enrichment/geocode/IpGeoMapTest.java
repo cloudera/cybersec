@@ -7,11 +7,13 @@ import com.cloudera.cyber.TestUtils;
 import org.apache.flink.configuration.Configuration;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
 import java.util.*;
 
+@Ignore
 public class IpGeoMapTest {
 
     private static final String SINGLE_IP_FIELD_NAME = "ip_dst_addr";
