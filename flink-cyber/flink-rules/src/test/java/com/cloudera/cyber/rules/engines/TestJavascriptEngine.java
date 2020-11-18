@@ -21,7 +21,7 @@ public class TestJavascriptEngine {
 
     @Test
     public void testJavascriptExecution() throws InterruptedException {
-        RuleEngine engine = JavaScriptEngine.builder().script("return { score: message.a + message.b }").build();
+        RuleEngine engine = JavaScriptEngine.builder().script("return { score: parseFloat(message.a) + parseFloat(message.b) }").build();
         engine.open();
 
         sleep(10);
