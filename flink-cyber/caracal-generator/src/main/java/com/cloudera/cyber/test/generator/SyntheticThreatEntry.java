@@ -3,11 +3,10 @@ package com.cloudera.cyber.test.generator;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.Map;
-
 @Data
 @Builder
-public class SyntheticEntry {
+public class SyntheticThreatEntry {
     private long ts;
     private RandomGenerators utils;
+    private String ip;
 }
