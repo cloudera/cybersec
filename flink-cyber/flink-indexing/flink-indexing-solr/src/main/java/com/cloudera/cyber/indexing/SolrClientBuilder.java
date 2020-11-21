@@ -1,7 +1,7 @@
 package com.cloudera.cyber.indexing;
 
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.HttpClientUtil;

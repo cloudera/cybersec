@@ -4,7 +4,6 @@ import com.cloudera.cyber.GroupedMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.SignedSourceKey;
 import com.cloudera.cyber.sessions.SessionJob;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.formats.avro.typeutils.AvroTypeInfo;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -16,7 +15,6 @@ import org.apache.flink.test.util.ManualSource;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

@@ -1,14 +1,14 @@
 package com.cloudera.cyber;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Builder;
-
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.avro.*;
+import org.apache.avro.AvroRuntimeException;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
-import org.apache.flink.api.common.typeinfo.TypeInfo;
 
 import java.nio.ByteBuffer;
 

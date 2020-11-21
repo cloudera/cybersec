@@ -2,7 +2,6 @@ package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.IdentifiedMessage;
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.rules.RuleType;
 import lombok.*;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
@@ -10,12 +9,7 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 
-import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
-
-import static java.util.stream.Collectors.toList;
 
 @Getter
 @EqualsAndHashCode

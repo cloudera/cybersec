@@ -2,7 +2,6 @@ package com.cloudera.cyber.enrichment.stix;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.ThreatIntelligence;
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +38,7 @@ public class ThreatIntelligenceBroadcastProcessFunction extends BroadcastProcess
 
     @Override
     public void processElement(Message message, ReadOnlyContext readOnlyContext, Collector<Message> collector) throws Exception {
-        log.info("processElement %s", message.getId());
+        log.debug("processElement {}", message.getId());
 
         Map<String, List<ThreatIntelligence>> threats = fieldToType.entrySet().stream()
                 .collect(Collectors.toMap(f -> f.getKey(), f -> {

@@ -4,8 +4,6 @@ import com.cloudera.cyber.DedupeMessage;
 import lombok.extern.java.Log;
 import org.apache.flink.api.common.functions.AggregateFunction;
 
-import java.util.UUID;
-
 @Log
 public class SumAndMaxTs implements AggregateFunction<DedupeMessage, SumAndMax, DedupeMessage> {
 

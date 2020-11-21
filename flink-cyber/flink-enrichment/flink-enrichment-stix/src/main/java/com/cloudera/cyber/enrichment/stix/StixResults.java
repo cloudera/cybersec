@@ -3,8 +3,8 @@ package com.cloudera.cyber.enrichment.stix;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.ThreatIntelligence;
 import com.cloudera.cyber.enrichment.stix.parsing.ThreatIntelligenceDetails;
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
 import org.apache.flink.streaming.api.datastream.DataStream;
 
 @Data

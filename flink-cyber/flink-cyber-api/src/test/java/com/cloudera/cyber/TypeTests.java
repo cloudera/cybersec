@@ -2,7 +2,6 @@ package com.cloudera.cyber;
 
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.java.typeutils.PojoField;
 import org.apache.flink.formats.avro.typeutils.AvroTypeInfo;
 import org.junit.Test;
 

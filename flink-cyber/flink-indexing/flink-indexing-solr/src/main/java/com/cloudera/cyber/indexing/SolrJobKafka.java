@@ -11,12 +11,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.flink.util.Preconditions;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.codehaus.jackson.map.ObjectMapper;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Properties;
 

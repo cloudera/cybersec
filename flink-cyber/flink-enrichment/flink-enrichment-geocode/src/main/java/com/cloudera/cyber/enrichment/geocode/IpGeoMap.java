@@ -1,8 +1,8 @@
 package com.cloudera.cyber.enrichment.geocode;
 
+import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.enrichment.geocode.impl.IpGeoEnrichment;
 import com.maxmind.db.CHMCache;
 import com.maxmind.geoip2.DatabaseReader;

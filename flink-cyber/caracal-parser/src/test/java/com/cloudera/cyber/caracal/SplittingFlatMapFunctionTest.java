@@ -2,7 +2,6 @@ package com.cloudera.cyber.caracal;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
-import com.cloudera.cyber.parser.MessageToParse;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
 import org.junit.Test;

@@ -6,7 +6,6 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.avro.util.Utf8;
-import org.apache.flink.api.common.typeinfo.TypeInfo;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +20,6 @@ import static java.util.stream.Collectors.toMap;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-//@TypeInfo(MessageTypeFactory.class)
 public class Message extends SpecificRecordBase implements SpecificRecord, IdentifiedMessage, Timestamped {
     @Builder.Default
     @NonNull private String id = UUID.randomUUID().toString();

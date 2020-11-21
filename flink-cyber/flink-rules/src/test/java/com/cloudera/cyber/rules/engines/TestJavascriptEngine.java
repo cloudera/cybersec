@@ -1,7 +1,6 @@
 package com.cloudera.cyber.rules.engines;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.SignedSourceKey;
 import com.cloudera.cyber.TestUtils;
 import org.junit.Test;
 
@@ -9,7 +8,6 @@ import javax.script.ScriptException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import static java.lang.Thread.sleep;
 import static org.hamcrest.MatcherAssert.assertThat;
