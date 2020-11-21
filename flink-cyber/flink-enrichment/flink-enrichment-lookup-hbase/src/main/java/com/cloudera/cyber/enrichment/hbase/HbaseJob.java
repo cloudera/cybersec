@@ -2,7 +2,6 @@ package com.cloudera.cyber.enrichment.hbase;
 
 import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.MessageTypeFactory;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -13,19 +12,18 @@ import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
-import org.apache.flink.table.functions.ScalarFunction;
 
-import javax.sound.midi.SysexMessage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static com.cloudera.cyber.enrichment.ConfigUtils.*;
+import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
+import static com.cloudera.cyber.enrichment.ConfigUtils.allConfigs;
 
 public abstract class HbaseJob {
 
-    public static DataStream<Message> enrich(DataStream<Message> source, StreamExecutionEnvironment env, List<EnrichmentConfig> configs) {
+    public static DataStream<Message> enrich(DataStream<Message> source, StreamExecutionEnvironment env, List<EnrichmentConfig> configs) throws IOException {
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, EnvironmentSettings
                 .newInstance()
                 .useBlinkPlanner()
