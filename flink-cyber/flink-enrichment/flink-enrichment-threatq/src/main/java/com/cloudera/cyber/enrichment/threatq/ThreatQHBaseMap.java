@@ -39,7 +39,7 @@ public class ThreatQHBaseMap extends AbstractHbaseMapFunction {
                     LookupKey key = LookupKey.builder()
                             .cf(cf)
                             .key(Bytes.toBytes(k)).build();
-                    return hbaseLookup(message.getTs(), key, f + ".threatq.");
+                    return hbaseLookup(message.getTs(), key, f + ".threatq");
                 })
                 .flatMap(m -> m.entrySet().stream())
                 .collect(toMap(k -> k.getKey(), v -> v.getValue()));
