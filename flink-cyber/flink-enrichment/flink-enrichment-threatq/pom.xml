@@ -73,6 +73,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-enrichment-lookup-hbase</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
@@ -95,8 +102,6 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
-
-
     </dependencies>
 
 </project>
