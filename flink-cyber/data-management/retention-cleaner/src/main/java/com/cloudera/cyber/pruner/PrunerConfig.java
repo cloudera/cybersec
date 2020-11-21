@@ -1,8 +1,8 @@
 package com.cloudera.cyber.pruner;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.text.DateFormat;

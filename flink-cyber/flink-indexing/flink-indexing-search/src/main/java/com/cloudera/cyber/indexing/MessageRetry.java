@@ -1,8 +1,8 @@
 package com.cloudera.cyber.indexing;
 
 import com.cloudera.cyber.Message;
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
 
 @Data
 @Builder

@@ -1,6 +1,5 @@
 package com.cloudera.cyber.indexing.elastic;
 
-import com.cloudera.cyber.indexing.CollectionField;
 import com.cloudera.cyber.indexing.IndexEntry;
 import com.cloudera.cyber.indexing.SearchIndexJob;
 import org.apache.flink.api.common.functions.RuntimeContext;
@@ -11,18 +10,12 @@ import org.apache.flink.streaming.connectors.elasticsearch.RequestIndexer;
 import org.apache.flink.streaming.connectors.elasticsearch7.ElasticsearchSink;
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.Requests;
-import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.indices.GetIndexTemplatesRequest;
-import org.elasticsearch.client.indices.GetIndexTemplatesResponse;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 

@@ -3,7 +3,6 @@ package com.cloudera.cyber.enrichment.lookup;
 import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

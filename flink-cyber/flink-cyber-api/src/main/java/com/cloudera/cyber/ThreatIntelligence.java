@@ -10,8 +10,6 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
-import org.apache.flink.api.common.typeinfo.TypeInfoFactory;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 
 import java.util.Map;
 import java.util.UUID;

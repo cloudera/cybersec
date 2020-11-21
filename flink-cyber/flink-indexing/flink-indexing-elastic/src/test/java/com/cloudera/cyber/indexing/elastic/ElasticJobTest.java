@@ -2,18 +2,14 @@ package com.cloudera.cyber.indexing.elastic;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.indexing.CollectionField;
-import com.cloudera.cyber.indexing.MessageRetry;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
 import org.junit.*;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
-
-import java.io.IOException;
 
 import static org.junit.Assert.fail;
 
