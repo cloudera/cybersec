@@ -1,8 +1,6 @@
 package com.cloudera.cyber.enrichment.threatq;
 
 import com.cloudera.cyber.EnrichmentEntry;
-import org.hamcrest.collection.IsMapContaining.*;
-import org.hamcrest.collection.IsMapWithSize.*;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -12,7 +10,6 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 
 public class TestParser {

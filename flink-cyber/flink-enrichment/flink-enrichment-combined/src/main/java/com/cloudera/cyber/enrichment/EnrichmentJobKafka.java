@@ -7,6 +7,8 @@ import com.cloudera.cyber.enrichment.stix.ThreatIndexHbaseSinkFunction;
 import com.cloudera.cyber.enrichment.stix.ThreatIntelligenceDetailsHBaseSinkFunction;
 import com.cloudera.cyber.enrichment.stix.ThreatIntelligenceHBaseSinkFunction;
 import com.cloudera.cyber.enrichment.stix.parsing.ThreatIntelligenceDetails;
+import com.cloudera.cyber.enrichment.threatq.ThreatQEntry;
+import com.cloudera.cyber.enrichment.threatq.ThreatQParserFlatMap;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
 import org.apache.flink.addons.hbase.HBaseWriteOptions;
@@ -17,12 +19,13 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Preconditions;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.util.Properties;
 
-import static com.cloudera.cyber.enrichment.stix.StixJobKafka.PARAM_STIX_OUTPUT_TOPIC;
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_OUTPUT;
+import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
 
 public class EnrichmentJobKafka extends EnrichmentJob {
 
@@ -35,12 +38,14 @@ public class EnrichmentJobKafka extends EnrichmentJob {
     public static final String DEFAULT_STIX_OUTPUT_TOPIC = "stix.output";
     private static final String PARAM_TI_TABLE = "stix.hbase.table";
     private static final String DEFAULT_TI_TABLE = "threatIntelligence";
+    private static final String PARAMS_TOPIC_THREATQ_INPUT = "threatq.topic.input";
 
 
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
         new EnrichmentJobKafka().createPipeline(ParameterTool.fromPropertiesFile(args[0])).execute("Enrichments - Combined");
     }
+
     @Override
     protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> reduction) {
         reduction.addSink(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), params))
@@ -61,6 +66,20 @@ public class EnrichmentJobKafka extends EnrichmentJob {
         ).name("Kafka Enrichments").uid("kafka-enrichment-source");
     }
 
+    @Override
+    protected DataStream<ThreatQEntry> createThreatQSource(StreamExecutionEnvironment env, ParameterTool params) {
+        String topic = params.getRequired(PARAMS_TOPIC_THREATQ_INPUT);
+        String groupId = "threatq-parser";
+
+        Properties kafkaProperties = readKafkaProperties(params, true);
+        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        // for the SMM interceptor
+        kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
+
+        FlinkKafkaConsumer<String> source = new FlinkKafkaConsumer<>(topic, new SimpleStringSchema(), kafkaProperties);
+        return env.addSource(source).name("ThreatQ Source").uid("threatq-kafka")
+                .flatMap(new ThreatQParserFlatMap()).name("ThreatQ Parser").uid("threatq-parser");
+    }
 
 
     @Override
@@ -85,7 +104,7 @@ public class EnrichmentJobKafka extends EnrichmentJob {
                 .setBufferFlushMaxRows(1000)
                 .setBufferFlushMaxSizeInBytes(1024 * 1024 * 64)
                 .build());
-        results.addSink(indexSink);
+        results.addSink(indexSink).name("Stix sink").uid("stix-hbase-sink");
     }
 
     @Override
@@ -98,7 +117,7 @@ public class EnrichmentJobKafka extends EnrichmentJob {
                 .setBufferFlushMaxSizeInBytes(1024 * 1024 * 64)
                 .build()
         );
-        results.addSink(hbaseSink);
+        results.addSink(hbaseSink).name("Stix Detail sink").uid("stix-hbase-detail-sink");
     }
 
     @Override
@@ -107,8 +126,7 @@ public class EnrichmentJobKafka extends EnrichmentJob {
         kafkaProperties.put("group.id", params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID));
 
         String topic = params.get(PARAM_STIX_INPUT_TOPIC, DEFAULT_STIX_INPUT_TOPIC);
-        FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(topic, new SimpleStringSchema(),  kafkaProperties);
-
+        FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(topic, new SimpleStringSchema(), kafkaProperties);
         return env.addSource(consumer).name("Stix Kafka Source").uid("stix-kafka-source");
     }
 

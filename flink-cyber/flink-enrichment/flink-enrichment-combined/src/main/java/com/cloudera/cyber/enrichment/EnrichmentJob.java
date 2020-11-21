@@ -4,7 +4,6 @@ import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.ThreatIntelligence;
 import com.cloudera.cyber.enrichment.geocode.IpGeo;
-import com.cloudera.cyber.enrichment.hbase.HbaseEnrichmentFunction;
 import com.cloudera.cyber.enrichment.hbase.HbaseJobRaw;
 import com.cloudera.cyber.enrichment.hbase.HbaseJobRawKafka;
 import com.cloudera.cyber.enrichment.lookup.LookupJob;
@@ -15,7 +14,11 @@ import com.cloudera.cyber.enrichment.rest.RestLookupJob;
 import com.cloudera.cyber.enrichment.stix.StixJob;
 import com.cloudera.cyber.enrichment.stix.StixResults;
 import com.cloudera.cyber.enrichment.stix.parsing.ThreatIntelligenceDetails;
+import com.cloudera.cyber.enrichment.threatq.ThreatQConfig;
+import com.cloudera.cyber.enrichment.threatq.ThreatQEntry;
+import com.cloudera.cyber.enrichment.threatq.ThreatQJob;
 import com.cloudera.cyber.flink.FlinkUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -29,15 +32,18 @@ import java.util.List;
 
 import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.*;
 
+@Slf4j
 public abstract class EnrichmentJob {
     private static final String PARAMS_LOOKUPS_CONFIG_FILE = "lookups.config.file";
     private static final String PARAMS_REST_CONFIG_FILE = "rest.config.file";
+    private static final String PARAMS_THREATQ_CONFIG_FILE = "threatq.config.file";
 
     private static final String PARAMS_ENABLE_GEO = "geo.enabled";
     private static final String PARAMS_ENABLE_ASN = "asn.enabled";
     private static final String PARAMS_ENABLE_HBASE = "hbase.enabled";
     private static final String PARAMS_ENABLE_REST = "rest.enabled";
     private static final String PARAMS_ENABLE_STIX = "stix.enabled";
+    private static final String PARAMS_ENABLE_THREATQ = "threatq.enabled";
     private static final String PARAMS_ENABLE_RULES = "rules.enabled";
 
     private DataStream<Message> messages;
@@ -51,7 +57,6 @@ public abstract class EnrichmentJob {
 
         List<RestEnrichmentConfig> restConfig = RestLookupJob.parseConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_REST_CONFIG_FILE))));
         List<EnrichmentConfig> enrichmentConfigs = ConfigUtils.allConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_LOOKUPS_CONFIG_FILE))));
-
         DataStream<EnrichmentEntry> localEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.LOCAL));
         DataStream<EnrichmentEntry> hbaseEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.HBASE));
 
@@ -83,27 +88,37 @@ public abstract class EnrichmentJob {
         DataStream<Message> tied = params.getBoolean(PARAMS_ENABLE_STIX, true) ?
                 doStix(rested, env, params) : rested;
 
+        // Run threatQ integrations
+        DataStream<Message> tqed;
+        if (params.getBoolean(PARAMS_ENABLE_THREATQ, true)) {
+            List<ThreatQConfig> threatQconfigs = ThreatQJob.parseConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_THREATQ_CONFIG_FILE))));
+            log.info("ThreatQ Configs {}", threatQconfigs);
+            tqed = ThreatQJob.enrich(tied, threatQconfigs);
+            ThreatQJob.ingest(createThreatQSource(env, params), threatQconfigs);
+        } else {
+            tqed = tied;
+        }
 
         // TODO - apply the rules based enrichments
-        DataStream<Message> ruled = params.getBoolean(PARAMS_ENABLE_RULES,true) ?
-                doRules(tied, params) : tied;
+        DataStream<Message> ruled = params.getBoolean(PARAMS_ENABLE_RULES, true) ?
+                doRules(tqed, params) : tqed;
 
         writeResults(env, params, ruled);
         return env;
     }
 
+
     /**
-     * @TODO - Add the rules processing engine
-     *
-     * @param in Messages incoming for rules processing
+     * @param in     Messages incoming for rules processing
      * @param params Global Job Parameters
      * @return
+     * @TODO - Add the rules processing engine
      */
     private DataStream<Message> doRules(DataStream<Message> in, ParameterTool params) {
         return in;
     }
 
-    private DataStream<Message> doStix(DataStream<Message> in,  StreamExecutionEnvironment env, ParameterTool params) {
+    private DataStream<Message> doStix(DataStream<Message> in, StreamExecutionEnvironment env, ParameterTool params) {
         DataStream<String> stixSource = createStixSource(env, params);
         StixResults stix = StixJob.enrich(in, stixSource, getLongTermLookupFunction(), params);
         writeStixThreats(params, stix.getThreats());
@@ -116,6 +131,8 @@ public abstract class EnrichmentJob {
     protected abstract void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> results);
 
     protected abstract DataStream<EnrichmentEntry> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
+
+    protected abstract DataStream<ThreatQEntry> createThreatQSource(StreamExecutionEnvironment env, ParameterTool params);
 
     /* STIX related parts */
     protected abstract DataStream<String> createStixSource(StreamExecutionEnvironment env, ParameterTool params);
