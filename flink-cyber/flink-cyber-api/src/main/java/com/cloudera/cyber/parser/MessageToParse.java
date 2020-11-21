@@ -1,8 +1,8 @@
 package com.cloudera.cyber.parser;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;

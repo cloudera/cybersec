@@ -1,9 +1,7 @@
 package com.cloudera.cyber.enrichment.geocode;
 
-import akka.io.Tcp;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
-import com.cloudera.cyber.enrichment.geocode.impl.IpGeoEnrichment;
 import lombok.extern.java.Log;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;

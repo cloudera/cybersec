@@ -1,7 +1,6 @@
 package com.cloudera.cyber.enrichment.stix;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.SignedSourceKey;
 import com.cloudera.cyber.TestUtils;
 import lombok.extern.log4j.Log4j;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -12,10 +11,8 @@ import org.hamcrest.collection.IsMapContaining;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.UUID;
 
 import static com.cloudera.cyber.flink.Utils.getResourceAsString;
 import static org.hamcrest.MatcherAssert.assertThat;

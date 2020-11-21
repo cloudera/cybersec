@@ -10,8 +10,6 @@ import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
 
-import java.io.IOException;
-
 public class SolrJobTest extends SolrJob {
     private ManualSource<Message> source;
     private CollectingSink<IndexEntry> output = new CollectingSink<>();

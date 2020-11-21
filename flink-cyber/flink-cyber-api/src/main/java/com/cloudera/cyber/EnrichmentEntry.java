@@ -9,12 +9,10 @@ import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
-import org.apache.avro.util.Utf8;
 
 import java.util.Map;
 
 import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
-import static java.util.stream.Collectors.toMap;
 
 @Data
 @Builder

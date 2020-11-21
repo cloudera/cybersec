@@ -16,7 +16,6 @@ import org.hamcrest.Matchers;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.time.Duration;
 import java.util.HashMap;
 
 import static com.cloudera.cyber.flink.Utils.getResourceAsString;

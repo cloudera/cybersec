@@ -2,8 +2,8 @@ package com.cloudera.cyber.enrichment.stix.parsing;
 
 import com.cloudera.cyber.ThreatIntelligence;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;

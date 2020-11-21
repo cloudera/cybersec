@@ -11,7 +11,6 @@ import org.apache.flink.formats.avro.typeutils.AvroTypeInfo;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;

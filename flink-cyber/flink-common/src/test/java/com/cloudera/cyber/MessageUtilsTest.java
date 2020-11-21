@@ -5,7 +5,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;

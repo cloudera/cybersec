@@ -30,7 +30,6 @@ public abstract class ScoringJob {
         final SingleOutputStreamOperator<ScoredMessage> results = Scoring
                 .score(data, ruleCommands, Descriptors.rulesResultSink, Descriptors.rulesState).name("Process Rules")
                 .uid("process-rules");
-        ;
 
         // output the results of the rules commands
         final DataStream<DynamicRuleCommandResult<ScoringRule>> rulesCommandResponse =
