@@ -49,7 +49,7 @@ public abstract class LookupJob implements CyberJob {
 
         Map<String, BroadcastStream<EnrichmentEntry>> enrichmentBroadcasts = enrichmentTypes.stream()
                 .map(enrichmentType ->
-                        Tuple2.of(enrichmentType, enrichmentSource.filter(f -> f.getType().equals(enrichmentType))
+                        Tuple2.of(enrichmentType, enrichmentSource.filter(f -> f.getType().equals(enrichmentType)).name("Filter: " + enrichmentType)
                                 .broadcast(broadcastDescriptors.get(enrichmentType)))
                 )
                 .collect(Collectors.toMap(v -> v.f0, k -> k.f1));
@@ -65,7 +65,7 @@ public abstract class LookupJob implements CyberJob {
                     List<String> fields = entry.getValue();
                     String type = entry.getKey();
                     return m.connect(enrichmentBroadcasts.get(type))
-                            .process(new EnrichmentBroadcastProcessFunction(type, fields, broadcastDescriptors)).name("BroadcastProcess: " + type).uid("broadcast-process-" + type);
+                            .process(new EnrichmentBroadcastProcessFunction(type, fields, broadcastDescriptors)).name("Process: " + type).uid("broadcast-process-" + type);
                 }, (a, b) -> a); // TODO - does the combiner really make sense?
 
         return pipeline;
