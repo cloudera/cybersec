@@ -10,14 +10,18 @@ SET hive.txn.manager=org.apache.hadoop.hive.ql.lockmgr.DbTxnManager;
 
 CREATE TABLE `events`(                    
    `id` string,                                     
-   `ts` bigint,                                  
+   `ts` timestamp,                                  
    `message` string,                                
    `fields` map<string,string>,                     
    `ip_src_addr` string,                            
    `ip_dst_addr` string,                            
    `ip_src_port` string,                          
-   `ip_dst_port` string)
-PARTITIONED BY (source string, dt string, hr string) 
+   `ip_dst_port` string,
+    source string 
+)
+
+PARTITIONED BY (dt string, hr string)
+CLUSTERED BY (source) INTO 2 BUCKETS
 STORED AS ORC
 TBLPROPERTIES (
   'partition.time-extractor.timestamp-pattern'='$dt $hr:00:00',

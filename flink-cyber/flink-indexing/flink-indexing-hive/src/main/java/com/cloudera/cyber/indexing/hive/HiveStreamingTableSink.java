@@ -5,14 +5,12 @@ import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
-import org.apache.flink.streaming.api.functions.windowing.ProcessAllWindowFunction;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.ValidationException;
 import org.apache.flink.table.sinks.AppendStreamTableSink;
@@ -30,7 +28,7 @@ public class HiveStreamingTableSink implements AppendStreamTableSink<Row> {
     @NonNull private TableSchema schema;
     @NonNull private String schemaName;
     @NonNull private String table;
-    private final ProcessAllWindowFunction<Row, ErrorRow, TimeWindow> process = new HiveStreamingTransactionProcess();
+
 
     public HiveStreamingTableSink(TableSchema schema, @NonNull String schemaName, @NonNull String table) {
         log.info(String.format("Constructing: %s, %s, %s", schema.toString(), schemaName, table));
@@ -51,14 +49,14 @@ public class HiveStreamingTableSink implements AppendStreamTableSink<Row> {
 
         return dataStream.windowAll(TumblingProcessingTimeWindows.of(Time.milliseconds(batchTime)))
                 .trigger(EventTimeAndCountTrigger.of(maxEvents))
-                .process(process).name("Hive Stream Process")
-                .map(e -> e.row).name("Error Mapper")
+                .process(new HiveStreamingTransactionProcess(getOutputType())).name("Hive Stream Process").uid("hive-process")
+                .map(e -> e.row).name("Error Mapper").uid("error-map")
                 .addSink(new SinkFunction<Row>() {
                     @Override
                     public void invoke(Row value, Context context) throws Exception {
-                        log.error(value.toString());
+                    log.error("Error Row: " + value.toString());
                     }
-                }).name("Error handler");
+                }).name("Error handler").uid("error-sink");
     }
 
     @Override
@@ -78,5 +76,10 @@ public class HiveStreamingTableSink implements AppendStreamTableSink<Row> {
     @Override
     public DataType getConsumedDataType() {
         return getTableSchema().toRowDataType();
+    }
+
+    @Override
+    public TypeInformation<Row> getOutputType() {
+        return new RowTypeInfo(schema.getFieldTypes(), schema.getFieldNames());
     }
 }
