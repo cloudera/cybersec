@@ -9,18 +9,23 @@ import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
-import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
-import org.apache.flink.table.catalog.ObjectPath;
 import org.apache.flink.table.catalog.exceptions.TableNotExistException;
-import org.apache.flink.table.catalog.hive.HiveCatalog;
 import org.apache.flink.table.descriptors.ConnectTableDescriptor;
 import org.apache.flink.table.descriptors.Schema;
+import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
+import org.apache.hadoop.hive.conf.HiveConf;
+import org.apache.hadoop.hive.metastore.HiveMetaStoreClient;
+import org.apache.hadoop.hive.metastore.api.FieldSchema;
+import org.apache.thrift.TException;
 
+import javax.annotation.Nullable;
+import java.net.MalformedURLException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,14 +34,15 @@ import java.util.stream.Collectors;
 public abstract class HiveJob {
     protected static final String PARAMS_HIVE_CONF = "hive.confdir";
     protected static final String DEFAULT_HIVE_CONF = "/etc/hive/conf/";
-    protected static final String PARAMS_HIVE_TABLE = "hive.table";
-    protected static final String DEFAULT_HIVE_TABLE = "events";
     protected static final String PARAMS_HIVE_CATALOG = "hive.catalog";
-    protected static final String DEFAULT_HIVE_CATALOG = "default";
+    protected static final String DEFAULT_HIVE_CATALOG = "hive";
     protected static final String PARAMS_HIVE_SCHEMA = "hive.schema";
     protected static final String DEFAULT_HIVE_SCHEMA = "cyber";
+    protected static final String PARAMS_HIVE_TABLE = "hive.table";
+    protected static final String DEFAULT_HIVE_TABLE = "events";
+    protected static final String PARAMS_INCLUDE_FIELD_MAP = "hive.include.all";
 
-    protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws TableNotExistException {
+    protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws TableNotExistException, TException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         FlinkUtils.setupEnv(env, params);
@@ -53,27 +59,18 @@ public abstract class HiveJob {
         String schema = params.get(PARAMS_HIVE_SCHEMA, DEFAULT_HIVE_SCHEMA);
         String table = params.get(PARAMS_HIVE_TABLE, DEFAULT_HIVE_TABLE);
 
-        HiveCatalog hive = new HiveCatalog(catalog, schema, hiveConfDir, "3.1.2");
-        tableEnv.registerCatalog("hive", hive);
-
+        TableSchema tableSchema = getHiveTable(hiveConfDir, catalog, schema, table);
         DataStream<Message> source = createSource(env, params);
 
         // get the schema of the hive table
-        TableSchema tableSchema = hive.getTable(new ObjectPath(schema, table)).getSchema();
         List<String> fields = Arrays.asList(tableSchema.getFieldNames());
-        FieldExtractor fieldExtractor = new FieldExtractor(fields);
+        FieldExtractor fieldExtractor = new FieldExtractor(fields, params.getBoolean(PARAMS_INCLUDE_FIELD_MAP, false));
 
         SingleOutputStreamOperator<Row> output = source
                 // TODO - apply any filtering here
                 // map the input messages to the hive schema
                 .map(fieldExtractor)
                 .returns(fieldExtractor.type())
-                .assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<Row>(Time.milliseconds(10000)) {
-                    @Override
-                    public long extractTimestamp(Row message) {
-                        return (long) message.getField(1);
-                    }
-                })
                 .name("field extract").uid("field-extract");
 
         ConnectTableDescriptor outputTableDescriptor = tableEnv
@@ -82,11 +79,50 @@ public abstract class HiveJob {
                 .inAppendMode();
         outputTableDescriptor.createTemporaryTable("outputTable");
 
-        String fieldSpec = fieldExtractor.fieldNames().stream().collect(Collectors.joining(", "))
-                .replace("ts", "ts.rowtime");
+        String fieldSpec = fieldExtractor.fieldNames().stream().collect(Collectors.joining(", "));
+        ///.replace("ts", "ts.rowtime");
         tableEnv.fromDataStream(output, fieldSpec)
                 .insertInto("outputTable");
         return env;
+    }
+
+    private TableSchema getHiveTable(String hiveConfDir, String catalog, String schema, String table) throws TException {
+        HiveConf hiveConf = createHiveConf("/etc/hive/conf/");
+        HiveMetaStoreClient hiveMetaStoreClient = null;
+
+        hiveMetaStoreClient = new HiveMetaStoreClient(hiveConf);
+        List<FieldSchema> hiveFields = hiveMetaStoreClient.getSchema(schema, table);
+        return hiveFields.stream().reduce(TableSchema.builder(),
+                (build, field) -> build.field(field.getName(), hiveTypeToDataType(field.getType())),
+                (a, b) -> a
+        ).build();
+    }
+
+
+    public static DataType hiveTypeToDataType(String type) {
+        switch (type.toLowerCase()) {
+            case "timestamp":
+            case "bigint":
+                return DataTypes.BIGINT();
+            case "map<string,string>":
+                return DataTypes.MAP(DataTypes.STRING(), DataTypes.STRING());
+            default:
+                return DataTypes.STRING();
+        }
+    }
+
+    private static HiveConf createHiveConf(@Nullable String hiveConfDir) {
+        log.info("Setting hive conf dir as {}", hiveConfDir);
+        org.apache.hadoop.conf.Configuration hadoopConf = new org.apache.hadoop.conf.Configuration();
+        hadoopConf.addResource("/etc/hive/conf/hive-site.xml");
+        hadoopConf.addResource("/etc/hive/conf/core-site.xml");
+        try {
+            HiveConf.setHiveSiteLocation(hiveConfDir == null ? null : Paths.get(hiveConfDir, "hive-site.xml").toUri().toURL());
+        } catch (MalformedURLException e) {
+            log.error("Cannot load Hive Config", e);
+        }
+        HiveConf hiveConf = new HiveConf(hadoopConf, HiveConf.class);
+        return hiveConf;
     }
 
     protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);

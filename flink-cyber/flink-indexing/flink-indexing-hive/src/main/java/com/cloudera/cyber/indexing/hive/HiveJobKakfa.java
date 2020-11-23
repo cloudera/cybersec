@@ -13,7 +13,7 @@ import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
 @Slf4j
 public class HiveJobKakfa extends HiveJob {
 
-    private static final String PARAMS_GROUP_ID = "group.id";
+    private static final String PARAMS_GROUP_ID = "kafka.group.id";
     private static final String DEFAULT_GROUP_ID = "indexer-hive";
 
     public static void main(String[] args) throws Exception {
