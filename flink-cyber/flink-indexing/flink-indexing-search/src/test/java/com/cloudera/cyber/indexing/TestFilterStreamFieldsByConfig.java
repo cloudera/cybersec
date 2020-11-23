@@ -27,7 +27,7 @@ public class TestFilterStreamFieldsByConfig {
     public void setupTestHarness() throws Exception {
 
         //instantiate user-defined function
-        f = new FilterStreamFieldsByConfig();
+        f = new FilterStreamFieldsByConfig(broadcastState);
 
         testHarness = ProcessFunctionTestHarnesses
                 .forKeyedBroadcastProcessFunction(f, Message::getSource, TypeInformation.of(String.class), broadcastState);

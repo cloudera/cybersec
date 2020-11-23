@@ -24,6 +24,7 @@ public abstract class SearchIndexJob {
 
     private static final long DEFAULT_RETRY_WINDOW = 5 * 60000;
     private static final String PARAMS_RETRY_WINDOW = "retry.window";
+    private static final String PARAM_EXCLUDE_PATTERN = "exclude.source.pattern";
 
     protected final StreamExecutionEnvironment createPipeline(ParameterTool params) throws IOException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -34,8 +35,8 @@ public abstract class SearchIndexJob {
         DataStream<Message> messages;
 
         // allow a general exclusion of any source that matches a regex pattern upfront to avoid retry loops
-        if (StringUtils.isNotBlank(params.get("exclude.source.pattern",""))) {
-            final Pattern filterExpression = Pattern.compile(params.get("exclude.source.pattern"));
+        if (StringUtils.isNotBlank(params.get(PARAM_EXCLUDE_PATTERN,""))) {
+            final Pattern filterExpression = Pattern.compile(params.get(PARAM_EXCLUDE_PATTERN));
             messages = source.filter(m -> !filterExpression.matcher(m.getSource()).matches());
         } else {
             messages = source;
@@ -54,12 +55,18 @@ public abstract class SearchIndexJob {
          * may also need to parse the filter clause and prepend map access parts, alternatively project the table
          * as a flat version of message, which may be more long term useful.
          */
+        MapStateDescriptor<String, List<String>> broadcastState = new MapStateDescriptor<>(
+                "fieldsByIndex",
+                Types.STRING,
+                Types.LIST(Types.STRING)
+        );
+        broadcastState.setQueryable("fieldsByIndex");
 
         // only process messages that we have a collection for, and extract only the fields that are accounted for in target index
         DataStream<IndexEntry> output = messages
                 .keyBy(Message::getSource)
                 .connect(entryStringKeyedStream)
-                .process(new FilterStreamFieldsByConfig())
+                .process(new FilterStreamFieldsByConfig(broadcastState))
                 .name("Index Entry Extractor").uid("index-entry-extract");
 
         // now add the correctly formed version for tables

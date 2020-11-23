@@ -7,7 +7,6 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.formats.avro.typeutils.AvroTypeInfo;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
-import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
@@ -16,39 +15,48 @@ import org.apache.solr.client.solrj.response.schema.SchemaResponse;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Consumer;
+
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @RequiredArgsConstructor
 public class SolrCollectionFieldsSource extends RichParallelSourceFunction<CollectionField> implements ResultTypeQueryable<CollectionField> {
-
-    @NonNull private List<String> solrUrls;
-    @NonNull private long delay;
+    @NonNull
+    private List<String> solrUrls;
+    @NonNull
+    private long delay;
     private volatile boolean isRunning = true;
 
     @Override
     public void run(SourceContext<CollectionField> sourceContext) throws Exception {
-        while(isRunning) {
+        loadFieldsFromIndex().forEach(collector(sourceContext));
+        while (isRunning) {
             try {
-                loadFieldsFromIndex().forEach(c -> {
-                    long now = Instant.now().toEpochMilli();
-                    sourceContext.collectWithTimestamp(c, now);
-                    sourceContext.emitWatermark(new Watermark(now));
-                });
-                Thread.sleep(delay);
-            } catch(Exception e) {
+                loadFieldsFromIndex().forEach(collector(sourceContext));
+            } catch (Exception e) {
                 log.error("Solr Collection updater failed", e);
-                throw(e);
+                throw (e);
             }
+            Thread.sleep(delay);
         }
+    }
+
+    private Consumer<? super CollectionField> collector(SourceContext<CollectionField> sourceContext) {
+        return c -> {
+            long now = Instant.now().toEpochMilli();
+            sourceContext.collectWithTimestamp(c, now);
+        };
     }
 
     private List<String> fieldsForCollection(SolrClient solrClient, String collection) {
         SchemaRequest.Fields request = new SchemaRequest.Fields();
         try {
-            log.info(String.format("Fetching schema details for %s", collection));
             SchemaResponse.FieldsResponse response = request.process(solrClient, collection);
+            log.info("Fetching schema details for {}. Response: {}", collection, response);
             return response.getFields().stream().map(m -> m.get("name").toString()).collect(toList());
         } catch (SolrServerException | IOException e) {
             log.error("Problem with Solr Schema inspection", e);
