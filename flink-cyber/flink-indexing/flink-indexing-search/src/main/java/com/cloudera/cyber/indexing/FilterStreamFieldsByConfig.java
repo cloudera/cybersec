@@ -2,6 +2,7 @@ package com.cloudera.cyber.indexing;
 
 import com.cloudera.cyber.Message;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.co.KeyedBroadcastProcessFunction;
@@ -12,15 +13,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static com.cloudera.cyber.indexing.SearchIndexJob.Descriptors.broadcastState;
 import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 public class FilterStreamFieldsByConfig extends KeyedBroadcastProcessFunction<String, Message, CollectionField, IndexEntry> {
 
+    private final MapStateDescriptor<String, List<String>> broadcastState;
+
+    public FilterStreamFieldsByConfig(MapStateDescriptor<String, List<String>> broadcastState) {
+        this.broadcastState = broadcastState;
+    }
+
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
+
     }
 
     @Override
@@ -33,8 +40,7 @@ public class FilterStreamFieldsByConfig extends KeyedBroadcastProcessFunction<St
 
         Stream<Tuple2<String, String>> messageFields = message.getExtensions() == null ? Stream.empty() :
                 message.getExtensions().entrySet().stream()
-                        .filter(f -> !f.getKey().equals("ts"))
-                        .filter(f -> fieldsRequired.contains(f.getKey()))
+                        .filter(f -> !f.getKey().equals("ts") && fieldsRequired.contains(f.getKey()))
                         .map(e -> Tuple2.of(e.getKey(), e.getValue()));
 
         Stream<Tuple2<String, String>> threatFields = message.getThreats() == null ? Stream.empty() :
@@ -72,6 +78,7 @@ public class FilterStreamFieldsByConfig extends KeyedBroadcastProcessFunction<St
 
     @Override
     public void processBroadcastElement(CollectionField collectionFields, Context context, Collector<IndexEntry> collector) throws Exception {
+        log.info("Schema Update message {}", collectionFields.toString());
         context.getBroadcastState(broadcastState).put(collectionFields.getKey(), new ArrayList<>(collectionFields.getValues()));
     }
 }
