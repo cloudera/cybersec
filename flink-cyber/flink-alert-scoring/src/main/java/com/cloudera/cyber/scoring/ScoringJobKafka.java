@@ -55,7 +55,6 @@ public class ScoringJobKafka extends ScoringJob {
         return env.addSource(createKafkaSource(inputTopic,
                 params,
                 groupId))
-                .assignTimestampsAndWatermarks(new MessageBoundedOutOfOrder(lateness))
                 .name("Kafka Source")
                 .uid("kafka.input");
     }
@@ -74,19 +73,9 @@ public class ScoringJobKafka extends ScoringJob {
         kafkaProperties.put("group.id", groupId);
         FlinkKafkaConsumer<ScoringRuleCommand> source = new FlinkKafkaConsumer<>(topic, schema, kafkaProperties);
 
-        Time lateness = milliseconds(params.getLong(PARAMS_ALLOWED_LATENESS, FlinkUtils.DEFAULT_MAX_LATENESS));
-
-        source.assignTimestampsAndWatermarks(new
-                                                     BoundedOutOfOrdernessTimestampExtractor<ScoringRuleCommand>(lateness) {
-                                                         @Override
-                                                         public long extractTimestamp(ScoringRuleCommand scoringRuleCommand) {
-                                                             return scoringRuleCommand.getTs();
-                                                         }
-                                                     });
-
         return env.addSource(source)
-                .name("Kafka Source")
-                .uid("kafka.input");
+                .name("Kafka Rule Source")
+                .uid("kafka.input.rules");
     }
 
     @Override
@@ -102,6 +91,6 @@ public class ScoringJobKafka extends ScoringJob {
                 kafkaProperties,
                 FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
 
-        results.addSink(sink).name("Kafka Results").uid("kafka.results");
+        results.addSink(sink).name("Kafka Query Results").uid("kafka.results.query");
     }
 }
