@@ -1,10 +1,10 @@
 package com.cloudera.cyber.enrichment;
 
-import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.ThreatIntelligence;
+import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.geocode.IpGeo;
-import com.cloudera.cyber.enrichment.hbase.HbaseJobRaw;
+import com.cloudera.cyber.enrichment.hbase.HbaseJob;
 import com.cloudera.cyber.enrichment.hbase.HbaseJobRawKafka;
 import com.cloudera.cyber.enrichment.lookup.LookupJob;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
@@ -53,12 +53,12 @@ public abstract class EnrichmentJob {
         FlinkUtils.setupEnv(env, params);
 
         DataStream<Message> messages = createSource(env, params);
-        DataStream<EnrichmentEntry> enrichments = createEnrichmentSource(env, params);
+        DataStream<EnrichmentCommand> enrichments = createEnrichmentSource(env, params);
 
         List<RestEnrichmentConfig> restConfig = RestLookupJob.parseConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_REST_CONFIG_FILE))));
         List<EnrichmentConfig> enrichmentConfigs = ConfigUtils.allConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_LOOKUPS_CONFIG_FILE))));
-        DataStream<EnrichmentEntry> localEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.LOCAL));
-        DataStream<EnrichmentEntry> hbaseEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.HBASE));
+        DataStream<EnrichmentCommand> localEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.LOCAL));
+        DataStream<EnrichmentCommand> hbaseEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.HBASE));
 
         DataStream<Message> geoEnriched = params.getBoolean(PARAMS_ENABLE_GEO, true) ?
                 IpGeo.geo(messages,
@@ -76,7 +76,7 @@ public abstract class EnrichmentJob {
             new HbaseJobRawKafka().writeEnrichments(env, params, hbaseEnrichments);
         }
         DataStream<Message> hbased = params.getBoolean(PARAMS_ENABLE_HBASE, true) ?
-                HbaseJobRaw.enrich(enriched, env, enrichmentConfigs) : enriched;
+                HbaseJob.enrich(enriched, env, enrichmentConfigs) : enriched;
 
         // rest based enrichments
         DataStream<Message> rested = params.getBoolean(PARAMS_ENABLE_REST, true) ?
@@ -130,7 +130,7 @@ public abstract class EnrichmentJob {
 
     protected abstract void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> results);
 
-    protected abstract DataStream<EnrichmentEntry> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
+    protected abstract DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
 
     protected abstract DataStream<ThreatQEntry> createThreatQSource(StreamExecutionEnvironment env, ParameterTool params);
 

@@ -1,7 +1,7 @@
 package com.cloudera.cyber.enrichment.lookup;
 
-import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
 import com.cloudera.cyber.flink.CyberJob;
@@ -29,13 +29,13 @@ import static com.cloudera.cyber.enrichment.ConfigUtils.*;
 @Slf4j
 public abstract class LookupJob implements CyberJob {
 
-    public static DataStream<Message> enrich(DataStream<EnrichmentEntry> baseEnrichmentSource,
+    public static DataStream<Message> enrich(DataStream<EnrichmentCommand> baseEnrichmentSource,
                                          DataStream<Message> source,
                                          List<EnrichmentConfig> configs
     ) {
-        DataStream<EnrichmentEntry> enrichmentSource = baseEnrichmentSource.keyBy(e -> EnrichmentKey.builder()
-                .type(e.getType())
-                .key(e.getKey())
+        DataStream<EnrichmentCommand> enrichmentSource = baseEnrichmentSource.keyBy(e -> EnrichmentKey.builder()
+                .type(e.getPayload().getType())
+                .key(e.getPayload().getKey())
                 .build()
         );
 
@@ -44,12 +44,12 @@ public abstract class LookupJob implements CyberJob {
 
         Map<String, MapStateDescriptor<String, Map<String, String>>> broadcastDescriptors = enrichmentTypes.stream().collect(Collectors.toMap(
                 v -> v,
-                enrichmentType -> new MapStateDescriptor<String, Map<String, String>>(enrichmentType, Types.STRING, Types.MAP(Types.STRING, Types.STRING)))
+                enrichmentType -> new MapStateDescriptor<>(enrichmentType, Types.STRING, Types.MAP(Types.STRING, Types.STRING)))
         );
 
-        Map<String, BroadcastStream<EnrichmentEntry>> enrichmentBroadcasts = enrichmentTypes.stream()
+        Map<String, BroadcastStream<EnrichmentCommand>> enrichmentBroadcasts = enrichmentTypes.stream()
                 .map(enrichmentType ->
-                        Tuple2.of(enrichmentType, enrichmentSource.filter(f -> f.getType().equals(enrichmentType)).name("Filter: " + enrichmentType)
+                        Tuple2.of(enrichmentType, enrichmentSource.filter(f -> f.getPayload().getType().equals(enrichmentType)).name("Filter: " + enrichmentType)
                                 .broadcast(broadcastDescriptors.get(enrichmentType)))
                 )
                 .collect(Collectors.toMap(v -> v.f0, k -> k.f1));
@@ -78,7 +78,7 @@ public abstract class LookupJob implements CyberJob {
         FlinkUtils.setupEnv(env, params);
 
         DataStream<Message> source = createSource(env, params);
-        DataStream<EnrichmentEntry> enrichmentSource = createEnrichmentSource(env, params);
+        DataStream<EnrichmentCommand> enrichmentSource = createEnrichmentSource(env, params);
 
         byte[] configJson = Files.readAllBytes(Paths.get(params.getRequired(PARAMS_CONFIG_FILE)));
 
@@ -91,11 +91,5 @@ public abstract class LookupJob implements CyberJob {
 
     public abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
 
-    protected abstract DataStream<EnrichmentEntry> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
-
-    public static class Descriptors {
-        public static MapStateDescriptor<EnrichmentKey, Map<String, String>> broadcast = new MapStateDescriptor<>("enrichment",
-                TypeInformation.of(EnrichmentKey.class),
-                Types.MAP(Types.STRING, Types.STRING));
-    }
+    protected abstract DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
 }

@@ -1,8 +1,8 @@
 package com.cloudera.cyber.enrichment.hbase;
 
-import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
+import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.google.common.collect.ImmutableMap;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -22,18 +22,18 @@ import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
 @Ignore
 public class HbaseJobTest extends HbaseJob {
     private transient ManualSource<Message> source;
-    private transient ManualSource<EnrichmentEntry> enrichmentsSource;
+    private transient ManualSource<EnrichmentCommand> enrichmentsSource;
     private transient StreamTableEnvironment tableEnv;
     private CollectingSink<Message> sink = new CollectingSink<Message>();
 
     @Override
-    protected DataStream<EnrichmentEntry> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
-        enrichmentsSource = JobTester.createManualSource(env, TypeInformation.of(EnrichmentEntry.class));
+    protected DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
+        enrichmentsSource = JobTester.createManualSource(env, TypeInformation.of(EnrichmentCommand.class));
         return enrichmentsSource.getDataStream();
     }
 
     @Override
-    protected void writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentEntry> enrichmentSource) {
+    protected void writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource) {
         // usually this would send to hbase
     }
 
@@ -54,7 +54,10 @@ public class HbaseJobTest extends HbaseJob {
                 PARAMS_CONFIG_FILE, "config.json"
         ))));
         source.sendRecord(TestUtils.createMessage(Collections.singletonMap("hostname", "test")), 0);
-
         JobTester.stopTest();
+
+
     }
+
+
 }
