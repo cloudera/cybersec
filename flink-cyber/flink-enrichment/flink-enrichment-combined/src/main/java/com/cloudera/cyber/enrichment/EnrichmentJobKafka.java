@@ -1,8 +1,8 @@
 package com.cloudera.cyber.enrichment;
 
-import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.ThreatIntelligence;
+import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.stix.ThreatIndexHbaseSinkFunction;
 import com.cloudera.cyber.enrichment.stix.ThreatIntelligenceDetailsHBaseSinkFunction;
 import com.cloudera.cyber.enrichment.stix.ThreatIntelligenceHBaseSinkFunction;
@@ -60,9 +60,9 @@ public class EnrichmentJobKafka extends EnrichmentJob {
     }
 
     @Override
-    protected DataStream<EnrichmentEntry> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
+    protected DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.addSource(
-                new FlinkUtils(EnrichmentEntry.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
+                new FlinkUtils(EnrichmentCommand.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
         ).name("Kafka Enrichments").uid("kafka-enrichment-source");
     }
 
