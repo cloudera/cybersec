@@ -3,9 +3,13 @@ package com.cloudera.cyber.enrichment.lookup;
 import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
+import com.cloudera.cyber.commands.EnrichmentCommand;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.avro.specific.SpecificRecordBase;
+import org.apache.flink.api.common.state.BroadcastState;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.state.ReadOnlyBroadcastState;
 import org.apache.flink.configuration.Configuration;
@@ -18,12 +22,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@NoArgsConstructor
 @RequiredArgsConstructor
 @Slf4j
-public class EnrichmentBroadcastProcessFunction extends BroadcastProcessFunction<Message, EnrichmentEntry, Message> {
-    @NonNull private String type;
-    @NonNull private List<String> fields;
-    @NonNull private Map<String, MapStateDescriptor<String, Map<String, String>>> broadcastDescriptors;
+public class EnrichmentBroadcastProcessFunction extends BroadcastProcessFunction<Message, EnrichmentCommand, Message> {
+    @NonNull
+    private String type;
+    @NonNull
+    private List<String> fields;
+    @NonNull
+    private Map<String, MapStateDescriptor<String, Map<String, String>>> broadcastDescriptors;
     private transient Counter enrichments;
     private transient Counter hits;
 
@@ -37,6 +45,8 @@ public class EnrichmentBroadcastProcessFunction extends BroadcastProcessFunction
     @Override
     public void processElement(Message message, ReadOnlyContext readOnlyContext, Collector<Message> collector) throws Exception {
         ReadOnlyBroadcastState<String, Map<String, String>> bc = readOnlyContext.getBroadcastState(broadcastDescriptors.get(type));
+        log.debug("Process Message: {}", message);
+
         if (bc != null) {
             HashMap<String, String> hm = new HashMap<>();
             for (String field : fields) {
@@ -57,13 +67,22 @@ public class EnrichmentBroadcastProcessFunction extends BroadcastProcessFunction
     }
 
     @Override
-    public void processBroadcastElement(EnrichmentEntry enrichmentEntry, Context context, Collector<Message> collector) throws Exception {
+    public void processBroadcastElement(EnrichmentCommand enrichmentCommand, Context context, Collector<Message> collector) throws Exception {
         // add to the state
-        enrichments.inc();
-        context.getBroadcastState(broadcastDescriptors.get(enrichmentEntry.getType()))
-                .put(
-                        enrichmentEntry.getKey(),
-                        enrichmentEntry.getEntries()
-                );
+        EnrichmentEntry enrichmentEntry = enrichmentCommand.getPayload();
+        log.debug("Process Command: {}", enrichmentCommand);
+        switch (enrichmentCommand.getType()) {
+            case ADD:
+                enrichments.inc();
+                context.getBroadcastState(broadcastDescriptors.get(enrichmentEntry.getType()))
+                        .put(enrichmentEntry.getKey(), enrichmentEntry.getEntries());
+                break;
+            case DELETE:
+                context.getBroadcastState(broadcastDescriptors.get(enrichmentEntry.getType()))
+                        .remove(enrichmentEntry.getKey());
+                break;
+            case LIST:
+                break;
+        }
     }
 }

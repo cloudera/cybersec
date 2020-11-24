@@ -13,7 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EnrichmentConfig implements Serializable {
-    String source;
     EnrichmentKind kind;
+    String source;
+    String type;
     List<EnrichmentField> fields;
 }

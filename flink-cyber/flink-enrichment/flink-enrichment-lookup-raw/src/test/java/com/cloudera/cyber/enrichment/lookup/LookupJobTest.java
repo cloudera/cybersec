@@ -1,8 +1,10 @@
 package com.cloudera.cyber.enrichment.lookup;
 
+import com.cloudera.cyber.commands.CommandType;
 import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
+import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.google.common.collect.ImmutableMap;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -11,7 +13,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.*;
@@ -22,12 +23,11 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsMapWithSize.aMapWithSize;
 
-@Ignore("Problems with timing")
 public class LookupJobTest extends LookupJob {
 
     CollectingSink<Message> sink = new CollectingSink<>();
     private ManualSource<Message> source;
-    private ManualSource<EnrichmentEntry> enrichmentSource;
+    private ManualSource<EnrichmentCommand> enrichmentSource;
 
     @Test
     public void testEnrichments() throws Exception {
@@ -36,17 +36,19 @@ public class LookupJobTest extends LookupJob {
         ))));
 
         // make up some enrichments (three types, multiple fields and multiple entries in some)
-
-        sendEnrichment("ip_whitelist", "10.0.0.1", Collections.singletonMap("whitelist", "true"));
-        sendEnrichment("ip_whitelist", "192.168.0.1", Collections.singletonMap("whitelist", "false"));
+        sendEnrichment("ip_whitelist", "10.0.0.1", Collections.singletonMap("whitelist", "true"), 100L);
+        sendEnrichment("ip_whitelist", "192.168.0.1", Collections.singletonMap("whitelist", "false"), 100L);
         sendEnrichment("internal_ip", "10.0.0.1", new HashMap<String, String>(2) {{
             put("field1", "1");
             put("field2", "2");
-        }});
+        }}, 100L);
         sendEnrichment("asset", "10.0.0.1", new HashMap<String, String>(2) {{
             put("owner", "mew");
             put("location", "office");
-        }});
+        }}, 100L);
+
+        enrichmentSource.sendWatermark(100L);
+        Thread.sleep(3000);
 
         // make up some enrichable messages, use the message attr to express expected field count after enrichment
         sendMessage("2", Collections.singletonMap("ip_src_addr", "10.0.0.1"), 100);
@@ -56,10 +58,12 @@ public class LookupJobTest extends LookupJob {
         }}, 150);
         sendMessage("1", Collections.singletonMap("ip_src_addr", "10.0.0.2"), 200);
 
+        source.sendWatermark(200L);
+
         JobTester.stopTest();
 
         // assert that the sink contains fully enriched entities
-        boolean running = true;
+
         List<Message> results = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             Message message = sink.poll();
@@ -72,8 +76,8 @@ public class LookupJobTest extends LookupJob {
     }
 
     @Override
-    protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> reduction) {
-        reduction.addSink(sink);
+    protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> results) {
+        results.addSink(sink);
     }
 
     @Override
@@ -83,22 +87,24 @@ public class LookupJobTest extends LookupJob {
     }
 
     @Override
-    protected DataStream<EnrichmentEntry> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
-        enrichmentSource = JobTester.createManualSource(env, TypeInformation.of(EnrichmentEntry.class));
+    protected DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
+        enrichmentSource = JobTester.createManualSource(env, TypeInformation.of(EnrichmentCommand.class));
         return enrichmentSource.getDataStream();
     }
 
-    private EnrichmentEntry enrichment(String type, String key, Map<String, String> entries) {
-        return EnrichmentEntry.builder()
+    private EnrichmentCommand enrichment(String type, String key, Map<String, String> entries) {
+        return EnrichmentCommand.builder()
+            .type(CommandType.ADD)
+            .payload(EnrichmentEntry.builder()
                 .type(type)
                 .key(key)
                 .entries(entries)
                 .ts(0)
-                .build();
+                .build()).build();
     }
 
-    private void sendEnrichment(String type, String key, Map<String, String> entries) {
-        enrichmentSource.sendRecord(enrichment(type, key, entries), 0);
+    private void sendEnrichment(String type, String key, Map<String, String> entries, long ts) {
+        enrichmentSource.sendRecord(enrichment(type, key, entries), ts);
     }
 
     private Message message(String message, Map<String, String> extensions, long ts) {
