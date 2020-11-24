@@ -6,6 +6,7 @@ import lombok.extern.java.Log;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
@@ -110,9 +111,9 @@ public class IpGeoJobTest extends IpGeoJob {
     }
 
     @Override
-    protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> ipFields) {
+    protected SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> ipFields) {
         source = JobTester.createManualSource(env, TypeInformation.of(Message.class));
-        return source.getDataStream();
+        return source.getDataStream().map(s->s);
     }
 }
 

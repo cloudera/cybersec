@@ -3,6 +3,7 @@ package com.cloudera.cyber.enrichment;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.ThreatIntelligence;
 import com.cloudera.cyber.commands.EnrichmentCommand;
+import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.cloudera.cyber.enrichment.stix.ThreatIndexHbaseSinkFunction;
 import com.cloudera.cyber.enrichment.stix.ThreatIntelligenceDetailsHBaseSinkFunction;
 import com.cloudera.cyber.enrichment.stix.ThreatIntelligenceHBaseSinkFunction;
@@ -15,6 +16,7 @@ import org.apache.flink.addons.hbase.HBaseWriteOptions;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
@@ -23,6 +25,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.util.Properties;
 
+import static com.cloudera.cyber.enrichment.lookup.LookupJobKafka.PARAMS_QUERY_OUTPUT;
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_OUTPUT;
 import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
@@ -53,7 +56,7 @@ public class EnrichmentJobKafka extends EnrichmentJob {
     }
 
     @Override
-    public DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
+    public SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.addSource(
                 new FlinkUtils(Message.class).createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
         ).name("Kafka Source").uid("kafka-source");
@@ -64,6 +67,12 @@ public class EnrichmentJobKafka extends EnrichmentJob {
         return env.addSource(
                 new FlinkUtils(EnrichmentCommand.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
         ).name("Kafka Enrichments").uid("kafka-enrichment-source");
+    }
+
+    @Override
+    protected void writeEnrichmentQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> sideOutput) {
+        sideOutput.addSink(new FlinkUtils<>(EnrichmentCommandResponse.class).createKafkaSink(params.getRequired(PARAMS_QUERY_OUTPUT), params))
+                .name("Enrichment Query Sink").uid("kafka-enrichment-query-sink");
     }
 
     @Override

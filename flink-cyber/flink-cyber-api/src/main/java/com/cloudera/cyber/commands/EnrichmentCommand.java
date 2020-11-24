@@ -1,6 +1,7 @@
 package com.cloudera.cyber.commands;
 
 import com.cloudera.cyber.EnrichmentEntry;
+import com.cloudera.cyber.flink.HasHeaders;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @ToString(callSuper = true)
-public class EnrichmentCommand extends Command<EnrichmentEntry> {
+public class EnrichmentCommand extends Command<EnrichmentEntry> implements HasHeaders {
 
     private static final Schema SCHEMA$ = SchemaBuilder
             .record(EnrichmentCommand.class.getName())

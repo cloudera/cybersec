@@ -25,7 +25,7 @@ public abstract class IpGeoJob {
         List<String> ipFields = Arrays.asList(params.getRequired(PARAM_GEO_FIELDS).split(","));
         String geoDatabasePath = params.getRequired(PARAM_GEO_DATABASE_PATH);
 
-        DataStream<Message> source = createSource(env, params, ipFields);
+        SingleOutputStreamOperator<Message> source = createSource(env, params, ipFields);
 
         SingleOutputStreamOperator<Message> results = IpGeo.geo(source, ipFields, geoDatabasePath);
         writeResults(params, results);
@@ -35,6 +35,6 @@ public abstract class IpGeoJob {
 
     protected abstract void writeResults(ParameterTool params, DataStream<Message> results);
 
-    protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> ipFields);
+    protected abstract SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> ipFields);
 
 }
