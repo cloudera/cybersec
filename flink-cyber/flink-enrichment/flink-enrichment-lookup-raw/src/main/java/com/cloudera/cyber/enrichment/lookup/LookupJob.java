@@ -2,6 +2,7 @@ package com.cloudera.cyber.enrichment.lookup;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.commands.EnrichmentCommand;
+import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
 import com.cloudera.cyber.flink.CyberJob;
@@ -15,7 +16,9 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.BroadcastStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.util.OutputTag;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -29,9 +32,11 @@ import static com.cloudera.cyber.enrichment.ConfigUtils.*;
 @Slf4j
 public abstract class LookupJob implements CyberJob {
 
-    public static DataStream<Message> enrich(DataStream<EnrichmentCommand> baseEnrichmentSource,
-                                         DataStream<Message> source,
-                                         List<EnrichmentConfig> configs
+    public static final OutputTag<EnrichmentCommandResponse> QUERY_RESULT = new OutputTag<EnrichmentCommandResponse>("query-result", TypeInformation.of(EnrichmentCommandResponse.class));
+
+    public static SingleOutputStreamOperator<Message> enrich(DataStream<EnrichmentCommand> baseEnrichmentSource,
+                                                             SingleOutputStreamOperator<Message> source,
+                                                             List<EnrichmentConfig> configs
     ) {
         DataStream<EnrichmentCommand> enrichmentSource = baseEnrichmentSource.keyBy(e -> EnrichmentKey.builder()
                 .type(e.getPayload().getType())
@@ -60,16 +65,17 @@ public abstract class LookupJob implements CyberJob {
          * Note this is done as a reduction to ensure a single pipeline graph is built and a broadcast processor
          * is created for each relevant message key
          */
-        DataStream<Message> pipeline = typeToFields.entrySet().stream().reduce(source,
-                (m, entry) -> {
+        SingleOutputStreamOperator<Message> pipeline = typeToFields.entrySet().stream().reduce(source,
+                (out, entry) -> {
                     List<String> fields = entry.getValue();
                     String type = entry.getKey();
-                    return m.connect(enrichmentBroadcasts.get(type))
+                    return out.connect(enrichmentBroadcasts.get(type))
                             .process(new EnrichmentBroadcastProcessFunction(type, fields, broadcastDescriptors)).name("Process: " + type).uid("broadcast-process-" + type);
                 }, (a, b) -> a); // TODO - does the combiner really make sense?
-
+        
         return pipeline;
     }
+
 
     @Override
     public StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
@@ -77,19 +83,22 @@ public abstract class LookupJob implements CyberJob {
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         FlinkUtils.setupEnv(env, params);
 
-        DataStream<Message> source = createSource(env, params);
+        SingleOutputStreamOperator<Message> source = createSource(env, params);
         DataStream<EnrichmentCommand> enrichmentSource = createEnrichmentSource(env, params);
 
         byte[] configJson = Files.readAllBytes(Paths.get(params.getRequired(PARAMS_CONFIG_FILE)));
 
-        DataStream<Message> pipeline = enrich(enrichmentSource, source, allConfigs(configJson));
+        SingleOutputStreamOperator<Message> pipeline = enrich(enrichmentSource, source, allConfigs(configJson));
         writeResults(env, params, pipeline);
+        writeQueryResults(env, params, pipeline.getSideOutput(QUERY_RESULT));
         return env;
     }
 
+    protected abstract void writeQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> sideOutput);
+
     protected abstract void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> reduction);
 
-    public abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
+    public abstract SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
 
     protected abstract DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
 }

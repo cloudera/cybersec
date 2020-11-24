@@ -2,18 +2,26 @@ package com.cloudera.cyber.commands;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificRecordBase;
 
+import java.util.Map;
+
+import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
+
 @Data
 @NoArgsConstructor
+@SuperBuilder
 public abstract class Command<T> extends SpecificRecordBase {
     private CommandType type;
     private T payload;
+    private Map<String, String> headers;
 
     protected Command(CommandBuilder<T, ?, ?> b) {
         this.type = b.type;
         this.payload = b.payload;
+        this.headers = b.headers;
     }
 
     @Override
@@ -23,6 +31,7 @@ public abstract class Command<T> extends SpecificRecordBase {
         switch (field$) {
             case 0: return type;
             case 1: return payload;
+            case 2: return headers;
             default: throw new org.apache.avro.AvroRuntimeException("Bad index");
         }
     }
@@ -33,30 +42,9 @@ public abstract class Command<T> extends SpecificRecordBase {
         switch (field$) {
             case 0: type = CommandType.valueOf(value$.toString()); break;
             case 1: payload = (T)value$; break;
+            case 2: headers = utf8toStringMap(value$); break;
             default: throw new org.apache.avro.AvroRuntimeException("Bad index");
         }
     }
 
-    public static abstract class CommandBuilder<T, C extends Command<T>, B extends CommandBuilder<T, C, B>> {
-        private CommandType type;
-        private T payload;
-
-        public B type(CommandType type) {
-            this.type = type;
-            return self();
-        }
-
-        public B payload(T payload) {
-            this.payload = payload;
-            return self();
-        }
-
-        protected abstract B self();
-
-        public abstract C build();
-
-        public String toString() {
-            return "Command.CommandBuilder(super=" + super.toString() + ", type=" + this.type + ", payload=" + this.payload + ")";
-        }
-    }
 }
