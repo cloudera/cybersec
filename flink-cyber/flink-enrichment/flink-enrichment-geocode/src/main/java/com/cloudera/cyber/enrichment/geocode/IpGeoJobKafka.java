@@ -4,6 +4,7 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 
@@ -44,7 +45,7 @@ public class IpGeoJobKafka extends IpGeoJob {
     }
 
     @Override
-    protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> ipFields) {
+    protected SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> ipFields) {
         String inputTopic = params.getRequired("topic.input");
       return env.addSource(FlinkUtils.createKafkaSource(inputTopic,
                 params,createGroupId(inputTopic, ipFields)))

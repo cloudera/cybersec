@@ -3,6 +3,7 @@ package com.cloudera.cyber.enrichment;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.ThreatIntelligence;
 import com.cloudera.cyber.commands.EnrichmentCommand;
+import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.cloudera.cyber.enrichment.geocode.IpGeo;
 import com.cloudera.cyber.enrichment.hbase.HbaseJob;
 import com.cloudera.cyber.enrichment.hbase.HbaseJobRawKafka;
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.io.IOException;
@@ -52,24 +54,26 @@ public abstract class EnrichmentJob {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         FlinkUtils.setupEnv(env, params);
 
-        DataStream<Message> messages = createSource(env, params);
+        SingleOutputStreamOperator<Message> messages = createSource(env, params);
         DataStream<EnrichmentCommand> enrichments = createEnrichmentSource(env, params);
 
         List<RestEnrichmentConfig> restConfig = RestLookupJob.parseConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_REST_CONFIG_FILE))));
         List<EnrichmentConfig> enrichmentConfigs = ConfigUtils.allConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_LOOKUPS_CONFIG_FILE))));
-        DataStream<EnrichmentCommand> localEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.LOCAL));
-        DataStream<EnrichmentCommand> hbaseEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.HBASE));
+        SingleOutputStreamOperator<EnrichmentCommand> localEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.LOCAL));
+        SingleOutputStreamOperator<EnrichmentCommand> hbaseEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.HBASE));
 
-        DataStream<Message> geoEnriched = params.getBoolean(PARAMS_ENABLE_GEO, true) ?
+        SingleOutputStreamOperator<Message> geoEnriched = params.getBoolean(PARAMS_ENABLE_GEO, true) ?
                 IpGeo.geo(messages,
                         Arrays.asList(params.getRequired(PARAM_GEO_FIELDS).split(",")),
                         params.getRequired(PARAM_GEO_DATABASE_PATH)) : messages;
-        DataStream<Message> asnEnriched = params.getBoolean(PARAMS_ENABLE_ASN, true) ?
+        SingleOutputStreamOperator<Message> asnEnriched = params.getBoolean(PARAMS_ENABLE_ASN, true) ?
                 IpGeo.asn(geoEnriched,
                         Arrays.asList(params.getRequired(PARAM_ASN_FIELDS).split(",")),
                         params.getRequired(PARAM_ASN_DATABASE_PATH)) : geoEnriched;
 
-        DataStream<Message> enriched = LookupJob.enrich(localEnrichments, asnEnriched, enrichmentConfigs);
+        SingleOutputStreamOperator<Message> enriched = LookupJob.enrich(localEnrichments, asnEnriched, enrichmentConfigs);
+
+        writeEnrichmentQueryResults(env, params, enriched.getSideOutput(LookupJob.QUERY_RESULT));
 
         // write the hbase enrichments to hbase
         if (params.getBoolean(PARAMS_ENABLE_HBASE, true)) {
@@ -108,6 +112,7 @@ public abstract class EnrichmentJob {
     }
 
 
+
     /**
      * @param in     Messages incoming for rules processing
      * @param params Global Job Parameters
@@ -126,11 +131,13 @@ public abstract class EnrichmentJob {
         return stix.getResults();
     }
 
-    protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
+    protected abstract SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
 
     protected abstract void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> results);
 
     protected abstract DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
+
+    protected abstract void writeEnrichmentQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> sideOutput);
 
     protected abstract DataStream<ThreatQEntry> createThreatQSource(StreamExecutionEnvironment env, ParameterTool params);
 

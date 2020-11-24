@@ -1,14 +1,16 @@
 package com.cloudera.cyber.enrichment.lookup;
 
-import com.cloudera.cyber.commands.CommandType;
 import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
+import com.cloudera.cyber.commands.CommandType;
 import com.cloudera.cyber.commands.EnrichmentCommand;
+import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.google.common.collect.ImmutableMap;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
@@ -26,6 +28,7 @@ import static org.hamcrest.collection.IsMapWithSize.aMapWithSize;
 public class LookupJobTest extends LookupJob {
 
     CollectingSink<Message> sink = new CollectingSink<>();
+    CollectingSink<EnrichmentCommandResponse> queryResults = new CollectingSink<>();
     private ManualSource<Message> source;
     private ManualSource<EnrichmentCommand> enrichmentSource;
 
@@ -76,14 +79,19 @@ public class LookupJobTest extends LookupJob {
     }
 
     @Override
+    protected void writeQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> sideOutput) {
+        sideOutput.addSink(queryResults);
+    }
+
+    @Override
     protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> results) {
         results.addSink(sink);
     }
 
     @Override
-    public DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
+    public SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         source = JobTester.createManualSource(env, TypeInformation.of(Message.class));
-        return source.getDataStream();
+        return source.getDataStream().map(s->s);
     }
 
     @Override
