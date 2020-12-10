@@ -1,5 +1,8 @@
 package com.cloudera.cyber;
 
+import com.cloudera.cyber.commands.CommandType;
+import com.cloudera.cyber.commands.EnrichmentCommand;
+import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
@@ -10,8 +13,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.*;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class SerializationTests {
@@ -75,6 +77,43 @@ public class SerializationTests {
         Message test = test(m);
         assertThat(test.getExtensions(), equalTo(map));
         assertThat(test.getDataQualityMessages().get(0).getMessage(), equalTo("test message"));
+    }
+    
+    @Test
+    public void testEnrichmentCommand() throws IOException {
+        Map<String, String> entryMap = Collections.singletonMap("test", "value");
+        EnrichmentCommand command = EnrichmentCommand.builder()
+                .type(CommandType.ADD)
+                .headers(Collections.singletonMap("test", "header"))
+                .payload(EnrichmentEntry.builder()
+                        .type("test")
+                        .ts(0)
+                        .entries(entryMap)
+                        .key("test")
+                        .build())
+                .build();
+        EnrichmentCommand output = test(command);
+        assertThat(output.getPayload().getEntries(), equalTo(entryMap));
+    }
+
+    @Test
+    public void testEnrichmentCommandResponse() throws IOException {
+        Map<String, String> entryMap = Collections.singletonMap("test", "value");
+        Map<String, String> headerMap = Collections.singletonMap("test", "header");
+        EnrichmentCommandResponse cr = EnrichmentCommandResponse.builder()
+                .success(true)
+                .message("")
+                .content(Arrays.asList(EnrichmentEntry.builder()
+                        .type("test")
+                        .ts(0)
+                        .entries(entryMap)
+                        .key("test")
+                        .build()))
+                .headers(headerMap)
+                .build();
+        EnrichmentCommandResponse output = test(cr);
+        assertThat(output.getHeaders(), hasEntry("test", "header"));
+        assertThat(output.getContent().get(0).getEntries(), hasEntry("test", "value"));
     }
 
     private List<ThreatIntelligence> createTi(Map<String, String> tiFields) {

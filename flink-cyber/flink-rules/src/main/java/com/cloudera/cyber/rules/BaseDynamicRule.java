@@ -48,6 +48,15 @@ public abstract class BaseDynamicRule extends SpecificRecordBase implements Dyna
         private RuleType type;
         private String ruleScript;
 
+        private static void $fillValuesFromInstanceIntoBuilder(BaseDynamicRule instance, BaseDynamicRuleBuilder<?, ?> b) {
+            b.name(instance.name);
+            b.order(instance.order);
+            b.tsStart(instance.tsStart);
+            b.tsEnd(instance.tsEnd);
+            b.type(instance.type);
+            b.ruleScript(instance.ruleScript);
+        }
+
         public B name(String name) {
             this.name = name;
             return self();
@@ -84,6 +93,11 @@ public abstract class BaseDynamicRule extends SpecificRecordBase implements Dyna
 
         public String toString() {
             return "BaseDynamicRule.BaseDynamicRuleBuilder(super=" + super.toString() + ", name=" + this.name + ", order=" + this.order + ", tsStart=" + this.tsStart + ", tsEnd=" + this.tsEnd + ", type=" + this.type + ", ruleScript=" + this.ruleScript + ")";
+        }
+
+        protected B $fillValuesFrom(C instance) {
+            BaseDynamicRuleBuilder.$fillValuesFromInstanceIntoBuilder(instance, this);
+            return self();
         }
     }
 }

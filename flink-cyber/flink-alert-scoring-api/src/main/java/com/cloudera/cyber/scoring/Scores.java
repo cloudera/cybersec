@@ -18,8 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Scores extends SpecificRecordBase implements SpecificRecord {
-    @Builder.Default
-    private UUID ruleId = UUID.randomUUID();
+    private String ruleId;
     private Double score;
     private String reason;
 
@@ -49,7 +48,7 @@ public class Scores extends SpecificRecordBase implements SpecificRecord {
     @Override
     public void put(int field$, Object value$) {
         switch (field$) {
-            case 0: ruleId = (UUID) value$; break;
+            case 0: ruleId = value$.toString(); break;
             case 1: score = (Double)value$; break;
             case 2: reason = value$.toString(); break;
             default: throw new AvroRuntimeException("Bad Index");
