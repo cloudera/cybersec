@@ -1,6 +1,8 @@
 import com.cloudera.cyber.rules.RuleType;
 import com.cloudera.cyber.scoring.Scores;
 import com.cloudera.cyber.scoring.ScoringRule;
+import org.apache.avro.Schema;
+import org.apache.avro.reflect.ReflectData;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
@@ -53,5 +55,12 @@ public class SerializationTests {
 
         assertThat(out, notNullValue());
         return out;
+    }
+
+    @Test
+    public void schemaTest() {
+        Schema schema = ReflectData.get().getSchema(ScoringRule.class);
+        assertThat(schema, notNullValue());
+        assertThat(schema, equalTo(ScoringRule.SCHEMA$));
     }
 }

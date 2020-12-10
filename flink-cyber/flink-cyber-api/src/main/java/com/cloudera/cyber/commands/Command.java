@@ -2,7 +2,6 @@ package com.cloudera.cyber.commands;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificRecordBase;
 
@@ -12,7 +11,6 @@ import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
 
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public abstract class Command<T> extends SpecificRecordBase {
     private CommandType type;
     private T payload;
@@ -47,4 +45,32 @@ public abstract class Command<T> extends SpecificRecordBase {
         }
     }
 
+    public static abstract class CommandBuilder<T, C extends Command<T>, B extends CommandBuilder<T, C, B>> {
+        private CommandType type;
+        private T payload;
+        private Map<String, String> headers;
+
+        public B type(CommandType type) {
+            this.type = type;
+            return self();
+        }
+
+        public B payload(T payload) {
+            this.payload = payload;
+            return self();
+        }
+
+        public B headers(Map<String, String> headers) {
+            this.headers = headers;
+            return self();
+        }
+
+        protected abstract B self();
+
+        public abstract C build();
+
+        public String toString() {
+            return "Command.CommandBuilder(super=" + super.toString() + ", type=" + this.type + ", payload=" + this.payload + ", headers=" + this.headers + ")";
+        }
+    }
 }
