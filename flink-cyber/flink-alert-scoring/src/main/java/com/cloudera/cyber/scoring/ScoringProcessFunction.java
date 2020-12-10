@@ -49,7 +49,7 @@ public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRu
 
         collector.collect(ScoredMessage.builder()
                 .message(message)
-                .scores(scores)
+                .cyberScoresDetails(scores)
                 .build());
     }
 }
