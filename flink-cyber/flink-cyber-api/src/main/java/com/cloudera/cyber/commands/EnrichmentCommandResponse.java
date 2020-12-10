@@ -2,6 +2,7 @@ package com.cloudera.cyber.commands;
 
 import com.cloudera.cyber.EnrichmentEntry;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -12,6 +13,7 @@ import static com.cloudera.cyber.AvroTypes.toListOf;
 
 @SuperBuilder
 @Data
+@NoArgsConstructor
 public class EnrichmentCommandResponse extends CommandResponse<EnrichmentEntry> {
     
     private static final Schema SCHEMA$ = SchemaBuilder

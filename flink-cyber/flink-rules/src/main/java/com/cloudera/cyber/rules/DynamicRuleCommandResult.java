@@ -8,7 +8,7 @@ import java.util.UUID;
 @Builder
 @Data
 public class DynamicRuleCommandResult<R extends DynamicRule> {
-    UUID cmdId;
+    String cmdId;
     boolean success;
     R rule;
 }

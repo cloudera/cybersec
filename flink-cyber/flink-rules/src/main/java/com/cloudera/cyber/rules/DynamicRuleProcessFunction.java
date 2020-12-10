@@ -63,7 +63,7 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule, C extend
                         .collect(Collectors.toList());
             case UPSERT:
                 R newRule = (ruleCommand.getRule().getId() == null) ?
-                        (R) ruleCommand.getRule().withId(UUID.randomUUID()) :
+                        (R) ruleCommand.getRule().withId(UUID.randomUUID().toString()) :
                         ruleCommand.getRule();
                 outputRule(context, newRule, ruleCommand.getId());
                 return ruleCommand.getRuleId() == null ?
@@ -91,7 +91,7 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule, C extend
         }
     }
 
-    private R outputRule(Context context, R r, UUID cmdId) {
+    private R outputRule(Context context, R r, String cmdId) {
         context.output(this.outputSink, DynamicRuleCommandResult.<R>builder()
                 .cmdId(cmdId)
                 .rule(r)
@@ -100,7 +100,7 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule, C extend
         return r;
     }
 
-    private List<R> setEnable(List<R> allScoringRules, UUID ruleId, boolean state) {
+    private List<R> setEnable(List<R> allScoringRules, String ruleId, boolean state) {
         return allScoringRules.stream()
                 .map(r -> r.getId() == ruleId ?
                         (R) r.withEnabled(state) :

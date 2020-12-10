@@ -10,9 +10,9 @@ public interface DynamicRule<T> {
 
     int getOrder();
 
-    UUID getId();
+    String getId();
 
-    T withId(UUID uuid);
+    T withId(String uuid);
     T withEnabled(boolean enabled);
 
     Map<String, Object> apply(Message message);

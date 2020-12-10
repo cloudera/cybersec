@@ -25,6 +25,7 @@ public class EnrichmentCommand extends Command<EnrichmentEntry> implements HasHe
                     CommandType.class.getPackage().getName(),
                     Arrays.stream(CommandType.values()).map(v -> v.name()).collect(Collectors.toList()))).noDefault()
             .name("payload").type().optional().type(EnrichmentEntry.SCHEMA$)
+            .name("headers").type(Schema.createMap(Schema.create(Schema.Type.STRING))).noDefault()
             .endRecord();
 
     protected EnrichmentCommand(EnrichmentCommandBuilder<?, ?> b) {

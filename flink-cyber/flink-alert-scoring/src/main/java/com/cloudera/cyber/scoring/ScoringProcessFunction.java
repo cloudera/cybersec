@@ -9,6 +9,7 @@ import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,19 +30,26 @@ public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRu
         List<Scores> scores = rules.stream()
                 .map(r -> {
                     Map<String, Object> results = r.apply(message);
-                    return Scores.builder()
-                            .ruleId(r.getId())
-                            .score((Double) results.get(RESULT_SCORE))
-                            .reason((String) results.get(RESULT_REASON))
-                            .build();
-                }).collect(Collectors.toList());
+                    if (results != null) {
+                        return Scores.builder()
+                                .ruleId(r.getId())
+                                .score((Double) results.get(RESULT_SCORE))
+                                .reason((String) results.get(RESULT_REASON))
+                                .build();
+                    } else {
+                        return null;
+                    }
+                })
+                .filter(f -> f != null)
+                .collect(Collectors.toList());
+
+        DoubleSummaryStatistics scoreSummary = scores.stream().collect(Collectors.summarizingDouble(s -> s.getScore()));
 
         log.info(String.format("%d, %s, %s", Thread.currentThread().getId(), message, rules));
 
         collector.collect(ScoredMessage.builder()
                 .message(message)
                 .scores(scores)
-                .rules(rules)
                 .build());
     }
 }

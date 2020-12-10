@@ -47,7 +47,7 @@ public class TestScoringJob extends ScoringJob {
 
         JobTester.startTest(env);
 
-        UUID ruleId = UUID.randomUUID();
+        String ruleId = UUID.randomUUID().toString();
 
         sendRule(ScoringRuleCommand.builder()
                 .type(UPSERT)
@@ -60,7 +60,7 @@ public class TestScoringJob extends ScoringJob {
                         .enabled(true)
                         .build())
                 .ts(1L)
-                .id(UUID.randomUUID())
+                .id(UUID.randomUUID().toString())
                 .build());
 
         DynamicRuleCommandResult<ScoringRule> poll = queryResponse.poll();
@@ -78,12 +78,12 @@ public class TestScoringJob extends ScoringJob {
         querySource.sendWatermark(100l);
 
         sendRule(ScoringRuleCommand.builder()
-                .type(LIST).ts(900).id(UUID.randomUUID()).build());
+                .type(LIST).ts(900).id(UUID.randomUUID().toString()).build());
 
         sendRule(ScoringRuleCommand.builder()
                 .type(DELETE)
                 .ts(1000l)
-                .id(UUID.randomUUID())
+                .id(UUID.randomUUID().toString())
                 .ruleId(ruleId).build());
 
         sendRecord(Message.builder()

@@ -9,7 +9,10 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
+
+import static com.cloudera.cyber.AvroTypes.toListOf;
 
 @Getter
 @EqualsAndHashCode
@@ -19,8 +22,22 @@ import java.util.List;
 @AllArgsConstructor
 public class ScoredMessage extends SpecificRecordBase implements IdentifiedMessage, SpecificRecord {
     private Message message;
-    private List<Scores> scores;
-    private List<ScoringRule> rules;
+    private List<Scores> cyberScoresDetails;
+
+    public DoubleSummaryStatistics getSummaryPositive() {
+        return cyberScoresDetails.stream().mapToDouble(s -> s.getScore()).filter(d -> d > 0).summaryStatistics();
+    }
+
+    public DoubleSummaryStatistics getSummaryNegative() {
+        return cyberScoresDetails.stream().mapToDouble(s -> s.getScore()).filter(d -> d > 0).summaryStatistics();
+    }
+    public boolean isCyberAlert() {
+        return (getSummaryPositive().getAverage() > -getSummaryNegative().getAverage());
+    }
+
+    public Double getCyberScore() {
+        return isCyberAlert() ? getSummaryPositive().getAverage(): 0.0;
+    }
 
     @Override
     public String getId() {
@@ -37,7 +54,6 @@ public class ScoredMessage extends SpecificRecordBase implements IdentifiedMessa
             .fields()
             .name("message").type(Message.SCHEMA$).noDefault()
             .name("scores").type(Schema.createArray(Scores.SCHEMA$)).noDefault()
-            .name("rules").type(Schema.createArray(ScoringRule.SCHEMA$)).noDefault()
             .endRecord();
 
     @Override
@@ -51,9 +67,7 @@ public class ScoredMessage extends SpecificRecordBase implements IdentifiedMessa
             case 0:
                 return message;
             case 1:
-                return scores;
-            case 2:
-                return rules;
+                return cyberScoresDetails;
             default:
                 throw new AvroRuntimeException("Bad index");
         }
@@ -66,10 +80,7 @@ public class ScoredMessage extends SpecificRecordBase implements IdentifiedMessa
                 this.message = (Message) value$;
                 break;
             case 1:
-                this.scores = (List<Scores>) value$;
-                break;
-            case 2:
-                this.rules = (List<ScoringRule>) value$;
+                this.cyberScoresDetails = toListOf(Scores.class, value$);
                 break;
             default:
                 throw new AvroRuntimeException("Bad index");
