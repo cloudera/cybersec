@@ -32,7 +32,7 @@ public class StreamingHiveSink extends RichSinkFunction<Message> implements Chec
     @Override
     public void invoke(Message message, Context context) throws Exception {
         log.debug("Adding message {} to transaction", message);
-        messageWriter.addMessageToTransaction(message);
+        counter.inc(messageWriter.addMessageToTransaction(message));
     }
 
     @Override
