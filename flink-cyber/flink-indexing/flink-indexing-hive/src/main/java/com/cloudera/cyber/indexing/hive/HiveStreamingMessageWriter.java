@@ -188,7 +188,7 @@ public class HiveStreamingMessageWriter  {
         return dateFormat.format(Date.from(Instant.ofEpochMilli(message.getTs())));
     }
 
-    protected void addMessageToTransaction(Message message) throws Exception {
+    protected int addMessageToTransaction(Message message) throws Exception {
 
         beginTransaction();
         tableSchema.getFieldNames();
@@ -239,8 +239,7 @@ public class HiveStreamingMessageWriter  {
         connection.write(rowJson);
         messagesInCurrentTransaction++;
 
-        endTransaction();
-
+        return endTransaction();
     }
 
     protected void beginTransaction() throws Exception {
