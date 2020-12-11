@@ -240,7 +240,7 @@ public class HiveStreamingMessageWriter  {
         messagesInCurrentTransaction++;
 
         return endTransaction();
-    }
+   }
 
     protected void beginTransaction() throws Exception {
         if (messagesInCurrentTransaction == 0) {
