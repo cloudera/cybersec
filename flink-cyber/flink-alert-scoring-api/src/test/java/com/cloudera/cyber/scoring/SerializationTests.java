@@ -1,6 +1,6 @@
+package com.cloudera.cyber.scoring;
+
 import com.cloudera.cyber.rules.RuleType;
-import com.cloudera.cyber.scoring.Scores;
-import com.cloudera.cyber.scoring.ScoringRule;
 import org.apache.avro.Schema;
 import org.apache.avro.reflect.ReflectData;
 import org.apache.avro.specific.SpecificRecordBase;
@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -23,15 +24,16 @@ public class SerializationTests {
 
     @Test
     public void testScore() throws IOException {
-        Scores test = Scores.builder().reason("test").score(1.0).build();
+        Scores test = Scores.builder().ruleId(UUID.randomUUID().toString()).reason("test").score(1.0).build();
         Scores out = test(test);
         assertThat(out, equalTo(test));
     }
 
     @Test
     @Ignore
-    public void testScoringRule() throws IOException {
+    public void testScoringRule() {
         ScoringRule test = ScoringRule.builder()
+                .id(UUID.randomUUID().toString())
                 .enabled(true)
                 .name("test")
                 .order(1)
@@ -39,6 +41,7 @@ public class SerializationTests {
                 .tsStart(Instant.MIN)
                 .tsEnd(Instant.MAX)
                 .type(RuleType.JS)
+                .version(0)
                 .build();
 
         fail("Cannot serialize because of base class");

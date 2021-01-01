@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @ToString(callSuper = true)
 @SuperBuilder
 @NoArgsConstructor
-@TypeInfo(ScoringRuleCommandTypeFactory.class)
+//@TypeInfo(ScoringRuleCommandTypeFactory.class)
 public class ScoringRuleCommand extends DynamicRuleCommand<ScoringRule> {
 
     public static Schema SCHEMA$ = SchemaBuilder.record(ScoringRuleCommand.class.getName())
@@ -29,8 +29,8 @@ public class ScoringRuleCommand extends DynamicRuleCommand<ScoringRule> {
             .name("type").type(Schema.createEnum(DynamicRuleCommandType.class.getName(), "", DynamicRuleCommandType.class.getPackage().getName(),
                     Arrays.stream(DynamicRuleCommandType.values()).map(v -> v.name()).collect(Collectors.toList()))).noDefault()
             .requiredLong("ts")
-            .requiredString("ruleId")
-            .name("rule").type(ScoringRule.SCHEMA$).noDefault()
+            .optionalString("ruleId")
+            .name("rule").type().optional().type(ScoringRule.SCHEMA$)
             .name("headers").type(Schema.createMap(Schema.create(Schema.Type.STRING))).noDefault()
             .endRecord();
 

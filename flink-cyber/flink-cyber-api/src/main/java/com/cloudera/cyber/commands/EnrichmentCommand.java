@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @ToString(callSuper = true)
 public class EnrichmentCommand extends Command<EnrichmentEntry> implements HasHeaders {
 
-    private static final Schema SCHEMA$ = SchemaBuilder
+    public static final Schema SCHEMA$ = SchemaBuilder
             .record(EnrichmentCommand.class.getName())
             .namespace(EnrichmentCommand.class.getPackage().getName())
             .fields()

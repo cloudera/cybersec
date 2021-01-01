@@ -12,8 +12,11 @@ public interface DynamicRule<T> {
 
     String getId();
 
+    int getVersion();
+
     T withId(String uuid);
     T withEnabled(boolean enabled);
+    T withVersion(int version);
 
     Map<String, Object> apply(Message message);
 }

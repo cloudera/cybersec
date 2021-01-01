@@ -41,6 +41,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-alert-scoring-api</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+
         <!-- Flink Dependency -->
         <dependency>
             <groupId>org.apache.flink</groupId>

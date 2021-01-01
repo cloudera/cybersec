@@ -1,6 +1,8 @@
 package com.cloudera.cyber.indexing.hive;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.scoring.ScoredMessage;
+import com.cloudera.cyber.scoring.Scores;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +64,7 @@ public class HiveStreamingMessageWriter  {
     /** schema describing the columns in the hive table where the flink job will write events **/
     private transient TableSchema tableSchema;
     /** methods for mapping built in Message class fields into hive column values **/
-    private transient Map<String, Function<Message, Object>> builtinColumnExtractor;
+    private transient Map<String, Function<ScoredMessage, Object>> builtinColumnExtractor;
     /** Type information for converting a single message to a json byte array.  The json is required by the StrictJsonWriter for the hive connection. **/
     private transient TypeInformation<Row> typeInfo;
     /** methods for converting String extensions to the column values required by hive. **/
@@ -109,17 +111,19 @@ public class HiveStreamingMessageWriter  {
 
         tableSchema = getHiveTable(hiveConf, databaseName, tableName);
 
-        builtinColumnExtractor = new HashMap<String, Function<Message, Object>>() {{
-            put("originalsource_topic", (m) -> m.getOriginalSource().getTopic());
-            put("originalsource_partition", (m) -> m.getOriginalSource().getPartition());
-            put("originalsource_offset", (m) -> m.getOriginalSource().getOffset());
-            put("originalsource_signature", (m) -> m.getOriginalSource().getSignature());
-            put("id", Message::getId);
-            put("ts", (m) -> formatMessageTimestamp(m, hiveTimestampFormat));
-            put("message", Message::getMessage);
-            put("source", Message::getSource);
-            put("dt", (m) -> formatMessageTimestamp(m, dayFormat));
-            put("hr", (m) -> formatMessageTimestamp(m, hourFormat));
+        builtinColumnExtractor = new HashMap<String, Function<ScoredMessage, Object>>() {{
+            put("originalsource_topic", (m) -> m.getMessage().getOriginalSource().getTopic());
+            put("originalsource_partition", (m) -> m.getMessage().getOriginalSource().getPartition());
+            put("originalsource_offset", (m) -> m.getMessage().getOriginalSource().getOffset());
+            put("originalsource_signature", (m) -> m.getMessage().getOriginalSource().getSignature());
+            put("id", (m) -> m.getMessage().getId());
+            put("ts", (m) -> formatMessageTimestamp(m.getMessage(), hiveTimestampFormat));
+            put("message", (m) -> m.getMessage().getMessage());
+            put("source", (m) -> m.getMessage().getSource());
+            put("dt", (m) -> formatMessageTimestamp(m.getMessage(), dayFormat));
+            put("hr", (m) -> formatMessageTimestamp(m.getMessage(), hourFormat));
+            put("cyberscore", (m) -> m.getCyberScore().floatValue());
+            put("cyberscore_details", HiveStreamingMessageWriter::convertCyberScoreDetailsToRow);
         }};
 
         columnConversion = new HashMap<DataType, Function<String, Object>>() {{
@@ -130,6 +134,19 @@ public class HiveStreamingMessageWriter  {
         }};
 
         typeInfo = new RowTypeInfo(tableSchema.getFieldTypes(), tableSchema.getFieldNames());
+    }
+
+    private static Row[] convertCyberScoreDetailsToRow(ScoredMessage scoredMessage) {
+        Row[] rows = new Row[scoredMessage.getCyberScoresDetails().size()];
+        int index = 0;
+        for(Scores scoreDetail : scoredMessage.getCyberScoresDetails()) {
+            Row scoreDetailRow = new Row(3);
+            scoreDetailRow.setField(0, scoreDetail.getRuleId());
+            scoreDetailRow.setField(1, scoreDetail.getScore().floatValue());
+            scoreDetailRow.setField(2, scoreDetail.getReason());
+            rows[index++] = scoreDetailRow;
+        }
+        return rows;
     }
 
     private static HiveConf createHiveConf(@Nullable String hiveConfDir) {
@@ -169,6 +186,13 @@ public class HiveStreamingMessageWriter  {
                 return DataTypes.BYTES();
             case "boolean":
                 return DataTypes.BOOLEAN();
+            case "float":
+                return DataTypes.FLOAT();
+            case "array<struct<ruleid:string,score:float,reason:string>>":
+                return DataTypes.ARRAY(
+                        DataTypes.ROW(DataTypes.FIELD("ruleid", DataTypes.STRING()),
+                                      DataTypes.FIELD("score", DataTypes.FLOAT()),
+                                      DataTypes.FIELD("reason", DataTypes.STRING())));
             default:
                 return DataTypes.STRING();
         }
@@ -188,9 +212,10 @@ public class HiveStreamingMessageWriter  {
         return dateFormat.format(Date.from(Instant.ofEpochMilli(message.getTs())));
     }
 
-    protected int addMessageToTransaction(Message message) throws Exception {
+    protected int addMessageToTransaction(ScoredMessage scoredMessage) throws Exception {
 
         beginTransaction();
+        Message message = scoredMessage.getMessage();
         tableSchema.getFieldNames();
         log.debug("writing message {}", message);
 
@@ -211,9 +236,9 @@ public class HiveStreamingMessageWriter  {
                 columnValue = extensions;
             } else {
 
-                Function<Message, Object> columnExtractor = builtinColumnExtractor.get(columnName);
+                Function<ScoredMessage, Object> columnExtractor = builtinColumnExtractor.get(columnName);
                 if (columnExtractor != null) {
-                    columnValue = columnExtractor.apply(message);
+                    columnValue = columnExtractor.apply(scoredMessage);
                 } else {
                     String extensionValue = extensions.get(columnName);
                     if (extensionValue != null) {

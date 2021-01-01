@@ -34,7 +34,7 @@ public class FlinkUtils<T> {
     private static final String PARAMS_TOPIC_OUTPUT = "topic.output";
     private static final String PARAMS_CHECKPOINT_INTERVAL = "checkpoint.interval.ms";
     private static final int DEFAULT_CHECKPOINT_INTERVAL = 60000;
-    private static final String PARAMS_PARALLELISM = "parallelism";
+    public static final String PARAMS_PARALLELISM = "parallelism";
     private static final int DEFAULT_PARALLELISM = 2;
 
     private final Class<T> type;

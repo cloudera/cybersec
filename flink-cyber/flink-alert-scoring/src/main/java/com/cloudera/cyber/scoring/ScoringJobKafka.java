@@ -75,22 +75,23 @@ public class ScoringJobKafka extends ScoringJob {
 
         return env.addSource(source)
                 .name("Kafka Rule Source")
-                .uid("kafka.input.rules");
+                .uid("kafka.input.rules")
+                .setParallelism(1);
     }
 
     @Override
-    protected void writeQueryResult(ParameterTool params, DataStream<DynamicRuleCommandResult<ScoringRule>> results) {
+    protected void writeQueryResult(ParameterTool params, DataStream<ScoringRuleCommandResult> results) {
         String topic = params.getRequired("query.output.topic");
         Properties kafkaProperties = readKafkaProperties(params, false);
-        KafkaSerializationSchema<DynamicRuleCommandResult<ScoringRule>> schema = ClouderaRegistryKafkaSerializationSchema
-                .<DynamicRuleCommandResult<ScoringRule>>builder(topic)
+        KafkaSerializationSchema<ScoringRuleCommandResult> schema = ClouderaRegistryKafkaSerializationSchema
+                .<ScoringRuleCommandResult>builder(topic)
                 .setRegistryAddress(params.getRequired(K_SCHEMA_REG_URL))
                 .build();
-        FlinkKafkaProducer<DynamicRuleCommandResult<ScoringRule>> sink = new FlinkKafkaProducer<>(topic,
+        FlinkKafkaProducer<ScoringRuleCommandResult> sink = new FlinkKafkaProducer<>(topic,
                 schema,
                 kafkaProperties,
                 FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
 
-        results.addSink(sink).name("Kafka Query Results").uid("kafka.results.query");
+        results.addSink(sink).name("Kafka Query Results").uid("kafka.results.query").setParallelism(1);
     }
 }
