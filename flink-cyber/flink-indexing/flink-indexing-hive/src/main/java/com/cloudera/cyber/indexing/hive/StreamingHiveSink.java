@@ -1,6 +1,6 @@
 package com.cloudera.cyber.indexing.hive;
 
-import com.cloudera.cyber.Message;
+import com.cloudera.cyber.scoring.ScoredMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -11,7 +11,7 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 
 @Slf4j
-public class StreamingHiveSink extends RichSinkFunction<Message> implements CheckpointedFunction {
+public class StreamingHiveSink extends RichSinkFunction<ScoredMessage> implements CheckpointedFunction {
 
     private final ParameterTool params;
     private transient HiveStreamingMessageWriter messageWriter;
@@ -30,9 +30,9 @@ public class StreamingHiveSink extends RichSinkFunction<Message> implements Chec
 
 
     @Override
-    public void invoke(Message message, Context context) throws Exception {
-        log.debug("Adding message {} to transaction", message);
-        counter.inc(messageWriter.addMessageToTransaction(message));
+    public void invoke(ScoredMessage scoredMessage, Context context) throws Exception {
+        log.debug("Adding message {} to transaction", scoredMessage);
+        counter.inc(messageWriter.addMessageToTransaction(scoredMessage));
     }
 
     @Override

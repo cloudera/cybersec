@@ -1,7 +1,6 @@
 package com.cloudera.cyber.ui;
 
-import com.cloudera.cyber.EnrichmentLookupSource;
-import com.cloudera.cyber.EnrichmentUpdateCommand;
+import com.cloudera.cyber.commands.EnrichmentCommand;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +11,8 @@ import java.util.Map;
 @RequestMapping("/enrichmentLookups")
 public class EnrichmentsController {
 
-    KafkaTemplate<String, EnrichmentUpdateCommand> enrichmentTemplate;
+    // code is not complete  - commenting out for now
+  /*  KafkaTemplate<String, EnrichmentCommand> enrichmentTemplate;
     @Value("#{cyber.kafka.enrichment.commandTopic}")
     private String enrichmentTopic;
 
@@ -38,5 +38,5 @@ public class EnrichmentsController {
     @PostMapping("/:name/:key")
     public void addEntry(String name, String key, @RequestBody Map<String,String> entries) {
         enrichmentTemplate.send(enrichmentTopic, name + "/" + key, null);
-    }
+    } */
 }
