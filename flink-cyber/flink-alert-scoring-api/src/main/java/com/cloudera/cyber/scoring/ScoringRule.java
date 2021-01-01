@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.toList;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @TypeInfo(ScoringRuleTypeFactory.class)
-public class ScoringRule extends BaseDynamicRule {
+public class ScoringRule extends BaseDynamicRule<ScoringRule> {
     private String id = UUID.randomUUID().toString();
     private boolean enabled = true;
     private int order;
@@ -43,9 +43,15 @@ public class ScoringRule extends BaseDynamicRule {
         return new ScoringRuleBuilderImpl();
     }
 
+
     @Override
     public ScoringRule withId(String id) {
         return this.toBuilder().id(id).build();
+    }
+
+    @Override
+    public ScoringRule withVersion(int version) {
+        return this.toBuilder().version(version).build();
     }
 
     @Override
@@ -73,6 +79,7 @@ public class ScoringRule extends BaseDynamicRule {
             .requiredString("ruleScript")
             .requiredString("id")
             .requiredBoolean("enabled")
+            .nullableInt("version", 0)
             .endRecord();
 
     @Override
@@ -85,12 +92,13 @@ public class ScoringRule extends BaseDynamicRule {
         switch (field$) {
             case 0: return getName();
             case 1: return order;
-            case 2: return getTsStart();
-            case 3: return getTsEnd();
+            case 2: return getTsStart().toEpochMilli();
+            case 3: return getTsEnd().toEpochMilli();
             case 4: return getType();
             case 5: return getRuleScript();
             case 6: return id.toString();
             case 7: return enabled;
+            case 8: return getVersion();
             default: throw new AvroRuntimeException("Bad index");
         }
     }
@@ -106,6 +114,7 @@ public class ScoringRule extends BaseDynamicRule {
             case 5: this.setRuleScript(value$.toString()); break;
             case 6: this.setId(value$.toString()); break;
             case 7: this.setEnabled((boolean) value$); break;
+            case 8 : this.setVersion((int) value$); break;
             default: throw new AvroRuntimeException("Bad index");
         }
     }
@@ -118,11 +127,13 @@ public class ScoringRule extends BaseDynamicRule {
         private String id;
         private boolean enabled;
         private int order;
+        private int version;
 
         private static void $fillValuesFromInstanceIntoBuilder(ScoringRule instance, ScoringRuleBuilder<?, ?> b) {
             b.id(instance.id);
             b.enabled(instance.enabled);
             b.order(instance.order);
+            b.version(instance.getVersion());
         }
 
         public B id(String id) {

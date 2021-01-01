@@ -51,7 +51,7 @@ public abstract class DynamicRuleCommand<T extends DynamicRule> extends Specific
             case 0: id = value$.toString(); break;
             case 1: type = DynamicRuleCommandType.valueOf(value$.toString()); break;
             case 2: ts = (long) value$; break;
-            case 3: ruleId = value$.toString(); break;
+            case 3: ruleId = (value$ != null ) ? (value$.toString()) : null; break;
             case 4: rule = (T)value$; break;
             case 5: headers = utf8toStringMap(value$); break;
             default: throw new AvroRuntimeException("Bad index");

@@ -1,8 +1,9 @@
 package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.rules.DynamicRuleCommandResult;
+import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.rules.RulesForm;
+import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -20,9 +21,10 @@ import java.util.List;
  * A job that will score alerts based on a set of dynamic rules stored in the state engine
  */
 public abstract class ScoringJob {
-    protected StreamExecutionEnvironment createPipeline(final ParameterTool params) throws Exception {
+    protected StreamExecutionEnvironment createPipeline(final ParameterTool params) {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+        FlinkUtils.setupEnv(env, params);
 
         final DataStream<ScoringRuleCommand> ruleCommands = createRulesSource(env, params);
         final DataStream<Message> data = createSource(env, params);
@@ -32,7 +34,7 @@ public abstract class ScoringJob {
                 .uid("process-rules");
 
         // output the results of the rules commands
-        final DataStream<DynamicRuleCommandResult<ScoringRule>> rulesCommandResponse =
+        final DataStream<ScoringRuleCommandResult> rulesCommandResponse =
                 results.getSideOutput(Descriptors.rulesResultSink);
 
         writeResults(params, results);
@@ -41,13 +43,14 @@ public abstract class ScoringJob {
         return env;
     }
 
-    private static class Descriptors {
+    @VisibleForTesting
+    static class Descriptors {
         public static final MapStateDescriptor<RulesForm, List<ScoringRule>> rulesState =
                 new MapStateDescriptor<>(
                         "rules", TypeInformation.of(RulesForm.class), Types.LIST(TypeInformation.of(ScoringRule.class)));
 
-        public static final OutputTag<DynamicRuleCommandResult<ScoringRule>> rulesResultSink =
-                new OutputTag<DynamicRuleCommandResult<ScoringRule>>("rules-sink") {
+        public static final OutputTag<ScoringRuleCommandResult> rulesResultSink =
+                new OutputTag<ScoringRuleCommandResult>("rules-sink") {
                 };
         public static ListStateDescriptor<ScoringRule> activeOrderedRules;
     }
@@ -58,5 +61,5 @@ public abstract class ScoringJob {
 
     protected abstract DataStream<ScoringRuleCommand> createRulesSource(StreamExecutionEnvironment env, ParameterTool params);
 
-    protected abstract void writeQueryResult(ParameterTool params, DataStream<DynamicRuleCommandResult<ScoringRule>> results);
+    protected abstract void writeQueryResult(ParameterTool params, DataStream<ScoringRuleCommandResult> results);
 }

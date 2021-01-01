@@ -18,7 +18,7 @@
         <module>flink-indexing-elastic</module>
         <module>flink-indexing-search</module>
         <module>flink-indexing-hive</module>
-        <module>flink-indexing-hive-partitions</module>
+       <!-- <module>flink-indexing-hive-partitions</module> -->
     </modules>
 
 </project>

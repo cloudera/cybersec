@@ -15,7 +15,7 @@ import java.util.Map;
 @Setter
 @NoArgsConstructor
 @ToString
-public abstract class BaseDynamicRule extends SpecificRecordBase implements DynamicRule {
+public abstract class BaseDynamicRule<R> extends SpecificRecordBase implements DynamicRule<R> {
     private String name;
     private int order;
 
@@ -25,6 +25,7 @@ public abstract class BaseDynamicRule extends SpecificRecordBase implements Dyna
     private RuleType type;
 
     private String ruleScript;
+    private int version;
 
     protected BaseDynamicRule(BaseDynamicRuleBuilder<?, ?> b) {
         this.name = b.name;
@@ -33,6 +34,7 @@ public abstract class BaseDynamicRule extends SpecificRecordBase implements Dyna
         this.tsEnd = b.tsEnd;
         this.type = b.type;
         this.ruleScript = b.ruleScript;
+        this.version = b.version;
     }
 
     @Override
@@ -47,6 +49,7 @@ public abstract class BaseDynamicRule extends SpecificRecordBase implements Dyna
         private Instant tsEnd;
         private RuleType type;
         private String ruleScript;
+        private int version;
 
         private static void $fillValuesFromInstanceIntoBuilder(BaseDynamicRule instance, BaseDynamicRuleBuilder<?, ?> b) {
             b.name(instance.name);
@@ -87,12 +90,17 @@ public abstract class BaseDynamicRule extends SpecificRecordBase implements Dyna
             return self();
         }
 
+        public B version(int version) {
+            this.version = version;
+            return self();
+        }
+
         protected abstract B self();
 
         public abstract C build();
 
         public String toString() {
-            return "BaseDynamicRule.BaseDynamicRuleBuilder(super=" + super.toString() + ", name=" + this.name + ", order=" + this.order + ", tsStart=" + this.tsStart + ", tsEnd=" + this.tsEnd + ", type=" + this.type + ", ruleScript=" + this.ruleScript + ")";
+            return "BaseDynamicRule.BaseDynamicRuleBuilder(super=" + super.toString() + ", name=" + this.name + ", order=" + this.order + ", tsStart=" + this.tsStart + ", tsEnd=" + this.tsEnd + ", type=" + this.type + ", ruleScript=" + this.ruleScript + ", version=" + this.version + ")";
         }
 
         protected B $fillValuesFrom(C instance) {

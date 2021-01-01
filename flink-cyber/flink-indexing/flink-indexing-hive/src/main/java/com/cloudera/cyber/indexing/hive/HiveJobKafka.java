@@ -1,10 +1,10 @@
 package com.cloudera.cyber.indexing.hive;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.scoring.ScoredMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
 
@@ -22,9 +22,9 @@ public class HiveJobKafka extends HiveJob {
     }
 
     @Override
-    protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
+    protected SingleOutputStreamOperator<ScoredMessage> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.addSource(
-                new FlinkUtils(Message.class).createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
+                new FlinkUtils(ScoredMessage.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
         ).name("Kafka Source").uid("kafka-source");
     }
 }

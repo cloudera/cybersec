@@ -4,9 +4,9 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.flink.MessageBoundedOutOfOrder;
 import com.cloudera.cyber.rules.DynamicRuleCommandResult;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
@@ -17,98 +17,128 @@ import org.apache.flink.test.util.ManualSource;
 import org.junit.Test;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.TimeoutException;
 
+import static com.cloudera.cyber.flink.FlinkUtils.PARAMS_PARALLELISM;
 import static com.cloudera.cyber.rules.DynamicRuleCommandType.*;
 import static com.cloudera.cyber.rules.RuleType.JS;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 
+@Slf4j
 public class TestScoringJob extends ScoringJob {
 
     private ManualSource<Message> source;
     private ManualSource<ScoringRuleCommand> querySource;
 
-    private CollectingSink<ScoredMessage> sink = new CollectingSink<>();
-    private CollectingSink<DynamicRuleCommandResult<ScoringRule>> queryResponse = new CollectingSink<>();
+    private final CollectingSink<ScoredMessage> sink = new CollectingSink<>();
+    private final CollectingSink<ScoringRuleCommandResult> queryResponse = new CollectingSink<>();
 
-    private List<Message> recordLog = new ArrayList<>();
-    private List<ScoringRuleCommand> ruleLog = new ArrayList<>();
+    private final List<Message> recordLog = new ArrayList<>();
 
 
     @Test
     public void testPipeline() throws Exception {
-        StreamExecutionEnvironment env = createPipeline(ParameterTool.fromMap(Collections.emptyMap()));
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-        env.setParallelism(1);
-
-        JobTester.startTest(env);
+        Map<String, String> props = new HashMap<String, String>() {{
+            put(PARAMS_PARALLELISM, "1");
+        }};
+        JobTester.startTest(createPipeline(ParameterTool.fromMap(props)));
 
         String ruleId = UUID.randomUUID().toString();
+        String ruleName = "test-rule";
+        ScoringRule rule = ScoringRule.builder()
+                .id(ruleId)
+                .name(ruleName)
+                .tsStart(Instant.now())
+                .tsEnd(Instant.now().plus(Duration.ofMinutes(5)))
+                .order(0)
+                .type(JS)
+                .ruleScript("return { score: 1.0, reason: message.test }")
+                .enabled(true)
+                .build();
 
         sendRule(ScoringRuleCommand.builder()
                 .type(UPSERT)
-                .rule(ScoringRule.builder()
-                        .id(ruleId)
-                        .name("test-rule")
-                        .order(0)
-                        .type(JS)
-                        .ruleScript("return { score: 1.0, reason: message.test }")
-                        .enabled(true)
-                        .build())
+                .rule(rule)
                 .ts(1L)
                 .id(UUID.randomUUID().toString())
+                .headers(Collections.emptyMap())
                 .build());
 
-        DynamicRuleCommandResult<ScoringRule> poll = queryResponse.poll();
-        assertThat("Command succeed", poll.isSuccess());
+        verifySuccessfulResponse(rule);
 
         // send a message and get score
+        long scoredMessageTs = 100L;
+        String expectedReason = "test-value";
         sendRecord(Message.builder()
-                .ts(100l)
-                .extensions(Collections.singletonMap("test", "test-value"))
+                .ts(scoredMessageTs)
+                .extensions(Collections.singletonMap("test", expectedReason))
                 .originalSource(TestUtils.source("test", 0, 0))
                 .source("test")
                 .build());
 
-        source.sendWatermark(100l);
-        querySource.sendWatermark(100l);
+        source.sendWatermark(100L);
+        querySource.sendWatermark(100L);
 
         sendRule(ScoringRuleCommand.builder()
-                .type(LIST).ts(900).id(UUID.randomUUID().toString()).build());
+                .type(LIST).ts(900).id(UUID.randomUUID().toString()).headers(Collections.emptyMap()).build());
+
+        source.sendWatermark(1000L);
+        querySource.sendWatermark(1000L);
+
+        verifyListResult(Collections.singletonList(rule));
 
         sendRule(ScoringRuleCommand.builder()
                 .type(DELETE)
-                .ts(1000l)
+                .ts(1000L)
                 .id(UUID.randomUUID().toString())
-                .ruleId(ruleId).build());
+                .ruleId(ruleId).headers(Collections.emptyMap()).build());
 
+        source.sendWatermark(1500L);
+        querySource.sendWatermark(1500L);
+        verifySuccessfulResponse(null);
+
+
+        long unscoredMessageTs = 2000L;
         sendRecord(Message.builder()
-                .extensions(Collections.singletonMap("test", "test-value2"))
-                .ts(2000l)
+                .extensions(Collections.singletonMap("test", expectedReason))
+                .ts(unscoredMessageTs)
                 .originalSource(TestUtils.source("test", 0, 0))
                 .source("test")
                 .build());
 
-        source.sendWatermark(3000l);
-        querySource.sendWatermark(3000l);
+        source.sendWatermark(3000L);
+        querySource.sendWatermark(3000L);
 
         JobTester.stopTest();
 
-        ScoredMessage message = sink.poll();
-        assertThat("message got scored", message.getScores(), hasSize(1));
+        List<ScoredMessage> scoredMessages = collectScoredMessages();
+        verifyMessageScores(scoredMessages, scoredMessageTs, Collections.singletonList(Scores.builder().ruleId(ruleId).score(1.0).reason(expectedReason).build()));
+        verifyMessageScores(scoredMessages, unscoredMessageTs, Collections.emptyList());
+    }
 
-        DynamicRuleCommandResult<ScoringRule> poll1 = queryResponse.poll(Duration.ofMillis(1000));
-        assertThat(poll1.getRule(), hasProperty("name", equalTo("test-rule")));
+    void verifyMessageScores(List<ScoredMessage> scoredMessages, long originalMessageTimestamp, List<Scores> expectedScores) {
+        List<Scores> actualScores =  scoredMessages.stream().
+                filter((m) -> (m.getTs() == originalMessageTimestamp)).
+                map(ScoredMessage::getCyberScoresDetails).findFirst().orElse(Collections.emptyList());
+        assertThat("message scores match", expectedScores, equalTo(actualScores));
+    }
 
-        DynamicRuleCommandResult<ScoringRule> poll2 = queryResponse.poll(Duration.ofMillis(1000));
+    private void verifySuccessfulResponse(ScoringRule expectedRule) throws TimeoutException {
+        DynamicRuleCommandResult<ScoringRule> poll = queryResponse.poll();
+        assertThat("Command succeed", poll.isSuccess());
+        assertThat("rule matched", poll.getRule(), equalTo(expectedRule));
+    }
 
-        ScoredMessage message1 = sink.poll();
-        assertThat("message got scored", message1.getScores(), nullValue());
-
+    private void verifyListResult(List<ScoringRule> scoringRules) throws TimeoutException {
+        DynamicRuleCommandResult<ScoringRule> actualScoringRule;
+        for(ScoringRule expectedRule : scoringRules) {
+            verifySuccessfulResponse(expectedRule);
+        }
+        verifySuccessfulResponse(null);
     }
 
     private void sendRecord(Message d) {
@@ -118,12 +148,26 @@ public class TestScoringJob extends ScoringJob {
 
     private void sendRule(ScoringRuleCommand c) {
         this.querySource.sendRecord(c, c.getTs());
-        this.ruleLog.add(c);
+    }
+
+    private List<ScoredMessage> collectScoredMessages() {
+        List<ScoredMessage> output = new ArrayList<>();
+
+        int recordCount = recordLog.size();
+        for (int i = 0; i < recordCount; i++) {
+            try {
+                output.add(sink.poll(Duration.ofMillis(100)));
+            } catch (TimeoutException e) {
+                log.info("Caught timeout exception.");
+            }
+        }
+
+        return output;
     }
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<ScoredMessage> results) {
-        results.addSink(sink);
+        results.addSink(sink).name("Scored messages").setParallelism(1);
     }
 
     @Override
@@ -149,7 +193,8 @@ public class TestScoringJob extends ScoringJob {
     }
 
     @Override
-    protected void writeQueryResult(ParameterTool params, DataStream<DynamicRuleCommandResult<ScoringRule>> results) {
-        results.addSink(queryResponse);
+    protected void writeQueryResult(ParameterTool params, DataStream<ScoringRuleCommandResult> results) {
+        results.addSink(queryResponse).name("Scoring command Results").setParallelism(1);
     }
+
 }

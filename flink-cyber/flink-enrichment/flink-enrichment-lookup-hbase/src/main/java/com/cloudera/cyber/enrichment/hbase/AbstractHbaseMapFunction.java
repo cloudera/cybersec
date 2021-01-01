@@ -12,16 +12,24 @@ import org.apache.flink.metrics.MetricGroup;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 public abstract class AbstractHbaseMapFunction extends RichMapFunction<Message, Message> {
+    private static final Map<String, Function<byte[],String>> columnConversionFunction = new HashMap<String, Function<byte[],String>>() {{
+        put("updatedAt", AbstractHbaseMapFunction::longBytesToString);
+        put("createdAt", AbstractHbaseMapFunction::longBytesToString);
+        put("touchedAt", AbstractHbaseMapFunction::longBytesToString);
+        put("score", AbstractHbaseMapFunction::floatBytesToString);
+    }};
     private transient org.apache.hadoop.conf.Configuration hbaseConfig;
     protected transient MetricGroup metricsGroup;
     protected transient Counter messageCounter;
@@ -34,7 +42,7 @@ public abstract class AbstractHbaseMapFunction extends RichMapFunction<Message, 
 
     private Cache<LookupKey, Map<String, String>> cache;
 
-    private final Map<String, String> fetch(LookupKey key) {
+    private Map<String, String> fetch(LookupKey key) {
         try {
             fetchCounter.inc();
 
@@ -48,15 +56,30 @@ public abstract class AbstractHbaseMapFunction extends RichMapFunction<Message, 
                 return Collections.emptyMap();
             }
             realResultCounter.inc();
-            return result.getFamilyMap(key.getCf()).entrySet().stream()
-                    .collect(toMap(
-                            k -> new String(k.getKey()),
-                            v -> new String(v.getValue())
-                    ));
+            return result.getFamilyMap(key.getCf()).entrySet().stream().map(AbstractHbaseMapFunction::hbaseBytesToString)
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (IOException e) {
             log.error("Error with HBase fetch", e);
             throw new RuntimeException(e);
         }
+    }
+
+    private static Map.Entry<String, String> hbaseBytesToString(Map.Entry<byte[], byte[]> e) {
+        String keyString = Bytes.toString(e.getKey());
+        Function<byte[], String> conversion = columnConversionFunction.getOrDefault(keyString, AbstractHbaseMapFunction::stringBytesToString);
+        return new AbstractMap.SimpleEntry<>(keyString, conversion.apply(e.getValue()));
+    }
+
+    private static String longBytesToString(byte[] bytesValue) {
+        return Long.toString(Bytes.toLong(bytesValue));
+    }
+
+    private static String floatBytesToString(byte[] bytesValue) {
+        return Float.toString(Bytes.toFloat(bytesValue));
+    }
+
+    private static String stringBytesToString(byte[] bytesValue) {
+        return Bytes.toString(bytesValue);
     }
 
     @Override
@@ -82,14 +105,14 @@ public abstract class AbstractHbaseMapFunction extends RichMapFunction<Message, 
     }
 
     protected final Map<String, String> notFound() {
-        return Collections.<String, String>emptyMap();
+        return Collections.emptyMap();
     }
 
     public final Map<String, String> hbaseLookup(long ts, LookupKey key, String prefix) {
         return cache.get(key, this::fetch).entrySet().stream()
                 .collect(toMap(
                         k -> prefix + "." + k.getKey(),
-                        v -> v.getValue())
+                        Map.Entry::getValue)
                 );
     }
 }

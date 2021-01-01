@@ -14,7 +14,7 @@ import java.util.List;
 public class Scoring {
     public static SingleOutputStreamOperator<ScoredMessage> score(DataStream<Message> data,
                                                                   DataStream<ScoringRuleCommand> ruleCommands,
-                                                                  OutputTag<DynamicRuleCommandResult<ScoringRule>> rulesResultSink,
+                                                                  OutputTag<ScoringRuleCommandResult> rulesResultSink,
                                                                   MapStateDescriptor<RulesForm, List<ScoringRule>> rulesState) {
         BroadcastStream<ScoringRuleCommand> rulesStream = ruleCommands.broadcast(rulesState);
         return data.connect(rulesStream).process(new ScoringProcessFunction(rulesResultSink, rulesState));

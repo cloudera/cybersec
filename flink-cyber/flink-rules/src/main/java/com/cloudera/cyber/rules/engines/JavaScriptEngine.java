@@ -65,7 +65,7 @@ public class JavaScriptEngine implements RuleEngine {
 
             engine.put("log", (Consumer<Object>) (s) -> log.info(s.toString()));
 
-            String functionScript = "function " + getFunctionName() + "(message) { log(message); " + this.getScript() + "}; ";
+            String functionScript = "function " + getFunctionName() + "(message) { " + this.getScript() + "}; ";
 
             log.info(setupScript);
             log.info(functionScript);
@@ -78,7 +78,7 @@ public class JavaScriptEngine implements RuleEngine {
         }
     }
 
-    private String getFunctionName() {
+    public String getFunctionName() {
         if (this.$functionName.isEmpty()) {
             this.$functionName = SCORE_FUNCTION + "_" +
                     String.valueOf(Math.abs(this.script.hashCode())) + "_"
@@ -121,6 +121,7 @@ public class JavaScriptEngine implements RuleEngine {
         HashMap<String, Object> flat = new HashMap<>(message.getExtensions());
         flat.put("ts", message.getTs());
         flat.put("id", message.getId());
+        flat.put("source", message.getSource());
         return flat;
     }
 

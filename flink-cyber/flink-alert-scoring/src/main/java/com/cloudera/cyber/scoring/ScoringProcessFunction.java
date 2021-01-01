@@ -1,14 +1,15 @@
 package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.rules.DynamicRuleCommandResult;
 import com.cloudera.cyber.rules.DynamicRuleProcessFunction;
 import com.cloudera.cyber.rules.RulesForm;
 import lombok.extern.java.Log;
 import org.apache.flink.api.common.state.MapStateDescriptor;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 
+import java.util.Collections;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Map;
@@ -18,35 +19,41 @@ import static com.cloudera.cyber.scoring.ScoringRule.RESULT_REASON;
 import static com.cloudera.cyber.scoring.ScoringRule.RESULT_SCORE;
 
 @Log
-public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRule, ScoringRuleCommand, ScoredMessage> {
+public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRule, ScoringRuleCommand, ScoringRuleCommandResult, ScoredMessage> {
 
-    public ScoringProcessFunction(OutputTag<DynamicRuleCommandResult<ScoringRule>> rulesResultSink, MapStateDescriptor<RulesForm, List<ScoringRule>> rulesDescriptor) {
+    public ScoringProcessFunction(OutputTag<ScoringRuleCommandResult> rulesResultSink, MapStateDescriptor<RulesForm, List<ScoringRule>> rulesDescriptor) {
         super(rulesResultSink, rulesDescriptor);
     }
 
+    @Override
+    public void open(Configuration parameters) throws Exception {
+        super.open(parameters);
+        setResultBuilderSupplier(ScoringRuleCommandResult::builder);
+    }
+
     protected void processMessages(Message message, Collector<ScoredMessage> collector, List<ScoringRule> rules) {
-        if (rules == null || rules.size() == 0)
-            collector.collect(ScoredMessage.builder().message(message).build());
-        List<Scores> scores = rules.stream()
-                .map(r -> {
-                    Map<String, Object> results = r.apply(message);
-                    if (results != null) {
-                        return Scores.builder()
-                                .ruleId(r.getId())
-                                .score((Double) results.get(RESULT_SCORE))
-                                .reason((String) results.get(RESULT_REASON))
-                                .build();
-                    } else {
-                        return null;
-                    }
-                })
-                .filter(f -> f != null)
-                .collect(Collectors.toList());
 
-        DoubleSummaryStatistics scoreSummary = scores.stream().collect(Collectors.summarizingDouble(s -> s.getScore()));
+        List<Scores> scores = Collections.emptyList();
+        if (rules != null && !rules.isEmpty()) {
+            scores = rules.stream()
+                    .map(r -> {
+                        Map<String, Object> results = r.apply(message);
+                        if (results != null) {
+                            return Scores.builder()
+                                    .ruleId(r.getId())
+                                    .score((Double) results.get(RESULT_SCORE))
+                                    .reason((String) results.get(RESULT_REASON))
+                                    .build();
+                        } else {
+                            return null;
+                        }
+                    })
+                    .filter(f -> f != null)
+                    .collect(Collectors.toList());
 
-        log.info(String.format("%d, %s, %s", Thread.currentThread().getId(), message, rules));
-
+            DoubleSummaryStatistics scoreSummary = scores.stream().collect(Collectors.summarizingDouble(s -> s.getScore()));
+        }
+        log.info(String.format("Scored Message: %d, %s, %s", Thread.currentThread().getId(), message, rules));
         collector.collect(ScoredMessage.builder()
                 .message(message)
                 .cyberScoresDetails(scores)

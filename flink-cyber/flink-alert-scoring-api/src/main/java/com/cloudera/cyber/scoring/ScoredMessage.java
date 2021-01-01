@@ -14,7 +14,7 @@ import java.util.List;
 
 import static com.cloudera.cyber.AvroTypes.toListOf;
 
-@Getter
+@Data
 @EqualsAndHashCode
 @ToString
 @Builder(toBuilder = true)
@@ -53,7 +53,7 @@ public class ScoredMessage extends SpecificRecordBase implements IdentifiedMessa
             .namespace(ScoredMessage.class.getPackage().getName())
             .fields()
             .name("message").type(Message.SCHEMA$).noDefault()
-            .name("scores").type(Schema.createArray(Scores.SCHEMA$)).noDefault()
+            .name("cyberScoresDetails").type(Schema.createArray(Scores.SCHEMA$)).noDefault()
             .endRecord();
 
     @Override

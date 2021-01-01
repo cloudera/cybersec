@@ -3,6 +3,7 @@ package com.cloudera.cyber.rest.scoring;
 import com.cloudera.cyber.rules.DynamicRuleCommandResult;
 import com.cloudera.cyber.scoring.ScoringRule;
 import com.cloudera.cyber.scoring.ScoringRuleCommand;
+import com.cloudera.cyber.scoring.ScoringRuleCommandResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +49,7 @@ public class KafkaConfigScoring {
     }
 
     @Bean
-    public KafkaMessageListenerContainer<UUID, DynamicRuleCommandResult<ScoringRule>> replyContainer(ConsumerFactory<UUID, DynamicRuleCommandResult<ScoringRule>> cf) {
+    public KafkaMessageListenerContainer<UUID, ScoringRuleCommandResult> replyContainer(ConsumerFactory<UUID, DynamicRuleCommandResult<ScoringRule>> cf) {
         ContainerProperties containerProperties = new ContainerProperties(requestReplyTopic);
         return new KafkaMessageListenerContainer<>(cf, containerProperties);
     }
@@ -59,8 +60,8 @@ public class KafkaConfigScoring {
     }
 
     @Bean
-    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<UUID, DynamicRuleCommandResult<ScoringRule>>> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<UUID, DynamicRuleCommandResult<ScoringRule>> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<UUID, ScoringRuleCommandResult>> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<UUID, ScoringRuleCommandResult> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         factory.setReplyTemplate(kafkaTemplate());
         return factory;
