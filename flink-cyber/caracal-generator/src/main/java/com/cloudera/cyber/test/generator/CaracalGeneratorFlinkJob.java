@@ -1,5 +1,6 @@
 package com.cloudera.cyber.test.generator;
 
+import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.libs.networking.IPLocal;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -21,6 +22,7 @@ public abstract class CaracalGeneratorFlinkJob {
 
     public StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        FlinkUtils.setupEnv(env, params);
 
         env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
 

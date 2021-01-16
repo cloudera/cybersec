@@ -32,7 +32,7 @@ public class SolrJobKafka extends SolrJob {
     @Override
     public DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.addSource(
-                new FlinkUtils(Message.class).createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, "indexer-solr")
+                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, "indexer-solr")
         ).name("Message Source").uid("message-source");
     }
 
@@ -50,7 +50,7 @@ public class SolrJobKafka extends SolrJob {
     @Override
     protected void logConfig(DataStream<CollectionField> configSource, ParameterTool params) {
         String topic = params.get(PARAMS_TOPIC_CONFIG_LOG, DEFAULT_TOPIC_CONFIG_LOG);
-        Properties kafkaProperties = readKafkaProperties(params, false);
+        Properties kafkaProperties = readKafkaProperties(params, "indexer-solr-schema", false);
         log.info("Creating Kafka Sink for {}, using {}", topic, kafkaProperties);
         KafkaSerializationSchema<CollectionField> schema = ClouderaRegistryKafkaSerializationSchema
                 .<CollectionField>builder(topic)

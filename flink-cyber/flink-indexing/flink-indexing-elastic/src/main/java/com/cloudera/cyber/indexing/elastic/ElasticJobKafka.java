@@ -25,17 +25,18 @@ import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
 public class ElasticJobKafka extends ElasticJob {
 
     private static final String DEFAULT_TOPIC_CONFIG_LOG = "es.config.log";
+    public static final String INDEXER_ELASTIC_GROUP_ID = "indexer-elastic";
 
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
         ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
-        new ElasticJobKafka().createPipeline(params).execute("Indexing - Parquet");
+        new ElasticJobKafka().createPipeline(params).execute("Indexing - Elastic");
     }
 
     @Override
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.addSource(
-                new FlinkUtils(Message.class).createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, "indexer-parquet")
+                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, INDEXER_ELASTIC_GROUP_ID)
         ).name("Kafka Source").uid("kafka-source");
     }
 
@@ -54,7 +55,7 @@ public class ElasticJobKafka extends ElasticJob {
     @Override
     protected void logConfig(DataStream<CollectionField> configSource, ParameterTool params) {
         String topic = params.get(PARAMS_TOPIC_CONFIG_LOG, DEFAULT_TOPIC_CONFIG_LOG);
-        Properties kafkaProperties = readKafkaProperties(params, false);
+        Properties kafkaProperties = readKafkaProperties(params, INDEXER_ELASTIC_GROUP_ID,false);
         log.info("Creating Kafka Sink for {}, using {}", topic, kafkaProperties);
         FlinkKafkaProducer<CollectionField> kafkaSink = new FlinkKafkaProducer<>(topic,
                 (KafkaSerializationSchema<CollectionField>) (collectionField, aLong) -> {

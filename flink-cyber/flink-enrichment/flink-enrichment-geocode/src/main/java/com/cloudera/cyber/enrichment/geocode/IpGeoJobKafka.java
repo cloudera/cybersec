@@ -26,6 +26,7 @@ public class IpGeoJobKafka extends IpGeoJob {
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
         FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
                 params.getRequired("topic.output"),
+                "enrichment-geocode",
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
     }
