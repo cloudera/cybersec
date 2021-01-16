@@ -35,7 +35,7 @@ public class StixJobKafka extends StixJob {
     /**
      * This function is used to lookup threat intelligence that is not in the near term cache
      *
-     * @return
+     * @return null
      */
     @Override
     protected MapFunction<Message, Message> getLongTermLookupFunction() {
@@ -46,6 +46,7 @@ public class StixJobKafka extends StixJob {
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
         FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
                 params.getRequired(PARAM_MARKED_OUTPUT_TOPIC),
+                "cyber-stix-enrichment",
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
     }
@@ -54,6 +55,7 @@ public class StixJobKafka extends StixJob {
     protected void writeStixResults(ParameterTool params, DataStream<ThreatIntelligence> results) {
         FlinkKafkaProducer<ThreatIntelligence> sink = new FlinkUtils<>(ThreatIntelligence.class).createKafkaSink(
                 params.getRequired(PARAM_STIX_OUTPUT_TOPIC),
+                "cyber-stix-command",
                 params);
         results.addSink(sink).name("Kafka Stix Results").uid("kafka.results.stix");
 
@@ -90,8 +92,7 @@ public class StixJobKafka extends StixJob {
 
     @Override
     protected DataStream<String> createStixSource(StreamExecutionEnvironment env, ParameterTool params) {
-        Properties kafkaProperties = Utils.readKafkaProperties(params, true);
-        kafkaProperties.put("group.id", GROUP_ID);
+        Properties kafkaProperties = Utils.readKafkaProperties(params, GROUP_ID, true);
 
         String topic = params.get(PARAM_INPUT_TOPIC, DEFAULT_INPUT_TOPIC);
         FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(topic, new SimpleStringSchema(),  kafkaProperties);

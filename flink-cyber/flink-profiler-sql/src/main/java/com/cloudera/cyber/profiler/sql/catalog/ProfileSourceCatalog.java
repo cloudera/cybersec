@@ -106,7 +106,7 @@ public class ProfileSourceCatalog extends AbstractReadOnlyCatalog {
 
     @Override
     public void open() throws CatalogException {
-        kafkaClient = KafkaAdminClient.create(readKafkaProperties(properties, true));
+        kafkaClient = KafkaAdminClient.create(readKafkaProperties(properties, "profiler-catalog", true));
 
         // initialise the functions
         CyberFunctionUtils.findAll().forEach(c -> {
@@ -177,7 +177,7 @@ public class ProfileSourceCatalog extends AbstractReadOnlyCatalog {
 
             // ensure the topic exists, and that a compatible schema is associated with it
 
-            Kafka kafkaConnector = new Kafka().properties(readKafkaProperties(this.properties, true)).topic(topic);
+            Kafka kafkaConnector = new Kafka().properties(readKafkaProperties(this.properties, "profiler-catalog", true)).topic(topic);
             try {
                 TableSchema schema = schemaForTopicFromRegistry(topic);
 

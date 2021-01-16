@@ -32,7 +32,7 @@ public class DedupeJobKafka extends DedupeJob {
      *
      * @param inputTopic topic to read from
      * @param sessionKey the keys being used to sessionise
-     * @return
+     * @return Generated group id for Kafka
      */
     private String createGroupId(String inputTopic, List<String> sessionKey, long sessionTimeout) {
         List<String> parts = Arrays.asList("dedupe",
@@ -46,6 +46,7 @@ public class DedupeJobKafka extends DedupeJob {
     protected void writeResults(ParameterTool params, DataStream<DedupeMessage> results) {
         FlinkKafkaProducer<DedupeMessage> sink = new FlinkUtils<>(DedupeMessage.class).createKafkaSink(
                 params.getRequired("topic.enrichment"),
+                "dedup",
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
     }

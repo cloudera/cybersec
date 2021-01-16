@@ -49,14 +49,14 @@ public class FlinkUtils<T> {
         env.getConfig().setGlobalJobParameters(params);
     }
 
-    public FlinkKafkaProducer<T> createKafkaSink(final String topic, final ParameterTool params) {
+    public FlinkKafkaProducer<T> createKafkaSink(final String topic, String groupId, final ParameterTool params) {
         Preconditions.checkNotNull(topic, "Must specific output topic");
 
-        Properties kafkaProperties = readKafkaProperties(params, false);
+        Properties kafkaProperties = readKafkaProperties(params, groupId, false);
         log.info("Creating Kafka Sink for {}, using {}", topic, kafkaProperties);
         KafkaSerializationSchema<T> schema = ClouderaRegistryKafkaSerializationSchema
                 .<T>builder(topic)
-                .setRegistryAddress(params.getRequired(K_SCHEMA_REG_URL))
+                .setConfig(readSchemaRegistryProperties(params))
                 .build();
         return new FlinkKafkaProducer<T>(topic,
                 schema,
@@ -68,34 +68,26 @@ public class FlinkUtils<T> {
         Preconditions.checkNotNull(topic, "Must specific input topic");
         Preconditions.checkNotNull(groupId, "Must specific group id");
 
-        Properties kafkaProperties = readKafkaProperties(params, true);
+        Properties kafkaProperties = readKafkaProperties(params, groupId, true);
         log.info(String.format("Creating Kafka Source for %s, using %s", topic, kafkaProperties));
         KafkaDeserializationSchema<T> schema = ClouderaRegistryKafkaDeserializationSchema
                 .builder(type)
                 .setConfig(readSchemaRegistryProperties(params))
                 .build();
-        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        // for the SMM interceptor
-        kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
 
-        FlinkKafkaConsumer<T> source = new FlinkKafkaConsumer<T>(topic, schema, kafkaProperties);
-
-        return source;
+        return new FlinkKafkaConsumer<T>(topic, schema, kafkaProperties);
     }
 
     public static FlinkKafkaConsumer<Message> createKafkaSource(String topic, ParameterTool params, String groupId) {
         Preconditions.checkNotNull(topic, "Must specific input topic");
         Preconditions.checkNotNull(groupId, "Must specific group id");
 
-        Properties kafkaProperties = readKafkaProperties(params, true);
+        Properties kafkaProperties = readKafkaProperties(params, groupId, true);
         log.info(String.format("Creating Kafka Source for %s, using %s", topic, kafkaProperties));
         KafkaDeserializationSchema<Message> schema = ClouderaRegistryKafkaDeserializationSchema
                 .builder(Message.class)
                 .setConfig(readSchemaRegistryProperties(params))
                 .build();
-        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        // for the SMM interceptor
-        kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
 
         FlinkKafkaConsumer<Message> source = new FlinkKafkaConsumer<>(topic, schema, kafkaProperties);
 
@@ -107,14 +99,11 @@ public class FlinkUtils<T> {
     public static FlinkKafkaConsumer<Message> createKafkaSource(Pattern topic, ParameterTool params, String groupId) {
         Preconditions.checkNotNull(topic, "Must specific input topic pattern");
         Preconditions.checkNotNull(groupId, "Must specific group id");
-        Properties kafkaProperties = readKafkaProperties(params, true);
+        Properties kafkaProperties = readKafkaProperties(params, groupId, true);
         KafkaDeserializationSchema<Message> schema = ClouderaRegistryKafkaDeserializationSchema
                 .builder(Message.class)
                 .setConfig(readSchemaRegistryProperties(params))
                 .build();
-        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        // for the SMM interceptor
-        kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
 
         FlinkKafkaConsumer<Message> source = new FlinkKafkaConsumer<>(topic, schema, kafkaProperties);
         Time lateness = milliseconds(params.getLong(PARAMS_ALLOWED_LATENESS, DEFAULT_MAX_LATENESS));
@@ -131,7 +120,7 @@ public class FlinkUtils<T> {
         Preconditions.checkArgument(!(inputTopic.isEmpty() && pattern.isEmpty()),
                 String.format("Must specify at least one of %s or %s", ConfigConstants.PARAMS_TOPIC_INPUT, ConfigConstants.PARAMS_TOPIC_PATTERN));
 
-        Properties kafkaProperties = readKafkaProperties(params, true);
+        Properties kafkaProperties = readKafkaProperties(params, groupId, true);
 
         kafkaProperties.putIfAbsent(ConsumerConfig.GROUP_ID_CONFIG, groupId);
 
