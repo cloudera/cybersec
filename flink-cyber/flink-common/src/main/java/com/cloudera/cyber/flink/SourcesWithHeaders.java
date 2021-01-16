@@ -10,7 +10,6 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.flink.util.Preconditions;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
@@ -41,11 +40,8 @@ public class SourcesWithHeaders<T extends HasHeaders> {
         Preconditions.checkNotNull(topic, "Must specific input topic");
         Preconditions.checkNotNull(groupId, "Must specific group id");
 
-        Properties kafkaProperties = readKafkaProperties(params, true);
+        Properties kafkaProperties = readKafkaProperties(params, groupId, true);
         log.info(String.format("Creating Kafka Source for %s, using %s", topic, kafkaProperties));
-        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        // for the SMM interceptor
-        kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
         ClouderaRegistryKafkaDeserializationSchema<Void, T, T> delegate = ClouderaRegistryKafkaDeserializationSchema
                 .builder(type)
                 .setConfig(readSchemaRegistryProperties(params))
@@ -53,15 +49,13 @@ public class SourcesWithHeaders<T extends HasHeaders> {
 
         KafkaDeserializationSchema<T> schema = new HeaderDeserializer(delegate);
 
-        FlinkKafkaConsumer<T> source = new FlinkKafkaConsumer<T>(topic, schema, kafkaProperties);
-
-        return source;
+        return new FlinkKafkaConsumer<T>(topic, schema, kafkaProperties);
     }
 
-    public FlinkKafkaProducer<T> createKafkaSink(final String topic, final ParameterTool params) {
+    public FlinkKafkaProducer<T> createKafkaSink(final String topic, String groupId, final ParameterTool params) {
         Preconditions.checkNotNull(topic, "Must specific output topic");
 
-        Properties kafkaProperties = readKafkaProperties(params, false);
+        Properties kafkaProperties = readKafkaProperties(params, groupId, false);
         log.info("Creating Kafka Sink for {}, using {}", topic, kafkaProperties);
         ClouderaRegistryKafkaSerializationSchema<Void, T, T> delegate = ClouderaRegistryKafkaSerializationSchema
                 .<T>builder(topic)

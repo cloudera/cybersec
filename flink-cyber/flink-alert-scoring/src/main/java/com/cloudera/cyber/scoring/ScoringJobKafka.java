@@ -2,30 +2,20 @@ package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
-import com.cloudera.cyber.flink.MessageBoundedOutOfOrder;
-import com.cloudera.cyber.rules.DynamicRuleCommandResult;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.formats.avro.registry.cloudera.ClouderaRegistryKafkaDeserializationSchema;
-import org.apache.flink.formats.avro.registry.cloudera.ClouderaRegistryKafkaSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
-import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
-import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
-import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 
-import java.util.Properties;
 import java.util.regex.Pattern;
 
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_ALLOWED_LATENESS;
 import static com.cloudera.cyber.flink.FlinkUtils.createKafkaSource;
-import static com.cloudera.cyber.flink.Utils.K_SCHEMA_REG_URL;
-import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
-import static org.apache.flink.streaming.api.windowing.time.Time.milliseconds;
 
 public class ScoringJobKafka extends ScoringJob {
+
+    private static final String SCORING_GROUP_ID = "scoring";
+    private static final String SCORING_RULES_GROUP_ID = "scoring-rules";
 
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
@@ -40,7 +30,7 @@ public class ScoringJobKafka extends ScoringJob {
     @Override
     protected void writeResults(ParameterTool params, DataStream<ScoredMessage> results) {
         FlinkKafkaProducer<ScoredMessage> sink = new FlinkUtils<>(ScoredMessage.class).createKafkaSink(
-                params.getRequired("topic.output"),
+                params.getRequired("topic.output"), SCORING_GROUP_ID,
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
 
@@ -49,12 +39,10 @@ public class ScoringJobKafka extends ScoringJob {
     @Override
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         Pattern inputTopic = Pattern.compile(params.getRequired("topic.pattern"));
-        String groupId = "scoring";
 
-        Time lateness = milliseconds(params.getLong(PARAMS_ALLOWED_LATENESS, FlinkUtils.DEFAULT_MAX_LATENESS));
         return env.addSource(createKafkaSource(inputTopic,
                 params,
-                groupId))
+                SCORING_GROUP_ID))
                 .name("Kafka Source")
                 .uid("kafka.input");
     }
@@ -62,36 +50,18 @@ public class ScoringJobKafka extends ScoringJob {
     @Override
     protected DataStream<ScoringRuleCommand> createRulesSource(StreamExecutionEnvironment env, ParameterTool params) {
         String topic = params.getRequired("query.input.topic");
-        String groupId = "scoring-rules";
 
-        Properties kafkaProperties = readKafkaProperties(params, true);
-
-        KafkaDeserializationSchema<ScoringRuleCommand> schema = ClouderaRegistryKafkaDeserializationSchema
-                .builder(ScoringRuleCommand.class)
-                .setRegistryAddress(params.getRequired(K_SCHEMA_REG_URL))
-                .build();
-        kafkaProperties.put("group.id", groupId);
-        FlinkKafkaConsumer<ScoringRuleCommand> source = new FlinkKafkaConsumer<>(topic, schema, kafkaProperties);
+        FlinkKafkaConsumer<ScoringRuleCommand> source = new FlinkUtils<>(ScoringRuleCommand.class).createKafkaGenericSource(topic, params, SCORING_RULES_GROUP_ID);
 
         return env.addSource(source)
                 .name("Kafka Rule Source")
-                .uid("kafka.input.rules")
-                .setParallelism(1);
+                .uid("kafka.input.rule.command");
     }
 
     @Override
     protected void writeQueryResult(ParameterTool params, DataStream<ScoringRuleCommandResult> results) {
         String topic = params.getRequired("query.output.topic");
-        Properties kafkaProperties = readKafkaProperties(params, false);
-        KafkaSerializationSchema<ScoringRuleCommandResult> schema = ClouderaRegistryKafkaSerializationSchema
-                .<ScoringRuleCommandResult>builder(topic)
-                .setRegistryAddress(params.getRequired(K_SCHEMA_REG_URL))
-                .build();
-        FlinkKafkaProducer<ScoringRuleCommandResult> sink = new FlinkKafkaProducer<>(topic,
-                schema,
-                kafkaProperties,
-                FlinkKafkaProducer.Semantic.EXACTLY_ONCE);
-
-        results.addSink(sink).name("Kafka Query Results").uid("kafka.results.query").setParallelism(1);
+        FlinkKafkaProducer<ScoringRuleCommandResult> sink = new FlinkUtils<>(ScoringRuleCommandResult.class).createKafkaSink(topic, SCORING_RULES_GROUP_ID, params);
+        results.addSink(sink).name("Kafka Rule Command Results").uid("kafka.output.rule.command.results");
     }
 }

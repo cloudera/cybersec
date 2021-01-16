@@ -44,7 +44,7 @@ public class ParserJobKafka extends ParserJob {
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
         FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
-                params.getRequired(PARAMS_TOPIC_OUTPUT),
+                params.getRequired(PARAMS_TOPIC_OUTPUT), "cyber-parser",
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
     }

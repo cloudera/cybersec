@@ -12,6 +12,7 @@ import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_OUTPUT;
 
 public class RestLookupJobKafka extends RestLookupJob {
 
+    private static final String DEFAULT_GROUP_ID = "enrichment-rest";
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
         new RestLookupJobKafka().createPipeline(ParameterTool.fromPropertiesFile(args[0])).execute("Enrichment - REST");
@@ -19,13 +20,13 @@ public class RestLookupJobKafka extends RestLookupJob {
 
     @Override
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        return env.addSource(FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, "enrichment-rest"))
+        return env.addSource(FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, DEFAULT_GROUP_ID))
                 .name("Kafka Source").uid("kafka-source");
     }
 
     @Override
     protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> results) {
-        results.addSink(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), params))
+        results.addSink(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), DEFAULT_GROUP_ID, params))
                 .name("Kafka Sink").uid("kafka-sink");
     }
 }

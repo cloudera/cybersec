@@ -36,8 +36,8 @@
         <java.verion>1.8</java.verion>
         <lombok.version>1.18.16</lombok.version>
         <lombok.plugin.version>1.18.16.0</lombok.plugin.version>
-        <flink.version>1.10.0-csa1.2.0.0</flink.version>
-        <guava.verison>20.0</guava.verison>
+        <flink.version>1.10.0-csa1.2.1.0</flink.version>
+        <guava.verison>21.0</guava.verison>
         <avro.version>1.8.2</avro.version>
         <log4j.kafka.version>2.4.1.7.1.1.0-565</log4j.kafka.version>
         <scala.binary.version>2.11</scala.binary.version>
@@ -62,18 +62,31 @@
         <repository>
             <id>cloudera</id>
             <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
         </repository>
         <repository>
             <id>hortonworks</id>
             <url>https://repo.hortonworks.com/content/repositories/releases/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>cloudera-local-releasde</id>
+            <url>https://repository.cloudera.com/artifactory/libs-release-local/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
 
         <repository>
             <id>multiline-release-repo</id>
             <url>https://raw.github.com/benelog/multiline/master/maven-repository</url>
-            <snapshots>
+            <releases>
                 <enabled>false</enabled>
-            </snapshots>
+            </releases>
         </repository>
     </repositories>
 
@@ -303,7 +316,7 @@
             <dependency>
                 <groupId>com.hortonworks.registries</groupId>
                 <artifactId>schema-registry-serdes</artifactId>
-                <version>0.9.0</version>
+                <version>0.9.1</version>
             </dependency>
 
             <!-- Utilities -->
