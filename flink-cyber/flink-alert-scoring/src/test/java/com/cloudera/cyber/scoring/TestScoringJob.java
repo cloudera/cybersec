@@ -133,7 +133,6 @@ public class TestScoringJob extends ScoringJob {
     }
 
     private void verifyListResult(List<ScoringRule> scoringRules) throws TimeoutException {
-        DynamicRuleCommandResult<ScoringRule> actualScoringRule;
         for(ScoringRule expectedRule : scoringRules) {
             verifySuccessfulResponse(expectedRule);
         }

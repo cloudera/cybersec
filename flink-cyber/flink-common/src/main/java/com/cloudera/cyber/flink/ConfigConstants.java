@@ -6,4 +6,5 @@ public final class ConfigConstants
     public static final String PARAMS_TOPIC_INPUT = "topic.input";
     public static final String PARAMS_TOPIC_OUTPUT = "topic.output";
     public static final String PARAMS_TOPIC_PATTERN = "topic.pattern";
+    public static final String PARAMS_TOPIC_ERROR = "topic.error";
 }

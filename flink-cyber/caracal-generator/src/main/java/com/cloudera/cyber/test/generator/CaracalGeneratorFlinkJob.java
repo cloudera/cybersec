@@ -20,7 +20,7 @@ public abstract class CaracalGeneratorFlinkJob {
     private static final String PARAMS_EPS = "generator.eps";
     private static final double THREAT_PROBABILITY = 0.01;
 
-    public StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
+    public StreamExecutionEnvironment createPipeline(ParameterTool params) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         FlinkUtils.setupEnv(env, params);
 
@@ -30,6 +30,9 @@ public abstract class CaracalGeneratorFlinkJob {
         outputs.put(new GenerationSource("Netflow/netflow_sample_1.json", "netflow"), 2.0);
         outputs.put(new GenerationSource("Netflow/netflow_sample_2.json", "netflow"), 4.0);
         outputs.put(new GenerationSource("Netflow/netflow_sample_3.json", "netflow"), 1.0);
+
+        outputs.put(new GenerationSource("Netflow/netflow_sample_b.json", "netflow_b"), 1.0);
+        outputs.put(new GenerationSource("Netflow/netflow_sample_b_error.json", "netflow_b"), 1.0);
 
         outputs.put(new GenerationSource("DPI_Logs/Metadata_Module/http/http_sample_1.json", "dpi_http"), 1.5);
         outputs.put(new GenerationSource("DPI_Logs/Metadata_Module/http/http_sample_2.json", "dpi_http"), 1.0);
