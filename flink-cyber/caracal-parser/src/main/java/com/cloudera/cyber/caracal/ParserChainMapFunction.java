@@ -1,6 +1,7 @@
 package com.cloudera.cyber.caracal;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.parser.ParserJob;
 import com.cloudera.parserchains.core.*;
 import com.cloudera.parserchains.core.catalog.ClassIndexParserCatalog;
 import lombok.NonNull;
@@ -8,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.util.OutputTag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,8 +26,8 @@ public class ParserChainMapFunction extends RichMapFunction<Message, Message> {
     @NonNull
     private Map<String, SplitConfig> chainConfig;
 
-    private ChainRunner chainRunner;
-    private Map<String, ChainLink> chains;
+    private transient ChainRunner chainRunner;
+    private transient Map<String, ChainLink> chains;
 
     @Override
     public void open(Configuration parameters) throws Exception {

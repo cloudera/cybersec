@@ -73,7 +73,7 @@ public class ReflectiveParserBuilder implements ParserBuilder {
                               Map<String, String> configValues) throws InvalidParserException {
         List<Parameter> annotatedParams = getAnnotatedParameters(method);
         List<String> methodArgs = buildMethodArgs(annotatedParams, configValues);
-        log.info(String.format("Invoking method {}({}); key={}, parser={}", method.getName(), methodArgs, configKey, parser.getClass().getName()));
+        log.info(String.format("Invoking method %s(%s); key=%s, parser=%s", method.getName(), methodArgs, configKey, parser.getClass().getName()));
 
         try {
             method.invoke(parser, methodArgs.toArray());

@@ -76,6 +76,14 @@ public class ParserJobKafka extends ParserJob {
     }
 
     @Override
+    protected void writeErrors(ParameterTool params, DataStream<Message> errors) {
+        FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
+                params.getRequired(PARAMS_TOPIC_ERROR), "cyber-parser",
+                params);
+        errors.addSink(sink).name("Kafka Results").uid("kafka.error.results");
+    }
+
+    @Override
     protected DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         return createRawKafkaSource(env, params, createGroupId(params.get(PARAMS_TOPIC_INPUT, "") + params.get(PARAMS_TOPIC_PATTERN, "")));
     }
