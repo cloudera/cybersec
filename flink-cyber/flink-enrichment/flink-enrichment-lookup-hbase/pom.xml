@@ -5,7 +5,7 @@
     <parent>
         <artifactId>flink-enrichment</artifactId>
         <groupId>com.cloudera.cyber</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -116,7 +116,7 @@
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-client</artifactId>
-            <version>2.2.3.7.1.1.0-567</version>
+            <version>2.2.6.7.2.6.1-1</version>
             <scope>compile</scope>
         </dependency>
 

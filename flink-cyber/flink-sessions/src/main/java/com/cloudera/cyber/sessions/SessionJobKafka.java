@@ -31,7 +31,7 @@ public class SessionJobKafka extends SessionJob {
      * @param inputTopic topic to read from
      * @param sessionKey the keys being used to sessionise
      * @param sessionTimeout
-     * @return
+     * @return Generated group id for Kakfa
      */
     private String createGroupId(String inputTopic, List<String> sessionKey, Long sessionTimeout) {
         List<String> parts = Arrays.asList("sessionizer",
@@ -44,7 +44,7 @@ public class SessionJobKafka extends SessionJob {
     @Override
     protected void writeResults(ParameterTool params, SingleOutputStreamOperator<GroupedMessage> results) {
         FlinkKafkaProducer<GroupedMessage> sink = new FlinkUtils<>(GroupedMessage.class).createKafkaSink(
-                params.getRequired("topic.enrichment"),
+                params.getRequired("topic.enrichment"), "sessionizer",
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
     }

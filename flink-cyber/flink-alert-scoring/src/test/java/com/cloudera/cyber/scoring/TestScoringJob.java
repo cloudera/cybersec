@@ -26,7 +26,6 @@ import static com.cloudera.cyber.rules.DynamicRuleCommandType.*;
 import static com.cloudera.cyber.rules.RuleType.JS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
 
 @Slf4j
 public class TestScoringJob extends ScoringJob {
@@ -134,7 +133,6 @@ public class TestScoringJob extends ScoringJob {
     }
 
     private void verifyListResult(List<ScoringRule> scoringRules) throws TimeoutException {
-        DynamicRuleCommandResult<ScoringRule> actualScoringRule;
         for(ScoringRule expectedRule : scoringRules) {
             verifySuccessfulResponse(expectedRule);
         }

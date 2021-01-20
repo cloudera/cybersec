@@ -18,7 +18,6 @@ import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.util.DigestUtils;
 
@@ -65,14 +64,11 @@ public class SplitJobKafka extends SplitJob {
 
     @Override
     protected DataStream<SplitConfig> createConfigSource(StreamExecutionEnvironment env, ParameterTool params) {
-        Properties kafkaProperties = readKafkaProperties(params, true);
         String groupId = createGroupId(params.get(PARAMS_TOPIC_INPUT, "") + params.get(PARAMS_TOPIC_PATTERN, ""), "cyber-split-parser-config-");
-
-        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
+        Properties kafkaProperties = readKafkaProperties(params, groupId, true);
 
         FlinkKafkaConsumer<String> source =
-                new FlinkKafkaConsumer<String>(params.getRequired(PARAMS_CONFIG_TOPIC),  new SimpleStringSchema(), kafkaProperties);
+                new FlinkKafkaConsumer<>(params.getRequired(PARAMS_CONFIG_TOPIC),  new SimpleStringSchema(), kafkaProperties);
 
         return env.addSource(source)
                 .name("Config Kafka Feed").uid("config.source.kafka").setParallelism(1).setMaxParallelism(1)
@@ -83,8 +79,9 @@ public class SplitJobKafka extends SplitJob {
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
-        FlinkKafkaProducer<Message> sink = new FlinkUtils<Message>(Message.class).createKafkaSink(
+        FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
                 params.getRequired(PARAMS_TOPIC_OUTPUT),
+                "splits-parser",
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
     }
@@ -120,7 +117,7 @@ public class SplitJobKafka extends SplitJob {
 
     @Override
     protected void writeCounts(ParameterTool params, DataStream<Tuple2<String, Long>> sums) {
-        Properties kafkaProperties = readKafkaProperties(params, false);
+        Properties kafkaProperties = readKafkaProperties(params, "splits-parser", false);
         String topic = params.get(PARAM_COUNT_TOPIC, DEFAULT_COUNT_TOPIC);
 
         sums.addSink(new FlinkKafkaProducer<>(topic,

@@ -21,7 +21,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Preconditions;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.util.Properties;
 
@@ -51,27 +50,27 @@ public class EnrichmentJobKafka extends EnrichmentJob {
 
     @Override
     protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> reduction) {
-        reduction.addSink(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), params))
+        reduction.addSink(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), "enrichments-combined", params))
                 .name("Kafka Sink").uid("kafka-sink");
     }
 
     @Override
     public SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.addSource(
-                new FlinkUtils(Message.class).createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
+                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
         ).name("Kafka Source").uid("kafka-source");
     }
 
     @Override
     protected DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.addSource(
-                new FlinkUtils(EnrichmentCommand.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
+                new FlinkUtils<>(EnrichmentCommand.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
         ).name("Kafka Enrichments").uid("kafka-enrichment-source");
     }
 
     @Override
     protected void writeEnrichmentQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> sideOutput) {
-        sideOutput.addSink(new FlinkUtils<>(EnrichmentCommandResponse.class).createKafkaSink(params.getRequired(PARAMS_QUERY_OUTPUT), params))
+        sideOutput.addSink(new FlinkUtils<>(EnrichmentCommandResponse.class).createKafkaSink(params.getRequired(PARAMS_QUERY_OUTPUT), "enrichment-combined-command", params))
                 .name("Enrichment Query Sink").uid("kafka-enrichment-query-sink");
     }
 
@@ -80,10 +79,7 @@ public class EnrichmentJobKafka extends EnrichmentJob {
         String topic = params.getRequired(PARAMS_TOPIC_THREATQ_INPUT);
         String groupId = "threatq-parser";
 
-        Properties kafkaProperties = readKafkaProperties(params, true);
-        kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-        // for the SMM interceptor
-        kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, groupId);
+        Properties kafkaProperties = readKafkaProperties(params, groupId, true);
 
         FlinkKafkaConsumer<String> source = new FlinkKafkaConsumer<>(topic, new SimpleStringSchema(), kafkaProperties);
         return env.addSource(source).name("ThreatQ Source").uid("threatq-kafka")
@@ -94,7 +90,7 @@ public class EnrichmentJobKafka extends EnrichmentJob {
     @Override
     protected void writeStixThreats(ParameterTool params, DataStream<ThreatIntelligence> results) {
         FlinkKafkaProducer<ThreatIntelligence> sink = new FlinkUtils<>(ThreatIntelligence.class).createKafkaSink(
-                params.get(PARAM_STIX_OUTPUT_TOPIC, DEFAULT_STIX_OUTPUT_TOPIC),
+                params.get(PARAM_STIX_OUTPUT_TOPIC, DEFAULT_STIX_OUTPUT_TOPIC), "stix-threat-intel",
                 params);
         results.addSink(sink).name("Kafka Stix Results").uid("kafka.results.stix");
 
@@ -131,8 +127,7 @@ public class EnrichmentJobKafka extends EnrichmentJob {
 
     @Override
     protected DataStream<String> createStixSource(StreamExecutionEnvironment env, ParameterTool params) {
-        Properties kafkaProperties = Utils.readKafkaProperties(params, true);
-        kafkaProperties.put("group.id", params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID));
+        Properties kafkaProperties = Utils.readKafkaProperties(params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID), true);
 
         String topic = params.get(PARAM_STIX_INPUT_TOPIC, DEFAULT_STIX_INPUT_TOPIC);
         FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(topic, new SimpleStringSchema(), kafkaProperties);

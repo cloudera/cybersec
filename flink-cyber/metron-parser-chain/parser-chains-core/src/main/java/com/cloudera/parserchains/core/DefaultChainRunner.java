@@ -4,7 +4,7 @@ import com.cloudera.parserchains.core.model.define.ParserName;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -37,7 +37,11 @@ public class DefaultChainRunner implements ChainRunner {
         Message original = originalMessage(toParse);
         results.add(original);
 
-        return run(original, chain, results);
+        if (chain != null) {
+            return run(original, chain, results);
+        } else {
+            return getErrorResult(original, "No parser chain defined for message");
+        }
 
     }
 
@@ -50,11 +54,7 @@ public class DefaultChainRunner implements ChainRunner {
             String msg = "An unexpected error occurred while running a parser chain. " +
                     "Ensure that no parser is throwing an unchecked exception. Parsers should " +
                     "instead be reporting the error in the output message.";
-            Message error = Message.builder()
-                    .clone(original)
-                    .withError(msg)
-                    .build();
-            results = Arrays.asList(error);
+            results = getErrorResult(original, msg);
             log.warn(msg, t);
         }
         return results;
@@ -66,5 +66,13 @@ public class DefaultChainRunner implements ChainRunner {
                 .addField(inputField, FieldValue.of(toParse))
                 .createdBy(ORIGINAL_MESSAGE_NAME)
                 .build();
+    }
+
+    private List<Message> getErrorResult(Message original, String errorMessage) {
+        Message error = Message.builder()
+                .clone(original)
+                .withError(errorMessage)
+                .build();
+        return Collections.singletonList(error);
     }
 }

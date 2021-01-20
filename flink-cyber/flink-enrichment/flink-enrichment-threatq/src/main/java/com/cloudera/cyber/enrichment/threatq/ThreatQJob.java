@@ -1,6 +1,7 @@
 package com.cloudera.cyber.enrichment.threatq;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.enrichment.hbase.AbstractHbaseMapFunction;
 import com.cloudera.cyber.flink.FlinkUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.addons.hbase.HBaseSinkFunction;
@@ -32,14 +33,12 @@ public abstract class ThreatQJob {
 
     public static DataStream<Message> enrich(DataStream<Message> source,
                                              List<ThreatQConfig> configs
-    ) throws IOException {
-        DataStream<Message> pipeline = source.map(new ThreatQHBaseMap(configs)).name("Apply ThreatQ").uid("threatq-enrich");
-        return pipeline;
+    ) {
+        return source.map(new ThreatQHBaseMap(configs)).name("Apply ThreatQ").uid("threatq-enrich");
     }
 
     public static DataStreamSink<ThreatQEntry> ingest(DataStream<ThreatQEntry> enrichmentSource, List<ThreatQConfig> configs) {
-        Configuration conf = new Configuration();
-        conf.addResource("/etc/hbase/conf/hbase-site.xml");
+        Configuration conf = AbstractHbaseMapFunction.configureHbase();
 
         return enrichmentSource.addSink(new HBaseSinkFunction<ThreatQEntry>(tableName, HBaseConfiguration.create(conf)) {
             private transient Counter newThreats;

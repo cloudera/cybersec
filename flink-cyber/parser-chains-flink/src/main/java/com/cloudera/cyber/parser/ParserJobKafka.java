@@ -44,7 +44,7 @@ public class ParserJobKafka extends ParserJob {
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
         FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
-                params.getRequired(PARAMS_TOPIC_OUTPUT),
+                params.getRequired(PARAMS_TOPIC_OUTPUT), "cyber-parser",
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
     }
@@ -73,6 +73,14 @@ public class ParserJobKafka extends ParserJob {
                 .build();
 
         results.addSink(sink).name("Original Archiver").uid("original.archiver");
+    }
+
+    @Override
+    protected void writeErrors(ParameterTool params, DataStream<Message> errors) {
+        FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
+                params.getRequired(PARAMS_TOPIC_ERROR), "cyber-parser",
+                params);
+        errors.addSink(sink).name("Kafka Results").uid("kafka.error.results");
     }
 
     @Override
