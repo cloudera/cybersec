@@ -8,6 +8,7 @@ import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.util.OutputTag;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -28,6 +29,7 @@ public abstract class ParserJob {
     protected static final String PARAM_CHAIN_CONFIG_FILE = "chain.file";
     public static final String PARAM_PRIVATE_KEY_FILE = "key.private.file";
     public static final String PARAM_PRIVATE_KEY = "key.private.base64";
+    public static final String PARSER_ERROR_SIDE_OUTPUT = "parser-error";
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -53,9 +55,13 @@ public abstract class ParserJob {
         PrivateKey privateKey = keyFactory.generatePrivate(privSpec);
 
         SingleOutputStreamOperator<Message> results =
-                source.flatMap(new ChainParserMapFunction(chainSchema, topicMap, privateKey))
+                source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey))
                 .name("Parser").uid("parser");
         writeResults(params, results);
+
+        final OutputTag<Message> outputTag = new OutputTag<Message>(PARSER_ERROR_SIDE_OUTPUT){};
+        DataStream<Message> parserErrors = results.getSideOutput(outputTag);
+        writeErrors(params, parserErrors);
 
         return env;
     }
@@ -67,6 +73,8 @@ public abstract class ParserJob {
     protected abstract void writeResults(ParameterTool params, DataStream<Message> results);
 
     protected abstract void writeOriginalsResults(ParameterTool params, DataStream<MessageToParse> results);
+
+    protected abstract void writeErrors(ParameterTool params, DataStream<Message> errors);
 
     protected abstract DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params);
 }

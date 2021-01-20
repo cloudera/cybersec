@@ -15,6 +15,7 @@ import java.util.Base64;
 public abstract class AbstractParserJobTest extends ParserJob {
     protected ManualSource<MessageToParse> source;
     protected CollectingSink<Message> sink = new CollectingSink<>();
+    protected CollectingSink<Message> errorSink = new CollectingSink<>();
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
@@ -23,6 +24,11 @@ public abstract class AbstractParserJobTest extends ParserJob {
 
     @Override
     protected void writeOriginalsResults(ParameterTool params, DataStream<MessageToParse> results) {
+    }
+
+    @Override
+    protected void writeErrors(ParameterTool params, DataStream<Message> errors) {
+        errors.addSink(errorSink);
     }
 
     @Override

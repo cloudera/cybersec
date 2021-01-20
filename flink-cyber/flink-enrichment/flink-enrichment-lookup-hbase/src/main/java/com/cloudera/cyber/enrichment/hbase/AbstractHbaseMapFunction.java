@@ -9,13 +9,18 @@ import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.metrics.Counter;
 import org.apache.flink.metrics.MetricGroup;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -91,9 +96,7 @@ public abstract class AbstractHbaseMapFunction extends RichMapFunction<Message, 
         this.realResultCounter = metricsGroup.counter("realResult");
         this.fetchCounter = metricsGroup.counter("fetchCounter");
 
-        org.apache.hadoop.conf.Configuration conf = new org.apache.hadoop.conf.Configuration();
-        conf.addResource("/etc/hbase/conf/hbase-site.xml");
-        hbaseConfig = HBaseConfiguration.create(conf);
+        hbaseConfig =  configureHbase();
         connection = ConnectionFactory.createConnection(hbaseConfig);
 
         cache = Caffeine.newBuilder()
@@ -102,6 +105,34 @@ public abstract class AbstractHbaseMapFunction extends RichMapFunction<Message, 
                 .recordStats(() -> new CacheMetrics(metricsGroup))
                 .build();
 
+    }
+
+    public static org.apache.hadoop.conf.Configuration configureHbase() {
+        org.apache.hadoop.conf.Configuration hbaseClientConf = HBaseConfiguration.create();
+        String hbaseConfDir = "/etc/hbase/conf";
+        if ((new File(hbaseConfDir)).exists()) {
+            String coreSite = hbaseConfDir + "/core-site.xml";
+            String hdfsSite = hbaseConfDir + "/hdfs-site.xml";
+            String hbaseSite = hbaseConfDir + "/hbase-site.xml";
+            if ((new File(coreSite)).exists()) {
+                hbaseClientConf.addResource(new Path(coreSite));
+                log.info("Adding " + coreSite + " to hbase configuration");
+            }
+
+            if ((new File(hdfsSite)).exists()) {
+                hbaseClientConf.addResource(new Path(hdfsSite));
+                log.info("Adding " + hdfsSite + " to hbase configuration");
+            }
+
+            if ((new File(hbaseSite)).exists()) {
+                hbaseClientConf.addResource(new Path(hbaseSite));
+                log.info("Adding " + hbaseSite + " to hbase configuration");
+            }
+        } else {
+            log.warn("HBase config directory '{}' not found, cannot load HBase configuration.", hbaseConfDir);
+        }
+
+        return hbaseClientConf;
     }
 
     protected final Map<String, String> notFound() {

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>flink-enrichment</artifactId>
         <groupId>com.cloudera.cyber</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.1.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-logging</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.1.0</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -88,7 +88,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient-cache</artifactId>
-            <version>4.3.5</version>
+            <version>4.5.6</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -103,7 +103,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.3.5</version>
+            <version>4.5.6</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
