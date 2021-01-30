@@ -5,6 +5,7 @@ import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentField;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
+import com.google.common.base.Joiner;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -38,7 +39,7 @@ public class HbaseEnrichmentMapFunction extends AbstractHbaseMapFunction {
                         k -> k.getSource(), v -> v.getFields())
                 );
 
-        log.info("Applying HBase enrichments to the following sources: %s", sources);
+        log.info("Applying HBase enrichments to the following sources: {}", sources);
 
         this.tableName = tableName;
     }
@@ -58,7 +59,8 @@ public class HbaseEnrichmentMapFunction extends AbstractHbaseMapFunction {
                                     .key(Bytes.toBytes(key))
                                     .cf(cf)
                                     .build(),
-                            field.getName())).entrySet().stream();
+                            Joiner.on(".").join(field.getName(), field.getEnrichmentType())
+                    )).entrySet().stream();
                 }).flatMap(l -> l)
                 .collect(toMap(k -> k.getKey(), v -> v.getValue(), (a, b) -> b)));
     }
