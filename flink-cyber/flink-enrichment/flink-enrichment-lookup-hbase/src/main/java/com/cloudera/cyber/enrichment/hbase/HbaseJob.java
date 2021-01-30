@@ -1,18 +1,12 @@
 package com.cloudera.cyber.enrichment.hbase;
 
-import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
 
 import java.io.IOException;
 import java.nio.file.Files;
