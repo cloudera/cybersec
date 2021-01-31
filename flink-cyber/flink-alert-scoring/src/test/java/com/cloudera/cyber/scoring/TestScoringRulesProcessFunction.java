@@ -53,6 +53,7 @@ public class TestScoringRulesProcessFunction {
                 Collections.singletonList(Scores.builder().ruleId(ruleV0.getId()).score(expectedScore).reason(MATCH_REASON).build()), harness);
 
         assertEquals(expectedScoredMessages, harness.extractOutputValues());
+        harness.snapshot(1L, 1L);
     }
 
     @Test

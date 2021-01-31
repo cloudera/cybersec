@@ -27,7 +27,6 @@ import static java.util.stream.Collectors.toList;
 public class ScoringRule extends BaseDynamicRule<ScoringRule> {
     private String id = UUID.randomUUID().toString();
     private boolean enabled = true;
-    private int order;
 
     public static final String RESULT_SCORE = "score";
     public static final String RESULT_REASON = "reason";
@@ -36,7 +35,6 @@ public class ScoringRule extends BaseDynamicRule<ScoringRule> {
         super(b);
         this.id = b.id;
         this.enabled = b.enabled;
-        this.order = b.order;
     }
 
     public static ScoringRuleBuilder<?, ?> builder() {
@@ -75,7 +73,7 @@ public class ScoringRule extends BaseDynamicRule<ScoringRule> {
                     RuleType.class.getName(),
                     "",
                     RuleType.class.getPackage().getName(),
-                    Arrays.stream(RuleType.values()).map(s->s.name()).collect(toList()))).noDefault()
+                    Arrays.stream(RuleType.values()).map(Enum::name).collect(toList()))).noDefault()
             .requiredString("ruleScript")
             .requiredString("id")
             .requiredBoolean("enabled")
@@ -91,12 +89,12 @@ public class ScoringRule extends BaseDynamicRule<ScoringRule> {
     public Object get(int field$) {
         switch (field$) {
             case 0: return getName();
-            case 1: return order;
+            case 1: return getOrder();
             case 2: return getTsStart().toEpochMilli();
             case 3: return getTsEnd().toEpochMilli();
             case 4: return getType();
             case 5: return getRuleScript();
-            case 6: return id.toString();
+            case 6: return id;
             case 7: return enabled;
             case 8: return getVersion();
             default: throw new AvroRuntimeException("Bad index");
@@ -126,14 +124,10 @@ public class ScoringRule extends BaseDynamicRule<ScoringRule> {
     public static abstract class ScoringRuleBuilder<C extends ScoringRule, B extends ScoringRuleBuilder<C, B>> extends BaseDynamicRuleBuilder<C, B> {
         private String id;
         private boolean enabled;
-        private int order;
-        private int version;
 
         private static void $fillValuesFromInstanceIntoBuilder(ScoringRule instance, ScoringRuleBuilder<?, ?> b) {
             b.id(instance.id);
             b.enabled(instance.enabled);
-            b.order(instance.order);
-            b.version(instance.getVersion());
         }
 
         public B id(String id) {
@@ -143,11 +137,6 @@ public class ScoringRule extends BaseDynamicRule<ScoringRule> {
 
         public B enabled(boolean enabled) {
             this.enabled = enabled;
-            return self();
-        }
-
-        public B order(int order) {
-            this.order = order;
             return self();
         }
 
@@ -162,7 +151,7 @@ public class ScoringRule extends BaseDynamicRule<ScoringRule> {
         public abstract C build();
 
         public String toString() {
-            return "ScoringRule.ScoringRuleBuilder(super=" + super.toString() + ", id=" + this.id + ", enabled=" + this.enabled + ", order=" + this.order + ")";
+            return "ScoringRule.ScoringRuleBuilder(super=" + super.toString() + ", id=" + this.id + ", enabled=" + this.enabled + ")";
         }
     }
 
