@@ -40,7 +40,7 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C ext
 
     @Override
     public void processBroadcastElement(C dynamicRuleCommand, Context context, Collector<T> collector) throws Exception {
-        log.info(String.format("Rule Command %d, time: %d, processing: %d, watermark: %d: %s" , Thread.currentThread().getId(), context.timestamp(), context.currentProcessingTime(), context.currentWatermark(), dynamicRuleCommand));
+        log.debug("Rule Command {}, time: {}, processing: %{}, watermark: {}: {}" , Thread.currentThread().getId(), context.timestamp(), context.currentProcessingTime(), context.currentWatermark(), dynamicRuleCommand);
         BroadcastState<RulesForm, List<R>> state = context.getBroadcastState(rulesStateDescriptor);
         List<R> scoringRules = processRulesCommands(state.get(RulesForm.ALL), dynamicRuleCommand, context);
 
@@ -58,7 +58,7 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C ext
 
     private List<R> processRulesCommands(List<R> stateRules, C ruleCommand, Context context) {
         List<R> rules = stateRules == null ? Collections.emptyList() : stateRules;
-        log.info("Processing Rule Command {}", ruleCommand);
+        log.debug("Processing Rule Command {}", ruleCommand);
         switch (ruleCommand.getType()) {
             case DELETE:
                 outputRule(context, null, ruleCommand.getId());

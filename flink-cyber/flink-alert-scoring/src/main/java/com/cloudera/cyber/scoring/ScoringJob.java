@@ -9,6 +9,7 @@ import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.formats.avro.typeutils.AvroTypeInfo;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -47,7 +48,7 @@ public abstract class ScoringJob {
     static class Descriptors {
         public static final MapStateDescriptor<RulesForm, List<ScoringRule>> rulesState =
                 new MapStateDescriptor<>(
-                        "rules", TypeInformation.of(RulesForm.class), Types.LIST(TypeInformation.of(ScoringRule.class)));
+                        "rules", TypeInformation.of(RulesForm.class), Types.LIST(new AvroTypeInfo<>(ScoringRule.class)));
 
         public static final OutputTag<ScoringRuleCommandResult> rulesResultSink =
                 new OutputTag<ScoringRuleCommandResult>("rules-sink") {
