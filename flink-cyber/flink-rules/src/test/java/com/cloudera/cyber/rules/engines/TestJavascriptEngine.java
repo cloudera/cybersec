@@ -22,7 +22,7 @@ public class TestJavascriptEngine {
         RuleEngine engine = JavaScriptEngine.builder().script("return { score: parseFloat(message.a) + parseFloat(message.b) }").build();
         engine.open();
 
-        sleep(10);
+        sleep(100);
 
         Map<String, Object> results = engine.feed(
                 createMessage(Message.builder()
@@ -42,7 +42,7 @@ public class TestJavascriptEngine {
         RuleEngine engine = JavaScriptEngine.builder().script(scoreScript).build();
         engine.open();
 
-        sleep(10);
+        sleep(100);
 
         engine.eval("function test(a) { log(ip_local(a)) } test('192.168.1.0')");
     }
@@ -52,7 +52,7 @@ public class TestJavascriptEngine {
         RuleEngine engine = JavaScriptEngine.builder().script(scoreScript).build();
         engine.open();
 
-        sleep(10);
+        sleep(100);
 
         Map<String, Object> results = engine.feed(
                 createMessage(Message.builder()
@@ -74,7 +74,7 @@ public class TestJavascriptEngine {
         RuleEngine engine = JavaScriptEngine.builder().script("return { local: in_subnet(message.local, '192.168.0.1/24') }").build();
         engine.open();
 
-        sleep(10);
+        sleep(100);
 
         Map<String, Object> results = engine.feed(
                 createMessage(Message.builder()
@@ -94,7 +94,7 @@ public class TestJavascriptEngine {
         RuleEngine engine = JavaScriptEngine.builder().script("return { local: in_subnet(message.local, '192.168.0.1/24') }").build();
         engine.open();
 
-        sleep(10);
+        sleep(100);
 
         for (int i = 0; i < 3; i++) {
             Map<String, Object> results = engine.feed(
