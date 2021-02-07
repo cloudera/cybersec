@@ -58,6 +58,7 @@ public abstract class BaseDynamicRule<R> extends SpecificRecordBase implements D
             b.tsEnd(instance.tsEnd);
             b.type(instance.type);
             b.ruleScript(instance.ruleScript);
+            b.version(instance.version);
         }
 
         public B name(String name) {
