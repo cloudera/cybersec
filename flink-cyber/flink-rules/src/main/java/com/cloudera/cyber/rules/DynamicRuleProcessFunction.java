@@ -27,7 +27,7 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C ext
 
     @Override
     public void processElement(Message message, ReadOnlyContext readOnlyContext, Collector<T> collector) throws Exception {
-        log.info(String.format("%d, time: %d, processing: %d, watermark: %d: %s",Thread.currentThread().getId(), readOnlyContext.timestamp(), readOnlyContext.currentProcessingTime(), readOnlyContext.currentWatermark(), message));
+        log.debug("{}, time: {}, processing: {}, watermark: {}: {}",Thread.currentThread().getId(), readOnlyContext.timestamp(), readOnlyContext.currentProcessingTime(), readOnlyContext.currentWatermark(), message);
         List<R> rules = readOnlyContext.getBroadcastState(rulesStateDescriptor).get(RulesForm.ACTIVE);
         processMessages(message, collector, rules);
     }
