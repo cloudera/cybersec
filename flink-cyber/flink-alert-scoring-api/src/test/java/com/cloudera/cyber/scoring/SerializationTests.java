@@ -13,12 +13,12 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 public class SerializationTests {
 
@@ -31,20 +31,21 @@ public class SerializationTests {
 
     @Test
     @Ignore
-    public void testScoringRule() {
+    public void testScoringRule() throws IOException {
         ScoringRule test = ScoringRule.builder()
                 .id(UUID.randomUUID().toString())
                 .enabled(true)
                 .name("test")
                 .order(1)
                 .ruleScript("test()")
-                .tsStart(Instant.MIN)
-                .tsEnd(Instant.MAX)
+                .tsStart(Instant.now())
+                .tsEnd(Instant.now().plus(5, ChronoUnit.MINUTES))
                 .type(RuleType.JS)
                 .version(0)
                 .build();
 
-        fail("Cannot serialize because of base class");
+        ScoringRule out = test(test);
+        assertThat(out, equalTo(test));
     }
 
 

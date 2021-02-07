@@ -5,12 +5,12 @@
 		<!-- Your own application should inherit from spring-boot-starter-parent -->
 		<artifactId>flink-cyber</artifactId>
 		<groupId>com.cloudera.cyber</groupId>
-		<version>1.1.0</version>
+		<version>1.1.1</version>
 	</parent>
 	<artifactId>flink-web</artifactId>
 
 	<description>API service to control the cyber platform</description>
-	<version>1.1.0</version>
+	<version>1.1.1</version>
 
 	<properties>
 		<main.basedir>${basedir}/../..</main.basedir>
@@ -72,13 +72,13 @@
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-cyber-api</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-alert-scoring-api</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
             <scope>compile</scope>
         </dependency>
 
