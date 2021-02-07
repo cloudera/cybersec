@@ -18,7 +18,6 @@ public abstract class HiveJob {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         FlinkUtils.setupEnv(env, params);
-        env.setRestartStrategy(RestartStrategies.noRestart());
 
         DataStream<ScoredMessage> source = createSource(env, params);
         source.addSink(new StreamingHiveSink(params)).name("Hive Streaming Indexer");

@@ -3,6 +3,7 @@ package com.cloudera.cyber.indexing.hive;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import com.cloudera.cyber.scoring.Scores;
+import com.google.inject.internal.util.$ToStringBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -47,6 +49,8 @@ public class HiveStreamingMessageWriter  {
     private static final String FIELDS_COLUMN_NAME = "fields";
     private static final String[] HIVE_SPECIAL_COLUMN_CHARACTERS = new String[] { ".", ":"};
     private static final String[] HIVE_SPECIAL_COLUMN_REPLACEMENT_CHARACTERS = new String[] {"_", "_"};
+    protected static final String DEFAULT_TIMESTAMP_FORMATS = "yyyy-MM-dd HH:mm:ss.SSSSSS,yyyy-MM-dd'T'HH:mm:ss.SSS'Z',yyyy-MM-dd'T'HH:mm:ss.SS'Z',yyyy-MM-dd'T'HH:mm:ss.S'Z',yyyy-MM-dd'T'HH:mm:ss'Z'";
+    protected static final String HIVE_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
     /** Hive database containing the table to write events to **/
     private String databaseName;
@@ -58,6 +62,8 @@ public class HiveStreamingMessageWriter  {
     private int messagesPerTransaction;
     /** directory containing the hive configuration files - hive-site.xml */
     private String hiveConfDir;
+    /** default java timestamp format to use when converting a string to a Hive timestamp */
+    private String possibleTimestampFormats;
 
     /** connection to hive for streaming updates **/
     private transient HiveStreamingConnection connection;
@@ -80,17 +86,22 @@ public class HiveStreamingMessageWriter  {
     private transient SimpleDateFormat hiveTimestampFormat;
     /** number of messages in the current transaction.  If set to zero, no transaction is open */
     private transient int messagesInCurrentTransaction = 0;
+    /** names of the fields with type timestamp.  Keep track of them since they will need to be normalized and stored as a string */
+    private transient List<String> timestampFieldNames;
+    /** normalizer for non-built in timestamp fields */
+    private transient TimestampNormalizer timestampNormalizer;
 
     public HiveStreamingMessageWriter(ParameterTool params) {
         this.dayFormat = new SimpleDateFormat("yyyy-MM-dd");
         this.hourFormat = new SimpleDateFormat("HH");
-        this.hiveTimestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        this.hiveTimestampFormat = new SimpleDateFormat(HIVE_DATE_FORMAT);
         this.hiveConfDir = params.get("hive.confdir","/etc/hive/conf");
 
         this.databaseName = params.get("hive.dbname", "cyber");
         this.tableName = params.get("hive.table", "events");
         this.batchSize = params.getInt("hive.batch.size", 1);
         this.messagesPerTransaction = params.getInt("hive.transaction.messages", 1000);
+        this.possibleTimestampFormats = params.get("hive.timestamp.format", DEFAULT_TIMESTAMP_FORMATS);
     }
 
     public void connect() throws StreamingException, TException {
@@ -126,14 +137,19 @@ public class HiveStreamingMessageWriter  {
             put("cyberscore_details", HiveStreamingMessageWriter::convertCyberScoreDetailsToRow);
         }};
 
-        columnConversion = new HashMap<DataType, Function<String, Object>>() {{
+       columnConversion = new HashMap<DataType, Function<String, Object>>() {{
             put(DataTypes.DOUBLE(), Double::parseDouble);
+            put(DataTypes.FLOAT(), Float::parseFloat);
             put(DataTypes.BIGINT(), Long::parseLong);
+            put(DataTypes.INT(), Integer::parseInt);
             put(DataTypes.STRING(), (s) -> s);
             put(DataTypes.BOOLEAN(), Boolean::parseBoolean);
         }};
 
         typeInfo = new RowTypeInfo(tableSchema.getFieldTypes(), tableSchema.getFieldNames());
+
+        timestampNormalizer = new TimestampNormalizer(possibleTimestampFormats, hiveTimestampFormat);
+
     }
 
     private static Row[] convertCyberScoreDetailsToRow(ScoredMessage scoredMessage) {
@@ -166,6 +182,9 @@ public class HiveStreamingMessageWriter  {
         HiveMetaStoreClient hiveMetaStoreClient = new HiveMetaStoreClient(hiveConf);
         List<FieldSchema> hiveFields = hiveMetaStoreClient.getSchema(schema, table);
         log.info("Read hive fields {}", hiveFields);
+        // find all the timestamp fields that are not the built in timestamp field
+        timestampFieldNames = hiveFields.stream().filter(field -> !field.getName().equals("ts") && field.getType().equalsIgnoreCase("timestamp")).
+                map(FieldSchema::getName).collect(Collectors.toList());
         return hiveFields.stream().reduce(TableSchema.builder(),
                 (build, field) -> build.field(field.getName(), hiveTypeToDataType(field.getType())),
                 (a, b) -> a
@@ -193,8 +212,11 @@ public class HiveStreamingMessageWriter  {
                         DataTypes.ROW(DataTypes.FIELD("ruleid", DataTypes.STRING()),
                                       DataTypes.FIELD("score", DataTypes.FLOAT()),
                                       DataTypes.FIELD("reason", DataTypes.STRING())));
-            default:
+            case "string":
+            case "timestamp":
                 return DataTypes.STRING();
+            default:
+                throw new IllegalArgumentException(String.format("Data type '%s' in Hive schema is not supported.", type));
         }
     }
 
@@ -209,7 +231,11 @@ public class HiveStreamingMessageWriter  {
     }
 
     private static String formatMessageTimestamp(Message message, SimpleDateFormat dateFormat) {
-        return dateFormat.format(Date.from(Instant.ofEpochMilli(message.getTs())));
+        return formatEpochMillis(message.getTs(), dateFormat);
+    }
+
+    private static String formatEpochMillis(long epochMillis, SimpleDateFormat dateFormat) {
+        return dateFormat.format(Date.from(Instant.ofEpochMilli(epochMillis)));
     }
 
     protected int addMessageToTransaction(ScoredMessage scoredMessage) throws Exception {
@@ -243,7 +269,11 @@ public class HiveStreamingMessageWriter  {
                     String extensionValue = extensions.get(columnName);
                     if (extensionValue != null) {
                         try {
-                            columnValue = columnConversion.get(column.getType()).apply(extensionValue);
+                            if (timestampFieldNames.contains(columnName)) {
+                                columnValue = timestampNormalizer.apply(extensionValue);
+                            } else {
+                                columnValue = columnConversion.get(column.getType()).apply(extensionValue);
+                            }
                             // stored as a separate column - remove from fields to avoid storing twice
                             extensions.remove(columnName);
                         } catch (Exception e) {
