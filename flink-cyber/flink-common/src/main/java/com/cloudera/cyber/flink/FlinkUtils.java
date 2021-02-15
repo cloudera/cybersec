@@ -11,6 +11,7 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
@@ -23,7 +24,8 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_ALLOWED_LATENESS;
-import static com.cloudera.cyber.flink.Utils.*;
+import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
+import static com.cloudera.cyber.flink.Utils.readSchemaRegistryProperties;
 import static org.apache.flink.streaming.api.windowing.time.Time.milliseconds;
 
 @Slf4j
@@ -131,5 +133,15 @@ public class FlinkUtils<T> {
         return source
                 .name("Kafka Source")
                 .uid("kafka.input");
+    }
+
+    public static DataStream<Message> assignTimestamps(DataStream<Message> messages, long allowedLatenessMillis) {
+        BoundedOutOfOrdernessTimestampExtractor<Message> timestampAssigner = new BoundedOutOfOrdernessTimestampExtractor<Message>(Time.milliseconds(allowedLatenessMillis)) {
+            @Override
+            public long extractTimestamp(Message message) {
+                return message.getTs();
+            }
+        };
+        return messages.assignTimestampsAndWatermarks(timestampAssigner);
     }
 }

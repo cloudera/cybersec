@@ -1,79 +1,100 @@
 package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.flink.MessageBoundedOutOfOrder;
-import org.apache.flink.api.java.tuple.Tuple2;
+import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.profiler.accumulator.ProfileGroupAccumulator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 public abstract class ProfileJob {
 
-/*    private SingleOutputStreamOperator<Message> profile(StreamExecutionEnvironment env, ParameterTool params,  ProfileConfig config) {
-        WindowedStream<Message, Object, TimeWindow> messageObjectTimeWindowWindowedStream = createSource(env, params, config.getSource())
-                .assignTimestampsAndWatermarks(new MessageTimestampAssigner(Time.milliseconds(config.getLatenessTolerance()))).name("Profile Source").uid("profile-source")
-                .filter(new FilterProfiles(config.getFilter())).name("Filter").uid("filter")
-                .keyBy(m -> m.get(config.getEntity()))
-                .timeWindow(Time.of(config.getInterval(), config.getIntervalUnit()))
-                .aggregate(new ProfileAggregateFunction(config.getFields()))
-    }*/
+    protected static final String PARAM_PROFILE_CONFIG = "profile.config.file";
+    protected static final String PARAM_LATENESS_TOLERANCE_MILLIS = "profile.lateness";
 
-    protected abstract Object createSource(String source);
+    protected static final ObjectMapper jsonObjectMapper =
+        new ObjectMapper()
+                .activateDefaultTyping(BasicPolymorphicTypeValidator.builder().
+                        allowIfSubType(Map.class).
+                        allowIfSubType(List.class).
+                        allowIfSubType(java.util.concurrent.TimeUnit.class).
+                        build())
+                .enable(SerializationFeature.INDENT_OUTPUT);
 
-    protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, String source);
-
-    private void work(StreamExecutionEnvironment env, ParameterTool params) {
-        List<ProfileConfig> profileConfigs = new ArrayList<>();
-
-        // group configs by entity and window settings
-
-
-        Map<ProfileConfigGroup, List<ProfileConfig>> groupedByWindowSpec = profileConfigs.stream().collect(Collectors.groupingBy(ProfileConfigGroup::from));
-
-        groupedByWindowSpec.entrySet().forEach(e -> {
-
-            // source for this window spec and source
-            SingleOutputStreamOperator<Message> source = sourceFrom(env, params, e.getKey());
-
-            // for each of the entities, create a filter stream
-
-
-            // filter by unique filters first
-            // TODO - filter hierarchically
-
-            List<SingleOutputStreamOperator<Profile>> profilers = e.getValue().stream().collect(Collectors.groupingBy(ProfileConfig::getFilter)).entrySet().stream()
-                    // Add filters to the streams
-                    .map(groupedByFilter -> Tuple2.of(
-                            groupedByFilter.getValue(),
-                            source.filter(new FilterExpressionFunction(groupedByFilter.getKey()))))
-                    .flatMap(streamsByConfig ->
-
-                            // for every entity produce a keyed version of the stream
-                            streamsByConfig.f0.stream()
-                                    .collect(Collectors.groupingBy(ProfileConfig::getEntity))
-                                    .entrySet().stream().map(s -> Tuple2.of(streamsByConfig.f0, streamsByConfig.f1.keyBy(s.getKey())))
-                    ).flatMap(keyedStreamByConfig ->
-
-                            keyedStreamByConfig.f0.stream().collect(Collectors.groupingBy(ProfileConfig::getFields)).entrySet().stream()
-                                    .map(fc -> keyedStreamByConfig.f1.timeWindow(Time.of(e.getKey().getInterval(), e.getKey().getIntervalUnit()))
-                                            .allowedLateness(Time.milliseconds(e.getKey().getLatenessTolerance()))
-                                            .aggregate(new ProfileAggregateFunction(fc.getKey())))
-                    ).collect(Collectors.toList());
-
-
-
-        });
+    protected List<ProfileGroupConfig> parseConfigFile(String configJson) throws JsonProcessingException {
+             List<ProfileGroupConfig>  profileGroupConfigs = jsonObjectMapper.readValue(
+                configJson,
+                new TypeReference<ArrayList<ProfileGroupConfig>>() {
+                });
+             profileGroupConfigs.forEach(ProfileGroupConfig::verify);
+             return profileGroupConfigs;
     }
 
-    private SingleOutputStreamOperator<Message> sourceFrom(StreamExecutionEnvironment env, ParameterTool params, ProfileConfigGroup config) {
-        return createSource(env, params, config.getSource())
-                .assignTimestampsAndWatermarks(new MessageBoundedOutOfOrder(Time.milliseconds(config.getLatenessTolerance()))).name("Profile Source").uid("profile-source");
+    protected StreamExecutionEnvironment createPipeline(final ParameterTool params) throws IOException {
+        final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+        FlinkUtils.setupEnv(env, params);
+
+        // read the profiler config
+        List<ProfileGroupConfig> profileGroups = parseConfigFile(new String(Files.readAllBytes(Paths.get(params.getRequired(PARAM_PROFILE_CONFIG)))));
+
+        long allowedLatenessMillis = params.getLong(PARAM_LATENESS_TOLERANCE_MILLIS, Time.minutes(5).toMilliseconds());
+        final DataStream<Message> messages = FlinkUtils.assignTimestamps(createSource(env, params), allowedLatenessMillis);
+        profileGroups.forEach(g -> profile(params, messages, g, allowedLatenessMillis));
+
+        return env;
     }
+
+    /**
+     * Aggregate events into profile messages for this ProfileGroup.
+     *
+     * @param params Configuration parameters
+     * @param messages Data stream of messages to profile.
+     * @return stream of profile messages.
+     */
+    protected DataStream<Message> profile(final ParameterTool params, DataStream<Message> messages, ProfileGroupConfig profileGroupConfig, long allowedLatenessMillis) {
+        if (profileGroupConfig.needsSourceFilter()) {
+            messages = messages.filter(new MessageSourceFilter(profileGroupConfig.getSources()));
+        }
+        List<String> keyFieldNames = profileGroupConfig.getKeyFieldNames();
+        Time profilePeriodDuration = Time.of(profileGroupConfig.getPeriodDuration(), TimeUnit.valueOf(profileGroupConfig.getPeriodDurationUnit()));
+        DataStream<Message> profileMessages = messages.filter(new MessageFieldFilter(keyFieldNames)).keyBy(new MessageKeySelector(keyFieldNames)).timeWindow(profilePeriodDuration).
+                aggregate(new ProfileAggregateFunction(profileGroupConfig, false));
+
+        if (profileGroupConfig.hasStats()) {
+            MessageKeySelector profileKeySelector = new MessageKeySelector(Collections.singletonList(ProfileGroupAccumulator.PROFILE_GROUP_NAME_EXTENSION));
+            profileMessages = FlinkUtils.assignTimestamps(profileMessages, allowedLatenessMillis);
+
+            Time statsSlide = Time.of(profileGroupConfig.getStatsSlide(), TimeUnit.valueOf(profileGroupConfig.getStatsSlideUnit()));
+
+            DataStream<Message> statsStream = profileMessages.
+                    keyBy(profileKeySelector).
+                    timeWindow(profilePeriodDuration, statsSlide).aggregate(new ProfileAggregateFunction(profileGroupConfig, true));
+            StatsProfileKeySelector statsKeySelector = new StatsProfileKeySelector();
+            profileMessages = profileMessages.connect(statsStream).keyBy(profileKeySelector, statsKeySelector).process(new ProfileStatsJoin());
+        }
+        writeResults(params, profileMessages);
+
+        return profileMessages;
+    }
+
+    protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
+    protected abstract void writeResults(ParameterTool params, DataStream<Message> results);
+
 }
