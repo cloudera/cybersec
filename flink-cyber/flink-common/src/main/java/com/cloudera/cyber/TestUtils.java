@@ -20,9 +20,13 @@ public class TestUtils {
     }
 
     public static Message createMessage(Map<String, String> extensions) {
+        return createMessage(MessageUtils.getCurrentTimestamp(), "test", extensions);
+    }
+
+    public static Message createMessage(long timestamp, String source, Map<String, String> extensions) {
         return Message.builder()
-                .ts(MessageUtils.getCurrentTimestamp())
-                .source("test")
+                .ts(timestamp)
+                .source(source)
                 .extensions(extensions)
                 .message("")
                 .originalSource(
@@ -35,9 +39,13 @@ public class TestUtils {
     }
 
     public static MessageToParse.MessageToParseBuilder createMessageToParse(String source) {
+        return createMessageToParse(source, "test");
+    }
+
+    public static MessageToParse.MessageToParseBuilder createMessageToParse(String source, String topic) {
         return MessageToParse.builder()
                 .originalSource(source)
-                .topic("test")
+                .topic(topic)
                 .offset(0)
                 .partition(0);
     }
