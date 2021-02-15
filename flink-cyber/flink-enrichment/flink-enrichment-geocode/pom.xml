@@ -5,7 +5,7 @@
     <parent>
         <artifactId>flink-enrichment</artifactId>
         <groupId>com.cloudera.cyber</groupId>
-        <version>1.1.1</version>
+        <version>1.1.2</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
