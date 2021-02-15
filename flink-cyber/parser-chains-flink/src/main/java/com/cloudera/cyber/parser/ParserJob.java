@@ -10,6 +10,7 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.OutputTag;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -17,8 +18,6 @@ import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Host for the chain parser jobs
@@ -27,6 +26,8 @@ public abstract class ParserJob {
 
     protected static final String PARAM_CHAIN_CONFIG = "chain";
     protected static final String PARAM_CHAIN_CONFIG_FILE = "chain.file";
+    protected static final String PARAM_TOPIC_MAP_CONFIG = "chain.topic.map";
+    protected static final String PARAM_TOPIC_MAP_CONFIG_FILE = "chain.topic.map.file";
     public static final String PARAM_PRIVATE_KEY_FILE = "key.private.file";
     public static final String PARAM_PRIVATE_KEY = "key.private.base64";
     public static final String PARSER_ERROR_SIDE_OUTPUT = "parser-error";
@@ -36,13 +37,11 @@ public abstract class ParserJob {
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         FlinkUtils.setupEnv(env, params);
 
-        String chainConfig = params.has(PARAM_CHAIN_CONFIG_FILE) ?
-                new String(Files.readAllBytes(Paths.get(params.getRequired(PARAM_CHAIN_CONFIG_FILE))), StandardCharsets.UTF_8):
-                params.getRequired(PARAM_CHAIN_CONFIG);
+        String chainConfig = readConfigMap(PARAM_CHAIN_CONFIG_FILE, PARAM_CHAIN_CONFIG, params, null);
+        String topicConfig = readConfigMap(PARAM_TOPIC_MAP_CONFIG_FILE, PARAM_TOPIC_MAP_CONFIG, params, "{}");
 
         ParserChainMap chainSchema = JSONUtils.INSTANCE.load(chainConfig, ParserChainMap.class);
-
-        Map<String, String> topicMap = new HashMap<>();
+        TopicPatternToChainMap topicMap = JSONUtils.INSTANCE.load(topicConfig, TopicPatternToChainMap.class);
 
         DataStream<MessageToParse> source = createSource(env, params);
 
@@ -59,6 +58,8 @@ public abstract class ParserJob {
                 .name("Parser").uid("parser");
         writeResults(params, results);
 
+        writeOriginalsResults(params, source);
+
         final OutputTag<Message> outputTag = new OutputTag<Message>(PARSER_ERROR_SIDE_OUTPUT){};
         DataStream<Message> parserErrors = results.getSideOutput(outputTag);
         writeErrors(params, parserErrors);
@@ -66,8 +67,11 @@ public abstract class ParserJob {
         return env;
     }
 
-    private void printResults(SingleOutputStreamOperator<Message> results) {
-        results.print();
+    private String readConfigMap(String fileParamKey, String inlineConfigKey,  ParameterTool params, String defaultConfig) throws IOException {
+        return params.has(fileParamKey) ?
+                new String(Files.readAllBytes(Paths.get(params.getRequired(fileParamKey))), StandardCharsets.UTF_8):
+                defaultConfig == null ? params.getRequired(inlineConfigKey) : params.get(inlineConfigKey, defaultConfig);
+
     }
 
     protected abstract void writeResults(ParameterTool params, DataStream<Message> results);

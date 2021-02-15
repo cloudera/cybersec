@@ -1,8 +1,14 @@
 # Chaining Parser
 
-Config is a topic to parser config map using a full parser chain.
+Parses the raw text of an event, extracts fields and constructs a cyber Message.
 
-For example, to process data in a json form in a topic called `netflow` would run the chain here.
+## Chain Configuration
+
+The parser chain defines how to convert a textual message to the fields of a structured cyber Message.
+
+For example, the chain below converts a netflow message in json format, renames the @timestamp json element to timestamp, and converts the string timestamp to epoch millis.
+
+Every message must produce a field called "timestamp" set to a long value of epoch milliseconds.  The timestamp field populates the ts field of cyber Message.
 ```json
 {
     "netflow": {
@@ -54,6 +60,34 @@ For example, to process data in a json form in a topic called `netflow` would ru
 }
 ```
 
+## Topic Map Configuration
+
+The parser reads from one or more Kafka topics specified by the topic.pattern property.
+
+The topic map determines which chain to use after reading a message from a topic.   The source field specifies the source of the resulting parsed cyber Message.
+
+The example topic config below uses the netflow_type1 chain for all messages with topics starting with netflow_type1 and
+uses the netflow_type2 chain for all messages with topics starting with netflow_type2.  Both parser chains result in a message with source type netflow.
+
+```json
+{ 
+    "netflow_type1_.*" : { 
+        "chainKey": "netflow_type1", 
+        "source" : "netflow"
+     }, 
+     "netflow_type2_.*" : {
+        "chainKey": "netflow_type2", 
+         "source" : "netflow"
+     }
+}
+```
+
+## Error Handling
+When a parser fails, the parser publishes a message to the parser.error topic with a single field containing the original text and a data quality error indicating the problem. 
+
+In production, monitor the parser.error topic.  Determine the cause of the failures and correct the chain configuration.   Then replay the failed messages.
+
+## Properties file
 The job properties file would be of the form: 
 
 ```
@@ -62,8 +96,17 @@ kafka.client.id=parser-chain
 kafka.group.id=parswr-chain
 kafka.auto.offset.reset=latest
 
-config.file=/path/to/config.json
-topic.output=enrichment
+# chain and topic map configurations - see above
+chain.file=/path/to/chain_config.json
+chain.topic.map=/path/to/topic_config.json
+
+# publish parsed messages to topic.output
+topic.output=enrichment.input
+# messages that fail to parse are published to topic.error
+topic.error=parser.error
+# read text messages from topics matching pattern below
+topic.pattern=netflow.*
+
 
 # Write the original string content to HDFS parquet files at the given location
 original.enabled=true
@@ -72,5 +115,7 @@ original.basepath=/data/original/
 # Signing key - used to sign the original content
 key.private.file=private_key.der
 
-registry.address=http://schema.registry.server:7788/api/v1
+schema.registry.url=https://schemareghost:7790/api/v1
+schema.registry.client.ssl.trustStorePath=truststore.jks
+schema.registry.client.ssl.trustStorePassword=truststorepassword
 ```
