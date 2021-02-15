@@ -1,32 +1,32 @@
 package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.profiler.accumulator.ProfileGroupAccumulator;
+import lombok.AllArgsConstructor;
 import org.apache.flink.api.common.functions.AggregateFunction;
 
-import java.util.Map;
+@AllArgsConstructor
+public class ProfileAggregateFunction implements AggregateFunction<Message, ProfileGroupAccumulator, Message> {
+    private ProfileGroupConfig profileGroupConfig;
+    private boolean stats;
 
-public class ProfileAggregateFunction implements AggregateFunction<Message, ProfileAccumulator, Profile> {
-    public ProfileAggregateFunction(Map<String, String> fields) {
-
+    @Override
+    public ProfileGroupAccumulator createAccumulator() {
+        return new ProfileGroupAccumulator(profileGroupConfig, stats);
     }
 
     @Override
-    public ProfileAccumulator createAccumulator() {
-        return new ProfileAccumulator();
-    }
-
-    @Override
-    public ProfileAccumulator add(Message message, ProfileAccumulator profileAccumulator) {
+    public ProfileGroupAccumulator add(Message message, ProfileGroupAccumulator profileAccumulator) {
         return profileAccumulator.add(message);
     }
 
     @Override
-    public Profile getResult(ProfileAccumulator profileAccumulator) {
-        return profileAccumulator.getProfile();
+    public Message getResult(ProfileGroupAccumulator profileAccumulator) {
+        return profileAccumulator.getProfileMessage();
     }
 
     @Override
-    public ProfileAccumulator merge(ProfileAccumulator profileAccumulator, ProfileAccumulator acc1) {
+    public ProfileGroupAccumulator merge(ProfileGroupAccumulator profileAccumulator, ProfileGroupAccumulator acc1) {
         return profileAccumulator.merge(acc1);
     }
 
