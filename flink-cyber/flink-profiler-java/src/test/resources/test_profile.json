@@ -1,0 +1,36 @@
+[{
+  "profileGroupName" : "test_profile",
+  "sources" : [ "ANY" ],
+  "keyFieldNames" : [ "key_field" ],
+  "periodDuration" : 1,
+  "periodDurationUnit" : "SECONDS",
+  "measurements" :  [ {
+    "resultExtensionName" : "count",
+    "aggregationMethod" : "COUNT"
+  }, {
+    "fieldName" : "max_field",
+    "resultExtensionName" : "max",
+    "aggregationMethod" : "MAX"
+  }  ]
+},
+  {
+    "profileGroupName" : "region_byte_count",
+    "sources" : [ "netflow" ],
+    "keyFieldNames" : [ "region" ],
+    "periodDuration" : 5,
+    "periodDurationUnit" : "SECONDS",
+    "statsSlide" : 5,
+    "statsSlideUnit" : "SECONDS",
+    "measurements" :  [ {
+      "fieldName" : "sum_field",
+      "resultExtensionName" : "total_bytes",
+      "aggregationMethod" : "SUM",
+      "calculateStats" : true
+    },
+      {
+        "fieldName" : "ip_dst",
+        "resultExtensionName" : "distinct_dest",
+        "aggregationMethod" : "COUNT_DISTINCT",
+        "calculateStats" : true
+      }]
+  }]
