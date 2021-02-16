@@ -6,7 +6,7 @@
 
     <groupId>com.cloudera.cyber</groupId>
     <artifactId>flink-cyber</artifactId>
-    <version>release_1.2.0</version>
+    <version>1.2.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>flink-logging</module>
