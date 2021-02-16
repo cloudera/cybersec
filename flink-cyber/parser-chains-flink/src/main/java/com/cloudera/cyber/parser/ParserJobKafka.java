@@ -51,7 +51,7 @@ public class ParserJobKafka extends ParserJob {
 
     @Override
     protected void writeOriginalsResults(ParameterTool params, DataStream<MessageToParse> results) {
-        if (!params.getBoolean(PARAMS_ORIGINAL_ENABLED, true)) return;
+       if (!params.getBoolean(PARAMS_ORIGINAL_ENABLED, true)) return;
 
         // write the original sources to HDFS files
         Path path = new Path(params.getRequired(PARAMS_ORIGINAL_LOGS_PATH));
@@ -62,8 +62,11 @@ public class ParserJobKafka extends ParserJob {
                 .withRolloverInterval(params.getLong(PARAMS_ROLL_INTERVAL, DEFAULT_ROLL_INTERVAL))
                 .build();
 
+        // TODO - add the message id
+        // TODO - add filtering (might not care about all raws)
+        // TODO - change the factory to support compression
         StreamingFileSink<MessageToParse> sink = StreamingFileSink
-                .forBulkFormat(path, ParquetAvroWriters.forSpecificRecord(MessageToParse.class))
+                .forBulkFormat(path, ParquetAvroWriters.forReflectRecord(MessageToParse.class))
                 .withRollingPolicy(OnCheckpointRollingPolicy.build())
                 .withOutputFileConfig(OutputFileConfig
                         .builder()
