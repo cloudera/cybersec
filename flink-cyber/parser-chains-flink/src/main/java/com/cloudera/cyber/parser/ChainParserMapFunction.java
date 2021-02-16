@@ -9,7 +9,10 @@ import com.cloudera.parserchains.core.catalog.ClassIndexParserCatalog;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.metrics.Meter;
+import org.apache.flink.metrics.MeterView;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
@@ -19,6 +22,7 @@ import java.security.PrivateKey;
 import java.security.Signature;
 import java.time.Instant;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
@@ -30,7 +34,7 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
     @NonNull
     private final ParserChainMap chainConfig;
     @NonNull
-    private final Map<String, String> topicMap;
+    private final TopicPatternToChainMap topicMap;
 
     @NonNull
     private final PrivateKey signKey;
@@ -38,14 +42,20 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
     private transient ChainRunner chainRunner;
     private transient Map<String, ChainLink> chains;
     private transient Signature signature;
+    private transient Meter messageMeter;
     private final OutputTag<Message> errorOutputTag = new OutputTag<Message>(ParserJob.PARSER_ERROR_SIDE_OUTPUT){};
-
+    private transient Map<String, TopicParserConfig> topicNameToChain;
+    private transient List<Tuple2<Pattern, TopicParserConfig>> topicPatternToChain;
 
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
         log.info( "Chain config {}", chainConfig);
         log.info( "Topic map {}", topicMap);
+        topicNameToChain = new HashMap<>();
+        topicPatternToChain = topicMap.entrySet().stream().
+                map( e -> new Tuple2<>(Pattern.compile(e.getKey()), e.getValue())).
+                collect(Collectors.toList());
         ChainBuilder chainBuilder = new DefaultChainBuilder(new ReflectiveParserBuilder(),
                 new ClassIndexParserCatalog());
         ArrayList<InvalidParserException> errors = new ArrayList<>();
@@ -72,6 +82,7 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
 
         signature = Signature.getInstance("SHA1WithRSA");
         signature.initSign(signKey);
+        messageMeter = getRuntimeContext().getMetricGroup().meter("messagesPerMinute", new MeterView(60));
         log.info("Parser chains {}", chains);
         log.info("Chain runner chains {}", chainRunner);
     }
@@ -79,9 +90,8 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
     @Override
     public void processElement(MessageToParse message, Context context, Collector<Message> collector) throws Exception {
         final String inputMessage = message.getOriginalSource();
-        final String chainKey = topicMap.getOrDefault(message.getTopic(), message.getTopic());
-
-        final List<com.cloudera.parserchains.core.Message> run = chainRunner.run(inputMessage, chains.get(chainKey));
+        final TopicParserConfig topicParserConfig = getChainForTopic(message.getTopic());
+        final List<com.cloudera.parserchains.core.Message> run = chainRunner.run(inputMessage, chains.get(topicParserConfig.getChainKey()));
         final com.cloudera.parserchains.core.Message m = run.get(run.size() - 1);
 
         Optional<FieldValue> timestamp = m.getField(FieldName.of("timestamp"));
@@ -110,7 +120,7 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
         signature.update(originalInput.getBytes(StandardCharsets.UTF_8));
         byte[] sig = signature.sign();
         Message parsedMessage = Message.builder().extensions(fieldsFromChain(errorMessage.isPresent(), m.getFields()))
-                .source(message.getTopic())
+                .source(topicParserConfig.getSource())
                 .originalSource(SignedSourceKey.builder()
                         .topic(message.getTopic())
                         .partition(message.getPartition())
@@ -126,18 +136,30 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
         } else {
             collector.collect(parsedMessage);
         }
+        messageMeter.markEvent();
     }
 
     private static HashMap<String, String> fieldsFromChain(boolean hasError, Map<FieldName, FieldValue> fields) {
         return new HashMap<String, String>() {{
-            fields.entrySet().stream().forEach(e -> {
-                String key = e.getKey().get();
+            fields.forEach((key1, value) -> {
+                String key = key1.get();
                 if ((key.equals(DEFAULT_INPUT_FIELD) && !hasError) || key.equals("timestamp")) {
                 } else {
-                    put(key, e.getValue().get());
+                    put(key, value.get());
                 }
             });
         }};
+    }
+
+    private TopicParserConfig getChainForTopic(String topic) {
+        TopicParserConfig topicParserConfig = topicNameToChain.get(topic);
+        if (topicParserConfig == null) {
+            topicParserConfig = topicPatternToChain.stream().filter(t -> t.f0.matcher(topic).
+                        matches()).findFirst().map(t -> t.f1).orElse(new TopicParserConfig(topic, topic));
+            topicNameToChain.put(topic, topicParserConfig);
+        }
+
+        return topicParserConfig;
     }
 
 }
