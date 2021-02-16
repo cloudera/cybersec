@@ -5,7 +5,7 @@
     <parent>
         <artifactId>flink-cyber</artifactId>
         <groupId>com.cloudera.cyber</groupId>
-        <version>release_1.2.0</version>
+        <version>1.2.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -134,7 +134,7 @@
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-common</artifactId>
-            <version>release_1.2.0</version>
+            <version>1.2.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
