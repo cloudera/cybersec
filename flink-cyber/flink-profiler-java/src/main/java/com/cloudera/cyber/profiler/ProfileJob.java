@@ -2,7 +2,6 @@ package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
-import com.cloudera.cyber.profiler.accumulator.ProfileGroupAccumulator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -75,26 +74,26 @@ public abstract class ProfileJob {
         List<String> keyFieldNames = profileGroupConfig.getKeyFieldNames();
         Time profilePeriodDuration = Time.of(profileGroupConfig.getPeriodDuration(), TimeUnit.valueOf(profileGroupConfig.getPeriodDurationUnit()));
         DataStream<Message> profileMessages = messages.filter(new MessageFieldFilter(keyFieldNames)).keyBy(new MessageKeySelector(keyFieldNames)).timeWindow(profilePeriodDuration).
-                aggregate(new ProfileAggregateFunction(profileGroupConfig, false));
+                aggregate(new FieldValueProfileAggregateFunction(profileGroupConfig));
 
         if (profileGroupConfig.hasStats()) {
-            MessageKeySelector profileKeySelector = new MessageKeySelector(Collections.singletonList(ProfileGroupAccumulator.PROFILE_GROUP_NAME_EXTENSION));
+            MessageKeySelector profileKeySelector = new MessageKeySelector(Collections.singletonList(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION));
             profileMessages = FlinkUtils.assignTimestamps(profileMessages, allowedLatenessMillis);
 
             Time statsSlide = Time.of(profileGroupConfig.getStatsSlide(), TimeUnit.valueOf(profileGroupConfig.getStatsSlideUnit()));
 
             DataStream<Message> statsStream = profileMessages.
                     keyBy(profileKeySelector).
-                    timeWindow(profilePeriodDuration, statsSlide).aggregate(new ProfileAggregateFunction(profileGroupConfig, true));
+                    timeWindow(profilePeriodDuration, statsSlide).aggregate(new StatsProfileAggregateFunction(profileGroupConfig));
             StatsProfileKeySelector statsKeySelector = new StatsProfileKeySelector();
             profileMessages = profileMessages.connect(statsStream).keyBy(profileKeySelector, statsKeySelector).process(new ProfileStatsJoin());
         }
-        writeResults(params, profileMessages);
+        writeResults(params, profileMessages, profileGroupConfig.getProfileGroupName());
 
         return profileMessages;
     }
 
     protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
-    protected abstract void writeResults(ParameterTool params, DataStream<Message> results);
+    protected abstract void writeResults(ParameterTool params, DataStream<Message> results, String profileGroupName);
 
 }

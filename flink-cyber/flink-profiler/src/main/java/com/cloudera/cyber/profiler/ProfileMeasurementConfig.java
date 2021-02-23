@@ -3,6 +3,7 @@ package com.cloudera.cyber.profiler;
 import lombok.*;
 
 import java.io.Serializable;
+import java.text.DecimalFormat;
 
 @Data
 @Builder
@@ -17,5 +18,13 @@ public class ProfileMeasurementConfig implements Serializable {
 
     public boolean hasStats() {
         return (calculateStats != null && calculateStats);
+    }
+
+    public DecimalFormat getDecimalFormat() {
+        if (format != null) {
+            return new DecimalFormat(format);
+        } else {
+            return ProfileAggregationMethod.defaultFormat.get(aggregationMethod);
+        }
     }
 }
