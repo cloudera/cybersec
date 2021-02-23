@@ -2,16 +2,14 @@ package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.profiler.accumulator.ProfileGroupAccumulator;
-import com.cloudera.cyber.profiler.accumulator.StatsProfileAccumulator;
-import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
+import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
 import org.apache.flink.streaming.util.TestHarnessUtil;
 import org.apache.flink.streaming.util.TwoInputStreamOperatorTestHarness;
 import org.junit.Test;
-import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -62,7 +60,7 @@ public class ProfileStatsJoinTest extends ProfileAggregateTest {
         Message resultMessage = message1;
         if (message2 != null) {
             resultMessage = MessageUtils.addFields(message1, message2.getExtensions().entrySet().stream().
-                    filter(e -> StatsProfileAccumulator.isStatsExtension(e.getKey())).
+                    filter(e -> ProfileStatsJoin.isStatsExtension(e.getKey())).
                     collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         }
         StreamRecord<Message> record = new StreamRecord<>(message1);
@@ -76,21 +74,21 @@ public class ProfileStatsJoinTest extends ProfileAggregateTest {
     }
 
     private Message createProfileMessage(ProfileGroupConfig profileGroupConfig) {
-        ProfileAggregateFunction aggregateFunction = new ProfileAggregateFunction(profileGroupConfig, false);
+        ProfileAggregateFunction aggregateFunction = new FieldValueProfileAggregateFunction(profileGroupConfig);
 
-        ProfileGroupAccumulator acc = aggregateFunction.createAccumulator();
+        ProfileGroupAcc acc = aggregateFunction.createAccumulator();
         long currentTimestamp = MessageUtils.getCurrentTimestamp();
-        addMessage(acc, currentTimestamp, 30);
-        addMessage(acc, currentTimestamp + 100, 100);
+        addMessage(acc, currentTimestamp, 30, profileGroupConfig);
+        addMessage(acc, currentTimestamp + 100, 100, profileGroupConfig);
 
-        return acc.getProfileMessage();
+        return aggregateFunction.getResult(acc);
     }
 
     private Message createStatsMessage(ProfileGroupConfig profileGroupConfig, Message profileMessage) {
-        ProfileAggregateFunction aggregateFunction = new ProfileAggregateFunction(profileGroupConfig, true);
-        ProfileGroupAccumulator acc = aggregateFunction.createAccumulator();
-        acc.add(profileMessage);
+        ProfileAggregateFunction aggregateFunction = new StatsProfileAggregateFunction(profileGroupConfig);
+        ProfileGroupAcc acc = aggregateFunction.createAccumulator();
+        acc.addMessage(profileMessage, profileGroupConfig);
 
-        return acc.getProfileMessage();
+        return aggregateFunction.getResult(acc);
     }
 }

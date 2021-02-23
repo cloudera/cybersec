@@ -20,11 +20,9 @@ public class ProfileJobKafka extends ProfileJob {
             throw new RuntimeException("Path to the properties file is expected as the only argument.");
         }
         ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
-        new ProfileJobKafka()
-                .createPipeline(params)
-                .execute("Flink Profiling");
+        FlinkUtils.executeEnv(new ProfileJobKafka()
+                .createPipeline(params), "Flink Profiling",  params);
     }
-
 
     @Override
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
@@ -38,10 +36,10 @@ public class ProfileJobKafka extends ProfileJob {
     }
 
     @Override
-    protected void writeResults(ParameterTool params, DataStream<Message> results) {
+    protected void writeResults(ParameterTool params, DataStream<Message> results, String profileGroupName) {
         FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
                 params.getRequired(ConfigConstants.PARAMS_TOPIC_OUTPUT), PROFILE_GROUP_ID,
                 params);
-        results.addSink(sink).name("Kafka Results").uid("kafka.results");
+        results.addSink(sink).name("Kafka Results").uid("kafka.results." + profileGroupName);
     }
 }

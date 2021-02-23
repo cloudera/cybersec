@@ -4,7 +4,7 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.flink.MessageBoundedOutOfOrder;
-import com.cloudera.cyber.profiler.accumulator.ProfileGroupAccumulator;
+import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.google.common.collect.ImmutableMap;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -80,34 +80,34 @@ public class ProfileJobTest extends ProfileJob {
                            put(COUNT_PROFILE_EXTENSION, "3");
                            put(MAX_PROFILE_EXTENSION, "30");
                            put(KEY_FIELD_NAME, KEY_1);
-                           put(ProfileGroupAccumulator.PROFILE_GROUP_NAME_EXTENSION, TEST_PROFILE_GROUP);
-                           put(ProfileGroupAccumulator.START_PERIOD_EXTENSION, Long.toString(currentTimestamp));
-                           put(ProfileGroupAccumulator.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 2));
+                           put(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION, TEST_PROFILE_GROUP);
+                           put(ProfileGroupAcc.START_PERIOD_EXTENSION, Long.toString(currentTimestamp));
+                           put(ProfileGroupAcc.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 2));
                         }});
 
             put(TEST_PROFILE_GROUP + KEY_2, new HashMap<String, String>() {{
                     put(COUNT_PROFILE_EXTENSION, "2");
                     put(MAX_PROFILE_EXTENSION, "75");
                     put(KEY_FIELD_NAME, KEY_2);
-                    put(ProfileGroupAccumulator.PROFILE_GROUP_NAME_EXTENSION, TEST_PROFILE_GROUP);
-                    put(ProfileGroupAccumulator.START_PERIOD_EXTENSION, Long.toString(currentTimestamp));
-                    put(ProfileGroupAccumulator.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 1));
+                    put(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION, TEST_PROFILE_GROUP);
+                    put(ProfileGroupAcc.START_PERIOD_EXTENSION, Long.toString(currentTimestamp));
+                    put(ProfileGroupAcc.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 1));
              }});
 
             put(BYTE_COUNT_PROFILE_GROUP + REGION_1, new HashMap<String, String>() {{
                 put(SUM_PROFILE_EXTENSION, "1536");
                 put(SUM_KEY_FIELD_NAME, REGION_1);
-                put(ProfileGroupAccumulator.PROFILE_GROUP_NAME_EXTENSION, BYTE_COUNT_PROFILE_GROUP);
-                put(ProfileGroupAccumulator.START_PERIOD_EXTENSION, Long.toString(currentTimestamp + 5));
-                put(ProfileGroupAccumulator.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 6));
+                put(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION, BYTE_COUNT_PROFILE_GROUP);
+                put(ProfileGroupAcc.START_PERIOD_EXTENSION, Long.toString(currentTimestamp + 5));
+                put(ProfileGroupAcc.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 6));
             }});
 
             put(BYTE_COUNT_PROFILE_GROUP + REGION_2, new HashMap<String, String>() {{
                 put(SUM_PROFILE_EXTENSION, "128");
                 put(SUM_KEY_FIELD_NAME, REGION_2);
-                put(ProfileGroupAccumulator.PROFILE_GROUP_NAME_EXTENSION, BYTE_COUNT_PROFILE_GROUP);
-                put(ProfileGroupAccumulator.START_PERIOD_EXTENSION, Long.toString(currentTimestamp + 4));
-                put(ProfileGroupAccumulator.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 4));
+                put(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION, BYTE_COUNT_PROFILE_GROUP);
+                put(ProfileGroupAcc.START_PERIOD_EXTENSION, Long.toString(currentTimestamp + 4));
+                put(ProfileGroupAcc.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 4));
             }});
 
         }};
@@ -131,7 +131,7 @@ public class ProfileJobTest extends ProfileJob {
         Message profile = sink.poll(Duration.ofSeconds(5));
 
         Map<String, String> extensions = profile.getExtensions();
-        String expectedExtensionsKey = extensions.get(ProfileGroupAccumulator.PROFILE_GROUP_NAME_EXTENSION) + extensions.getOrDefault(KEY_FIELD_NAME, extensions.get(SUM_KEY_FIELD_NAME));
+        String expectedExtensionsKey = extensions.get(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION) + extensions.getOrDefault(KEY_FIELD_NAME, extensions.get(SUM_KEY_FIELD_NAME));
         Assert.assertEquals(expectedExtensions.get(expectedExtensionsKey), extensions);
     }
 
@@ -162,8 +162,8 @@ public class ProfileJobTest extends ProfileJob {
     }
 
     @Override
-    protected void writeResults(ParameterTool params, DataStream<Message> results) {
-        results.addSink(sink).name("Profile events").setParallelism(1);
+    protected void writeResults(ParameterTool params, DataStream<Message> results, String profileGroupName) {
+        results.addSink(sink).name("Profile events " + profileGroupName).setParallelism(1);
     }
 
 }
