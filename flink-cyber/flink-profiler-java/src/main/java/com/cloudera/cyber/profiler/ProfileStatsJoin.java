@@ -2,7 +2,7 @@ package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.profiler.accumulator.StatsProfileAccumulator;
+import com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.co.CoProcessFunction;
 import org.apache.flink.util.Collector;
@@ -29,9 +29,16 @@ public class ProfileStatsJoin extends CoProcessFunction<Message, Message, Messag
 
     @Override
     public void processElement2(Message statsMessage, Context context, Collector<Message> collector) {
-        currentStats = statsMessage.getExtensions().entrySet().stream().filter(e -> StatsProfileAccumulator.isStatsExtension(e.getKey())).
+        currentStats = statsMessage.getExtensions().entrySet().stream().filter(e -> isStatsExtension(e.getKey())).
                 collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         collector.collect(statsMessage);
     }
 
+    public static boolean isStatsExtension(String extensionName) {
+        int suffixStart = extensionName.lastIndexOf('.');
+        if (suffixStart > 0) {
+            return StatsProfileGroupAcc.STATS_EXTENSION_SUFFIXES.contains(extensionName.substring(suffixStart));
+        }
+        return false;
+    }
 }

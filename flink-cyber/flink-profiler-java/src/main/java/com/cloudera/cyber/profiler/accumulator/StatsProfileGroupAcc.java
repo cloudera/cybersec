@@ -1,0 +1,63 @@
+package com.cloudera.cyber.profiler.accumulator;
+
+import com.cloudera.cyber.Message;
+import com.cloudera.cyber.profiler.ProfileGroupConfig;
+import com.cloudera.cyber.profiler.ProfileMeasurementConfig;
+import com.google.common.collect.Lists;
+import org.apache.commons.math3.stat.descriptive.AggregateSummaryStatistics;
+import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
+import org.apache.flink.api.common.accumulators.Accumulator;
+
+import java.io.Serializable;
+import java.text.DecimalFormat;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class StatsProfileGroupAcc extends ProfileGroupAcc {
+    public static final String MIN_RESULT_SUFFIX = ".min";
+    public static final String MAX_RESULT_SUFFIX = ".max";
+    public static final String MEAN_RESULT_SUFFIX = ".mean";
+    public static final String STDDEV_RESULT_SUFFIX = ".stddev";
+    public static List<String> STATS_EXTENSION_SUFFIXES = Lists.newArrayList(MIN_RESULT_SUFFIX, MAX_RESULT_SUFFIX, MEAN_RESULT_SUFFIX, STDDEV_RESULT_SUFFIX);
+    private static final DecimalFormat DEFAULT_FORMAT = new DecimalFormat("0.00");
+
+    public StatsProfileGroupAcc(ProfileGroupConfig profileGroupConfig) {
+        super(profileGroupConfig.getMeasurements().stream().filter(ProfileMeasurementConfig::hasStats).
+                map(config -> new StatsAcc()).collect(Collectors.toList()));
+    }
+
+    @Override
+    protected void updateAccumulators(Message message, ProfileGroupConfig profileGroupConfig) {
+        Iterator<ProfileMeasurementConfig> measurementIter = profileGroupConfig.getMeasurements().stream().
+                filter(ProfileMeasurementConfig::hasStats).iterator();
+        Iterator<Accumulator<?, ? extends Serializable>> accumulatorIter= accumulators.iterator();
+        while(measurementIter.hasNext() && accumulatorIter.hasNext()) {
+            ProfileMeasurementConfig measurementConfig = measurementIter.next();
+            StatsAcc accumulator = (StatsAcc)accumulatorIter.next();
+            Double fieldValue = getFieldValueAsDouble(message, measurementConfig.getResultExtensionName());
+            if (fieldValue != null) {
+                accumulator.getLocalValue().get(0).addValue(fieldValue);
+            }
+        }
+    }
+
+    @Override
+    protected void addExtensions(ProfileGroupConfig profileGroupConfig, Map<String, String> extensions, Map<String, DecimalFormat> ignored) {
+        Iterator<ProfileMeasurementConfig> measurementIter = profileGroupConfig.getMeasurements().stream().
+                filter(ProfileMeasurementConfig::hasStats).iterator();
+        Iterator<Accumulator<?, ? extends Serializable>> accumulatorIter= accumulators.iterator();
+        while(measurementIter.hasNext() && accumulatorIter.hasNext()) {
+            ProfileMeasurementConfig measurementConfig = measurementIter.next();
+            StatsAcc accumulator = (StatsAcc)accumulatorIter.next();
+
+            StatisticalSummaryValues stats = AggregateSummaryStatistics.aggregate(accumulator.getLocalValue());
+            String resultExtensionName = measurementConfig.getResultExtensionName();
+            extensions.put(resultExtensionName.concat(MIN_RESULT_SUFFIX), DEFAULT_FORMAT.format(stats.getMin()));
+            extensions.put(resultExtensionName.concat(MAX_RESULT_SUFFIX), DEFAULT_FORMAT.format(stats.getMax()));
+            extensions.put(resultExtensionName.concat(MEAN_RESULT_SUFFIX), DEFAULT_FORMAT.format(stats.getMean()));
+            extensions.put(resultExtensionName.concat(STDDEV_RESULT_SUFFIX), DEFAULT_FORMAT.format(stats.getStandardDeviation()));
+        }
+    }
+}

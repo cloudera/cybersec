@@ -51,6 +51,10 @@ public class FlinkUtils<T> {
         env.getConfig().setGlobalJobParameters(params);
     }
 
+    public static void executeEnv(StreamExecutionEnvironment env,  String defaultJobName, ParameterTool params) throws Exception {
+        env.execute(params.get("flink.job.name",defaultJobName));
+    }
+
     public FlinkKafkaProducer<T> createKafkaSink(final String topic, String groupId, final ParameterTool params) {
         Preconditions.checkNotNull(topic, "Must specific output topic");
 
