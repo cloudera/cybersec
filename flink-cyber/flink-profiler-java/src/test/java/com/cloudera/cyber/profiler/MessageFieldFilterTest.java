@@ -4,7 +4,6 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.TestUtils;
 import com.google.common.collect.ImmutableMap;
-import com.typesafe.config.ConfigException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class MessageFieldFilterTest {
     private static final Map<String, String> extensions = ImmutableMap.of("field_name1", "field_value_1",

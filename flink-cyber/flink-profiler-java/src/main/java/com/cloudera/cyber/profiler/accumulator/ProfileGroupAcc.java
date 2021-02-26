@@ -17,9 +17,9 @@ public abstract class ProfileGroupAcc {
     public static final String START_PERIOD_EXTENSION = "start_period";
     public static final String END_PERIOD_EXTENSION = "end_period";
 
-    LongMinimum startPeriodTimestamp = new LongMinimum();
-    LongMaximum endPeriodTimestamp = new LongMaximum();
-    List<Accumulator<?, ? extends Serializable>> accumulators;
+    final LongMinimum startPeriodTimestamp = new LongMinimum();
+    final LongMaximum endPeriodTimestamp = new LongMaximum();
+    final List<Accumulator<?, ? extends Serializable>> accumulators;
 
     public ProfileGroupAcc(List<Accumulator<?, ? extends Serializable>> accumulators) {
         this.accumulators = accumulators;
