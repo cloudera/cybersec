@@ -1,14 +1,12 @@
 package com.cloudera.cyber;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -27,9 +25,6 @@ public class MessageUtilsTest {
     private final HashMap<String, String> FIRST_FIELD_MAP = new HashMap<>();
     private final HashMap<String, String> SECOND_FIELD_MAP = new HashMap<>();
     private final HashMap<String, String> ALL_FIELDS_MAP = new HashMap<>();
-    private final HashMap<String, String> STRING_ARRAY_FIELD_MAP = new HashMap<>();
-    private final HashMap<String, String> INT_ARRAY_FIELD_MAP = new HashMap<>();
-    private final HashMap<String, String> ALL_ARRAY_FIELDS_MAP = new HashMap<>();
 
     private final List<DataQualityMessage> DATA_QUALITY_MESSAGES_1 = Collections.singletonList(new DataQualityMessage(DataQualityMessageLevel.INFO.name(), TEST_FEATURE, TEST_FIELD_1, TEST_MESSAGE_1));
     private final List<DataQualityMessage> DATA_QUALITY_MESSAGES_1_DEEP_COPY = DATA_QUALITY_MESSAGES_1.stream().map(m -> m.toBuilder().build()).collect(toList());
@@ -42,8 +37,6 @@ public class MessageUtilsTest {
         SECOND_FIELD_MAP.put(TEST_FIELD_2, TEST_VALUE_2);
         ALL_FIELDS_MAP.putAll(FIRST_FIELD_MAP);
         ALL_FIELDS_MAP.putAll(SECOND_FIELD_MAP);
-        ALL_ARRAY_FIELDS_MAP.putAll(STRING_ARRAY_FIELD_MAP);
-        ALL_ARRAY_FIELDS_MAP.putAll(INT_ARRAY_FIELD_MAP);
     }
 
     @Test
@@ -110,4 +103,56 @@ public class MessageUtilsTest {
 
         Assert.assertTrue(currentMillis - currentTime < 1000);
     }
+
+    @Test
+    public void testReplaceExtensions() {
+        String extensionStaysSame = "unchanged_field";
+        String extensionStaysSameValue = "original_value";
+        String extensionToChange = "change_me";
+        String extensionsToChangeOriginalValue = "old_value";
+        String extensionsToChangeNewValue = "new_value";
+        Message input = TestUtils.createMessage(ImmutableMap.of(extensionStaysSame, extensionStaysSameValue,
+                                                                extensionToChange, extensionsToChangeOriginalValue));
+        Message output = MessageUtils.replaceFields(input, ImmutableMap.of(extensionToChange, extensionsToChangeNewValue));
+        Assert.assertEquals(ImmutableMap.of(extensionStaysSame, extensionStaysSameValue,
+                extensionToChange, extensionsToChangeNewValue), output.getExtensions());
+    }
+
+    @Test
+    public void testReplaceExtensionsNullMap() {
+        testReplaceNoOriginalEventExtensions(null);
+    }
+
+    @Test
+    public void testReplaceExtensionsEmptyMap() {
+        testReplaceNoOriginalEventExtensions(Collections.emptyMap());
+    }
+
+    private void testReplaceNoOriginalEventExtensions(Map<String, String> originalEventExtensions) {
+        String extensionToChange = "change_me";
+        String extensionsToChangeNewValue = "new_value";
+        Message input = TestUtils.createMessage(originalEventExtensions);
+        Message output = MessageUtils.replaceFields(input, ImmutableMap.of(extensionToChange, extensionsToChangeNewValue));
+        Assert.assertEquals(ImmutableMap.of(extensionToChange, extensionsToChangeNewValue), output.getExtensions());
+    }
+
+    @Test
+    public void testReplaceExtensionsNullReplaceExtensions() {
+        testNoReplaceValues(null);
+    }
+
+    @Test
+    public void testReplaceExtensionsEmptyReplaceExtensions() {
+        testNoReplaceValues(Collections.emptyMap());
+    }
+
+    void testNoReplaceValues(Map<String, String> noReplaceValues) {
+        Map<String, String> originalExtensions = ImmutableMap.of("field_1", "value_1",
+                "field_2", "value_2");
+        Message input = TestUtils.createMessage(originalExtensions);
+        Message output = MessageUtils.replaceFields(input, noReplaceValues);
+        Assert.assertEquals(originalExtensions, output.getExtensions());
+
+    }
+
 }

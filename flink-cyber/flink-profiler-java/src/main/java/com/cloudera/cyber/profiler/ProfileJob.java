@@ -65,9 +65,8 @@ public abstract class ProfileJob {
      *
      * @param params Configuration parameters
      * @param messages Data stream of messages to profile.
-     * @return stream of profile messages.
      */
-    protected DataStream<Message> profile(final ParameterTool params, DataStream<Message> messages, ProfileGroupConfig profileGroupConfig, long allowedLatenessMillis) {
+    protected void profile(final ParameterTool params, DataStream<Message> messages, ProfileGroupConfig profileGroupConfig, long allowedLatenessMillis) {
         if (profileGroupConfig.needsSourceFilter()) {
             messages = messages.filter(new MessageSourceFilter(profileGroupConfig.getSources()));
         }
@@ -75,6 +74,9 @@ public abstract class ProfileJob {
         Time profilePeriodDuration = Time.of(profileGroupConfig.getPeriodDuration(), TimeUnit.valueOf(profileGroupConfig.getPeriodDurationUnit()));
         DataStream<Message> profileMessages = messages.filter(new MessageFieldFilter(keyFieldNames)).keyBy(new MessageKeySelector(keyFieldNames)).timeWindow(profilePeriodDuration).
                 aggregate(new FieldValueProfileAggregateFunction(profileGroupConfig));
+        if (profileGroupConfig.hasFirstSeen()) {
+            profileMessages = updateFirstSeen(params, profileMessages, profileGroupConfig);
+        }
 
         if (profileGroupConfig.hasStats()) {
             MessageKeySelector profileKeySelector = new MessageKeySelector(Collections.singletonList(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION));
@@ -89,11 +91,10 @@ public abstract class ProfileJob {
             profileMessages = profileMessages.connect(statsStream).keyBy(profileKeySelector, statsKeySelector).process(new ProfileStatsJoin());
         }
         writeResults(params, profileMessages, profileGroupConfig.getProfileGroupName());
-
-        return profileMessages;
     }
 
     protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
     protected abstract void writeResults(ParameterTool params, DataStream<Message> results, String profileGroupName);
+    protected abstract DataStream<Message> updateFirstSeen(ParameterTool params, DataStream<Message> results, ProfileGroupConfig profileGroupConfig);
 
 }

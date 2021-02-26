@@ -1,8 +1,9 @@
 package com.cloudera.cyber;
 
-import avro.shaded.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,7 +22,7 @@ public class MessageUtils {
      * @return Message with fields from the original message and the fields passed in.  If fields is empty, return original unmodified message.
      */
     public static Message addFields(Message message, Map<String, String> field) {
-        if (!field.isEmpty()) {
+        if (field != null && !field.isEmpty()) {
             return message.toBuilder()
                     .extensions(Stream.concat(
                             streamExtensions(message),
@@ -33,14 +34,13 @@ public class MessageUtils {
         }
     }
 
-    public static Message addFields(Message message, Map<String, String> field, String prefix) {
-        if (!field.isEmpty()) {
-            return message.toBuilder()
-                    .extensions(Stream.concat(
-                            message.getExtensions().entrySet().stream(),
-                            prefixMap(field, prefix)
-                    ).collect(toMap(Map.Entry::getKey, Map.Entry::getValue)))
-                    .build();
+    public static Message replaceFields(Message message, Map<String, String> fields) {
+        if (fields != null && !fields.isEmpty()) {
+            Map<String, String> messageExtensions = message.getExtensions() != null ? message.getExtensions() : new HashMap<>();
+            Map<String, String> newMessageExtensions = new HashMap<>(messageExtensions);
+            newMessageExtensions.putAll(fields);
+
+            return message.toBuilder().extensions(newMessageExtensions).build();
         } else {
             return message;
         }

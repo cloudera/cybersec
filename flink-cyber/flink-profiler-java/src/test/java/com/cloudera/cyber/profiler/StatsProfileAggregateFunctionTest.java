@@ -15,8 +15,6 @@ import java.util.Map;
 import static com.cloudera.cyber.profiler.ProfileAggregateFunction.*;
 import static com.cloudera.cyber.profiler.StatsProfileAggregateFunction.STATS_PROFILE_GROUP_SUFFIX;
 import static com.cloudera.cyber.profiler.accumulator.FieldValueProfileGroupAccTest.*;
-import static com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc.END_PERIOD_EXTENSION;
-import static com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc.START_PERIOD_EXTENSION;
 import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.*;
 import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAccTest.NO_STATS_RESULT_NAME;
 import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAccTest.STATS_RESULT_NAME;

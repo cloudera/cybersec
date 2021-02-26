@@ -27,29 +27,29 @@ public class FieldProfileAggregateFunction {
         long currentTimestamp = MessageUtils.getCurrentTimestamp();
         Message profileMessage = getProfileMessage(aggregateFunction, acc,
                 currentTimestamp,500, "1 string", 10000, 8);
-        verifyProfileMessage(profileGroupConfig, profileMessage,  currentTimestamp, currentTimestamp, KEY_1_VALUE, KEY_2_VALUE,
-                500, 1, 1, 10000, 8, currentTimestamp);
+        verifyProfileMessage(profileGroupConfig, profileMessage,  currentTimestamp, currentTimestamp,
+                500, 1, 1, 10000, 8);
 
         profileMessage = getProfileMessage(aggregateFunction, acc,
                 currentTimestamp - 1, 10, "2 string", 10100, 2);
-        verifyProfileMessage(profileGroupConfig, profileMessage,  currentTimestamp - 1, currentTimestamp, KEY_1_VALUE, KEY_2_VALUE,
-                510, 2, 2, 10100, 2, currentTimestamp - 1);
+        verifyProfileMessage(profileGroupConfig, profileMessage,  currentTimestamp - 1, currentTimestamp,
+                510, 2, 2, 10100, 2);
 
 
         ProfileGroupAcc acc1 = aggregateFunction.createAccumulator();
         profileMessage = getProfileMessage(aggregateFunction, acc1,
                 currentTimestamp + 5,50000, "3 string", 100000, 1);
-        verifyProfileMessage(profileGroupConfig, profileMessage,  currentTimestamp + 5, currentTimestamp + 5, KEY_1_VALUE, KEY_2_VALUE,
-                50000, 1, 1, 100000, 1, currentTimestamp + 5);
+        verifyProfileMessage(profileGroupConfig, profileMessage,  currentTimestamp + 5, currentTimestamp + 5,
+                50000, 1, 1, 100000, 1);
 
         ProfileGroupAcc mergeAcc = aggregateFunction.merge(acc, acc1);
         profileMessage = aggregateFunction.getResult(mergeAcc);
-        verifyProfileMessage(profileGroupConfig, profileMessage,  currentTimestamp - 1, currentTimestamp + 5, KEY_1_VALUE, KEY_2_VALUE,
-                50510, 3, 3, 100000, 1, currentTimestamp - 1);
+        verifyProfileMessage(profileGroupConfig, profileMessage,  currentTimestamp - 1, currentTimestamp + 5,
+                50510, 3, 3, 100000, 1);
     }
 
-    private void verifyProfileMessage(ProfileGroupConfig profileGroupConfig, Message profileMessage, long startPeriod, long endPeriod, String key1, String key2, double sum, double count,
-                               double countDistinct, double max, double min, long firstSeen) {
+    private void verifyProfileMessage(ProfileGroupConfig profileGroupConfig, Message profileMessage, long startPeriod, long endPeriod, double sum, double count,
+                                      double countDistinct, double max, double min) {
 
         Assert.assertEquals(PROFILE_TOPIC_NAME, profileMessage.getOriginalSource().getTopic());
         Assert.assertEquals(PROFILE_SOURCE, profileMessage.getSource());
@@ -65,14 +65,9 @@ public class FieldProfileAggregateFunction {
         Assert.assertEquals(formats.get(COUNT_DIST_RESULT).format(countDistinct), actualExtensions.get(COUNT_DIST_RESULT));
         Assert.assertEquals(formats.get(MAX_RESULT).format(max), actualExtensions.get(MAX_RESULT));
         Assert.assertEquals(formats.get(MIN_RESULT).format(min), actualExtensions.get(MIN_RESULT));
-        Assert.assertEquals(formats.get(FIRST_SEEN_RESULT).format(firstSeen), actualExtensions.get(FIRST_SEEN_RESULT));
-        if (key1 != null && key2 != null) {
-            Assert.assertEquals(key1, actualExtensions.get(KEY_1));
-            Assert.assertEquals(key2, actualExtensions.get(KEY_2));
-            Assert.assertEquals(11, actualExtensions.size());
-        } else {
-            Assert.assertEquals(9, actualExtensions.size());
-        }
+        Assert.assertEquals(com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.KEY_1_VALUE, actualExtensions.get(KEY_1));
+        Assert.assertEquals(com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.KEY_2_VALUE, actualExtensions.get(KEY_2));
+        Assert.assertEquals(10, actualExtensions.size());
     }
 
     private Message getProfileMessage(ProfileAggregateFunction aggregateFunction, ProfileGroupAcc acc,

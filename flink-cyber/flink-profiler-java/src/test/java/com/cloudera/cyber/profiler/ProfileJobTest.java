@@ -166,4 +166,10 @@ public class ProfileJobTest extends ProfileJob {
         results.addSink(sink).name("Profile events " + profileGroupName).setParallelism(1);
     }
 
+    @Override
+    protected DataStream<Message> updateFirstSeen(ParameterTool params, DataStream<Message> results, ProfileGroupConfig profileGroupConfig) {
+        //skip hbase for unit tests
+        return results;
+    }
+
 }
