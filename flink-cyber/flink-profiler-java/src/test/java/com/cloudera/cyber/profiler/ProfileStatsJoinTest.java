@@ -11,12 +11,14 @@ import org.apache.flink.streaming.util.TestHarnessUtil;
 import org.apache.flink.streaming.util.TwoInputStreamOperatorTestHarness;
 import org.junit.Test;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 
-public class ProfileStatsJoinTest extends ProfileAggregateTest {
+public class ProfileStatsJoinTest extends ProfileGroupTest {
 
     @Test
     public void profileJoinTestWithStats() throws Exception {
@@ -32,7 +34,7 @@ public class ProfileStatsJoinTest extends ProfileAggregateTest {
         ProfileStatsJoin join = new ProfileStatsJoin();
         join.open(new Configuration());
 
-        ProfileGroupConfig profileGroupConfig = getProfileGroupConfig(true);
+        ProfileGroupConfig profileGroupConfig = getProfileGroupConfig();
         Message profileMessage = createProfileMessage(profileGroupConfig);
         Message statsMessage = createStatsMessage(profileGroupConfig, profileMessage);
 
@@ -90,5 +92,13 @@ public class ProfileStatsJoinTest extends ProfileAggregateTest {
         acc.addMessage(profileMessage, profileGroupConfig);
 
         return aggregateFunction.getResult(acc);
+    }
+
+    private ProfileGroupConfig getProfileGroupConfig() {
+        List<ProfileMeasurementConfig> measurements = Collections.singletonList(ProfileMeasurementConfig.builder().resultExtensionName(RESULT_EXTENSION_NAME).
+                aggregationMethod(ProfileAggregationMethod.SUM).fieldName(SUM_FIELD_NAME).format("0.000000").calculateStats(true).
+                build());
+
+        return getProfileGroupConfig(measurements);
     }
 }

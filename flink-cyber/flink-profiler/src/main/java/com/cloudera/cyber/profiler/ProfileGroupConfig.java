@@ -31,6 +31,10 @@ public class ProfileGroupConfig implements Serializable {
          return !sources.contains(ANY_SOURCE);
     }
 
+    public boolean hasFirstSeen() {
+        return measurements.stream().anyMatch(m -> m.getAggregationMethod().equals(ProfileAggregationMethod.FIRST_SEEN));
+    }
+
     public void verify() {
         Preconditions.checkNotNull(profileGroupName, "profileGroupName is null");
         Preconditions.checkState(!profileGroupName.isEmpty());

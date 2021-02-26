@@ -47,7 +47,7 @@ public abstract class AbstractHbaseMapFunction extends RichMapFunction<Message, 
 
     private Cache<LookupKey, Map<String, String>> cache;
 
-    private Map<String, String> fetch(LookupKey key) {
+    protected Map<String, String> fetch(LookupKey key) {
         try {
             fetchCounter.inc();
 

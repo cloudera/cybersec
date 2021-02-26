@@ -3,12 +3,9 @@ package com.cloudera.cyber.profiler;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
-import com.cloudera.cyber.profiler.accumulator.FieldValueProfileGroupAcc;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -21,19 +18,8 @@ public class ProfileGroupTest {
     protected static final String SUM_FIELD_NAME = "field_to_sum";
 
 
-    protected ProfileGroupAcc getProfileGroupAccumulator(String profileGroupName) {
-        List<ProfileMeasurementConfig> measurements = Collections.singletonList(ProfileMeasurementConfig.builder().resultExtensionName(RESULT_EXTENSION_NAME).
-                aggregationMethod(ProfileAggregationMethod.SUM).fieldName(SUM_FIELD_NAME).format("0.000000").
-                build());
-        return getProfileGroupAccumulator(profileGroupName, measurements);
-    }
-
-    protected ProfileGroupAcc getProfileGroupAccumulator(String profileGroupName, List<ProfileMeasurementConfig> measurements) {
-        return new FieldValueProfileGroupAcc(getProfileGroupConfig(profileGroupName, measurements));
-    }
-
-    protected ProfileGroupConfig getProfileGroupConfig(String profileGroupName,  List<ProfileMeasurementConfig> measurements) {
-        return ProfileGroupConfig.builder().profileGroupName(profileGroupName).keyFieldNames(Lists.newArrayList(KEY_FIELD_NAME))
+    protected ProfileGroupConfig getProfileGroupConfig(List<ProfileMeasurementConfig> measurements) {
+        return ProfileGroupConfig.builder().profileGroupName(ProfileGroupTest.PROFILE_GROUP_NAME).keyFieldNames(Lists.newArrayList(KEY_FIELD_NAME))
                 .sources(Lists.newArrayList("ANY")).
                         periodDuration(1L).periodDurationUnit(TimeUnit.MINUTES.name()).
                         measurements(Lists.newArrayList(measurements)).
@@ -50,23 +36,5 @@ public class ProfileGroupTest {
                 SUM_FIELD_NAME, Long.toString(aggregationFieldValue)
         );
         return TestUtils.createMessage(timestamp, "test", extensions);
-    }
-
-    protected void verifyProfileGroupAccumulatorMessage(ProfileGroupAcc profileGroupAccumulator, long startPeriod, long endPeriod, double profileResultValue) {
-       // Message profileMessage = profileGroupAccumulator.getProfileExtensions(profileGroupConfig);
-       // verifyProfileMessage(startPeriod, endPeriod, profileResultValue, profileMessage);
-    }
-
-    protected void verifyProfileMessage(long startPeriod, long endPeriod, double profileResultValue, Message profileMessage) {
-        Map<String, String> extensions = profileMessage.getExtensions();
-        Assert.assertEquals(endPeriod, profileMessage.getTs());
-      //  Assert.assertEquals(PROFILE_GROUP_NAME, extensions.get(ProfileGroupAcc.PROFILE_GROUP_NAME_EXTENSION));
-      //  Assert.assertEquals(KEY_FIELD_VALUE, extensions.get(KEY_FIELD_NAME));
-        Assert.assertEquals(String.format("%f", profileResultValue), extensions.get(RESULT_EXTENSION_NAME));
-        Assert.assertEquals(endPeriod, profileMessage.getTs());
-      //  Assert.assertEquals(Long.toString(startPeriod), extensions.get(ProfileGroupAccumulator.START_PERIOD_EXTENSION));
-      //  Assert.assertEquals(Long.toString(endPeriod), extensions.get(ProfileGroupAccumulator.END_PERIOD_EXTENSION));
-       // Assert.assertEquals(ProfileGroupAccumulator.PROFILE_SOURCE, profileMessage.getSource());
-        //Assert.assertEquals(ProfileGroupAccumulator.PROFILE_TOPIC_NAME, profileMessage.getOriginalSource().getTopic());
     }
 }

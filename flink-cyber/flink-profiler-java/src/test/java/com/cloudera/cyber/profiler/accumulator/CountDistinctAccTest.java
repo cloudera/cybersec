@@ -1,17 +1,15 @@
 package com.cloudera.cyber.profiler.accumulator;
 
-import com.cloudera.cyber.TestUtils;
-import com.google.common.collect.ImmutableMap;
 import org.apache.flink.api.common.accumulators.Accumulator;
-import org.apache.kafka.common.metrics.stats.Count;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 public class CountDistinctAccTest {
-    private static final String FIELD_NAME = "field_name";
-    private static final String TEST_RESULT_NAME = "distinct_count";
 
     @Test
     public void testAddFollowedByResetLocal() {
