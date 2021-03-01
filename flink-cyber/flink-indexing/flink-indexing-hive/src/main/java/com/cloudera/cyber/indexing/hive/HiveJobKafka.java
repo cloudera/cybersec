@@ -18,7 +18,8 @@ public class HiveJobKafka extends HiveJob {
 
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        new HiveJobKafka().createPipeline(ParameterTool.fromPropertiesFile(args[0])).execute("Indexing - Hive");
+        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        FlinkUtils.executeEnv(new HiveJobKafka().createPipeline(params),"Indexing - Hive", params);
     }
 
     @Override
