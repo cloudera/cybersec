@@ -31,12 +31,13 @@ import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
 @Slf4j
 public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Message> {
 
+    private byte[] EMPTY_SIGNATURE = new byte[1];
+
     @NonNull
     private final ParserChainMap chainConfig;
     @NonNull
     private final TopicPatternToChainMap topicMap;
 
-    @NonNull
     private final PrivateKey signKey;
 
     private transient ChainRunner chainRunner;
@@ -61,7 +62,7 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
         ArrayList<InvalidParserException> errors = new ArrayList<>();
         try {
             chains = chainConfig.entrySet().stream().collect(Collectors.toMap(
-                    e -> e.getKey(),
+                    Map.Entry::getKey,
                     v ->
                     {
                         try {
@@ -80,8 +81,12 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
 
         chainRunner = new DefaultChainRunner();
 
-        signature = Signature.getInstance("SHA1WithRSA");
-        signature.initSign(signKey);
+        if (signKey != null) {
+            signature = Signature.getInstance("SHA1WithRSA");
+            signature.initSign(signKey);
+        } else {
+            signature = null;
+        }
         messageMeter = getRuntimeContext().getMetricGroup().meter("messagesPerMinute", new MeterView(60));
         log.info("Parser chains {}", chains);
         log.info("Chain runner chains {}", chainRunner);
@@ -116,9 +121,11 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
 
         String originalInput
                 = m.getField(FieldName.of(DEFAULT_INPUT_FIELD)).get().get();
-
-        signature.update(originalInput.getBytes(StandardCharsets.UTF_8));
-        byte[] sig = signature.sign();
+        byte[] sig = EMPTY_SIGNATURE;
+        if (signature != null) {
+            signature.update(originalInput.getBytes(StandardCharsets.UTF_8));
+            sig = signature.sign();
+        }
         Message parsedMessage = Message.builder().extensions(fieldsFromChain(errorMessage.isPresent(), m.getFields()))
                 .source(topicParserConfig.getSource())
                 .originalSource(SignedSourceKey.builder()
