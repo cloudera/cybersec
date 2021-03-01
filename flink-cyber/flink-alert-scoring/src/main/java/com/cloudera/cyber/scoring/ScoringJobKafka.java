@@ -22,9 +22,8 @@ public class ScoringJobKafka extends ScoringJob {
             throw new RuntimeException("Path to the properties file is expected as the only argument.");
         }
         ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
-        new ScoringJobKafka()
-                .createPipeline(params)
-                .execute("Flink Scoring");
+        FlinkUtils.executeEnv(new ScoringJobKafka()
+                .createPipeline(params), "Flink Scoring", params);
     }
 
     @Override
