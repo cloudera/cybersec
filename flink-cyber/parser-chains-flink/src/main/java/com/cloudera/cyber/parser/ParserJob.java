@@ -31,6 +31,7 @@ public abstract class ParserJob {
     public static final String PARAM_PRIVATE_KEY_FILE = "key.private.file";
     public static final String PARAM_PRIVATE_KEY = "key.private.base64";
     public static final String PARSER_ERROR_SIDE_OUTPUT = "parser-error";
+    public static final String SIGNATURE_ENABLED = "signature.enabled";
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -45,13 +46,16 @@ public abstract class ParserJob {
 
         DataStream<MessageToParse> source = createSource(env, params);
 
-        byte[] privKeyBytes = params.has(PARAM_PRIVATE_KEY_FILE) ?
-                Files.readAllBytes(Paths.get(params.get(PARAM_PRIVATE_KEY_FILE))) :
-                Base64.getDecoder().decode(params.getRequired(PARAM_PRIVATE_KEY));
+        PrivateKey privateKey = null;
+        if (params.getBoolean(SIGNATURE_ENABLED, true)) {
+            byte[] privKeyBytes = params.has(PARAM_PRIVATE_KEY_FILE) ?
+                    Files.readAllBytes(Paths.get(params.get(PARAM_PRIVATE_KEY_FILE))) :
+                    Base64.getDecoder().decode(params.getRequired(PARAM_PRIVATE_KEY));
 
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privKeyBytes);
-        PrivateKey privateKey = keyFactory.generatePrivate(privSpec);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privKeyBytes);
+            privateKey = keyFactory.generatePrivate(privSpec);
+        }
 
         SingleOutputStreamOperator<Message> results =
                 source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey))
