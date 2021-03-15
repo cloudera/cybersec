@@ -48,7 +48,7 @@ public class MessageToParse extends SpecificRecordBase implements SpecificRecord
     @Override
     public void put(int field$, java.lang.Object value$) {
         switch (field$) {
-            case 0: originalSource = value$.toString(); break;
+            case 0: originalSource = String.valueOf(value$); break;
             case 1: topic = value$.toString(); break;
             case 2: partition = (int)value$; break;
             case 3: offset = (long)value$; break;
