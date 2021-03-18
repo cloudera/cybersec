@@ -10,23 +10,24 @@ import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.BinaryDecoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.core.fs.FSDataInputStream;
+import org.apache.flink.core.fs.FileSystem;
+import org.apache.flink.core.fs.Path;
 
 @MessageParser(
         name = "Simple Avro parser",
         description = "Parses Avro data by creating a field for each Avro element.")
+@Slf4j
 public class AvroParser implements Parser {
 
     public static final String DEFAULT_AVRO_SCHEMA = "avro-9009.schema";
@@ -56,11 +57,23 @@ public class AvroParser implements Parser {
             label = "Schema Path",
             description = "Path to schema of avro file",
             defaultValue = DEFAULT_AVRO_SCHEMA)
-    public AvroParser schemaPath(String pathToSchema) throws URISyntaxException, IOException {
-        URI uriPath = Objects.requireNonNull(getClass().getClassLoader().getResource(pathToSchema))
-                .toURI();
-        this.schema = new Schema.Parser().parse(new File(uriPath));
+    public AvroParser schemaPath(String pathToSchema) {
+        try {
+            FileSystem fileSystem = new Path(pathToSchema).getFileSystem();
+            loadSchema(pathToSchema, fileSystem);
+        } catch (IOException ioe) {
+            log.error("Unable to load file system " + pathToSchema, ioe);
+        }
         return this;
+    }
+
+    private void loadSchema(String pathToSchema, FileSystem fileSystem) {
+        try (FSDataInputStream fsDataInputStream = fileSystem.open(new Path(pathToSchema))) {
+            this.schema = new Schema.Parser().parse(fsDataInputStream);
+            log.info("Successfully loaded schema {}", pathToSchema);
+        } catch (Exception e) {
+            log.error("Exception while loading schema " + pathToSchema, e);
+        }
     }
 
     @Override
