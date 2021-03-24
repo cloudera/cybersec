@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.*;
+import static org.assertj.core.api.Assertions.*;
 
 public class IpAsnMapTest {
     private static final String IP_FIELD_NAME = "ip_dst_addr";
@@ -26,9 +27,8 @@ public class IpAsnMapTest {
     public void testNoAsnIpFields() {
         IpAsnMap emptyFields = new IpAsnMap(IpAsnTestData.ASN_DATABASE_PATH, Collections.emptyList(), null);
         emptyFields.open(new Configuration());
-        Map<String, String> inputFields = new HashMap<String, String>() {{
-            put(IP_FIELD_NAME, IpAsnTestData.IP_WITH_NUMBER_AND_ORG);
-        }};
+        Map<String, String> inputFields = new HashMap<>();
+        inputFields.put(IP_FIELD_NAME, IpAsnTestData.IP_WITH_NUMBER_AND_ORG);
         Message result = emptyFields.map(TestUtils.createMessage(inputFields));
         Assert.assertEquals(inputFields, result.getExtensions());
         assertNoErrorsOrInfos(result);
@@ -67,30 +67,34 @@ public class IpAsnMapTest {
         assertNoErrorsOrInfos(output);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testThrowsAsnDatabaseDoesNotExist() {
         String doesntExistPath = "./src/test/resources/geolite/doesntexist";
         File databaseFile = new File(doesntExistPath);
         Assert.assertFalse(databaseFile.exists());
         IpAsnMap map = new IpAsnMap(doesntExistPath, ENRICH_FIELD_NAMES, null);
-        map.open(new Configuration());
+        assertThatThrownBy(() -> map.open(new Configuration())).
+                isInstanceOfAny(IllegalStateException.class).
+                hasMessage("Could not read asn database %s", doesntExistPath);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testThrowsAsnDatabaseEmptyFile() {
         String emptyFilePath = "./src/test/resources/geolite/invalid_maxmind_db";
         File databaseFile = new File(emptyFilePath);
         Assert.assertTrue(databaseFile.exists());
         Assert.assertTrue(databaseFile.length() > 0);
         IpAsnMap map = new IpAsnMap(emptyFilePath, ENRICH_FIELD_NAMES, null);
-        map.open(new Configuration());
+        assertThatThrownBy(() ->map.open(new Configuration())).isInstanceOfAny(IllegalStateException.class).
+                hasMessage("Could not read asn database %s", emptyFilePath);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testThrowsBadFilesystem() {
         String badFilesystemPath = "bad:/src/test/resources/geolite/invalid_maxmind_db";
         IpAsnMap map = new IpAsnMap(badFilesystemPath, ENRICH_FIELD_NAMES, null);
-        map.open(new Configuration());
+        assertThatThrownBy(() ->map.open(new Configuration())).isInstanceOfAny(IllegalStateException.class).
+                hasMessage("Could not read asn database %s", badFilesystemPath);
     }
 
     private Message testAsnMap(Map<String, String> inputFields) {
