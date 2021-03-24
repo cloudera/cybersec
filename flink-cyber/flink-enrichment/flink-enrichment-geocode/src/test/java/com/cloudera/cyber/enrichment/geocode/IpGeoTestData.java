@@ -1,6 +1,7 @@
 package com.cloudera.cyber.enrichment.geocode;
 
 import com.cloudera.cyber.enrichment.geocode.impl.IpGeoEnrichment;
+import com.google.common.collect.ImmutableMap;
 
 import java.util.*;
 
@@ -27,19 +28,19 @@ public class IpGeoTestData {
     public static Map<String, Map<IpGeoEnrichment.GeoEnrichmentFields, String>> createGeoExpectedValues() {
         Map<String, Map<IpGeoEnrichment.GeoEnrichmentFields, String>> expectedValues = new HashMap<>();
         expectedValues.put(COUNTRY_ONLY_IPv6,
-                new HashMap<IpGeoEnrichment.GeoEnrichmentFields, String>() {{
-                    put(IpGeoEnrichment.GeoEnrichmentFields.COUNTRY, "JP");
-                    put(IpGeoEnrichment.GeoEnrichmentFields.LATITUDE, "35.68536");
-                    put(IpGeoEnrichment.GeoEnrichmentFields.LONGITUDE, "139.75309");
-                }});
+                ImmutableMap.of(
+                    IpGeoEnrichment.GeoEnrichmentFields.COUNTRY, "JP",
+                    IpGeoEnrichment.GeoEnrichmentFields.LATITUDE, "35.68536",
+                    IpGeoEnrichment.GeoEnrichmentFields.LONGITUDE, "139.75309"
+                ));
         expectedValues.put(ALL_FIELDS_IPv4,
-                new HashMap<IpGeoEnrichment.GeoEnrichmentFields, String>() {{
-                    put(IpGeoEnrichment.GeoEnrichmentFields.COUNTRY, "GB");
-                    put(IpGeoEnrichment.GeoEnrichmentFields.CITY, "Boxford");
-                    put(IpGeoEnrichment.GeoEnrichmentFields.STATE, "West Berkshire");
-                    put(IpGeoEnrichment.GeoEnrichmentFields.LATITUDE, "51.75");
-                    put(IpGeoEnrichment.GeoEnrichmentFields.LONGITUDE, "-1.25");
-                }});
+                ImmutableMap.of(
+                    IpGeoEnrichment.GeoEnrichmentFields.COUNTRY, "GB",
+                    IpGeoEnrichment.GeoEnrichmentFields.CITY, "Boxford",
+                    IpGeoEnrichment.GeoEnrichmentFields.STATE, "West Berkshire",
+                    IpGeoEnrichment.GeoEnrichmentFields.LATITUDE, "51.75",
+                    IpGeoEnrichment.GeoEnrichmentFields.LONGITUDE, "-1.25"
+                ));
 
         return expectedValues;
     }
@@ -53,11 +54,4 @@ public class IpGeoTestData {
         expectedGeos.forEach((field, value) -> expectedEnrichments.put(String.join(".", enrichmentFieldName, GEOCODE_FEATURE, field.getSingularName()), value));
     }
 
-    public static void getExpectedEnrichmentValues(Map<String, String> expectedEnrichments, String enrichmentFieldName, Object enrichmentValue, List<IpGeoEnrichment.GeoEnrichmentFields> expectedGeoEnrichments) {
-        if (enrichmentValue instanceof String) {
-            getExpectedEnrichmentValues(expectedEnrichments, enrichmentFieldName, (String) enrichmentValue);
-        } else if (enrichmentValue instanceof List){
-            getExpectedEnrichmentValues(expectedEnrichments, enrichmentFieldName, enrichmentValue, expectedGeoEnrichments);
-        }
-    }
 }
