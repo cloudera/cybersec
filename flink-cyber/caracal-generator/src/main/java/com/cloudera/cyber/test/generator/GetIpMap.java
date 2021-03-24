@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 public class GetIpMap implements MapFunction<Tuple2<String, String>, String> {
 
-    private final static Pattern ipExtractPattern = Pattern.compile("([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})");
+    private static final Pattern ipExtractPattern = Pattern.compile("([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})");
 
     @Override
     public String map(Tuple2<String, String> s) {
