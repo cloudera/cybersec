@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
 @Log
-@Ignore
 public class IpGeoJobTest extends IpGeoJob {
     private static final String STRING_IP_FIELD_NAME = "string_ip_field";
     private static final String LIST_IP_FIELD_NAME = "list_ip_field";
