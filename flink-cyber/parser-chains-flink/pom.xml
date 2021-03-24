@@ -102,7 +102,7 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
+      <!--  <dependency>
             <groupId>org.apache.parquet</groupId>
             <artifactId>parquet-avro</artifactId>
             <version>${flink.format.parquet.version}</version>
@@ -116,7 +116,7 @@
                     <artifactId>fastutil</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
+        </dependency> -->
 
         <!-- Logging -->
         <dependency>
