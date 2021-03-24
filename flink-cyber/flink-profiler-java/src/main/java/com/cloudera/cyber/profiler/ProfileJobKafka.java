@@ -3,9 +3,8 @@ package com.cloudera.cyber.profiler;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.ConfigConstants;
 import com.cloudera.cyber.flink.FlinkUtils;
-import org.apache.flink.addons.hbase.HBaseSinkFunction;
-import org.apache.flink.addons.hbase.HBaseWriteOptions;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.hbase.sink.HBaseSinkFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
@@ -55,11 +54,7 @@ public class ProfileJobKafka extends ProfileJob {
         DataStream<Message> updatedProfileMessages = results.map(new FirstSeenHbaseLookup(tableName, columnFamilyName, profileGroupConfig));
 
         // write the new first and last seen timestamps in hbase
-        HBaseSinkFunction<Message> hbaseSink = new FirstSeenHbaseSink(tableName, columnFamilyName, profileGroupConfig);
-        hbaseSink.setWriteOptions(HBaseWriteOptions.builder()
-                .setBufferFlushIntervalMillis(1000)
-                .build()
-        );
+        HBaseSinkFunction<Message> hbaseSink = new FirstSeenHbaseSink(tableName, columnFamilyName, profileGroupConfig, params);
         updatedProfileMessages.addSink(hbaseSink).name("HBase First Seen Profile Sink");
         return updatedProfileMessages;
     }

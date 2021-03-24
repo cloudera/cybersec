@@ -2,8 +2,8 @@ package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.enrichment.hbase.AbstractHbaseMapFunction;
-import com.cloudera.cyber.enrichment.hbase.LookupKey;
+import com.cloudera.cyber.hbase.AbstractHbaseMapFunction;
+import com.cloudera.cyber.hbase.LookupKey;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;

@@ -3,7 +3,7 @@ package com.cloudera.cyber.profiler;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.TestUtils;
-import com.cloudera.cyber.enrichment.hbase.LookupKey;
+import com.cloudera.cyber.hbase.LookupKey;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
