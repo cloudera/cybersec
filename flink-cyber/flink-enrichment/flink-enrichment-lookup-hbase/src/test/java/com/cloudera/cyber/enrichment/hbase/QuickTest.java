@@ -9,7 +9,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
 import org.junit.Ignore;
@@ -21,7 +21,6 @@ public class QuickTest {
     @Test
     public void testing() throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 
         ManualSource<Message> ms = JobTester.createManualSource(env, TypeInformation.of(Message.class));
 

@@ -2,8 +2,8 @@ package com.cloudera.cyber.enrichment.threatq;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.enrichment.hbase.AbstractHbaseMapFunction;
-import com.cloudera.cyber.enrichment.hbase.LookupKey;
+import com.cloudera.cyber.hbase.AbstractHbaseMapFunction;
+import com.cloudera.cyber.hbase.LookupKey;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -42,7 +42,7 @@ public class ThreatQHBaseMap extends AbstractHbaseMapFunction {
                     return hbaseLookup(message.getTs(), key, f + ".threatq");
                 })
                 .flatMap(m -> m.entrySet().stream())
-                .collect(toMap(k -> k.getKey(), v -> v.getValue()));
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         return MessageUtils.addFields(message, results);
     }
