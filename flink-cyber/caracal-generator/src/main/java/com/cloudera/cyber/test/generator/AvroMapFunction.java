@@ -1,10 +1,8 @@
 package com.cloudera.cyber.test.generator;
 
-import java.io.File;
 import java.nio.charset.StandardCharsets;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
