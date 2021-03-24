@@ -2,6 +2,13 @@ package com.cloudera.cyber.test.generator;
 
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.libs.networking.IPLocal;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -11,21 +18,73 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public abstract class CaracalGeneratorFlinkJob {
+
     public static final String PARAMS_RECORDS_LIMIT = "generator.count";
     private static final int DEFAULT_EPS = 0;
     private static final String PARAMS_EPS = "generator.eps";
+    private static final String PARAMS_SCHEMA = "generator.avro";
+    private static final String SCHEMA_PATH = "Netflow/netflow.schema";
     private static final double THREAT_PROBABILITY = 0.01;
 
-    public StreamExecutionEnvironment createPipeline(ParameterTool params) {
+    public StreamExecutionEnvironment createPipeline(ParameterTool params) throws URISyntaxException, IOException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         FlinkUtils.setupEnv(env, params);
 
         env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
 
+        String avroGeneratorFlag = params.get(PARAMS_SCHEMA);
+        SingleOutputStreamOperator<Tuple2<String, String>> generatedInput;
+        if (BooleanUtils.toBoolean(avroGeneratorFlag)) {
+            String schemaString = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(SCHEMA_PATH));
+            generatedInput = convertDataToAvro(schemaString, createSourceFromTemplateSource(
+                    params, env, Collections
+                            .singletonMap(new GenerationSource("Netflow/netflow_avro_sample1.json", "generator.avro"),
+                                    1.0)));
+        } else {
+            generatedInput = createSourceFromTemplateSource(params, env, getNetflowSampleMap());
+            generateRandomThreatResults(params, generatedInput);
+
+        }
+        writeMetrics(params, generateMetrics(generatedInput));
+        writeResults(params, generatedInput);
+        return env;
+    }
+
+    private SingleOutputStreamOperator<Tuple2<String, String>> convertDataToAvro(String schemaString,
+            SingleOutputStreamOperator<Tuple2<String, String>> generatedInput) {
+        return generatedInput
+                .map(new AvroMapFunction(schemaString));
+    }
+
+    private SingleOutputStreamOperator<Tuple2<String, Integer>> generateMetrics(
+            SingleOutputStreamOperator<Tuple2<String, String>> generatedInput) {
+        return generatedInput
+                .map(new MapFunction<Tuple2<String, String>, Tuple2<String, Integer>>() {
+                    @Override
+                    public Tuple2<String, Integer> map(Tuple2<String, String> stringStringTuple2) throws Exception {
+                        return Tuple2.of(stringStringTuple2.f0, Integer.valueOf(1));
+                    }
+                })
+                .keyBy(0)
+                .window(TumblingProcessingTimeWindows.of(Time.seconds(30)))
+                .sum(1);
+    }
+
+    private void generateRandomThreatResults(ParameterTool params,
+            SingleOutputStreamOperator<Tuple2<String, String>> generatedInput) {
+        // add random threat intelligence for a sample of the generated IPs
+        IPLocal localIp = new IPLocal();
+
+        SingleOutputStreamOperator<Tuple2<String, String>> threats = generatedInput
+                .map(new GetIpMap())
+                .filter(f -> f != null && !localIp.eval(f))
+                .filter(new RandomSampler<>(THREAT_PROBABILITY))
+                .map(new ThreatGeneratorMap());
+        writeResults(params, threats);
+    }
+
+    private Map<GenerationSource, Double> getNetflowSampleMap() {
         Map<GenerationSource, Double> outputs = new HashMap<>();
         outputs.put(new GenerationSource("Netflow/netflow_sample_1.json", "netflow"), 2.0);
         outputs.put(new GenerationSource("Netflow/netflow_sample_2.json", "netflow"), 4.0);
@@ -44,39 +103,19 @@ public abstract class CaracalGeneratorFlinkJob {
         outputs.put(new GenerationSource("DPI_Logs/Metadata_Module/DNS/dns_sample_3.json", "dpi_dns"), 1.0);
 
         outputs.put(new GenerationSource("DPI_Logs/Metadata_Module/SMTP/smtp_sample_1.json", "dpi_smtp"), 1.0);
-
-        SingleOutputStreamOperator<Tuple2<String, String>> generatedInput =
-                env.addSource(new FreemarkerTemplateSource(outputs, params.getLong(PARAMS_RECORDS_LIMIT, -1), params.getInt(PARAMS_EPS, DEFAULT_EPS))).name("Weighted Data Source");
-
-        // add random threat intelligence for a sample of the generated IPs
-        IPLocal localIp = new IPLocal();
-        SingleOutputStreamOperator<Tuple2<String, String>> threats = generatedInput
-                .map(new GetIpMap())
-                .filter(f -> f != null && !localIp.eval(f))
-                .filter(new RandomSampler(THREAT_PROBABILITY))
-                .map(new ThreatGeneratorMap());
-        writeResults(params, threats);
-
-        SingleOutputStreamOperator<Tuple2<String, Integer>> metrics = generatedInput
-                .map(new MapFunction<Tuple2<String, String>, Tuple2<String, Integer>>() {
-                    @Override
-                    public Tuple2<String, Integer> map(Tuple2<String, String> stringStringTuple2) throws Exception {
-                        return Tuple2.of(stringStringTuple2.f0, Integer.valueOf(1));
-                    }
-                })
-                .keyBy(0)
-                .window(TumblingProcessingTimeWindows.of(Time.seconds(30)))
-                .sum(1);
-
-        writeMetrics(params, metrics);
-        writeResults(params, generatedInput);
-
-        return env;
+        return outputs;
     }
 
-    protected abstract void writeMetrics(ParameterTool params, SingleOutputStreamOperator<Tuple2<String, Integer>> metrics);
+    private SingleOutputStreamOperator<Tuple2<String, String>> createSourceFromTemplateSource(ParameterTool params,
+            StreamExecutionEnvironment env, Map<GenerationSource, Double> outputs) {
+        return env.addSource(new FreemarkerTemplateSource(
+                outputs, params.getLong(PARAMS_RECORDS_LIMIT, -1), params.getInt(PARAMS_EPS, DEFAULT_EPS)))
+                .name("Weighted Data Source");
+    }
 
-    protected abstract void writeResults(ParameterTool params, SingleOutputStreamOperator<Tuple2<String, String>> generatedInput);
+    protected abstract void writeMetrics(ParameterTool params,
+            SingleOutputStreamOperator<Tuple2<String, Integer>> metrics);
 
-
+    protected abstract void writeResults(ParameterTool params,
+            SingleOutputStreamOperator<Tuple2<String, String>> generatedInput);
 }

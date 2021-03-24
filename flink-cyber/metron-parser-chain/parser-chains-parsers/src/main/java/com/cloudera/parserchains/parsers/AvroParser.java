@@ -30,7 +30,7 @@ import org.apache.flink.core.fs.Path;
 @Slf4j
 public class AvroParser implements Parser {
 
-    public static final String DEFAULT_AVRO_SCHEMA = "avro-9009.schema";
+    public static final String DEFAULT_AVRO_SCHEMA = "netflow.schema";
 
     private FieldName inputField;
     private Schema schema;
@@ -57,22 +57,19 @@ public class AvroParser implements Parser {
             label = "Schema Path",
             description = "Path to schema of avro file",
             defaultValue = DEFAULT_AVRO_SCHEMA)
-    public AvroParser schemaPath(String pathToSchema) {
-        try {
-            FileSystem fileSystem = new Path(pathToSchema).getFileSystem();
-            loadSchema(pathToSchema, fileSystem);
-        } catch (IOException ioe) {
-            log.error("Unable to load file system " + pathToSchema, ioe);
-        }
+    public AvroParser schemaPath(String pathToSchema) throws IOException {
+        FileSystem fileSystem = new Path(pathToSchema).getFileSystem();
+        loadSchema(pathToSchema, fileSystem);
         return this;
     }
 
-    private void loadSchema(String pathToSchema, FileSystem fileSystem) {
+    private void loadSchema(String pathToSchema, FileSystem fileSystem) throws IOException {
         try (FSDataInputStream fsDataInputStream = fileSystem.open(new Path(pathToSchema))) {
             this.schema = new Schema.Parser().parse(fsDataInputStream);
             log.info("Successfully loaded schema {}", pathToSchema);
-        } catch (Exception e) {
-            log.error("Exception while loading schema " + pathToSchema, e);
+        } catch (IOException ioe) {
+            log.error("Exception while loading schema from file " + pathToSchema, ioe);
+            throw ioe;
         }
     }
 

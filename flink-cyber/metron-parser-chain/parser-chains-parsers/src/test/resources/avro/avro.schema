@@ -1,0 +1,1 @@
+{"type":"record","name":"testFile","namespace":"com.example.avro","fields":[{"name":"name","type":"string"},{"name":"number","type":"int"},{"name":"innerRecord","type":{"type":"record","name":"inner","fields":[{"name":"age","type":"int"}]}},{"name":"tes3","type":{"type":"map","values":"int"},"default":{"td3":1}}]}
