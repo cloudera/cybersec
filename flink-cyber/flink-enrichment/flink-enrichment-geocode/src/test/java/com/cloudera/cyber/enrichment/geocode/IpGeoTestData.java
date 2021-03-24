@@ -57,17 +57,7 @@ public class IpGeoTestData {
         if (enrichmentValue instanceof String) {
             getExpectedEnrichmentValues(expectedEnrichments, enrichmentFieldName, (String) enrichmentValue);
         } else if (enrichmentValue instanceof List){
-            //noinspection unchecked
-            getExpectedEnrichmentValues(expectedEnrichments, enrichmentFieldName, (List<Object>) enrichmentValue, expectedGeoEnrichments);
-        }
-    }
-
-    public static void getExpectedEnrichmentValues(Map<String, String> expectedEnrichments, String enrichmentFieldName, Object enrichmentValue) {
-        if (enrichmentValue instanceof String) {
-            getExpectedEnrichmentValues(expectedEnrichments, enrichmentFieldName, enrichmentValue, Arrays.asList(IpGeoMap.ALL_GEO_FIELDS));
-        } else if (enrichmentValue instanceof List){
-            //noinspection unchecked
-            getExpectedEnrichmentValues(expectedEnrichments, enrichmentFieldName, (List<Object>) enrichmentValue, Arrays.asList(IpGeoMap.AGGREGATE_GEO_FIELDS));
+            getExpectedEnrichmentValues(expectedEnrichments, enrichmentFieldName, enrichmentValue, expectedGeoEnrichments);
         }
     }
 }
