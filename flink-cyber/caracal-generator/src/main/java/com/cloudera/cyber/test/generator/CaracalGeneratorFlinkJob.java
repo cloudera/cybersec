@@ -7,6 +7,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -23,11 +24,11 @@ public abstract class CaracalGeneratorFlinkJob {
     public static final String PARAMS_RECORDS_LIMIT = "generator.count";
     private static final int DEFAULT_EPS = 0;
     private static final String PARAMS_EPS = "generator.eps";
-    private static final String PARAMS_SCHEMA = "generator.avro";
+    private static final String PARAMS_SCHEMA = "generator.avro.flag";
     private static final String SCHEMA_PATH = "Netflow/netflow.schema";
     private static final double THREAT_PROBABILITY = 0.01;
 
-    public StreamExecutionEnvironment createPipeline(ParameterTool params) throws URISyntaxException, IOException {
+    public StreamExecutionEnvironment createPipeline(ParameterTool params) throws IOException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         FlinkUtils.setupEnv(env, params);
 
@@ -36,7 +37,8 @@ public abstract class CaracalGeneratorFlinkJob {
         String avroGeneratorFlag = params.get(PARAMS_SCHEMA);
         SingleOutputStreamOperator<Tuple2<String, String>> generatedInput;
         if (BooleanUtils.toBoolean(avroGeneratorFlag)) {
-            String schemaString = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(SCHEMA_PATH));
+            String schemaString = IOUtils.toString(
+                    Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(SCHEMA_PATH)));
             generatedInput = convertDataToAvro(schemaString, createSourceFromTemplateSource(
                     params, env, Collections
                             .singletonMap(new GenerationSource("Netflow/netflow_avro_sample1.json", "generator.avro"),
