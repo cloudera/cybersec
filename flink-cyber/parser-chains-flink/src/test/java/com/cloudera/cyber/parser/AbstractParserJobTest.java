@@ -32,7 +32,7 @@ public abstract class AbstractParserJobTest extends ParserJob {
     }
 
     @Override
-    protected DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params) {
+    protected DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params, TopicPatternToChainMap topicPatternToChainMap) {
         source = JobTester.createManualSource(env, TypeInformation.of(MessageToParse.class));
         return source.getDataStream();
     }
