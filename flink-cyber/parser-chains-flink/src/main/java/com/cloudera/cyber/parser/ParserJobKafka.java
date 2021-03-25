@@ -1,25 +1,35 @@
 package com.cloudera.cyber.parser;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.flink.ConfigConstants;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.regex.Pattern;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.formats.parquet.avro.ParquetAvroWriters;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.filesystem.OutputFileConfig;
 import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.flink.util.Preconditions;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
-
-import static com.cloudera.cyber.flink.ConfigConstants.*;
-import static com.cloudera.cyber.flink.FlinkUtils.createRawKafkaSource;
-
+@Slf4j
 public class ParserJobKafka extends ParserJob {
 
     public static final String PARAMS_ORIGINAL_LOGS_PATH = "original.basepath";
@@ -44,7 +54,7 @@ public class ParserJobKafka extends ParserJob {
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
         FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
-                params.getRequired(PARAMS_TOPIC_OUTPUT), "cyber-parser",
+                params.getRequired(ConfigConstants.PARAMS_TOPIC_OUTPUT), "cyber-parser",
                 params);
         results.addSink(sink).name("Kafka Results").uid("kafka.results");
     }
@@ -81,14 +91,36 @@ public class ParserJobKafka extends ParserJob {
     @Override
     protected void writeErrors(ParameterTool params, DataStream<Message> errors) {
         FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
-                params.getRequired(PARAMS_TOPIC_ERROR), "cyber-parser",
+                params.getRequired(ConfigConstants.PARAMS_TOPIC_ERROR), "cyber-parser",
                 params);
         errors.addSink(sink).name("Kafka Results").uid("kafka.error.results");
     }
 
     @Override
-    protected DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        return createRawKafkaSource(env, params, createGroupId(params.get(PARAMS_TOPIC_INPUT, "") + params.get(PARAMS_TOPIC_PATTERN, "")));
+    protected DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params, TopicPatternToChainMap topicPatternToChainMap) {
+        return createDataStreamFromMultipleKafkaBrokers(env, params, createGroupId(params.get(ConfigConstants.PARAMS_TOPIC_INPUT, "") + params.get(ConfigConstants.PARAMS_TOPIC_PATTERN, "")),topicPatternToChainMap);
+    }
+
+    public DataStream<MessageToParse> createDataStreamFromMultipleKafkaBrokers(StreamExecutionEnvironment env, ParameterTool params, String groupId, TopicPatternToChainMap topicPatternToChainMap) {
+        List<DataStreamSource<MessageToParse>> sources = new ArrayList<>();
+        topicPatternToChainMap.forEach((key,val) -> {
+            Pattern topicNamePattern = Pattern.compile(key);
+            log.info(String.format("createRawKafkaSource  pattern: '%s', good: %b",topicNamePattern, StringUtils.isNotEmpty(key)));
+            Preconditions.checkArgument(StringUtils.isNotEmpty(key), "Topic name must be specified in chain.topic.map property variable");
+            Properties kafkaProperties = Utils.readKafkaProperties(params, groupId, true);
+            if (StringUtils.isNotEmpty(val.getBroker())) {
+                String bootstrapServers = params.get(val.getBroker() + '.' + Utils.KAFKA_PREFIX + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG);
+                kafkaProperties.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+            }
+            sources.add(env.addSource(new FlinkKafkaConsumer<>(topicNamePattern, new MessageToParseDeserializer(), kafkaProperties)));
+        });
+        if (CollectionUtils.size(sources) > 1) {
+            DataStreamSource<MessageToParse> first = sources.remove(0);
+            return first.union(sources.toArray(new DataStreamSource[sources.size()]));
+        }
+        return sources.get(0)
+                .name("Kafka Source")
+                .uid("kafka.input");
     }
 
     private String createGroupId(String inputTopic) {
