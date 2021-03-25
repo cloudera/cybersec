@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import org.apache.avro.Schema;
-import org.apache.avro.Schema.Parser;
 import org.apache.avro.SchemaParseException;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumWriter;
@@ -71,8 +70,18 @@ class AvroParserTest {
     @Test
     public void testNotExistSchemaRead() {
         String schemaPath = "/some/file.schema";
+        assertThatThrownBy(() -> parser.schemaPath(schemaPath)).isInstanceOf(IOException.class).hasMessageContaining("some/file.schema");
+    }
 
-        assertThatThrownBy(() -> parser.schemaPath(schemaPath)).isInstanceOf(IOException.class);
+    @Test
+    public void testIfMessageIsIncorrect() throws IOException {
+        String schemaPath = getFileFromResource(SCHEMA_PATH).getAbsolutePath();
+        String missingField = "missing field";
+        Message message = parser.schemaPath(schemaPath).inputField(missingField).parse(buildMessageFromFile(DATA_PATH));
+
+        assertThat(message.getError()).hasValueSatisfying( ex -> {
+           assertThat(ex).isInstanceOf(IllegalStateException.class).hasMessage("Message missing expected input field '"+ missingField + "'");
+        });
     }
 
     @Test
@@ -95,7 +104,7 @@ class AvroParserTest {
 
 
     private static Message buildMessage() throws IOException {
-        Schema schema = new Parser().parse(getFileFromResource(SCHEMA_PATH));
+        Schema schema = new Schema.Parser().parse(getFileFromResource(SCHEMA_PATH));
         Schema innerSchema = schema.getField("innerRecord").schema();
         GenericRecordBuilder innerRecordBuilder = new GenericRecordBuilder(innerSchema);
         innerRecordBuilder.set("age", 42);

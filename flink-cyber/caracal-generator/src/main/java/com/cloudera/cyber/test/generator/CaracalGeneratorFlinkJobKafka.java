@@ -1,5 +1,6 @@
 package com.cloudera.cyber.test.generator;
 
+import com.cloudera.cyber.flink.FlinkUtils;
 import java.nio.charset.StandardCharsets;
 import javax.annotation.Nullable;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -17,9 +18,8 @@ public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
         }
         ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
 
-        new CaracalGeneratorFlinkJobKafka()
-                .createPipeline(params)
-                .execute("Caracal Data generator - " + params.get("name", "Default"));
+        FlinkUtils.executeEnv(new CaracalGeneratorFlinkJobKafka()
+                .createPipeline(params), "Caracal Data generator", params);
     }
 
     @Override
