@@ -1,0 +1,21 @@
+{
+  "timestamp_log": {
+    "id": "220ee8c5-07d7-48d9-8df5-7d23376cb664",
+    "name": "Timestamp Json Parser",
+    "parsers": [
+      {
+        "id": "f812c6dc-40cc-4c77-abf8-e15fccdfea32",
+        "name": "Json parser",
+        "type": "com.cloudera.parserchains.parsers.JSONParser",
+        "config": {
+          "input": {
+            "input": "original_string"
+          },
+          "norm": {
+            "norm": "UNFOLD_NESTED"
+          }
+        }
+      }
+    ]
+  }
+}
