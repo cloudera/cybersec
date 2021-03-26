@@ -117,26 +117,30 @@ public class FlinkUtils<T> {
         return source;
     }
 
-    public static DataStream<MessageToParse> createRawKafkaSource(StreamExecutionEnvironment env, ParameterTool params, String groupId) {
+    public static <T> DataStream<T> createRawKafkaSource(StreamExecutionEnvironment env, ParameterTool params, String groupId, KafkaDeserializationSchema<T> deserializationSchema) {
         String inputTopic = params.get(ConfigConstants.PARAMS_TOPIC_INPUT,"");
         String pattern = params.get(ConfigConstants.PARAMS_TOPIC_PATTERN, "");
 
         log.info(String.format("createRawKafkaSource topic: '%s', pattern: '%s', good: %b", inputTopic, pattern, !(inputTopic.isEmpty() && pattern.isEmpty())));
 
         Preconditions.checkArgument(!(inputTopic.isEmpty() && pattern.isEmpty()),
-                String.format("Must specify at least one of %s or %s", ConfigConstants.PARAMS_TOPIC_INPUT, ConfigConstants.PARAMS_TOPIC_PATTERN));
+            String.format("Must specify at least one of %s or %s", ConfigConstants.PARAMS_TOPIC_INPUT, ConfigConstants.PARAMS_TOPIC_PATTERN));
 
         Properties kafkaProperties = readKafkaProperties(params, groupId, true);
 
         kafkaProperties.putIfAbsent(ConsumerConfig.GROUP_ID_CONFIG, groupId);
 
-        DataStreamSource<MessageToParse> source = (pattern != null) ?
-                env.addSource(new FlinkKafkaConsumer<>(Pattern.compile(pattern), new MessageToParseDeserializer(), kafkaProperties)) :
-                env.addSource(new FlinkKafkaConsumer<>(inputTopic, new MessageToParseDeserializer(), kafkaProperties));
+        DataStreamSource<T> source = (pattern != null) ?
+            env.addSource(new FlinkKafkaConsumer<>(Pattern.compile(pattern), deserializationSchema, kafkaProperties)) :
+            env.addSource(new FlinkKafkaConsumer<>(inputTopic, deserializationSchema, kafkaProperties));
 
         return source
-                .name("Kafka Source")
-                .uid("kafka.input");
+            .name("Kafka Source")
+            .uid("kafka.input");
+    }
+
+    public static DataStream<MessageToParse> createRawKafkaSource(StreamExecutionEnvironment env, ParameterTool params, String groupId) {
+        return createRawKafkaSource(env, params,groupId, new MessageToParseDeserializer());
     }
 
     public static DataStream<Message> assignTimestamps(DataStream<Message> messages, long allowedLatenessMillis) {
