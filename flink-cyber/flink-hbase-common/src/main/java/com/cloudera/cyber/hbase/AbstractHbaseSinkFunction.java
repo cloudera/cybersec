@@ -16,7 +16,7 @@ public class AbstractHbaseSinkFunction<T> extends HBaseSinkFunction<T> {
     public AbstractHbaseSinkFunction(String hTableName, HBaseMutationConverter<T> mutationConverter, ParameterTool params, String counterName) {
         super(hTableName, HbaseConfiguration.configureHbase(), mutationConverter, params.getLong("hbase.sink.buffer-flush.max-size", 2),
                 params.getLong("hbase.sink.buffer-flush.max-rows", 1000),
-                params.getLong("sink.buffer-flush.interval", 1000));
+                params.getLong("hbase.sink.buffer-flush.interval", 1000));
         this.counterName = counterName;
     }
 
