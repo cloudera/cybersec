@@ -149,7 +149,24 @@
             <artifactId>log4j-1.2-api</artifactId>
             <version>${log4j.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-runtime_${scala.binary.version}</artifactId>
+            <scope>test</scope>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
+            <scope>test</scope>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.13.2</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 
@@ -159,6 +176,7 @@
                 <directory>src/test/resources</directory>
                 <includes>
                     <include>**/*.json</include>
+                    <include>**/*.der</include>
                 </includes>
             </testResource>
         </testResources>
