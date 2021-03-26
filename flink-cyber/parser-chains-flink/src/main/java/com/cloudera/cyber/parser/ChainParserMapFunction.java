@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.metrics.Meter;
@@ -87,7 +88,7 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
                         }
                     }));
         } catch (NullPointerException e) {
-            if (errors.size() > 0) {
+            if (CollectionUtils.isNotEmpty(errors)) {
                 throw errors.get(0);
             }
         }

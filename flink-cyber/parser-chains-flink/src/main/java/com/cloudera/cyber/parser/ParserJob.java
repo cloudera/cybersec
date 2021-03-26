@@ -4,6 +4,8 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
 import com.cloudera.parserchains.core.utils.JSONUtils;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -35,7 +37,8 @@ public abstract class ParserJob {
     public static final String PARSER_ERROR_SIDE_OUTPUT = "parser-error";
     public static final String SIGNATURE_ENABLED = "signature.enabled";
 
-    protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
+    protected StreamExecutionEnvironment createPipeline(ParameterTool params)
+            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         FlinkUtils.setupEnv(env, params);
