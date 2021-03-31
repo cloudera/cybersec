@@ -13,7 +13,6 @@ import org.junit.Test;
 import java.io.File;
 import java.util.*;
 
-@Ignore
 public class IpGeoMapTest {
 
     private static final String SINGLE_IP_FIELD_NAME = "ip_dst_addr";
@@ -49,6 +48,14 @@ public class IpGeoMapTest {
 
     @Test
     public void testFieldNotSet() {
+        Message input = TestUtils.createMessage(Collections.emptyMap());
+        Message output = geoMap.map(input);
+        Assert.assertEquals(Collections.emptyMap(), output.getExtensions());
+        assertNoErrorsOrInfos(output);
+    }
+
+    @Test
+    public void testNullExtensions() {
         Message input = TestUtils.createMessage();
         Message output = geoMap.map(input);
         Assert.assertNull(output.getExtensions());
@@ -95,15 +102,4 @@ public class IpGeoMapTest {
         List<DataQualityMessage> dataQualityMessages = output.getDataQualityMessages();
         Assert.assertTrue(dataQualityMessages == null || dataQualityMessages.isEmpty());
     }
-
-    private void verifyInfoMessage(Message output, String infoMessage) {
-        Collection<DataQualityMessage> dqMessages = output.getDataQualityMessages();
-        Assert.assertEquals(1, dqMessages.size());
-        DataQualityMessage firstMessage = output.getDataQualityMessages().get(0);
-        Assert.assertEquals(DataQualityMessageLevel.INFO, firstMessage.getLevel());
-        Assert.assertEquals(IpGeoMapTest.LIST_IPS_FIELD_NAME, firstMessage.getField());
-        Assert.assertEquals(IpGeoMap.GEOCODE_FEATURE, firstMessage.getFeature());
-        Assert.assertEquals(infoMessage, firstMessage.getMessage());
-    }
-
 }
