@@ -2,6 +2,7 @@ package com.cloudera.cyber.enrichment.geocode.impl;
 
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
+import com.cloudera.cyber.enrichment.geocode.IpAsnTestData;
 import com.cloudera.cyber.enrichment.geocode.IpGeoTestData;
 import com.maxmind.geoip2.DatabaseProvider;
 import com.maxmind.geoip2.DatabaseReader;
@@ -18,39 +19,44 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class IpGeoEnrichmentTest {
-    private IpGeoEnrichment ipGeoEnrichment;
+public class IpAsnEnrichmentTest {
+    private IpAsnEnrichment ipAsnEnrichment;
     private static final String TEST_ENRICHMENT_FIELD_NAME = "test_field";
 
     @Before
-    public void createGeoEnrichment() throws Exception {
-        ipGeoEnrichment = new IpGeoEnrichment(new DatabaseReader.Builder(new File(IpGeoTestData.GEOCODE_DATABASE_PATH)).build());
+    public void createAsnEnrichment() throws Exception {
+        ipAsnEnrichment = new IpAsnEnrichment(new DatabaseReader.Builder(new File(IpAsnTestData.ASN_DATABASE_PATH)).build());
     }
 
     @Test(expected = NullPointerException.class)
-    public void throwsWithNullCityDatabase() {
-        new IpGeoEnrichment(null);
+    public void throwsWithNullAsnDatabase() {
+        new IpAsnEnrichment(null);
     }
 
     @Test
-    public void testNullCityState() {
-        testGeoEnrichment(IpGeoTestData.COUNTRY_ONLY_IPv6);
+    public void testIPv4AsnMapped() {
+        testAsnEnrichment(IpAsnTestData.IP_WITH_NUMBER_AND_ORG);
     }
 
     @Test
-    public void testAllFieldsPresent() {
-        testGeoEnrichment(IpGeoTestData.ALL_FIELDS_IPv4);
+    public void testIPv6AsnMapped() {
+        testAsnEnrichment(IpAsnTestData.IP_V6_WITH_NUMBER_AND_ORG);
     }
 
     @Test
+    public void testNoAsn() {
+        testAsnEnrichment("1.1.1.1");
+    }
+
+   @Test
     public void testHostIsNotIp() {
-        testGeoEnrichment(IpGeoTestData.UNKNOWN_HOST_IP, DataQualityMessageLevel.INFO, String.format(IpGeoEnrichment.FIELD_VALUE_IS_NOT_A_VALID_IP_ADDRESS, IpGeoTestData.UNKNOWN_HOST_IP), ipGeoEnrichment);
+        testAsnEnrichment(IpGeoTestData.UNKNOWN_HOST_IP, DataQualityMessageLevel.INFO, String.format(IpGeoEnrichment.FIELD_VALUE_IS_NOT_A_VALID_IP_ADDRESS, IpGeoTestData.UNKNOWN_HOST_IP), ipAsnEnrichment);
     }
 
     @Test
     public void testLocalIp() {
         // local ips are legitimate addresses but don't have geocode info
-        testGeoEnrichment(IpGeoTestData.LOCAL_IP);
+        testAsnEnrichment(IpGeoTestData.LOCAL_IP);
     }
 
     @Test
@@ -58,36 +64,37 @@ public class IpGeoEnrichmentTest {
         Map<String, String> emptyEnrichments = new HashMap<>();
         List<DataQualityMessage> emptyMessages = new ArrayList<>();
 
-        ipGeoEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, null, IpGeoEnrichment.GeoEnrichmentFields.values(), emptyEnrichments, emptyMessages);
+        ipAsnEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, null, emptyEnrichments, emptyMessages);
         Assert.assertTrue(emptyEnrichments.isEmpty());
         Assert.assertTrue(emptyMessages.isEmpty());
     }
+
 
     @Test
     public void testMaxmindThrows() throws IOException, GeoIp2Exception {
         String testExceptionMessage = "this is a test message";
         DatabaseProvider throwingMaxmind = mock(DatabaseProvider.class);
-        when(throwingMaxmind.tryCity(any()))
+        when(throwingMaxmind.tryAsn(any()))
                 .thenThrow(new GeoIp2Exception(testExceptionMessage), new RuntimeException());
 
         // use non-local ip to test throwing path
-        testGeoEnrichment("100.200.200.1", DataQualityMessageLevel.ERROR, String.format(IpGeoEnrichment.GEOCODE_FAILED_MESSAGE, testExceptionMessage), new IpGeoEnrichment(throwingMaxmind));
+        testAsnEnrichment("100.200.200.1", DataQualityMessageLevel.ERROR, String.format(IpAsnEnrichment.ASN_FAILED_MESSAGE, testExceptionMessage), new IpAsnEnrichment(throwingMaxmind));
     }
 
-    private void testGeoEnrichment(String ipAddress) {
-        testGeoEnrichment(ipAddress, null, null, ipGeoEnrichment);
+
+    private void testAsnEnrichment(String ipAddress) {
+        testAsnEnrichment(ipAddress, null, null, ipAsnEnrichment);
     }
 
-    private void testGeoEnrichment(String ipAddress, DataQualityMessageLevel level, String messageText, IpGeoEnrichment testIpGeoEnrichment) {
+    private void testAsnEnrichment(String ipAddress, DataQualityMessageLevel level, String messageText, IpAsnEnrichment testAsnEnrichment) {
 
         List<DataQualityMessage> expectedQualityMessages = createExpectedDataQualityMessages(level, messageText);
 
-        Map<String, String> expectedExtensions = new HashMap<>();
-        com.cloudera.cyber.enrichment.geocode.IpGeoTestData.getExpectedEnrichmentValues(expectedExtensions, TEST_ENRICHMENT_FIELD_NAME, ipAddress);
+        Map<String, String> expectedExtensions = IpAsnTestData.getExpectedValues(TEST_ENRICHMENT_FIELD_NAME, ipAddress);
 
         Map<String, String> actualExtensions = new HashMap<>();
         List<DataQualityMessage> actualQualityMessages = new ArrayList<>();
-        testIpGeoEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, ipAddress, IpGeoEnrichment.GeoEnrichmentFields.values(), actualExtensions, actualQualityMessages);
+        testAsnEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, ipAddress, actualExtensions, actualQualityMessages);
         Assert.assertEquals(expectedExtensions, actualExtensions);
         Assert.assertEquals(expectedQualityMessages, actualQualityMessages);
     }
@@ -97,8 +104,8 @@ public class IpGeoEnrichmentTest {
         if (messageText != null) {
             dataQualityMessages.add(DataQualityMessage.builder()
                     .level(level.name())
-                    .feature(IpGeoEnrichment.GEOCODE_FEATURE)
-                    .field(IpGeoEnrichmentTest.TEST_ENRICHMENT_FIELD_NAME)
+                    .feature(IpAsnEnrichment.ASN_FEATURE)
+                    .field(TEST_ENRICHMENT_FIELD_NAME)
                     .message(messageText).build());
         }
         return dataQualityMessages;
