@@ -42,7 +42,7 @@ public class Utils {
 
     public static final String K_PROPERTIES_FILE = "properties.file";
 
-    private static Properties readProperties(Properties properties, String prefix) {
+    public static Properties readProperties(Properties properties, String prefix) {
         Properties targetProperties = new Properties();
         for (String key : properties.stringPropertyNames()) {
             if (key.startsWith(prefix)) {
