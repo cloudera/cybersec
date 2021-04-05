@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.cloudera.parserchains</groupId>
         <artifactId>metron-parser-chain</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>parser-chains-parsers</artifactId>
     <name>Parser Chains Parsers</name>
@@ -38,6 +38,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-parse-metron</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
         <!-- grok parser dependencies -->
         <dependency>
             <groupId>io.krakens</groupId>
@@ -84,6 +90,21 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+
+        <!-- stellar dependencies -->
+        <dependency>
+            <groupId>com.googlecode.json-simple</groupId>
+            <artifactId>json-simple</artifactId>
+            <version>${json.simple.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+
         <!-- test dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -108,6 +129,14 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
         </dependency>
     </dependencies>
 </project>

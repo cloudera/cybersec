@@ -1,0 +1,51 @@
+{
+  "parserClassName": "com.cloudera.parserchains.parsers.ExampleStellarParser",
+  "filterClassName": null,
+  "sensorTopic": "checkpoint_antibot_raw",
+  "outputTopic": null,
+  "errorTopic": null,
+  "writerClassName": null,
+  "errorWriterClassName": null,
+  "readMetadata": false,
+  "mergeMetadata": false,
+  "numWorkers": 6,
+  "numAckers": 6,
+  "spoutParallelism": 6,
+  "spoutNumTasks": 6,
+  "parserParallelism": 6,
+  "parserNumTasks": 6,
+  "errorWriterParallelism": 6,
+  "errorWriterNumTasks": 6,
+  "spoutConfig": {
+    "spout.pollTimeoutMs": 300,
+    "spout.maxUncommittedOffsets": 10000000,
+    "spout.offsetCommitPeriodMs": 30000,
+    "topology.max.spout.pending": 10000
+  },
+  "securityProtocol": null,
+  "stormConfig": {
+    "topology.message.timeout.secs": 60,
+    "topology.max.spout.pending": 10000
+  },
+  "parserConfig": {
+    "a": "a config",
+    "b": "b config"
+  },
+  "fieldTransformations": [
+    {
+      "input": [],
+      "output": [
+        "unique_hash",
+        "upper_col2"
+      ],
+      "transformation": "STELLAR",
+      "config": {
+        "unique_hash": "HASH(original_string,'SHA-256')",
+        "upper_col2": "TO_UPPER(column2)"
+     }
+    }
+  ],
+  "cacheConfig": {},
+  "rawMessageStrategy": "DEFAULT",
+  "rawMessageStrategyConfig": {}
+}

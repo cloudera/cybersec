@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>flink-cyber</artifactId>
+        <groupId>com.cloudera.cyber</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>flink-parse</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>flink-parse-metron</module>
+    </modules>
+
+    <properties>
+        <json.simple.version>1.1.1</json.simple.version>
+        <commons.lang3.version>3.2</commons.lang3.version>
+        <jackson.version>2.10.1</jackson.version>
+    </properties>
+
+</project>
