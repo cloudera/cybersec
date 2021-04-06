@@ -1,8 +1,5 @@
 package com.cloudera.cyber.parser;
 
-import static com.cloudera.cyber.parser.Utils.DEFAULT_BROKER;
-import static com.cloudera.cyber.parser.Utils.getBrokerTopicPatternMap;
-
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.ConfigConstants;
 import com.cloudera.cyber.flink.FlinkUtils;
@@ -119,23 +116,23 @@ public class ParserJobKafka extends ParserJob {
     public List<DataStream<MessageToParse>> createDataStreamFromMultipleKafkaBrokers(StreamExecutionEnvironment env,
             ParameterTool params, String groupId, TopicPatternToChainMap topicPatternToChainMap) {
         List<DataStream<MessageToParse>> sources = new ArrayList<>();
-        Map<String, Pattern> brokerTopicPatternMap = getBrokerTopicPatternMap(topicPatternToChainMap);
-        brokerTopicPatternMap.forEach((brokerName, topicNamePattern) -> {
+        Map<String, Pattern> brokerTopicPatternMap = topicPatternToChainMap.getBrokerPrefixTopicPatternMap();
+        brokerTopicPatternMap.forEach((kafkaPrefixConf, topicNamePattern) -> {
             log.info(String.format("createRawKafkaSource  pattern: '%s', good: %b", topicNamePattern,
-                    StringUtils.isNotEmpty(brokerName)));
+                    StringUtils.isNotEmpty(kafkaPrefixConf)));
             Preconditions.checkArgument(StringUtils.isNotEmpty(topicNamePattern.toString()),
                     "Topic name must be specified in chain.topic.map property variable");
             Properties kafkaProperties = Utils.readKafkaProperties(params, groupId, true);
-            if (!StringUtils.equals(brokerName, DEFAULT_BROKER)) {
+            if (!StringUtils.equals(kafkaPrefixConf, TopicPatternToChainMap.DEFAULT_PREFIX)) {
                 Properties brokerSpecificProperties = Utils
-                        .readProperties(params.getProperties(), brokerName + '.' + Utils.KAFKA_PREFIX);
+                        .readProperties(params.getProperties(), kafkaPrefixConf + '.' + Utils.KAFKA_PREFIX);
                 kafkaProperties.putAll(brokerSpecificProperties);
             }
             DataStreamSource<MessageToParse> streamSource = env.addSource(
                     new FlinkKafkaConsumer<>(topicNamePattern, new MessageToParseDeserializer(), kafkaProperties));
             SingleOutputStreamOperator<MessageToParse> source = streamSource
-                    .name(String.format("Kafka Source topic='%s' broker='%s'", topicNamePattern.toString(), brokerName))
-                    .uid("kafka.input." + brokerName);
+                    .name(String.format("Kafka Source topic='%s' kafka prefix configuration='%s'", topicNamePattern.toString(), kafkaPrefixConf))
+                    .uid("kafka.input." + kafkaPrefixConf);
             sources.add(source);
         });
         return sources;
