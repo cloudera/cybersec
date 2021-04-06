@@ -12,6 +12,7 @@ import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSin
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.flink.util.Preconditions;
 import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -33,14 +34,12 @@ public class ParserJobKafka extends ParserJob {
     public static final String PARAMS_CONFIG_TOPIC = "config.topic";
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            throw new RuntimeException("Path to the properties file is expected as the only argument.");
-        }
+        Preconditions.checkArgument(args.length == 1, "Path to the properties file is expected as the only argument.");
         ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
-        new ParserJobKafka()
-                .createPipeline(params)
-                .execute("Flink Parser - " + params.get("name", "Default"));
+        FlinkUtils.executeEnv(new ParserJobKafka()
+                .createPipeline(params), "Flink Parser", params);
     }
+
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
         FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
