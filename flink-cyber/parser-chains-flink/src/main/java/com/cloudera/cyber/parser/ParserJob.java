@@ -2,7 +2,12 @@ package com.cloudera.cyber.parser;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
 import com.cloudera.parserchains.core.utils.JSONUtils;
+
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -18,6 +23,9 @@ import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
+import java.util.List;
+
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 /**
  * Host for the chain parser jobs
@@ -33,7 +41,8 @@ public abstract class ParserJob {
     public static final String PARSER_ERROR_SIDE_OUTPUT = "parser-error";
     public static final String SIGNATURE_ENABLED = "signature.enabled";
 
-    protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
+    protected StreamExecutionEnvironment createPipeline(ParameterTool params)
+            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         FlinkUtils.setupEnv(env, params);
@@ -43,8 +52,9 @@ public abstract class ParserJob {
 
         ParserChainMap chainSchema = JSONUtils.INSTANCE.load(chainConfig, ParserChainMap.class);
         TopicPatternToChainMap topicMap = JSONUtils.INSTANCE.load(topicConfig, TopicPatternToChainMap.class);
+        String defaultKafkaBootstrap = params.get(Utils.KAFKA_PREFIX + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG);
 
-        DataStream<MessageToParse> source = createSource(env, params);
+        List<DataStream<MessageToParse>> sources = createSource(env, params, topicMap);
 
         PrivateKey privateKey = null;
         if (params.getBoolean(SIGNATURE_ENABLED, true)) {
@@ -57,24 +67,30 @@ public abstract class ParserJob {
             privateKey = keyFactory.generatePrivate(privSpec);
         }
 
-        SingleOutputStreamOperator<Message> results =
-                source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey))
-                .name("Parser").uid("parser");
-        writeResults(params, results);
+        for (DataStream<MessageToParse> source : sources) {
+            SingleOutputStreamOperator<Message> results =
+                    source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey, defaultKafkaBootstrap))
+                            .name("Parser "+ source.getTransformation().getName()).uid("parser" +  source.getTransformation().getUid());
 
-        writeOriginalsResults(params, source);
+            writeResults(params, results);
+            writeOriginalsResults(params, source);
 
-        final OutputTag<Message> outputTag = new OutputTag<Message>(PARSER_ERROR_SIDE_OUTPUT){};
-        DataStream<Message> parserErrors = results.getSideOutput(outputTag);
-        writeErrors(params, parserErrors);
+            final OutputTag<Message> outputTag = new OutputTag<Message>(PARSER_ERROR_SIDE_OUTPUT) {
+            };
+            DataStream<Message> parserErrors = results.getSideOutput(outputTag);
+            writeErrors(params, parserErrors);
+        }
 
         return env;
     }
 
-    private String readConfigMap(String fileParamKey, String inlineConfigKey,  ParameterTool params, String defaultConfig) throws IOException {
-        return params.has(fileParamKey) ?
-                new String(Files.readAllBytes(Paths.get(params.getRequired(fileParamKey))), StandardCharsets.UTF_8):
-                defaultConfig == null ? params.getRequired(inlineConfigKey) : params.get(inlineConfigKey, defaultConfig);
+    private String readConfigMap(String fileParamKey, String inlineConfigKey, ParameterTool params,
+                                 String defaultConfig) throws IOException {
+        if (params.has(fileParamKey)) {
+            return new String(Files.readAllBytes(Paths.get(params.getRequired(fileParamKey))), StandardCharsets.UTF_8);
+        }
+        return defaultConfig == null ? params.getRequired(inlineConfigKey)
+                : params.get(inlineConfigKey, defaultConfig);
 
     }
 
@@ -84,5 +100,6 @@ public abstract class ParserJob {
 
     protected abstract void writeErrors(ParameterTool params, DataStream<Message> errors);
 
-    protected abstract DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params);
+    protected abstract List<DataStream<MessageToParse>> createSource(StreamExecutionEnvironment env, ParameterTool params,
+                                                                     TopicPatternToChainMap topicPatternToChainMap);
 }
