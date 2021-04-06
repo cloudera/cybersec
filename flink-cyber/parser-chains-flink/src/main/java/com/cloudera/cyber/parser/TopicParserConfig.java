@@ -12,4 +12,5 @@ import java.io.Serializable;
 public class TopicParserConfig implements Serializable {
     private String chainKey;
     private String source;
+    private String broker;
 }
