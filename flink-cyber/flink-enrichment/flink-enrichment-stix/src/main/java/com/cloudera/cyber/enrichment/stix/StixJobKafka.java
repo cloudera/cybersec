@@ -5,7 +5,6 @@ import com.cloudera.cyber.ThreatIntelligence;
 import com.cloudera.cyber.enrichment.stix.parsing.ThreatIntelligenceDetails;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
-import org.apache.flink.addons.hbase.HBaseWriteOptions;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -59,34 +58,17 @@ public class StixJobKafka extends StixJob {
                 params);
         results.addSink(sink).name("Kafka Stix Results").uid("kafka.results.stix");
 
-        ThreatIntelligenceHBaseSinkFunction hbaseSink = new ThreatIntelligenceHBaseSinkFunction("threatIntelligence");
-        hbaseSink.setWriteOptions(HBaseWriteOptions.builder()
-                .setBufferFlushIntervalMillis(1000)
-                .setBufferFlushMaxRows(1000)
-                .setBufferFlushMaxSizeInBytes(1024 * 1024 * 64)
-                .build()
-        );
+        ThreatIntelligenceHBaseSinkFunction hbaseSink = new ThreatIntelligenceHBaseSinkFunction("threatIntelligence", params);
         results.addSink(hbaseSink);
 
-        ThreatIndexHbaseSinkFunction indexSink = new ThreatIndexHbaseSinkFunction("threatIndex");
-        indexSink.setWriteOptions(HBaseWriteOptions.builder()
-                .setBufferFlushIntervalMillis(1000)
-                .setBufferFlushMaxRows(1000)
-                .setBufferFlushMaxSizeInBytes(1024 * 1024 * 64)
-                .build());
+        ThreatIndexHbaseSinkFunction indexSink = new ThreatIndexHbaseSinkFunction("threatIndex", params);
         results.addSink(indexSink);
     }
 
     @Override
     protected void writeDetails(ParameterTool params, DataStream<ThreatIntelligenceDetails> results) {
         // write out to HBase
-        ThreatIntelligenceDetailsHBaseSinkFunction hbaseSink = new ThreatIntelligenceDetailsHBaseSinkFunction("threatIntelligence");
-        hbaseSink.setWriteOptions(HBaseWriteOptions.builder()
-                .setBufferFlushIntervalMillis(1000)
-                .setBufferFlushMaxRows(1000)
-                .setBufferFlushMaxSizeInBytes(1024 * 1024 * 64)
-                .build()
-        );
+        ThreatIntelligenceDetailsHBaseSinkFunction hbaseSink = new ThreatIntelligenceDetailsHBaseSinkFunction("threatIntelligence", params);
         results.addSink(hbaseSink);
     }
 

@@ -29,6 +29,7 @@
         <module>caracal-parser</module>
         <module>data-management</module>
         <module>flink-web</module>
+        <module>flink-hbase-common</module>
     </modules>
 
     <properties>
@@ -36,11 +37,11 @@
         <java.verion>1.8</java.verion>
         <lombok.version>1.18.16</lombok.version>
         <lombok.plugin.version>1.18.16.0</lombok.plugin.version>
-        <flink.version>1.10.0-csa1.2.1.0</flink.version>
+        <flink.version>1.12-csa1.3.0.0</flink.version>
         <guava.verison>21.0</guava.verison>
-        <avro.version>1.8.2</avro.version>
+        <avro.version>1.10.0</avro.version>
         <log4j.kafka.version>2.4.1.7.1.1.0-565</log4j.kafka.version>
-        <scala.binary.version>2.11</scala.binary.version>
+        <scala.binary.version>2.12</scala.binary.version>
         <kafka.version>2.4.1.7.1.1.0-565</kafka.version>
         <nifi.version>1.11.4</nifi.version>
         <jackson.version>2.11.0</jackson.version>

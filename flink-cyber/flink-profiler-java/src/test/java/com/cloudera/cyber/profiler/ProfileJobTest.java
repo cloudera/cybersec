@@ -3,14 +3,13 @@ package com.cloudera.cyber.profiler;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.TestUtils;
-import com.cloudera.cyber.flink.MessageBoundedOutOfOrder;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.google.common.collect.ImmutableMap;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
@@ -156,8 +155,10 @@ public class ProfileJobTest extends ProfileJob {
     @Override
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         source = JobTester.createManualSource(env, TypeInformation.of(Message.class));
-        return source.getDataStream()
-                .assignTimestampsAndWatermarks(new MessageBoundedOutOfOrder(Time.milliseconds(1000)))
+        WatermarkStrategy<Message> watermarkStrategy = WatermarkStrategy
+                .<Message>forBoundedOutOfOrderness(Duration.ofMillis(1000))
+                .withTimestampAssigner((message, timestamp) -> message.getTs());
+        return source.getDataStream().assignTimestampsAndWatermarks(watermarkStrategy)
                 .setParallelism(1);
     }
 

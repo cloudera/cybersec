@@ -8,9 +8,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
+import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
 import java.io.IOException;
@@ -47,7 +48,6 @@ public abstract class ProfileJob {
 
     protected StreamExecutionEnvironment createPipeline(final ParameterTool params) throws IOException {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         FlinkUtils.setupEnv(env, params);
 
         // read the profiler config
@@ -72,7 +72,7 @@ public abstract class ProfileJob {
         }
         List<String> keyFieldNames = profileGroupConfig.getKeyFieldNames();
         Time profilePeriodDuration = Time.of(profileGroupConfig.getPeriodDuration(), TimeUnit.valueOf(profileGroupConfig.getPeriodDurationUnit()));
-        DataStream<Message> profileMessages = messages.filter(new MessageFieldFilter(keyFieldNames)).keyBy(new MessageKeySelector(keyFieldNames)).timeWindow(profilePeriodDuration).
+        DataStream<Message> profileMessages = messages.filter(new MessageFieldFilter(keyFieldNames)).keyBy(new MessageKeySelector(keyFieldNames)).window(TumblingEventTimeWindows.of(profilePeriodDuration)).
                 aggregate(new FieldValueProfileAggregateFunction(profileGroupConfig));
         if (profileGroupConfig.hasFirstSeen()) {
             profileMessages = updateFirstSeen(params, profileMessages, profileGroupConfig);
@@ -86,7 +86,7 @@ public abstract class ProfileJob {
 
             DataStream<Message> statsStream = profileMessages.
                     keyBy(profileKeySelector).
-                    timeWindow(profilePeriodDuration, statsSlide).aggregate(new StatsProfileAggregateFunction(profileGroupConfig));
+                    window(SlidingEventTimeWindows.of(profilePeriodDuration, statsSlide)).aggregate(new StatsProfileAggregateFunction(profileGroupConfig));
             StatsProfileKeySelector statsKeySelector = new StatsProfileKeySelector();
             profileMessages = profileMessages.connect(statsStream).keyBy(profileKeySelector, statsKeySelector).process(new ProfileStatsJoin());
         }
