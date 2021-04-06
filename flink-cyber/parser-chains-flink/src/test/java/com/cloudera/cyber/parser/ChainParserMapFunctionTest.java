@@ -141,7 +141,7 @@ public class ChainParserMapFunctionTest {
         ParserChainMap chainSchema = JSONUtils.INSTANCE.load(chainConfig, ParserChainMap.class);
         TopicPatternToChainMap topicMap = JSONUtils.INSTANCE.load(topicConfig, TopicPatternToChainMap.class);
 
-        return ProcessFunctionTestHarnesses.forProcessFunction(new ChainParserMapFunction(chainSchema, topicMap, privateKey));
+        return ProcessFunctionTestHarnesses.forProcessFunction(new ChainParserMapFunction(chainSchema, topicMap, privateKey, "default"));
     }
 
 }
