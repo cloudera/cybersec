@@ -22,11 +22,6 @@
             <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-runtime-web_${scala.binary.version}</artifactId>
-            <version>${flink.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -161,6 +156,18 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-runtime_${scala.binary.version}</artifactId>
+            <scope>test</scope>
+            <classifier>tests</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
+            <scope>test</scope>
+            <classifier>tests</classifier>
+        </dependency>
     </dependencies>
 
 
@@ -170,6 +177,7 @@
                 <directory>src/test/resources</directory>
                 <includes>
                     <include>**/*.json</include>
+                    <include>**/*.der</include>
                 </includes>
             </testResource>
         </testResources>

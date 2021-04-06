@@ -45,7 +45,10 @@ import org.apache.flink.util.OutputTag;
 @Slf4j
 public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Message> {
 
-    private byte[] EMPTY_SIGNATURE = new byte[1];
+    public static final String CHAIN_PARSER_FEATURE = "chain_parser";
+    public static final String TIMESTAMP_NOT_EPOCH = "Timestamp is not in epoch milliseconds or seconds. ";
+    public static final String NO_TIMESTAMP_FIELD_MESSAGE = "Message does not contain a timestamp field.";
+    public static final byte[] EMPTY_SIGNATURE = new byte[1];
 
     @NonNull
     private final ParserChainMap chainConfig;
@@ -114,22 +117,34 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
         final TopicParserConfig topicParserConfig = getChainForTopic(topic);
         final List<com.cloudera.parserchains.core.Message> run = chainRunner.run(inputMessage, chains.get(topicParserConfig.getChainKey()));
         final com.cloudera.parserchains.core.Message m = run.get(run.size() - 1);
-
-        Optional<FieldValue> timestamp = m.getField(FieldName.of("timestamp"));
-
-        long messageTimestamp = timestamp.map(t -> Long.valueOf(t.get())).
-                orElseGet(() -> Instant.now().toEpochMilli());
-
         Optional<String> errorMessage = m.getError().map(Throwable::getMessage);
-        if (!errorMessage.isPresent() && !timestamp.isPresent()) {
-            errorMessage = Optional.of("Message does not contain a timestamp field.");
+        long messageTimestamp = Instant.now().toEpochMilli();
+
+        if (!errorMessage.isPresent()) {
+            Optional<FieldValue> timestamp = m.getField(FieldName.of("timestamp"));
+
+            if (timestamp.isPresent()) {
+                try {
+                    // handle timestamps that are <seconds>.<milliseconds>
+                    String timestampString = timestamp.get().get().replace(".", "");
+                    messageTimestamp = Long.parseLong(timestampString);
+                    if (timestampString.length() < 12) {
+                        // normalize second times
+                        messageTimestamp *= 1000;
+                    }
+                } catch (NumberFormatException nfe) {
+                    errorMessage = Optional.of(TIMESTAMP_NOT_EPOCH.concat(nfe.getMessage()));
+                }
+            } else {
+                errorMessage = Optional.of(NO_TIMESTAMP_FIELD_MESSAGE);
+            }
         }
 
         List<DataQualityMessage> dataQualityMessages = errorMessage.
                 map(messageText -> Collections.singletonList(
                         DataQualityMessage.builder().
                                 field(DEFAULT_INPUT_FIELD).
-                                feature("chain_parser").
+                                feature(CHAIN_PARSER_FEATURE).
                                 level(DataQualityMessageLevel.ERROR.name()).
                                 message(messageText).
                                 build())).

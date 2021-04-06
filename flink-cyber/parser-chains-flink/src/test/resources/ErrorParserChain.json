@@ -1,0 +1,18 @@
+{
+  "timestamp_log": {
+    "id": "This parsesr is in valid",
+    "name": "Bad parser class",
+    "parsers": [
+      {
+        "id": "f812c6dc-40cc-4c77-abf8-e15fccdfea32",
+        "name": "TimestampGrok",
+        "type": "com.cloudera.InvalidParserClass",
+        "config": {
+          "grokExpression": {
+            "grokExpression": "%{NUMBER:timestamp}"
+          }
+        }
+      }
+    ]
+  }
+}
