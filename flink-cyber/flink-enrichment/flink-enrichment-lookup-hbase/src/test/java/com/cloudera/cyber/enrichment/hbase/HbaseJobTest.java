@@ -8,7 +8,7 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
@@ -23,8 +23,7 @@ import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
 public class HbaseJobTest extends HbaseJob {
     private transient ManualSource<Message> source;
     private transient ManualSource<EnrichmentCommand> enrichmentsSource;
-    private transient StreamTableEnvironment tableEnv;
-    private CollectingSink<Message> sink = new CollectingSink<Message>();
+    private CollectingSink<Message> sink = new CollectingSink<>();
 
     @Override
     protected DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {

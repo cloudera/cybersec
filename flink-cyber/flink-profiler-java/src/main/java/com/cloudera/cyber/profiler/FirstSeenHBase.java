@@ -1,7 +1,7 @@
 package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.enrichment.hbase.LookupKey;
+import com.cloudera.cyber.hbase.LookupKey;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import lombok.Data;
 import org.apache.hadoop.hbase.util.Bytes;

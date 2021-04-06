@@ -6,11 +6,10 @@ import com.cloudera.cyber.profiler.sql.catalog.ProfileSourceCatalog;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.CheckpointingMode;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.environment.ExecutionCheckpointingOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.expressions.TimeIntervalUnit;
 
 import java.time.Duration;
@@ -32,7 +31,6 @@ public class ProfilerJob {
 
     private StreamExecutionEnvironment createPipeline(ParameterTool params) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
 
         tableEnv.registerFunction("hll", new Hll());
@@ -74,7 +72,7 @@ public class ProfilerJob {
                           Map<String,String> profileFields,
                           String profileFilter,
                           String profileSource) {
-        ProfileSourceCatalog profileCatalog = new ProfileSourceCatalog((Map<String, String>) params);
+        ProfileSourceCatalog profileCatalog = new ProfileSourceCatalog(params.toMap());
         tableEnv.registerCatalog("profiler", profileCatalog);
 
         Map<String, String> values = new HashMap<String, String>() {{
