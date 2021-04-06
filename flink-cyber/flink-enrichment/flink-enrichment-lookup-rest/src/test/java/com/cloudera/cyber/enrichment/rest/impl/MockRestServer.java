@@ -1,6 +1,6 @@
 package com.cloudera.cyber.enrichment.rest.impl;
 
-import avro.shaded.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 import com.cloudera.cyber.enrichment.rest.*;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;

@@ -12,7 +12,6 @@ import com.cloudera.cyber.enrichment.threatq.ThreatQEntry;
 import com.cloudera.cyber.enrichment.threatq.ThreatQParserFlatMap;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
-import org.apache.flink.addons.hbase.HBaseWriteOptions;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -94,34 +93,18 @@ public class EnrichmentJobKafka extends EnrichmentJob {
                 params);
         results.addSink(sink).name("Kafka Stix Results").uid("kafka.results.stix");
 
-        ThreatIntelligenceHBaseSinkFunction hbaseSink = new ThreatIntelligenceHBaseSinkFunction("threatIntelligence");
-        hbaseSink.setWriteOptions(HBaseWriteOptions.builder()
-                .setBufferFlushIntervalMillis(1000)
-                .setBufferFlushMaxRows(1000)
-                .setBufferFlushMaxSizeInBytes(1024 * 1024 * 64)
-                .build()
-        );
+        ThreatIntelligenceHBaseSinkFunction hbaseSink = new ThreatIntelligenceHBaseSinkFunction("threatIntelligence", params);
+
         results.addSink(hbaseSink);
 
-        ThreatIndexHbaseSinkFunction indexSink = new ThreatIndexHbaseSinkFunction("threatIndex");
-        indexSink.setWriteOptions(HBaseWriteOptions.builder()
-                .setBufferFlushIntervalMillis(1000)
-                .setBufferFlushMaxRows(1000)
-                .setBufferFlushMaxSizeInBytes(1024 * 1024 * 64)
-                .build());
+        ThreatIndexHbaseSinkFunction indexSink = new ThreatIndexHbaseSinkFunction("threatIndex", params);
         results.addSink(indexSink).name("Stix sink").uid("stix-hbase-sink");
     }
 
     @Override
     protected void writeStixDetails(ParameterTool params, DataStream<ThreatIntelligenceDetails> results) {
         // write out to HBase
-        ThreatIntelligenceDetailsHBaseSinkFunction hbaseSink = new ThreatIntelligenceDetailsHBaseSinkFunction(params.get(PARAM_TI_TABLE, DEFAULT_TI_TABLE));
-        hbaseSink.setWriteOptions(HBaseWriteOptions.builder()
-                .setBufferFlushIntervalMillis(1000)
-                .setBufferFlushMaxRows(1000)
-                .setBufferFlushMaxSizeInBytes(1024 * 1024 * 64)
-                .build()
-        );
+        ThreatIntelligenceDetailsHBaseSinkFunction hbaseSink = new ThreatIntelligenceDetailsHBaseSinkFunction(params.get(PARAM_TI_TABLE, DEFAULT_TI_TABLE), params);
         results.addSink(hbaseSink).name("Stix Detail sink").uid("stix-hbase-detail-sink");
     }
 
