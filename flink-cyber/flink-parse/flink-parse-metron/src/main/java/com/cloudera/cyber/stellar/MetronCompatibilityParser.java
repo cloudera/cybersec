@@ -55,9 +55,6 @@ public class MetronCompatibilityParser {
         parser.init();
         log.info("Parser initialized");
 
-        Properties config = new Properties();
-        config.put(STELLAR_SEARCH_INCLUDES_KEY.param(), "org.apache.metron.*");
-
         Cache<CachingStellarProcessor.Key, Object> cache = CachingStellarProcessor.createCache(cacheConfig);
         Context stellarContext = new Context.Builder()
                 .with(Context.Capabilities.CACHE, () -> cache)
