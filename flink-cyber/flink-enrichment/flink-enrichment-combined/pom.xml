@@ -63,6 +63,12 @@
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+      <dependency>
+        <groupId>com.cloudera.cyber</groupId>
+        <artifactId>flink-enrichment-alert-scoring</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <scope>compile</scope>
+      </dependency>
     </dependencies>
 
 
