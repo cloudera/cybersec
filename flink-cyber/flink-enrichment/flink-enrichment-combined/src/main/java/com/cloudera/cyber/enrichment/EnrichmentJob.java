@@ -19,6 +19,10 @@ import com.cloudera.cyber.enrichment.threatq.ThreatQConfig;
 import com.cloudera.cyber.enrichment.threatq.ThreatQEntry;
 import com.cloudera.cyber.enrichment.threatq.ThreatQJob;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.scoring.ScoredMessage;
+import com.cloudera.cyber.scoring.ScoringJob;
+import com.cloudera.cyber.scoring.ScoringRuleCommand;
+import com.cloudera.cyber.scoring.ScoringRuleCommandResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -107,7 +111,9 @@ public abstract class EnrichmentJob {
         DataStream<Message> ruled = params.getBoolean(PARAMS_ENABLE_RULES, true) ?
                 doRules(tqed, params) : tqed;
 
-        writeResults(env, params, ruled);
+        DataStream<ScoredMessage> scoring = doScoring(ruled, env, params);
+
+        writeResults(env, params, scoring);
         return env;
     }
 
@@ -131,9 +137,16 @@ public abstract class EnrichmentJob {
         return stix.getResults();
     }
 
+    private DataStream<ScoredMessage> doScoring(DataStream<Message> in, StreamExecutionEnvironment env, ParameterTool params) {
+        DataStream<ScoringRuleCommand> rulesSource = createRulesSource(env, params);
+        SingleOutputStreamOperator<ScoredMessage> results = ScoringJob.enrich(in, rulesSource);
+        writeScoredRuleCommandResult(params, results.getSideOutput(ScoringJob.COMMAND_RESULT_OUTPUT_TAG));
+        return results;
+    }
+
     protected abstract SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
 
-    protected abstract void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> results);
+    protected abstract void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<ScoredMessage> results);
 
     protected abstract DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
 
@@ -152,5 +165,8 @@ public abstract class EnrichmentJob {
         return null;
     }
 
+    protected abstract DataStream<ScoringRuleCommand> createRulesSource(StreamExecutionEnvironment env, ParameterTool params);
+
+    protected abstract void writeScoredRuleCommandResult(ParameterTool params, DataStream<ScoringRuleCommandResult> results);
 
 }
