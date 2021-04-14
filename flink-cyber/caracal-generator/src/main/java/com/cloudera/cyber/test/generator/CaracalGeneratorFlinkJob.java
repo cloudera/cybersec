@@ -41,7 +41,7 @@ public abstract class CaracalGeneratorFlinkJob {
                     Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(SCHEMA_PATH)));
             generatedInput = convertDataToAvro(schemaString, createSourceFromTemplateSource(
                     params, env, Collections
-                            .singletonMap(new GenerationSource("Netflow/netflow_avro_sample1.json", "generator.avro"),
+                            .singletonMap(new GenerationSource("Netflow/netflow_avro_sample1.json", "netflow.avro"),
                                     1.0)));
         } else {
             generatedInput = createSourceFromTemplateSource(params, env, getNetflowSampleMap());

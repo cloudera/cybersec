@@ -13,6 +13,8 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>flink-enrichment-alert-scoring</module>
+        <module>flink-enrichment-alert-scoring-api</module>
         <module>flink-enrichment-lookup-raw</module>
         <module>flink-enrichment-lookup-hbase</module>
         <module>flink-enrichment-lookup-rest</module>
@@ -23,6 +25,7 @@
         <module>flink-enrichment-geocode</module>
         <module>flink-enrichment-threatq</module>
         <module>flink-enrichment-load</module>
+        <module>flink-enrichment-rulemgmt</module>
     </modules>
 
 </project>
