@@ -13,8 +13,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>flink-enrichment-alert-scoring</module>
-        <module>flink-enrichment-alert-scoring-api</module>
         <module>flink-enrichment-lookup-raw</module>
         <module>flink-enrichment-lookup-hbase</module>
         <module>flink-enrichment-lookup-rest</module>
