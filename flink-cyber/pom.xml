@@ -13,6 +13,8 @@
         <module>flink-cyber-api</module>
         <module>cyber-functions</module>
         <module>flink-common</module>
+        <module>flink-alert-scoring</module>
+        <module>flink-alert-scoring-api</module>
         <module>flink-indexing</module>
         <module>flink-enrichment</module>
         <module>flink-sessions</module>
