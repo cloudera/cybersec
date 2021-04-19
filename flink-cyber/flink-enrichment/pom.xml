@@ -23,7 +23,6 @@
         <module>flink-enrichment-geocode</module>
         <module>flink-enrichment-threatq</module>
         <module>flink-enrichment-load</module>
-        <module>flink-enrichment-rulemgmt</module>
     </modules>
 
 </project>
