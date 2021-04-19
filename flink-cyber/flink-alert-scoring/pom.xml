@@ -50,7 +50,7 @@
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
-            <artifactId>flink-enrichment-alert-scoring-api</artifactId>
+            <artifactId>flink-alert-scoring-api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
