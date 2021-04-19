@@ -27,7 +27,6 @@ public class SecurePostRestRequestTest extends PostRestRequestTest {
     }
 
     @Test
-    @Ignore
     public void testTlsHandshakeException() throws Exception {
         RestEnrichmentConfig.RestEnrichmentConfigBuilder modelResultPostRequestWithKeyAlias = mockRestServer.configureTLS(mockRestServer.configureModelPostRequest(), "nosuchkeyalias");
         RestRequest badHandshakePost = new PostRestRequest(modelResultPostRequestWithKeyAlias.build());
