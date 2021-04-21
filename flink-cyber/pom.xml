@@ -13,6 +13,8 @@
         <module>flink-cyber-api</module>
         <module>cyber-functions</module>
         <module>flink-common</module>
+        <module>flink-alert-scoring</module>
+        <module>flink-alert-scoring-api</module>
         <module>flink-indexing</module>
         <module>flink-enrichment</module>
         <module>flink-sessions</module>
@@ -21,8 +23,6 @@
         <module>flink-profiler-java</module>
         <module>flink-profiler</module>
         <module>flink-rules</module>
-        <module>flink-alert-scoring-api</module>
-        <module>flink-alert-scoring</module>
         <module>metron-parser-chain</module>
         <module>parser-chains-flink</module>
         <module>caracal-generator</module>
@@ -530,6 +530,7 @@
             <id>add-dependencies-for-IDEA</id>
 
             <activation>
+                <activeByDefault>true</activeByDefault>
                 <property>
                     <name>idea.version</name>
                 </property>
