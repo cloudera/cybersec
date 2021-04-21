@@ -1,8 +1,11 @@
 package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.commands.EnrichmentCommandResponse;
+import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.rules.RulesForm;
+import java.io.IOException;
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.state.MapStateDescriptor;
@@ -22,6 +25,11 @@ import java.util.List;
  * A job that will score alerts based on a set of dynamic rules stored in the state engine
  */
 public abstract class ScoringJob {
+
+    private static final String RULE_STATE_TAG = "rules";
+    private static final String RULE_COMMANDS_TAG = "rules-sink";
+    public static final OutputTag<ScoringRuleCommandResult> COMMAND_RESULT_OUTPUT_TAG = new OutputTag<>(RULE_COMMANDS_TAG, TypeInformation.of(ScoringRuleCommandResult.class));
+
     protected StreamExecutionEnvironment createPipeline(final ParameterTool params) {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
@@ -34,24 +42,27 @@ public abstract class ScoringJob {
                 .score(data, ruleCommands, Descriptors.rulesResultSink, Descriptors.rulesState).name("Process Rules")
                 .uid("process-rules");
 
-        // output the results of the rules commands
-        final DataStream<ScoringRuleCommandResult> rulesCommandResponse =
-                results.getSideOutput(Descriptors.rulesResultSink);
-
         writeResults(params, results);
-        writeQueryResult(params, rulesCommandResponse);
+        // output the results of the rules commands
+        writeQueryResult(params, results.getSideOutput(Descriptors.rulesResultSink));
 
         return env;
+    }
+
+    public static SingleOutputStreamOperator<ScoredMessage> enrich(DataStream<Message> source,  DataStream<ScoringRuleCommand> ruleCommands) {
+        return Scoring
+                .score(source, ruleCommands, Descriptors.rulesResultSink, Descriptors.rulesState).name("Process Rules")
+                .uid("process-rules");
     }
 
     @VisibleForTesting
     static class Descriptors {
         public static final MapStateDescriptor<RulesForm, List<ScoringRule>> rulesState =
                 new MapStateDescriptor<>(
-                        "rules", TypeInformation.of(RulesForm.class), Types.LIST(new AvroTypeInfo<>(ScoringRule.class)));
+                        RULE_STATE_TAG, TypeInformation.of(RulesForm.class), Types.LIST(new AvroTypeInfo<>(ScoringRule.class)));
 
         public static final OutputTag<ScoringRuleCommandResult> rulesResultSink =
-                new OutputTag<ScoringRuleCommandResult>("rules-sink") {
+                new OutputTag<ScoringRuleCommandResult>(RULE_COMMANDS_TAG) {
                 };
         public static ListStateDescriptor<ScoringRule> activeOrderedRules;
     }
