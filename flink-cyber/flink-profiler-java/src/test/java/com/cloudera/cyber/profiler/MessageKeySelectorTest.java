@@ -1,9 +1,7 @@
 package com.cloudera.cyber.profiler;
 
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.TestUtils;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import org.junit.Assert;
@@ -37,13 +35,7 @@ public class MessageKeySelectorTest {
         List<String> keyFieldValues = keyFields.stream().map(extensions::get).collect(Collectors.toList());
         String expectedKey = Joiner.on("-").join(keyFieldValues);
 
-        Message message = Message.builder()
-                .extensions(extensions)
-                .ts(MessageUtils.getCurrentTimestamp())
-                .originalSource(TestUtils.source("test", 0, 0))
-                .source("test")
-                .build();
-
+        ProfileMessage message = new ProfileMessage(MessageUtils.getCurrentTimestamp(), extensions);
         MessageKeySelector selector = new MessageKeySelector(keyFields);
         Assert.assertEquals(expectedKey, selector.getKey(message));
     }
