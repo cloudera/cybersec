@@ -1,9 +1,9 @@
 package com.cloudera.cyber.profiler.accumulator;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.profiler.ProfileAggregationMethod;
 import com.cloudera.cyber.profiler.ProfileGroupConfig;
 import com.cloudera.cyber.profiler.ProfileMeasurementConfig;
+import com.cloudera.cyber.profiler.ProfileMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.accumulators.*;
 
@@ -30,7 +30,7 @@ public class FieldValueProfileGroupAcc extends ProfileGroupAcc {
 
     @FunctionalInterface
     interface ProfileUpdateFunction {
-        void update(ProfileMeasurementConfig config, Message message, Accumulator<?, ? extends Serializable> acc);
+        void update(ProfileMeasurementConfig config, ProfileMessage message, Accumulator<?, ? extends Serializable> acc);
     }
 
     private static final Map<ProfileAggregationMethod, ProfileUpdateFunction> accUpdate =
@@ -70,7 +70,7 @@ public class FieldValueProfileGroupAcc extends ProfileGroupAcc {
     }
 
     @Override
-    protected void updateAccumulators(Message message, ProfileGroupConfig profileGroupConfig) {
+    protected void updateAccumulators(ProfileMessage message, ProfileGroupConfig profileGroupConfig) {
         Map<String, String> extensions = message.getExtensions();
         if (keyFieldValues.isEmpty()) {
             keyFieldValues = profileGroupConfig.getKeyFieldNames().stream().map(extensions::get).collect(Collectors.toList());
@@ -123,18 +123,18 @@ public class FieldValueProfileGroupAcc extends ProfileGroupAcc {
         extensions.put(config.getResultExtensionName(), format.format(((CountDistinctAcc)acc).getLocalValue().getUnion().getResult().getEstimate()));
     }
 
-    private static  void updateDoubleAccumulator(ProfileMeasurementConfig config, Message message, Accumulator<?, ? extends Serializable> acc) {
+    private static  void updateDoubleAccumulator(ProfileMeasurementConfig config, ProfileMessage message, Accumulator<?, ? extends Serializable> acc) {
         Double fieldValueDouble = getFieldValueAsDouble(message, config.getFieldName());
         if (fieldValueDouble != null) {
             ((Accumulator<Double, Double>) acc).add(fieldValueDouble);
         }
     }
 
-    private static void updateCounterAccumulator(ProfileMeasurementConfig config, Message message, Accumulator<?, ? extends Serializable> acc) {
+    private static void updateCounterAccumulator(ProfileMeasurementConfig config, ProfileMessage message, Accumulator<?, ? extends Serializable> acc) {
         ((Accumulator<Double, ? extends Serializable>)acc).add(1D);
     }
 
-    private static void updateStringAccumulator(ProfileMeasurementConfig config, Message message, Accumulator<?, ? extends Serializable> acc) {
+    private static void updateStringAccumulator(ProfileMeasurementConfig config, ProfileMessage message, Accumulator<?, ? extends Serializable> acc) {
         String stringFieldValue = message.getExtensions().get(config.getFieldName());
         if (stringFieldValue != null) {
             ((Accumulator<String, ? extends Serializable>)acc).add(stringFieldValue);

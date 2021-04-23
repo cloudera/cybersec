@@ -1,6 +1,5 @@
 package com.cloudera.cyber.profiler;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.hbase.LookupKey;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import lombok.Data;
@@ -32,7 +31,7 @@ public class FirstSeenHBase implements Serializable {
         this.firstSeenResultName = measurementConfig.getResultExtensionName();
     }
 
-    public LookupKey getKey(Message message) {
+    public LookupKey getKey(ProfileMessage message) {
         Map<String, String> extensions = message.getExtensions();
         String key = Stream.concat(Stream.of(profileName),
                 keyFieldNames.stream().map(extensions::get)).collect(Collectors.joining(":"));
@@ -42,11 +41,11 @@ public class FirstSeenHBase implements Serializable {
                 .build();
     }
 
-    public String getFirstSeen(Message message) {
+    public String getFirstSeen(ProfileMessage message) {
         return message.getExtensions().get(ProfileGroupAcc.START_PERIOD_EXTENSION);
     }
 
-    public String getLastSeen(Message message) {
+    public String getLastSeen(ProfileMessage message) {
         return message.getExtensions().get(ProfileGroupAcc.END_PERIOD_EXTENSION);
     }
 

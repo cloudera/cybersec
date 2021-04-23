@@ -30,11 +30,11 @@ public class ProfileGroupTest {
         profileGroupAccumulator.addMessage(createMessage(timestamp, aggregationFieldValue), profileGroupConfig);
     }
 
-    protected Message createMessage(long timestamp, long aggregationFieldValue) {
+    protected ProfileMessage createMessage(long timestamp, long aggregationFieldValue) {
         Map<String, String> extensions = ImmutableMap.of(
                 KEY_FIELD_NAME, KEY_FIELD_VALUE,
                 SUM_FIELD_NAME, Long.toString(aggregationFieldValue)
         );
-        return TestUtils.createMessage(timestamp, "test", extensions);
+        return new ProfileMessage(timestamp, extensions);
     }
 }

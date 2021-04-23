@@ -1,6 +1,5 @@
 package com.cloudera.cyber.profiler;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.profiler.accumulator.FieldValueProfileGroupAccTest;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
@@ -10,12 +9,12 @@ import org.junit.Test;
 import java.text.DecimalFormat;
 import java.util.Map;
 
-import static com.cloudera.cyber.profiler.ProfileAggregateFunction.*;
+import static com.cloudera.cyber.profiler.ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION;
 import static com.cloudera.cyber.profiler.accumulator.FieldValueProfileGroupAccTest.*;
 import static com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc.END_PERIOD_EXTENSION;
 import static com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc.START_PERIOD_EXTENSION;
 
-public class FieldProfileAggregateFunction {
+public class FieldValueProfileAggregateFunctionTest {
 
     @Test
     public void testProfileAggregator() {
@@ -25,7 +24,7 @@ public class FieldProfileAggregateFunction {
         ProfileGroupAcc acc = aggregateFunction.createAccumulator();
 
         long currentTimestamp = MessageUtils.getCurrentTimestamp();
-        Message profileMessage = getProfileMessage(aggregateFunction, acc,
+        ProfileMessage profileMessage = getProfileMessage(aggregateFunction, acc,
                 currentTimestamp,500, "1 string", 10000, 8);
         verifyProfileMessage(profileGroupConfig, profileMessage,  currentTimestamp, currentTimestamp,
                 500, 1, 1, 10000, 8);
@@ -48,11 +47,9 @@ public class FieldProfileAggregateFunction {
                 50510, 3, 3, 100000, 1);
     }
 
-    private void verifyProfileMessage(ProfileGroupConfig profileGroupConfig, Message profileMessage, long startPeriod, long endPeriod, double sum, double count,
+    private void verifyProfileMessage(ProfileGroupConfig profileGroupConfig, ProfileMessage profileMessage, long startPeriod, long endPeriod, double sum, double count,
                                       double countDistinct, double max, double min) {
 
-        Assert.assertEquals(PROFILE_TOPIC_NAME, profileMessage.getOriginalSource().getTopic());
-        Assert.assertEquals(PROFILE_SOURCE, profileMessage.getSource());
         Assert.assertEquals(endPeriod, profileMessage.getTs());
 
         Map<String, DecimalFormat> formats = getFormats(profileGroupConfig);
@@ -70,10 +67,10 @@ public class FieldProfileAggregateFunction {
         Assert.assertEquals(10, actualExtensions.size());
     }
 
-    private Message getProfileMessage(ProfileAggregateFunction aggregateFunction, ProfileGroupAcc acc,
+    private ProfileMessage getProfileMessage(ProfileAggregateFunction aggregateFunction, ProfileGroupAcc acc,
                                       long timestamp, double sum,
                                       String countDistinct, double max, double min) {
-        Message firstMessage = createMessage(timestamp, sum, countDistinct, max, min);
+        ProfileMessage firstMessage = createMessage(timestamp, sum, countDistinct, max, min);
         ProfileGroupAcc acc1 = aggregateFunction.add(firstMessage, acc);
         return aggregateFunction.getResult(acc1);
     }

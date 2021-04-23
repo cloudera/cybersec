@@ -1,7 +1,5 @@
 package com.cloudera.cyber.profiler;
 
-import com.cloudera.cyber.Message;
-import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.hbase.AbstractHbaseMapFunction;
 import com.cloudera.cyber.hbase.LookupKey;
 import lombok.Data;
@@ -17,7 +15,7 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Slf4j
-public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction {
+public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction<ProfileMessage, ProfileMessage> {
     public static final String FIRST_SEEN_PROPERTY_NAME = "firstSeen";
     public static final String LAST_SEEN_PROPERTY_NAME = "lastSeen";
     public static final String FIRST_SEEN_TIME_SUFFIX = ".time";
@@ -38,7 +36,7 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction {
     }
 
     @Override
-    public Message map(Message message) {
+    public ProfileMessage map(ProfileMessage message) {
         messageCounter.inc(1);
         LookupKey lookupKey = firstSeenHBaseInfo.getKey(message);
         Map<String, String> previousFirstLastSeen = fetch(lookupKey);
@@ -56,7 +54,10 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction {
             }
         }
         firstSeenExtensions.put(firstSeenHBaseInfo.getFirstSeenResultName(), Integer.toString(first ? 1 : 0));
-        return MessageUtils.addFields(message, firstSeenExtensions);
+
+        message.getExtensions().forEach(firstSeenExtensions::putIfAbsent);
+
+        return new ProfileMessage(message.getTs(), firstSeenExtensions);
     }
 
     protected String mergeFirstLastSeen(String previousFirstString, String previousLastString, String newFirstString) {
