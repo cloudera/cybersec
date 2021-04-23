@@ -1,8 +1,8 @@
 package com.cloudera.cyber.profiler.accumulator;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.profiler.ProfileGroupConfig;
 import com.cloudera.cyber.profiler.ProfileMeasurementConfig;
+import com.cloudera.cyber.profiler.ProfileMessage;
 import com.google.common.collect.Lists;
 import org.apache.commons.math3.stat.descriptive.AggregateSummaryStatistics;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
@@ -29,7 +29,7 @@ public class StatsProfileGroupAcc extends ProfileGroupAcc {
     }
 
     @Override
-    protected void updateAccumulators(Message message, ProfileGroupConfig profileGroupConfig) {
+    protected void updateAccumulators(ProfileMessage message, ProfileGroupConfig profileGroupConfig) {
         Iterator<ProfileMeasurementConfig> measurementIter = profileGroupConfig.getMeasurements().stream().
                 filter(ProfileMeasurementConfig::hasStats).iterator();
         Iterator<Accumulator<?, ? extends Serializable>> accumulatorIter= accumulators.iterator();

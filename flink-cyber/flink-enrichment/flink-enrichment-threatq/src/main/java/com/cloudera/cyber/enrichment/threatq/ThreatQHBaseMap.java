@@ -14,7 +14,7 @@ import java.util.Map;
 import static java.util.stream.Collectors.toMap;
 
 @Slf4j
-public class ThreatQHBaseMap extends AbstractHbaseMapFunction {
+public class ThreatQHBaseMap extends AbstractHbaseMapFunction<Message, Message> {
     private static final byte[] cf = Bytes.toBytes("t");
 
     private List<ThreatQConfig> configs;

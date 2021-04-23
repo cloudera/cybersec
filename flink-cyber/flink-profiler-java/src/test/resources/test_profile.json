@@ -33,4 +33,17 @@
         "aggregationMethod" : "COUNT_DISTINCT",
         "calculateStats" : true
       }]
-  }]
+  },
+  {
+    "profileGroupName" : "endpoint_aggregate_score",
+    "sources" : [ "netflow" ],
+    "keyFieldNames" : [ "ip_src" ],
+    "periodDuration" : 5,
+    "periodDurationUnit" : "SECONDS",
+    "measurements" :  [ {
+      "fieldName" : "cyberscore",
+      "resultExtensionName" : "total_score",
+      "aggregationMethod" : "SUM"
+    }]
+  }
+]
