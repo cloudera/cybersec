@@ -2,12 +2,10 @@ package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.TestUtils;
-import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import com.cloudera.cyber.scoring.Scores;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -15,16 +13,19 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
-import org.junit.Assert;
 import org.junit.Test;
 
-import javax.print.DocFlavor;
-import java.time.Duration;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
 import static com.cloudera.cyber.flink.FlinkUtils.PARAMS_PARALLELISM;
+import static com.cloudera.cyber.profiler.ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION;
+import static com.cloudera.cyber.profiler.StatsProfileAggregateFunction.STATS_PROFILE_GROUP_SUFFIX;
+import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 public class ProfileJobTest extends ProfileJob {
 
@@ -35,8 +36,6 @@ public class ProfileJobTest extends ProfileJob {
     private static final String KEY_2 = "key_2";
     private static final String MAX_FIELD_NAME = "max_field";
     private static final String SUM_FIELD_NAME = "sum_field";
-    private static final String COUNT_PROFILE_EXTENSION = "count";
-    private static final String MAX_PROFILE_EXTENSION = "max";
     private static final String TEST_PROFILE_GROUP = "test_profile";
     private static final String BYTE_COUNT_PROFILE_GROUP ="region_byte_count";
     private static final String REGION_1 = "region_1";
@@ -44,11 +43,9 @@ public class ProfileJobTest extends ProfileJob {
     private static final String IP_SRC_1 = "1.1.1.1";
     private static final String IP_SRC_2 = "2.2.2.2";
     private static final String IP_SRC_3 = "3.3.3.3";
-    private static final String SUM_PROFILE_EXTENSION = "total_bytes";
-    private static final String SUM_SCORES_PROFILE_EXTENSION = "total_score";
+
     private static final String SUM_SCORES_PROFILE_GROUP = "endpoint_aggregate_score";
     private static final String RULE_UUID = UUID.randomUUID().toString();
-    private static final List<String> PROFILE_KEY_FIELDS = Lists.newArrayList(SUM_KEY_FIELD_NAME, SUM_SECOND_KEY_FIELD_NAME, KEY_FIELD_NAME);
     private ManualSource<ScoredMessage> source;
 
     private final CollectingSink<ScoredMessage> sink = new CollectingSink<>();
@@ -56,11 +53,14 @@ public class ProfileJobTest extends ProfileJob {
 
     @Test
     public void testPipeline() throws Exception {
-        Map<String, String> props = new HashMap<String, String>() {{
-            put(PARAMS_PARALLELISM, "1");
-            put(PARAM_PROFILE_CONFIG, ClassLoader.getSystemResource("test_profile.json").getPath());
-            put(PARAM_LATENESS_TOLERANCE_MILLIS, "5");
-        }};
+        String profileConfigFilePath = ClassLoader.getSystemResource("test_profile.json").getPath();
+        Map<String, String> props = ImmutableMap.of(
+            PARAMS_PARALLELISM, "1",
+            PARAM_PROFILE_CONFIG, profileConfigFilePath,
+            PARAM_LATENESS_TOLERANCE_MILLIS, "5"
+        );
+
+        List<ProfileGroupConfig> profileGroupConfigs = parseConfigFile(new String(Files.readAllBytes(Paths.get(profileConfigFilePath))));
         JobTester.startTest(createPipeline(ParameterTool.fromMap(props)));
         long currentTimestamp = MessageUtils.getCurrentTimestamp();
         // send the messages to the any profile
@@ -75,92 +75,74 @@ public class ProfileJobTest extends ProfileJob {
         sendSumMessage(currentTimestamp + 4, REGION_2, IP_SRC_2,128);
         sendSumMessage(currentTimestamp + 2500, REGION_1, IP_SRC_3, 1000);
 
-        sendSumMessage(currentTimestamp + 3000, REGION_1, IP_SRC_3, 50000);
+        sendSumMessage(currentTimestamp + 6000, REGION_1, IP_SRC_3, 50000);
 
         // send the messages to the bytes profile
         JobTester.stopTest();
 
-        ImmutableMap<String, Map<String, String>> expectedExtensions = ImmutableMap.<String, Map<String, String>>builder().
-            put(TEST_PROFILE_GROUP + KEY_1, ImmutableMap.<String, String>builder().
-                           put(COUNT_PROFILE_EXTENSION, "3").
-                           put(MAX_PROFILE_EXTENSION, "30").
-                           put(KEY_FIELD_NAME, KEY_1).
-                           put(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION, TEST_PROFILE_GROUP).
-                           put(ProfileGroupAcc.START_PERIOD_EXTENSION, Long.toString(currentTimestamp)).
-                           put(ProfileGroupAcc.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 2)).
-                           build()).
+        ImmutableMap<String, List<String>> possibleKeyValues = ImmutableMap.<String, List<String>>builder().
+                put(TEST_PROFILE_GROUP, Lists.newArrayList(KEY_1, KEY_2)).
+                put(SUM_SCORES_PROFILE_GROUP, Lists.newArrayList(IP_SRC_1, IP_SRC_2, IP_SRC_3)).
+                put(BYTE_COUNT_PROFILE_GROUP, Lists.newArrayList(REGION_1, REGION_2)).
+                build();
 
 
-            put(TEST_PROFILE_GROUP + KEY_2, ImmutableMap.<String, String>builder().
-                    put(COUNT_PROFILE_EXTENSION, "2").
-                    put(MAX_PROFILE_EXTENSION, "75").
-                    put(KEY_FIELD_NAME, KEY_2).
-                    put(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION, TEST_PROFILE_GROUP).
-                    put(ProfileGroupAcc.START_PERIOD_EXTENSION, Long.toString(currentTimestamp)).
-                    put(ProfileGroupAcc.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 1)).
-                    build()).
-
-            put(BYTE_COUNT_PROFILE_GROUP + REGION_1, ImmutableMap.<String, String>builder().
-                put(SUM_PROFILE_EXTENSION, "1536").
-                put(SUM_KEY_FIELD_NAME, REGION_1).
-                put(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION, BYTE_COUNT_PROFILE_GROUP).
-                put(ProfileGroupAcc.START_PERIOD_EXTENSION, Long.toString(currentTimestamp + 5)).
-                put(ProfileGroupAcc.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 6)).
-                build()).
-
-            put(BYTE_COUNT_PROFILE_GROUP + REGION_2, ImmutableMap.<String, String>builder().
-                put(SUM_PROFILE_EXTENSION, "128").
-                put(SUM_KEY_FIELD_NAME, REGION_2).
-                put(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION, BYTE_COUNT_PROFILE_GROUP).
-                put(ProfileGroupAcc.START_PERIOD_EXTENSION, Long.toString(currentTimestamp + 4)).
-                put(ProfileGroupAcc.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 4)).
-                build()).
-            put(SUM_SCORES_PROFILE_GROUP + IP_SRC_1, ImmutableMap.<String, String>builder().
-                    put(SUM_SCORES_PROFILE_EXTENSION, "14").
-                    put(SUM_SECOND_KEY_FIELD_NAME, IP_SRC_1).
-                    put(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION, SUM_SCORES_PROFILE_GROUP).
-                    put(ProfileGroupAcc.START_PERIOD_EXTENSION, Long.toString(currentTimestamp + 5)).
-                    put(ProfileGroupAcc.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 6)).
-                    build()).
-            put(SUM_SCORES_PROFILE_GROUP + IP_SRC_2, ImmutableMap.<String, String>builder().
-                    put(SUM_SCORES_PROFILE_EXTENSION, "13").
-                    put(SUM_SECOND_KEY_FIELD_NAME, IP_SRC_2).
-                    put(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION, SUM_SCORES_PROFILE_GROUP).
-                    put(ProfileGroupAcc.START_PERIOD_EXTENSION, Long.toString(currentTimestamp + 4)).
-                    put(ProfileGroupAcc.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 4)).
-                    build()).
-            put(SUM_SCORES_PROFILE_GROUP + IP_SRC_3, ImmutableMap.<String, String>builder().
-                    put(SUM_SCORES_PROFILE_EXTENSION, "62").
-                    put(SUM_SECOND_KEY_FIELD_NAME, IP_SRC_3).
-                    put(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION, SUM_SCORES_PROFILE_GROUP).
-                    put(ProfileGroupAcc.START_PERIOD_EXTENSION, Long.toString(currentTimestamp + 2500)).
-                    put(ProfileGroupAcc.END_PERIOD_EXTENSION, Long.toString(currentTimestamp + 3000)).
-                    build()).
-            build();
-
-       /* IntStream.range(0, 10).forEach(i -> {
-            try {
-                verifyProfileMessages(expectedExtensions);
-            } catch (TimeoutException e) {
-                throw new IllegalStateException("poll timed out");
-            }
-        }); */
         List<ScoredMessage> messages = new ArrayList<>();
         while (!sink.isEmpty()) {
             messages.add(sink.poll());
         }
 
-        Assert.assertFalse(messages.isEmpty());
+        messages.forEach(message -> verifyProfileMessages(currentTimestamp, message, profileGroupConfigs, possibleKeyValues));
+        IntStream.range(0, 10).forEach(i -> verifyProfileMessages(currentTimestamp, messages.get(i), profileGroupConfigs, possibleKeyValues));
+
+        assertThat(messages).isNotEmpty();
     }
 
-    private void verifyProfileMessages(Map<String, Map<String, String>> expectedExtensions) throws TimeoutException {
-        ScoredMessage profile = sink.poll(Duration.ofSeconds(5));
-
+    private void verifyProfileMessages(long currentTimestamp, ScoredMessage profile, List<ProfileGroupConfig> profileGroupConfigs, Map<String, List<String>> possibleKeyValues) {
         Map<String, String> extensions = profile.getMessage().getExtensions();
-        String keyFieldValue = extensions.entrySet().stream().filter(e -> PROFILE_KEY_FIELDS.contains(e.getKey())).
-                map(e -> e.getValue()).findFirst().orElseThrow(() -> new RuntimeException("no key field found in profile message"));
-        String expectedExtensionsKey = extensions.get(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION) + keyFieldValue;
-        Assert.assertEquals(String.format("Message with key %s extensions did not match", expectedExtensionsKey), expectedExtensions.get(expectedExtensionsKey), extensions);
+
+        // check profile group
+        String profileGroupName = extensions.get(PROFILE_GROUP_NAME_EXTENSION);
+        assertThat(profileGroupName).isNotNull();
+        String baseProfileName = profileGroupName.replace(STATS_PROFILE_GROUP_SUFFIX, "");
+
+        // find the profile definition
+        ProfileGroupConfig profileGroupConfig = profileGroupConfigs.stream().filter(pg -> pg.getProfileGroupName().equals(baseProfileName)).findFirst().orElse(null);
+        assertThat(profileGroupConfig).isNotNull();
+
+        // check the start and end period and timestamp range
+        long maxTimestamp = currentTimestamp + 6000;
+        long startPeriod = Long.parseLong(extensions.get(START_PERIOD_EXTENSION));
+        long endPeriod = Long.parseLong(extensions.get(END_PERIOD_EXTENSION));
+        assertThat(startPeriod).isBetween(currentTimestamp, maxTimestamp);
+        assertThat(startPeriod).isLessThanOrEqualTo(endPeriod);
+        assertThat(endPeriod).isBetween(currentTimestamp, maxTimestamp);
+        assertThat(profile.getTs()).isBetween(currentTimestamp, maxTimestamp);
+
+        if (profileGroupName.endsWith(STATS_PROFILE_GROUP_SUFFIX)) {
+            assertThat(profileGroupConfig.hasStats()).isTrue();
+        } else {
+            String keyExtensionName = profileGroupConfig.getKeyFieldNames().get(0);
+            String keyValue = extensions.get(keyExtensionName);
+            assertThat(possibleKeyValues.get(profileGroupName)).contains(keyValue);
+
+            // make sure there is a value for each measurement and that it is a double
+            profileGroupConfig.getMeasurements().forEach(m -> checkMeasurementValues(extensions, profileGroupConfig, m));
+        }
+    }
+
+    private void checkMeasurementValues(Map<String, String> extensions, ProfileGroupConfig profileGroupConfig, ProfileMeasurementConfig measurement) {
+        checkMeasurementValue(extensions, measurement.getResultExtensionName());
+        if (profileGroupConfig.hasStats()) {
+            profileGroupConfig.getMeasurements().forEach( m -> STATS_EXTENSION_SUFFIXES.forEach(suffix -> checkMeasurementValue(extensions, m.getResultExtensionName().concat(suffix))));
+        }
+    }
+
+    private void checkMeasurementValue(Map<String, String> extensions, String name) {
+        String measurementString = extensions.get(name);
+        assertThat(measurementString).isNotNull();
+        //noinspection ResultOfMethodCallIgnored
+        assertThatCode(() ->Double.parseDouble(measurementString)).doesNotThrowAnyException();
     }
 
     private void sendMaxMessage(long timestamp, String keyFieldValue, long maxFieldValue) {
@@ -192,11 +174,7 @@ public class ProfileJobTest extends ProfileJob {
     @Override
     protected DataStream<ScoredMessage> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         source = JobTester.createManualSource(env, TypeInformation.of(ScoredMessage.class));
-        WatermarkStrategy<ScoredMessage> watermarkStrategy = WatermarkStrategy
-                .<ScoredMessage>forBoundedOutOfOrderness(Duration.ofMillis(1000))
-                .withTimestampAssigner((message, timestamp) -> message.getTs());
-        return source.getDataStream().assignTimestampsAndWatermarks(watermarkStrategy)
-                .setParallelism(1);
+        return source.getDataStream();
     }
 
     @Override
