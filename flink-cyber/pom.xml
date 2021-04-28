@@ -59,6 +59,7 @@
         <hbase.version>2.2.6.7.2.6.1-1</hbase.version>
         <mockito.version>3.6.0</mockito.version>
         <datasketches.version>1.3.0-incubating</datasketches.version>
+        <assertj.version>3.13.2</assertj.version>
     </properties>
 
     <repositories>
