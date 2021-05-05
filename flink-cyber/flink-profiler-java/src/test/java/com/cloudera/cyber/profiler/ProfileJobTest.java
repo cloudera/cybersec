@@ -2,30 +2,37 @@ package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.TestUtils;
-import com.cloudera.cyber.scoring.ScoredMessage;
-import com.cloudera.cyber.scoring.Scores;
+import com.cloudera.cyber.rules.DynamicRuleCommandResult;
+import com.cloudera.cyber.scoring.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
+import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
 import static com.cloudera.cyber.flink.FlinkUtils.PARAMS_PARALLELISM;
 import static com.cloudera.cyber.profiler.ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION;
 import static com.cloudera.cyber.profiler.StatsProfileAggregateFunction.STATS_PROFILE_GROUP_SUFFIX;
 import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static com.cloudera.cyber.rules.DynamicRuleCommandType.UPSERT;
+import static com.cloudera.cyber.rules.RuleType.JS;
+import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.Matchers.equalTo;
 
 public class ProfileJobTest extends ProfileJob {
 
@@ -49,6 +56,8 @@ public class ProfileJobTest extends ProfileJob {
     private ManualSource<ScoredMessage> source;
 
     private final CollectingSink<ScoredMessage> sink = new CollectingSink<>();
+    private ManualSource<ScoringRuleCommand> scoringRuleCommandSource;
+    private final CollectingSink<ScoringRuleCommandResult> scoringRuleCommandResponse = new CollectingSink<>();
 
 
     @Test
@@ -63,6 +72,9 @@ public class ProfileJobTest extends ProfileJob {
         List<ProfileGroupConfig> profileGroupConfigs = parseConfigFile(new String(Files.readAllBytes(Paths.get(profileConfigFilePath))));
         JobTester.startTest(createPipeline(ParameterTool.fromMap(props)));
         long currentTimestamp = MessageUtils.getCurrentTimestamp();
+
+        ScoringRule rule = upsertScoringCommand();
+
         // send the messages to the any profile
         sendMaxMessage(currentTimestamp, KEY_1, 20);
         sendMaxMessage(currentTimestamp, KEY_2, 50);
@@ -92,13 +104,13 @@ public class ProfileJobTest extends ProfileJob {
             messages.add(sink.poll());
         }
 
-        messages.forEach(message -> verifyProfileMessages(currentTimestamp, message, profileGroupConfigs, possibleKeyValues));
-        IntStream.range(0, 10).forEach(i -> verifyProfileMessages(currentTimestamp, messages.get(i), profileGroupConfigs, possibleKeyValues));
+        messages.forEach(message -> verifyProfileMessages(currentTimestamp, message, profileGroupConfigs, possibleKeyValues, rule));
+        IntStream.range(0, 10).forEach(i -> verifyProfileMessages(currentTimestamp, messages.get(i), profileGroupConfigs, possibleKeyValues, rule));
 
         assertThat(messages).isNotEmpty();
     }
 
-    private void verifyProfileMessages(long currentTimestamp, ScoredMessage profile, List<ProfileGroupConfig> profileGroupConfigs, Map<String, List<String>> possibleKeyValues) {
+    private void verifyProfileMessages(long currentTimestamp, ScoredMessage profile, List<ProfileGroupConfig> profileGroupConfigs, Map<String, List<String>> possibleKeyValues, ScoringRule rule) {
         Map<String, String> extensions = profile.getMessage().getExtensions();
 
         // check profile group
@@ -129,6 +141,9 @@ public class ProfileJobTest extends ProfileJob {
             // make sure there is a value for each measurement and that it is a double
             profileGroupConfig.getMeasurements().forEach(m -> checkMeasurementValues(extensions, profileGroupConfig, m));
         }
+
+        assertThat(profile.getCyberScore()).isCloseTo(1.0, withPrecision(.01d));
+        assertThat(profile.getCyberScoresDetails()).hasSize(1).contains(Scores.builder().ruleId(rule.getId()).score(1.0).reason("profile").build());
     }
 
     private void checkMeasurementValues(Map<String, String> extensions, ProfileGroupConfig profileGroupConfig, ProfileMeasurementConfig measurement) {
@@ -171,6 +186,42 @@ public class ProfileJobTest extends ProfileJob {
         source.sendRecord(message, timestamp);
     }
 
+    private ScoringRule upsertScoringCommand() throws TimeoutException {
+
+        String ruleId = UUID.randomUUID().toString();
+        String ruleName = "test-rule";
+        ScoringRule rule = ScoringRule.builder()
+                .id(ruleId)
+                .name(ruleName)
+                .tsStart(Instant.now())
+                .tsEnd(Instant.now().plus(Duration.ofMinutes(5)))
+                .order(0)
+                .type(JS)
+                .ruleScript("return { score: 1.0, reason: message.source }")
+                .enabled(true)
+                .build();
+
+        ScoringRuleCommand command = ScoringRuleCommand.builder()
+                .type(UPSERT)
+                .rule(rule)
+                .ts(1L)
+                .id(UUID.randomUUID().toString())
+                .headers(Collections.emptyMap())
+                .build();
+        scoringRuleCommandSource.sendRecord(command, command.getTs());
+        scoringRuleCommandSource.sendWatermark(command.getTs() + 5000L);
+
+        verifySuccessfulResponse(rule);
+
+        return rule;
+    }
+
+    private void verifySuccessfulResponse(ScoringRule expectedRule) throws TimeoutException {
+        DynamicRuleCommandResult<ScoringRule> poll = scoringRuleCommandResponse.poll();
+        MatcherAssert.assertThat("Command succeed", poll.isSuccess());
+        MatcherAssert.assertThat("rule matched", poll.getRule(), equalTo(expectedRule));
+    }
+
     @Override
     protected DataStream<ScoredMessage> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         source = JobTester.createManualSource(env, TypeInformation.of(ScoredMessage.class));
@@ -178,14 +229,26 @@ public class ProfileJobTest extends ProfileJob {
     }
 
     @Override
-    protected void writeResults(ParameterTool params, DataStream<ScoredMessage> results, String profileGroupName) {
-        results.addSink(sink).name("Profile events " + profileGroupName).setParallelism(1);
+    protected void writeResults(ParameterTool params, DataStream<ScoredMessage> results) {
+        results.addSink(sink).name("Profile events ").setParallelism(1);
     }
 
     @Override
     protected DataStream<ProfileMessage> updateFirstSeen(ParameterTool params, DataStream<ProfileMessage> results, ProfileGroupConfig profileGroupConfig) {
         //skip hbase for unit tests
         return results;
+    }
+
+    @Override
+    protected DataStream<ScoringRuleCommand> createRulesSource(StreamExecutionEnvironment env, ParameterTool params) {
+        scoringRuleCommandSource = JobTester.createManualSource(env, TypeInformation.of(ScoringRuleCommand.class));
+
+        return scoringRuleCommandSource.getDataStream();
+    }
+
+    @Override
+    protected void writeScoredRuleCommandResult(ParameterTool params, DataStream<ScoringRuleCommandResult> results) {
+        results.addSink(scoringRuleCommandResponse).name("Kafka Score Rule Command Results").uid("kafka.output.rule.command.results");
     }
 
 }

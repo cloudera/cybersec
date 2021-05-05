@@ -2,16 +2,15 @@ package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
-import com.cloudera.cyber.scoring.ScoredMessage;
-import com.cloudera.cyber.scoring.ScoredMessageWatermarkedStream;
+import com.cloudera.cyber.scoring.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
@@ -25,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class ProfileJob {
 
@@ -59,9 +59,11 @@ public abstract class ProfileJob {
         long allowedLatenessMillis = params.getLong(PARAM_LATENESS_TOLERANCE_MILLIS, Time.minutes(5).toMilliseconds());
         final DataStream<ScoredMessage> messages = ScoredMessageWatermarkedStream.of(createSource(env, params), allowedLatenessMillis);
 
-        MapFunction<Message, ScoredMessage> scoringMap = (MapFunction<Message, ScoredMessage>) message -> ScoredMessage.builder().cyberScoresDetails(Collections.emptyList()).message(message).build();
+        AtomicReference<DataStream<ProfileMessage>> profiledStreams = new AtomicReference<>();
+        profileGroups.forEach(g -> profile(params, messages, g, allowedLatenessMillis, profiledStreams));
 
-        profileGroups.forEach(g -> profile(params, messages, g, allowedLatenessMillis, scoringMap));
+        DataStream<ScoredMessage> scoredMessages =  score(profiledStreams.get().map(new ProfileMessageToMessageMap()), env, params);
+        writeResults(params, scoredMessages);
 
         return env;
     }
@@ -72,7 +74,7 @@ public abstract class ProfileJob {
      * @param params Configuration parameters
      * @param messages Data stream of messages to profile.
      */
-    protected void profile(final ParameterTool params, DataStream<ScoredMessage> messages, ProfileGroupConfig profileGroupConfig, long allowedLatenessMillis, MapFunction<Message, ScoredMessage> scoringMap) {
+    protected void profile(final ParameterTool params, DataStream<ScoredMessage> messages, ProfileGroupConfig profileGroupConfig, long allowedLatenessMillis, AtomicReference<DataStream<ProfileMessage>> profileMessageStreams) {
 
         Time profilePeriodDuration = Time.of(profileGroupConfig.getPeriodDuration(), TimeUnit.valueOf(profileGroupConfig.getPeriodDurationUnit()));
         DataStream<ProfileMessage> profileMessages = messages.filter(new ProfileMessageFilter(profileGroupConfig)).
@@ -93,16 +95,30 @@ public abstract class ProfileJob {
                     aggregate(new StatsProfileAggregateFunction(profileGroupConfig));
             StatsProfileKeySelector statsKeySelector = new StatsProfileKeySelector();
             profileMessages = profileMessages.join(statsStream).where(profileKeySelector).equalTo(statsKeySelector).window(TumblingEventTimeWindows.of(profilePeriodDuration)).apply(new ProfileStatsJoin());
-            writeResults(params, statsStream.map(new ProfileMessageToMessageMap()).map(scoringMap), profileGroupConfig.getProfileGroupName());
-          //  profileMessages = profileMessages.connect(statsStream).keyBy(profileKeySelector, statsKeySelector).process(new ProfileStatsJoin());
+            unionProfileMessages(profileMessageStreams, statsStream);
         }
 
+        unionProfileMessages(profileMessageStreams, profileMessages);
+    }
 
-        writeResults(params, profileMessages.map(new ProfileMessageToMessageMap()).map(scoringMap), profileGroupConfig.getProfileGroupName());
+    private void unionProfileMessages(AtomicReference<DataStream<ProfileMessage>> profileMessageUnion, DataStream<ProfileMessage> newStream) {
+        if (!profileMessageUnion.compareAndSet(null, newStream)) {
+            profileMessageUnion.getAndUpdate(union -> union.union(newStream));
+        }
     }
 
     protected abstract DataStream<ScoredMessage> createSource(StreamExecutionEnvironment env, ParameterTool params);
-    protected abstract void writeResults(ParameterTool params, DataStream<ScoredMessage> results, String profileGroupName);
+    protected abstract void writeResults(ParameterTool params, DataStream<ScoredMessage> results);
     protected abstract DataStream<ProfileMessage> updateFirstSeen(ParameterTool params, DataStream<ProfileMessage> results, ProfileGroupConfig profileGroupConfig);
+    protected abstract DataStream<ScoringRuleCommand> createRulesSource(StreamExecutionEnvironment env, ParameterTool params);
+    protected abstract void writeScoredRuleCommandResult(ParameterTool params, DataStream<ScoringRuleCommandResult> results);
+
+    private DataStream<ScoredMessage> score(DataStream<Message> in, StreamExecutionEnvironment env, ParameterTool params) {
+        DataStream<ScoringRuleCommand> rulesSource = createRulesSource(env, params);
+        SingleOutputStreamOperator<ScoredMessage> results = ScoringJob.enrich(in, rulesSource);
+        writeScoredRuleCommandResult(params, results.getSideOutput(ScoringJob.COMMAND_RESULT_OUTPUT_TAG));
+        return results;
+    }
+
 
 }
