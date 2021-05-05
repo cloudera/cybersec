@@ -40,7 +40,7 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C ext
 
     @Override
     public void processBroadcastElement(C dynamicRuleCommand, Context context, Collector<T> collector) throws Exception {
-        log.debug("Rule Command {}, time: {}, processing: %{}, watermark: {}: {}" , Thread.currentThread().getId(), context.timestamp(), context.currentProcessingTime(), context.currentWatermark(), dynamicRuleCommand);
+        log.info("Rule Command {}, time: {}, processing: %{}, watermark: {}: {}" , Thread.currentThread().getId(), context.timestamp(), context.currentProcessingTime(), context.currentWatermark(), dynamicRuleCommand);
         BroadcastState<RulesForm, List<R>> state = context.getBroadcastState(rulesStateDescriptor);
         List<R> scoringRules = processRulesCommands(state.get(RulesForm.ALL), dynamicRuleCommand, context);
 
@@ -54,6 +54,8 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C ext
 
         // update the ordered version with just the active rules for processing
         state.put(RulesForm.ACTIVE, activeRules);
+        log.info("All Rules {}" , scoringRules);
+        log.info("Enabled Rules {}" , activeRules);
     }
 
     private List<R> processRulesCommands(List<R> stateRules, C ruleCommand, Context context) {
