@@ -1,11 +1,10 @@
 package com.cloudera.cyber.profiler.accumulator;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.profiler.ProfileAggregationMethod;
 import com.cloudera.cyber.profiler.ProfileGroupConfig;
 import com.cloudera.cyber.profiler.ProfileMeasurementConfig;
+import com.cloudera.cyber.profiler.ProfileMessage;
 import com.google.common.collect.Lists;
 import org.junit.Assert;
 import org.junit.Test;
@@ -113,7 +112,7 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
 
         // add a message with no extensions - should only update count and first seen since timestamp is earlier
         expectedCount += 1;
-        valueAcc.addMessage(TestUtils.createMessage(currentTimestamp - 1, "test", Collections.emptyMap()), profileGroupConfig);
+        valueAcc.addMessage(new ProfileMessage(currentTimestamp - 1,  Collections.emptyMap()), profileGroupConfig);
         verifyResults(profileGroupConfig, valueAcc, currentTimestamp - 1, currentTimestamp, KEY_1_VALUE, KEY_2_VALUE,
                 expectedSum, expectedCount, expectedCountDistinct, expectedMax, expectedMin);
 
@@ -151,7 +150,7 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
 
     }
 
-    private Message createInvalidDoubleNumberMessage(long timestamp) {
+    private ProfileMessage createInvalidDoubleNumberMessage(long timestamp) {
         Map<String, String> extensions = new HashMap<String, String>() {{
             put(KEY_1, KEY_1_VALUE);
             put(KEY_2, KEY_2_VALUE);
@@ -160,12 +159,12 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
             put(MAX_FIELD, "Bad number 2");
             put(MIN_FIELD, "Bad number 3");
         }};
-        return TestUtils.createMessage(timestamp, "test", extensions);
+        return new ProfileMessage(timestamp, extensions);
     }
 
 
-    public static Message createMessage(long timestamp, double sum_field, String count_dist_field,
-                                  double max_field, double min_field) {
+    public static ProfileMessage createMessage(long timestamp, double sum_field, String count_dist_field,
+                                               double max_field, double min_field) {
         Map<String, String> extensions = new HashMap<String, String>() {{
                 put(KEY_1, KEY_1_VALUE);
                 put(KEY_2, KEY_2_VALUE);
@@ -174,7 +173,7 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
                 put(MAX_FIELD, Double.toString(max_field));
                 put(MIN_FIELD, Double.toString(min_field));
         }};
-        return TestUtils.createMessage(timestamp, "test", extensions);
+        return new ProfileMessage(timestamp, extensions);
     }
 
     public static Map<String, DecimalFormat> getFormats(ProfileGroupConfig profileGroupConfig){

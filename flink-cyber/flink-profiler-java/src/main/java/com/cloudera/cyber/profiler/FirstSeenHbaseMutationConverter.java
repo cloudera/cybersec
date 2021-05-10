@@ -1,6 +1,5 @@
 package com.cloudera.cyber.profiler;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.hbase.LookupKey;
 import org.apache.flink.connector.hbase.sink.HBaseMutationConverter;
 import org.apache.hadoop.hbase.client.Mutation;
@@ -10,7 +9,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import static com.cloudera.cyber.enrichment.EnrichmentUtils.CF_ID;
 import static com.cloudera.cyber.enrichment.EnrichmentUtils.Q_KEY;
 
-public class FirstSeenHbaseMutationConverter implements HBaseMutationConverter<Message> {
+public class FirstSeenHbaseMutationConverter implements HBaseMutationConverter<ProfileMessage> {
     private final FirstSeenHBase firstSeenHBase;
 
     public FirstSeenHbaseMutationConverter(String hTableName, String columnFamily, ProfileGroupConfig profileGroupConfig) {
@@ -23,7 +22,7 @@ public class FirstSeenHbaseMutationConverter implements HBaseMutationConverter<M
     }
 
     @Override
-    public Mutation convertToMutation(Message message) {
+    public Mutation convertToMutation(ProfileMessage message) {
         String firstSeen = firstSeenHBase.getFirstSeen(message);
         String lastSeen = firstSeenHBase.getLastSeen(message);
 
