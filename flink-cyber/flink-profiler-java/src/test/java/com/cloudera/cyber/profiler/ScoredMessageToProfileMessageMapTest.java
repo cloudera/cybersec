@@ -1,0 +1,66 @@
+package com.cloudera.cyber.profiler;
+
+import com.cloudera.cyber.Message;
+import com.cloudera.cyber.TestUtils;
+import com.cloudera.cyber.scoring.ScoredMessage;
+import com.cloudera.cyber.scoring.Scores;
+import com.google.common.collect.Lists;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.createMeasurement;
+
+public class ScoredMessageToProfileMessageMapTest {
+    private static final String TEST_PROFILE_GROUP = "test_profile";
+    private static final String KEY_1 = "key_1";
+
+    @Test
+    public void testScoredToProfileMessageConversion() {
+        double expectedScore = 55.0;
+        ProfileGroupConfig profileGroupConfig = createAllAggregationMethodProfileGroupConfig();
+        Map<String, String> inputExtensions = Stream.concat(profileGroupConfig.getKeyFieldNames().stream(), profileGroupConfig.getMeasurementFieldNames().stream()).
+                filter(fieldName -> !fieldName.equals(ScoredMessageToProfileMessageMap.CYBER_SCORE_FIELD)).
+                collect(Collectors.toMap(k -> k, v -> v.concat("_value")));
+
+        String notRequiredFieldName = "not required";
+        inputExtensions.put(notRequiredFieldName, "should be removed");
+
+        Message inputMessage = TestUtils.createMessage(inputExtensions);
+        ScoredMessage inputScoredMessage = ScoredMessage.builder().
+                cyberScoresDetails(Collections.singletonList(Scores.builder().reason("because").score(expectedScore).build())).
+                message(inputMessage).
+                build();
+        ScoredMessageToProfileMessageMap map = new ScoredMessageToProfileMessageMap(profileGroupConfig);
+        ProfileMessage outputProfileMessage = map.map(inputScoredMessage);
+
+        Assert.assertEquals(inputMessage.getTs(), outputProfileMessage.getTs());
+
+        Map<String, String> expectedExtensions = new HashMap<>(inputExtensions);
+        expectedExtensions.remove(notRequiredFieldName);
+        expectedExtensions.put(ScoredMessageToProfileMessageMap.CYBER_SCORE_FIELD, Double.toString(expectedScore));
+        Assert.assertEquals(expectedExtensions, outputProfileMessage.getExtensions());
+
+    }
+
+    private static ProfileGroupConfig createAllAggregationMethodProfileGroupConfig() {
+        ArrayList<ProfileMeasurementConfig> measurements = Stream.of(ProfileAggregationMethod.values()).map(method -> {
+            {
+                String methodName = method.name().toLowerCase();
+                String fieldName = ProfileAggregationMethod.usesFieldValue.get(method) ? methodName.concat("_field") : null;
+                return createMeasurement(method, methodName.concat("_result"), fieldName, null);
+            }
+        }).collect(Collectors.toCollection(ArrayList::new));
+
+        measurements.add(createMeasurement(ProfileAggregationMethod.MAX, "max_score", ScoredMessageToProfileMessageMap.CYBER_SCORE_FIELD, null));
+
+        return ProfileGroupConfig.builder().
+                profileGroupName(TEST_PROFILE_GROUP).keyFieldNames(Lists.newArrayList(KEY_1)).
+                periodDuration(5L).periodDurationUnit("MINUTES").
+                sources(Lists.newArrayList("ANY")).measurements(measurements).build();
+
+    }
+}

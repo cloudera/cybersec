@@ -23,7 +23,7 @@ import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 @Getter
-public class HbaseEnrichmentMapFunction extends AbstractHbaseMapFunction {
+public class HbaseEnrichmentMapFunction extends AbstractHbaseMapFunction<Message, Message> {
     private final Map<String, List<EnrichmentField>> fieldToLookup;
     private final Set<String> sources;
     private final String tableName;
@@ -67,5 +67,6 @@ public class HbaseEnrichmentMapFunction extends AbstractHbaseMapFunction {
                 }).flatMap(l -> l)
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b)));
     }
+
 }
 

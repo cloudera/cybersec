@@ -1,6 +1,5 @@
 package com.cloudera.cyber.hbase;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.CacheMetrics;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -14,25 +13,22 @@ import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
 @Slf4j
-public abstract class AbstractHbaseMapFunction extends RichMapFunction<Message, Message> {
+public abstract class AbstractHbaseMapFunction<IN, OUT> extends RichMapFunction<IN, OUT> {
     private static final Map<String, Function<byte[],String>> columnConversionFunction = new HashMap<String, Function<byte[],String>>() {{
         put("updatedAt", AbstractHbaseMapFunction::longBytesToString);
         put("createdAt", AbstractHbaseMapFunction::longBytesToString);
         put("touchedAt", AbstractHbaseMapFunction::longBytesToString);
         put("score", AbstractHbaseMapFunction::floatBytesToString);
     }};
-    private transient org.apache.hadoop.conf.Configuration hbaseConfig;
     protected transient MetricGroup metricsGroup;
     protected transient Counter messageCounter;
     protected transient Counter fetchCounter;
@@ -58,18 +54,17 @@ public abstract class AbstractHbaseMapFunction extends RichMapFunction<Message, 
                 return Collections.emptyMap();
             }
             realResultCounter.inc();
-            return result.getFamilyMap(key.getCf()).entrySet().stream().map(AbstractHbaseMapFunction::hbaseBytesToString)
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+            Map<String, String> hbaseMap = new HashMap<>();
+            result.getFamilyMap(key.getCf()).forEach((k,v) ->{{
+                String keyString = Bytes.toString(k);
+                hbaseMap.put( Bytes.toString(k), columnConversionFunction.getOrDefault(keyString, AbstractHbaseMapFunction::stringBytesToString).apply(v));
+            }});
+            return hbaseMap;
         } catch (IOException e) {
             log.error("Error with HBase fetch", e);
             throw new RuntimeException(e);
         }
-    }
-
-    private static Map.Entry<String, String> hbaseBytesToString(Map.Entry<byte[], byte[]> e) {
-        String keyString = Bytes.toString(e.getKey());
-        Function<byte[], String> conversion = columnConversionFunction.getOrDefault(keyString, AbstractHbaseMapFunction::stringBytesToString);
-        return new AbstractMap.SimpleEntry<>(keyString, conversion.apply(e.getValue()));
     }
 
     private static String longBytesToString(byte[] bytesValue) {
@@ -93,7 +88,7 @@ public abstract class AbstractHbaseMapFunction extends RichMapFunction<Message, 
         this.realResultCounter = metricsGroup.counter("realResult");
         this.fetchCounter = metricsGroup.counter("fetchCounter");
 
-        hbaseConfig =  HbaseConfiguration.configureHbase();
+        org.apache.hadoop.conf.Configuration hbaseConfig = HbaseConfiguration.configureHbase();
         connection = ConnectionFactory.createConnection(hbaseConfig);
 
         cache = Caffeine.newBuilder()
@@ -115,5 +110,6 @@ public abstract class AbstractHbaseMapFunction extends RichMapFunction<Message, 
                         Map.Entry::getValue)
                 );
     }
+
 }
 

@@ -6,6 +6,8 @@ import org.apache.flink.util.Preconditions;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor(force = true, access = AccessLevel.PUBLIC)
@@ -29,6 +31,10 @@ public class ProfileGroupConfig implements Serializable {
 
     public boolean needsSourceFilter() {
          return !sources.contains(ANY_SOURCE);
+    }
+
+    public List<String> getMeasurementFieldNames() {
+        return measurements.stream().map(ProfileMeasurementConfig::getFieldName).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     public boolean hasFirstSeen() {

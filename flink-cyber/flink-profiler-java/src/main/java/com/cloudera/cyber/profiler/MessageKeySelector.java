@@ -1,19 +1,18 @@
 package com.cloudera.cyber.profiler;
 
+import com.cloudera.cyber.scoring.ScoredMessage;
 import com.google.common.base.Preconditions;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.flink.api.java.functions.KeySelector;
 
 import java.util.List;
-import com.cloudera.cyber.Message;
-
 import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
-public class MessageKeySelector implements KeySelector<Message, String>{
+public class MessageKeySelector implements KeySelector<ProfileMessage, String>{
 
     private List<String> fieldNames;
 
@@ -24,7 +23,7 @@ public class MessageKeySelector implements KeySelector<Message, String>{
     }
 
     @Override
-    public String getKey(Message message) {
+    public String getKey(ProfileMessage message) {
         Map<String, String> extensions = message.getExtensions();
         return fieldNames.stream().map(extensions::get).collect(Collectors.joining("-"));
     }
