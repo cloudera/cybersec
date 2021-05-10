@@ -1,8 +1,6 @@
 package com.cloudera.cyber.profiler;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.hbase.LookupKey;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.google.common.base.Joiner;
@@ -88,11 +86,11 @@ public class FirstSeenHbaseLookupTest extends FirstSeenHbaseLookup {
     }
 
     private void verifyFirstSeen(String key1, String key2, String firstSeen, String expectedFirstSeen, String expectedFirstTimestamp) {
-        Message profileMessage = TestUtils.createMessage(CURRENT_TIMESTAMP, "profile", ImmutableMap.of(KEY_1, key1,
+        ProfileMessage profileMessage = new ProfileMessage(CURRENT_TIMESTAMP, ImmutableMap.of(KEY_1, key1,
                 KEY_2, key2,
                 ProfileGroupAcc.START_PERIOD_EXTENSION, firstSeen));
         FirstSeenHbaseLookup lookup = new FirstSeenHbaseLookupTest();
-        Message result = lookup.map(profileMessage);
+        ProfileMessage result = lookup.map(profileMessage);
         Assert.assertEquals(expectedFirstSeen, result.getExtensions().get(FIRST_SEEN_RESULT_NAME));
         Assert.assertEquals(expectedFirstTimestamp, result.getExtensions().get(FIRST_SEEN_RESULT_NAME.concat(FIRST_SEEN_TIME_SUFFIX)));
     }
