@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import com.google.common.base.Preconditions;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -24,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class ProfileJob {
 
@@ -59,10 +59,13 @@ public abstract class ProfileJob {
         long allowedLatenessMillis = params.getLong(PARAM_LATENESS_TOLERANCE_MILLIS, Time.minutes(5).toMilliseconds());
         final DataStream<ScoredMessage> messages = ScoredMessageWatermarkedStream.of(createSource(env, params), allowedLatenessMillis);
 
-        AtomicReference<DataStream<ProfileMessage>> profiledStreams = new AtomicReference<>();
-        profileGroups.forEach(g -> profile(params, messages, g, allowedLatenessMillis, profiledStreams));
+        DataStream<ProfileMessage> profiledStreams = null;
+        for(ProfileGroupConfig profileGroupConfig: profileGroups) {
+            profiledStreams = profile(params, messages, profileGroupConfig, allowedLatenessMillis, profiledStreams);
+        }
 
-        DataStream<ScoredMessage> scoredMessages =  score(profiledStreams.get().map(new ProfileMessageToMessageMap()), env, params);
+        Preconditions.checkNotNull(profiledStreams, "At least one profile must be specified");
+        DataStream<ScoredMessage> scoredMessages =  score(profiledStreams.map(new ProfileMessageToMessageMap()), env, params);
         writeResults(params, scoredMessages);
 
         return env;
@@ -74,7 +77,7 @@ public abstract class ProfileJob {
      * @param params Configuration parameters
      * @param messages Data stream of messages to profile.
      */
-    protected void profile(final ParameterTool params, DataStream<ScoredMessage> messages, ProfileGroupConfig profileGroupConfig, long allowedLatenessMillis, AtomicReference<DataStream<ProfileMessage>> profileMessageStreams) {
+    protected DataStream<ProfileMessage> profile(final ParameterTool params, DataStream<ScoredMessage> messages, ProfileGroupConfig profileGroupConfig, long allowedLatenessMillis, DataStream<ProfileMessage> profileMessageStreams) {
 
         Time profilePeriodDuration = Time.of(profileGroupConfig.getPeriodDuration(), TimeUnit.valueOf(profileGroupConfig.getPeriodDurationUnit()));
         DataStream<ProfileMessage> profileMessages = messages.filter(new ProfileMessageFilter(profileGroupConfig)).
@@ -95,15 +98,17 @@ public abstract class ProfileJob {
                     aggregate(new StatsProfileAggregateFunction(profileGroupConfig));
             StatsProfileKeySelector statsKeySelector = new StatsProfileKeySelector();
             profileMessages = profileMessages.join(statsStream).where(profileKeySelector).equalTo(statsKeySelector).window(TumblingEventTimeWindows.of(profilePeriodDuration)).apply(new ProfileStatsJoin());
-            unionProfileMessages(profileMessageStreams, statsStream);
+            profileMessageStreams = unionProfileMessages(profileMessageStreams, statsStream);
         }
 
-        unionProfileMessages(profileMessageStreams, profileMessages);
+        return unionProfileMessages(profileMessageStreams, profileMessages);
     }
 
-    private void unionProfileMessages(AtomicReference<DataStream<ProfileMessage>> profileMessageUnion, DataStream<ProfileMessage> newStream) {
-        if (!profileMessageUnion.compareAndSet(null, newStream)) {
-            profileMessageUnion.getAndUpdate(union -> union.union(newStream));
+    private DataStream<ProfileMessage> unionProfileMessages(DataStream<ProfileMessage> profileMessageUnion, DataStream<ProfileMessage> newStream) {
+        if (profileMessageUnion == null) {
+            return newStream;
+        } else {
+            return profileMessageUnion.union(newStream);
         }
     }
 
