@@ -12,7 +12,9 @@ import com.cloudera.cyber.enrichment.threatq.ThreatQEntry;
 import com.cloudera.cyber.enrichment.threatq.ThreatQParserFlatMap;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
-import org.apache.flink.addons.hbase.HBaseWriteOptions;
+import com.cloudera.cyber.scoring.ScoredMessage;
+import com.cloudera.cyber.scoring.ScoringRuleCommand;
+import com.cloudera.cyber.scoring.ScoringRuleCommandResult;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -35,6 +37,7 @@ public class EnrichmentJobKafka extends EnrichmentJob {
     private static final String PARAMS_GROUP_ID = "group.id";
     private static final String DEFAULT_GROUP_ID = "enrichment-combined";
     public static final String PARAM_STIX_INPUT_TOPIC = "stix.input.topic";
+    public static final String SCORING_RULES_GROUP_ID = "scoring-rules";
     public static final String DEFAULT_STIX_INPUT_TOPIC = "stix";
     public static final String PARAM_STIX_OUTPUT_TOPIC = "stix.output.topic";
     public static final String DEFAULT_STIX_OUTPUT_TOPIC = "stix.output";
@@ -45,13 +48,14 @@ public class EnrichmentJobKafka extends EnrichmentJob {
 
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        new EnrichmentJobKafka().createPipeline(ParameterTool.fromPropertiesFile(args[0])).execute("Enrichments - Combined");
+        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        FlinkUtils.executeEnv(new EnrichmentJobKafka().createPipeline(params),"Triaging Job - default",params);
     }
 
     @Override
-    protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> reduction) {
-        reduction.addSink(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), "enrichments-combined", params))
-                .name("Kafka Sink").uid("kafka-sink");
+    protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<ScoredMessage> reduction) {
+        reduction.addSink(new FlinkUtils<>(ScoredMessage.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), "enrichments-combined", params))
+                .name("Kafka Triaging Scored Sink").uid("kafka-sink");
     }
 
     @Override
@@ -65,13 +69,13 @@ public class EnrichmentJobKafka extends EnrichmentJob {
     protected DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.addSource(
                 new FlinkUtils<>(EnrichmentCommand.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
-        ).name("Kafka Enrichments").uid("kafka-enrichment-source");
+        ).name("Kafka Triaging").uid("kafka-enrichment-source");
     }
 
     @Override
     protected void writeEnrichmentQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> sideOutput) {
         sideOutput.addSink(new FlinkUtils<>(EnrichmentCommandResponse.class).createKafkaSink(params.getRequired(PARAMS_QUERY_OUTPUT), "enrichment-combined-command", params))
-                .name("Enrichment Query Sink").uid("kafka-enrichment-query-sink");
+                .name("Triaging Query Sink").uid("kafka-enrichment-query-sink");
     }
 
     @Override
@@ -94,35 +98,35 @@ public class EnrichmentJobKafka extends EnrichmentJob {
                 params);
         results.addSink(sink).name("Kafka Stix Results").uid("kafka.results.stix");
 
-        ThreatIntelligenceHBaseSinkFunction hbaseSink = new ThreatIntelligenceHBaseSinkFunction("threatIntelligence");
-        hbaseSink.setWriteOptions(HBaseWriteOptions.builder()
-                .setBufferFlushIntervalMillis(1000)
-                .setBufferFlushMaxRows(1000)
-                .setBufferFlushMaxSizeInBytes(1024 * 1024 * 64)
-                .build()
-        );
+        ThreatIntelligenceHBaseSinkFunction hbaseSink = new ThreatIntelligenceHBaseSinkFunction("threatIntelligence", params);
+
         results.addSink(hbaseSink);
 
-        ThreatIndexHbaseSinkFunction indexSink = new ThreatIndexHbaseSinkFunction("threatIndex");
-        indexSink.setWriteOptions(HBaseWriteOptions.builder()
-                .setBufferFlushIntervalMillis(1000)
-                .setBufferFlushMaxRows(1000)
-                .setBufferFlushMaxSizeInBytes(1024 * 1024 * 64)
-                .build());
+        ThreatIndexHbaseSinkFunction indexSink = new ThreatIndexHbaseSinkFunction("threatIndex", params);
         results.addSink(indexSink).name("Stix sink").uid("stix-hbase-sink");
     }
 
     @Override
     protected void writeStixDetails(ParameterTool params, DataStream<ThreatIntelligenceDetails> results) {
         // write out to HBase
-        ThreatIntelligenceDetailsHBaseSinkFunction hbaseSink = new ThreatIntelligenceDetailsHBaseSinkFunction(params.get(PARAM_TI_TABLE, DEFAULT_TI_TABLE));
-        hbaseSink.setWriteOptions(HBaseWriteOptions.builder()
-                .setBufferFlushIntervalMillis(1000)
-                .setBufferFlushMaxRows(1000)
-                .setBufferFlushMaxSizeInBytes(1024 * 1024 * 64)
-                .build()
-        );
+        ThreatIntelligenceDetailsHBaseSinkFunction hbaseSink = new ThreatIntelligenceDetailsHBaseSinkFunction(params.get(PARAM_TI_TABLE, DEFAULT_TI_TABLE), params);
         results.addSink(hbaseSink).name("Stix Detail sink").uid("stix-hbase-detail-sink");
+    }
+
+    @Override
+    protected DataStream<ScoringRuleCommand> createRulesSource(StreamExecutionEnvironment env, ParameterTool params) {
+        String topic = params.getRequired("query.input.topic");
+        FlinkKafkaConsumer<ScoringRuleCommand> source = new FlinkUtils<>(ScoringRuleCommand.class).createKafkaGenericSource(topic, params, SCORING_RULES_GROUP_ID);
+        return env.addSource(source)
+                .name("Kafka Score Rule Source")
+                .uid("kafka.input.rule.command");
+    }
+
+    @Override
+    protected void writeScoredRuleCommandResult(ParameterTool params, DataStream<ScoringRuleCommandResult> results) {
+        String topic = params.getRequired("query.output.topic");
+        FlinkKafkaProducer<ScoringRuleCommandResult> sink = new FlinkUtils<>(ScoringRuleCommandResult.class).createKafkaSink(topic, SCORING_RULES_GROUP_ID, params);
+        results.addSink(sink).name("Kafka Score Rule Command Results").uid("kafka.output.rule.command.results");
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.cloudera.cyber.enrichment.geocode;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
+import com.google.common.collect.ImmutableMap;
 import lombok.extern.java.Log;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -12,7 +13,6 @@ import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
 import org.hamcrest.Matchers;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.time.Duration;
@@ -23,7 +23,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
 @Log
-@Ignore
 public class IpGeoJobTest extends IpGeoJob {
     private static final String STRING_IP_FIELD_NAME = "string_ip_field";
     private static final String LIST_IP_FIELD_NAME = "list_ip_field";
@@ -36,10 +35,10 @@ public class IpGeoJobTest extends IpGeoJob {
     public void testIpGeoPipeline() throws Exception {
         long ts = 0;
 
-        JobTester.startTest(createPipeline(ParameterTool.fromMap(new HashMap<String, String>() {{
-            put(PARAM_GEO_FIELDS, String.join(",", STRING_IP_FIELD_NAME, LIST_IP_FIELD_NAME));
-            put(PARAM_GEO_DATABASE_PATH, IpGeoTestData.GEOCODE_DATABASE_PATH);
-        }})).setParallelism(1));
+        JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
+            PARAM_GEO_FIELDS, String.join(",", STRING_IP_FIELD_NAME, LIST_IP_FIELD_NAME),
+            PARAM_GEO_DATABASE_PATH, IpGeoTestData.GEOCODE_DATABASE_PATH
+        ))).setParallelism(1));
 
         createMessages(ts);
 
@@ -61,7 +60,6 @@ public class IpGeoJobTest extends IpGeoJob {
 
     private void createMessages(long ts) {
 
-        List<String> ipList = Arrays.asList(IpGeoTestData.LOCAL_IP,IpGeoTestData.ALL_FIELDS_IPv4, IpGeoTestData.ALL_FIELDS_IPv4, IpGeoTestData.UNKNOWN_HOST_IP, IpGeoTestData.COUNTRY_ONLY_IPv6);
         List<Message.MessageBuilder> messages = new ArrayList<>();
 
         messages.add(TestUtils.createMessage().toBuilder()

@@ -1,6 +1,6 @@
 package com.cloudera.cyber.enrichment.geocode.impl;
 
-import avro.shaded.com.google.common.base.Preconditions;
+import com.google.common.base.Preconditions;
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.enrichment.Enrichment;

@@ -3,6 +3,7 @@ package com.cloudera.cyber.indexing.elastic;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.indexing.CollectionField;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -12,7 +13,6 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 import java.time.Instant;

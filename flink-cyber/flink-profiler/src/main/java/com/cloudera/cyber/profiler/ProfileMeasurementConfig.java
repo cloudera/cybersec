@@ -15,6 +15,8 @@ public class ProfileMeasurementConfig implements Serializable {
     private ProfileAggregationMethod aggregationMethod;
     private Boolean calculateStats;
     private String format;
+    private Long firstSeenExpirationDuration;
+    private String firstSeenExpirationDurationUnit;
 
     public boolean hasStats() {
         return (calculateStats != null && calculateStats);

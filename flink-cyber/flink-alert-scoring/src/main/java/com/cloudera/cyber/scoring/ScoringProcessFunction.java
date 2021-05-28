@@ -3,7 +3,7 @@ package com.cloudera.cyber.scoring;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.rules.DynamicRuleProcessFunction;
 import com.cloudera.cyber.rules.RulesForm;
-import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import static com.cloudera.cyber.scoring.ScoringRule.RESULT_REASON;
 import static com.cloudera.cyber.scoring.ScoringRule.RESULT_SCORE;
 
-@Log
+@Slf4j
 public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRule, ScoringRuleCommand, ScoringRuleCommandResult, ScoredMessage> {
 
     public ScoringProcessFunction(OutputTag<ScoringRuleCommandResult> rulesResultSink, MapStateDescriptor<RulesForm, List<ScoringRule>> rulesDescriptor) {
@@ -53,7 +53,9 @@ public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRu
 
             DoubleSummaryStatistics scoreSummary = scores.stream().collect(Collectors.summarizingDouble(s -> s.getScore()));
         }
-        log.info(String.format("Scored Message: %d, %s, %s", Thread.currentThread().getId(), message, rules));
+        if (log.isDebugEnabled()) {
+            log.debug("Scored Message: {}, {}", message, rules);
+        }
         collector.collect(ScoredMessage.builder()
                 .message(message)
                 .cyberScoresDetails(scores)

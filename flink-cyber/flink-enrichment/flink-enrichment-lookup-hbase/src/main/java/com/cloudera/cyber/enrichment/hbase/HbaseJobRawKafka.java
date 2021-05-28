@@ -2,11 +2,11 @@ package com.cloudera.cyber.enrichment.hbase;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageTypeFactory;
+import com.cloudera.cyber.commands.CommandType;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.flink.FlinkUtils;
-import org.apache.flink.addons.hbase.HBaseSinkFunction;
-import org.apache.flink.addons.hbase.HBaseWriteOptions;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.hbase.sink.HBaseSinkFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
@@ -26,12 +26,10 @@ public class HbaseJobRawKafka extends HbaseJob {
 
     @Override
     public void writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource) {
-        HBaseSinkFunction<EnrichmentCommand> hbaseSink = new HBaseEnrichmentCommandSink(params.getRequired(PARAMS_ENRICHMENT_TABLE));
-        hbaseSink.setWriteOptions(HBaseWriteOptions.builder()
-                .setBufferFlushIntervalMillis(1000)
-                .build()
-        );
-        enrichmentSource.addSink(hbaseSink);
+        // filter out commands that don't require changes to Hbase
+        DataStream<EnrichmentCommand> hbaseMods = enrichmentSource.filter(c -> (c.getType().equals(CommandType.ADD) || c.getType().equals(CommandType.DELETE)));
+        HBaseSinkFunction<EnrichmentCommand> hbaseSink = new HBaseEnrichmentCommandSink(params.getRequired(PARAMS_ENRICHMENT_TABLE), params);
+        hbaseMods.addSink(hbaseSink);
     }
 
     @Override

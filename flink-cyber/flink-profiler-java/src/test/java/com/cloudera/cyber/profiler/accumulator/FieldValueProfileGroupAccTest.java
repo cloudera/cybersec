@@ -1,11 +1,10 @@
 package com.cloudera.cyber.profiler.accumulator;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.profiler.ProfileAggregationMethod;
 import com.cloudera.cyber.profiler.ProfileGroupConfig;
 import com.cloudera.cyber.profiler.ProfileMeasurementConfig;
+import com.cloudera.cyber.profiler.ProfileMessage;
 import com.google.common.collect.Lists;
 import org.junit.Assert;
 import org.junit.Test;
@@ -62,28 +61,28 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
         long currentTimestamp = MessageUtils.getCurrentTimestamp();
         acc1.addMessage(createMessage(currentTimestamp, 5, "first string",60, 10), profileGroupConfig);
         verifyResults(profileGroupConfig, acc1, currentTimestamp, currentTimestamp, KEY_1_VALUE, KEY_2_VALUE,
-                5, 1, 1, 60, 10, currentTimestamp);
+                5, 1, 1, 60, 10);
 
         // create the second accumulator
         FieldValueProfileGroupAcc acc2 = new FieldValueProfileGroupAcc(profileGroupConfig);
         acc2.addMessage(createMessage(currentTimestamp - 1, 10, "second string", 1000, 4), profileGroupConfig);
         verifyResults(profileGroupConfig, acc2, currentTimestamp - 1, currentTimestamp - 1, KEY_1_VALUE, KEY_2_VALUE,
-                10, 1, 1, 1000, 4, currentTimestamp - 1);
+                10, 1, 1, 1000, 4);
 
         acc2.addMessage(createMessage(currentTimestamp + 1, 30, "first string", 500, 300), profileGroupConfig);
         verifyResults(profileGroupConfig, acc2, currentTimestamp - 1, currentTimestamp + 1, KEY_1_VALUE, KEY_2_VALUE,
-                40, 2, 2, 1000, 4, currentTimestamp - 1);
+                40, 2, 2, 1000, 4);
 
         // merge together
         acc1.merge(acc2);
         verifyResults(profileGroupConfig, acc1, currentTimestamp - 1, currentTimestamp + 1, KEY_1_VALUE, KEY_2_VALUE,
-                45,  3, 2, 1000, 4, currentTimestamp - 1);
+                45,  3, 2, 1000, 4);
 
         // merge into an empty accumulator
         FieldValueProfileGroupAcc emptyAcc = new FieldValueProfileGroupAcc(profileGroupConfig);
         emptyAcc.merge(acc2);
         verifyResults(profileGroupConfig, acc1, currentTimestamp - 1, currentTimestamp + 1, KEY_1_VALUE, KEY_2_VALUE,
-                45,  3, 2, 1000, 4, currentTimestamp - 1);
+                45,  3, 2, 1000, 4);
     }
 
     private void testValueGroupAccumulator(String format) {
@@ -96,11 +95,10 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
         double expectedCountDistinct = 0;
         double expectedMax = Double.NEGATIVE_INFINITY;
         double expectedMin = Double.POSITIVE_INFINITY;
-        long expectedFirstSeen = Long.MAX_VALUE;
 
         // check results of default values
         verifyResults(profileGroupConfig, valueAcc, Long.MAX_VALUE, Long.MIN_VALUE, null, null,
-                expectedSum, expectedCount, expectedCountDistinct, expectedMax, expectedMin, expectedFirstSeen);
+                expectedSum, expectedCount, expectedCountDistinct, expectedMax, expectedMin);
 
         // add a message with all fields set
         valueAcc.addMessage(createMessage(currentTimestamp, 5, "first string",60, 10), profileGroupConfig);
@@ -109,23 +107,21 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
         expectedCountDistinct = 1;
         expectedMax = 60;
         expectedMin = 10;
-        expectedFirstSeen = currentTimestamp;
         verifyResults(profileGroupConfig, valueAcc, currentTimestamp, currentTimestamp, KEY_1_VALUE, KEY_2_VALUE,
-                expectedSum, expectedCount, expectedCountDistinct, expectedMax, expectedMin, expectedFirstSeen);
+                expectedSum, expectedCount, expectedCountDistinct, expectedMax, expectedMin);
 
         // add a message with no extensions - should only update count and first seen since timestamp is earlier
         expectedCount += 1;
-        expectedFirstSeen = currentTimestamp - 1;
-        valueAcc.addMessage(TestUtils.createMessage(currentTimestamp - 1, "test", Collections.emptyMap()), profileGroupConfig);
+        valueAcc.addMessage(new ProfileMessage(currentTimestamp - 1,  Collections.emptyMap()), profileGroupConfig);
         verifyResults(profileGroupConfig, valueAcc, currentTimestamp - 1, currentTimestamp, KEY_1_VALUE, KEY_2_VALUE,
-                expectedSum, expectedCount, expectedCountDistinct, expectedMax, expectedMin, expectedFirstSeen);
+                expectedSum, expectedCount, expectedCountDistinct, expectedMax, expectedMin);
 
         // add a message with invalid numbers encoded as strings
         valueAcc.addMessage(createInvalidDoubleNumberMessage(currentTimestamp + 1), profileGroupConfig);
         expectedCount += 1;
         expectedCountDistinct += 1;
         verifyResults(profileGroupConfig, valueAcc, currentTimestamp - 1, currentTimestamp + 1, KEY_1_VALUE, KEY_2_VALUE,
-                expectedSum, expectedCount, expectedCountDistinct, expectedMax, expectedMin, expectedFirstSeen);
+                expectedSum, expectedCount, expectedCountDistinct, expectedMax, expectedMin);
 
         // add another valid message
         valueAcc.addMessage(createMessage(currentTimestamp + 3, 1000, "a third string",60000, 4), profileGroupConfig);
@@ -135,7 +131,7 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
         expectedMax = 60000;
         expectedMin = 4;
         verifyResults(profileGroupConfig, valueAcc, currentTimestamp - 1, currentTimestamp + 3, KEY_1_VALUE, KEY_2_VALUE,
-                expectedSum, expectedCount, expectedCountDistinct, expectedMax, expectedMin, expectedFirstSeen);
+                expectedSum, expectedCount, expectedCountDistinct, expectedMax, expectedMin);
 
     }
 
@@ -154,7 +150,7 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
 
     }
 
-    private Message createInvalidDoubleNumberMessage(long timestamp) {
+    private ProfileMessage createInvalidDoubleNumberMessage(long timestamp) {
         Map<String, String> extensions = new HashMap<String, String>() {{
             put(KEY_1, KEY_1_VALUE);
             put(KEY_2, KEY_2_VALUE);
@@ -163,12 +159,12 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
             put(MAX_FIELD, "Bad number 2");
             put(MIN_FIELD, "Bad number 3");
         }};
-        return TestUtils.createMessage(timestamp, "test", extensions);
+        return new ProfileMessage(timestamp, extensions);
     }
 
 
-    public static Message createMessage(long timestamp, double sum_field, String count_dist_field,
-                                  double max_field, double min_field) {
+    public static ProfileMessage createMessage(long timestamp, double sum_field, String count_dist_field,
+                                               double max_field, double min_field) {
         Map<String, String> extensions = new HashMap<String, String>() {{
                 put(KEY_1, KEY_1_VALUE);
                 put(KEY_2, KEY_2_VALUE);
@@ -177,7 +173,7 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
                 put(MAX_FIELD, Double.toString(max_field));
                 put(MIN_FIELD, Double.toString(min_field));
         }};
-        return TestUtils.createMessage(timestamp, "test", extensions);
+        return new ProfileMessage(timestamp, extensions);
     }
 
     public static Map<String, DecimalFormat> getFormats(ProfileGroupConfig profileGroupConfig){
@@ -187,7 +183,7 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
     }
 
     private void verifyResults(ProfileGroupConfig profileGroupConfig, FieldValueProfileGroupAcc acc, long startPeriod, long endPeriod, String key1, String key2, double sum, double count,
-                               double countDistinct, double max, double min, long firstSeen) {
+                               double countDistinct, double max, double min) {
 
         Assert.assertEquals(endPeriod, acc.getEndTimestamp());
         Map<String, DecimalFormat> formats = getFormats(profileGroupConfig);
@@ -199,13 +195,12 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
         Assert.assertEquals(formats.get(COUNT_DIST_RESULT).format(countDistinct), actualExtensions.get(COUNT_DIST_RESULT));
         Assert.assertEquals(formats.get(MAX_RESULT).format(max), actualExtensions.get(MAX_RESULT));
         Assert.assertEquals(formats.get(MIN_RESULT).format(min), actualExtensions.get(MIN_RESULT));
-        Assert.assertEquals(formats.get(FIRST_SEEN_RESULT).format(firstSeen), actualExtensions.get(FIRST_SEEN_RESULT));
         if (key1 != null && key2 != null) {
             Assert.assertEquals(key1, actualExtensions.get(KEY_1));
             Assert.assertEquals(key2, actualExtensions.get(KEY_2));
-            Assert.assertEquals(10, actualExtensions.size());
+            Assert.assertEquals(9, actualExtensions.size());
         } else {
-            Assert.assertEquals(8, actualExtensions.size());
+            Assert.assertEquals(7, actualExtensions.size());
         }
     }
 
