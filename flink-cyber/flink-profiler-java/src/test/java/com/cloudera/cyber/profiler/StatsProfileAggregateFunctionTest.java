@@ -1,8 +1,6 @@
 package com.cloudera.cyber.profiler;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAccTest;
 import com.google.common.collect.ImmutableMap;
@@ -12,11 +10,9 @@ import org.junit.Test;
 import java.text.DecimalFormat;
 import java.util.Map;
 
-import static com.cloudera.cyber.profiler.ProfileAggregateFunction.*;
+import static com.cloudera.cyber.profiler.ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION;
 import static com.cloudera.cyber.profiler.StatsProfileAggregateFunction.STATS_PROFILE_GROUP_SUFFIX;
-import static com.cloudera.cyber.profiler.accumulator.FieldValueProfileGroupAccTest.*;
-import static com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc.END_PERIOD_EXTENSION;
-import static com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc.START_PERIOD_EXTENSION;
+import static com.cloudera.cyber.profiler.accumulator.FieldValueProfileGroupAccTest.getFormats;
 import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.*;
 import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAccTest.NO_STATS_RESULT_NAME;
 import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAccTest.STATS_RESULT_NAME;
@@ -35,7 +31,7 @@ public class StatsProfileAggregateFunctionTest {
         ProfileGroupAcc acc = agg.createAccumulator();
 
         long currentTimestamp = MessageUtils.getCurrentTimestamp();
-        Message profileMessage = getProfileMessage(agg, acc, currentTimestamp, "100", "3");
+        ProfileMessage profileMessage = getProfileMessage(agg, acc, currentTimestamp, "100", "3");
         verifyProfileMessage(profileGroupConfig, profileMessage, currentTimestamp, currentTimestamp,
                 100, 100, 100, 0);
 
@@ -53,21 +49,19 @@ public class StatsProfileAggregateFunctionTest {
                 100, 100000, 33700, 57419.25);
     }
 
-    private Message getProfileMessage(ProfileAggregateFunction aggregateFunction, ProfileGroupAcc acc,
+    private ProfileMessage getProfileMessage(ProfileAggregateFunction aggregateFunction, ProfileGroupAcc acc,
                                       long timestamp, String statsFieldValue, String noStatsFieldValue) {
 
-        aggregateFunction.add(TestUtils.createMessage(timestamp, "test",
+        aggregateFunction.add(new ProfileMessage(timestamp,
                 ImmutableMap.of(STATS_RESULT_NAME, statsFieldValue, NO_STATS_RESULT_NAME, noStatsFieldValue)),
                 acc);
         return aggregateFunction.getResult(acc);
     }
 
-    private void verifyProfileMessage(ProfileGroupConfig profileGroupConfig, Message profileMessage,
+    private void verifyProfileMessage(ProfileGroupConfig profileGroupConfig, ProfileMessage profileMessage,
                                       long startPeriod, long endPeriod,
                                       double min, double max, double mean, double stddev) {
 
-        Assert.assertEquals(PROFILE_TOPIC_NAME, profileMessage.getOriginalSource().getTopic());
-        Assert.assertEquals(PROFILE_SOURCE, profileMessage.getSource());
         Assert.assertEquals(endPeriod, profileMessage.getTs());
 
         Map<String, DecimalFormat> formats = getFormats(profileGroupConfig);

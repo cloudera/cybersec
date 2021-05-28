@@ -3,10 +3,11 @@ package com.cloudera.cyber.enrichment;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentField;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,9 +28,9 @@ public class ConfigUtils {
                                 mapping(EnrichmentField::getName, Collectors.toList())))
                         .entrySet().stream()
                 )
-                .collect(Collectors.toMap(k -> k.getKey(), v -> v.getValue(), (a, b) ->
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) ->
                         Stream.of(a, b)
-                                .flatMap(x -> x.stream())
+                                .flatMap(Collection::stream)
                                 .collect(Collectors.toList())
                 ));
     }
@@ -37,7 +38,7 @@ public class ConfigUtils {
     public static Set<String> enrichmentTypes(List<EnrichmentConfig> allConfigs, EnrichmentKind kind) {
         return allConfigs.stream()
                 .filter(f -> f.getKind() == kind)
-                .flatMap(s -> s.getFields().stream().map(m -> m.getEnrichmentType())).collect(Collectors.toSet());
+                .flatMap(s -> s.getFields().stream().map(EnrichmentField::getEnrichmentType)).collect(Collectors.toSet());
     }
 
     public static List<EnrichmentConfig> allConfigs(byte[] configJson) throws IOException {

@@ -1,8 +1,8 @@
 package com.cloudera.cyber.profiler.accumulator;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.profiler.ProfileGroupConfig;
 import com.cloudera.cyber.profiler.ProfileMeasurementConfig;
+import com.cloudera.cyber.profiler.ProfileMessage;
 import com.google.common.collect.Lists;
 import org.apache.commons.math3.stat.descriptive.AggregateSummaryStatistics;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
@@ -20,7 +20,7 @@ public class StatsProfileGroupAcc extends ProfileGroupAcc {
     public static final String MAX_RESULT_SUFFIX = ".max";
     public static final String MEAN_RESULT_SUFFIX = ".mean";
     public static final String STDDEV_RESULT_SUFFIX = ".stddev";
-    public static List<String> STATS_EXTENSION_SUFFIXES = Lists.newArrayList(MIN_RESULT_SUFFIX, MAX_RESULT_SUFFIX, MEAN_RESULT_SUFFIX, STDDEV_RESULT_SUFFIX);
+    public static final List<String> STATS_EXTENSION_SUFFIXES = Lists.newArrayList(MIN_RESULT_SUFFIX, MAX_RESULT_SUFFIX, MEAN_RESULT_SUFFIX, STDDEV_RESULT_SUFFIX);
     private static final DecimalFormat DEFAULT_FORMAT = new DecimalFormat("0.00");
 
     public StatsProfileGroupAcc(ProfileGroupConfig profileGroupConfig) {
@@ -29,7 +29,7 @@ public class StatsProfileGroupAcc extends ProfileGroupAcc {
     }
 
     @Override
-    protected void updateAccumulators(Message message, ProfileGroupConfig profileGroupConfig) {
+    protected void updateAccumulators(ProfileMessage message, ProfileGroupConfig profileGroupConfig) {
         Iterator<ProfileMeasurementConfig> measurementIter = profileGroupConfig.getMeasurements().stream().
                 filter(ProfileMeasurementConfig::hasStats).iterator();
         Iterator<Accumulator<?, ? extends Serializable>> accumulatorIter= accumulators.iterator();

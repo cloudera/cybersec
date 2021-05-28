@@ -83,7 +83,7 @@ public class IpGeoEnrichmentTest {
         List<DataQualityMessage> expectedQualityMessages = createExpectedDataQualityMessages(level, messageText);
 
         Map<String, String> expectedExtensions = new HashMap<>();
-        com.cloudera.cyber.enrichment.geocode.IpGeoTestData.getExpectedEnrichmentValues(expectedExtensions, TEST_ENRICHMENT_FIELD_NAME, ipAddress, Arrays.asList(IpGeoEnrichment.GeoEnrichmentFields.values()));
+        com.cloudera.cyber.enrichment.geocode.IpGeoTestData.getExpectedEnrichmentValues(expectedExtensions, TEST_ENRICHMENT_FIELD_NAME, ipAddress);
 
         Map<String, String> actualExtensions = new HashMap<>();
         List<DataQualityMessage> actualQualityMessages = new ArrayList<>();

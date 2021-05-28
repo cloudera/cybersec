@@ -11,8 +11,11 @@ import org.apache.flink.test.util.ManualSource;
 
 import java.security.*;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class AbstractParserJobTest extends ParserJob {
+
     protected ManualSource<MessageToParse> source;
     protected CollectingSink<Message> sink = new CollectingSink<>();
     protected CollectingSink<Message> errorSink = new CollectingSink<>();
@@ -32,9 +35,10 @@ public abstract class AbstractParserJobTest extends ParserJob {
     }
 
     @Override
-    protected DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params) {
+    protected List<DataStream<MessageToParse>> createSource(StreamExecutionEnvironment env, ParameterTool params,
+            TopicPatternToChainMap topicPatternToChainMap) {
         source = JobTester.createManualSource(env, TypeInformation.of(MessageToParse.class));
-        return source.getDataStream();
+        return Collections.singletonList(source.getDataStream());
     }
 
     public abstract void testParser() throws Exception;

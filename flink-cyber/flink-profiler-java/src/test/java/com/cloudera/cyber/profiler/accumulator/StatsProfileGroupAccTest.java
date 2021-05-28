@@ -1,10 +1,10 @@
 package com.cloudera.cyber.profiler.accumulator;
 
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.profiler.ProfileAggregationMethod;
 import com.cloudera.cyber.profiler.ProfileGroupConfig;
 import com.cloudera.cyber.profiler.ProfileMeasurementConfig;
+import com.cloudera.cyber.profiler.ProfileMessage;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.junit.Assert;
@@ -84,7 +84,7 @@ public class StatsProfileGroupAccTest {
     private void testAddMessage(StatsProfileGroupAcc acc, ProfileGroupConfig profileGroupConfig, long timestamp, long startPeriod, long endPeriod,
                                 String statsFieldValue, String noStatsFieldValue, Map<String, DecimalFormat> formats,
                                 double expectedMin, double expectedMax, double expectedMean, double expectedStdDev) {
-        acc.addMessage(TestUtils.createMessage(timestamp, "test", ImmutableMap.of(STATS_RESULT_NAME, statsFieldValue, NO_STATS_RESULT_NAME, noStatsFieldValue)), profileGroupConfig);
+        acc.addMessage(new ProfileMessage(timestamp, ImmutableMap.of(STATS_RESULT_NAME, statsFieldValue, NO_STATS_RESULT_NAME, noStatsFieldValue)), profileGroupConfig);
         verifyStatsResult(acc, profileGroupConfig, formats, startPeriod, endPeriod, expectedMin, expectedMax, expectedMean, expectedStdDev);
     }
 

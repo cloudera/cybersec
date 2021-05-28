@@ -2,7 +2,6 @@ package com.cloudera.cyber.flink;
 
 import com.google.common.io.Resources;
 import com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.client.cli.CliFrontend;
@@ -42,7 +41,7 @@ public class Utils {
 
     public static final String K_PROPERTIES_FILE = "properties.file";
 
-    private static Properties readProperties(Properties properties, String prefix) {
+    public static Properties readProperties(Properties properties, String prefix) {
         Properties targetProperties = new Properties();
         for (String key : properties.stringPropertyNames()) {
             if (key.startsWith(prefix)) {
@@ -146,7 +145,7 @@ public class Utils {
     }
 
 
-    public static String readResourceFile(String resourceLocation, Class cls) {
+    public static String readResourceFile(String resourceLocation, Class<?> cls) {
         try {
             return new String(Files.readAllBytes(Paths.get(cls.getResource(resourceLocation).toURI())));
         } catch (Exception e) {

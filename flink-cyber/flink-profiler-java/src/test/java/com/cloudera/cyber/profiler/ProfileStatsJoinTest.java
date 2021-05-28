@@ -1,79 +1,43 @@
 package com.cloudera.cyber.profiler;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
-import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
-import org.apache.flink.streaming.util.TestHarnessUtil;
 import org.apache.flink.streaming.util.TwoInputStreamOperatorTestHarness;
+import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 
-public class ProfileStatsJoinTest extends ProfileAggregateTest {
+public class ProfileStatsJoinTest extends ProfileGroupTest {
 
     @Test
-    public void profileJoinTestWithStats() throws Exception {
-        testJoinProfiles(true);
-    }
-
-    @Test
-    public void profileJoinTestBeforeStats() throws Exception {
-        testJoinProfiles(false);
-    }
-
-    private void testJoinProfiles(boolean statsFirst) throws Exception {
+    public void testProfileStatsJoin() {
         ProfileStatsJoin join = new ProfileStatsJoin();
-        join.open(new Configuration());
 
-        ProfileGroupConfig profileGroupConfig = getProfileGroupConfig(true);
-        Message profileMessage = createProfileMessage(profileGroupConfig);
-        Message statsMessage = createStatsMessage(profileGroupConfig, profileMessage);
+        ProfileGroupConfig profileGroupConfig = getProfileGroupConfig();
+        ProfileMessage profileMessage = createProfileMessage(profileGroupConfig);
+        ProfileMessage statsMessage = createStatsMessage(profileGroupConfig, profileMessage);
 
-        TwoInputStreamOperatorTestHarness<Message, Message, Message> harness = ProcessFunctionTestHarnesses.forCoProcessFunction(join);
-        harness.setup();
-        harness.open();
-        ConcurrentLinkedQueue<Object> expectedOutput = new ConcurrentLinkedQueue<>();
+        ProfileMessage joinedMessage = join.join(profileMessage, statsMessage);
 
-        if (statsFirst) {
-            sendMessage2(harness, statsMessage, expectedOutput);
-            sendMessage1(harness, profileMessage, statsMessage, expectedOutput);
-        } else {
-            sendMessage1(harness, profileMessage, null, expectedOutput);
-            sendMessage2(harness, statsMessage, expectedOutput);
-        }
-        Watermark watermark = new Watermark(profileMessage.getTs() + 200);
-        expectedOutput.add(watermark);
-        harness.processBothWatermarks(watermark);
-
-        TestHarnessUtil.assertOutputEquals("output events equal", expectedOutput, harness.getOutput());
-        harness.close();
+        Assert.assertEquals(getExpectedJoinedMessage(profileMessage, statsMessage), joinedMessage);
     }
 
-    private void sendMessage1(TwoInputStreamOperatorTestHarness<Message, Message, Message> harness, Message message1, Message message2, ConcurrentLinkedQueue<Object> expectedOutput) throws Exception {
-        Message resultMessage = message1;
-        if (message2 != null) {
-            resultMessage = MessageUtils.addFields(message1, message2.getExtensions().entrySet().stream().
-                    filter(e -> ProfileStatsJoin.isStatsExtension(e.getKey())).
-                    collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-        }
-        StreamRecord<Message> record = new StreamRecord<>(message1);
-        harness.processElement1(record);
-        expectedOutput.add(new StreamRecord<>(resultMessage));
+    private ProfileMessage getExpectedJoinedMessage( ProfileMessage message1, ProfileMessage message2) {
+        Map<String, String> mergedExtensions = message2.getExtensions().entrySet().stream().
+                filter(e -> ProfileStatsJoin.isStatsExtension(e.getKey())).
+                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        message1.getExtensions().forEach(mergedExtensions::putIfAbsent);
+        return new ProfileMessage(message1.getTs(), mergedExtensions);
     }
 
-    private void sendMessage2(TwoInputStreamOperatorTestHarness<Message, Message, Message> harness, Message message2, ConcurrentLinkedQueue<Object> expectedOutput) throws Exception {
-        harness.processElement2(new StreamRecord<>(message2));
-        expectedOutput.add(new StreamRecord<>(message2));
-    }
-
-    private Message createProfileMessage(ProfileGroupConfig profileGroupConfig) {
+    private ProfileMessage createProfileMessage(ProfileGroupConfig profileGroupConfig) {
         ProfileAggregateFunction aggregateFunction = new FieldValueProfileAggregateFunction(profileGroupConfig);
 
         ProfileGroupAcc acc = aggregateFunction.createAccumulator();
@@ -84,11 +48,19 @@ public class ProfileStatsJoinTest extends ProfileAggregateTest {
         return aggregateFunction.getResult(acc);
     }
 
-    private Message createStatsMessage(ProfileGroupConfig profileGroupConfig, Message profileMessage) {
+    private ProfileMessage createStatsMessage(ProfileGroupConfig profileGroupConfig, ProfileMessage profileMessage) {
         ProfileAggregateFunction aggregateFunction = new StatsProfileAggregateFunction(profileGroupConfig);
         ProfileGroupAcc acc = aggregateFunction.createAccumulator();
         acc.addMessage(profileMessage, profileGroupConfig);
 
         return aggregateFunction.getResult(acc);
+    }
+
+    private ProfileGroupConfig getProfileGroupConfig() {
+        List<ProfileMeasurementConfig> measurements = Collections.singletonList(ProfileMeasurementConfig.builder().resultExtensionName(RESULT_EXTENSION_NAME).
+                aggregationMethod(ProfileAggregationMethod.SUM).fieldName(SUM_FIELD_NAME).format("0.000000").calculateStats(true).
+                build());
+
+        return getProfileGroupConfig(measurements);
     }
 }

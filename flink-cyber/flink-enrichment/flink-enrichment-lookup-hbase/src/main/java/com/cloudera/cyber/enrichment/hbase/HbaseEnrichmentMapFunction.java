@@ -5,6 +5,8 @@ import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentField;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
+import com.cloudera.cyber.hbase.LookupKey;
+
 import com.google.common.base.Joiner;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,28 +17,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.cloudera.cyber.hbase.AbstractHbaseMapFunction;
 
 import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 @Getter
-public class HbaseEnrichmentMapFunction extends AbstractHbaseMapFunction {
+public class HbaseEnrichmentMapFunction extends AbstractHbaseMapFunction<Message, Message> {
     private final Map<String, List<EnrichmentField>> fieldToLookup;
     private final Set<String> sources;
     private final String tableName;
 
-    public HbaseEnrichmentMapFunction(List<EnrichmentConfig> configs, String tableName) throws IOException {
+    public HbaseEnrichmentMapFunction(List<EnrichmentConfig> configs, String tableName) {
         super();
 
         sources = configs.stream()
                 .filter(c -> c.getKind().equals(EnrichmentKind.HBASE))
-                .map(c -> c.getSource())
+                .map(EnrichmentConfig::getSource)
                 .collect(Collectors.toSet());
 
         fieldToLookup = configs.stream()
                 .filter(c -> c.getKind().equals(EnrichmentKind.HBASE))
                 .collect(toMap(
-                        k -> k.getSource(), v -> v.getFields())
+                        EnrichmentConfig::getSource, EnrichmentConfig::getFields)
                 );
 
         log.info("Applying HBase enrichments to the following sources: {}", sources);
@@ -62,7 +65,8 @@ public class HbaseEnrichmentMapFunction extends AbstractHbaseMapFunction {
                             Joiner.on(".").join(field.getName(), field.getEnrichmentType())
                     )).entrySet().stream();
                 }).flatMap(l -> l)
-                .collect(toMap(k -> k.getKey(), v -> v.getValue(), (a, b) -> b)));
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b)));
     }
+
 }
 

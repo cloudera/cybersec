@@ -1,7 +1,7 @@
 package com.cloudera.cyber.profiler.accumulator;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.profiler.ProfileGroupConfig;
+import com.cloudera.cyber.profiler.ProfileMessage;
 import org.apache.flink.api.common.accumulators.Accumulator;
 import org.apache.flink.api.common.accumulators.LongMaximum;
 import org.apache.flink.api.common.accumulators.LongMinimum;
@@ -17,19 +17,19 @@ public abstract class ProfileGroupAcc {
     public static final String START_PERIOD_EXTENSION = "start_period";
     public static final String END_PERIOD_EXTENSION = "end_period";
 
-    LongMinimum startPeriodTimestamp = new LongMinimum();
-    LongMaximum endPeriodTimestamp = new LongMaximum();
-    List<Accumulator<?, ? extends Serializable>> accumulators;
+    final LongMinimum startPeriodTimestamp = new LongMinimum();
+    final LongMaximum endPeriodTimestamp = new LongMaximum();
+    final List<Accumulator<?, ? extends Serializable>> accumulators;
 
     public ProfileGroupAcc(List<Accumulator<?, ? extends Serializable>> accumulators) {
         this.accumulators = accumulators;
     }
 
-    protected abstract void updateAccumulators(Message message, ProfileGroupConfig profileGroupConfig);
+    protected abstract void updateAccumulators(ProfileMessage message, ProfileGroupConfig profileGroupConfig);
 
     protected abstract void addExtensions(ProfileGroupConfig profileGroupConfig, Map<String, String> extensions, Map<String, DecimalFormat> measurementFormats);
 
-    protected static Double getFieldValueAsDouble(Message message, String fieldName) {
+    protected static Double getFieldValueAsDouble(ProfileMessage message, String fieldName) {
         String extensionValue = message.getExtensions().get(fieldName);
         if (extensionValue != null) {
             try {
@@ -41,7 +41,7 @@ public abstract class ProfileGroupAcc {
         return null;
     }
 
-    public void addMessage(Message message, ProfileGroupConfig profileGroupConfig) {
+    public void addMessage(ProfileMessage message, ProfileGroupConfig profileGroupConfig) {
         startPeriodTimestamp.add(message.getTs());
         endPeriodTimestamp.add(message.getTs());
         updateAccumulators(message, profileGroupConfig);

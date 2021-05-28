@@ -57,7 +57,7 @@ public class IpAsnMap extends RichMapFunction<Message, Message> {
                 asnEnrichment = new IpAsnEnrichment(new DatabaseReader.Builder(dbStream).withCache(new CHMCache()).build());
                 log.info("Successfully loaded Maxmind database {}", asnDatabasePath);
             } catch (Exception e) {
-                log.error(String.format("Exception while loading geocode database %s", asnDatabasePath), e);
+                log.error(String.format("Exception while loading asn database %s", asnDatabasePath), e);
             }
         } catch (IOException ioe) {
             log.error(String.format("Unable to load file system %s", asnDatabasePath), ioe);

@@ -2,16 +2,13 @@ package com.cloudera.cyber.enrichment.load;
 
 import com.cloudera.cyber.commands.CommandType;
 import com.cloudera.cyber.commands.EnrichmentCommand;
-import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.java.BatchTableEnvironment;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.sources.CsvTableSource;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Preconditions;
@@ -48,7 +45,6 @@ public abstract class BatchEnrichmentLoaderCSV extends BatchEnrichmentLoader {
             builder.ignoreFirstLine();
         }
 
-        StreamTableEnvironment ste;
         // add a field for each column, any ignored column is named ignore_<number>
         IntStream.range(0, fieldNames.size()).
                 mapToObj(index -> !fieldNames.get(index).isEmpty() ? fieldNames.get(index) : String.format("ignore_%d", index)).
@@ -61,7 +57,6 @@ public abstract class BatchEnrichmentLoaderCSV extends BatchEnrichmentLoader {
 
 
         String fieldSelection = Stream.concat(Stream.of(keyFieldName), valueFieldNames.stream()).collect(Collectors.joining(","));
-
         Table enrichmentTable = streamTableEnv.fromTableSource(tableSource).select(fieldSelection);
 
         DataStream<Row> enrichmentStream = streamTableEnv.toAppendStream(enrichmentTable, Row.class);

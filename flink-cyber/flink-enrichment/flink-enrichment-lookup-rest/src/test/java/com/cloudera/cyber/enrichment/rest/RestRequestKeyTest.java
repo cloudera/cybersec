@@ -1,6 +1,6 @@
 package com.cloudera.cyber.enrichment.rest;
 
-import avro.shaded.com.google.common.base.Joiner;
+import com.google.common.base.Joiner;
 import org.junit.Assert;
 import org.junit.Test;
 
