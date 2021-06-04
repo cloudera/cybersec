@@ -7,7 +7,6 @@ import com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient;
 import com.hortonworks.registries.schemaregistry.errors.SchemaNotFoundException;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.typeutils.RowTypeInfo;
-import org.apache.flink.formats.avro.registry.cloudera.ClouderaRegistryTableConfigurator;
 import org.apache.flink.formats.avro.typeutils.AvroSchemaConverter;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableSchema;
@@ -46,10 +45,9 @@ public class ProfileSourceCatalog extends AbstractReadOnlyCatalog {
     public ProfileSourceCatalog(Map<String,String> properties) {
         super(CATALOG_NAME, SOURCE_DATABASE);
         this.properties = properties;
-        registryClient = ClouderaRegistryTableConfigurator
-                .forCatalog()
-                .getRegistryClient(readSchemaRegistryProperties(properties));
-
+        registryClient = new SchemaRegistryClient(
+                readSchemaRegistryProperties(properties)
+        );
     }
 
     private Set<String> getSourceTables() throws ExecutionException, InterruptedException {
