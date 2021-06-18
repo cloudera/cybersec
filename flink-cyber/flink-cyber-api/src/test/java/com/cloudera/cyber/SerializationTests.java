@@ -3,6 +3,7 @@ package com.cloudera.cyber;
 import com.cloudera.cyber.commands.CommandType;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
+import com.cloudera.cyber.parser.MessageToParse;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
@@ -13,6 +14,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.*;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
@@ -77,6 +79,17 @@ public class SerializationTests {
         Message test = test(m);
         assertThat(test.getExtensions(), equalTo(map));
         assertThat(test.getDataQualityMessages().get(0).getMessage(), equalTo("test message"));
+    }
+
+    @Test
+    public void testMessageToParse() throws IOException {
+        MessageToParse messageToParse = MessageToParse.builder().
+                offset(3).partition(1).
+                originalBytes("this is a test".getBytes(UTF_8)).
+                topic("test_topic").
+                build();
+        MessageToParse output = test(messageToParse);
+        assertThat(output, equalTo(messageToParse));
     }
     
     @Test
