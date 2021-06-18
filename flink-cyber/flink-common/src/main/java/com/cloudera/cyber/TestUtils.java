@@ -2,6 +2,7 @@ package com.cloudera.cyber;
 
 import com.cloudera.cyber.parser.MessageToParse;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class TestUtils {
@@ -44,7 +45,7 @@ public class TestUtils {
 
     public static MessageToParse.MessageToParseBuilder createMessageToParse(String source, String topic) {
         return MessageToParse.builder()
-                .originalSource(source)
+                .originalBytes(source.getBytes(StandardCharsets.UTF_8))
                 .topic(topic)
                 .offset(0)
                 .partition(0);
