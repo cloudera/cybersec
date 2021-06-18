@@ -114,10 +114,10 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
     @Override
     public void flatMap(MessageToParse input, Collector<Message> collector) throws Exception {
         // sign the source content
-        signature.update(input.getOriginalSource().getBytes(StandardCharsets.UTF_8));
+        signature.update(input.getOriginalBytes());
         final byte[] sig = signature.sign();
 
-        DocumentContext documentContext = JsonPath.using(STRICT_PROVIDER_CONFIGURATION).parse(input.getOriginalSource());
+        DocumentContext documentContext = JsonPath.using(STRICT_PROVIDER_CONFIGURATION).parse(new String(input.getOriginalBytes(), StandardCharsets.UTF_8));
 
         // header is all top level simple type fields.
         Object header = documentContext.read(headerPath);

@@ -3,14 +3,23 @@ package com.cloudera.parserchains.core;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import java.nio.charset.StandardCharsets;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * The value of a field contained within a {@link Message}.
  */
 public class FieldValue {
     static final int MAX_LENGTH = 65_536;
     private final String value;
+    private final byte[] byteValue;
 
     public static FieldValue of(String fieldValue) {
+        return new FieldValue(fieldValue);
+    }
+
+    public static FieldValue of(byte[] fieldValue) {
         return new FieldValue(fieldValue);
     }
 
@@ -22,15 +31,37 @@ public class FieldValue {
             throw new IllegalArgumentException("Invalid field value.");
         }
         this.value = value;
+        this.byteValue = null;
+    }
+
+    private FieldValue(byte[] byteValue) {
+        if (byteValue == null) {
+            throw new IllegalArgumentException("Null byteValue supplied to constructor");
+        }
+        this.value = null;
+        this.byteValue = byteValue;
     }
 
     public String get() {
-        return value;
+        return toString();
+    }
+
+    public byte[] getByteValue() {
+        if (value != null) {
+            return value.getBytes(UTF_8);
+        }
+        return byteValue;
     }
 
     @Override
     public String toString() {
-        return value;
+        if (value != null) {
+            return value;
+        } else if (byteValue != null) {
+            return new String(byteValue, StandardCharsets.UTF_8);
+        } else {
+            return "null";
+        }
     }
 
     @Override
@@ -44,6 +75,7 @@ public class FieldValue {
         FieldValue that = (FieldValue) o;
         return new EqualsBuilder()
                 .append(value, that.value)
+                .append(byteValue, that.byteValue)
                 .isEquals();
     }
 
@@ -51,6 +83,7 @@ public class FieldValue {
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
                 .append(value)
+                .append(byteValue)
                 .toHashCode();
     }
 }

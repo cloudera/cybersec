@@ -15,7 +15,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -25,6 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.cloudera.cyber.parser.ChainParserMapFunction.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -49,7 +49,7 @@ public class ChainParserMapFunctionTest {
 
     private void testMessageWithError(String messageText, String timestampNotEpoch) throws Exception {
         OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = createTestHarness("JsonTimestampParserChain.json", null);
-        harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic(TEST_TOPIC).originalSource(messageText).build()));
+        harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic(TEST_TOPIC).originalBytes(messageText.getBytes(UTF_8)).build()));
         Message outputMessage = Objects.requireNonNull(harness.getSideOutput(ERROR_OUTPUT).poll()).getValue();
         assertThat(outputMessage.getExtensions().get("original_string")).isEqualTo(messageText);
         assertThat(outputMessage.getDataQualityMessages()).hasSize(1);
@@ -100,10 +100,10 @@ public class ChainParserMapFunctionTest {
 
 
     private void sendTimestampMessage(Map<Long, Tuple2<Long, byte[]>> expectedTimestamps, OneInputStreamOperatorTestHarness<MessageToParse, Message> harness, String messageText, long offset, long expectedTimestamp, Signature signature) throws Exception {
-        harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(offset).partition(TEST_PARTITION).topic(TEST_TOPIC).originalSource(messageText).build()));
+        harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(offset).partition(TEST_PARTITION).topic(TEST_TOPIC).originalBytes(messageText.getBytes(UTF_8)).build()));
         Tuple2<Long, byte[]> expectedResult = new Tuple2<>(expectedTimestamp, null);
         if (signature != null) {
-            signature.update(messageText.getBytes(StandardCharsets.UTF_8));
+            signature.update(messageText.getBytes(UTF_8));
             expectedResult.f1 = signature.sign();
         } else {
             expectedResult.f1 = EMPTY_SIGNATURE;
@@ -113,7 +113,7 @@ public class ChainParserMapFunctionTest {
 
     private String readConfigFile(String name) throws IOException {
         URL url = Resources.getResource(name);
-        return Resources.toString(url, StandardCharsets.UTF_8);
+        return Resources.toString(url, UTF_8);
     }
 
     private Signature loadSignature(PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeyException {

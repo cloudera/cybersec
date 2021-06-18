@@ -14,9 +14,9 @@ public class MessageToParseDeserializer implements KafkaDeserializationSchema<Me
     }
 
     @Override
-    public MessageToParse deserialize(ConsumerRecord<byte[], byte[]> consumerRecord) throws Exception {
+    public MessageToParse deserialize(ConsumerRecord<byte[], byte[]> consumerRecord) {
         return MessageToParse.builder()
-                .originalSource(new String(consumerRecord.value(), StandardCharsets.UTF_8))
+                .originalBytes(consumerRecord.value())
                 .topic(consumerRecord.topic())
                 .offset(consumerRecord.offset())
                 .partition(consumerRecord.partition())

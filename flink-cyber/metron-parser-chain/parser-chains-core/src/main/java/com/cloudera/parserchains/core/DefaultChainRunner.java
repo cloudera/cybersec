@@ -33,16 +33,8 @@ public class DefaultChainRunner implements ChainRunner {
 
     @Override
     public List<Message> run(String toParse, ChainLink chain) {
-        List<Message> results = new ArrayList<>();
         Message original = originalMessage(toParse);
-        results.add(original);
-
-        if (chain != null) {
-            return run(original, chain, results);
-        } else {
-            return getErrorResult(original, "No parser chain defined for message");
-        }
-
+        return parseMessage(original, chain);
     }
 
     @Override
@@ -60,8 +52,33 @@ public class DefaultChainRunner implements ChainRunner {
         return results;
     }
 
+    private List<Message> parseMessage(Message original, ChainLink chain) {
+        List<Message> results = new ArrayList<>();
+        results.add(original);
+
+        if (chain != null) {
+            return run(original, chain, results);
+        } else {
+            return getErrorResult(original, "No parser chain defined for message");
+        }
+    }
+
+    @Override
+    public List<Message> run(byte[] toParse, ChainLink chain) {
+        Message original = originalMessage(toParse);
+        return parseMessage(original, chain);
+    }
+
     @Override
     public Message originalMessage(String toParse) {
+        return Message.builder()
+                .addField(inputField, FieldValue.of(toParse))
+                .createdBy(ORIGINAL_MESSAGE_NAME)
+                .build();
+    }
+
+    @Override
+    public Message originalMessage(byte[] toParse) {
         return Message.builder()
                 .addField(inputField, FieldValue.of(toParse))
                 .createdBy(ORIGINAL_MESSAGE_NAME)
