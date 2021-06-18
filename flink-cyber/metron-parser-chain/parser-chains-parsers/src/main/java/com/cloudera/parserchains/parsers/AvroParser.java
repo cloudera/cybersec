@@ -88,7 +88,7 @@ public class AvroParser implements Parser {
 
     public Message doParse(FieldValue toParse, Message.Builder output) {
         try {
-            byte[] bytes = toParse.get().getBytes(StandardCharsets.UTF_8);
+            byte[] bytes = toParse.getByteValue();
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
             GenericDatumReader<GenericRecord> genericDatumReader = new GenericDatumReader<>(schema);
             BinaryDecoder binaryDecoder = DecoderFactory.get().binaryDecoder(byteArrayInputStream, null);
