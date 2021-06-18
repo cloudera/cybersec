@@ -112,7 +112,7 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
 
     @Override
     public void processElement(MessageToParse message, Context context, Collector<Message> collector) throws Exception {
-        final String inputMessage = message.getOriginalSource();
+        final byte[] inputMessage = message.getOriginalBytes();
         final String topic = message.getTopic();
         final TopicParserConfig topicParserConfig = getChainForTopic(topic);
         final List<com.cloudera.parserchains.core.Message> run = chainRunner.run(inputMessage, chains.get(topicParserConfig.getChainKey()));

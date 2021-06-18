@@ -25,10 +25,16 @@ public class FieldValueTest {
     }
 
     @Test
-    void notNull() {
-        assertThrows(IllegalArgumentException.class, () -> FieldValue.of(null));
+    void notNullString() {
+        String nullString = null;
+        assertThrows(IllegalArgumentException.class, () -> FieldValue.of(nullString));
     }
 
+    @Test
+    void notNullBytest() {
+        byte[] nullBytes = null;
+        assertThrows(IllegalArgumentException.class, () -> FieldValue.of(nullBytes));
+    }
     @Test
     void get() {
         assertEquals(value, FieldValue.of(value).get());
