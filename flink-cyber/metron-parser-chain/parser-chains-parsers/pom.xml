@@ -13,7 +13,7 @@
 
     <properties>
         <!-- main dependency versions -->
-        <simple-syslog.version>0.0.3</simple-syslog.version>
+        <simple-syslog.version>0.0.6</simple-syslog.version>
         <antlr4.version>4.7.2</antlr4.version>
         <java-grok.version>0.1.9</java-grok.version>
     </properties>

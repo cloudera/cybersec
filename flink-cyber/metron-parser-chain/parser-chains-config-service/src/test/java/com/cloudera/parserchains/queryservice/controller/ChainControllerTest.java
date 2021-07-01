@@ -614,6 +614,6 @@ public class ChainControllerTest {
                 .andExpect(jsonPath("$.results.[0].log.type", is("error")))
                 .andExpect(jsonPath("$.results.[0].log.parserId", is("8f498980-5f13-11ea-9ea2-a3a38413c812")))
                 .andExpect(jsonPath("$.results.[0].log.message",
-                        is("Syntax error @ 1:0 no viable alternative at input 'A'")));
+                        is("Syntax error @ 1:0 mismatched input 'A' expecting {' ', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '<'}")));
     }
 }
