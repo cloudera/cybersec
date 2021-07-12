@@ -1,7 +1,6 @@
 package com.cloudera.cyber.profiler.sql.catalog;
 
-import com.cloudera.cyber.CyberFunction;
-import com.cloudera.cyber.libs.CyberFunctionUtils;
+import com.cloudera.cyber.libs.CyberFunctionDefinition;
 import com.hortonworks.registries.schemaregistry.SchemaVersionInfo;
 import com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient;
 import com.hortonworks.registries.schemaregistry.errors.SchemaNotFoundException;
@@ -107,8 +106,8 @@ public class ProfileSourceCatalog extends AbstractReadOnlyCatalog {
         kafkaClient = KafkaAdminClient.create(readKafkaProperties(properties, "profiler-catalog", true));
 
         // initialise the functions
-        CyberFunctionUtils.findAll().forEach(c -> {
-            functions.put(c.getAnnotation(CyberFunction.class).value(), new CatalogFunctionImpl(c.getCanonicalName()));
+        CyberFunctionDefinition.findAll().forEach(c -> {
+            functions.put(c.getFunctionName(), new CatalogFunctionImpl(c.getImplementationClass().getCanonicalName()));
         });
     }
 
