@@ -13,7 +13,7 @@ public class TestCyberFunctionUtils {
 
     @Test
     public void testClassFinder() {
-        List<Class<?>> allFunctions = CyberFunctionUtils.findAll().collect(Collectors.toList());
+        List<CyberFunctionDefinition> allFunctions = CyberFunctionDefinition.findAll().collect(Collectors.toList());
         assertThat("Returns some functions", allFunctions, hasSize(greaterThan(1)));
     }
 }
