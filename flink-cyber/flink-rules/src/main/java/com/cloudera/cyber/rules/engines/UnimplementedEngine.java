@@ -17,6 +17,11 @@ public class UnimplementedEngine implements RuleEngine {
     }
 
     @Override
+    public boolean validate() {
+        return true;
+    }
+
+    @Override
     public void close() {
 
     }
@@ -27,7 +32,7 @@ public class UnimplementedEngine implements RuleEngine {
     }
 
     @Override
-    public void eval(String script) throws ScriptException {
+    public void eval(String script) {
         throw new RuntimeException("RuleEngine not implemented yet");
     }
 
