@@ -63,4 +63,25 @@ public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
                 FlinkKafkaProducer.Semantic.AT_LEAST_ONCE);
         generatedInput.addSink(kafkaSink).name("Generator Sink");
     }
+
+    @Override
+    protected void writeBinaryResults(ParameterTool params,
+                                SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput) {
+        FlinkKafkaProducer<Tuple2<String, byte[]>> kafkaSink = new FlinkKafkaProducer<Tuple2<String, byte[]>>(
+                "generator.output",
+                new KafkaSerializationSchema<Tuple2<String, byte[]>>() {
+                    @Override
+                    public ProducerRecord<byte[], byte[]> serialize(Tuple2<String, byte[]> stringStringTuple2,
+                                                                    @Nullable Long aLong) {
+                        return new ProducerRecord<byte[], byte[]>(
+                                stringStringTuple2.f0,
+                                stringStringTuple2.f1
+                        );
+                    }
+                },
+                Utils.readKafkaProperties(params, false),
+                FlinkKafkaProducer.Semantic.AT_LEAST_ONCE);
+        generatedInput.addSink(kafkaSink).name("Generator Sink");
+    }
+
 }

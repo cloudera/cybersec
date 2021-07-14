@@ -24,7 +24,7 @@ public abstract class CaracalGeneratorFlinkJob {
     public static final String PARAMS_RECORDS_LIMIT = "generator.count";
     private static final int DEFAULT_EPS = 0;
     private static final String PARAMS_EPS = "generator.eps";
-    private static final String PARAMS_SCHEMA = "generator.avro.flag";
+    public static final String PARAMS_SCHEMA = "generator.avro.flag";
     private static final String SCHEMA_PATH = "Netflow/netflow.schema";
     private static final double THREAT_PROBABILITY = 0.01;
 
@@ -39,21 +39,22 @@ public abstract class CaracalGeneratorFlinkJob {
         if (BooleanUtils.toBoolean(avroGeneratorFlag)) {
             String schemaString = IOUtils.toString(
                     Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(SCHEMA_PATH)));
-            generatedInput = convertDataToAvro(schemaString, createSourceFromTemplateSource(
+            SingleOutputStreamOperator<Tuple2<String, byte[]>> binaryInput = convertDataToAvro(schemaString, createSourceFromTemplateSource(
                     params, env, Collections
                             .singletonMap(new GenerationSource("Netflow/netflow_avro_sample1.json", "generator.avro"),
                                     1.0)));
+            writeBinaryResults(params, binaryInput);
         } else {
             generatedInput = createSourceFromTemplateSource(params, env, getNetflowSampleMap());
             generateRandomThreatResults(params, generatedInput);
+            writeMetrics(params, generateMetrics(generatedInput));
+            writeResults(params, generatedInput);
 
         }
-        writeMetrics(params, generateMetrics(generatedInput));
-        writeResults(params, generatedInput);
         return env;
     }
 
-    private SingleOutputStreamOperator<Tuple2<String, String>> convertDataToAvro(String schemaString,
+    private SingleOutputStreamOperator<Tuple2<String, byte[]>> convertDataToAvro(String schemaString,
             SingleOutputStreamOperator<Tuple2<String, String>> generatedInput) {
         return generatedInput
                 .map(new AvroMapFunction(schemaString));
@@ -120,4 +121,8 @@ public abstract class CaracalGeneratorFlinkJob {
 
     protected abstract void writeResults(ParameterTool params,
             SingleOutputStreamOperator<Tuple2<String, String>> generatedInput);
+
+    protected abstract void writeBinaryResults(ParameterTool params,
+                                         SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput);
+
 }
