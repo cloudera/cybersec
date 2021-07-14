@@ -7,7 +7,7 @@ import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 
-public class AvroMapFunction extends RichMapFunction<Tuple2<String, String>, Tuple2<String, String>> {
+public class AvroMapFunction extends RichMapFunction<Tuple2<String, String>, Tuple2<String, byte[]>> {
 
     private final String schemaString;
     private transient Schema schema;
@@ -24,8 +24,7 @@ public class AvroMapFunction extends RichMapFunction<Tuple2<String, String>, Tup
     }
 
     @Override
-    public Tuple2<String, String> map(Tuple2<String, String> tuple2) {
-        return new Tuple2<>(tuple2.f0, new String(Utils.jsonDecodeToAvroByteArray(tuple2.f1, schema),
-                StandardCharsets.UTF_8));
+    public Tuple2<String, byte[]> map(Tuple2<String, String> tuple2) {
+        return new Tuple2<>(tuple2.f0, Utils.jsonDecodeToAvroByteArray(tuple2.f1, schema));
     }
 }

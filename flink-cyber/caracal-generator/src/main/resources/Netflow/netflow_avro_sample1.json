@@ -43,6 +43,6 @@
   "stamp_updated": null,
   "packets": null,
   "flows": null,
-  "bytes": null,
+  "bytes": {"long":${utils.randomInt(1,65535)?c}},
   "writer_id": "testId"
 }
