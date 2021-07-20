@@ -44,7 +44,7 @@
         <scala.binary.version>2.12</scala.binary.version>
         <kafka.version>2.4.1.7.1.1.0-565</kafka.version>
         <nifi.version>1.11.4</nifi.version>
-        <jackson.version>2.11.0</jackson.version>
+        <jackson.version>2.11.2</jackson.version>
         <smm.intercepter.version>2.1.0.7.1.2.0-96</smm.intercepter.version>
         <flink.format.parquet.version>1.10.0</flink.format.parquet.version>
         <slf4j.version>1.7.15</slf4j.version>
@@ -348,8 +348,15 @@
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <scope>compile</scope>
-                <version>2.11.2</version>
-            </dependency>
+                <version>${jackson.version}</version>
+             </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <scope>compile</scope>
+                <version>${jackson.version}</version>
+             </dependency>
 
             <dependency>
                 <groupId>commons-validator</groupId>

@@ -61,14 +61,14 @@ public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
                 },
                 Utils.readKafkaProperties(params, false),
                 FlinkKafkaProducer.Semantic.AT_LEAST_ONCE);
-        generatedInput.addSink(kafkaSink).name("Generator Sink");
+        generatedInput.addSink(kafkaSink).name("Text Generator Sink");
     }
 
     @Override
     protected void writeBinaryResults(ParameterTool params,
                                 SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput) {
         FlinkKafkaProducer<Tuple2<String, byte[]>> kafkaSink = new FlinkKafkaProducer<Tuple2<String, byte[]>>(
-                "generator.output",
+                "generator.binary.output",
                 new KafkaSerializationSchema<Tuple2<String, byte[]>>() {
                     @Override
                     public ProducerRecord<byte[], byte[]> serialize(Tuple2<String, byte[]> stringStringTuple2,
@@ -81,7 +81,7 @@ public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
                 },
                 Utils.readKafkaProperties(params, false),
                 FlinkKafkaProducer.Semantic.AT_LEAST_ONCE);
-        generatedInput.addSink(kafkaSink).name("Generator Sink");
+        generatedInput.addSink(kafkaSink).name("Binary Generator Sink");
     }
 
 }
