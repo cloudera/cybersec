@@ -1,13 +1,15 @@
 package com.cloudera.cyber.rules.engines;
 
-import com.cloudera.cyber.CyberFunction;
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.libs.CyberFunctionUtils;
+import com.cloudera.cyber.libs.CyberFunctionDefinition;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.ConcurrentException;
+import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.apache.flink.annotation.VisibleForTesting;
 
 import javax.script.*;
@@ -17,87 +19,114 @@ import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 @Data
-@RequiredArgsConstructor
-@Log
+@Slf4j
 public class JavaScriptEngine implements RuleEngine {
     private static final String ENGINE_NAME = "javascript";
 
     private static final String SCORE_FUNCTION = "score";
 
-    private final ScriptEngineManager mgr = new ScriptEngineManager();
-    private final ScriptEngine engine = mgr.getEngineByName(ENGINE_NAME);
+    private static final ScriptEngineManager mgr = new ScriptEngineManager();
+
+    @AllArgsConstructor
+    @Getter
+    private static class ValidatedScriptEngine {
+        private final boolean isValid;
+        private final ScriptEngine engine;
+    }
+
+    private final LazyInitializer<ValidatedScriptEngine> engine = new LazyInitializer<ValidatedScriptEngine>() {
+
+        @Override
+        protected ValidatedScriptEngine initialize() {
+            return create(getFunctionName(), script);
+        }
+    };
 
     @NonNull
-    private String script;
-    private String $functionName = "";
+    private final String script;
+    private final String functionName;
+
+    public JavaScriptEngine(String script) {
+        this.script = script;
+        this.functionName = SCORE_FUNCTION + "_" +
+                Math.abs(this.script.hashCode()) + "_"
+                + ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE);
+    }
+
+    private static final String setupScript = CyberFunctionDefinition.findAll().map(JavaScriptEngine::generateJavascript).collect(Collectors.joining(";"));
+
+    private static String generateJavascript(CyberFunctionDefinition functionDefinition) {
+        String paramNames = functionDefinition.getParameters().stream().map(Parameter::getName).collect(Collectors.joining(","));
+        String functionName = functionDefinition.getFunctionName();
+        return functionName + "=function(" + paramNames + "){ return _" + functionName + ".eval(" + paramNames + ");}";
+    }
 
     @Override
     public void open() {
+
+    }
+
+    private static ValidatedScriptEngine create(String functionName, String script) {
+        ScriptEngine engine =  mgr.getEngineByName(ENGINE_NAME);
+        boolean isValid = true;
         try {
-            String setupScript = CyberFunctionUtils.findAll()
-                    .map(e -> {
-                        String functionName = e.getAnnotation(CyberFunction.class).value();
-                        try {
-                            return ImmutablePair.of(
-                                    functionName,
-                                    ImmutablePair.of(e.newInstance(),
-                                            Stream.of(e.getDeclaredMethods()).filter(m -> m.getName().equals("eval")).findFirst().get().getParameters()
-                                    )
-                            );
-                        } catch (Exception ex) {
-                            log.warning(String.format("Couldn't register function %s because %s", functionName, ex));
-                            return null;
-                        }
-                    })
-                    .filter(f -> f != null)
-                    .map(e -> {
-                        engine.getBindings(ScriptContext.GLOBAL_SCOPE).put("_" + e.getKey(), e.getValue().getLeft());
-                        log.info(String.format("Registering %s as %s", e.getValue().getLeft().getClass(), e.getKey()));
-
-                        Parameter[] params = e.getRight().getRight();
-                        String paramNames = Stream.of(params).map(p -> p.getName()).collect(Collectors.joining(","));
-
-                        return e.getKey() + "=function(" + paramNames + "){ return _" + e.getKey() + ".eval(" + paramNames + ");}";
-                    }).collect(Collectors.joining(";"));
+            Bindings globalBindings = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
+            CyberFunctionDefinition.findAll().forEach(func -> {
+                String udfFunctionName = func.getFunctionName();
+                Class<?> implementationClass = func.getImplementationClass();
+                try {
+                    log.info("Registering {} as {}", implementationClass, udfFunctionName);
+                    globalBindings.put("_".concat(udfFunctionName), implementationClass.newInstance());
+                    log.info("Successfully registered {} as {}", implementationClass, udfFunctionName);
+                } catch (Exception e) {
+                    log.debug(String.format("Could not register %s as %s", implementationClass, udfFunctionName), e);
+                }
+            });
 
             engine.put("log", (Consumer<Object>) (s) -> log.info(s.toString()));
 
-            String functionScript = "function " + getFunctionName() + "(message) { " + this.getScript() + "}; ";
+            if (StringUtils.isNotEmpty(script)) {
+                String functionScript = "function " + functionName + "(message) { " + script + "}; ";
 
-            log.info(setupScript);
-            log.info(functionScript);
-            engine.eval(setupScript + ";" + functionScript, engine.getContext());
+                log.info(setupScript);
+                log.info(functionScript);
+                engine.eval(setupScript + ";" + functionScript, engine.getContext());
+            }
 
-            initialized = true;
-        } catch (
-                ScriptException e) {
-            throw new RuntimeException("Script invalid", e);
+        } catch (ScriptException e) {
+            isValid = false;
         }
-    }
-
-    public String getFunctionName() {
-        if (this.$functionName.isEmpty()) {
-            this.$functionName = SCORE_FUNCTION + "_" +
-                    String.valueOf(Math.abs(this.script.hashCode())) + "_"
-                    + String.valueOf(ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
-        }
-        return this.$functionName;
+        return new ValidatedScriptEngine(isValid, engine);
     }
 
     @Override
     public void close() {
     }
 
-    boolean initialized = false;
+    @Override
+    public boolean validate() {
+        try {
+            return engine.get().isValid();
+        } catch (ConcurrentException e) {
+            log.error("Unable to intialize javascript engine", e);
+            return false;
+        }
+    }
+
+    private ScriptEngine getScriptEngine() throws ConcurrentException {
+        return engine.get().getEngine();
+    }
 
     @Override
     public Map<String, Object> feed(Message message) {
-        if (!initialized) open();
         try {
-            return (Map<String, Object>) ((Invocable) engine).invokeFunction(getFunctionName(), extractMessage(message));
+            Invocable invokableEngine = (Invocable)(getScriptEngine());
+            return (Map<String, Object>) invokableEngine.invokeFunction(getFunctionName(), extractMessage(message));
+        } catch (ConcurrentException e) {
+            throw new RuntimeException("Unable to initialize javascript rule.", e);
         } catch (ScriptException e) {
             throw new RuntimeException("Javascript Engine function failed", e);
         } catch (NoSuchMethodException e) {
@@ -109,12 +138,20 @@ public class JavaScriptEngine implements RuleEngine {
 
     @VisibleForTesting
     public void eval(String script) throws ScriptException {
-        engine.eval(script);
+        try {
+            getScriptEngine().eval(script);
+        } catch (ConcurrentException e) {
+            throw new RuntimeException("Unable to initialize javascript rule.", e);
+        }
     }
 
     @Override
     public Object invokeFunction(String function, Object... args) throws ScriptException, NoSuchMethodException {
-        return ((Invocable) engine).invokeFunction(function, args);
+        try {
+            return ((Invocable) getScriptEngine()).invokeFunction(function, args);
+        } catch (ConcurrentException e) {
+            throw new RuntimeException("Unable to initialize javascript rule.", e);
+        }
     }
 
     private HashMap<String, Object> extractMessage(Message message) {
