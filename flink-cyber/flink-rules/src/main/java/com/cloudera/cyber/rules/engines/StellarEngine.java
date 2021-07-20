@@ -21,6 +21,11 @@ public class StellarEngine implements RuleEngine {
     }
 
     @Override
+    public boolean validate() {
+        return true;
+    }
+
+    @Override
     public void close() {
 
     }
@@ -31,7 +36,7 @@ public class StellarEngine implements RuleEngine {
     }
 
     @Override
-    public void eval(String script) throws ScriptException {
+    public void eval(String script) {
 
     }
 
