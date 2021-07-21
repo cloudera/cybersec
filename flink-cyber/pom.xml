@@ -13,8 +13,6 @@
         <module>flink-cyber-api</module>
         <module>cyber-functions</module>
         <module>flink-common</module>
-        <module>flink-alert-scoring</module>
-        <module>flink-alert-scoring-api</module>
         <module>flink-indexing</module>
         <module>flink-enrichment</module>
         <module>flink-sessions</module>
@@ -29,6 +27,8 @@
         <module>caracal-parser</module>
         <module>data-management</module>
         <module>flink-web</module>
+        <module>flink-parse</module>
+       <module>flink-stellar</module>
         <module>flink-hbase-common</module>
     </modules>
 
@@ -60,6 +60,8 @@
         <mockito.version>3.6.0</mockito.version>
         <datasketches.version>1.3.0-incubating</datasketches.version>
         <assertj.version>3.13.2</assertj.version>
+        <json.simple.version>1.1.1</json.simple.version>
+        <jupiter.junit.version>5.5.2</jupiter.junit.version>
     </properties>
 
     <repositories>
