@@ -1,0 +1,7 @@
+{
+  "parserClassName": "com.cloudera.parserchains.parsers.ExampleStellarParser",
+  "parserConfig": {
+    "a": "a config",
+    "b": "b config"
+  }
+}
