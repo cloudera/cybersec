@@ -30,6 +30,7 @@
         <module>flink-parse</module>
        <module>flink-stellar</module>
         <module>flink-hbase-common</module>
+       <module>metron-common</module>
     </modules>
 
     <properties>
@@ -38,7 +39,7 @@
         <lombok.version>1.18.16</lombok.version>
         <lombok.plugin.version>1.18.16.0</lombok.plugin.version>
         <flink.version>1.12-csa1.4.0.0</flink.version>
-        <guava.verison>21.0</guava.verison>
+        <guava.version>21.0</guava.version>
         <avro.version>1.10.0</avro.version>
         <log4j.kafka.version>2.4.1.7.1.1.0-565</log4j.kafka.version>
         <scala.binary.version>2.12</scala.binary.version>
@@ -62,6 +63,12 @@
         <assertj.version>3.13.2</assertj.version>
         <json.simple.version>1.1.1</json.simple.version>
         <jupiter.junit.version>5.5.2</jupiter.junit.version>
+        <classindex.version>3.4</classindex.version>
+        <antlr.version>4.5</antlr.version>
+        <metrics.version>3.0.2</metrics.version>
+        <pcap.version>1.7.1</pcap.version>
+        <global_kryo_version>3.0.3</global_kryo_version>
+        <global_kryo_serializers_version>0.38</global_kryo_serializers_version>
     </properties>
 
     <repositories>
@@ -343,7 +350,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>${guava.verison}</version>
+                <version>${guava.version}</version>
             </dependency>
 
             <dependency>
