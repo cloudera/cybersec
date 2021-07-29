@@ -17,18 +17,15 @@
  */
 package org.apache.metron.stellar.dsl.functions;
 
-import com.google.common.collect.Iterables;
-import org.apache.metron.stellar.dsl.BaseStellarFunction;
-import org.apache.metron.stellar.dsl.Stellar;
 import org.apache.metron.stellar.common.utils.BloomFilter;
 import org.apache.metron.stellar.common.utils.ConversionUtils;
 import org.apache.metron.stellar.common.utils.SerDeUtils;
+import org.apache.metron.stellar.dsl.BaseStellarFunction;
+import org.apache.metron.stellar.dsl.Stellar;
 
 import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class DataStructureFunctions {
 
