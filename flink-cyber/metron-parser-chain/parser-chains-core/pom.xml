@@ -13,7 +13,6 @@
 
     <properties>
         <commons-lang3.version>3.0.1</commons-lang3.version>
-        <classindex.version>3.4</classindex.version>
     </properties>
 
     <dependencies>

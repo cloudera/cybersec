@@ -1,0 +1,8 @@
+{
+    "enrichment" : {
+        "fieldMap": {
+            "geo": ["ip_dst_addr", "ip_src_addr"]
+        }
+    }
+}
+
