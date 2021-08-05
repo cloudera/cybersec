@@ -71,9 +71,9 @@ public class HBaseClient implements Closeable {
     this.mutations = new ArrayList<>();
     this.gets = new ArrayList<>();
     try {
-      LOG.error("connecting to table");
+      LOG.info("connecting to table");
       this.table = provider.getTable(configuration, tableName);
-      LOG.error("connected to table");
+      LOG.info("connected to table");
     } catch (Exception e) {
       String msg = String.format("Unable to open connection to HBase for table '%s'", tableName);
       LOG.error(msg, e);

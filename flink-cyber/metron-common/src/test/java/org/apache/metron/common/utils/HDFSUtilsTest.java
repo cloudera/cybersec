@@ -19,7 +19,6 @@
 package org.apache.metron.common.utils;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.metron.integration.utils.TestUtils;
 import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
