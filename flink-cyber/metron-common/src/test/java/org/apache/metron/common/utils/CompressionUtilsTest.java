@@ -18,7 +18,6 @@
 
 package org.apache.metron.common.utils;
 
-import org.apache.metron.integration.utils.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

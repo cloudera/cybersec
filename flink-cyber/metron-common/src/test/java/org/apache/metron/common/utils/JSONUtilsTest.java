@@ -19,16 +19,21 @@
 package org.apache.metron.common.utils;
 
 import org.adrianwalker.multilinestring.Multiline;
-import org.apache.metron.test.utils.UnitTestHelper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -45,8 +50,8 @@ public class JSONUtilsTest {
 
   @BeforeAll
   public static void setUp() throws Exception {
-    tmpDir = UnitTestHelper.createTempDir(new File("target/jsonutilstest"));
-    configFile = UnitTestHelper.write(new File(tmpDir, "config.json"), config);
+    tmpDir = createTempDir(new File("target/jsonutilstest"));
+    configFile = writeToFile(new File(tmpDir, "config.json"), config);
   }
 
   @Test
@@ -162,6 +167,79 @@ public class JSONUtilsTest {
     String actual = new String(JSONUtils.INSTANCE.applyPatch(patchComplexJson, complexJson),
         StandardCharsets.UTF_8);
     assertThat(JSONUtils.INSTANCE.load(actual, JSONUtils.MAP_SUPPLIER), equalTo(JSONUtils.INSTANCE.load(expectedComplexJson, JSONUtils.MAP_SUPPLIER)));
+  }
+
+  public static File createTempDir(File dir) throws IOException {
+    if (!dir.mkdirs() && !dir.exists()) {
+      throw new IOException(String.format("Failed to create directory structure '%s'", dir.toString()));
+    }
+    addCleanupHook(dir.toPath());
+    return dir;
+  }
+
+  /**
+   * Adds JVM shutdown hook that will recursively delete the passed directory
+   *
+   * @param dir Directory that will be cleaned up upon JVM shutdown
+   */
+  public static void addCleanupHook(final Path dir) {
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      @Override
+      public void run() {
+        try {
+          cleanDir(dir);
+        } catch (IOException e) {
+          System.out.println(format("Warning: Unable to clean folder '%s'", dir.toString()));
+        }
+      }
+    });
+  }
+
+    /**
+     * Recursive directory delete
+     *
+     * @param dir Directory to delete
+     * @throws IOException Unable to delete
+     */
+    public static void cleanDir(Path dir) throws IOException {
+      Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+          Files.delete(file);
+          return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+          Files.delete(file);
+          return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+          if (exc == null) {
+            return FileVisitResult.CONTINUE;
+          } else {
+            throw exc;
+          }
+        }
+      });
+      Files.delete(dir);
+    }
+
+  /**
+   * Write contents to a file
+   *
+   * @param file
+   * @param contents
+   * @return file handle
+   * @throws IOException
+   */
+  public static File writeToFile(File file, String contents) throws IOException {
+    com.google.common.io.Files.createParentDirs(file);
+    com.google.common.io.Files.write(contents, file, StandardCharsets.UTF_8);
+    return file;
   }
 
 }

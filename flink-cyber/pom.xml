@@ -28,9 +28,10 @@
         <module>data-management</module>
         <module>flink-web</module>
         <module>flink-parse</module>
-       <module>flink-stellar</module>
+        <module>flink-stellar</module>
         <module>flink-hbase-common</module>
-       <module>metron-common</module>
+        <module>metron-common</module>
+        <module>metron-hbase-common</module>
     </modules>
 
     <properties>
@@ -460,7 +461,7 @@
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
-                <version>3.3.3</version>
+                <version>${mockito.version}</version>
                 <scope>test</scope>
             </dependency>
 
