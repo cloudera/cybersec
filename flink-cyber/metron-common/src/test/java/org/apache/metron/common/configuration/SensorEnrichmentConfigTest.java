@@ -20,8 +20,8 @@ package org.apache.metron.common.configuration;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.apache.commons.io.IOUtils;
-import org.apache.metron.TestConstants;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
+import org.apache.metron.common.utils.TestConstants;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;

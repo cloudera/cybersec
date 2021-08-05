@@ -18,7 +18,7 @@
 package org.apache.metron.common.configuration;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.metron.TestConstants;
+import org.apache.metron.common.utils.TestConstants;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
