@@ -22,6 +22,12 @@ public class TestScoringRulesProcessFunction {
     private static final String MATCH_REASON = "key match";
     private static final String NO_MATCH_REASON = "no match";
     private static final String RULE_SCRIPT_FORMAT = "if (message.containsKey(\"%s\")) {\n" +
+        "        return {score: %f, reason: '"+ MATCH_REASON + "'};\n" +
+        "  } else {\n" +
+        "        return {score: 0.0, reason: '" + NO_MATCH_REASON + "'};\n" +
+        "  }";
+
+    private static final String RULE_SCRIPT_FORMAT_BROKEN = "if 111(message.containsKey(\"%s\")) {\n" +
             "        return {score: %f, reason: '"+ MATCH_REASON + "'};\n" +
             "  } else {\n" +
             "        return {score: 0.0, reason: '" + NO_MATCH_REASON + "'};\n" +
@@ -54,6 +60,17 @@ public class TestScoringRulesProcessFunction {
 
         assertEquals(expectedScoredMessages, harness.extractOutputValues());
         harness.snapshot(1L, 1L);
+    }
+
+    @Test
+    public void testUpsertRuleFailed() throws Exception {
+        BroadcastOperatorTestHarness<Message, ScoringRuleCommand, ScoredMessage> harness = createTestHarness();
+
+        // insert a new rule
+        double expectedScore = 90.0;
+        ScoringRule ruleV0 = buildScoringRule(true, 1, "first ruleV0", String.format(RULE_SCRIPT_FORMAT_BROKEN, FIRST_RULE_EXTENSION_KEY, expectedScore));
+        ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> scoringRuleCommandResults = verifyUpsert(ruleV0, false, harness, null, false);
+
     }
 
     @Test
@@ -188,12 +205,16 @@ public class TestScoringRulesProcessFunction {
     }
 
     private  ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> verifyUpsert(ScoringRule rule, boolean isUpdate, BroadcastOperatorTestHarness<Message, ScoringRuleCommand, ScoredMessage> harness, ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> scoringRuleCommandResults) throws Exception {
+        return verifyUpsert(rule, isUpdate, harness, scoringRuleCommandResults, true);
+    }
+
+    private  ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> verifyUpsert(ScoringRule rule, boolean isUpdate, BroadcastOperatorTestHarness<Message, ScoringRuleCommand, ScoredMessage> harness, ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> scoringRuleCommandResults, Boolean success) throws Exception {
         ScoringRuleCommand upsertCommand =  buildScoringRuleCommand(DynamicRuleCommandType.UPSERT, rule, rule.getId());
         int version = rule.getVersion();
         if (isUpdate) {
             version += 1;
         }
-        ScoringRuleCommandResult expectedResult = ScoringRuleCommandResult.builder().cmdId(upsertCommand.getId()).success(true).rule(rule.withVersion(version)).build();
+        ScoringRuleCommandResult expectedResult = ScoringRuleCommandResult.builder().cmdId(upsertCommand.getId()).success(success).rule(rule.withVersion(version)).build();
         return verifyBroadcast(upsertCommand, harness, scoringRuleCommandResults, expectedResult);
     }
 
