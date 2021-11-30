@@ -38,6 +38,11 @@ public abstract class BaseDynamicRule<R> extends SpecificRecordBase implements D
     }
 
     @Override
+    public boolean isValid() {
+        return getType().engine(this.getRuleScript()).validate();
+    }
+
+    @Override
     public Map<String, Object> apply(Message message) {
         return getType().engine(ruleScript).feed(message);
     }
