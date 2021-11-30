@@ -31,6 +31,7 @@ public class ScoringRule extends BaseDynamicRule<ScoringRule> {
     public static final String RESULT_SCORE = "score";
     public static final String RESULT_REASON = "reason";
 
+
     protected ScoringRule(ScoringRuleBuilder<?, ?> b) {
         super(b);
         this.id = b.id;

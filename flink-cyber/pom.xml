@@ -9,6 +9,8 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
+        <module>flink-alert-scoring</module>
+        <module>flink-alert-scoring-api</module>
         <module>flink-logging</module>
         <module>flink-cyber-api</module>
         <module>cyber-functions</module>
@@ -28,7 +30,7 @@
         <module>data-management</module>
         <module>flink-web</module>
         <module>flink-parse</module>
-       <module>flink-stellar</module>
+        <module>flink-stellar</module>
         <module>flink-hbase-common</module>
     </modules>
 
@@ -72,13 +74,13 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
-     <!--   <repository>
-            <id>hortonworks</id>
-            <url>https://repo.hortonworks.com/content/repositories/releases/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>-->
+        <!--   <repository>
+               <id>hortonworks</id>
+               <url>https://repo.hortonworks.com/content/repositories/releases/</url>
+               <releases>
+                   <enabled>false</enabled>
+               </releases>
+           </repository>-->
         <repository>
             <id>cloudera-local-releasde</id>
             <url>https://repository.cloudera.com/artifactory/libs-release-local/</url>
@@ -351,14 +353,14 @@
                 <artifactId>jackson-annotations</artifactId>
                 <scope>compile</scope>
                 <version>${jackson.version}</version>
-             </dependency>
+            </dependency>
 
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <scope>compile</scope>
                 <version>${jackson.version}</version>
-             </dependency>
+            </dependency>
 
             <dependency>
                 <groupId>commons-validator</groupId>
