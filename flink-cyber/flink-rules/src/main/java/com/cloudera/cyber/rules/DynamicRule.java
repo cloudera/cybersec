@@ -7,6 +7,7 @@ import java.util.UUID;
 
 public interface DynamicRule<T> {
     boolean isEnabled();
+    boolean isValid();
 
     int getOrder();
 

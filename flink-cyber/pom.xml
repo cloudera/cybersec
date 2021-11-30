@@ -82,13 +82,13 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
-     <!--   <repository>
-            <id>hortonworks</id>
-            <url>https://repo.hortonworks.com/content/repositories/releases/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>-->
+        <!--   <repository>
+               <id>hortonworks</id>
+               <url>https://repo.hortonworks.com/content/repositories/releases/</url>
+               <releases>
+                   <enabled>false</enabled>
+               </releases>
+           </repository>-->
         <repository>
             <id>cloudera-local-releasde</id>
             <url>https://repository.cloudera.com/artifactory/libs-release-local/</url>
@@ -361,14 +361,14 @@
                 <artifactId>jackson-annotations</artifactId>
                 <scope>compile</scope>
                 <version>${jackson.version}</version>
-             </dependency>
+            </dependency>
 
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <scope>compile</scope>
                 <version>${jackson.version}</version>
-             </dependency>
+            </dependency>
 
             <dependency>
                 <groupId>commons-validator</groupId>

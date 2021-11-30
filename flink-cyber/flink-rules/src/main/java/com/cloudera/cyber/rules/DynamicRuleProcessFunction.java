@@ -74,12 +74,20 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C ext
                 if (matchingRule.isPresent()) {
                     newRuleVersion = matchingRule.get().getVersion() + 1;
                 }
-
                 R newRule = ruleCommand.getRule().withVersion(newRuleVersion).withId(ruleId);
-                outputRule(context, newRule, ruleCommand.getId());
-                return Stream.concat(rules.stream().filter(r -> !r.getId().equals(ruleCommand.getRuleId())),
-                                Stream.of(newRule))
-                                .collect(Collectors.toList());
+
+                Boolean success = newRule.isValid();
+
+                outputRule(context, newRule, ruleCommand.getId(), success);
+                if(success) {
+                    return Stream.concat(rules.stream().filter(r -> !r.getId().equals(ruleCommand.getRuleId())),
+                            Stream.of(newRule))
+                            .collect(Collectors.toList());
+                } else {
+                    return rules;
+                }
+
+
             case ENABLE:
                 return setEnable(context, ruleCommand.getId(), rules, ruleCommand.getRuleId(), true);
             case DISABLE:
@@ -99,10 +107,15 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C ext
     }
 
     private R outputRule(Context context, R r, String cmdId) {
+
+        return outputRule(context, r, cmdId, true);
+    }
+
+    private R outputRule(Context context, R r, String cmdId, Boolean success) {
         context.output(this.outputSink, resultBuilderSupplier.get()
                 .cmdId(cmdId)
                 .rule(r)
-                .success(true)
+                .success(success)
                 .build());
         return r;
     }
