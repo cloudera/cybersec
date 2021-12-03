@@ -9,12 +9,12 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
-        <module>flink-alert-scoring</module>
-        <module>flink-alert-scoring-api</module>
         <module>flink-logging</module>
         <module>flink-cyber-api</module>
         <module>cyber-functions</module>
         <module>flink-common</module>
+        <module>flink-alert-scoring</module>
+        <module>flink-alert-scoring-api</module>
         <module>flink-indexing</module>
         <module>flink-enrichment</module>
         <module>flink-sessions</module>
@@ -32,6 +32,7 @@
         <module>flink-parse</module>
         <module>flink-stellar</module>
         <module>flink-hbase-common</module>
+        <module>flink-commands</module>
     </modules>
 
     <properties>
@@ -47,6 +48,7 @@
         <kafka.version>2.4.1.7.1.1.0-565</kafka.version>
         <nifi.version>1.11.4</nifi.version>
         <jackson.version>2.11.2</jackson.version>
+        <jackson.datatype.version>2.10.1</jackson.datatype.version>
         <smm.intercepter.version>2.1.0.7.1.2.0-96</smm.intercepter.version>
         <flink.format.parquet.version>1.10.0</flink.format.parquet.version>
         <slf4j.version>1.7.15</slf4j.version>

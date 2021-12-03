@@ -126,14 +126,14 @@ public class TestScoringRulesProcessFunction {
         sendMessage(expectedScoredMessages, extensionsToTriggerRule,
                 Collections.singletonList(Scores.builder().ruleId(rule.getId()).score(expectedScore).reason(MATCH_REASON).build()), harness);
 
-        verifyDelete(rule.getId(), harness, scoringRuleCommandResults);
+        verifyDelete(rule, rule.getId(), harness, scoringRuleCommandResults);
 
         // trigger the rule again and make sure the deleted rule is not triggered
         sendMessage(expectedScoredMessages, extensionsToTriggerRule,
                 Collections.emptyList(), harness);
 
         // delete the rule again should be no op
-        verifyDelete(rule.getId(), harness, scoringRuleCommandResults);
+        verifyDelete(null, rule.getId(), harness, scoringRuleCommandResults);
 
         // trigger the rule again and make sure the deleted rule is not triggered
         sendMessage(expectedScoredMessages, extensionsToTriggerRule,
@@ -225,9 +225,9 @@ public class TestScoringRulesProcessFunction {
         return verifyBroadcast(disableCommand, harness, scoringRuleCommandResults, expectedResult);
     }
 
-    private ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> verifyDelete(String ruleIdToDelete, BroadcastOperatorTestHarness<Message, ScoringRuleCommand, ScoredMessage> harness, ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> scoringRuleCommandResults) throws Exception {
+    private ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> verifyDelete(ScoringRule rule, String ruleIdToDelete, BroadcastOperatorTestHarness<Message, ScoringRuleCommand, ScoredMessage> harness, ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> scoringRuleCommandResults) throws Exception {
         ScoringRuleCommand deleteCommand =  buildScoringRuleCommand(DynamicRuleCommandType.DELETE, null, ruleIdToDelete);
-        return verifyBroadcast(deleteCommand, harness, scoringRuleCommandResults, ScoringRuleCommandResult.builder().cmdId(deleteCommand.getId()).success(true).build());
+        return verifyBroadcast(deleteCommand, harness, scoringRuleCommandResults, ScoringRuleCommandResult.builder().cmdId(deleteCommand.getId()).success(true).rule(rule).build());
     }
 
     private ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> verifyGet(ScoringRule rule, String ruleId, BroadcastOperatorTestHarness<Message, ScoringRuleCommand, ScoredMessage> harness, ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> scoringRuleCommandResults) throws Exception {
