@@ -15,16 +15,17 @@ import org.apache.avro.SchemaBuilder;
 @NoArgsConstructor
 public class ScoringRuleCommandResult extends DynamicRuleCommandResult<ScoringRule> {
 
-    private ScoringRuleCommandResult(String cmdId, boolean success, ScoringRule rule) {
-        super(cmdId, success, rule);
+    private ScoringRuleCommandResult(String cmdId, boolean success, ScoringRule rule, int parallelSubtaskNumber) {
+        super(cmdId, success, rule, parallelSubtaskNumber);
     }
 
-    public static Schema SCHEMA$ = SchemaBuilder.record(ScoringRuleCommandResult.class.getName())
+    public static final Schema SCHEMA$ = SchemaBuilder.record(ScoringRuleCommandResult.class.getName())
             .namespace(ScoringRuleCommandResult.class.getPackage().getName())
             .fields()
             .requiredString("id")
             .requiredBoolean("result")
             .name("rule").type().optional().type(ScoringRule.SCHEMA$)
+            .optionalInt("parallelSubtaskNumber")
             .endRecord();
 
     @Override
@@ -39,14 +40,13 @@ public class ScoringRuleCommandResult extends DynamicRuleCommandResult<ScoringRu
     public static class ScoringRuleCommandResultBuilder extends DynamicRuleCommandResultBuilder<ScoringRule, ScoringRuleCommandResult> {
 
         @Override
-        protected DynamicRuleCommandResultBuilder self() {
+        protected ScoringRuleCommandResultBuilder self() {
             return this;
         }
 
         @Override
         public ScoringRuleCommandResult build() {
-            return new ScoringRuleCommandResult(cmdId, success, rule);
+            return new ScoringRuleCommandResult(cmdId, success, rule, parallelSubtaskNumber);
         }
     }
-
 }
