@@ -98,7 +98,7 @@ public class TestScoringJob extends ScoringJob {
 
         source.sendWatermark(1500L);
         querySource.sendWatermark(1500L);
-        verifySuccessfulResponse(null);
+        verifySuccessfulResponse(rule);
 
 
         long unscoredMessageTs = 2000L;
