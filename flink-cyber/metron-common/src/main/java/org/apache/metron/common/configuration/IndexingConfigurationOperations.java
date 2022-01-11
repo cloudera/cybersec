@@ -18,10 +18,10 @@
 
 package org.apache.metron.common.configuration;
 
-import java.io.IOException;
-import java.util.Map;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.metron.common.utils.JSONUtils;
+
+import java.io.IOException;
 
 public class IndexingConfigurationOperations implements ConfigurationOperations {
 
@@ -38,7 +38,6 @@ public class IndexingConfigurationOperations implements ConfigurationOperations 
   @Override
   public void writeSensorConfigToZookeeper(String sensorType, byte[] configData,
       CuratorFramework client) throws Exception {
-    ConfigurationsUtils.writeSensorIndexingConfigToZookeeper(sensorType, configData, client);
   }
 
 }

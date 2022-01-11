@@ -9,6 +9,8 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
+        <module>flink-alert-scoring</module>
+        <module>flink-alert-scoring-api</module>
         <module>flink-logging</module>
         <module>flink-cyber-api</module>
         <module>cyber-functions</module>

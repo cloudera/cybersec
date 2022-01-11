@@ -21,7 +21,7 @@ package org.apache.metron.enrichment.stellar;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.metron.common.utils.SerDeUtils;
-import org.apache.metron.integration.utils.TestUtils;
+import org.apache.metron.common.utils.TestUtils;
 import org.apache.metron.stellar.common.utils.StellarProcessorUtils;
 import org.apache.metron.stellar.dsl.ParseException;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,6 +36,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class ObjectGetIntegrationTest {
     private File file;
+
+
 
     @BeforeEach
     public void setup() throws Exception {

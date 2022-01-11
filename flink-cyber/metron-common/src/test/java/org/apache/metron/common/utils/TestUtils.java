@@ -17,6 +17,9 @@
  */
 package org.apache.metron.common.utils;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +36,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class TestUtils {
   public static long MAX_ASSERT_WAIT_MS = 30000L;
@@ -114,6 +118,39 @@ public class TestUtils {
   public static String read(File in, Charset charset) throws IOException {
     byte[] bytes = Files.readAllBytes(Paths.get(in.getPath()));
     return new String(bytes, charset);
+  }
+
+  public static String findDir(String name) {
+    return findDir(new File("."), name);
+  }
+
+  public static String findDir(File startDir, String name) {
+    Stack<File> s = new Stack<>();
+    s.push(startDir);
+    while (!s.empty()) {
+      File parent = s.pop();
+      if (parent.getName().equalsIgnoreCase(name)) {
+        return parent.getAbsolutePath();
+      } else {
+        File[] children = parent.listFiles();
+        if (children != null) {
+          for (File child : children) {
+            s.push(child);
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  public static void setLog4jLevel(Class clazz, Level level) {
+    Logger logger = Logger.getLogger(clazz);
+    logger.setLevel(level);
+  }
+
+  public static Level getLog4jLevel(Class clazz) {
+    Logger logger = Logger.getLogger(clazz);
+    return logger.getLevel();
   }
 
   /**

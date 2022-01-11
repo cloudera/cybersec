@@ -70,11 +70,9 @@ public enum ConfigurationType implements Function<String, Object>, Configuration
   @Override
   public void writeSensorConfigToZookeeper(String sensorType, byte[] configData,
       CuratorFramework client) throws Exception {
-    ops.writeSensorConfigToZookeeper(sensorType, configData, client);
+
   }
 
-  public String getZookeeperRoot() {
-    return ops.getZookeeperRoot();
-  }
+  public String getZookeeperRoot() {return null;}
 
 }

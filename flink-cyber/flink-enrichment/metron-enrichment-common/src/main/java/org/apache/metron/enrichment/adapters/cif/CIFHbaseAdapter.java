@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
@@ -33,6 +34,7 @@ import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.enrichment.cache.CacheKey;
 import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
 import org.json.simple.JSONObject;
@@ -82,8 +84,9 @@ public class CIFHbaseAdapter implements EnrichmentAdapter<CacheKey>,Serializable
 		try {
 			rs = table.get(get);
 
-			for (KeyValue kv : rs.raw())
-				output.put(new String(kv.getQualifier(), StandardCharsets.UTF_8), "Y");
+			for (Cell cell : rs.rawCells()) {
+				output.put(Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength()), "Y");
+			}
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

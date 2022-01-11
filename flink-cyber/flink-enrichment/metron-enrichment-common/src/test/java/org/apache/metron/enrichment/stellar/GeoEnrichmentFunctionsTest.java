@@ -20,12 +20,12 @@ package org.apache.metron.enrichment.stellar;
 
 import com.google.common.collect.ImmutableMap;
 import org.adrianwalker.multilinestring.Multiline;
+import org.apache.metron.common.utils.TestUtils;
 import org.apache.metron.enrichment.adapters.maxmind.geo.GeoLiteCityDatabase;
 import org.apache.metron.stellar.common.StellarProcessor;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.DefaultVariableResolver;
 import org.apache.metron.stellar.dsl.StellarFunctions;
-import org.apache.metron.test.utils.UnitTestHelper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -81,7 +81,7 @@ public class GeoEnrichmentFunctionsTest {
 
     expectedSubsetMessage = (JSONObject) jsonParser.parse(expectedSubsetString);
 
-    String baseDir = UnitTestHelper.findDir("GeoLite");
+    String baseDir = TestUtils.findDir("GeoLite");
     geoHdfsFile = new File(new File(baseDir), "GeoLite2-City.mmdb.gz");
   }
 

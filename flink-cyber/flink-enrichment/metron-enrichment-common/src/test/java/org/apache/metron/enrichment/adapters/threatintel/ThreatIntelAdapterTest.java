@@ -23,6 +23,7 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.log4j.Level;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
 import org.apache.metron.common.utils.JSONUtils;
+import org.apache.metron.common.utils.TestUtils;
 import org.apache.metron.enrichment.cache.CacheKey;
 import org.apache.metron.enrichment.converter.EnrichmentHelper;
 import org.apache.metron.enrichment.converter.EnrichmentKey;
@@ -34,7 +35,6 @@ import org.apache.metron.enrichment.lookup.accesstracker.PersistentAccessTracker
 import org.apache.metron.hbase.TableProvider;
 import org.apache.metron.hbase.mock.MockHBaseTableProvider;
 import org.apache.metron.hbase.mock.MockHTable;
-import org.apache.metron.test.utils.UnitTestHelper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.jupiter.api.BeforeEach;
@@ -158,9 +158,9 @@ public class ThreatIntelAdapterTest {
     config.withTrackerHBaseTable(trackTable);
     config.withProviderImpl(ExceptionProvider.class.getName());
     ThreatIntelAdapter tia = new ThreatIntelAdapter(config);
-    UnitTestHelper.setLog4jLevel(ThreatIntelAdapter.class, Level.FATAL);
+    TestUtils.setLog4jLevel(ThreatIntelAdapter.class, Level.FATAL);
     tia.initializeAdapter(null);
-    UnitTestHelper.setLog4jLevel(ThreatIntelAdapter.class, Level.ERROR);
+    TestUtils.setLog4jLevel(ThreatIntelAdapter.class, Level.ERROR);
     assertFalse(tia.isInitialized());
   }
 
