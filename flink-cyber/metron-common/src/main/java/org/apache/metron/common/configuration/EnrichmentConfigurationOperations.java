@@ -38,7 +38,6 @@ public class EnrichmentConfigurationOperations implements ConfigurationOperation
   @Override
   public void writeSensorConfigToZookeeper(String sensorType, byte[] configData,
       CuratorFramework client) throws Exception {
-    ConfigurationsUtils.writeSensorEnrichmentConfigToZookeeper(sensorType, configData, client);
   }
 
 }

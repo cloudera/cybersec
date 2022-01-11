@@ -19,16 +19,9 @@ package org.apache.metron.common.zookeeper.configurations;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.metron.common.configuration.ConfigurationType;
-import org.apache.metron.common.configuration.ConfigurationsUtils;
 import org.apache.metron.common.configuration.EnrichmentConfigurations;
-import org.apache.zookeeper.KeeperException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.lang.invoke.MethodHandles;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 public class EnrichmentUpdater extends ConfigurationsUpdater<EnrichmentConfigurations>{
@@ -44,15 +37,6 @@ public class EnrichmentUpdater extends ConfigurationsUpdater<EnrichmentConfigura
 
   @Override
   public void forceUpdate(CuratorFramework client) {
-    try {
-      ConfigurationsUtils.updateEnrichmentConfigsFromZookeeper(getConfigurations(), client);
-    }
-    catch (KeeperException.NoNodeException nne) {
-      LOG.warn("No current enrichment configs in zookeeper, but the cache should load lazily...");
-    }
-    catch (Exception e) {
-      LOG.warn("Unable to load configs from zookeeper, but the cache should load lazily...", e);
-    }
   }
 
   @Override

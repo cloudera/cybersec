@@ -22,8 +22,8 @@ import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.metron.common.utils.TestUtils;
 import org.apache.metron.stellar.dsl.Context;
-import org.apache.metron.test.utils.UnitTestHelper;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -121,7 +121,7 @@ public class GeoLiteCityDatabaseTest {
     expectedDmaMessage = (JSONObject) jsonParser.parse(expectedDmaMessageString);
     expectedMessageTarGz = (JSONObject) jsonParser.parse(expectedMessageStringTarGz);
 
-    String baseDir = UnitTestHelper.findDir("GeoLite");
+    String baseDir = TestUtils.findDir("GeoLite");
     geoHdfsFile = new File(new File(baseDir), GEO_CITY_FILE_NAME);
     geoHdfsFile_update = new File(new File(baseDir), GEO_CITY_COPY_FILE_NAME);
     FileUtils.copyFile(geoHdfsFile, geoHdfsFile_update);

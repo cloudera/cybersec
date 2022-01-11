@@ -17,10 +17,7 @@
  */
 package org.apache.metron.common.configuration;
 
-import org.apache.curator.framework.CuratorFramework;
-
 import java.nio.file.Path;
-import java.util.Map;
 
 /**
  * Allows users to have a {@link Configurations} that can use a ZooKeeper curator or a file during
@@ -28,19 +25,7 @@ import java.util.Map;
  */
 public class Configuration extends Configurations {
 
-    protected CuratorFramework curatorFramework = null;
     private Path configFileRoot;
-
-    /**
-     * Constructor for interacting with ZooKeeper.
-     * @param curatorFramework The ZooKeeper curator to use for configs
-     */
-    public Configuration(CuratorFramework curatorFramework){
-
-        this.curatorFramework = curatorFramework;
-
-    }
-
 
     /**
      * Constructor for interacting with a file.
@@ -57,16 +42,6 @@ public class Configuration extends Configurations {
      * @throws Exception If there's an issue updating the config
      */
     public void update() throws Exception {
-
-        if( null != curatorFramework ) {
-
-            ConfigurationsUtils.updateConfigsFromZookeeper(this, this.curatorFramework);
-
-        } else {
-
-            updateGlobalConfig(ConfigurationsUtils.readGlobalConfigFromFile(configFileRoot.toAbsolutePath().toString()));
-
-        }
-
+        updateGlobalConfig(ConfigurationsUtils.readGlobalConfigFromFile(configFileRoot.toAbsolutePath().toString()));
     }
 }

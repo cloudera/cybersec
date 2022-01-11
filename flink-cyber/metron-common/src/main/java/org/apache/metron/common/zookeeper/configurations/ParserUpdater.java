@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,56 +19,43 @@ package org.apache.metron.common.zookeeper.configurations;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.metron.common.configuration.ConfigurationType;
-import org.apache.metron.common.configuration.ConfigurationsUtils;
 import org.apache.metron.common.configuration.ParserConfigurations;
-import org.apache.zookeeper.KeeperException;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 public class ParserUpdater extends ConfigurationsUpdater<ParserConfigurations> {
-  public ParserUpdater(Reloadable reloadable, Supplier<ParserConfigurations> configSupplier) {
-    super(reloadable, configSupplier);
-  }
-
-  @Override
-  public Class<ParserConfigurations> getConfigurationClass() {
-    return ParserConfigurations.class;
-  }
-
-  @Override
-  public void forceUpdate(CuratorFramework client) {
-    try {
-      ConfigurationsUtils.updateParserConfigsFromZookeeper(getConfigurations(), client);
+    public ParserUpdater(Reloadable reloadable, Supplier<ParserConfigurations> configSupplier) {
+        super(reloadable, configSupplier);
     }
-    catch (KeeperException.NoNodeException nne) {
-      LOG.warn("No current parser configs in zookeeper, but the cache should load lazily...");
+
+    @Override
+    public Class<ParserConfigurations> getConfigurationClass() {
+        return ParserConfigurations.class;
     }
-    catch (Exception e) {
-      LOG.warn("Unable to load configs from zookeeper, but the cache should load lazily...", e);
+
+    @Override
+    public void forceUpdate(CuratorFramework client) {
     }
-  }
 
-  @Override
-  public ParserConfigurations defaultConfigurations() {
-    return new ParserConfigurations();
-  }
+    @Override
+    public ParserConfigurations defaultConfigurations() {
+        return new ParserConfigurations();
+    }
 
-  @Override
-  public ConfigurationType getType() {
-    return ConfigurationType.PARSER;
-  }
+    @Override
+    public ConfigurationType getType() {
+        return ConfigurationType.PARSER;
+    }
 
-  @Override
-  public void delete(String name) {
-    getConfigurations().delete(name);
-  }
+    @Override
+    public void delete(String name) {
+        getConfigurations().delete(name);
+    }
 
-  @Override
-  public void update(String name, byte[] data) throws IOException {
-    getConfigurations().updateSensorParserConfig(name, data);
-  }
+    @Override
+    public void update(String name, byte[] data) throws IOException {
+        getConfigurations().updateSensorParserConfig(name, data);
+    }
 
 }
