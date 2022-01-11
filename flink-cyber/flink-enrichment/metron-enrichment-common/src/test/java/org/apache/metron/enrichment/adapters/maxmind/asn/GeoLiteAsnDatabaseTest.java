@@ -19,8 +19,8 @@ package org.apache.metron.enrichment.adapters.maxmind.asn;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FileUtils;
+import org.apache.metron.common.utils.TestUtils;
 import org.apache.metron.stellar.dsl.Context;
-import org.apache.metron.test.utils.UnitTestHelper;
 import org.json.simple.JSONObject;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
@@ -64,7 +64,7 @@ public class GeoLiteAsnDatabaseTest {
     expectedAsnMessage.put("autonomous_system_number", 15169);
     expectedAsnMessage.put("network", "8.8.4.0");
 
-    String baseDir = UnitTestHelper.findDir("GeoLite");
+    String baseDir = TestUtils.findDir("GeoLite");
     asnHdfsFile = new File(new File(baseDir), GEO_ASN_FILE_NAME);
     asnHdfsFile_update = new File(new File(baseDir), GEO_ASN_COPY_FILE_NAME);
     FileUtils.copyFile(asnHdfsFile, asnHdfsFile_update);

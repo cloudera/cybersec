@@ -17,19 +17,11 @@
  */
 package org.apache.metron.common.zookeeper.configurations;
 
-import static org.apache.metron.common.configuration.ConfigurationType.PROFILER;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.metron.common.configuration.ConfigurationType;
-import org.apache.metron.common.configuration.ConfigurationsUtils;
-import org.apache.metron.common.configuration.profiler.ProfilerConfig;
 import org.apache.metron.common.configuration.profiler.ProfilerConfigurations;
-import org.apache.metron.common.utils.JSONUtils;
-import org.apache.zookeeper.KeeperException;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 public class ProfilerUpdater extends ConfigurationsUpdater<ProfilerConfigurations> {
@@ -43,35 +35,8 @@ public class ProfilerUpdater extends ConfigurationsUpdater<ProfilerConfiguration
     return ProfilerConfigurations.class;
   }
 
-  private ProfilerConfig readFromZookeeper(CuratorFramework client) throws Exception {
-    byte[] raw = client.getData().forPath(PROFILER.getZookeeperRoot());
-    return JSONUtils.INSTANCE.load(new ByteArrayInputStream(raw), ProfilerConfig.class);
-  }
-
   @Override
   public void forceUpdate(CuratorFramework client) {
-    try {
-      ConfigurationsUtils.updateConfigsFromZookeeper(getConfigurations(), client);
-    }
-    catch (KeeperException.NoNodeException nne) {
-      LOG.warn("No current global configs in zookeeper, but the cache should load lazily...");
-    }
-    catch(Exception e) {
-      LOG.warn("Unable to load global configs from zookeeper, but the cache should load lazily...", e);
-    }
-    try {
-      ProfilerConfig config = readFromZookeeper(client);
-      if(config != null) {
-        getConfigurations().updateProfilerConfig(config);
-      }
-
-    }
-    catch (KeeperException.NoNodeException nne) {
-      LOG.warn("No current profiler configs in zookeeper, but the cache should load lazily...");
-    }
-    catch (Exception e) {
-      LOG.warn("Unable to load profiler configs from zookeeper, but the cache should load lazily...", e);
-    }
   }
 
   @Override

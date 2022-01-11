@@ -19,12 +19,12 @@
 package org.apache.metron.enrichment.stellar;
 
 import com.google.common.collect.ImmutableMap;
+import org.apache.metron.common.utils.TestUtils;
 import org.apache.metron.enrichment.adapters.maxmind.asn.GeoLiteAsnDatabase;
 import org.apache.metron.stellar.common.StellarProcessor;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.DefaultVariableResolver;
 import org.apache.metron.stellar.dsl.StellarFunctions;
-import org.apache.metron.test.utils.UnitTestHelper;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +56,7 @@ public class AsnEnrichmentFunctionsTest {
     expectedSubsetMessage.put("autonomous_system_organization", "Google LLC");
     expectedSubsetMessage.put("autonomous_system_number", 15169);
 
-    String baseDir = UnitTestHelper.findDir("GeoLite");
+    String baseDir = TestUtils.findDir("GeoLite");
     asnHdfsFile = new File(new File(baseDir), "GeoLite2-ASN.tar.gz");
   }
 

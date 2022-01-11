@@ -19,19 +19,16 @@
 package org.apache.metron.common.configuration.enrichment;
 
 import com.google.common.base.Joiner;
+import org.apache.metron.common.Constants;
+import org.apache.metron.common.utils.LazyLogger;
+import org.apache.metron.common.utils.LazyLoggerFactory;
+
 import java.lang.invoke.MethodHandles;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.metron.common.Constants;
-import org.apache.metron.common.configuration.ConfigurationsUtils;
-import org.apache.metron.common.utils.LazyLogger;
-import org.apache.metron.common.utils.LazyLoggerFactory;
-import org.apache.zookeeper.KeeperException;
 
 public class SensorEnrichmentUpdateConfig {
 
@@ -76,48 +73,9 @@ public class SensorEnrichmentUpdateConfig {
     this.sensorToFieldList = sensorToFieldList;
   }
 
-  /**
-   * Updates the sensor configs using a {@link ZKSourceConfigHandler} to read configs from
-   * ZooKeeper and the internal {@code sensorToFieldList}.
-   *
-   * @throws Exception If there's an issue reading from ZK or updating configs
-   */
-  public void updateSensorConfigs( ) throws Exception {
-    CuratorFramework client = ConfigurationsUtils.getClient(getZkQuorum());
-    try {
-      client.start();
-      updateSensorConfigs(new ZKSourceConfigHandler(client), sensorToFieldList);
-    }
-    finally {
-      client.close();
-    }
-  }
-
   public static interface SourceConfigHandler {
     SensorEnrichmentConfig readConfig(String sensor) throws Exception;
     void persistConfig(String sensor, SensorEnrichmentConfig config) throws Exception;
-  }
-
-  public static class ZKSourceConfigHandler implements SourceConfigHandler {
-    CuratorFramework client;
-    public ZKSourceConfigHandler(CuratorFramework client) {
-      this.client = client;
-    }
-    @Override
-    public SensorEnrichmentConfig readConfig(String sensor) throws Exception {
-      SensorEnrichmentConfig sensorEnrichmentConfig = new SensorEnrichmentConfig();
-      try {
-        sensorEnrichmentConfig = SensorEnrichmentConfig.fromBytes(ConfigurationsUtils.readSensorEnrichmentConfigBytesFromZookeeper(sensor, client));
-      }catch (KeeperException.NoNodeException e) {
-      }
-      return sensorEnrichmentConfig;
-    }
-
-    @Override
-    public void persistConfig(String sensor, SensorEnrichmentConfig config) throws Exception {
-      ConfigurationsUtils.writeSensorEnrichmentConfigToZookeeper(sensor, config.toJSON().getBytes(
-          StandardCharsets.UTF_8), client);
-    }
   }
 
   /**
