@@ -30,8 +30,7 @@ public enum ConfigurationType implements Function<String, Object>, Configuration
   GLOBAL(new GlobalConfigurationOperations()),
   PARSER(new ParserConfigurationOperations()),
   ENRICHMENT(new EnrichmentConfigurationOperations()),
-  INDEXING(new IndexingConfigurationOperations()),
-  PROFILER(new ProfilerConfigurationOperations());
+  INDEXING(new IndexingConfigurationOperations());
 
   ConfigurationOperations ops;
 

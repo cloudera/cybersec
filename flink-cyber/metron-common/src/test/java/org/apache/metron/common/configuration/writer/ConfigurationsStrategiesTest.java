@@ -21,7 +21,6 @@ package org.apache.metron.common.configuration.writer;
 import org.apache.metron.common.configuration.EnrichmentConfigurations;
 import org.apache.metron.common.configuration.IndexingConfigurations;
 import org.apache.metron.common.configuration.ParserConfigurations;
-import org.apache.metron.common.configuration.profiler.ProfilerConfigurations;
 import org.apache.metron.common.writer.BulkMessageWriter;
 import org.apache.metron.common.zookeeper.configurations.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,8 +52,6 @@ public class ConfigurationsStrategiesTest {
         instanceOf(EnrichmentWriterConfiguration.class));
     assertThat(INDEXING.createWriterConfig(writer, new IndexingConfigurations()),
         instanceOf(IndexingWriterConfiguration.class));
-    assertThat(PROFILER.createWriterConfig(writer, new ProfilerConfigurations()),
-        instanceOf(ProfilerWriterConfiguration.class));
   }
 
   @Test
@@ -65,8 +62,6 @@ public class ConfigurationsStrategiesTest {
         instanceOf(EnrichmentUpdater.class));
     assertThat(INDEXING.createUpdater(reloadable, IndexingConfigurations::new),
         instanceOf(IndexingUpdater.class));
-    assertThat(PROFILER.createUpdater(reloadable, ProfilerConfigurations::new),
-        instanceOf(ProfilerUpdater.class));
   }
 
 }

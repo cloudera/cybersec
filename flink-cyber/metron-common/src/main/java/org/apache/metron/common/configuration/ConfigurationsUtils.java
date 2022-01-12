@@ -118,22 +118,6 @@ public class ConfigurationsUtils {
     }
 
     /**
-     * Read the Profiler configuration from a file.  There is only a single profiler configuration.
-     *
-     * @param rootPath Path to the Profiler configuration.
-     */
-    public static byte[] readProfilerConfigFromFile(String rootPath) throws IOException {
-
-        byte[] config = new byte[0];
-        File configPath = new File(rootPath, PROFILER.getTypeName() + ".json");
-        if (configPath.exists()) {
-            config = Files.readAllBytes(configPath.toPath());
-        }
-
-        return config;
-    }
-
-    /**
      * Reads sensor configs from a file on local disk.
      *
      * @param rootPath   root FS location to read configs from
