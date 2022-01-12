@@ -18,19 +18,18 @@
 
 package org.apache.metron.common.configuration.writer;
 
-import java.util.function.Supplier;
 import org.apache.metron.common.configuration.Configurations;
 import org.apache.metron.common.configuration.EnrichmentConfigurations;
 import org.apache.metron.common.configuration.IndexingConfigurations;
 import org.apache.metron.common.configuration.ParserConfigurations;
-import org.apache.metron.common.configuration.profiler.ProfilerConfigurations;
 import org.apache.metron.common.writer.BulkMessageWriter;
 import org.apache.metron.common.zookeeper.configurations.ConfigurationsUpdater;
 import org.apache.metron.common.zookeeper.configurations.EnrichmentUpdater;
 import org.apache.metron.common.zookeeper.configurations.IndexingUpdater;
 import org.apache.metron.common.zookeeper.configurations.ParserUpdater;
-import org.apache.metron.common.zookeeper.configurations.ProfilerUpdater;
 import org.apache.metron.common.zookeeper.configurations.Reloadable;
+
+import java.util.function.Supplier;
 
 /**
  * Strategy pattern implementation that couples factories for WriterConfiguration and
@@ -98,25 +97,6 @@ public enum ConfigurationsStrategies implements ConfigurationStrategy {
     public ConfigurationsUpdater<IndexingConfigurations> createUpdater(Reloadable reloadable,
         Supplier configSupplier) {
       return new IndexingUpdater(reloadable, configSupplier);
-    }
-  }),
-
-  PROFILER(new ConfigurationStrategy() {
-
-    @Override
-    public WriterConfiguration createWriterConfig(BulkMessageWriter writer,
-        Configurations configs) {
-        if (configs instanceof ProfilerConfigurations) {
-          return new ProfilerWriterConfiguration((ProfilerConfigurations) configs);
-        } else {
-          throw new IllegalArgumentException(
-              "Expected config of type IndexingConfigurations but found " + configs.getClass());
-        }
-    }
-
-    @Override
-    public ConfigurationsUpdater createUpdater(Reloadable reloadable, Supplier configSupplier) {
-      return new ProfilerUpdater(reloadable, configSupplier);
     }
   });
 
