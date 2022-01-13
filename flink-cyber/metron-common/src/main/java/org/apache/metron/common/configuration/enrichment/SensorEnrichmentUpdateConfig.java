@@ -19,9 +19,9 @@
 package org.apache.metron.common.configuration.enrichment;
 
 import com.google.common.base.Joiner;
-import org.apache.metron.common.Constants;
 import org.apache.metron.common.utils.LazyLogger;
 import org.apache.metron.common.utils.LazyLoggerFactory;
+import org.apache.metron.stellar.common.Constants;
 
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;

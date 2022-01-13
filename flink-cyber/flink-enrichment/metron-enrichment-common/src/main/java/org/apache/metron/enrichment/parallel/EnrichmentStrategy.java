@@ -17,9 +17,9 @@
  */
 package org.apache.metron.enrichment.parallel;
 
-import org.apache.metron.common.Constants;
 import org.apache.metron.common.configuration.enrichment.EnrichmentConfig;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
+import org.apache.metron.stellar.common.Constants;
 import org.json.simple.JSONObject;
 
 /**

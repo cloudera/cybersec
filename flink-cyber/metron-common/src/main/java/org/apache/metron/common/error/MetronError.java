@@ -18,12 +18,12 @@
 package org.apache.metron.common.error;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.metron.common.Constants.ERROR_TYPE;
-import static org.apache.metron.common.Constants.ErrorFields;
+import static org.apache.metron.stellar.common.Constants.ERROR_TYPE;
+import static org.apache.metron.stellar.common.Constants.ErrorFields;
+import static org.apache.metron.stellar.common.Constants.ErrorType;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -35,9 +35,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.metron.common.Constants;
-import org.apache.metron.common.Constants.ErrorType;
 import org.apache.metron.common.utils.HashUtils;
+import org.apache.metron.stellar.common.Constants;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -119,8 +118,8 @@ public class MetronError {
   public JSONObject getJSONObject() {
     JSONObject errorMessage = new JSONObject();
     errorMessage.put(Constants.GUID, UUID.randomUUID().toString());
-    errorMessage.put(Constants.SENSOR_TYPE, Constants.ERROR_TYPE);
-    errorMessage.put(ErrorFields.ERROR_TYPE.getName(), errorType.getType());
+    errorMessage.put(Constants.SENSOR_TYPE, ERROR_TYPE);
+    errorMessage.put(Constants.ErrorFields.ERROR_TYPE.getName(), errorType.getType());
     addFailedSensorType(errorMessage);
     addMessageString(errorMessage);
 		addStacktrace(errorMessage);

@@ -18,10 +18,10 @@
 package org.apache.metron.common.configuration;
 
 import org.adrianwalker.multilinestring.Multiline;
-import org.apache.metron.common.Constants;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentUpdateConfig;
 import org.apache.metron.common.utils.JSONUtils;
+import org.apache.metron.stellar.common.Constants;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;

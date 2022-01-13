@@ -17,7 +17,7 @@
  */
 package org.apache.metron.common.utils;
 
-import org.apache.metron.common.Constants;
+import org.apache.metron.stellar.common.Constants;
 import org.json.simple.JSONObject;
 
 public class MessageUtils {
