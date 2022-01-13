@@ -18,7 +18,7 @@
 package org.apache.metron.common.configuration;
 
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.metron.common.Constants;
+import org.apache.metron.stellar.common.Constants;
 
 import java.io.IOException;
 

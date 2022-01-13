@@ -133,26 +133,7 @@ public class ComparisonOperatorsEvaluatorTest {
     Token<Long> right = mock(Token.class);
     when(right.getValue()).thenReturn(1L);
 
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LT()).thenReturn(mock(TerminalNode.class));
-      assertTrue(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LTE()).thenReturn(mock(TerminalNode.class));
-      assertTrue(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GT()).thenReturn(mock(TerminalNode.class));
-      assertFalse(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GTE()).thenReturn(mock(TerminalNode.class));
-      assertFalse(evaluator.evaluate(left, right, op));
-    }
+    operatorsCheck(left,right);
   }
 
   @Test
@@ -164,26 +145,7 @@ public class ComparisonOperatorsEvaluatorTest {
     Token<Double> right = mock(Token.class);
     when(right.getValue()).thenReturn(1D);
 
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LT()).thenReturn(mock(TerminalNode.class));
-      assertTrue(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LTE()).thenReturn(mock(TerminalNode.class));
-      assertTrue(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GT()).thenReturn(mock(TerminalNode.class));
-      assertFalse(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GTE()).thenReturn(mock(TerminalNode.class));
-      assertFalse(evaluator.evaluate(left, right, op));
-    }
+    operatorsCheck(left, right);
   }
 
   @Test
@@ -195,26 +157,7 @@ public class ComparisonOperatorsEvaluatorTest {
     Token<Float> right = mock(Token.class);
     when(right.getValue()).thenReturn(1F);
 
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LT()).thenReturn(mock(TerminalNode.class));
-      assertTrue(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LTE()).thenReturn(mock(TerminalNode.class));
-      assertTrue(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GT()).thenReturn(mock(TerminalNode.class));
-      assertFalse(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GTE()).thenReturn(mock(TerminalNode.class));
-      assertFalse(evaluator.evaluate(left, right, op));
-    }
+    operatorsCheck(left, right);
   }
 
   @Test
@@ -226,26 +169,7 @@ public class ComparisonOperatorsEvaluatorTest {
     Token<Integer> right = mock(Token.class);
     when(right.getValue()).thenReturn(1);
 
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LT()).thenReturn(mock(TerminalNode.class));
-      assertTrue(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LTE()).thenReturn(mock(TerminalNode.class));
-      assertTrue(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GT()).thenReturn(mock(TerminalNode.class));
-      assertFalse(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GTE()).thenReturn(mock(TerminalNode.class));
-      assertFalse(evaluator.evaluate(left, right, op));
-    }
+    operatorsCheck(left,right);
   }
 
   @Test
@@ -257,26 +181,7 @@ public class ComparisonOperatorsEvaluatorTest {
     Token<Double> right = mock(Token.class);
     when(right.getValue()).thenReturn(1.0000001D);
 
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LT()).thenReturn(mock(TerminalNode.class));
-      assertTrue(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LTE()).thenReturn(mock(TerminalNode.class));
-      assertTrue(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GT()).thenReturn(mock(TerminalNode.class));
-      assertFalse(evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GTE()).thenReturn(mock(TerminalNode.class));
-      assertFalse(evaluator.evaluate(left, right, op));
-    }
+    operatorsCheck(left,right);
   }
 
   @Test
@@ -291,26 +196,7 @@ public class ComparisonOperatorsEvaluatorTest {
     Token<Float> right = mock(Token.class);
     when(right.getValue()).thenReturn(rightValue);
 
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LT()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue < rightValue, evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LTE()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue <= rightValue, evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GT()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue > rightValue, evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GTE()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue >= rightValue, evaluator.evaluate(left, right, op));
-    }
+    operatorsCheck(left,right);
   }
 
   @Test
@@ -325,60 +211,7 @@ public class ComparisonOperatorsEvaluatorTest {
     Token<Float> right = mock(Token.class);
     when(right.getValue()).thenReturn(rightValue);
 
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LT()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue < rightValue, evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LTE()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue <= rightValue, evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GT()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue > rightValue, evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GTE()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue >= rightValue, evaluator.evaluate(left, right, op));
-    }
-  }
-
-  @Test
-  @SuppressWarnings("unchecked")
-  public void makeSureAllOperatorsWorkForMixedTypesFloatIntegers2() {
-    final int leftValue = 1;
-    final float rightValue = 1.00000001F;
-
-    Token<Integer> left = mock(Token.class);
-    when(left.getValue()).thenReturn(leftValue);
-
-    Token<Float> right = mock(Token.class);
-    when(right.getValue()).thenReturn(rightValue);
-
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LT()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue < rightValue, evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LTE()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue <= rightValue, evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GT()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue > rightValue, evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GTE()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue >= rightValue, evaluator.evaluate(left, right, op));
-    }
+    operatorsCheck(left,right);
   }
 
   @Test
@@ -393,26 +226,7 @@ public class ComparisonOperatorsEvaluatorTest {
     Token<Long> right = mock(Token.class);
     when(right.getValue()).thenReturn(rightValue);
 
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LT()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue < rightValue, evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.LTE()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue <= rightValue, evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GT()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue > rightValue, evaluator.evaluate(left, right, op));
-    }
-    {
-      StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
-      when(op.GTE()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue >= rightValue, evaluator.evaluate(left, right, op));
-    }
+    operatorsCheck(left,right);
   }
 
   @Test
@@ -427,25 +241,29 @@ public class ComparisonOperatorsEvaluatorTest {
     Token<String> right = mock(Token.class);
     when(right.getValue()).thenReturn(rightValue);
 
+    operatorsCheck(left,right);
+  }
+
+  private void operatorsCheck(Token<?> left, Token<?> right) {
     {
       StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
       when(op.LT()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue.compareTo(rightValue) < 0, evaluator.evaluate(left, right, op));
+      assertTrue(evaluator.evaluate(left, right, op));
     }
     {
       StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
       when(op.LTE()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue.compareTo(rightValue) <= 0, evaluator.evaluate(left, right, op));
+      assertTrue(evaluator.evaluate(left, right, op));
     }
     {
       StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
       when(op.GT()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue.compareTo(rightValue) > 0, evaluator.evaluate(left, right, op));
+      assertFalse(evaluator.evaluate(left, right, op));
     }
     {
       StellarParser.ComparisonOpContext op = mock(StellarParser.ComparisonOpContext.class);
       when(op.GTE()).thenReturn(mock(TerminalNode.class));
-      assertEquals(leftValue.compareTo(rightValue) >= 0, evaluator.evaluate(left, right, op));
+      assertFalse(evaluator.evaluate(left, right, op));
     }
   }
 }

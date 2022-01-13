@@ -18,8 +18,9 @@
 package org.apache.metron.common.message.metadata;
 
 import java.nio.charset.StandardCharsets;
-import org.apache.metron.common.Constants;
+
 import org.apache.metron.common.utils.JSONUtils;
+import org.apache.metron.stellar.common.Constants;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
