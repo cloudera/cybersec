@@ -17,10 +17,10 @@
  */
 package org.apache.metron.parsers;
 
-import static org.apache.metron.common.Constants.Fields.DST_ADDR;
-import static org.apache.metron.common.Constants.Fields.ORIGINAL;
-import static org.apache.metron.common.Constants.Fields.SRC_ADDR;
-import static org.apache.metron.common.Constants.Fields.TIMESTAMP;
+import static org.apache.metron.stellar.common.Constants.Fields.DST_ADDR;
+import static org.apache.metron.stellar.common.Constants.Fields.ORIGINAL;
+import static org.apache.metron.stellar.common.Constants.Fields.SRC_ADDR;
+import static org.apache.metron.stellar.common.Constants.Fields.TIMESTAMP;
 
 import java.io.Serializable;
 import java.lang.invoke.MethodHandles;
