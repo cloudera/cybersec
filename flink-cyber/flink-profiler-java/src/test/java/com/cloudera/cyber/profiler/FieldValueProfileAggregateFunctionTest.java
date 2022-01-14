@@ -56,14 +56,14 @@ public class FieldValueProfileAggregateFunctionTest {
         Map<String, String> actualExtensions = profileMessage.getExtensions();
         Assert.assertEquals(profileGroupConfig.getProfileGroupName(), actualExtensions.get(PROFILE_GROUP_NAME_EXTENSION));
         Assert.assertEquals(Long.toString(startPeriod), actualExtensions.get(START_PERIOD_EXTENSION));
-        Assert.assertEquals(Long.toString(endPeriod), actualExtensions.get(END_PERIOD_EXTENSION));
-        Assert.assertEquals(formats.get(SUM_RESULT).format(sum), actualExtensions.get(SUM_RESULT));
-        Assert.assertEquals(formats.get(COUNT_RESULT).format(count), actualExtensions.get(COUNT_RESULT));
-        Assert.assertEquals(formats.get(COUNT_DIST_RESULT).format(countDistinct), actualExtensions.get(COUNT_DIST_RESULT));
-        Assert.assertEquals(formats.get(MAX_RESULT).format(max), actualExtensions.get(MAX_RESULT));
         Assert.assertEquals(formats.get(MIN_RESULT).format(min), actualExtensions.get(MIN_RESULT));
+        Assert.assertEquals(formats.get(SUM_RESULT).format(sum), actualExtensions.get(SUM_RESULT));
+        Assert.assertEquals(Long.toString(endPeriod), actualExtensions.get(END_PERIOD_EXTENSION));
+        Assert.assertEquals(formats.get(MAX_RESULT).format(max), actualExtensions.get(MAX_RESULT));
         Assert.assertEquals(com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.KEY_1_VALUE, actualExtensions.get(KEY_1));
         Assert.assertEquals(com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.KEY_2_VALUE, actualExtensions.get(KEY_2));
+        Assert.assertEquals(formats.get(COUNT_RESULT).format(count), actualExtensions.get(COUNT_RESULT));
+        Assert.assertEquals(formats.get(COUNT_DIST_RESULT).format(countDistinct), actualExtensions.get(COUNT_DIST_RESULT));
         Assert.assertEquals(10, actualExtensions.size());
     }
 
