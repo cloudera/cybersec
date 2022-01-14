@@ -23,15 +23,13 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <commons.config.version>1.10</commons.config.version>
         <accumulo.version>1.8.0</accumulo.version>
-        <guava_version>${guava.verison}</guava_version>
+        <guava_version>${guava.version}</guava_version>
         <curator.version>2.7.1</curator.version>
         <global_aesh_version>0.66.19</global_aesh_version>
         <global_jackson_version>2.7.4</global_jackson_version>
         <global_json_simple_version>1.1.1</global_json_simple_version>
         <global_antlr_version>4.5</global_antlr_version>
-        <global_classindex_version>3.3</global_classindex_version>
-        <global_kryo_version>3.0.3</global_kryo_version>
-        <global_kryo_serializers_version>0.38</global_kryo_serializers_version>
+        <global_classindex_version>${classindex.version}</global_classindex_version>
         <global_httpclient_version>4.3.2</global_httpclient_version>
         <global_junit_jupiter_version>5.5.2</global_junit_jupiter_version>
         <global_hamcrest_version>2.2</global_hamcrest_version>
@@ -200,7 +198,7 @@
         <dependency>
             <groupId>org.atteo.classindex</groupId>
             <artifactId>classindex</artifactId>
-            <version>${global_classindex_version}</version>
+            <version>${classindex.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -472,7 +470,7 @@
                     <dependency>
                         <groupId>org.atteo.classindex</groupId>
                         <artifactId>classindex-transformer</artifactId>
-                        <version>${global_classindex_version}</version>
+                        <version>${classindex.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>

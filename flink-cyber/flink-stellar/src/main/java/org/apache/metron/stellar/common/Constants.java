@@ -25,20 +25,31 @@ public class Constants {
   public static final String ZOOKEEPER_ROOT = "/metron";
   public static final String ZOOKEEPER_TOPOLOGY_ROOT = ZOOKEEPER_ROOT + "/topology";
   public static final long DEFAULT_CONFIGURED_BOLT_TIMEOUT = 5000;
+  public static final String SENSOR_TYPE = Fields.SENSOR_TYPE.getName();
+  public static final String SENSOR_TYPE_FIELD_PROPERTY = "source.type.field";
+  public static final String THREAT_SCORE_FIELD_PROPERTY = "threat.triage.score.field";
+  public static final String ENRICHMENT_TOPIC = "enrichments";
+  public static final String INDEXING_TOPIC = "indexing";
   public static final String ERROR_STREAM = "error";
-  public static final String GUID = "guid";
+  public static final String ERROR_TYPE = "error";
+  public static final String SIMPLE_HBASE_ENRICHMENT = "hbaseEnrichment";
+  public static final String SIMPLE_HBASE_THREAT_INTEL = "hbaseThreatIntel";
+  public static final String STELLAR_CONTEXT_CONF = "stellarContext";
+  public static final String GUID = Fields.GUID.getName();
 
   public interface Field {
     String getName();
   }
   public enum Fields implements Field {
-     SRC_ADDR("ip_src_addr")
+    SRC_ADDR("ip_src_addr")
     ,SRC_PORT("ip_src_port")
     ,DST_ADDR("ip_dst_addr")
     ,DST_PORT("ip_dst_port")
     ,PROTOCOL("protocol")
     ,TIMESTAMP("timestamp")
     ,ORIGINAL("original_string")
+    ,GUID("guid")
+    ,SENSOR_TYPE("source.type")
     ,INCLUDES_REVERSE_TRAFFIC("includes_reverse_traffic")
     ;
     private static Map<String, Fields> nameToField;
@@ -56,7 +67,6 @@ public class Constants {
       this.name = name;
     }
 
-    @Override
     public String getName() {
       return name;
     }
@@ -78,6 +88,7 @@ public class Constants {
     ,RAW_MESSAGE_BYTES("raw_message_bytes")
     ,ERROR_FIELDS("error_fields")
     ,ERROR_HASH("error_hash")
+    ,METADATA("metadata")
     ;
 
     private String name;
@@ -93,7 +104,11 @@ public class Constants {
 
   public enum ErrorType {
 
-     PARSER_ERROR("parser_error")
+    PARSER_ERROR("parser_error")
+    ,PARSER_INVALID("parser_invalid")
+    ,ENRICHMENT_ERROR("enrichments_error")
+    ,THREAT_INTEL_ERROR("threatintel_error")
+    ,INDEXING_ERROR("indexing_error")
     ,DEFAULT_ERROR("error")
     ;
 

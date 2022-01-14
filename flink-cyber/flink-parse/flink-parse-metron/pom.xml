@@ -52,6 +52,11 @@
             <version>${jackson.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>metron-common</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.cloudera.parserchains</groupId>
             <artifactId>parser-chains-core</artifactId>
             <version>1.0-SNAPSHOT</version>
@@ -60,7 +65,7 @@
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-stellar</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
