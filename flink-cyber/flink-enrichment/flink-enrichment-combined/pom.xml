@@ -59,14 +59,20 @@
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-enrichment-stellar</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-enrichment-threatq</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>
       <dependency>
         <groupId>com.cloudera.cyber</groupId>
         <artifactId>flink-alert-scoring</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>${project.parent.version}</version>
         <scope>compile</scope>
       </dependency>
     </dependencies>

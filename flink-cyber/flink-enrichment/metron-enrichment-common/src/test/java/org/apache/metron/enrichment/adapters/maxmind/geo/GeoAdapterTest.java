@@ -17,9 +17,9 @@
  */
 package org.apache.metron.enrichment.adapters.maxmind.geo;
 
+import com.cloudera.cyber.TestUtils;
 import com.google.common.collect.ImmutableMap;
 import org.adrianwalker.multilinestring.Multiline;
-import org.apache.metron.common.utils.TestUtils;
 import org.apache.metron.enrichment.adapters.geo.GeoAdapter;
 import org.apache.metron.enrichment.cache.CacheKey;
 import org.json.simple.JSONObject;

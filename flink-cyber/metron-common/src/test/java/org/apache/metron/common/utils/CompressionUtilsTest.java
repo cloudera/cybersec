@@ -18,6 +18,7 @@
 
 package org.apache.metron.common.utils;
 
+import com.cloudera.cyber.TestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -3,7 +3,6 @@ package com.cloudera.cyber.enrichment.hbase;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;

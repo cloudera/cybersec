@@ -74,6 +74,7 @@
         <pcap.version>1.7.1</pcap.version>
         <global_kryo_version>3.0.3</global_kryo_version>
         <global_kryo_serializers_version>0.38</global_kryo_serializers_version>
+        <global_jar_version>3.0.2</global_jar_version>
     </properties>
 
     <repositories>

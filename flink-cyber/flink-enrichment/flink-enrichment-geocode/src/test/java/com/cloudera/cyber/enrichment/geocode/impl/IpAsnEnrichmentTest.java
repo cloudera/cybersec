@@ -24,13 +24,18 @@ public class IpAsnEnrichmentTest {
     private static final String TEST_ENRICHMENT_FIELD_NAME = "test_field";
 
     @Before
-    public void createAsnEnrichment() throws Exception {
-        ipAsnEnrichment = new IpAsnEnrichment(new DatabaseReader.Builder(new File(IpAsnTestData.ASN_DATABASE_PATH)).build());
+    public void createAsnEnrichment()  {
+        ipAsnEnrichment = new IpAsnEnrichment((IpAsnTestData.ASN_DATABASE_PATH));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throwsWithNullAsnDatabaseForNullPathDb() {
+        new IpAsnEnrichment((String) null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void throwsWithNullAsnDatabase() {
-        new IpAsnEnrichment(null);
+    public void throwsWithNullAsnDatabaseForNullDb() {
+        new IpAsnEnrichment((DatabaseProvider) null);
     }
 
     @Test

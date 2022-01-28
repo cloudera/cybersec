@@ -4,13 +4,16 @@ import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.enrichment.Enrichment;
 import com.cloudera.cyber.enrichment.SingleValueEnrichment;
+import com.cloudera.cyber.enrichment.geocode.impl.types.GeoFields;
 import com.maxmind.geoip2.DatabaseProvider;
 import com.maxmind.geoip2.model.AsnResponse;
 
 import java.net.InetAddress;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 public class IpAsnEnrichment extends MaxMindBase {
     static final String ASN_FAILED_MESSAGE = "ASN lookup failed '%s'";
@@ -21,6 +24,10 @@ public class IpAsnEnrichment extends MaxMindBase {
 
     public IpAsnEnrichment(DatabaseProvider database) {
         super(database);
+    }
+
+    public IpAsnEnrichment(String path) {
+        super(path);
     }
 
     public void lookup(Enrichment enrichment, Object ipFieldValue, Map<String, String> extensions, List<DataQualityMessage> qualityMessages) {
@@ -40,8 +47,18 @@ public class IpAsnEnrichment extends MaxMindBase {
     }
 
     public void lookup(String fieldName, Object ipFieldValue, Map<String, String> extensions, List<DataQualityMessage> qualityMessages) {
+        lookup(SingleValueEnrichment::new, fieldName, ipFieldValue, extensions, qualityMessages);
+
+    }
+
+    public void lookup(BiFunction<String, String, Enrichment> enrichmentBiFunction, String fieldName, Object ipFieldValue, Map<String, String> extensions, List<DataQualityMessage> qualityMessages) {
+        if (ipFieldValue instanceof Collection) {
+            Enrichment enrichment = enrichmentBiFunction.apply(fieldName, ASN_FEATURE);
+            //noinspection unchecked
+            ((Collection<Object>) ipFieldValue).forEach(ip -> lookup(enrichment, ip, extensions, qualityMessages));
+        }
         if (ipFieldValue != null) {
-            lookup(new SingleValueEnrichment(fieldName, ASN_FEATURE), ipFieldValue, extensions, qualityMessages);
+            lookup(enrichmentBiFunction.apply(fieldName, ASN_FEATURE), ipFieldValue, extensions, qualityMessages);
         }
     }
 }

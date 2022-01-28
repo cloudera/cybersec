@@ -9,7 +9,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.JobTester;
 import org.junit.Test;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.TimeZone;
