@@ -1,7 +1,5 @@
 package com.cloudera.cyber.profiler;
 
-import com.cloudera.cyber.Message;
-import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;

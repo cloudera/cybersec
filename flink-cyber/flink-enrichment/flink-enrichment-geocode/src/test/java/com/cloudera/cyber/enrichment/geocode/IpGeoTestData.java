@@ -1,6 +1,6 @@
 package com.cloudera.cyber.enrichment.geocode;
 
-import com.cloudera.cyber.enrichment.geocode.impl.IpGeoEnrichment;
+import com.cloudera.cyber.enrichment.geocode.impl.types.GeoEnrichmentFields;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.*;
@@ -19,38 +19,38 @@ import static com.cloudera.cyber.enrichment.geocode.IpGeoMap.GEOCODE_FEATURE;
  */
 public class IpGeoTestData {
     public static final String GEOCODE_DATABASE_PATH = "./src/test/resources/geolite/GeoIP2-City-Test.mmdb";
-    public static final Map<String, Map<IpGeoEnrichment.GeoEnrichmentFields, String>> EXPECTED_VALUES = createGeoExpectedValues();
+    public static final Map<String, Map<GeoEnrichmentFields, String>> EXPECTED_VALUES = createGeoExpectedValues();
     public static final String COUNTRY_ONLY_IPv6 = "2001:0218:0000:0000:0000:0000:0000:0000";
     public static final String ALL_FIELDS_IPv4 = "2.125.160.216";
     public static final String UNKNOWN_HOST_IP = "this.is.not.ip";
     public static final String LOCAL_IP = "10.0.0.1";
 
-    public static Map<String, Map<IpGeoEnrichment.GeoEnrichmentFields, String>> createGeoExpectedValues() {
-        Map<String, Map<IpGeoEnrichment.GeoEnrichmentFields, String>> expectedValues = new HashMap<>();
+    public static Map<String, Map<GeoEnrichmentFields, String>> createGeoExpectedValues() {
+        Map<String, Map<GeoEnrichmentFields, String>> expectedValues = new HashMap<>();
         expectedValues.put(COUNTRY_ONLY_IPv6,
                 ImmutableMap.of(
-                    IpGeoEnrichment.GeoEnrichmentFields.COUNTRY, "JP",
-                    IpGeoEnrichment.GeoEnrichmentFields.LATITUDE, "35.68536",
-                    IpGeoEnrichment.GeoEnrichmentFields.LONGITUDE, "139.75309"
+                    GeoEnrichmentFields.COUNTRY, "JP",
+                    GeoEnrichmentFields.LATITUDE, "35.68536",
+                    GeoEnrichmentFields.LONGITUDE, "139.75309"
                 ));
         expectedValues.put(ALL_FIELDS_IPv4,
                 ImmutableMap.of(
-                    IpGeoEnrichment.GeoEnrichmentFields.COUNTRY, "GB",
-                    IpGeoEnrichment.GeoEnrichmentFields.CITY, "Boxford",
-                    IpGeoEnrichment.GeoEnrichmentFields.STATE, "West Berkshire",
-                    IpGeoEnrichment.GeoEnrichmentFields.LATITUDE, "51.75",
-                    IpGeoEnrichment.GeoEnrichmentFields.LONGITUDE, "-1.25"
+                    GeoEnrichmentFields.COUNTRY, "GB",
+                    GeoEnrichmentFields.CITY, "Boxford",
+                    GeoEnrichmentFields.STATE, "West Berkshire",
+                    GeoEnrichmentFields.LATITUDE, "51.75",
+                    GeoEnrichmentFields.LONGITUDE, "-1.25"
                 ));
 
         return expectedValues;
     }
 
-    public static  Map<IpGeoEnrichment.GeoEnrichmentFields, String> getExpectedGeoEnrichments(String ipAddress) {
+    public static  Map<GeoEnrichmentFields, String> getExpectedGeoEnrichments(String ipAddress) {
         return EXPECTED_VALUES.getOrDefault(ipAddress, Collections.emptyMap());
     }
 
     public static void getExpectedEnrichmentValues(Map<String, String> expectedEnrichments, String enrichmentFieldName, String ipAddress) {
-        Map<IpGeoEnrichment.GeoEnrichmentFields, String> expectedGeos = getExpectedGeoEnrichments(ipAddress);
+        Map<GeoEnrichmentFields, String> expectedGeos = getExpectedGeoEnrichments(ipAddress);
         expectedGeos.forEach((field, value) -> expectedEnrichments.put(String.join(".", enrichmentFieldName, GEOCODE_FEATURE, field.getSingularName()), value));
     }
 

@@ -4,6 +4,7 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.ThreatIntelligence;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
+import com.cloudera.cyber.enrichemnt.stellar.StellarEnrichmentJob;
 import com.cloudera.cyber.enrichment.geocode.IpGeo;
 import com.cloudera.cyber.enrichment.hbase.HbaseJob;
 import com.cloudera.cyber.enrichment.hbase.HbaseJobRawKafka;
@@ -51,6 +52,7 @@ public abstract class EnrichmentJob {
     private static final String PARAMS_ENABLE_STIX = "stix.enabled";
     private static final String PARAMS_ENABLE_THREATQ = "threatq.enabled";
     private static final String PARAMS_ENABLE_RULES = "rules.enabled";
+    private static final String PARAMS_ENABLE_STELLAR = "stellar.enabled";
 
     private DataStream<Message> messages;
 
@@ -107,16 +109,25 @@ public abstract class EnrichmentJob {
             tqed = tied;
         }
 
+        DataStream<Message> stellarStream;
+        if (params.getBoolean(PARAMS_ENABLE_STELLAR, true)) {
+            String configDir = params.getRequired(StellarEnrichmentJob.PARAMS_CONFIG_DIR);
+            String geoDatabasePath = params.getRequired(PARAM_GEO_DATABASE_PATH);
+            String asnDatabasePath = params.getRequired(PARAM_ASN_DATABASE_PATH);
+            stellarStream = StellarEnrichmentJob.enrich(tqed, StellarEnrichmentJob.loadFiles(configDir), geoDatabasePath, asnDatabasePath);
+        } else {
+            stellarStream = tqed;
+        }
+
         // TODO - apply the rules based enrichments
         DataStream<Message> ruled = params.getBoolean(PARAMS_ENABLE_RULES, true) ?
-                doRules(tqed, params) : tqed;
+                doRules(stellarStream, params) : stellarStream;
 
         DataStream<ScoredMessage> scoring = doScoring(ruled, env, params);
 
         writeResults(env, params, scoring);
         return env;
     }
-
 
 
     /**

@@ -32,18 +32,18 @@ public class MockHBaseTableProvider implements Serializable, TableProvider {
         return ret;
     }
 
-    public static Table getFromCache(String tableName) {
-        return _cache.get(tableName);
-    }
+  public static Table getFromCache(String tableName) {
+    return _cache.get(tableName);
+  }
 
-    public static Table addToCache(String tableName, String... columnFamilies) {
-        MockHTable ret =  new MockHTable(tableName, columnFamilies);
-        _cache.put(tableName, ret);
-        return ret;
-    }
+  public static Table addToCache(String tableName, String... columnFamilies) {
+    MockHTable ret =  new MockHTable(tableName, columnFamilies);
+    _cache.put(tableName, ret);
+    return ret;
+  }
 
-    public static void clear() {
-        _cache.clear();
-    }
+  public static void clear() {
+    _cache.clear();
+  }
 
 }

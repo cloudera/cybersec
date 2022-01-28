@@ -34,7 +34,6 @@
         <global_junit_jupiter_version>5.5.2</global_junit_jupiter_version>
         <global_hamcrest_version>2.2</global_hamcrest_version>
         <global_shade_version>3.2.0</global_shade_version>
-        <global_jar_version>3.0.2</global_jar_version>
         <global_mockito_version>3.1.0</global_mockito_version>
         <maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>

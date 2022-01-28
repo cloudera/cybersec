@@ -3,12 +3,10 @@ package com.cloudera.cyber.rules.engines;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.google.common.collect.ImmutableMap;
-import lombok.val;
 import org.junit.Test;
 
 import javax.script.ScriptException;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;

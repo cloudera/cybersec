@@ -18,8 +18,8 @@
 
 package org.apache.metron.enrichment.stellar;
 
+import com.cloudera.cyber.TestUtils;
 import com.google.common.collect.ImmutableMap;
-import org.apache.metron.common.utils.TestUtils;
 import org.apache.metron.enrichment.adapters.maxmind.asn.GeoLiteAsnDatabase;
 import org.apache.metron.stellar.common.StellarProcessor;
 import org.apache.metron.stellar.dsl.Context;

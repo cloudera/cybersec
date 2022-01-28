@@ -527,7 +527,6 @@ public class ChainControllerTest {
      *       }
      *    ]
      * }
-     *
      */
     @Multiline
     static String test_invalid_chain_response;
@@ -584,7 +583,6 @@ public class ChainControllerTest {
      *             "type":"com.cloudera.parserchains.parsers.SyslogParser",
      *             "id":"8f498980-5f13-11ea-9ea2-a3a38413c812",
      *             "config":{
-     *
      *             }
      *          }
      *       ]

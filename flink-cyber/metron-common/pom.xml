@@ -284,6 +284,13 @@
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-common</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+            <type>test-jar</type>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.adrianwalker/multiline-string -->
         <dependency>
             <groupId>org.adrianwalker</groupId>

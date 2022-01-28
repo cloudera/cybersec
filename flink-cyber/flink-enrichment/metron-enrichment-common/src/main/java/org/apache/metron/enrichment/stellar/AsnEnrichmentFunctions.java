@@ -35,15 +35,6 @@ public class AsnEnrichmentFunctions {
 
   private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  @Stellar(name = "GET"
-      , namespace = "ASN"
-      , description = "Look up an IPV4 address and returns Autonomous System Number information about it"
-      , params = {
-      "ip - The IPV4 address to lookup",
-      "fields - Optional list of ASN fields to grab. Options are autonomous_system_organization, autonomous_system_number, network"
-  }
-      , returns = "If a single field is requested a string of the field, If multiple fields a map of string of the fields, and null otherwise"
-  )
   public static class AsnGet implements StellarFunction {
 
     boolean initialized = false;

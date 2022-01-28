@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -69,6 +70,18 @@ public class MessageUtils {
         } else {
             // no changes to the message needed
             return message;
+        }
+    }
+
+    public static void addQualityMessage(List<DataQualityMessage> messages, DataQualityMessageLevel level, String errorMessage, String fieldName, String feature) {
+        Optional<DataQualityMessage> duplicate = messages.stream().
+                filter(m -> m.getLevel().equals(level.name()) && m.getMessage().equals(errorMessage)).findFirst();
+        if (!duplicate.isPresent()) {
+            messages.add(DataQualityMessage.builder()
+                    .level(level.name())
+                    .feature(feature)
+                    .field(fieldName)
+                    .message(errorMessage).build());
         }
     }
 

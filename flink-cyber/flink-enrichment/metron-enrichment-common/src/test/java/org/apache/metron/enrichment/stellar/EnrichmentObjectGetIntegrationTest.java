@@ -19,8 +19,8 @@
 
 package org.apache.metron.enrichment.stellar;
 
+import com.cloudera.cyber.TestUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.metron.common.utils.TestUtils;
 import org.apache.metron.stellar.common.utils.SerDeUtils;
 import org.apache.metron.stellar.common.utils.StellarProcessorUtils;
 import org.apache.metron.stellar.dsl.ParseException;

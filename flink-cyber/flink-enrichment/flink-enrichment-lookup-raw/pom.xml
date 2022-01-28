@@ -59,7 +59,8 @@
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-common</artifactId>
             <version>${project.parent.version}</version>
-            <scope>compile</scope>
+            <scope>test</scope>
+            <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
@@ -78,6 +79,13 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-test-utils_${scala.binary.version}</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <scope>test</scope>
+            <version>${jackson.version}</version>
         </dependency>
 
     </dependencies>

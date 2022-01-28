@@ -37,6 +37,13 @@
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-common</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-cyber-api</artifactId>
             <version>${project.parent.version}</version>
             <scope>compile</scope>

@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,88 +41,87 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SimpleHBaseEnrichmentFunctionsTest {
-  private final String hbaseTableName = "enrichments";
-  private static final String ENRICHMENT_TYPE = "et";
-  private String cf = "cf";
-  private static Context context;
+    private final String hbaseTableName = "enrichments";
+    private static final String ENRICHMENT_TYPE = "et";
+    private String cf = "cf";
+    private static Context context;
 
 
+    @BeforeEach
+    public void setup() throws Exception {
+        ArrayList<LookupKV<EnrichmentKey, EnrichmentValue>> lookupKVS = new ArrayList<>();
+        lookupKVS.add(new LookupKV<>(new EnrichmentKey(ENRICHMENT_TYPE, "indicator0"), new EnrichmentValue(ImmutableMap.of("key0", "value0"))));
+        lookupKVS.add(new LookupKV<>(new EnrichmentKey(ENRICHMENT_TYPE, "indicator1"), new EnrichmentValue(ImmutableMap.of("key1", "value1"))));
+        lookupKVS.add(new LookupKV<>(new EnrichmentKey(ENRICHMENT_TYPE, "indicator2"), new EnrichmentValue(ImmutableMap.of("key2", "value2"))));
+        lookupKVS.add(new LookupKV<>(new EnrichmentKey(ENRICHMENT_TYPE, "indicator3"), new EnrichmentValue(ImmutableMap.of("key3", "value3"))));
 
-  @BeforeEach
-  public void setup() throws Exception {
-
-    final MockHTable hbaseTable = (MockHTable) MockHBaseTableProvider.addToCache(hbaseTableName, cf);
-    EnrichmentHelper.INSTANCE.load(hbaseTable, cf, new ArrayList<LookupKV<EnrichmentKey, EnrichmentValue>>() {{
-      for(int i = 0;i < 5;++i) {
-        add(new LookupKV<>(new EnrichmentKey(ENRICHMENT_TYPE, "indicator" + i)
-                        , new EnrichmentValue(ImmutableMap.of("key" + i, "value" + i))
+        final MockHTable hbaseTable = (MockHTable) MockHBaseTableProvider.addToCache(hbaseTableName, cf);
+        EnrichmentHelper.INSTANCE.load(hbaseTable, cf, lookupKVS);
+        context = new Context.Builder()
+                .with(Context.Capabilities.GLOBAL_CONFIG
+                        , () -> ImmutableMap.of(SimpleHBaseEnrichmentFunctions.TABLE_PROVIDER_TYPE_CONF
+                                , MockHBaseTableProvider.class.getName()
+                        )
                 )
-        );
-      }
-    }});
-    context = new Context.Builder()
-            .with( Context.Capabilities.GLOBAL_CONFIG
-                 , () -> ImmutableMap.of( SimpleHBaseEnrichmentFunctions.TABLE_PROVIDER_TYPE_CONF
-                                        , MockHBaseTableProvider.class.getName()
-                                        )
-                 )
-            .build();
-  }
-  public Object run(String rule, Map<String, Object> variables) throws Exception {
-    StellarProcessor processor = new StellarProcessor();
-    assertTrue(processor.validate(rule, context), rule + " not valid.");
-    return processor.parse(rule, new DefaultVariableResolver(x -> variables.get(x),x -> variables.containsKey(x)), StellarFunctions.FUNCTION_RESOLVER(), context);
-  }
-
-  @Test
-  public void testExists() throws Exception {
-    String stellar = "ENRICHMENT_EXISTS('et', indicator, 'enrichments', 'cf')";
-    Object result = run(stellar, ImmutableMap.of("indicator", "indicator0"));
-    assertTrue(result instanceof Boolean);
-    assertTrue((Boolean)result);
-  }
-
-  @Test
-  public void testNotExists() throws Exception {
-    String stellar = "ENRICHMENT_EXISTS('et', indicator, 'enrichments', 'cf')";
-    Object result = run(stellar, ImmutableMap.of("indicator", "indicator7"));
-    assertTrue(result instanceof Boolean);
-    assertFalse((Boolean)result);
-  }
-
-  @Test
-  public void testSuccessfulGet() throws Exception {
-    String stellar = "ENRICHMENT_GET('et', indicator, 'enrichments', 'cf')";
-    Object result = run(stellar, ImmutableMap.of("indicator", "indicator0"));
-    assertTrue(result instanceof Map);
-    Map<String, Object> out = (Map<String, Object>) result;
-    assertEquals("value0", out.get("key0"));
-  }
-
-  @Test
-  public void testMultiGet() throws Exception {
-    String stellar = "MAP([ 'indicator0', 'indicator1' ], indicator -> ENRICHMENT_GET('et', indicator, 'enrichments', 'cf') )";
-    Object result = run(stellar, new HashMap<>());
-    assertTrue(result instanceof List);
-    List<Map<String, Object>> out = (List<Map<String, Object>>) result;
-    assertEquals(2, out.size());
-    for(int i = 0;i < 2;++i) {
-      Map<String, Object> map = out.get(i);
-      assertEquals("value" +i, map.get("key" + i));
+                .build();
     }
-  }
-  @Test
-  public void testUnsuccessfulGet() throws Exception {
-    String stellar = "ENRICHMENT_GET('et', indicator, 'enrichments', 'cf')";
-    Object result = run(stellar, ImmutableMap.of("indicator", "indicator7"));
-    assertTrue(result instanceof Map);
-    Map<String, Object> out = (Map<String, Object>) result;
-    assertTrue(out.isEmpty());
-  }
 
-  @Test
-  public void testProvidedParameters() {
-    String stellar = "ENRICHMENT_GET('et', indicator)";
-    assertThrows(ParseException.class, () -> run(stellar, ImmutableMap.of("indicator", "indicator7")));
-  }
+    public Object run(String rule, Map<String, Object> variables) throws Exception {
+        StellarProcessor processor = new StellarProcessor();
+        assertTrue(processor.validate(rule, context), rule + " not valid.");
+        return processor.parse(rule, new DefaultVariableResolver(x -> variables.get(x), x -> variables.containsKey(x)), StellarFunctions.FUNCTION_RESOLVER(), context);
+    }
+
+    @Test
+    public void testExists() throws Exception {
+        String stellar = "ENRICHMENT_EXISTS('et', indicator, 'enrichments', 'cf')";
+        Object result = run(stellar, ImmutableMap.of("indicator", "indicator0"));
+        assertTrue(result instanceof Boolean);
+        assertTrue((Boolean) result);
+    }
+
+    @Test
+    public void testNotExists() throws Exception {
+        String stellar = "ENRICHMENT_EXISTS('et', indicator, 'enrichments', 'cf')";
+        Object result = run(stellar, ImmutableMap.of("indicator", "indicator7"));
+        assertTrue(result instanceof Boolean);
+        assertFalse((Boolean) result);
+    }
+
+    @Test
+    public void testSuccessfulGet() throws Exception {
+        String stellar = "ENRICHMENT_GET('et', indicator, 'enrichments', 'cf')";
+        Object result = run(stellar, ImmutableMap.of("indicator", "indicator0"));
+        assertTrue(result instanceof Map);
+        Map<String, Object> out = (Map<String, Object>) result;
+        assertEquals("value0", out.get("key0"));
+    }
+
+    @Test
+    public void testMultiGet() throws Exception {
+        String stellar = "MAP([ 'indicator0', 'indicator1' ], indicator -> ENRICHMENT_GET('et', indicator, 'enrichments', 'cf') )";
+        Object result = run(stellar, new HashMap<>());
+        assertTrue(result instanceof List);
+        List<Map<String, Object>> out = (List<Map<String, Object>>) result;
+        assertEquals(2, out.size());
+        for (int i = 0; i < 2; ++i) {
+            Map<String, Object> map = out.get(i);
+            assertEquals("value" + i, map.get("key" + i));
+        }
+    }
+
+    @Test
+    public void testUnsuccessfulGet() throws Exception {
+        String stellar = "ENRICHMENT_GET('et', indicator, 'enrichments', 'cf')";
+        Object result = run(stellar, ImmutableMap.of("indicator", "indicator7"));
+        assertTrue(result instanceof Map);
+        Map<String, Object> out = (Map<String, Object>) result;
+        assertTrue(out.isEmpty());
+    }
+
+    @Test
+    public void testProvidedParameters() {
+        String stellar = "ENRICHMENT_GET('et', indicator)";
+        assertThrows(ParseException.class, () -> run(stellar, ImmutableMap.of("indicator", "indicator7")));
+    }
 }
