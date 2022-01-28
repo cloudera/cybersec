@@ -31,7 +31,6 @@
         <commons-compress.version>1.13</commons-compress.version>
         <geoip.version>${maxmind.version}</geoip.version>
         <guava_version>${guava.version}</guava_version>
-        <global_jar_version>3.0.2</global_jar_version>
     </properties>
 
     <dependencies>
@@ -42,14 +41,34 @@
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-stellar</artifactId>
             <version>${project.parent.version}</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>metron-hbase-common</artifactId>
             <version>${project.parent.version}</version>
-            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>metron-hbase-common</artifactId>
+            <version>${project.parent.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>metron-common</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>metron-common</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+            <type>test-jar</type>
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
@@ -67,6 +86,21 @@
         </dependency>
 
         <!-- Other -->
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-common</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>test</scope>
+            <type>test-jar</type>
+        </dependency>
 
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
@@ -142,6 +176,23 @@
         </dependency>
 
         <!-- Test -->
+        <dependency>
+            <groupId>org.adrianwalker</groupId>
+            <artifactId>multiline-string</artifactId>
+            <version>0.1.2</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>tools</artifactId>
+                    <groupId>sun.jdk</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.adrianwalker</groupId>

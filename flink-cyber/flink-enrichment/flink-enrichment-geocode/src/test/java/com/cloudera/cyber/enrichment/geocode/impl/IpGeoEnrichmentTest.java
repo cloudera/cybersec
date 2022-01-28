@@ -3,16 +3,18 @@ package com.cloudera.cyber.enrichment.geocode.impl;
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.enrichment.geocode.IpGeoTestData;
+import com.cloudera.cyber.enrichment.geocode.impl.types.GeoEnrichmentFields;
 import com.maxmind.geoip2.DatabaseProvider;
-import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -23,13 +25,18 @@ public class IpGeoEnrichmentTest {
     private static final String TEST_ENRICHMENT_FIELD_NAME = "test_field";
 
     @Before
-    public void createGeoEnrichment() throws Exception {
-        ipGeoEnrichment = new IpGeoEnrichment(new DatabaseReader.Builder(new File(IpGeoTestData.GEOCODE_DATABASE_PATH)).build());
+    public void createGeoEnrichment() {
+        ipGeoEnrichment = new IpGeoEnrichment(IpGeoTestData.GEOCODE_DATABASE_PATH);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throwsWithNullAsnDatabaseForNullPathDb() {
+        new IpGeoEnrichment((String) null);
     }
 
     @Test(expected = NullPointerException.class)
     public void throwsWithNullCityDatabase() {
-        new IpGeoEnrichment(null);
+        new IpGeoEnrichment((DatabaseProvider) null);
     }
 
     @Test
@@ -58,7 +65,7 @@ public class IpGeoEnrichmentTest {
         Map<String, String> emptyEnrichments = new HashMap<>();
         List<DataQualityMessage> emptyMessages = new ArrayList<>();
 
-        ipGeoEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, null, IpGeoEnrichment.GeoEnrichmentFields.values(), emptyEnrichments, emptyMessages);
+        ipGeoEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, null, GeoEnrichmentFields.values(), emptyEnrichments, emptyMessages);
         Assert.assertTrue(emptyEnrichments.isEmpty());
         Assert.assertTrue(emptyMessages.isEmpty());
     }
@@ -87,7 +94,7 @@ public class IpGeoEnrichmentTest {
 
         Map<String, String> actualExtensions = new HashMap<>();
         List<DataQualityMessage> actualQualityMessages = new ArrayList<>();
-        testIpGeoEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, ipAddress, IpGeoEnrichment.GeoEnrichmentFields.values(), actualExtensions, actualQualityMessages);
+        testIpGeoEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, ipAddress, GeoEnrichmentFields.values(), actualExtensions, actualQualityMessages);
         Assert.assertEquals(expectedExtensions, actualExtensions);
         Assert.assertEquals(expectedQualityMessages, actualQualityMessages);
     }

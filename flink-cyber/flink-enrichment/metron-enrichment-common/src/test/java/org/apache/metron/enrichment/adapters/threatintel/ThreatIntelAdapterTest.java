@@ -21,9 +21,9 @@ import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
 import org.apache.metron.common.utils.JSONUtils;
-import org.apache.metron.common.utils.TestUtils;
 import org.apache.metron.enrichment.cache.CacheKey;
 import org.apache.metron.enrichment.converter.EnrichmentHelper;
 import org.apache.metron.enrichment.converter.EnrichmentKey;
@@ -158,10 +158,15 @@ public class ThreatIntelAdapterTest {
     config.withTrackerHBaseTable(trackTable);
     config.withProviderImpl(ExceptionProvider.class.getName());
     ThreatIntelAdapter tia = new ThreatIntelAdapter(config);
-    TestUtils.setLog4jLevel(ThreatIntelAdapter.class, Level.FATAL);
+    setLog4jLevel(ThreatIntelAdapter.class, Level.FATAL);
     tia.initializeAdapter(null);
-    TestUtils.setLog4jLevel(ThreatIntelAdapter.class, Level.ERROR);
+    setLog4jLevel(ThreatIntelAdapter.class, Level.ERROR);
     assertFalse(tia.isInitialized());
+  }
+
+  public static void setLog4jLevel(Class clazz, Level level) {
+    Logger logger = Logger.getLogger(clazz);
+    logger.setLevel(level);
   }
 
 

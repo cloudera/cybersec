@@ -17,9 +17,9 @@
  */
 package org.apache.metron.enrichment.adapters.maxmind.asn;
 
+import com.cloudera.cyber.TestUtils;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FileUtils;
-import org.apache.metron.common.utils.TestUtils;
 import org.apache.metron.stellar.dsl.Context;
 import org.json.simple.JSONObject;
 import org.junit.Rule;

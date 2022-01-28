@@ -17,12 +17,12 @@
  */
 package org.apache.metron.enrichment.adapters.maxmind.geo;
 
+import com.cloudera.cyber.TestUtils;
 import com.google.common.collect.ImmutableMap;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.metron.common.utils.TestUtils;
 import org.apache.metron.stellar.dsl.Context;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

@@ -34,15 +34,6 @@ import org.slf4j.LoggerFactory;
 public class GeoEnrichmentFunctions {
   private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  @Stellar(name="GET"
-          ,namespace="GEO"
-          ,description="Look up an IPV4 address and returns geographic information about it"
-          ,params = {
-                      "ip - The IPV4 address to lookup",
-                      "fields - Optional list of GeoIP fields to grab. Options are locID, country, city, postalCode, dmaCode, latitude, longitude, location_point"
-                    }
-          ,returns = "If a Single field is requested a string of the field, If multiple fields a map of string of the fields, and null otherwise"
-  )
   public static class GeoGet implements StellarFunction {
     boolean initialized = false;
 

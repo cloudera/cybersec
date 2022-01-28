@@ -51,8 +51,8 @@ public enum GeoLiteCityDatabase implements MaxMindDatabase {
 
   protected static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   public static final String GEO_HDFS_FILE = "geo.hdfs.file";
-  public static final String GEO_HDFS_FILE_DEFAULT = "/apps/metron/geo/default/GeoLite2-City.tar.gz";
-  public static final String GEO_HDFS_FILE_DEFAULT_FALLBACK = "/apps/metron/geo/default/GeoLite2-City.mmdb.gz";
+  public static final String GEO_HDFS_FILE_DEFAULT = "/tmp/flink-cyber/reference-data/GeoLite2-City.mmdb";
+  public static final String GEO_HDFS_FILE_DEFAULT_FALLBACK = "/tmp/flink-cyber/reference-data/GeoLite2-City.mmdb";
 
   private static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
   private static final Lock readLock = lock.readLock();
