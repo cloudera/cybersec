@@ -9,12 +9,23 @@ import org.apache.flink.api.java.typeutils.RowTypeInfo;
 import org.apache.flink.formats.avro.typeutils.AvroSchemaConverter;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.catalog.*;
-import org.apache.flink.table.catalog.exceptions.*;
+import org.apache.flink.table.catalog.AbstractReadOnlyCatalog;
+import org.apache.flink.table.catalog.CatalogBaseTable;
+import org.apache.flink.table.catalog.CatalogDatabase;
+import org.apache.flink.table.catalog.CatalogDatabaseImpl;
+import org.apache.flink.table.catalog.CatalogFunction;
+import org.apache.flink.table.catalog.CatalogFunctionImpl;
+import org.apache.flink.table.catalog.CatalogPartitionSpec;
+import org.apache.flink.table.catalog.CatalogTable;
+import org.apache.flink.table.catalog.ObjectPath;
+import org.apache.flink.table.catalog.exceptions.CatalogException;
+import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
+import org.apache.flink.table.catalog.exceptions.FunctionNotExistException;
+import org.apache.flink.table.catalog.exceptions.PartitionNotExistException;
+import org.apache.flink.table.catalog.exceptions.TableNotExistException;
+import org.apache.flink.table.catalog.exceptions.TableNotPartitionedException;
 import org.apache.flink.table.catalog.stats.CatalogColumnStatistics;
 import org.apache.flink.table.catalog.stats.CatalogTableStatistics;
-import org.apache.flink.table.descriptors.Avro;
-import org.apache.flink.table.descriptors.Kafka;
 import org.apache.flink.table.expressions.Expression;
 import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -22,7 +33,12 @@ import org.apache.kafka.clients.admin.KafkaAdminClient;
 import org.apache.kafka.clients.admin.ListTopicsOptions;
 import org.apache.kafka.clients.admin.ListTopicsResult;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
@@ -173,15 +189,10 @@ public class ProfileSourceCatalog extends AbstractReadOnlyCatalog {
             String topic = objectPath.getObjectName();
 
             // ensure the topic exists, and that a compatible schema is associated with it
-
-            Kafka kafkaConnector = new Kafka().properties(readKafkaProperties(this.properties, "profiler-catalog", true)).topic(topic);
             try {
                 TableSchema schema = schemaForTopicFromRegistry(topic);
+                return CatalogTable.of(schema.toSchema(),"Profiler source table from " + topic ,Collections.emptyList(),(Map) readKafkaProperties(this.properties, "profiler-catalog", true));
 
-                return new CatalogTableBuilder(kafkaConnector, schema)
-                        .withComment("Profiler source table from " + topic)
-                        .withFormat(new Avro())
-                        .build();
 
             } catch (SchemaNotFoundException e) {
                 throw new TableNotExistException(CATALOG_NAME, objectPath, e);
