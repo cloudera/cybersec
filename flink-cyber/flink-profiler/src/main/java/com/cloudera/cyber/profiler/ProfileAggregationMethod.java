@@ -1,9 +1,9 @@
 package com.cloudera.cyber.profiler;
 
-import org.apache.flink.shaded.guava18.com.google.common.collect.ImmutableMap;
+
+import com.google.common.collect.ImmutableMap;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
 import java.util.Map;
 
 public enum ProfileAggregationMethod {
