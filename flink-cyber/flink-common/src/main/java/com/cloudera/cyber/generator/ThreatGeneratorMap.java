@@ -1,5 +1,6 @@
-package com.cloudera.cyber.test.generator;
+package com.cloudera.cyber.generator;
 
+import com.cloudera.cyber.generator.ThreatGenerator;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;

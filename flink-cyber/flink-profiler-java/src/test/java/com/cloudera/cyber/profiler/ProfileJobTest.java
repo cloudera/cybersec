@@ -2,10 +2,12 @@ package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.TestUtils;
+import com.cloudera.cyber.profiler.dto.ProfileDto;
 import com.cloudera.cyber.rules.DynamicRuleCommandResult;
 import com.cloudera.cyber.scoring.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -57,16 +59,19 @@ public class ProfileJobTest extends ProfileJob {
     private final CollectingSink<ScoredMessage> sink = new CollectingSink<>();
     private ManualSource<ScoringRuleCommand> scoringRuleCommandSource;
     private final CollectingSink<ScoringRuleCommandResult> scoringRuleCommandResponse = new CollectingSink<>();
+    private final CollectingSink<ProfileMessage> jdbcSink = new CollectingSink<>();
 
 
     @Test
     public void testPipeline() throws Exception {
         String profileConfigFilePath = ClassLoader.getSystemResource("test_profile.json").getPath();
-        Map<String, String> props = ImmutableMap.of(
-            PARAMS_PARALLELISM, "1",
-            PARAM_PROFILE_CONFIG, profileConfigFilePath,
-            PARAM_LATENESS_TOLERANCE_MILLIS, "5"
-        );
+        ImmutableMap<String, String> props = ImmutableMap.<String, String>builder()
+                .put(PARAMS_PARALLELISM, "1")
+                .put(PARAM_PROFILE_CONFIG, profileConfigFilePath)
+                .put(PARAM_LATENESS_TOLERANCE_MILLIS, "5")
+                .put(PARAMS_PHOENIX_DB_INIT, "false")
+                .build();
+
 
         List<ProfileGroupConfig> profileGroupConfigs = parseConfigFile(new String(Files.readAllBytes(Paths.get(profileConfigFilePath))));
         JobTester.startTest(createPipeline(ParameterTool.fromMap(props)));
@@ -103,10 +108,16 @@ public class ProfileJobTest extends ProfileJob {
             messages.add(sink.poll());
         }
 
-        messages.forEach(message -> verifyProfileMessages(currentTimestamp, message, profileGroupConfigs, possibleKeyValues, rule));
-        IntStream.range(0, 10).forEach(i -> verifyProfileMessages(currentTimestamp, messages.get(i), profileGroupConfigs, possibleKeyValues, rule));
+        List<ProfileMessage> jdbcMessages = new ArrayList<>();
+        while (!jdbcSink.isEmpty()) {
+            jdbcMessages.add(jdbcSink.poll());
+        }
 
         assertThat(messages).isNotEmpty();
+        assertThat(jdbcMessages).isNotEmpty();
+
+        messages.forEach(message -> verifyProfileMessages(currentTimestamp, message, profileGroupConfigs, possibleKeyValues, rule));
+        IntStream.range(0, 10).forEach(i -> verifyProfileMessages(currentTimestamp, messages.get(i), profileGroupConfigs, possibleKeyValues, rule));
     }
 
     private void verifyProfileMessages(long currentTimestamp, ScoredMessage profile, List<ProfileGroupConfig> profileGroupConfigs, Map<String, List<String>> possibleKeyValues, ScoringRule rule) {
@@ -183,6 +194,11 @@ public class ProfileJobTest extends ProfileJob {
         ScoredMessage message = ScoredMessage.builder().cyberScoresDetails(scores).
                 message(TestUtils.createMessage(timestamp, "netflow", extensions)).build();
         source.sendRecord(message, timestamp);
+    }
+
+    @Override
+    protected void writeProfileMeasurementsResults(ParameterTool params, List<ProfileDto> profileDtos, DataStream<ProfileMessage> results) {
+        results.addSink(jdbcSink).name("Profile data ").setParallelism(1);
     }
 
     private ScoringRule upsertScoringCommand() throws TimeoutException {

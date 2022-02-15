@@ -1,34 +1,61 @@
 package com.cloudera.cyber.profiler;
 
+import com.cloudera.cyber.ValidateUtils;
 import com.cloudera.cyber.flink.ConfigConstants;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
+import com.cloudera.cyber.jdbc.connector.jdbc.JdbcConnectionOptions;
+import com.cloudera.cyber.jdbc.connector.jdbc.JdbcExecutionOptions;
+import com.cloudera.cyber.jdbc.connector.jdbc.JdbcSink;
+import com.cloudera.cyber.jdbc.connector.jdbc.internal.JdbcStatementBuilder;
+import com.cloudera.cyber.profiler.dto.MeasurementDataDto;
+import com.cloudera.cyber.profiler.dto.ProfileDto;
+import com.cloudera.cyber.profiler.phoenix.PhoenixThinClient;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import com.cloudera.cyber.scoring.ScoringRuleCommand;
 import com.cloudera.cyber.scoring.ScoringRuleCommandResult;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import freemarker.template.TemplateException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.hbase.sink.HBaseSinkFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.sink.SinkFunction;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.flink.util.Preconditions;
+
+import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Properties;
 
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
 
 public class ProfileJobKafka extends ProfileJob {
+
     private static final String PROFILE_GROUP_ID = "profile";
     private static final String PARAMS_FIRST_SEEN_HBASE_TABLE = "profile.first.seen.table";
     private static final String PARAMS_FIRST_SEEN_HBASE_COLUMN_FAMILY = "profile.first.seen.column.family";
+    private static final String PARAMS_PHOENIX_DB_BATCH_SIZE = "phoenix.db.batchSize";
+    private static final String UPSERT_SQL = "<#assign key_count = field_key_count?number >UPSERT INTO ${measurement_data_table_name} (MEASUREMENT_ID, <#list 1..key_count as i> KEY_${i},</#list> MEASUREMENT_NAME, MEASUREMENT_TYPE, MEASUREMENT_TIME, MEASUREMENT_VALUE) VALUES(?, <#list 1..key_count as i> ?,</#list> ?, ?, ?, ?) ON DUPLICATE KEY IGNORE";
     private static final String PARAMS_GROUP_ID = "kafka.group.id";
 
     private FlinkKafkaProducer<ScoredMessage> sink;
 
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
-            throw new RuntimeException("Path to the properties file is expected as the only argument.");
+            throw new IllegalArgumentException("Path to the properties file is expected as the only argument.");
         }
         ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        validatePhoenixParam(params);
         FlinkUtils.executeEnv(new ProfileJobKafka()
-                .createPipeline(params), "Flink Profiling",  params);
+                .createPipeline(params), "Flink Profiling", params);
     }
 
     @Override
@@ -40,7 +67,6 @@ public class ProfileJobKafka extends ProfileJob {
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<ScoredMessage> results) {
-
         if (sink == null) {
             sink = new FlinkUtils<>(ScoredMessage.class).createKafkaSink(
                     params.getRequired(ConfigConstants.PARAMS_TOPIC_OUTPUT), PROFILE_GROUP_ID,
@@ -49,15 +75,37 @@ public class ProfileJobKafka extends ProfileJob {
         results.addSink(sink).name("Kafka Results").uid("kafka.results.");
     }
 
+    protected void writeProfileMeasurementsResults(ParameterTool params, List<ProfileDto> profileDtos, DataStream<ProfileMessage> results) throws IOException, TemplateException {
+        DataStream<MeasurementDataDto> measurementDtoDataStream = results.flatMap(new ProfileMessageToMeasurementDataDtoMapping(new ArrayList<>(profileDtos)));
+        Properties properties = Utils.readProperties(params.getProperties(), PARAMS_PHOENIX_DB_QUERY_PARAM);
+        JdbcStatementBuilder<MeasurementDataDto> objectJdbcStatementBuilder = new PhoenixJdbcStatementBuilder(params.getInt(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT, 0));
+        JdbcExecutionOptions executionOptions = JdbcExecutionOptions.builder()
+                .withBatchSize(Integer.parseInt(params.getRequired(PARAMS_PHOENIX_DB_BATCH_SIZE)))
+                .build();
+        JdbcConnectionOptions connectionOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+                .withDriverName(PhoenixThinClient.getDRIVER())
+                .withUrl(client.getDbUrl())
+                .build();
+        SinkFunction<MeasurementDataDto> jdbcSink = JdbcSink.sink(
+                freemarkerGenerator.replceByTemplate(UPSERT_SQL, Maps.fromProperties(properties)),
+                objectJdbcStatementBuilder,
+                executionOptions,
+                connectionOptions);
+        measurementDtoDataStream.addSink(jdbcSink).name("JDBC Sink").uid("jdbc.profile.group");
+    }
+
     @Override
-    protected DataStream<ProfileMessage> updateFirstSeen(ParameterTool params, DataStream<ProfileMessage> results, ProfileGroupConfig profileGroupConfig) {
+    protected DataStream<ProfileMessage> updateFirstSeen(ParameterTool params, DataStream<ProfileMessage> results,
+                                                         ProfileGroupConfig profileGroupConfig) {
         String tableName = params.getRequired(PARAMS_FIRST_SEEN_HBASE_TABLE);
         String columnFamilyName = params.getRequired(PARAMS_FIRST_SEEN_HBASE_COLUMN_FAMILY);
         // look up the previous first seen timestamp and update the profile message
-        DataStream<ProfileMessage> updatedProfileMessages = results.map(new FirstSeenHbaseLookup(tableName, columnFamilyName, profileGroupConfig));
+        DataStream<ProfileMessage> updatedProfileMessages = results
+                .map(new FirstSeenHbaseLookup(tableName, columnFamilyName, profileGroupConfig));
 
         // write the new first and last seen timestamps in hbase
-        HBaseSinkFunction<ProfileMessage> hbaseSink = new FirstSeenHbaseSink(tableName, columnFamilyName, profileGroupConfig, params);
+        HBaseSinkFunction<ProfileMessage> hbaseSink = new FirstSeenHbaseSink(tableName, columnFamilyName, profileGroupConfig,
+                params);
         updatedProfileMessages.addSink(hbaseSink).name("HBase First Seen Profile Sink");
         return updatedProfileMessages;
     }
@@ -74,9 +122,53 @@ public class ProfileJobKafka extends ProfileJob {
     @Override
     protected void writeScoredRuleCommandResult(ParameterTool params, DataStream<ScoringRuleCommandResult> results) {
         String topic = params.getRequired("query.output.topic");
-        FlinkKafkaProducer<ScoringRuleCommandResult> sink = new FlinkUtils<>(ScoringRuleCommandResult.class).createKafkaSink(topic, params.get(PARAMS_GROUP_ID, PROFILE_GROUP_ID), params);
-        results.addSink(sink).name("Kafka Score Rule Command Results").uid("kafka.output.rule.command.results");
+        FlinkKafkaProducer<ScoringRuleCommandResult> scoredSink = new FlinkUtils<>(ScoringRuleCommandResult.class).createKafkaSink(topic, params.get(PARAMS_GROUP_ID, PROFILE_GROUP_ID), params);
+        results.addSink(scoredSink).name("Kafka Score Rule Command Results").uid("kafka.output.rule.command.results");
 
+    }
+
+    private static class PhoenixJdbcStatementBuilder implements JdbcStatementBuilder<MeasurementDataDto> {
+        private final int keyCount;
+
+        PhoenixJdbcStatementBuilder(int keyCount) {
+            this.keyCount = keyCount;
+        }
+
+        @Override
+        public void accept(PreparedStatement ps, MeasurementDataDto measurementDataDto) throws SQLException {
+            int index = 1;
+            ps.setInt(index++, measurementDataDto.getMeasurementId());
+            for (int i = 0; i < keyCount; i++) {
+                ps.setString(index++, Iterables.get(Optional.ofNullable(measurementDataDto.getKeys()).orElseGet(ArrayList::new), i, null));
+            }
+            ps.setString(index++, measurementDataDto.getMeasurementName());
+            ps.setString(index++, measurementDataDto.getMeasurementType());
+            ps.setTimestamp(index++, measurementDataDto.getMeasurementTime());
+            ps.setDouble(index, measurementDataDto.getMeasurementValue());
+        }
+    }
+
+    private static void validatePhoenixParam(ParameterTool params) {
+        String phoenixFlag = params.get(PARAMS_PHOENIX_DB_INIT);
+        if (Boolean.parseBoolean(phoenixFlag)) {
+            String emptyErrorMessageTemplate = "'%s' can not be empty.";
+            String notNumericMessageTemplate = "Property '%s' has incorrect value '%s'. It should be numeric";
+            Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PARAMS_PHOENIX_DB_URL)), emptyErrorMessageTemplate, PARAMS_PHOENIX_DB_URL);
+            Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PARAMS_PHOENIX_DB_USER)), emptyErrorMessageTemplate, PARAMS_PHOENIX_DB_USER);
+            Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PARAMS_PHOENIX_DB_PASSWORD)), emptyErrorMessageTemplate, PARAMS_PHOENIX_DB_PASSWORD);
+            ValidateUtils.validatePhoenixName(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_DATA_TABLE_NAME), PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_DATA_TABLE_NAME);
+            ValidateUtils.validatePhoenixName(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_METADATA_TABLE_NAME), PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_METADATA_TABLE_NAME);
+            ValidateUtils.validatePhoenixName(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_NAME), PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_NAME);
+            ValidateUtils.validatePhoenixName(params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_METADATA_TABLE_NAME), PARAMS_PHOENIX_DB_QUERY_PROFILE_METADATA_TABLE_NAME);
+            ValidateUtils.validatePhoenixName(params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_NAME), PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_NAME);
+            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_START_WITH)), notNumericMessageTemplate, PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_START_WITH, params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_START_WITH));
+            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_CACHE)), notNumericMessageTemplate, PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_CACHE, params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_CACHE));
+            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_START_WITH)), notNumericMessageTemplate, PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_START_WITH, params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_START_WITH));
+            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE)), notNumericMessageTemplate, PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE, params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE));
+            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT)), notNumericMessageTemplate, PARAMS_PHOENIX_DB_QUERY_KEY_COUNT, params.get(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT));
+        } else {
+            Preconditions.checkArgument(!StringUtils.equals(phoenixFlag, "false"), "Invalid properties '%s' value %s (expected 'true' or 'false').", PARAMS_PHOENIX_DB_INIT, phoenixFlag);
+        }
     }
 
 }

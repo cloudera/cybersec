@@ -1,4 +1,4 @@
-package com.cloudera.cyber.test.generator;
+package com.cloudera.cyber.generator;
 
 import com.github.javafaker.Faker;
 import org.apache.commons.net.util.SubnetUtils;

@@ -3,16 +3,24 @@ package com.cloudera.cyber.flink;
 import com.google.common.io.Resources;
 import com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.avro.Schema;
+import org.apache.commons.io.IOUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.client.cli.CliFrontend;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.core.fs.FSDataInputStream;
+import org.apache.flink.core.fs.FileSystem;
+import org.apache.flink.core.fs.Path;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.encrypttool.EncryptTool;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -72,7 +80,7 @@ public class Utils {
 //                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringConsumerInterceptor" :
 //                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringProducerInterceptor");
 
-        groupId = (String)kafkaProperties.getOrDefault(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        groupId = (String) kafkaProperties.getOrDefault(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         if (!consumer) {
             kafkaProperties.putIfAbsent(ProducerConfig.ACKS_CONFIG, "all");
             kafkaProperties.put(ProducerConfig.CLIENT_ID_CONFIG, String.format("%s-producer-%d", groupId, nextKafkaClientId.incrementAndGet()));
@@ -147,8 +155,16 @@ public class Utils {
 
     public static String readResourceFile(String resourceLocation, Class<?> cls) {
         try {
-            return new String(Files.readAllBytes(Paths.get(cls.getResource(resourceLocation).toURI())));
+            log.info("Try open file at {} for class {}", resourceLocation, cls);
+            URL resource = cls.getResource(resourceLocation);
+            if (resource == null) {
+                log.info("Try open file with class loader at {} for class {}", resourceLocation, cls);
+                resource = cls.getClassLoader().getResource(resourceLocation);
+            }
+            Preconditions.checkNotNull(resource, "resource is null");
+            return IOUtils.toString(resource.openStream(), StandardCharsets.UTF_8);
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }

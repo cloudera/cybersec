@@ -1,4 +1,4 @@
-package com.cloudera.cyber.test.generator;
+package com.cloudera.cyber.generator;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

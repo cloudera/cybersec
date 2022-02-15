@@ -34,7 +34,6 @@ public abstract class ProfileAggregateFunction implements AggregateFunction<Prof
 
     @Override
     public ProfileMessage getResult(ProfileGroupAcc profileAccumulator) {
-
         Map<String, String> extensions = profileAccumulator.getProfileExtensions(profileGroupConfig, measurementFormats);
         extensions.put(PROFILE_GROUP_NAME_EXTENSION, profileGroupName);
         return new ProfileMessage(profileAccumulator.getEndTimestamp(), extensions);

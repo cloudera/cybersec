@@ -1,0 +1,1 @@
+CREATE SEQUENCE IF NOT EXISTS ${measurement_sequence_name} START WITH ${measurement_sequence_start_with} CACHE ${measurement_sequence_cache}

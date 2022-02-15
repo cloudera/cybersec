@@ -1,0 +1,12 @@
+<#assign key_count = field_key_count?number >
+CREATE TABLE IF NOT EXISTS ${measurement_data_table_name} (
+    MEASUREMENT_ID INTEGER NOT NULL,
+    <#list 1..key_count as i>
+    KEY_${i} VARCHAR,
+    </#list>
+    MEASUREMENT_NAME VARCHAR NOT NULL,
+    MEASUREMENT_TYPE VARCHAR,
+    MEASUREMENT_TIME TIMESTAMP NOT NULL,
+    MEASUREMENT_VALUE DOUBLE NOT NULL,
+     CONSTRAINT pk PRIMARY KEY(MEASUREMENT_ID, <#list 1..key_count as i>KEY_${i}, </#list>MEASUREMENT_NAME, MEASUREMENT_TYPE, MEASUREMENT_TIME,MEASUREMENT_VALUE)
+)

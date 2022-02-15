@@ -35,6 +35,7 @@
         <module>metron-common</module>
         <module>metron-hbase-common</module>
         <module>flink-commands</module>
+        <module>flink-phoenix-jdbc</module>
     </modules>
 
     <properties>
@@ -68,6 +69,8 @@
         <assertj.version>3.13.2</assertj.version>
         <json.simple.version>1.1.1</json.simple.version>
         <jupiter.junit.version>5.5.2</jupiter.junit.version>
+        <phoenix.version>5.1.1.7.2.11.0-233</phoenix.version>
+        <phoenix.queryserver>6.0.0.7.1.6.0-297</phoenix.queryserver>
         <classindex.version>3.4</classindex.version>
         <antlr.version>4.5</antlr.version>
         <metrics.version>3.0.2</metrics.version>
@@ -238,12 +241,6 @@
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-table-api-java-bridge_${scala.binary.version}</artifactId>
-                <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
-                <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
                 <version>${flink.version}</version>
             </dependency>
 
