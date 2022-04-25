@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Licensed to Cloudera, Inc. under one
+  or more contributor license agreements.  See the NOTICE file
+  distributed with this work for additional information
+  regarding copyright ownership.  Cloudera, Inc. licenses this file
+  to you under the Apache License, Version 2.0 (the
+  "License"); you may not use this file except in compliance
+  with the License.  You may obtain a copy of the License at
+      http://www.apache.org/licenses/LICENSE-2.0
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<assembly>
+    <id>flink-parcel-assembly</id>
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+    <fileSets>
+
+        <fileSet>
+            <directory>${basedir}/src/main/meta</directory>
+            <outputDirectory>/meta</outputDirectory>
+            <filtered>true</filtered>
+        </fileSet>
+
+		<fileSet>
+			<directory>${basedir}/src/main/notice</directory>
+			<outputDirectory>/lib/cybersec/notice</outputDirectory>
+			<filtered>true</filtered>
+			<includes>
+				<include>NOTICE</include>
+				<include>ce/**</include>
+			</includes>
+		</fileSet>
+
+        <!-- CSA Powered by Apache Flink distribution contents -->
+        <fileSet>
+            <directory>${basedir}/target/cyber-jobs-${project.parent.version}</directory>
+            <outputDirectory>/lib/cybersec</outputDirectory>
+            <includes>
+                <include>bin/**</include>
+                <include>examples/streaming/**</include>
+                <include>examples/table/*Stream*jar</include>
+                <include>lib/**</include>
+                <include>LICENSE</include>
+                <include>licenses/**</include>
+                <include>README.txt</include>
+                <include>plugins/**</include>
+                <include>opt/**</include>
+				<include>tools/**</include>
+            </includes>
+            <excludes>
+                <exclude>bin/mesos*</exclude>
+                <exclude>bin/py*</exclude>
+                <exclude>bin/*cluster*</exclude>
+                <exclude>bin/*zookeeper*</exclude>
+                <exclude>bin/jobmanager.sh</exclude>
+                <exclude>bin/taskmanager.sh</exclude>
+                <exclude>bin/standalone-job.sh</exclude>
+            </excludes>
+        </fileSet>
+
+        <!-- CSA Powered by Apache Flink distribution configuration -->
+        <fileSet>
+            <directory>${basedir}/target/cyber-jobs-${project.parent.version}/conf</directory>
+            <outputDirectory>/etc/cybersec/conf.dist</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+            <excludes>
+                <exclude>logback-console.xml</exclude>
+                <exclude>logback-yarn.xml</exclude>
+                <exclude>logback.xml</exclude>
+                <exclude>masters</exclude>
+                <exclude>slaves</exclude>
+                <exclude>zoo.cfg</exclude>
+            </excludes>
+        </fileSet>
+
+        <!-- CSA Powered by Apache Flink executable wrappers -->
+        <fileSet>
+            <directory>${basedir}/src/main/scripts</directory>
+            <outputDirectory>/bin</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+
+    </fileSets>
+</assembly>

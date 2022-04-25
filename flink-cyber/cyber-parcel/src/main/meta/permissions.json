@@ -1,0 +1,13 @@
+{
+
+  "bin/start-generator.sh": {
+    "user":  "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/cybersec/conf.dist": {
+    "user":  "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "generator": {
+    "destination": "/usr/bin/start-generator",
+    "source": "bin/start-generator.sh",
+    "priority": 10,
+    "isDirectory": false
+  }
+}
