@@ -1,4 +1,4 @@
-/**
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -16,11 +16,28 @@
  * limitations under the License.
  */
 
-package org.apache.metron.parsers.interfaces;
+package org.apache.metron.parsers.syslog;
+
+import com.github.palindromicity.syslog.AllowableDeviations;
+import com.github.palindromicity.syslog.SyslogParser;
+import com.github.palindromicity.syslog.SyslogParserBuilder;
+import com.github.palindromicity.syslog.SyslogSpecification;
 
 import java.io.Serializable;
+import java.util.EnumSet;
 import java.util.Map;
 
-public interface Configurable extends Serializable {
-  void configure(Map<String, Object> config);
+
+/**
+ * Parser for RFC 3164 messages.
+ */
+public class Syslog3164Parser extends BaseSyslogParser implements Serializable {
+
+  @Override
+  public SyslogParser buildSyslogParser(Map<String, Object> config) {
+    return new SyslogParserBuilder()
+            .forSpecification(SyslogSpecification.RFC_3164)
+            .withDeviations(EnumSet.of(AllowableDeviations.PRIORITY, AllowableDeviations.VERSION))
+            .build();
+  }
 }

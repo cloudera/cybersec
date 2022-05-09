@@ -27,22 +27,22 @@ import java.util.Optional;
  * @param <T>
  */
 public interface MessageParserResult<T> {
-    /**
-     * Returns the Message objects of {@code T}
-     * @return {@code List}
-     */
-    List<T> getMessages();
+  /**
+   * Returns the Message objects of {@code T}
+   * @return {@code List}
+   */
+  List<T> getMessages();
 
-    /**
-     * Returns a map of raw message objects to the {@code Throwable} they triggered.
-     * @return {@code Map}
-     */
-    Map<Object,Throwable> getMessageThrowables();
+  /**
+   * Returns a map of raw message objects to the {@code Throwable} they triggered.
+   * @return {@code Map}
+   */
+  Map<Object,Throwable> getMessageThrowables();
 
-    /**
-     * Returns a master {@code Throwable} for a parse call.  This represents a complete
-     * call failure, as opposed to one associated with a message.
-     * @return {@code Optional}{@code Throwable}
-     */
-    Optional<Throwable> getMasterThrowable();
+  /**
+   * Returns a master {@code Throwable} for a parse call.  This represents a complete
+   * call failure, as opposed to one associated with a message.
+   * @return {@code Optional}{@code Throwable}
+   */
+  Optional<Throwable> getMasterThrowable();
 }

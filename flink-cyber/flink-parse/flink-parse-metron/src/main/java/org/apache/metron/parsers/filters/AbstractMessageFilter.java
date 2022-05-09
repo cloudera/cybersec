@@ -16,11 +16,15 @@
  * limitations under the License.
  */
 
-package org.apache.metron.parsers.interfaces;
+package org.apache.metron.parsers.filters;
+
+import org.apache.metron.parsers.interfaces.MessageFilter;
+import org.json.simple.JSONObject;
 
 import java.io.Serializable;
 import java.util.Map;
 
-public interface Configurable extends Serializable {
-  void configure(Map<String, Object> config);
+public abstract class AbstractMessageFilter implements MessageFilter<JSONObject>, Serializable{
+  public AbstractMessageFilter(Map<String, Object> config) {
+  }
 }

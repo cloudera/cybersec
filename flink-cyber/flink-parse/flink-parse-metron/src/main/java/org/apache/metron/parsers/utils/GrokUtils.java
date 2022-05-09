@@ -15,12 +15,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-package org.apache.metron.parsers.interfaces;
-
+package org.apache.metron.parsers.utils;
 import java.io.Serializable;
-import java.util.Map;
 
-public interface Configurable extends Serializable {
-  void configure(Map<String, Object> config);
-}
+import com.google.code.regexp.Pattern;
+
+public class GrokUtils implements Serializable {
+
+	private static final long serialVersionUID = 7465176887422419286L;
+	/**
+	   * Extract Grok patter like %{FOO} to FOO, Also Grok pattern with semantic.
+	   */
+	  public static final Pattern GROK_PATTERN = Pattern.compile(
+	      "%\\{" +
+	      "(?<name>" +
+	        "(?<pattern>[A-z0-9]+)" +
+	          "(?::(?<subname>[A-z0-9_:;\\/\\s\\.]+))?" +
+	          ")" +
+	          "(?:=(?<definition>" +
+	            "(?:" +
+	            "(?:[^{}]+|\\.+)+" +
+	            ")+" +
+	            ")" +
+	      ")?" +
+	      "\\}");
+
+	}

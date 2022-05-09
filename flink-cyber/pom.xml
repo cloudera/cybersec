@@ -72,12 +72,13 @@
         <phoenix.version>5.1.1.7.2.11.0-233</phoenix.version>
         <phoenix.queryserver>6.0.0.7.1.6.0-297</phoenix.queryserver>
         <classindex.version>3.4</classindex.version>
-        <antlr.version>4.5</antlr.version>
+        <antlr.version>4.7.2</antlr.version>
         <metrics.version>3.0.2</metrics.version>
         <pcap.version>1.7.1</pcap.version>
         <global_kryo_version>3.0.3</global_kryo_version>
         <global_kryo_serializers_version>0.38</global_kryo_serializers_version>
         <global_jar_version>3.0.2</global_jar_version>
+        <simple-syslog.version>0.0.6</simple-syslog.version>
     </properties>
 
     <repositories>

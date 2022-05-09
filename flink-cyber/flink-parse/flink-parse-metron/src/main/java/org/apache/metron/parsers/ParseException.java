@@ -15,12 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.metron.parsers;
 
-package org.apache.metron.parsers.interfaces;
+public class ParseException extends Exception {
 
-import java.io.Serializable;
-import java.util.Map;
+    public ParseException(String message) {
+        super(message);
+    }
 
-public interface Configurable extends Serializable {
-  void configure(Map<String, Object> config);
+    public ParseException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
