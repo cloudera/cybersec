@@ -117,6 +117,9 @@
                             </filters>
                             <transformers>
                                 <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.atteo.classindex.ClassIndexTransformer" />
+                                <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>${main.class}</mainClass>
                                 </transformer>
@@ -124,6 +127,13 @@
                         </configuration>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.atteo.classindex</groupId>
+                        <artifactId>classindex-transformer</artifactId>
+                        <version>${classindex.version}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
         </plugins>
     </build>
