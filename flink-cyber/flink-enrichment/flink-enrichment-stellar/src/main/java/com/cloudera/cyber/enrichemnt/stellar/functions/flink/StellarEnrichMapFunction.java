@@ -133,18 +133,22 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
 
         String source = message.getSource();
         SensorEnrichmentConfig sensorEnrichmentConfig = sensorEnrichmentConfigs.get(source);
-        extensions.put(Constants.SENSOR_TYPE, source);
-        extensions.put(Constants.Fields.TIMESTAMP.getName(), String.valueOf(Instant.now().toEpochMilli()));
-        JSONObject obj = new JSONObject(extensions);
-        Map<String, String> tmpMap = new HashMap<>();
-        Map<String, List<JSONObject>> tasks = generateTasks(obj, sensorEnrichmentConfig);
-        for (Map.Entry<String, List<JSONObject>> task : tasks.entrySet()) {
-            EnrichmentAdapter<CacheKey> adapter = adapterMap.get(task.getKey());
-            for (JSONObject m : task.getValue()) {
-                collectData(sensorEnrichmentConfig, task, adapter, m, tmpMap, dataQualityMessages);
+        if (sensorEnrichmentConfig != null) {
+            extensions.put(Constants.SENSOR_TYPE, source);
+            extensions.put(Constants.Fields.TIMESTAMP.getName(), String.valueOf(Instant.now().toEpochMilli()));
+            JSONObject obj = new JSONObject(extensions);
+            Map<String, String> tmpMap = new HashMap<>();
+            Map<String, List<JSONObject>> tasks = generateTasks(obj, sensorEnrichmentConfig);
+            for (Map.Entry<String, List<JSONObject>> task : tasks.entrySet()) {
+                EnrichmentAdapter<CacheKey> adapter = adapterMap.get(task.getKey());
+                for (JSONObject m : task.getValue()) {
+                    collectData(sensorEnrichmentConfig, task, adapter, m, tmpMap, dataQualityMessages);
+                }
             }
+            return MessageUtils.enrich(message, tmpMap, dataQualityMessages);
+        } else {
+            return message;
         }
-        return MessageUtils.enrich(message, tmpMap, dataQualityMessages);
     }
 
     private void collectData(SensorEnrichmentConfig sensorEnrichmentConfig, Map.Entry<String, List<JSONObject>> task, EnrichmentAdapter<CacheKey> adapter, JSONObject m, Map<String, String> tmpMap, List<DataQualityMessage> dataQualityMessages) {
