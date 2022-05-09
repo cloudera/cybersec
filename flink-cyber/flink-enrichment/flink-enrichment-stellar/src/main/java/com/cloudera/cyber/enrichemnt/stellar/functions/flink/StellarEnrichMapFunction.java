@@ -8,6 +8,7 @@ import com.cloudera.cyber.enrichemnt.stellar.adapter.MetronGeoEnrichmentAdapter;
 import com.cloudera.cyber.enrichment.geocode.IpGeoJob;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
 import org.apache.metron.common.configuration.EnrichmentConfigurations;
@@ -30,7 +31,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.metron.stellar.common.Constants.STELLAR_CONTEXT_CONF;
@@ -154,7 +154,10 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
             Object value = fieldValueEntry.getValue();
             CacheKey cacheKey = new CacheKey(field, value, sensorEnrichmentConfig);
             try {
-                tmpMap.putAll(adapter.enrich(cacheKey));
+                JSONObject enrichmentResults = adapter.enrich(cacheKey);
+                enrichmentResults.forEach((k,v) -> {
+                    tmpMap.put((String)k, ObjectUtils.toString(v, "null") );
+                });
             } catch (Exception e) {
                 log.error("Error with " + task.getKey() + " failed: " + e.getMessage(), e);
                 MessageUtils.addQualityMessage(dataQualityMessages, DataQualityMessageLevel.ERROR, "Error with " + task.getKey() + " failed: " + e.getMessage(), field, ADAPTER_NAME_FEATURE.get(task.getKey()));
