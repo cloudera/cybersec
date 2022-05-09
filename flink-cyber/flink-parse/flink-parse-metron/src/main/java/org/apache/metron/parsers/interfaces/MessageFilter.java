@@ -15,12 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.apache.metron.parsers.interfaces;
 
-import java.io.Serializable;
-import java.util.Map;
+import org.apache.metron.stellar.dsl.Context;
 
-public interface Configurable extends Serializable {
-  void configure(Map<String, Object> config);
+public interface MessageFilter<T> extends Configurable{
+
+	boolean emit(T message, Context context);
 }
