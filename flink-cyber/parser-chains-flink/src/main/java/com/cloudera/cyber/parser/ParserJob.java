@@ -1,35 +1,37 @@
 package com.cloudera.cyber.parser;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.commands.EnrichmentCommand;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
 import com.cloudera.parserchains.core.utils.JSONUtils;
-
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.OutputTag;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
-
-import org.apache.kafka.clients.consumer.ConsumerConfig;
+import java.util.stream.Collectors;
 
 /**
  * Host for the chain parser jobs
  */
+@Slf4j
 public abstract class ParserJob {
 
     protected static final String PARAM_CHAIN_CONFIG = "chain";
@@ -38,23 +40,39 @@ public abstract class ParserJob {
     protected static final String PARAM_TOPIC_MAP_CONFIG_FILE = "chain.topic.map.file";
     public static final String PARAM_PRIVATE_KEY_FILE = "key.private.file";
     public static final String PARAM_PRIVATE_KEY = "key.private.base64";
-    public static final String PARSER_ERROR_SIDE_OUTPUT = "parser-error";
+    public static final String ERROR_MESSAGE_SIDE_OUTPUT = "error-message";
     public static final String SIGNATURE_ENABLED = "signature.enabled";
+    public static final String PARAM_STREAMING_ENRICHMENTS_CONFIG = "chain.enrichments.file";
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params)
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         FlinkUtils.setupEnv(env, params);
 
         String chainConfig = readConfigMap(PARAM_CHAIN_CONFIG_FILE, PARAM_CHAIN_CONFIG, params, null);
         String topicConfig = readConfigMap(PARAM_TOPIC_MAP_CONFIG_FILE, PARAM_TOPIC_MAP_CONFIG, params, "{}");
 
+
         ParserChainMap chainSchema = JSONUtils.INSTANCE.load(chainConfig, ParserChainMap.class);
         TopicPatternToChainMap topicMap = JSONUtils.INSTANCE.load(topicConfig, TopicPatternToChainMap.class);
         String defaultKafkaBootstrap = params.get(Utils.KAFKA_PREFIX + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG);
 
-        List<DataStream<MessageToParse>> sources = createSource(env, params, topicMap);
+        String enrichmentsConfigFile = params.get(PARAM_STREAMING_ENRICHMENTS_CONFIG);
+        List<String> streamingSourcesProduced = Collections.emptyList();
+        StreamingEnrichmentsSourceFilter streamingEnrichFilter = null;
+        EnrichmentsConfig streamingEnrichmentsConfig = null;
+        if (enrichmentsConfigFile != null) {
+            streamingEnrichmentsConfig = EnrichmentsConfig.load(enrichmentsConfigFile);
+
+            List<String> sourcesProduced = topicMap.getSourcesProduced();
+            streamingSourcesProduced = streamingEnrichmentsConfig.getStreamingEnrichmentSources().stream().
+                    filter(sourcesProduced::contains).collect(Collectors.toList());
+            if (!streamingSourcesProduced.isEmpty()) {
+                streamingEnrichFilter = new StreamingEnrichmentsSourceFilter(streamingSourcesProduced);
+            }
+        }
+
+        DataStream<MessageToParse> source = createSource(env, params, topicMap);
 
         PrivateKey privateKey = null;
         if (params.getBoolean(SIGNATURE_ENABLED, true)) {
@@ -67,19 +85,24 @@ public abstract class ParserJob {
             privateKey = keyFactory.generatePrivate(privSpec);
         }
 
-        for (DataStream<MessageToParse> source : sources) {
-            SingleOutputStreamOperator<Message> results =
-                    source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey, defaultKafkaBootstrap))
-                            .name("Parser "+ source.getTransformation().getName()).uid("parser" +  source.getTransformation().getUid());
+        SingleOutputStreamOperator<Message> results =
+                source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey, defaultKafkaBootstrap))
+                        .name("Parser " + source.getTransformation().getName()).uid("parser" + source.getTransformation().getUid());
+        final OutputTag<Message> errorMessageSideOutput = new OutputTag<Message>(ERROR_MESSAGE_SIDE_OUTPUT) {
+        };
+        DataStream<Message> errorMessages = results.getSideOutput(errorMessageSideOutput);
 
-            writeResults(params, results);
-            writeOriginalsResults(params, source);
+        writeResults(params, results);
+        writeOriginalsResults(params, source);
 
-            final OutputTag<Message> outputTag = new OutputTag<Message>(PARSER_ERROR_SIDE_OUTPUT) {
-            };
-            DataStream<Message> parserErrors = results.getSideOutput(outputTag);
-            writeErrors(params, parserErrors);
+        if (streamingEnrichFilter != null) {
+            DataStream<Message> streamingEnrichmentMessages = results.filter(streamingEnrichFilter).name("Streaming Enrichment Sources Filter");
+            SingleOutputStreamOperator<EnrichmentCommand> enrichmentCommands = streamingEnrichmentMessages.process(new MessageToEnrichmentCommandFunction(streamingSourcesProduced, streamingEnrichmentsConfig)).name("Message to EnrichmentCommand");
+            errorMessages = errorMessages.union(enrichmentCommands.getSideOutput(errorMessageSideOutput));
+            writeEnrichments(params, enrichmentCommands, streamingSourcesProduced,  streamingEnrichmentsConfig);
         }
+
+        writeErrors(params, errorMessages);
 
         return env;
     }
@@ -98,8 +121,11 @@ public abstract class ParserJob {
 
     protected abstract void writeOriginalsResults(ParameterTool params, DataStream<MessageToParse> results);
 
+    protected abstract void writeEnrichments(ParameterTool params, DataStream<EnrichmentCommand> streamingEnrichmentResults, List<String> streamingEnrichmentSources, EnrichmentsConfig streamingEnrichmentConfig);
+
     protected abstract void writeErrors(ParameterTool params, DataStream<Message> errors);
 
-    protected abstract List<DataStream<MessageToParse>> createSource(StreamExecutionEnvironment env, ParameterTool params,
+    protected abstract DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params,
                                                                      TopicPatternToChainMap topicPatternToChainMap);
+
 }

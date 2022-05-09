@@ -1,0 +1,33 @@
+{
+  "storageConfigs": {
+    "default": {
+      "format": "HBASE_METRON",
+      "hbaseTableName": "enrichments_metron",
+      "columnFamily": "cf"
+    }
+  },
+  "enrichmentConfigs": {
+    "address": {
+      "storage": null,
+      "fieldMapping": {
+        "keyFields": [
+          "name"
+        ],
+        "valueFields": [
+          "address"
+        ],
+        "streamingSources" : ["streaming"]
+      }
+    },
+    "error_enrichment": {
+      "storage": null,
+      "fieldMapping": {
+        "keyFields": [
+          "doesnt_exist"
+        ],
+        "valueFields": null,
+        "streamingSources" : ["badstreaming"]
+      }
+    }
+  }
+}

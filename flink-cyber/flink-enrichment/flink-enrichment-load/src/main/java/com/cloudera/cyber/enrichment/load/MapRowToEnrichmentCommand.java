@@ -9,28 +9,28 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.types.Row;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @AllArgsConstructor
 @Slf4j
 public class MapRowToEnrichmentCommand implements MapFunction<Row, EnrichmentCommand> {
+    private static final String NULL_STRING_VALUE = "null";
     private final String enrichmentType;
     private final CommandType commandType;
     private final List<String> fieldNames;
-
+    private final String keyDelimiter;
+    private final int numKeyFields;
 
     @Override
     public EnrichmentCommand map(Row row) {
 
-        String enrichmentKey = row.getField(0).toString();
+        String enrichmentKey = IntStream.range(0, numKeyFields).mapToObj(index -> Objects.toString(row.getField(index), NULL_STRING_VALUE)).collect(Collectors.joining(keyDelimiter));
 
         Map<String, String> enrichmentValues = new HashMap<>();
-        IntStream.range(1, row.getArity()).
-                forEach(index -> enrichmentValues.put(fieldNames.get( index - 1), row.getField(index).toString()));
+        IntStream.range(numKeyFields, row.getArity()).
+                forEach(index -> enrichmentValues.put(fieldNames.get( index - 1), Objects.toString(row.getField(index), "null")));
 
         EnrichmentEntry enrichmentEntry = EnrichmentEntry.builder().ts(MessageUtils.getCurrentTimestamp()).
                 type(enrichmentType).

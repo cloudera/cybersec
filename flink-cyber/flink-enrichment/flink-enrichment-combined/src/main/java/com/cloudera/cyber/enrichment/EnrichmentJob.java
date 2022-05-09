@@ -86,7 +86,7 @@ public abstract class EnrichmentJob {
             new HbaseJobRawKafka().writeEnrichments(env, params, hbaseEnrichments);
         }
         DataStream<Message> hbased = params.getBoolean(PARAMS_ENABLE_HBASE, true) ?
-                HbaseJob.enrich(enriched, env, enrichmentConfigs) : enriched;
+                HbaseJob.enrich(enriched, enrichmentConfigs) : enriched;
 
         // rest based enrichments
         DataStream<Message> rested = params.getBoolean(PARAMS_ENABLE_REST, true) ?

@@ -1,6 +1,7 @@
 package com.cloudera.cyber.parser;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -22,5 +23,9 @@ public class TopicPatternToChainMap extends HashMap<String, TopicParserConfig> {
     public Map<String, Pattern> getBrokerPrefixTopicPatternMap() {
         return getBrokerPrefixTopicNameMap().entrySet().stream()
                 .collect(Collectors.toMap(Entry::getKey, entry -> Pattern.compile(entry.getValue())));
+    }
+
+    public List<String> getSourcesProduced() {
+        return values().stream().map(TopicParserConfig::getSource).collect(Collectors.toList());
     }
 }
