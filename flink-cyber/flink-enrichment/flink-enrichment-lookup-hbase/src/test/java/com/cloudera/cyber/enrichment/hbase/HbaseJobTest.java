@@ -31,7 +31,7 @@ public class HbaseJobTest extends HbaseJob {
     }
 
     @Override
-    protected void writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource) {
+    public void writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource) {
         // usually this would send to hbase
     }
 

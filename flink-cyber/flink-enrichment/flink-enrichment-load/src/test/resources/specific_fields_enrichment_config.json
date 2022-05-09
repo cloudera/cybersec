@@ -1,0 +1,22 @@
+{
+  "storageConfigs": {
+    "default": {
+      "format": "HBASE_METRON",
+      "hbaseTableName": "enrichments",
+      "columnFamily": "cf"
+    }
+  },
+  "enrichmentConfigs": {
+    "majestic_million": {
+      "storage": null,
+      "fieldMapping": {
+        "keyFields": [
+          "Domain"
+        ],
+        "valueFields": [
+          "GlobalRank"
+        ]
+      }
+    }
+  }
+}
