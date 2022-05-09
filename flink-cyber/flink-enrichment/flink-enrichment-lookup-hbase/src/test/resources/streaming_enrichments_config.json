@@ -1,0 +1,40 @@
+{
+  "storageConfigs": {
+    "default": {
+      "format": "HBASE_METRON",
+      "hbaseTableName": "metron_enrich",
+      "columnFamily": "cf"
+    },
+    "simple": {
+      "format": "HBASE_SIMPLE",
+      "hbaseTableName": "simple_enrich"
+    }
+  },
+  "enrichmentConfigs": {
+    "malicious_domain": {
+      "storage": "simple",
+      "fieldMapping": {
+        "keyFields": [
+          "domain"
+        ],
+        "valueFields": [
+          "source"
+        ],
+        "streamingSources": [
+          "malicious_domain"
+        ]
+      }
+    },
+    "majestic_million": {
+      "storage": null,
+      "fieldMapping": {
+        "keyFields": [
+          "domain"
+        ],
+        "valueFields": [
+          "rank"
+        ]
+      }
+    }
+  }
+}

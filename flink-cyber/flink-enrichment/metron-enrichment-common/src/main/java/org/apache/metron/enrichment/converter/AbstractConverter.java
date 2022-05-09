@@ -18,7 +18,6 @@
 
 package org.apache.metron.enrichment.converter;
 
-import com.google.common.collect.Iterables;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
@@ -51,7 +50,7 @@ public abstract class AbstractConverter<KEY_T extends LookupKey, VALUE_T extends
     };
 
     @Override
-    public Put toPut(String columnFamily, KEY_T key, VALUE_T values) throws IOException {
+    public Put toPut(String columnFamily, KEY_T key, VALUE_T values) {
         Put put = new Put(key.toBytes());
         byte[] cf = Bytes.toBytes(columnFamily);
         for (Map.Entry<byte[], byte[]> kv : values.toColumns()) {

@@ -1,0 +1,37 @@
+{
+  "storageConfigs": {
+    "default": {
+      "format": "HBASE_METRON",
+      "hbaseTableName": "enrichments_metron",
+      "columnFamily": "cf"
+    },
+    "simple": {
+      "format": "HBASE_SIMPLE",
+      "hbaseTableName": "enrichments_metron"
+    }
+  },
+  "enrichmentConfigs": {
+    "metron_enrich": {
+      "storage": null,
+      "fieldMapping": {
+        "keyFields": [
+          "key_1"
+        ]
+      }
+    },
+    "simple_enrich": {
+      "storage": "simple",
+      "fieldMapping": {
+        "keyFields": [
+          "key_1",
+          "key_2"
+        ],
+        "keyDelimiter": "_",
+        "valueFields": [
+          "value_1",
+          "value_2"
+        ]
+      }
+    }
+  }
+}

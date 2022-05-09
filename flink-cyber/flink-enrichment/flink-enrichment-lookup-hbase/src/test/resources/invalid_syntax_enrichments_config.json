@@ -1,0 +1,23 @@
+{
+  "metron_enrich" : {
+     "storage" : {
+       "format" : "HBASE_METRON",
+       "hbaseTableName" : "enrichments_metron",
+       "columnFamily" : "cf"
+     },
+    "fieldMapping" : {
+      "keyFields" : ["key_1"]
+    }
+  },
+  "simple_enrich" : {
+    "storage" : {
+      "format" : "HBASE_SIMPLE",
+      "hbaseTableName" : "enrichments_metron"
+    },
+    "fieldMapping" : {
+      "keyFields" : null,
+      "keyDelimiter" : "_",
+      "valueFields" : ["value_1", "value_2"]
+    }
+  }
+}
