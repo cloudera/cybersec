@@ -1,34 +1,37 @@
 package com.cloudera.cyber.enrichment.load;
 
 import com.cloudera.cyber.commands.EnrichmentCommand;
-import com.cloudera.cyber.enrichment.hbase.HBaseEnrichmentCommandSink;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
+import com.cloudera.cyber.enrichment.hbase.writer.HbaseEnrichmentCommandSink;
 import com.cloudera.cyber.flink.FlinkUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.hbase.sink.HBaseSinkFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
 
+@Slf4j
 public class BatchEnrichmentLoaderCSVHbaseKafka extends BatchEnrichmentLoaderCSV {
-    protected static final String PARAMS_ENRICHMENT_TABLE = "enrichments.table";
     private static final String PARAMS_TOPIC_ENRICHMENT_INPUT = "enrichment.topic.input";
 
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        new BatchEnrichmentLoaderCSVHbaseKafka().runPipeline(ParameterTool.fromPropertiesFile(args[0])).execute("Batch Enrichment Load");
+        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        FlinkUtils.executeEnv(new BatchEnrichmentLoaderCSVHbaseKafka().runPipeline(params),
+                String.format("Enrichment %s - batch load", params.get(ENRICHMENT_TYPE, "unspecified")),
+                params);
     }
 
     @Override
-    protected void writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource) {
+    protected void writeResults(ParameterTool params, EnrichmentsConfig enrichmentsConfig, String enrichmentType, DataStream<EnrichmentCommand> enrichmentSource, StreamExecutionEnvironment env) {
         String topic = params.get(PARAMS_TOPIC_ENRICHMENT_INPUT);
-        String enrichmentTable = params.get(PARAMS_ENRICHMENT_TABLE);
-        Preconditions.checkArgument(topic != null || enrichmentTable != null, "Properties must specify a topic %s or an enrichment table %s. Define one of these properties.", PARAMS_TOPIC_ENRICHMENT_INPUT, PARAMS_ENRICHMENT_TABLE);
-        Preconditions.checkArgument((topic == null) || (enrichmentTable == null), "Properties can not specify both a topic %s or an enrichment table %s. Remove one of these properties.", PARAMS_TOPIC_ENRICHMENT_INPUT, PARAMS_ENRICHMENT_TABLE);
-        if (enrichmentTable != null) {
-            HBaseSinkFunction<EnrichmentCommand> hbaseSink = new HBaseEnrichmentCommandSink(params.getRequired(PARAMS_ENRICHMENT_TABLE), params);
-            enrichmentSource.addSink(hbaseSink).name("HBase Enrichment Command Sink");
-        } else {
+        if (topic != null) {
             enrichmentSource.addSink(new FlinkUtils<>(EnrichmentCommand.class).createKafkaSink(topic, "enrichment_loader", params)).name("Kafka Enrichment Command Sink");
+        } else {
+            String hbaseTable = enrichmentsConfig.getStorageForEnrichmentType(enrichmentType).getHbaseTableName();
+            HBaseSinkFunction<EnrichmentCommand> hbaseSink = new HbaseEnrichmentCommandSink(hbaseTable, enrichmentsConfig, params);
+            enrichmentSource.addSink(hbaseSink);
         }
     }
 }

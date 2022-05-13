@@ -8,6 +8,7 @@ import com.cloudera.cyber.enrichemnt.stellar.adapter.MetronGeoEnrichmentAdapter;
 import com.cloudera.cyber.enrichment.geocode.IpGeoJob;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
 import org.apache.metron.common.configuration.EnrichmentConfigurations;
@@ -30,7 +31,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.metron.stellar.common.Constants.STELLAR_CONTEXT_CONF;
@@ -133,18 +133,22 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
 
         String source = message.getSource();
         SensorEnrichmentConfig sensorEnrichmentConfig = sensorEnrichmentConfigs.get(source);
-        extensions.put(Constants.SENSOR_TYPE, source);
-        extensions.put(Constants.Fields.TIMESTAMP.getName(), String.valueOf(Instant.now().toEpochMilli()));
-        JSONObject obj = new JSONObject(extensions);
-        Map<String, String> tmpMap = new HashMap<>();
-        Map<String, List<JSONObject>> tasks = generateTasks(obj, sensorEnrichmentConfig);
-        for (Map.Entry<String, List<JSONObject>> task : tasks.entrySet()) {
-            EnrichmentAdapter<CacheKey> adapter = adapterMap.get(task.getKey());
-            for (JSONObject m : task.getValue()) {
-                collectData(sensorEnrichmentConfig, task, adapter, m, tmpMap, dataQualityMessages);
+        if (sensorEnrichmentConfig != null) {
+            extensions.put(Constants.SENSOR_TYPE, source);
+            extensions.put(Constants.Fields.TIMESTAMP.getName(), String.valueOf(Instant.now().toEpochMilli()));
+            JSONObject obj = new JSONObject(extensions);
+            Map<String, String> tmpMap = new HashMap<>();
+            Map<String, List<JSONObject>> tasks = generateTasks(obj, sensorEnrichmentConfig);
+            for (Map.Entry<String, List<JSONObject>> task : tasks.entrySet()) {
+                EnrichmentAdapter<CacheKey> adapter = adapterMap.get(task.getKey());
+                for (JSONObject m : task.getValue()) {
+                    collectData(sensorEnrichmentConfig, task, adapter, m, tmpMap, dataQualityMessages);
+                }
             }
+            return MessageUtils.enrich(message, tmpMap, dataQualityMessages);
+        } else {
+            return message;
         }
-        return MessageUtils.enrich(message, tmpMap, dataQualityMessages);
     }
 
     private void collectData(SensorEnrichmentConfig sensorEnrichmentConfig, Map.Entry<String, List<JSONObject>> task, EnrichmentAdapter<CacheKey> adapter, JSONObject m, Map<String, String> tmpMap, List<DataQualityMessage> dataQualityMessages) {
@@ -154,7 +158,10 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
             Object value = fieldValueEntry.getValue();
             CacheKey cacheKey = new CacheKey(field, value, sensorEnrichmentConfig);
             try {
-                tmpMap.putAll(adapter.enrich(cacheKey));
+                JSONObject enrichmentResults = adapter.enrich(cacheKey);
+                enrichmentResults.forEach((k,v) -> {
+                    tmpMap.put((String)k, ObjectUtils.toString(v, "null") );
+                });
             } catch (Exception e) {
                 log.error("Error with " + task.getKey() + " failed: " + e.getMessage(), e);
                 MessageUtils.addQualityMessage(dataQualityMessages, DataQualityMessageLevel.ERROR, "Error with " + task.getKey() + " failed: " + e.getMessage(), field, ADAPTER_NAME_FEATURE.get(task.getKey()));

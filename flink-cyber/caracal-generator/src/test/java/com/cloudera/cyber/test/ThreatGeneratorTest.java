@@ -1,6 +1,6 @@
 package com.cloudera.cyber.test;
 
-import com.cloudera.cyber.test.generator.ThreatGenerator;
+import com.cloudera.cyber.generator.ThreatGenerator;
 import freemarker.template.TemplateException;
 import org.junit.Test;
 

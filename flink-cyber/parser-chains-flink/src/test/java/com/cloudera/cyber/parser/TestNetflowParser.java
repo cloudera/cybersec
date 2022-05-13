@@ -20,49 +20,48 @@ import static org.hamcrest.Matchers.*;
 public class TestNetflowParser extends AbstractParserJobTest {
 
     /**
-     *{
-     *     "netflow": {
-     *         "id": "220ee8c5-07d7-48d9-8df5-7d23376cb664",
-     *         "name": "Netflow Parser",
-     *         "parsers": [
-     *             {
-     *                 "id": "f812c6dc-40cc-4c77-abf8-e15fccdfea32",
-     *                 "name": "Netflow as JSON",
-     *                 "type": "com.cloudera.parserchains.parsers.JSONParser",
-     *                 "config": {
-     *                      "input" : { "input": "original_string" },
-     *                      "norm": { "norm": "UNFOLD_NESTED" }
-     *                 }
-     *             },
-     *             {
-     *                  "id": "6b8797a2-95df-4021-83c2-60ac4c786e67",
-     *                  "name": "Field Renamer",
-     *                  "type" : "com.cloudera.parserchains.parsers.RenameFieldParser",
-     *                  "config": {
-     *                      "fieldToRename": [
-     *                          { "from": "@timestamp", "to":"timestamp" }
-     *                      ]
-     *                  }
-     *              },
-     *              {
-     *                  "id": "9549004f-83e4-4d24-8baa-abdbdad06e61",
-     *                  "name": "Timestamp Parser",
-     *                  "type" : "com.cloudera.parserchains.parsers.TimestampFormatParser",
-     *                  "config": {
-     *                      "fields": [
-     *                          { "field": "timestamp", "format":"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "tz": "" }
-     *                      ]
-     *                  }
-     *              }
-     *         ]
-     *     }
+     * {
+     * "netflow": {
+     * "id": "220ee8c5-07d7-48d9-8df5-7d23376cb664",
+     * "name": "Netflow Parser",
+     * "parsers": [
+     * {
+     * "id": "f812c6dc-40cc-4c77-abf8-e15fccdfea32",
+     * "name": "Netflow as JSON",
+     * "type": "com.cloudera.parserchains.parsers.JSONParser",
+     * "config": {
+     * "input" : { "input": "original_string" },
+     * "norm": { "norm": "UNFOLD_NESTED" }
+     * }
+     * },
+     * {
+     * "id": "6b8797a2-95df-4021-83c2-60ac4c786e67",
+     * "name": "Field Renamer",
+     * "type" : "com.cloudera.parserchains.parsers.RenameFieldParser",
+     * "config": {
+     * "fieldToRename": [
+     * { "from": "@timestamp", "to":"timestamp" }
+     * ]
+     * }
+     * },
+     * {
+     * "id": "9549004f-83e4-4d24-8baa-abdbdad06e61",
+     * "name": "Timestamp Parser",
+     * "type" : "com.cloudera.parserchains.parsers.TimestampFormatParser",
+     * "config": {
+     * "fields": [
+     * { "field": "timestamp", "format":"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "tz": "" }
+     * ]
+     * }
+     * }
+     * ]
+     * }
      * }
      */
     @Multiline
     private String config;
 
 
-    @Override
     @Test
     public void testParser() throws Exception {
         ParameterTool params = ParameterTool.fromMap(new HashMap<String, String>() {{
@@ -86,6 +85,5 @@ public class TestNetflowParser extends AbstractParserJobTest {
         assertThat("Output not null", out, notNullValue());
         assertThat("Original String is moved", out.getExtensions(), not(hasKey(DEFAULT_INPUT_FIELD)));
         assertThat("Timestamp is moved", out.getExtensions(), not(hasKey("timestamp")));
-
     }
 }

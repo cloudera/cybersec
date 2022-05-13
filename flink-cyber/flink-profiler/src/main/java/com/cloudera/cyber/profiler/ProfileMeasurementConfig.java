@@ -7,9 +7,11 @@ import java.text.DecimalFormat;
 
 @Data
 @Builder
+@EqualsAndHashCode
 @AllArgsConstructor
 @NoArgsConstructor(force = true, access = AccessLevel.PUBLIC)
 public class ProfileMeasurementConfig implements Serializable {
+    private Integer id;
     private String fieldName;
     private String resultExtensionName;
     private ProfileAggregationMethod aggregationMethod;

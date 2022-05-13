@@ -1,0 +1,1 @@
+CREATE SEQUENCE IF NOT EXISTS ${profile_sequence_name} START WITH ${profile_sequence_start_with} CACHE ${profile_sequence_cache}

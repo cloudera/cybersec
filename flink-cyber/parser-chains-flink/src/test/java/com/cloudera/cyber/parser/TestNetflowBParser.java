@@ -18,7 +18,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class TestNetflowBParser extends AbstractParserJobTest {
-
     private static final String config = "{\n" +
             "    \"netflow\": {\n" +
             "        \"id\": \"220ee8c5-07d7-48d9-8df5-7d23376cb664\",\n" +
@@ -69,7 +68,6 @@ public class TestNetflowBParser extends AbstractParserJobTest {
             "}\n";
 
 
-    @Override
     @Test
     public void testParser() throws Exception {
         ParameterTool params = ParameterTool.fromMap(new HashMap<String, String>() {{
@@ -105,7 +103,6 @@ public class TestNetflowBParser extends AbstractParserJobTest {
         assertThat("Error output not null", error, notNullValue());
         assertThat("Original String is preserved", error.getExtensions(), hasKey(DEFAULT_INPUT_FIELD));
         assertThat("data quality message reported", error.getDataQualityMessages(), hasSize(1));
-
     }
 
     private void sendRecord(String topic, String resourceName) throws IOException {
