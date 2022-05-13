@@ -1,6 +1,6 @@
 package com.cloudera.cyber.test;
 
-import com.cloudera.cyber.test.generator.RandomGenerators;
+import com.cloudera.cyber.generator.RandomGenerators;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

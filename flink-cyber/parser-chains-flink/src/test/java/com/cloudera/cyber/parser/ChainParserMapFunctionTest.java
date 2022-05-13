@@ -34,7 +34,7 @@ public class ChainParserMapFunctionTest {
     private static final String TEST_TOPIC = "test_topic";
     private static final int TEST_PARTITION = 2;
     private static final String TEST_SOURCE = "test_source";
-    private static final OutputTag<Message> ERROR_OUTPUT = new OutputTag<Message>(ParserJob.PARSER_ERROR_SIDE_OUTPUT){};
+    private static final OutputTag<Message> ERROR_OUTPUT = new OutputTag<Message>(ParserJob.ERROR_MESSAGE_SIDE_OUTPUT){};
 
 
     @Test

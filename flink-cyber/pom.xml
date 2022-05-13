@@ -37,12 +37,14 @@
         <module>flink-commands</module>
         <module>cyber-csd</module>
         <module>cyber-jobs</module>
+        <module>cyber-parcel</module>
+        <module>flink-phoenix-jdbc</module>
     </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.verion>1.8</java.verion>
-        <lombok.version>1.18.16</lombok.version>
+        <lombok.version>1.18.22</lombok.version>
         <lombok.plugin.version>1.18.16.0</lombok.plugin.version>
         <flink.version>1.14.0-csa1.6.1.0</flink.version>
         <guava.version>21.0</guava.version>
@@ -70,8 +72,10 @@
         <assertj.version>3.13.2</assertj.version>
         <json.simple.version>1.1.1</json.simple.version>
         <jupiter.junit.version>5.5.2</jupiter.junit.version>
+        <phoenix.version>5.1.1.7.2.11.0-233</phoenix.version>
+        <phoenix.queryserver>6.0.0.7.1.6.0-297</phoenix.queryserver>
         <classindex.version>3.4</classindex.version>
-        <antlr.version>4.5</antlr.version>
+        <antlr.version>4.7.2</antlr.version>
         <metrics.version>3.0.2</metrics.version>
         <pcap.version>1.7.1</pcap.version>
         <global_kryo_version>3.0.3</global_kryo_version>
@@ -80,6 +84,7 @@
         <cybersec.version>2.5.5</cybersec.version>
         <cdh.version>7.1.7.0-551-20897251</cdh.version>
         <cybersec.full.version>${cybersec.version}-cdh${cdh.version}</cybersec.full.version>
+        <simple-syslog.version>0.0.6</simple-syslog.version>
     </properties>
 
     <repositories>
@@ -245,10 +250,9 @@
                 <artifactId>flink-table-api-java-bridge_${scala.binary.version}</artifactId>
                 <version>${flink.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.flink</groupId>
-                <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
+                <artifactId>metron-enrichment-common</artifactId>
                 <version>${flink.version}</version>
             </dependency>
 

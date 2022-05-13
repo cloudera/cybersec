@@ -22,5 +22,5 @@ import java.io.Serializable;
 import java.util.Map;
 
 public interface Configurable extends Serializable {
-    void configure(Map<String, Object> config);
+  void configure(Map<String, Object> config);
 }

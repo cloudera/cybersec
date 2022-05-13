@@ -1,33 +1,11 @@
 package com.cloudera.cyber.parser;
 
-import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
-
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.SignedSourceKey;
-import com.cloudera.parserchains.core.ChainBuilder;
-import com.cloudera.parserchains.core.ChainLink;
-import com.cloudera.parserchains.core.ChainRunner;
-import com.cloudera.parserchains.core.DefaultChainBuilder;
-import com.cloudera.parserchains.core.DefaultChainRunner;
-import com.cloudera.parserchains.core.FieldName;
-import com.cloudera.parserchains.core.FieldValue;
-import com.cloudera.parserchains.core.InvalidParserException;
-import com.cloudera.parserchains.core.ReflectiveParserBuilder;
+import com.cloudera.parserchains.core.*;
 import com.cloudera.parserchains.core.catalog.ClassIndexParserCatalog;
-import java.nio.charset.StandardCharsets;
-import java.security.PrivateKey;
-import java.security.Signature;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +18,16 @@ import org.apache.flink.metrics.MeterView;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
+
+import java.nio.charset.StandardCharsets;
+import java.security.PrivateKey;
+import java.security.Signature;
+import java.time.Instant;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -62,7 +50,7 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
     private transient Map<String, ChainLink> chains;
     private transient Signature signature;
     private transient Meter messageMeter;
-    private final OutputTag<Message> errorOutputTag = new OutputTag<Message>(ParserJob.PARSER_ERROR_SIDE_OUTPUT){};
+    private final OutputTag<Message> errorOutputTag = new OutputTag<Message>(ParserJob.ERROR_MESSAGE_SIDE_OUTPUT){};
     private transient Map<String, TopicParserConfig> topicNameToChain;
     private transient List<Tuple2<Pattern, TopicParserConfig>> topicPatternToChain;
 
@@ -190,5 +178,4 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
                 topicPatternToChain.stream().filter(t -> t.f0.matcher(top).
                         matches()).findFirst().map(t -> t.f1).orElse(new TopicParserConfig(top, top, defaultKafkaBootstrap)));
     }
-
 }
