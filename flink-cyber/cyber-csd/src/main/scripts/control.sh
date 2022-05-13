@@ -11,11 +11,10 @@ case $CMD in
   (start_generator)
     echo "Starting generator job"
     export LOGGER_JARS=${CDH_PARCEL_HOME}/lib/hadoop/client/log4j.jar:${CDH_PARCEL_HOME}/lib/hadoop/client/slf4j-api.jar
-
     exec ${CDH_FLINK_BIN}/flink run --jobmanager yarn-cluster -yjm 1024 -ytm 1024 --detached --yarnname "Caracal Generator" ${CYBERSEC_BIN}/caracal-generator-0.0.1-SNAPSHOT.jar ${CYBERSEC_CONF_DIR}/generator.properties
     ;;
   (client)
-    echo "Client EHO"
+    echo "Client echo"
     set-dependencies
     ;;
   (*)

@@ -53,7 +53,7 @@
                     <descriptors>
                         <descriptor>${project.basedir}/src/main/assemblies/csd-assembly.xml</descriptor>
                     </descriptors>
-                    <finalName>CYBERSEC-2.4.2</finalName>
+                    <finalName>CYBERSEC-${cybersec.full.version}</finalName>
                 </configuration>
                 <executions>
                     <execution>

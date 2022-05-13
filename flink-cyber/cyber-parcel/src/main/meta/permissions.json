@@ -1,11 +1,30 @@
 {
-
-  "bin/start-generator.sh": {
+  "bin": {
     "user":  "cybersec",
     "group": "cybersec",
     "permissions": "0755"
   },
-  "etc/cybersec/conf.dist": {
+  "bin/start-generator": {
+    "user":  "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/start-enrichment": {
+    "user":  "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/start-parser": {
+    "user":  "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/start-profile": {
+    "user":  "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/send-scoring-command": {
     "user":  "cybersec",
     "group": "cybersec",
     "permissions": "0755"

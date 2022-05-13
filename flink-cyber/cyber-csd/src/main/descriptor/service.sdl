@@ -532,7 +532,7 @@
     "configWriter" : {
       "generators" : [
         {
-          "filename": "conf/generator.properties",
+          "filename": "cybersec-conf/generator.properties",
           "configFormat": "properties",
           "includedParams": [
             "ssl_client_truststore_location",
