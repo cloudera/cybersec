@@ -77,6 +77,9 @@
         <global_kryo_version>3.0.3</global_kryo_version>
         <global_kryo_serializers_version>0.38</global_kryo_serializers_version>
         <global_jar_version>3.0.2</global_jar_version>
+        <cybersec.version>2.5.5</cybersec.version>
+        <cdh.version>7.1.7.0-551-20897251</cdh.version>
+        <cybersec.full.version>${cybersec.version}-cdh${cdh.version}</cybersec.full.version>
     </properties>
 
     <repositories>

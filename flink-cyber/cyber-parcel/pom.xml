@@ -46,7 +46,6 @@ under the License.
 	</repositories>
 
     <properties>
-        <cybersec.full.version>2.4.2-csa1.6.1.0-cdh7.1.7.0-551-20897251</cybersec.full.version>
 		<cybersec.basedir>${project.parent.basedir}</cybersec.basedir>
 		<parcel.basename>CYBERSEC-${cybersec.full.version}</parcel.basename>
         <parcel.tar.gz.filename>${parcel.basename}.tar.gz</parcel.tar.gz.filename>

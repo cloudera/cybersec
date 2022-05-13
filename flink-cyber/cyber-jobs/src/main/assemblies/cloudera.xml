@@ -37,310 +37,87 @@
 			<useTransitiveDependencies>true</useTransitiveDependencies>
 			<useTransitiveFiltering>true</useTransitiveFiltering>
 			<includes>
-				<include>org.apache.logging.log4j:log4j-api</include>
-				<include>org.apache.logging.log4j:log4j-core</include>
-				<include>org.apache.logging.log4j:log4j-slf4j-impl</include>
-				<include>org.apache.logging.log4j:log4j-1.2-api</include>
+				<include>org.slf4j:slf4j-api</include>
 			</includes>
 		</dependencySet>
 	</dependencySets>
+
 	<files>
-		<!-- copy bash utils -->
 		<file>
-			<source>target/bash-java-utils.jar</source>
-			<outputDirectory>bin/</outputDirectory>
+			<source>../caracal-generator/target/caracal-generator-${project.version}.jar</source>
+			<outputDirectory>jobs/</outputDirectory>
+			<destName>caracal-generator-${cybersec.full.version}.jar</destName>
 			<fileMode>0644</fileMode>
 		</file>
 
 		<file>
-			<source>../caracal-generator/target/caracal-generator-0.0.1-SNAPSHOT.jar</source>
-			<outputDirectory>opt/</outputDirectory>
-			<destName>caracal-generator-${project.version}.jar</destName>
+			<source>../flink-enrichment/flink-enrichment-combined/target/flink-enrichment-combined-${project.version}.jar</source>
+			<outputDirectory>jobs/</outputDirectory>
+			<destName>flink-enrichment-combined-${cybersec.full.version}.jar</destName>
 			<fileMode>0644</fileMode>
 		</file>
 
-<!--		&lt;!&ndash; Table/SQL Uber JAR &ndash;&gt;-->
-<!--		<file>-->
-<!--			<source>../flink-table/flink-table-uber/target/flink-table-uber_${scala.binary.version}-${project.version}.jar</source>-->
-<!--			<outputDirectory>lib/</outputDirectory>-->
-<!--			<destName>flink-table-uber_${scala.binary.version}-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
+		<file>
+			<source>../flink-profiler-java/target/flink-profiler-java-${project.version}.jar</source>
+			<outputDirectory>jobs/</outputDirectory>
+			<destName>flink-profiler-java-${cybersec.full.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
+		<file>
+			<source>../parser-chains-flink/target/parser-chains-flink-${project.version}.jar</source>
+			<outputDirectory>jobs/</outputDirectory>
+			<destName>parser-chains-flink-${cybersec.full.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
 
-<!--		&lt;!&ndash; Table/SQL Formats &ndash;&gt;-->
-<!--		<file>-->
-<!--			<source>../flink-formats/flink-json/target/flink-json-${project.version}.jar</source>-->
-<!--			<outputDirectory>lib/</outputDirectory>-->
-<!--			<destName>flink-json-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
+		<file>
+			<source>../flink-commands/scoring-commands/target/scoring-commands-${project.version}.jar</source>
+			<outputDirectory>tools/</outputDirectory>
+			<destName>scoring-commands-${cybersec.full.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
 
-<!--		<file>-->
-<!--			<source>../flink-formats/flink-avro/target/flink-avro-${project.version}.jar</source>-->
-<!--			<outputDirectory>lib/</outputDirectory>-->
-<!--			<destName>flink-avro-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
+		<file>
+			<source>../flink-commands/scoring-commands/README.md</source>
+			<outputDirectory>tools/</outputDirectory>
+			<destName>README.md</destName>
+			<fileMode>0644</fileMode>
+		</file>
 
-<!--		<file>-->
-<!--			<source>../flink-formats/flink-csv/target/flink-csv-${project.version}.jar</source>-->
-<!--			<outputDirectory>lib/</outputDirectory>-->
-<!--			<destName>flink-csv-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		<file>-->
-<!--			<source>../flink-formats/flink-parquet/target/flink-parquet_2.12-${project.version}.jar</source>-->
-<!--			<outputDirectory>lib/</outputDirectory>-->
-<!--			<destName>flink-parquet_2.12-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		<file>-->
-<!--			<source>../flink-formats/flink-orc/target/flink-orc_2.12-${project.version}.jar</source>-->
-<!--			<outputDirectory>lib/</outputDirectory>-->
-<!--			<destName>flink-orc_2.12-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		<file>-->
-<!--			<source>../flink-filesystems/flink-s3-fs-hadoop/target/flink-s3-fs-hadoop-${project.version}.jar</source>-->
-<!--			<outputDirectory>lib/</outputDirectory>-->
-<!--			<destName>flink-s3-fs-hadoop-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		<file>-->
-<!--			<source>../flink-filesystems/flink-azure-fs-hadoop/target/flink-azure-fs-hadoop-${project.version}.jar</source>-->
-<!--			<outputDirectory>lib/</outputDirectory>-->
-<!--			<destName>flink-azure-fs-hadoop-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		<file>-->
-<!--			<source>../flink-filesystems/gateway-cloud-bindings-shaded/target/gateway-cloud-bindings-shaded-${project.version}.jar</source>-->
-<!--			<outputDirectory>lib/</outputDirectory>-->
-<!--			<destName>gateway-cloud-bindings-shaded-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		&lt;!&ndash; Kafka Metrics Reporter &ndash;&gt;-->
-<!--		<file>-->
-<!--			<source>../flink-metrics/flink-metrics-kafka/target/flink-metrics-kafka-${project.version}.jar</source>-->
-<!--			<outputDirectory>lib/</outputDirectory>-->
-<!--			<destName>flink-metrics-kafka-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		&lt;!&ndash; copy the config file &ndash;&gt;-->
-<!--		<file>-->
-<!--			<source>src/main/resources/flink-conf.yaml</source>-->
-<!--			<outputDirectory>conf</outputDirectory>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		<file>-->
-<!--			<source>../LICENSE</source>-->
-<!--			<outputDirectory/>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		&lt;!&ndash; copy the Kafka metrics reporter &ndash;&gt;-->
-<!--		<file>-->
-<!--			<source>../flink-metrics/flink-metrics-kafka/target/flink-metrics-kafka-${project.version}.jar</source>-->
-<!--			<outputDirectory>lib/</outputDirectory>-->
-<!--			<destName>flink-metrics-kafka-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		&lt;!&ndash; Atlas Bridge &ndash;&gt;-->
-<!--		<file>-->
-<!--			<source>../flink-atlas-bridge/target/flink-atlas-bridge_${scala.binary.version}-${project.version}.jar</source>-->
-<!--			<outputDirectory>opt/cloudera/atlas</outputDirectory>-->
-<!--			<destName>flink-atlas-bridge_${scala.binary.version}-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		&lt;!&ndash; SQL Client &ndash;&gt;-->
-<!--		<file>-->
-<!--			<source>../flink-table/flink-sql-client/target/flink-sql-client_${scala.binary.version}-${project.version}.jar</source>-->
-<!--			<outputDirectory>opt/cloudera/sql-client</outputDirectory>-->
-<!--			<destName>flink-sql-client_${scala.binary.version}-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		&lt;!&ndash; copy the SQL Client dependencies &ndash;&gt;-->
-<!--		<file>-->
-<!--			<source>../flink-connectors/flink-sql-connector-kafka/target/flink-sql-connector-kafka_${scala.binary.version}-${project.version}.jar</source>-->
-<!--			<outputDirectory>opt/cloudera/sql-client/lib</outputDirectory>-->
-<!--			<destName>flink-sql-connector-kafka_${scala.binary.version}-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		<file>-->
-<!--			<source>../flink-formats/flink-sql-avro-cloudera-registry/target/flink-sql-avro-cloudera-registry-${project.version}.jar</source>-->
-<!--			<outputDirectory>opt/cloudera/sql-client/lib</outputDirectory>-->
-<!--			<destName>flink-sql-avro-cloudera-registry-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		<file>-->
-<!--			<source>../flink-connectors/flink-connector-hbase-2.2/target/flink-connector-hbase-2.2_${scala.binary.version}-${project.version}.jar</source>-->
-<!--			<outputDirectory>opt/cloudera/sql-client/lib</outputDirectory>-->
-<!--			<destName>flink-hbase_${scala.binary.version}-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
-
-<!--		<file>-->
-<!--			<source>../flink-python/target/flink-python_${scala.binary.version}-${project.version}.jar</source>-->
-<!--			<outputDirectory>opt/cloudera/sql-client/lib</outputDirectory>-->
-<!--			<destName>flink-python_${scala.binary.version}-${project.version}.jar</destName>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</file>-->
 	</files>
 
 	<fileSets>
-<!--		<fileSet>-->
-<!--			<directory>../licenses-binary</directory>-->
-<!--			<outputDirectory>licenses</outputDirectory>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</fileSet>-->
-<!--		&lt;!&ndash; copy start scripts &ndash;&gt;-->
-<!--		<fileSet>-->
-<!--			<directory>src/main/flink-bin/bin</directory>-->
-<!--			<outputDirectory>bin</outputDirectory>-->
-<!--			<fileMode>0755</fileMode>-->
-<!--		</fileSet>-->
-
-<!--		&lt;!&ndash; copy plugins directory &ndash;&gt;-->
-<!--		<fileSet>-->
-<!--			<directory>src/main/flink-bin/plugins</directory>-->
-<!--			<outputDirectory>plugins</outputDirectory>-->
-<!--			<fileMode>0755</fileMode>-->
-<!--		</fileSet>-->
-
-<!--		&lt;!&ndash; copy yarn start scripts &ndash;&gt;-->
-<!--		<fileSet>-->
-<!--			<directory>src/main/flink-bin/yarn-bin</directory>-->
-<!--			<outputDirectory>bin</outputDirectory>-->
-<!--			<fileMode>0755</fileMode>-->
-<!--		</fileSet>-->
-
-		<!-- copy default configuration -->
 		<fileSet>
 			<directory>src/main/resources/conf</directory>
 			<outputDirectory>conf</outputDirectory>
 			<fileMode>0644</fileMode>
+			<excludes>
+				<exclude>*.json</exclude>
+			</excludes>
 		</fileSet>
-
-<!--		&lt;!&ndash; create an empty log directory &ndash;&gt;-->
-<!--		<fileSet>-->
-<!--			<directory>src/main/flink-bin/</directory>-->
-<!--			<outputDirectory>log</outputDirectory>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--			<excludes>-->
-<!--				<exclude>**/*</exclude>-->
-<!--			</excludes>-->
-<!--		</fileSet>-->
-
-<!--		&lt;!&ndash; copy SQL client &ndash;&gt;-->
-<!--		<fileSet>-->
-<!--			<directory>../flink-table/flink-sql-client/bin/</directory>-->
-<!--			<outputDirectory>bin</outputDirectory>-->
-<!--			<fileMode>0755</fileMode>-->
-<!--		</fileSet>-->
-
-<!--		&lt;!&ndash; copy SQL client configuration files &ndash;&gt;-->
-<!--		<fileSet>-->
-<!--			<directory>../flink-table/flink-sql-client/conf/</directory>-->
-<!--			<outputDirectory>conf</outputDirectory>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</fileSet>-->
-
-<!--		&lt;!&ndash; copy *.txt files &ndash;&gt;-->
-<!--		<fileSet>-->
-<!--			<directory>src/main/flink-bin/</directory>-->
-<!--			<outputDirectory/>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--			<includes>-->
-<!--				<include>*.txt</include>-->
-<!--			</includes>-->
-<!--		</fileSet>-->
-
-<!--		&lt;!&ndash; copy JavaDocs &ndash;&gt;-->
-<!--		<fileSet>-->
-<!--			&lt;!&ndash; <directory>../target/apidocs</directory &ndash;&gt;-->
-<!--			<directory>../target</directory>-->
-<!--			<includes>-->
-<!--				<include>flink-*-javadoc.jar</include>-->
-<!--			</includes>-->
-<!--			<outputDirectory>docs/javadoc</outputDirectory>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</fileSet>-->
-
-<!--		&lt;!&ndash; copy the tools &ndash;&gt;-->
-<!--		<fileSet>-->
-<!--			<directory>src/main/flink-bin/tools</directory>-->
-<!--			<outputDirectory>tools</outputDirectory>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</fileSet>-->
-
-<!--		<fileSet>-->
-<!--			<directory>../tools/jar-repack</directory>-->
-<!--			<outputDirectory>tools</outputDirectory>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--		</fileSet>-->
-
-<!--		&lt;!&ndash; copy jar files of the streaming examples &ndash;&gt;-->
-<!--		<fileSet>-->
-<!--			<directory>../flink-examples/flink-examples-streaming/target</directory>-->
-<!--			<outputDirectory>examples/streaming</outputDirectory>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--			<includes>-->
-<!--				<include>*.jar</include>-->
-<!--			</includes>-->
-<!--			<excludes>-->
-<!--				<exclude>flink-examples-streaming*.jar</exclude>-->
-<!--				<exclude>original-*.jar</exclude>-->
-<!--			</excludes>-->
-<!--		</fileSet>-->
-
-<!--		&lt;!&ndash; copy jar files of the streaming examples &ndash;&gt;-->
-<!--		<fileSet>-->
-<!--			<directory>../flink-examples/flink-examples-build-helper/flink-examples-streaming-twitter/target</directory>-->
-<!--			<outputDirectory>examples/streaming</outputDirectory>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--			<includes>-->
-<!--				<include>*.jar</include>-->
-<!--			</includes>-->
-<!--			<excludes>-->
-<!--				<exclude>original-*.jar</exclude>-->
-<!--			</excludes>-->
-<!--		</fileSet>-->
-<!--		<fileSet>-->
-<!--			<directory>../flink-examples/flink-examples-build-helper/flink-examples-streaming-state-machine/target</directory>-->
-<!--			<outputDirectory>examples/streaming</outputDirectory>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--			<includes>-->
-<!--				<include>*.jar</include>-->
-<!--			</includes>-->
-<!--			<excludes>-->
-<!--				<exclude>original-*.jar</exclude>-->
-<!--			</excludes>-->
-<!--		</fileSet>-->
-
-<!--		&lt;!&ndash; copy jar file of the table examples &ndash;&gt;-->
-<!--		<fileSet>-->
-<!--			<directory>../flink-examples/flink-examples-table/target</directory>-->
-<!--			<outputDirectory>examples/table</outputDirectory>-->
-<!--			<fileMode>0644</fileMode>-->
-<!--			<includes>-->
-<!--				<include>*.jar</include>-->
-<!--			</includes>-->
-<!--			<excludes>-->
-<!--				<exclude>flink-*.jar</exclude>-->
-<!--				<exclude>original-*.jar</exclude>-->
-<!--			</excludes>-->
-<!--		</fileSet>-->
+		<fileSet>
+			<directory>target/classes/scripts</directory>
+			<outputDirectory>bin</outputDirectory>
+			<fileMode>0755</fileMode>
+			<excludes>
+				<exclude>send*</exclude>
+			</excludes>
+		</fileSet>
+		<fileSet>
+			<directory>target/classes/scripts</directory>
+			<outputDirectory>tools</outputDirectory>
+			<fileMode>755</fileMode>
+			<excludes>
+				<exclude>start*</exclude>
+			</excludes>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/resources/conf</directory>
+			<outputDirectory>tools</outputDirectory>
+			<fileMode>0644</fileMode>
+			<includes>
+				<include>sample-rule.json</include>
+			</includes>
+		</fileSet>
 	</fileSets>
 </assembly>

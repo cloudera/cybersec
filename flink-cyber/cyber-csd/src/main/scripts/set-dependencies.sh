@@ -1,5 +1,6 @@
 function set-dependencies {
   # Generating Zookeeper quorum
+  echo "SET DEPENDENCY START"
   QUORUM=$ZK_QUORUM
   if [[ -n $CHROOT ]]; then
     QUORUM="${QUORUM}${CHROOT}"
@@ -20,5 +21,6 @@ function set-dependencies {
   echo "historyserver.web.ssl.enabled: $HS_REST_ENABLED" >> $CYBERSEC_CONF_DIR/test-cybersec-conf.yaml
   echo "historyserver.security.spnego.auth.enabled: $HS_SPNEGO_ENABLED" >> $CYBERSEC_CONF_DIR/test-cybersec-conf.yaml
   echo "" >> $CYBERSEC_CONF_DIR/test-cybersec-conf.yaml
+  echo "SET DEPENDENCY END"
 
 }
