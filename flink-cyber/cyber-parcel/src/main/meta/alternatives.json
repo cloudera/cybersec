@@ -1,0 +1,32 @@
+{
+  "start-generator": {
+    "destination": "/usr/bin/start-generator",
+    "source": "bin/start-generator",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "start-enrichment": {
+    "destination": "/usr/bin/start-enrichment",
+    "source": "bin/start-enrichment",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "start-parser": {
+    "destination": "/usr/bin/start-parser",
+    "source": "bin/start-parser",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "start-profile": {
+    "destination": "/usr/bin/start-profile",
+    "source": "bin/start-profile",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "send-scoring-command": {
+    "destination": "/usr/bin/send-scoring-command",
+    "source": "bin/send-scoring-command",
+    "priority": 10,
+    "isDirectory": false
+  }
+}

@@ -1,0 +1,123 @@
+<!--
+  ~ Licensed to the Apache Software Foundation (ASF) under one
+  ~ or more contributor license agreements.  See the NOTICE file
+  ~ distributed with this work for additional information
+  ~ regarding copyright ownership.  The ASF licenses this file
+  ~ to you under the Apache License, Version 2.0 (the
+  ~ "License"); you may not use this file except in compliance
+  ~ with the License.  You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<assembly>
+	<!-- Do not depend on the output of the bin.xml as assemblies are executed during the same maven
+	lifecycle phase it is safer to create independently. This also enables us to filter unnecessary files.
+	 -->
+	<id>cloudera</id>
+	<formats>
+		<format>tar.gz</format>
+	</formats>
+
+	<includeBaseDirectory>true</includeBaseDirectory>
+	<baseDirectory>${cloudera.tar.name}</baseDirectory>
+
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>lib</outputDirectory>
+			<unpack>false</unpack>
+			<useProjectArtifact>false</useProjectArtifact>
+			<useProjectAttachments>false</useProjectAttachments>
+			<useTransitiveDependencies>true</useTransitiveDependencies>
+			<useTransitiveFiltering>true</useTransitiveFiltering>
+			<includes>
+				<include>org.slf4j:slf4j-api</include>
+			</includes>
+		</dependencySet>
+	</dependencySets>
+
+	<files>
+		<file>
+			<source>../caracal-generator/target/caracal-generator-${project.version}.jar</source>
+			<outputDirectory>jobs/</outputDirectory>
+			<destName>caracal-generator-${cybersec.full.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
+
+		<file>
+			<source>../flink-enrichment/flink-enrichment-combined/target/flink-enrichment-combined-${project.version}.jar</source>
+			<outputDirectory>jobs/</outputDirectory>
+			<destName>flink-enrichment-combined-${cybersec.full.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
+
+		<file>
+			<source>../flink-profiler-java/target/flink-profiler-java-${project.version}.jar</source>
+			<outputDirectory>jobs/</outputDirectory>
+			<destName>flink-profiler-java-${cybersec.full.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
+		<file>
+			<source>../parser-chains-flink/target/parser-chains-flink-${project.version}.jar</source>
+			<outputDirectory>jobs/</outputDirectory>
+			<destName>parser-chains-flink-${cybersec.full.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
+
+		<file>
+			<source>../flink-commands/scoring-commands/target/scoring-commands-${project.version}.jar</source>
+			<outputDirectory>tools/</outputDirectory>
+			<destName>scoring-commands-${cybersec.full.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
+
+		<file>
+			<source>../flink-commands/scoring-commands/README.md</source>
+			<outputDirectory>tools/</outputDirectory>
+			<destName>README.md</destName>
+			<fileMode>0644</fileMode>
+		</file>
+
+	</files>
+
+	<fileSets>
+		<fileSet>
+			<directory>src/main/resources/conf</directory>
+			<outputDirectory>conf</outputDirectory>
+			<fileMode>0644</fileMode>
+			<excludes>
+				<exclude>*.json</exclude>
+			</excludes>
+		</fileSet>
+		<fileSet>
+			<directory>target/classes/scripts</directory>
+			<outputDirectory>bin</outputDirectory>
+			<fileMode>0755</fileMode>
+			<excludes>
+				<exclude>send*</exclude>
+			</excludes>
+		</fileSet>
+		<fileSet>
+			<directory>target/classes/scripts</directory>
+			<outputDirectory>tools</outputDirectory>
+			<fileMode>755</fileMode>
+			<excludes>
+				<exclude>start*</exclude>
+			</excludes>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/resources/conf</directory>
+			<outputDirectory>tools</outputDirectory>
+			<fileMode>0644</fileMode>
+			<includes>
+				<include>sample-rule.json</include>
+			</includes>
+		</fileSet>
+	</fileSets>
+</assembly>

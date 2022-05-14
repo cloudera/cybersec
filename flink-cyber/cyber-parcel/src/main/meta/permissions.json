@@ -1,0 +1,32 @@
+{
+  "bin": {
+    "user":  "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/start-generator": {
+    "user":  "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/start-enrichment": {
+    "user":  "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/start-parser": {
+    "user":  "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/start-profile": {
+    "user":  "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/send-scoring-command": {
+    "user":  "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  }
+}
