@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "name": "CYBERSEC",
+  "version": "${cybersec.full.version}",
+  "extraVersionInfo": {
+    "fullVersion": "${cybersec.full.version}",
+    "baseVersion": "${cybersec.full.version}",
+    "patchCount": "0"
+  },
+  "depends": "CDH (>= 7.0)",
+  "setActiveSymlink": true,
+  "scripts": {
+    "defines": "cybersec_env.sh"
+  },
+  "packages": [
+    {
+      "name": "cybersec",
+      "version": "${cybersec.full.version}"
+    }
+  ],
+  "components": [
+    {
+      "name": "cybersec",
+      "version": "${cybersec.full.version}",
+      "pkg_version": "${cybersec.full.version}"
+    }
+  ],
+  "provides": [
+    "cybersec"
+  ],
+  "users": {
+    "cybersec": {
+      "longname": "CSA Powered by Cyber Security",
+      "home": "/var/lib/cybersec",
+      "shell": "/bin/bash",
+      "extra_groups": ["flink"]
+    }
+  },
+  "groups": [
+    "cybersec"
+  ]
+}

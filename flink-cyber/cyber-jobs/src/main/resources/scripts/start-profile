@@ -1,0 +1,5 @@
+#!/bin/sh
+
+flink run --jobmanager yarn-cluster -yjm 2048 -ytm 2048 \
+# --classpath file://<path-to-phoenix-queryserver-client-6-jar> \
+ --detached --yarnname "Profile job" /opt/cloudera/CYBERSEC/jobs/flink-profiler-java-${cybersec.full.version}.jar /opt/cloudera/CYBERSEC/etc/conf/profile.properties
