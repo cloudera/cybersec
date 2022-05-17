@@ -91,31 +91,10 @@
         <repository>
             <id>cloudera</id>
             <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
         </repository>
-        <!--   <repository>
-               <id>hortonworks</id>
-               <url>https://repo.hortonworks.com/content/repositories/releases/</url>
-               <releases>
-                   <enabled>false</enabled>
-               </releases>
-           </repository>-->
-        <repository>
-            <id>cloudera-local-releasde</id>
-            <url>https://repository.cloudera.com/artifactory/libs-release-local/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-
         <repository>
             <id>multiline-release-repo</id>
             <url>https://raw.github.com/benelog/multiline/master/maven-repository</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
         </repository>
     </repositories>
 
