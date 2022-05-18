@@ -21,7 +21,7 @@
         <dependency>
             <groupId>com.cloudera.parserchains</groupId>
             <artifactId>parser-chains-core</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
 
 
