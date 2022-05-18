@@ -19,27 +19,11 @@
 
     <pluginRepositories>
         <pluginRepository>
-            <releases>
-                <updatePolicy>never</updatePolicy>
-            </releases>
+            <id>cloudera-staging</id>
+            <url>https://repository.cloudera.com/artifactory/libs-staging-local</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-            <id>cloudera-build-plugins</id>
-            <name>cloudera-build-plugins</name>
-            <url>https://repository.cloudera.com/content/repositories/releases/</url>
-        </pluginRepository>
-        <pluginRepository>
-            <id>Cloudera-Mirrors</id>
-            <name>cloudera-mirrors-artifactory</name>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <url>http://maven.jenkins.cloudera.com:8081/artifactory/cloudera-mirrors</url>
-            <layout>default</layout>
         </pluginRepository>
     </pluginRepositories>
 
