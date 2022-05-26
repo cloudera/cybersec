@@ -99,17 +99,6 @@
 			<directory>target/classes/scripts</directory>
 			<outputDirectory>bin</outputDirectory>
 			<fileMode>0755</fileMode>
-			<excludes>
-				<exclude>send*</exclude>
-			</excludes>
-		</fileSet>
-		<fileSet>
-			<directory>target/classes/scripts</directory>
-			<outputDirectory>tools</outputDirectory>
-			<fileMode>755</fileMode>
-			<excludes>
-				<exclude>start*</exclude>
-			</excludes>
 		</fileSet>
 		<fileSet>
 			<directory>src/main/resources/conf</directory>

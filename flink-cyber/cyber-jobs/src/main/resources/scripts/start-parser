@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 flink run --jobmanager yarn-cluster -yjm 1024 -ytm 1024 -yt netflow.schema --detached --yarnname "Parser" \
-    /opt/cloudera/CYBERSEC/jobs/parser-chains-flink-${cybersec.full.version}.jar /opt/cloudera/CYBERSEC/etc/conf/6parser.properties
+    /opt/cloudera/parcels/CYBERSEC/jobs/parser-chains-flink-${cybersec.full.version}.jar /opt/cloudera/parcels/CYBERSEC/etc/conf/parser.properties

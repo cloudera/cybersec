@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 flink run --jobmanager yarn-cluster -yjm 1024 -ytm 1024 --detached --yarnname "Caracal Generator" \
-      /opt/cloudera/CYBERSEC/jobs/caracal-generator-${cybersec.full.version}.jar /opt/cloudera/CYBERSEC/etc/conf/generator.properties
+      /opt/cloudera/parcels/CYBERSEC/jobs/caracal-generator-${cybersec.full.version}.jar /opt/cloudera/parcels/CYBERSEC/etc/conf/generator.properties
