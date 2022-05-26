@@ -5,14 +5,13 @@
     <parent>
         <artifactId>nifi-parser-bundle</artifactId>
         <groupId>com.cloudera.cyber</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>${project.parent.version}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>nifi-parser-nar</artifactId>
     <groupId>com.cloudera.cyber</groupId>
-    <version>0.0.1-SNAPSHOT</version>
     <packaging>nar</packaging>
 
     <dependencies>

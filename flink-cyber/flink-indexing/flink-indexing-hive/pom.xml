@@ -5,7 +5,7 @@
     <parent>
         <artifactId>flink-indexing</artifactId>
         <groupId>com.cloudera.cyber</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>2.3.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -14,8 +14,7 @@
     <properties>
         <main.class>com.cloudera.cyber.indexing.hive.HiveJobKafka</main.class>
         <java.version>1.8</java.version>
-        <hive.version>3.1.3000.7.2.6.3-1</hive.version>
-        <hadoop.version>3.1.1.7.2.6.3-1</hadoop.version>
+        <hive.version>3.1.3000.${cdh.version}</hive.version>
     </properties>
 
     <dependencies>
