@@ -12,13 +12,11 @@
 
     <groupId>com.cloudera.cyber</groupId>
     <artifactId>nifi-parser-bundle</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
 
     <packaging>pom</packaging>
 
     <properties>
         <nifi.version>1.11.4</nifi.version>
-        <kafka.version>2.4.1.7.1.1.0-565</kafka.version>
         <lombok.version>1.18.12</lombok.version>
     </properties>
 
