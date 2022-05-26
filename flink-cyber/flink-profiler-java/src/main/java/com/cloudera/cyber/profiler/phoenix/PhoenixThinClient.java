@@ -25,26 +25,25 @@ public class PhoenixThinClient {
     public final String userName;
     public final String password;
 
-    private static final String PHOENIX_THIN_PROPERTY_URL = "phoenix.db.thin.url";
-    private static final String PHOENIX_THIN_PROPERTY_SERIALIZATION = "phoenix.db.thin.serialization";
-    private static final String PHOENIX_THIN_PROPERTY_AUTHENTICATION = "phoenix.db.thin.authentication";
-    private static final String PHOENIX_THIN_PROPERTY_AVATICA_USER = "phoenix.db.thin.avatica_user";
-    private static final String PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD = "phoenix.db.thin.avatica_password";
-    private static final String PHOENIX_THIN_PROPERTY_TRUSTSTORE = "phoenix.db.thin.truststore";
-    private static final String PHOENIX_THIN_PROPERTY_TRUSTSTORE_PASSWORD = "phoenix.db.thin.truststore_password";
+    public static final String PHOENIX_THIN_PROPERTY_URL = "phoenix.db.thin.url";
+    public static final String PHOENIX_THIN_PROPERTY_SERIALIZATION = "phoenix.db.thin.serialization";
+    public static final String PHOENIX_THIN_PROPERTY_AUTHENTICATION = "phoenix.db.thin.authentication";
+    public static final String PHOENIX_THIN_PROPERTY_AVATICA_USER = "phoenix.db.thin.avatica_user";
+    public static final String PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD = "phoenix.db.thin.avatica_password";
+    public static final String PHOENIX_THIN_PROPERTY_TRUSTSTORE = "phoenix.db.thin.truststore";
+    public static final String PHOENIX_THIN_PROPERTY_TRUSTSTORE_PASSWORD = "phoenix.db.thin.truststore_password";
 
     public PhoenixThinClient(ParameterTool params) {
         this.userName = params.get(PHOENIX_THIN_PROPERTY_AVATICA_USER);
         this.password = params.get(PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD);
-        dbUrl = new StringBuilder("jdbc:phoenix:thin:url=")
-                .append(params.get(PHOENIX_THIN_PROPERTY_URL)).append(";")
-                .append(Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_SERIALIZATION)).map(str -> String.format("serialization=%s;", str)).orElse("serialization=PROTOBUF;"))
-                .append(Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_AUTHENTICATION)).map(str -> String.format("authentication=%s;", str)).orElse("authentication=BASIC;"))
-                .append(Optional.ofNullable(userName).map(str -> String.format("avatica_user=%s;", str)).orElse(""))
-                .append(Optional.ofNullable(password).map(str -> String.format("avatica_password=%s;", str)).orElse(""))
-                .append(Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE)).map(str -> String.format("truststore=%s;", str)).orElse(""))
-                .append(Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE_PASSWORD)).map(str -> String.format("truststore_password=%s;", str)).orElse(""))
-                .toString();
+        dbUrl = "jdbc:phoenix:thin:url=" +
+                params.get(PHOENIX_THIN_PROPERTY_URL) + ";" +
+                Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_SERIALIZATION)).map(str -> String.format("serialization=%s;", str)).orElse("serialization=PROTOBUF;") +
+                Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_AUTHENTICATION)).map(str -> String.format("authentication=%s;", str)).orElse("authentication=BASIC;") +
+                Optional.ofNullable(userName).map(str -> String.format("avatica_user=%s;", str)).orElse("") +
+                Optional.ofNullable(password).map(str -> String.format("avatica_password=%s;", str)).orElse("") +
+                Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE)).map(str -> String.format("truststore=%s;", str)).orElse("") +
+                Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE_PASSWORD)).map(str -> String.format("truststore_password=%s;", str)).orElse("");
     }
 
     private Object connectionResultMetaData(Function<Connection, Object> function) {

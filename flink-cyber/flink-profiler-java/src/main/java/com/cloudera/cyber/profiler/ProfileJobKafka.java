@@ -34,8 +34,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Consumer;
 
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
+import static com.cloudera.cyber.profiler.phoenix.PhoenixThinClient.*;
 
 public class ProfileJobKafka extends ProfileJob {
 
@@ -43,8 +45,16 @@ public class ProfileJobKafka extends ProfileJob {
     private static final String PARAMS_FIRST_SEEN_HBASE_TABLE = "profile.first.seen.table";
     private static final String PARAMS_FIRST_SEEN_HBASE_COLUMN_FAMILY = "profile.first.seen.column.family";
     private static final String PARAMS_PHOENIX_DB_BATCH_SIZE = "phoenix.db.batchSize";
+
+    private static final String PARAMS_PHOENIX_DB_INTERVAL_MILLIS = "phoenix.db.interval_millis";
+
+    private static final String PARAMS_PHOENIX_DB_MAX_RETRY_TIMES = "phoenix.db.max_retries_times";
     private static final String UPSERT_SQL = "<#assign key_count = field_key_count?number >UPSERT INTO ${measurement_data_table_name} (MEASUREMENT_ID, <#list 1..key_count as i> KEY_${i},</#list> MEASUREMENT_NAME, MEASUREMENT_TYPE, MEASUREMENT_TIME, MEASUREMENT_VALUE) VALUES(?, <#list 1..key_count as i> ?,</#list> ?, ?, ?, ?) ON DUPLICATE KEY IGNORE";
     private static final String PARAMS_GROUP_ID = "kafka.group.id";
+
+    private static final String EMPTY_ERROR_MESSAGE_TEMPLATE = "'%s' can not be empty.";
+
+    private static final String INCORRECT_NUMERIC_MESSAGE_TEMPLATE = "Property '%s' has incorrect value '%s'. It should be numeric";
 
     private FlinkKafkaProducer<ScoredMessage> sink;
 
@@ -79,9 +89,12 @@ public class ProfileJobKafka extends ProfileJob {
         DataStream<MeasurementDataDto> measurementDtoDataStream = results.flatMap(new ProfileMessageToMeasurementDataDtoMapping(new ArrayList<>(profileDtos)));
         Properties properties = Utils.readProperties(params.getProperties(), PARAMS_PHOENIX_DB_QUERY_PARAM);
         JdbcStatementBuilder<MeasurementDataDto> objectJdbcStatementBuilder = new PhoenixJdbcStatementBuilder(params.getInt(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT, 0));
-        JdbcExecutionOptions executionOptions = JdbcExecutionOptions.builder()
-                .withBatchSize(Integer.parseInt(params.getRequired(PARAMS_PHOENIX_DB_BATCH_SIZE)))
-                .build();
+        JdbcExecutionOptions.Builder jdbcExecutionOptionsBuilder = JdbcExecutionOptions.builder();
+        validateNumericParamAndApply(PARAMS_PHOENIX_DB_BATCH_SIZE, params.get(PARAMS_PHOENIX_DB_BATCH_SIZE), jdbcExecutionOptionsBuilder::withBatchSize);
+        validateNumericParamAndApply(PARAMS_PHOENIX_DB_INTERVAL_MILLIS, params.get(PARAMS_PHOENIX_DB_INTERVAL_MILLIS), jdbcExecutionOptionsBuilder::withBatchIntervalMs);
+        validateNumericParamAndApply(PARAMS_PHOENIX_DB_MAX_RETRY_TIMES, params.get(PARAMS_PHOENIX_DB_MAX_RETRY_TIMES), jdbcExecutionOptionsBuilder::withMaxRetries);
+
+        JdbcExecutionOptions executionOptions = jdbcExecutionOptionsBuilder.build();
         JdbcConnectionOptions connectionOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
                 .withDriverName(PhoenixThinClient.getDRIVER())
                 .withUrl(client.getDbUrl())
@@ -148,24 +161,27 @@ public class ProfileJobKafka extends ProfileJob {
         }
     }
 
+    private void validateNumericParamAndApply(String paramName, String paramValue, Consumer<Integer> consumer) {
+        Preconditions.checkArgument(StringUtils.isNumeric(paramValue), INCORRECT_NUMERIC_MESSAGE_TEMPLATE, paramName, paramValue);
+        consumer.accept(Integer.parseInt(paramValue));
+    }
+
     private static void validatePhoenixParam(ParameterTool params) {
         String phoenixFlag = params.get(PARAMS_PHOENIX_DB_INIT);
         if (Boolean.parseBoolean(phoenixFlag)) {
-            String emptyErrorMessageTemplate = "'%s' can not be empty.";
-            String notNumericMessageTemplate = "Property '%s' has incorrect value '%s'. It should be numeric";
-            Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PARAMS_PHOENIX_DB_URL)), emptyErrorMessageTemplate, PARAMS_PHOENIX_DB_URL);
-            Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PARAMS_PHOENIX_DB_USER)), emptyErrorMessageTemplate, PARAMS_PHOENIX_DB_USER);
-            Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PARAMS_PHOENIX_DB_PASSWORD)), emptyErrorMessageTemplate, PARAMS_PHOENIX_DB_PASSWORD);
+            Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_URL)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_URL);
+            Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_AVATICA_USER)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_AVATICA_USER);
+            Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD);
             ValidateUtils.validatePhoenixName(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_DATA_TABLE_NAME), PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_DATA_TABLE_NAME);
             ValidateUtils.validatePhoenixName(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_METADATA_TABLE_NAME), PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_METADATA_TABLE_NAME);
             ValidateUtils.validatePhoenixName(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_NAME), PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_NAME);
             ValidateUtils.validatePhoenixName(params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_METADATA_TABLE_NAME), PARAMS_PHOENIX_DB_QUERY_PROFILE_METADATA_TABLE_NAME);
             ValidateUtils.validatePhoenixName(params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_NAME), PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_NAME);
-            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_START_WITH)), notNumericMessageTemplate, PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_START_WITH, params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_START_WITH));
-            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_CACHE)), notNumericMessageTemplate, PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_CACHE, params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_CACHE));
-            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_START_WITH)), notNumericMessageTemplate, PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_START_WITH, params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_START_WITH));
-            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE)), notNumericMessageTemplate, PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE, params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE));
-            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT)), notNumericMessageTemplate, PARAMS_PHOENIX_DB_QUERY_KEY_COUNT, params.get(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT));
+            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_START_WITH)), INCORRECT_NUMERIC_MESSAGE_TEMPLATE, PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_START_WITH, params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_START_WITH));
+            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_CACHE)), INCORRECT_NUMERIC_MESSAGE_TEMPLATE, PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_CACHE, params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_SEQUENCE_CACHE));
+            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_START_WITH)), INCORRECT_NUMERIC_MESSAGE_TEMPLATE, PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_START_WITH, params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_START_WITH));
+            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE)), INCORRECT_NUMERIC_MESSAGE_TEMPLATE, PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE, params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE));
+            Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT)), INCORRECT_NUMERIC_MESSAGE_TEMPLATE, PARAMS_PHOENIX_DB_QUERY_KEY_COUNT, params.get(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT));
         } else {
             Preconditions.checkArgument(!StringUtils.equals(phoenixFlag, "false"), "Invalid properties '%s' value %s (expected 'true' or 'false').", PARAMS_PHOENIX_DB_INIT, phoenixFlag);
         }

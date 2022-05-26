@@ -59,9 +59,6 @@ public abstract class ProfileJob {
     protected static final String PARAM_PROFILE_CONFIG = "profile.config.file";
     protected static final String PARAM_LATENESS_TOLERANCE_MILLIS = "profile.lateness";
     protected static final String PARAMS_PHOENIX_DB_INIT = "phoenix.db.init";
-    protected static final String PARAMS_PHOENIX_DB_URL = "phoenix.db.url";
-    protected static final String PARAMS_PHOENIX_DB_USER = "phoenix.db.user";
-    protected static final String PARAMS_PHOENIX_DB_PASSWORD = "phoenix.db.password";
     protected static final String PARAMS_PHOENIX_DB_QUERY_PARAM = "phoenix.db.query.param.";
     protected static final String PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_DATA_TABLE_NAME = "phoenix.db.query.param.measurement_data_table_name";
     protected static final String PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_METADATA_TABLE_NAME = "phoenix.db.query.param.measurement_metadata_table_name";
