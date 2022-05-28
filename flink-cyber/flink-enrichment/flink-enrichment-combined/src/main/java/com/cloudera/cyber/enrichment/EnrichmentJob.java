@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.*;
@@ -63,7 +64,6 @@ public abstract class EnrichmentJob {
         SingleOutputStreamOperator<Message> messages = createSource(env, params);
         DataStream<EnrichmentCommand> enrichments = createEnrichmentSource(env, params);
 
-        List<RestEnrichmentConfig> restConfig = RestLookupJob.parseConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_REST_CONFIG_FILE))));
         List<EnrichmentConfig> enrichmentConfigs = ConfigUtils.allConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_LOOKUPS_CONFIG_FILE))));
         SingleOutputStreamOperator<EnrichmentCommand> localEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.LOCAL));
         SingleOutputStreamOperator<EnrichmentCommand> hbaseEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.HBASE));
@@ -90,7 +90,7 @@ public abstract class EnrichmentJob {
 
         // rest based enrichments
         DataStream<Message> rested = params.getBoolean(PARAMS_ENABLE_REST, true) ?
-                RestLookupJob.enrich(hbased, restConfig) : hbased;
+                RestLookupJob.enrich(hbased, params.getRequired(PARAMS_REST_CONFIG_FILE)) : hbased;
 
 
         // stix process parses incoming stix sources and stores locally, can use long term backup

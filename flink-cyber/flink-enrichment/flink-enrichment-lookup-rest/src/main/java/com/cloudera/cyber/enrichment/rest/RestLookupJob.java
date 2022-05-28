@@ -38,7 +38,12 @@ public abstract class RestLookupJob {
             .enable(SerializationFeature.INDENT_OUTPUT);
     }
 
-    public static DataStream<Message> enrich(DataStream<Message> source, List<RestEnrichmentConfig> configs) {
+    public static DataStream<Message> enrich(DataStream<Message> source, String enrichmentConfigPath) throws IOException {
+        List<RestEnrichmentConfig> restConfig = RestLookupJob.parseConfigs(Files.readAllBytes(Paths.get(enrichmentConfigPath)));
+        return enrich(source, restConfig);
+    }
+
+    private static DataStream<Message> enrich(DataStream<Message> source, List<RestEnrichmentConfig> configs) {
         return configs.stream().reduce(source, (in, config) -> {
             Preconditions.checkNotNull(config.getSources(),"specify a list of source names or ANY to match any source");
             Preconditions.checkArgument(!config.getSources().isEmpty(), "specify a list of source names or ANY to match any source");
