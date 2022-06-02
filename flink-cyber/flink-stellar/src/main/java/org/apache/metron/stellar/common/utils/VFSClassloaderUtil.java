@@ -21,7 +21,6 @@ import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.Optional;
-import org.apache.accumulo.start.classloader.vfs.UniqueFileReplicator;
 import org.apache.commons.vfs2.CacheStrategy;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
