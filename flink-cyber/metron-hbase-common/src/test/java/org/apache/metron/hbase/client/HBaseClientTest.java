@@ -49,7 +49,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests the HBaseClient
  */
-@Ignore
+
 public class HBaseClientTest {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
