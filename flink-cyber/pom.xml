@@ -59,7 +59,7 @@
         <smm.intercepter.version>2.1.0.${cdh.version}</smm.intercepter.version>
         <flink.format.parquet.version>1.10.0</flink.format.parquet.version>
         <slf4j.version>1.7.15</slf4j.version>
-        <log4j.version>2.12.1</log4j.version>
+        <log4j.version>2.17.2</log4j.version>
         <multiline-string.version>0.1.2</multiline-string.version>
         <testcontainers.version>1.15.0</testcontainers.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
