@@ -17,15 +17,10 @@
  */
 package org.apache.metron.enrichment.stellar;
 
+import com.cloudera.cyber.hbase.HbaseConfiguration;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import java.io.IOException;
-import java.lang.invoke.MethodHandles;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.metron.enrichment.converter.EnrichmentKey;
 import org.apache.metron.enrichment.converter.EnrichmentValue;
@@ -42,12 +37,21 @@ import org.apache.metron.stellar.dsl.StellarFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
 public class SimpleHBaseEnrichmentFunctions {
   private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   public static final String ACCESS_TRACKER_TYPE_CONF = "accessTracker";
   public static final String TABLE_PROVIDER_TYPE_CONF = "tableProviderImpl";
   private static AccessTracker tracker;
   private static TableProvider provider;
+
+  private static Configuration hBaseConfiguration;
 
 
   private static class WrapperTable {
@@ -109,13 +113,16 @@ public class SimpleHBaseEnrichmentFunctions {
     }
   }
 
-  private static synchronized void initializeProvider( Map<String, Object> config) {
-    if(provider != null) {
-      return ;
-    }
-    else {
+  private static synchronized void initializeProvider(Map<String, Object> config) {
+    if(provider == null) {
       String tableProviderClass = (String) config.getOrDefault(TABLE_PROVIDER_TYPE_CONF, HTableProvider.class.getName());
       provider = createProvider(tableProviderClass);
+    }
+  }
+
+  private static void initializeHbaseConfiguration(Map<String, Object> config) {
+    if (hBaseConfiguration == null) {
+      hBaseConfiguration = (Configuration) config.getOrDefault(HbaseConfiguration.HBASE_CONFIG_NAME, HbaseConfiguration.configureHbase());
     }
   }
 
@@ -155,7 +162,7 @@ public class SimpleHBaseEnrichmentFunctions {
       EnrichmentLookup lookup = null;
       try {
         lookup = enrichmentCollateralCache.get(key, () -> {
-            Table hTable = provider.getTable(HBaseConfiguration.create(), key.name);
+            Table hTable = provider.getTable(hBaseConfiguration, key.name);
             return new EnrichmentLookup(hTable, key.columnFamily, tracker);
           }
         );
@@ -232,7 +239,7 @@ public class SimpleHBaseEnrichmentFunctions {
       EnrichmentLookup lookup = null;
       try {
         lookup = enrichmentCollateralCache.get(key, () -> {
-                  Table hTable = provider.getTable(HBaseConfiguration.create(), key.name);
+                  Table hTable = provider.getTable(hBaseConfiguration, key.name);
                   return new EnrichmentLookup(hTable, key.columnFamily, tracker);
                 }
         );
@@ -259,6 +266,7 @@ public class SimpleHBaseEnrichmentFunctions {
         Map<String, Object> config = getConfig(context);
         initializeProvider(config);
         initializeTracker(config, provider);
+        initializeHbaseConfiguration(config);
       } catch (IOException e) {
         LOG.error("Unable to initialize ENRICHMENT.GET: {}", e.getMessage(), e);
       }

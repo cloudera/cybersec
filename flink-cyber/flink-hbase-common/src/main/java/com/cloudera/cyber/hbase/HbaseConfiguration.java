@@ -8,6 +8,9 @@ import java.io.File;
 
 @Slf4j
 public class HbaseConfiguration {
+
+    public static final String HBASE_CONFIG_NAME = "hbase-config";
+
     public static org.apache.hadoop.conf.Configuration configureHbase() {
         org.apache.hadoop.conf.Configuration hbaseClientConf = HBaseConfiguration.create();
         String hbaseConfDir = "/etc/hbase/conf";

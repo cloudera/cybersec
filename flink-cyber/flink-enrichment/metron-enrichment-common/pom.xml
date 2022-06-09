@@ -42,13 +42,11 @@
             <artifactId>flink-stellar</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>metron-hbase-common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>metron-hbase-common</artifactId>
@@ -56,13 +54,11 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>metron-common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>metron-common</artifactId>
@@ -82,6 +78,11 @@
             <artifactId>metron-common</artifactId>
             <classifier>tests</classifier>
             <type>test-jar</type>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-hbase-common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
