@@ -17,6 +17,7 @@
  */
 package org.apache.metron.enrichment.adapters.threatintel;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.metron.enrichment.utils.EnrichmentUtils;
 import org.apache.metron.hbase.HTableProvider;
 import org.apache.metron.hbase.TableProvider;
@@ -27,6 +28,9 @@ public class ThreatIntelConfig implements Serializable {
   public static final long MS_IN_HOUR = 10000*60*60;
   private String hBaseTable;
   private String hBaseCF;
+
+  private Configuration hbaseConfig;
+
   private double falsePositiveRate = 0.03;
   private int expectedInsertions = 100000;
   private String trackerHBaseTable;
@@ -40,6 +44,10 @@ public class ThreatIntelConfig implements Serializable {
 
   public int getExpectedInsertions() {
     return expectedInsertions;
+  }
+
+  public Configuration getHbaseConfig() {
+    return hbaseConfig;
   }
 
   public double getFalsePositiveRate() {
@@ -103,5 +111,11 @@ public class ThreatIntelConfig implements Serializable {
   public ThreatIntelConfig withMillisecondsBetweenPersists(long millisecondsBetweenPersists) {
     this.millisecondsBetweenPersists = millisecondsBetweenPersists;
     return this;
+  }
+
+  public ThreatIntelConfig withHbaseConfig(Configuration hbaseConfig) {
+    this.hbaseConfig = hbaseConfig;
+    return this;
+
   }
 }

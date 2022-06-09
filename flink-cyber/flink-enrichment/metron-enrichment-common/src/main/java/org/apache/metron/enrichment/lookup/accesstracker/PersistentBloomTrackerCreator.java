@@ -20,6 +20,8 @@ package org.apache.metron.enrichment.lookup.accesstracker;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
+
+import com.cloudera.cyber.hbase.HbaseConfiguration;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.metron.hbase.TableProvider;
@@ -36,12 +38,16 @@ public class PersistentBloomTrackerCreator implements AccessTrackerCreator {
     public static final long MS_IN_HOUR = 10000*60*60;
     private String hBaseTable;
     private String hBaseCF;
+
+    private Configuration hbaseConfig;
+
     private double falsePositiveRate = 0.03;
     private int expectedInsertions = 100000;
     private long millisecondsBetweenPersists = 2*MS_IN_HOUR;
     public Config(Map<String, Object> config) {
       hBaseTable = (String) config.get(PERSISTENT_BLOOM_TABLE);
       hBaseCF = (String) config.get(PERSISTENT_BLOOM_CF);
+      hbaseConfig = (Configuration) config.getOrDefault(HbaseConfiguration.HBASE_CONFIG_NAME, HbaseConfiguration.configureHbase());
       Object fpObj = config.get(PERSISTENT_BLOOM_FP);
       if (fpObj != null) {
         falsePositiveRate = ConversionUtils.convert(fpObj, Double.class);
@@ -72,6 +78,9 @@ public class PersistentBloomTrackerCreator implements AccessTrackerCreator {
       return expectedInsertions;
     }
 
+    public Configuration getHbaseConfig() {
+      return hbaseConfig;
+    }
 
     public long getMillisecondsBetweenPersists() {
       return millisecondsBetweenPersists;
@@ -86,7 +95,7 @@ public class PersistentBloomTrackerCreator implements AccessTrackerCreator {
     double falsePositives = patConfig.getFalsePositiveRate();
     long millisecondsBetweenPersist = patConfig.getMillisecondsBetweenPersists();
     BloomAccessTracker bat = new BloomAccessTracker(hbaseTable, expectedInsertions, falsePositives);
-    Configuration hbaseConfig = HBaseConfiguration.create();
+    Configuration hbaseConfig = patConfig.getHbaseConfig();
 
     AccessTracker ret = new PersistentAccessTracker( hbaseTable
                                                    , UUID.randomUUID().toString()

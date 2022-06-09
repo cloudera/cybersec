@@ -120,7 +120,7 @@ public class ThreatIntelAdapter implements EnrichmentAdapter<CacheKey>,Serializa
     String trackerHBaseCF = config.getTrackerHBaseCF();
     long millisecondsBetweenPersist = config.getMillisecondsBetweenPersists();
     BloomAccessTracker bat = new BloomAccessTracker(hbaseTable, expectedInsertions, falsePositives);
-    Configuration hbaseConfig = HBaseConfiguration.create();
+    Configuration hbaseConfig = config.getHbaseConfig();
     try {
       accessTracker = new PersistentAccessTracker( hbaseTable
               , UUID.randomUUID().toString()
