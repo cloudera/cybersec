@@ -6,6 +6,7 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.enrichemnt.stellar.adapter.MetronGeoEnrichmentAdapter;
 import com.cloudera.cyber.enrichment.geocode.IpGeoJob;
+import com.cloudera.cyber.hbase.HbaseConfiguration;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.ObjectUtils;
@@ -88,7 +89,10 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
 
     private Context initializeStellarContext(EnrichmentConfigurations enrichmentConfigurations) {
         Context stellarContext = new Context.Builder()
-                .with(Context.Capabilities.GLOBAL_CONFIG, enrichmentConfigurations::getGlobalConfig)
+                .with(Context.Capabilities.GLOBAL_CONFIG, () -> ImmutableMap.builder()
+                        .putAll(enrichmentConfigurations.getGlobalConfig())
+                        .put(HbaseConfiguration.HBASE_CONFIG_NAME, HbaseConfiguration.configureHbase())
+                        .build())
                 .with(Context.Capabilities.STELLAR_CONFIG, enrichmentConfigurations::getGlobalConfig)
                 .build();
 
@@ -159,8 +163,8 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
             CacheKey cacheKey = new CacheKey(field, value, sensorEnrichmentConfig);
             try {
                 JSONObject enrichmentResults = adapter.enrich(cacheKey);
-                enrichmentResults.forEach((k,v) -> {
-                    tmpMap.put((String)k, ObjectUtils.toString(v, "null") );
+                enrichmentResults.forEach((k, v) -> {
+                    tmpMap.put((String) k, ObjectUtils.toString(v, "null"));
                 });
             } catch (Exception e) {
                 log.error("Error with " + task.getKey() + " failed: " + e.getMessage(), e);

@@ -25,8 +25,7 @@ import java.io.Serializable;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
+
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.metron.common.utils.LazyLogger;
 import org.apache.metron.common.utils.LazyLoggerFactory;
@@ -108,12 +107,10 @@ public class SimpleHBaseAdapter implements EnrichmentAdapter<CacheKey>,Serializa
   @Override
   public boolean initializeAdapter(Map<String, Object> configuration) {
     String hbaseTable = config.getHBaseTable();
-    Configuration hbaseConfig = HBaseConfiguration.create();
     try {
-      lookup = new EnrichmentLookup( config.getProvider().getTable(hbaseConfig, hbaseTable)
-                                   , config.getHBaseCF()
-                                   , new NoopAccessTracker()
-                                   );
+      lookup = new EnrichmentLookup(config.getProvider().getTable(config.getHbaseConfig(), hbaseTable),
+              config.getHBaseCF(),
+              new NoopAccessTracker());
     } catch (IOException e) {
       LOG.error("Unable to initialize adapter: {}", e.getMessage(), e);
       return false;
