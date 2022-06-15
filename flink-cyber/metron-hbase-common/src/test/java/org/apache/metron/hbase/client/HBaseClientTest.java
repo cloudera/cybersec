@@ -34,6 +34,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.hbase.ColumnList;
 import org.apache.metron.hbase.HBaseProjectionCriteria;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * Tests the HBaseClient
  */
+
 public class HBaseClientTest {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -56,7 +58,6 @@ public class HBaseClientTest {
     private static HBaseTestingUtility util;
     private static HBaseClient client;
     private static Table table;
-    private static Admin admin;
     private static final byte[] cf = Bytes.toBytes("cf");
     private static final byte[] column = Bytes.toBytes("column");
     byte[] rowKey1;
@@ -71,9 +72,8 @@ public class HBaseClientTest {
         Configuration config = HBaseConfiguration.create();
         config.set("hbase.master.hostname", "localhost");
         config.set("hbase.regionserver.hostname", "localhost");
-        util = new HBaseTestingUtility();
+        util = new HBaseTestingUtility(config);
         util.startMiniCluster();
-        admin = util.getHBaseAdmin();
         // create the table
         table = util.createTable(TableName.valueOf(tableName), cf);
         util.waitTableEnabled(table.getName());
