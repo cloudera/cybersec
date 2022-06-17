@@ -45,7 +45,20 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.client.Append;
+import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Durability;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Increment;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Row;
+import org.apache.hadoop.hbase.client.RowMutations;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.client.TableDescriptor;
+import org.apache.hadoop.hbase.client.TableDescriptorBuilder;
 import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import org.apache.hadoop.hbase.client.metrics.ScanMetrics;
 import org.apache.hadoop.hbase.filter.CompareFilter;
@@ -144,11 +157,6 @@ public class MockHTable implements Table {
         return TableDescriptorBuilder.newBuilder(TableName.valueOf(tableName))
                 .setColumnFamilies(Stream.of(descriptors).collect(Collectors.toList()))
                 .build();
-    }
-
-    @Override
-    public RegionLocator getRegionLocator() throws IOException {
-        return null;
     }
 
     @Override
@@ -590,7 +598,7 @@ public class MockHTable implements Table {
     }
 
     @Override
-    public Result mutateRow(RowMutations rowMutations) throws IOException {
+    public void mutateRow(RowMutations rowMutations) throws IOException {
         throw new UnsupportedOperationException();
 
     }
