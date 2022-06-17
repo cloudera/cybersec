@@ -46,14 +46,6 @@
             <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.hbase</groupId>
-            <artifactId>hbase-client</artifactId>
-            <version>${hbase.version}</version>
-            <scope>compile</scope>
-        </dependency>
-
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-logging</artifactId>

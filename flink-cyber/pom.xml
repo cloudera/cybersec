@@ -19,6 +19,7 @@
         <module>flink-enrichment</module>
         <module>flink-sessions</module>
         <module>flink-dedupe</module>
+        <module>flink-profiler-sql</module>
         <module>flink-profiler-java</module>
         <module>flink-profiler</module>
         <module>flink-rules</module>
@@ -43,21 +44,20 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.verion>1.8</java.verion>
-        <flink.version>1.14.0-csadh1.6.1.0</flink.version>
-        <flink.hbase.version>2.4</flink.hbase.version>
-        <cdh.version>7.2.15.0-147</cdh.version>
+        <flink.version>1.14.0-csa1.6.1.0</flink.version>
+        <cdh.version>7.1.6.0-297</cdh.version>
         <lombok.version>1.18.22</lombok.version>
         <lombok.plugin.version>1.18.16.0</lombok.plugin.version>
         <guava.version>21.0</guava.version>
         <avro.version>1.10.0</avro.version>
-        <log4j.kafka.version>2.8.1.${cdh.version}</log4j.kafka.version>
+        <log4j.kafka.version>2.5.0.${cdh.version}</log4j.kafka.version>
         <scala.binary.version>2.12</scala.binary.version>
-        <kafka.version>2.8.1.${cdh.version}</kafka.version>
+        <kafka.version>2.5.0.${cdh.version}</kafka.version>
         <nifi.version>1.11.4</nifi.version>
         <jackson.version>2.11.2</jackson.version>
         <jackson.datatype.version>2.10.1</jackson.datatype.version>
-        <smm.intercepter.version>2.3.0.${cdh.version}</smm.intercepter.version>
-        <flink.format.parquet.version>1.11.1</flink.format.parquet.version>
+        <smm.intercepter.version>2.1.0.${cdh.version}</smm.intercepter.version>
+        <flink.format.parquet.version>1.10.0</flink.format.parquet.version>
         <slf4j.version>1.7.15</slf4j.version>
         <log4j.version>2.17.2</log4j.version>
         <multiline-string.version>0.1.2</multiline-string.version>
@@ -67,13 +67,13 @@
         <solr.version>8.4.1.${cdh.version}</solr.version>
         <maxmind.version>2.13.1</maxmind.version>
         <hadoop.version>3.1.1.${cdh.version}</hadoop.version>
-        <hbase.version>2.4.6.${cdh.version}</hbase.version>
+        <hbase.version>2.2.3.${cdh.version}</hbase.version>
         <mockito.version>3.6.0</mockito.version>
         <datasketches.version>1.3.0-incubating</datasketches.version>
         <assertj.version>3.13.2</assertj.version>
         <json.simple.version>1.1.1</json.simple.version>
         <jupiter.junit.version>5.5.2</jupiter.junit.version>
-        <phoenix.version>5.1.1.${cdh.version}</phoenix.version>
+        <phoenix.version>5.1.0.${cdh.version}</phoenix.version>
         <phoenix.queryserver>6.0.0.${cdh.version}</phoenix.queryserver>
         <classindex.version>3.4</classindex.version>
         <antlr.version>4.7.2</antlr.version>
@@ -153,35 +153,30 @@
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-avro</artifactId>
                 <version>${flink.version}</version>
-                <scope>provided</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-json</artifactId>
                 <version>${flink.version}</version>
-                <scope>provided</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-csv</artifactId>
                 <version>${flink.version}</version>
-                <scope>provided</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-orc_${scala.binary.version}</artifactId>
                 <version>${flink.version}</version>
-                <scope>provided</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-parquet_${scala.binary.version}</artifactId>
                 <version>${flink.version}</version>
-                <scope>provided</scope>
             </dependency>
 
             <dependency>
@@ -295,7 +290,6 @@
                 <groupId>org.apache.avro</groupId>
                 <artifactId>avro</artifactId>
                 <version>${avro.version}</version>
-                <scope>provided</scope>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.hadoop</groupId>
