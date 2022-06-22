@@ -1,0 +1,7 @@
+<ngx-monaco-editor
+  data-qe-id="monaco-editor"
+  class="advanced-editor"
+  [ngModel]="config | json"
+  [options]="monacoOptions"
+  (ngModelChange)="onChange($event)">
+</ngx-monaco-editor>

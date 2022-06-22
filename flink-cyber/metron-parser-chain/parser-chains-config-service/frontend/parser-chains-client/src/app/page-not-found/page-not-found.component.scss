@@ -1,0 +1,38 @@
+.page-not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  .text-container {
+    text-align: center;
+
+    .code {
+      color: white;
+      font-size: bold;
+      font-style: italic;
+      font-size: 12rem;
+
+      line-height: 1em;
+      padding: 3rem 0 0 0;
+    }
+
+    .message {
+      color: grey;
+      font-size: bold;
+      font-size: 1.2rem;
+    }
+  }
+
+  .button-container {
+    padding: 2rem;
+
+    button {
+      line-height: 1 !important;
+    }
+
+    i {
+      margin: 0 .4rem 0 0;
+    }
+  }
+}

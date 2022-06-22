@@ -1,0 +1,31 @@
+<div nz-row>
+  <div nz-col nzSpan="22">
+    <h3>Live View</h3>
+  </div>
+  <div nz-col nzSpan="2" class="live-view-toolbar">
+    <nz-spin *ngIf="isExecuting$ | async" nzSimple></nz-spin>
+    <nz-switch
+      [ngModel]="isLiveViewOn$ | async"
+      (ngModelChange)="featureToggleChange$.next($event)"
+      nzCheckedChildren="On"
+      nzUnCheckedChildren="Off"
+      ></nz-switch>
+  </div>
+</div>
+<nz-tabset
+  [nzSelectedIndex]="selectedTabIndex"
+  (nzSelectedIndexChange)="onSelectedTabChange($event)">
+  <nz-tab
+    data-qe-id="input-tab"
+    nzTitle="Sample Data">
+    <app-sample-data-form
+      [sampleData]="sampleData$ | async"
+      (sampleDataChange)="sampleDataChange$.next($event)"
+      ></app-sample-data-form>
+  </nz-tab>
+  <nz-tab
+    nzTitle="Result"
+    data-qe-id="result-tab">
+    <app-live-view-result [results]="results$ | async" (investigateParserAction)="onInvestigateParserAction($event)"></app-live-view-result>
+  </nz-tab>
+</nz-tabset>

@@ -1,0 +1,121 @@
+// Ant overrides
+// These styles should only be here for two reasons:
+// 1. The less variable in the theme.less file needs a compile-time value.
+// 2. The desired styling cannot be applied from a parent component
+//    due to Angular encapsulation.
+
+.ant-card-body {
+  padding: 16px;
+}
+.ant-card-head {
+  background: var(--card-head-bg);
+}
+
+// Table
+
+.ant-table-placeholder {
+  border-bottom: none;
+}
+
+// .ant-table-thead > tr > th {
+//   background: var(--background);
+//   color: var(--text);
+// }
+
+.ant-table-tbody > tr:hover:not(.ant-table-expanded-row) > td {
+  background: var(--background);
+}
+.ant-table-thead > tr > th {
+  border-bottom: 1px solid var(--light-border);
+}
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid var(--light-separator);
+}
+
+.ant-table-placeholder {
+  background: var(--background);
+}
+
+.ant-empty {
+  color: var(--empty-text-color);
+}
+
+// Pagination
+
+.ant-pagination-item-active,
+.ant-pagination-item-active:hover {
+  border-color: var(--pagination-active);
+}
+
+.ant-pagination-item-active a,
+.ant-pagination-item-active:hover a {
+  color: var(--pagination-active);
+}
+
+.ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination-next .ant-pagination-item-link {
+  background: var(--background);
+  color: var(--text);
+}
+
+.ant-pagination-disabled a,
+.ant-pagination-disabled:hover a,
+.ant-pagination-disabled:focus a,
+.ant-pagination-disabled .ant-pagination-item-link,
+.ant-pagination-disabled:hover .ant-pagination-item-link,
+.ant-pagination-disabled:focus .ant-pagination-item-link {
+  border-color: var(--light-border);
+}
+// Menu
+
+.ant-menu-item > a:hover {
+  color: var(--text);
+}
+
+.ant-menu-item-selected > a:hover {
+  color: var(--cldr-white);
+}
+
+// Button
+
+.ant-btn-default,
+.ant-btn-default:hover,
+.ant-btn-default:active,
+.ant-btn-default:focus {
+  background: var(--background);
+  border-color: var(--light-border);
+  color: var(--text);
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.ant-btn-primary[disabled] {
+  background-color: var(--btn-primary-disabled-bg);
+}
+
+.ant-btn-danger:hover,
+.ant-btn-danger:focus {
+  background-color: var(--warning);
+  border-color: var(--warning);
+}
+
+.ant-select-selection {
+  border:1px solid var(--input-border-color);
+}
+
+.parser-chain .ant-card-head-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chain-item {
+  background-color: var(--card-head-bg);
+  .ant-tabs-content {
+    min-height: 150px;
+  }
+}

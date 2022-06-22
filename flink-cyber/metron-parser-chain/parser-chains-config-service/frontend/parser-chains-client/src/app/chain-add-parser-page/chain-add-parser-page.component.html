@@ -1,0 +1,35 @@
+<nz-card nzTitle="Add New Parser">
+    <form nz-form [formGroup]="addParserForm" class="login-form" (ngSubmit)="addParser()">
+        <nz-form-item>
+          <nz-form-label>Parser Name</nz-form-label>
+          <nz-form-control>
+            <input type="text" nz-input formControlName="name" placeholder="Parser Name" />
+          </nz-form-control>
+          <nz-form-explain *ngIf="name.dirty && name.errors && (name.errors.required || name.errors.minlength)">
+            Parser Name is Required with atleast 3 characters
+          </nz-form-explain>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <nz-select nzShowSearch nzAllowClear formControlName="type" nzPlaceHolder="Select Type">
+              <nz-option nzLabel="{{ type.name }}" nzValue="{{ type.id }}" *ngFor="let type of typesList"></nz-option>
+            </nz-select>
+          </nz-form-control>
+          <nz-form-explain *ngIf="type.dirty && type.errors && type.errors.required">
+            Select Parser Type
+          </nz-form-explain>
+        </nz-form-item>
+        <nz-form-item *ngIf="parsersList.length">
+          <nz-form-control>
+            <nz-select nzShowSearch nzAllowClear formControlName="parentId" nzPlaceHolder="Select Source Parser">
+              <nz-option nzLabel="{{ parser.name }}" nzValue="{{ parser.id }}" *ngFor="let parser of parsersList"></nz-option>
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-control>
+            <button nz-button nzType="primary" type="submit" [disabled] = "!addParserForm.valid">Add Parser</button>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+</nz-card>
