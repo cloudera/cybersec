@@ -16,9 +16,30 @@
             "version": "2.3.0.0"
         }
     },
+    "dependent-stack": {
+        "CDH": {
+            "components": [
+                "kafka",
+                "solr",
+                "hadoop",
+                "hbase",
+                "phoenix",
+                "phoenix_queryserver"
+            ],
+            "os": "centos7",
+            "poll": false,
+            "stack-name": "CDH",
+            "stack-version": "7.1.6.0-297"
+        },
+        "CSA": {
+            "components": [
+                "flink"
+            ]
+        }
+    },
     "hwx": {
         "platforms": [
-            "ubuntu18"
+            "centos7"
         ],
         "poll-frequency": "360",
         "stack-version": "2.3.0.0"
