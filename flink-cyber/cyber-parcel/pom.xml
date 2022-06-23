@@ -48,10 +48,20 @@ under the License.
     <properties>
 		<cybersec.basedir>${project.parent.basedir}</cybersec.basedir>
 		<parcel.basename>CYBERSEC-${cybersec.full.version}</parcel.basename>
+        <os.suffix>el7</os.suffix>
         <parcel.tar.gz.filename>${parcel.basename}.tar.gz</parcel.tar.gz.filename>
-        <parcel.filename>${parcel.basename}-el7.parcel</parcel.filename>
+        <parcel.filename>${parcel.basename}-${os.suffix}.parcel</parcel.filename>
 		<flink.tar.gz.url>file://${cybersec.basedir}/cyber-jobs/target/cyber-jobs-${project.parent.version}.tar.gz</flink.tar.gz.url>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>cyber-jobs</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
