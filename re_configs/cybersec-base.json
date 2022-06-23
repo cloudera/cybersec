@@ -1,0 +1,29 @@
+{
+    "apache": {
+        "build-support": {
+            "enable-blackduck-scan": false,
+            "enable-merge": false,
+            "enable-sync": false,
+            "internal-branch": "cdp-demo-master",
+            "cldr-infra-git": true,
+            "repo-url": "git@github.infra.cloudera.com:CDH/build-support.git"
+        },
+        "cybersec": {
+            "branch": "cybersec-2.3.0",
+            "enable-merge": false,
+            "enable-sync": false,
+            "repo-url": "git@github.infra.cloudera.com:CDH/cybersec.git",
+            "version": "2.3.0"
+        }
+    },
+    "hwx": {
+        "platforms": [
+            "ubuntu18"
+        ],
+        "poll-frequency": "360",
+        "stack-version": "2.3.0"
+    },
+    "remotes": {
+        "hwx": "git@github.infra.cloudera.com:CDH/%s.git"
+    }
+}
