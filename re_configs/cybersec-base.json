@@ -13,7 +13,7 @@
             "enable-merge": false,
             "enable-sync": false,
             "repo-url": "git@github.infra.cloudera.com:CDH/cybersec.git",
-            "version": "2.3.0"
+            "version": "2.3.0.0"
         }
     },
     "hwx": {
@@ -21,7 +21,7 @@
             "ubuntu18"
         ],
         "poll-frequency": "360",
-        "stack-version": "2.3.0"
+        "stack-version": "2.3.0.0"
     },
     "remotes": {
         "hwx": "git@github.infra.cloudera.com:CDH/%s.git"
