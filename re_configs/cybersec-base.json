@@ -9,7 +9,7 @@
             "repo-url": "git@github.infra.cloudera.com:CDH/build-support.git"
         },
         "cybersec": {
-            "branch": "cybersec-2.3.0",
+            "branch": "cybersec-dh-2.3.0",
             "enable-merge": false,
             "enable-sync": false,
             "repo-url": "git@github.infra.cloudera.com:CDH/cybersec.git",
