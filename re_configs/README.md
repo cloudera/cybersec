@@ -1,3 +1,3 @@
 # RE-CEM-AGENTS-JAVA
 
-Build configs for the CYBERSEC stack
+Build configs for the CYBERSEC-DH stack
