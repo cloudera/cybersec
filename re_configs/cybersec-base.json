@@ -25,7 +25,8 @@
                 "hbase",
                 "phoenix",
                 "phoenix_queryserver",
-                "streams_messaging_manager"
+                "streams_messaging_manager",
+                "curator"
             ],
             "os": "centos7",
             "poll": false,
