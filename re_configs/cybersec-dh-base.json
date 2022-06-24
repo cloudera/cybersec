@@ -24,7 +24,8 @@
                 "hadoop",
                 "hbase",
                 "phoenix",
-                "phoenix_queryserver"
+                "phoenix_queryserver",
+                "streams_messaging_manager"
             ],
             "os": "centos7",
             "poll": false,
