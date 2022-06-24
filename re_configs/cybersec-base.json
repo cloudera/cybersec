@@ -34,7 +34,11 @@
         "CSA": {
             "components": [
                 "flink"
-            ]
+            ],
+            "os": "centos7",
+            "poll": false,
+            "stack-name": "CSA",
+            "stack-version": "1.6.1.0-14"
         }
     },
     "hwx": {
