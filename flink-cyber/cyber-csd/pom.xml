@@ -17,6 +17,15 @@
         <schema.validator.version>7.3.0</schema.validator.version>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>cyber-jobs</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
     <pluginRepositories>
         <pluginRepository>
             <id>cloudera-staging</id>

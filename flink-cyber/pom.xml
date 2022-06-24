@@ -15,6 +15,7 @@
         <module>flink-common</module>
         <module>flink-alert-scoring</module>
         <module>flink-alert-scoring-api</module>
+        <module>flink-phoenix-jdbc</module>
         <module>flink-indexing</module>
         <module>flink-enrichment</module>
         <module>flink-sessions</module>
@@ -38,7 +39,6 @@
         <module>cyber-csd</module>
         <module>cyber-jobs</module>
         <module>cyber-parcel</module>
-        <module>flink-phoenix-jdbc</module>
     </modules>
 
     <properties>
