@@ -31,10 +31,14 @@
             "stack-name": "CDH",
             "stack-version": "7.1.6.0-297"
         },
-        "CSA": {
+        "CSA-DH": {
             "components": [
                 "flink"
-            ]
+            ],
+            "os": "centos7",
+            "poll": false,
+            "stack-name": "CSA-DH",
+            "stack-version": "1.6.1.0-15"
         }
     },
     "hwx": {
