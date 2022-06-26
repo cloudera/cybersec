@@ -117,7 +117,8 @@ public class UpsertScoringRule {
         Properties consumerProperties = Utils.readKafkaProperties(applicationProperties, "rule-config-console", true);
         consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
-        consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "flink_cyber_command_line");
+        consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "flink_cyber_command_line".concat(UUID.randomUUID().toString()));
+        consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         consumerProperties.put("specific.avro.reader", true);
         consumerProperties.putAll(readSchemaRegistryProperties((Map) applicationProperties));
 
