@@ -35,7 +35,7 @@ public class RouterLinkTest {
     @Test
     void route() {
         Message input = Message.builder()
-                .addField(FieldName.of("tag"), FieldValue.of("route1"))
+                .addField(FieldName.of("tag"), StringFieldValue.of("route1"))
                 .createdBy(LinkName.of("original", parserName))
                 .build();
         ChainLink route1 = new NextChainLink(makeParser(parser1, "route", "route1"), linkName1);
@@ -61,7 +61,7 @@ public class RouterLinkTest {
     @Test
     void noRoute() {
         Message input = Message.builder()
-                .addField(FieldName.of("tag"), FieldValue.of("no_match"))
+                .addField(FieldName.of("tag"), StringFieldValue.of("no_match"))
                 .createdBy(LinkName.of("original", parserName))
                 .build();
         ChainLink route1 = new NextChainLink(parser1, linkName1);
@@ -83,7 +83,7 @@ public class RouterLinkTest {
     @Test
     void routeWithNextLink() {
         Message input = Message.builder()
-                .addField(FieldName.of("tag"), FieldValue.of("route1"))
+                .addField(FieldName.of("tag"), StringFieldValue.of("route1"))
                 .createdBy(LinkName.of("original", parserName))
                 .build();
         ChainLink route1 = new NextChainLink(makeParser(parser1, "route1", "route1"), linkName1);
@@ -121,7 +121,7 @@ public class RouterLinkTest {
     @Test
     void noRouteWithNextLink() {
         Message input = Message.builder()
-                .addField(FieldName.of("tag"), FieldValue.of("route1"))
+                .addField(FieldName.of("tag"), StringFieldValue.of("route1"))
                 .createdBy(LinkName.of("original", parserName))
                 .build();
         ChainLink route1 = new NextChainLink(makeEchoParser(parser1), linkName1);
@@ -150,7 +150,7 @@ public class RouterLinkTest {
     @Test
     void errorRouteWithNextLink() {
         Message input = Message.builder()
-                .addField(FieldName.of("tag"), FieldValue.of("route1"))
+                .addField(FieldName.of("tag"), StringFieldValue.of("route1"))
                 .createdBy(LinkName.of("original", parserName))
                 .build();
         ChainLink route1 = new NextChainLink(makeErrorParser(parser1), linkName1);
@@ -170,7 +170,7 @@ public class RouterLinkTest {
     @Test
     void defaultRoute() {
         Message input = Message.builder()
-                .addField(FieldName.of("tag"), FieldValue.of("use_default"))
+                .addField(FieldName.of("tag"), StringFieldValue.of("use_default"))
                 .createdBy(LinkName.of("original", parserName))
                 .build();
         ChainLink route1 = new NextChainLink(makeEchoParser(parser1), linkName1);
@@ -197,7 +197,7 @@ public class RouterLinkTest {
     @Test
     void undefinedRoutingField() {
         Message input = Message.builder()
-                .addField(FieldName.of("tag"), FieldValue.of("use_default"))
+                .addField(FieldName.of("tag"), StringFieldValue.of("use_default"))
                 .createdBy(LinkName.of("original", parserName))
                 .build();
         ChainLink route1 = new NextChainLink(makeEchoParser(parser1), linkName1);
@@ -220,7 +220,7 @@ public class RouterLinkTest {
         when(parser1.parse(any())).thenReturn(null);
         ChainLink route1 = new NextChainLink(parser1, linkName1);
         Message input = Message.builder()
-                .addField(FieldName.of("tag"), FieldValue.of("route1"))
+                .addField(FieldName.of("tag"), StringFieldValue.of("route1"))
                 .createdBy(LinkName.of("original", parserName))
                 .build();
         RouterLink routerLink = new RouterLink()

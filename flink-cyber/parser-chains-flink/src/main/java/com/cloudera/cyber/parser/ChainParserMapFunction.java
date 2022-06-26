@@ -19,9 +19,9 @@ import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 
-import java.nio.charset.StandardCharsets;
 import java.security.PrivateKey;
 import java.security.Signature;
+import java.security.SignatureException;
 import java.time.Instant;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -99,70 +99,85 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
     }
 
     @Override
-    public void processElement(MessageToParse message, Context context, Collector<Message> collector) throws Exception {
-        final byte[] inputMessage = message.getOriginalBytes();
+    public void processElement(MessageToParse message, Context context, Collector<Message> collector) {
         final String topic = message.getTopic();
         final TopicParserConfig topicParserConfig = getChainForTopic(topic);
-        final List<com.cloudera.parserchains.core.Message> run = chainRunner.run(inputMessage, chains.get(topicParserConfig.getChainKey()));
+        final ChainLink chain = chains.get(topicParserConfig.getChainKey());
+
+        final List<com.cloudera.parserchains.core.Message> run = chainRunner.run(message, chain);
         final com.cloudera.parserchains.core.Message m = run.get(run.size() - 1);
-        Optional<String> errorMessage = m.getError().map(Throwable::getMessage);
-        long messageTimestamp = Instant.now().toEpochMilli();
+        if (m.getEmit()) {
+            Optional<String> errorMessage = m.getError().map(Throwable::getMessage);
+            long messageTimestamp = Instant.now().toEpochMilli();
 
-        if (!errorMessage.isPresent()) {
-            Optional<FieldValue> timestamp = m.getField(FieldName.of("timestamp"));
+            if (!errorMessage.isPresent()) {
+                Optional<FieldValue> timestamp = m.getField(FieldName.of("timestamp"));
 
-            if (timestamp.isPresent()) {
-                try {
-                    // handle timestamps that are <seconds>.<milliseconds>
-                    String timestampString = timestamp.get().get().replace(".", "");
-                    messageTimestamp = Long.parseLong(timestampString);
-                    if (timestampString.length() < 12) {
-                        // normalize second times
-                        messageTimestamp *= 1000;
+                if (timestamp.isPresent()) {
+                    try {
+                        // handle timestamps that are <seconds>.<milliseconds>
+                        String timestampString = timestamp.get().get().replace(".", "");
+                        messageTimestamp = Long.parseLong(timestampString);
+                        if (timestampString.length() < 12) {
+                            // normalize second times
+                            messageTimestamp *= 1000;
+                        }
+                    } catch (NumberFormatException nfe) {
+                        errorMessage = Optional.of(TIMESTAMP_NOT_EPOCH.concat(nfe.getMessage()));
                     }
-                } catch (NumberFormatException nfe) {
-                    errorMessage = Optional.of(TIMESTAMP_NOT_EPOCH.concat(nfe.getMessage()));
+                } else {
+                    errorMessage = Optional.of(NO_TIMESTAMP_FIELD_MESSAGE);
                 }
+            }
+
+            List<DataQualityMessage> dataQualityMessages = errorMessage.
+                    map(messageText -> Collections.singletonList(
+                            DataQualityMessage.builder().
+                                    field(DEFAULT_INPUT_FIELD).
+                                    feature(CHAIN_PARSER_FEATURE).
+                                    level(DataQualityMessageLevel.ERROR.name()).
+                                    message(messageText).
+                                    build())).
+                    orElse(null);
+
+            Message parsedMessage = Message.builder().extensions(fieldsFromChain(errorMessage.isPresent(), m.getFields()))
+                    .source(topicParserConfig.getSource())
+                    .originalSource(SignedSourceKey.builder()
+                            .topic(topic)
+                            .partition(message.getPartition())
+                            .offset(message.getOffset())
+                            .signature(signOriginalText(m))
+                            .build())
+                    .ts(messageTimestamp)
+                    .dataQualityMessages(dataQualityMessages)
+                    .build();
+
+            if (dataQualityMessages != null) {
+                context.output(errorOutputTag, parsedMessage);
             } else {
-                errorMessage = Optional.of(NO_TIMESTAMP_FIELD_MESSAGE);
+                collector.collect(parsedMessage);
+            }
+        }
+        messageMeter.markEvent();
+    }
+
+    private byte[] signOriginalText(com.cloudera.parserchains.core.Message m)  {
+
+        if (signature != null) {
+            Optional<FieldValue> originalMessage = m.getField(FieldName.of(DEFAULT_INPUT_FIELD));
+            if (originalMessage.isPresent()) {
+                byte[] bytes = originalMessage.get().toBytes();
+                try {
+                    signature.update(bytes);
+                    return signature.sign();
+                } catch (SignatureException e) {
+                    // this should not happen because signature is intialized but log it just in case
+                    log.error("Failed to sign message.", e);
+                }
             }
         }
 
-        List<DataQualityMessage> dataQualityMessages = errorMessage.
-                map(messageText -> Collections.singletonList(
-                        DataQualityMessage.builder().
-                                field(DEFAULT_INPUT_FIELD).
-                                feature(CHAIN_PARSER_FEATURE).
-                                level(DataQualityMessageLevel.ERROR.name()).
-                                message(messageText).
-                                build())).
-                orElse(null);
-
-        String originalInput
-                = m.getField(FieldName.of(DEFAULT_INPUT_FIELD)).get().get();
-        byte[] sig = EMPTY_SIGNATURE;
-        if (signature != null) {
-            signature.update(originalInput.getBytes(StandardCharsets.UTF_8));
-            sig = signature.sign();
-        }
-        Message parsedMessage = Message.builder().extensions(fieldsFromChain(errorMessage.isPresent(), m.getFields()))
-                .source(topicParserConfig.getSource())
-                .originalSource(SignedSourceKey.builder()
-                        .topic(topic)
-                        .partition(message.getPartition())
-                        .offset(message.getOffset())
-                        .signature(sig)
-                        .build())
-                .ts(messageTimestamp)
-                .dataQualityMessages(dataQualityMessages)
-                .build();
-
-        if (dataQualityMessages != null) {
-            context.output(errorOutputTag, parsedMessage);
-        } else {
-            collector.collect(parsedMessage);
-        }
-        messageMeter.markEvent();
+        return EMPTY_SIGNATURE;
     }
 
     private static Map<String, String> fieldsFromChain(boolean hasError, Map<FieldName, FieldValue> fields) {
@@ -178,4 +193,5 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
                 topicPatternToChain.stream().filter(t -> t.f0.matcher(top).
                         matches()).findFirst().map(t -> t.f1).orElse(new TopicParserConfig(top, top, defaultKafkaBootstrap)));
     }
+
 }

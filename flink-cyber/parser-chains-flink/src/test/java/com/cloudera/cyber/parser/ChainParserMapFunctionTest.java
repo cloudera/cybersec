@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.cloudera.cyber.parser.ChainParserMapFunction.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -45,6 +46,27 @@ public class ChainParserMapFunctionTest {
     @Test
     public void testNoTimestamp() throws Exception {
         testMessageWithError("{\"wrong_field_name\": \"1616706642\" }", NO_TIMESTAMP_FIELD_MESSAGE);
+    }
+
+    @Test
+    public void testMessageFiltered() throws Exception {
+        OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = createTestHarness("metron/parser_chain.json", "metron/topic_map.json", null);
+        String messageText = readConfigFile("metron/samples/oraclelogon_filtered.txt");
+        harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic("oraclelogon").originalBytes(messageText.getBytes(UTF_8)).build()));
+        List<Message> messages = harness.extractOutputValues();
+        assertThat(messages.isEmpty()).isTrue();
+        assertThat(harness.getSideOutput(ERROR_OUTPUT)).isNull();
+    }
+
+    @Test
+    public void testMessageEmittedFromFilter() throws Exception {
+        OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = createTestHarness("metron/parser_chain.json", "metron/topic_map.json", null);
+        String messageText = readConfigFile("metron/samples/oraclelogon.txt");
+        harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic("oraclelogon").originalBytes(messageText.getBytes(UTF_8)).build()));
+        List<Message> messages = harness.extractOutputValues();
+        assertThat(messages.size()).isEqualTo(1);
+        assertThat(messages.get(0).getExtensions().get("oracle_user")).isEqualTo("SYSMAN");
+        assertThat(harness.getSideOutput(ERROR_OUTPUT)).isNull();
     }
 
     private void testMessageWithError(String messageText, String timestampNotEpoch) throws Exception {
@@ -136,8 +158,12 @@ public class ChainParserMapFunctionTest {
     }
 
     private OneInputStreamOperatorTestHarness<MessageToParse, Message> createTestHarness(String chainConfigFile, PrivateKey privateKey) throws Exception {
+        return createTestHarness(chainConfigFile, "TimestampTopicMap.json", privateKey);
+    }
+
+    private OneInputStreamOperatorTestHarness<MessageToParse, Message> createTestHarness(String chainConfigFile, String topicMapFile, PrivateKey privateKey) throws Exception {
         String chainConfig = readConfigFile(chainConfigFile);
-        String topicConfig = readConfigFile("TimestampTopicMap.json");
+        String topicConfig = readConfigFile(topicMapFile);
         ParserChainMap chainSchema = JSONUtils.INSTANCE.load(chainConfig, ParserChainMap.class);
         TopicPatternToChainMap topicMap = JSONUtils.INSTANCE.load(topicConfig, TopicPatternToChainMap.class);
 

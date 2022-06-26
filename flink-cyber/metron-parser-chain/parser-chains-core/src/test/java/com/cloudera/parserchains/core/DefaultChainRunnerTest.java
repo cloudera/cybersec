@@ -76,7 +76,7 @@ public class DefaultChainRunnerTest {
 
         // validate
         Message expected0 = Message.builder()
-                .addField(newInputField, FieldValue.of(inputToParse))
+                .addField(newInputField, StringFieldValue.of(inputToParse))
                 .createdBy(DefaultChainRunner.ORIGINAL_MESSAGE_NAME)
                 .build();
         Message expected1 = Message.builder()
@@ -121,7 +121,7 @@ public class DefaultChainRunnerTest {
         assertEquals(DefaultChainRunner.ORIGINAL_MESSAGE_NAME, results.get(0).getCreatedBy(),
                 "Expected the 1st message to have 'createdBy' defined.");
         Message expectedMessage = Message.builder()
-                .addField(runner.getInputField(), FieldValue.of(inputToParse))
+                .addField(runner.getInputField(), StringFieldValue.of(inputToParse))
                 .createdBy(DefaultChainRunner.ORIGINAL_MESSAGE_NAME)
                 .build();
         assertEquals(1, results.size(),

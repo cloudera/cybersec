@@ -152,7 +152,7 @@ public class DelimitedKeyValueParser implements Parser {
                 if(validKey && validValue) {
                     try {
                         FieldName fieldName = FieldName.of(key);
-                        FieldValue fieldValue = FieldValue.of(value);
+                        FieldValue fieldValue = StringFieldValue.of(value);
                         output.addField(fieldName, fieldValue);
 
                     } catch(IllegalArgumentException e) {

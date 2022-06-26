@@ -193,6 +193,7 @@
                 <directory>src/test/resources</directory>
                 <includes>
                     <include>**/*.json</include>
+                    <include>**/*.txt</include>
                     <include>**/*.der</include>
                     <include>**/*.properties</include>
                 </includes>
