@@ -73,7 +73,7 @@ public class DefaultChainBuilderServiceTest {
         // validate
         Message input = Message.builder()
                 .createdBy(LinkName.of("original", parserName))
-                .addField(FieldName.of("original_string"), FieldValue.of("Homer Simpson, 740 Evergreen Terrace, (939)-555-0113"))
+                .addField(FieldName.of("original_string"), StringFieldValue.of("Homer Simpson, 740 Evergreen Terrace, (939)-555-0113"))
                 .build();
         List<Message> results = head.process(input);
 

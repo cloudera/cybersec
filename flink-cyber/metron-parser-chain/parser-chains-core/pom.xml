@@ -95,6 +95,12 @@
             <artifactId>lombok</artifactId>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-cyber-api</artifactId>
+            <version>2.3.0</version>
+            <scope>compile</scope>
+        </dependency>
 
     </dependencies>
 </project>

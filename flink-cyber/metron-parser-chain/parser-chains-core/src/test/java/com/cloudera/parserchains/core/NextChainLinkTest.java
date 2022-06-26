@@ -88,7 +88,7 @@ public class NextChainLinkTest {
     @Test
     void parserReturnsNull() {
         Message input = Message.builder()
-                .addField(FieldName.of("tag"), FieldValue.of("route1"))
+                .addField(FieldName.of("tag"), StringFieldValue.of("route1"))
                 .createdBy(LinkName.of("original", parserName))
                 .build();
         RouterLink routerLink = new RouterLink()

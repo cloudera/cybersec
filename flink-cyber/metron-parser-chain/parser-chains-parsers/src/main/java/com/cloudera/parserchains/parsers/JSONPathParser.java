@@ -1,9 +1,6 @@
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.FieldName;
-import com.cloudera.parserchains.core.FieldValue;
-import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
+import com.cloudera.parserchains.core.*;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
@@ -90,7 +87,7 @@ public class JSONPathParser implements Parser {
     }
 
     private FieldValue execute(JsonPath jsonPath, ReadContext readContext) {
-        FieldValue result = FieldValue.of("");
+        FieldValue result = StringFieldValue.of("");
         try {
             // execute the path expression
             List<Object> values = readContext.read(jsonPath);
@@ -98,7 +95,7 @@ public class JSONPathParser implements Parser {
             // convert the result to a a string
             List<String> strings = values.stream().map(v -> v.toString()).collect(Collectors.toList());
             String value = String.join(",", strings);
-            result = FieldValue.of(value);
+            result = StringFieldValue.of(value);
 
         } catch(PathNotFoundException e) {
             log.debug("No results for path expression. Nothing to do. jsonPath={}", jsonPath.getPath());

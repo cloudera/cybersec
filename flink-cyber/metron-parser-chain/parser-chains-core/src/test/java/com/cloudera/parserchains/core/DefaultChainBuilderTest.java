@@ -5,6 +5,7 @@ import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.core.model.define.ParserName;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import org.adrianwalker.multilinestring.Multiline;
+import org.apache.flink.core.fs.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -57,7 +58,7 @@ public class DefaultChainBuilderTest {
     void success() throws InvalidParserException, IOException {
         Message input = Message.builder()
                 .createdBy(LinkName.of("original", parserName))
-                .addField(FieldName.of("original_string"), FieldValue.of("Homer Simpson, 740 Evergreen Terrace, (939)-555-0113"))
+                .addField(FieldName.of("original_string"), StringFieldValue.of("Homer Simpson, 740 Evergreen Terrace, (939)-555-0113"))
                 .build();
         ParserChainSchema schema = JSONUtils.INSTANCE.load(parserChain, ParserChainSchema.class);
         ChainLink head = chainBuilder.build(schema);
@@ -175,7 +176,7 @@ public class DefaultChainBuilderTest {
     void parserAfterRouter() throws IOException, InvalidParserException {
         Message input = Message.builder()
                 .createdBy(LinkName.of("original", parserName))
-                .addField(FieldName.of("original_string"), FieldValue.of("Homer Simpson, 740 Evergreen Terrace, (939)-555-0113"))
+                .addField(FieldName.of("original_string"), StringFieldValue.of("Homer Simpson, 740 Evergreen Terrace, (939)-555-0113"))
                 .build();
         ParserChainSchema schema = JSONUtils.INSTANCE.load(parserAfterRouter, ParserChainSchema.class);
         ChainLink head = chainBuilder.build(schema);
@@ -192,5 +193,13 @@ public class DefaultChainBuilderTest {
                 results.get(1).getCreatedBy().getLinkName(), is("26bf648f-930e-44bf-a4de-bfd34ac16165"));
         assertThat("Expected the original field to remain.",
                 results.get(1).getFields().keySet(), hasItem(FieldName.of("original_string")));
+    }
+
+    @Test
+    public void getSensorTypeName() {
+        String pathString = "parsers/squid.json";
+        Path path = new Path(pathString);
+        String fileName = path.getName();
+        String sensorType = fileName.substring(0, fileName.lastIndexOf('.'));
     }
 }

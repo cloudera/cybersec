@@ -11,7 +11,6 @@ import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
@@ -88,7 +87,7 @@ public class AvroParser implements Parser {
 
     public Message doParse(FieldValue toParse, Message.Builder output) {
         try {
-            byte[] bytes = toParse.getByteValue();
+            byte[] bytes = toParse.toBytes();
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
             GenericDatumReader<GenericRecord> genericDatumReader = new GenericDatumReader<>(schema);
             BinaryDecoder binaryDecoder = DecoderFactory.get().binaryDecoder(byteArrayInputStream, null);
