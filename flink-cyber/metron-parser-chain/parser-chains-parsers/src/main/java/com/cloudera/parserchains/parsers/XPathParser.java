@@ -1,9 +1,6 @@
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.FieldName;
-import com.cloudera.parserchains.core.FieldValue;
-import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
+import com.cloudera.parserchains.core.*;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
@@ -140,7 +137,7 @@ public class XPathParser implements Parser {
     private void execute(Document document, FieldName fieldName, XPathExpression expression, Message.Builder output) {
         try {
             String value = (String) expression.evaluate(document, XPathConstants.STRING);
-            output.addField(fieldName, FieldValue.of(value));
+            output.addField(fieldName, StringFieldValue.of(value));
 
         } catch (XPathExpressionException e) {
             String msg = String.format("Unable to execute XPath expression; %s", expressions.get(fieldName));

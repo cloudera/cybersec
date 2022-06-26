@@ -1,9 +1,6 @@
 package com.cloudera.parserchains.core;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * A {@link ChainLink} that links directly to the next link in a chain.
@@ -29,17 +26,20 @@ public class NextChainLink implements ChainLink {
         Message parsed = parser.parse(input);
         Objects.requireNonNull(parsed, "Parser must not return a null message.");
 
+        boolean emitMessage = parsed.getEmit();
+
         // ensure the message is attributed to this link by name
         Message output = Message.builder()
                 .clone(parsed)
                 .createdBy(linkName)
+                .emit(emitMessage)
                 .build();
         List<Message> results = new ArrayList<>();
         results.add(output);
 
         // if no errors, allow the next link in the chain to process the message
         boolean noError = !output.getError().isPresent();
-        if(noError && nextLink.isPresent()) {
+        if (noError && emitMessage && nextLink.isPresent()) {
             List<Message> nextResults = nextLink.get().process(output);
             results.addAll(nextResults);
         }

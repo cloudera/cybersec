@@ -162,7 +162,7 @@ public class BaseStellarProcessor<T> {
   private ParseException createException(String rule, VariableResolver resolver, Throwable t) {
     String message = "Unable to parse: " + rule + " due to: " + t.getMessage();
     Set<String> variablesUsed = variablesUsed(rule);
-    if(variablesUsed.isEmpty()) {
+    if(variablesUsed == null || variablesUsed.isEmpty()) {
       return new ParseException(message, t);
     }
     List<Map.Entry<String, Object>> messagesUsed = new ArrayList<>(variablesUsed.size());

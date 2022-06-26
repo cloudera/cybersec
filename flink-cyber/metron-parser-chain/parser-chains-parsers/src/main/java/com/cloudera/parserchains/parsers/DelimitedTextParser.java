@@ -158,7 +158,7 @@ public class DelimitedTextParser implements Parser {
                 if(trimWhitespace) {
                     column = column.trim();
                 }
-                output.addField(outputField.fieldName, FieldValue.of(column));
+                output.addField(outputField.fieldName, StringFieldValue.of(column));
 
             } else {
                 String err = format("Found %d column(s), index %d does not exist.", width, outputField.index);

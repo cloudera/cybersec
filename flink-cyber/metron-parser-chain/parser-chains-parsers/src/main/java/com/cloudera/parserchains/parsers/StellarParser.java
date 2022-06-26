@@ -1,10 +1,8 @@
 package com.cloudera.parserchains.parsers;
 
+import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.cyber.stellar.MetronCompatibilityParser;
-import com.cloudera.parserchains.core.FieldName;
-import com.cloudera.parserchains.core.FieldValue;
-import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
+import com.cloudera.parserchains.core.*;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +15,6 @@ import org.apache.metron.parsers.interfaces.MessageParserResult;
 import org.json.simple.JSONObject;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,8 +59,11 @@ public class StellarParser implements Parser {
     }
 
     private void loadParser(String pathToConfig, FileSystem fileSystem) throws IOException {
-        try (FSDataInputStream fsDataInputStream = fileSystem.open(new Path(pathToConfig))) {
-            this.metronCompatibilityParser = MetronCompatibilityParser.of(fsDataInputStream);
+        Path configPath = new Path(pathToConfig);
+        try (FSDataInputStream fsDataInputStream = fileSystem.open(configPath)) {
+            String fileName = configPath.getName();
+            String sensorType = fileName.substring(0, fileName.lastIndexOf('.'));
+            this.metronCompatibilityParser = MetronCompatibilityParser.of(sensorType, fsDataInputStream);
         } catch (Exception e) {
             log.error(String.format("Could not create parser from '%s'", pathToConfig), e);
             throw e;
@@ -84,8 +84,8 @@ public class StellarParser implements Parser {
     }
 
     private Message doParse(FieldValue toParse, Message.Builder output) {
-        byte[] bytes = toParse.get().getBytes(StandardCharsets.UTF_8);
-        Optional<MessageParserResult<JSONObject>> optionalResult = metronCompatibilityParser.parse(bytes);
+        MessageToParse messageToParse = toParse.toMessageToParse();
+        Optional<MessageParserResult<JSONObject>> optionalResult = metronCompatibilityParser.parse(messageToParse);
         if (optionalResult.isPresent()) {
             MessageParserResult<JSONObject> result = optionalResult.get();
             Optional<Throwable> messageException = result.getMasterThrowable();
@@ -101,7 +101,8 @@ public class StellarParser implements Parser {
                         output.addField(entry.getKey(), String.valueOf(entry.getValue()));
                     }
                 } else {
-                    output.withError("Parser returned an empty message result").build();
+                    // message was filtered
+                    output.emit(false).build();
                 }
             }
         } else {

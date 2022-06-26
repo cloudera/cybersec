@@ -1,8 +1,8 @@
 package com.cloudera.parserchains.core;
 
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.util.*;
 
@@ -15,6 +15,8 @@ import java.util.*;
  * A {@link Message} is immutable and a {@link Builder} should be used to
  * construct one.
  */
+@EqualsAndHashCode
+@ToString
 public class Message {
 
     /**
@@ -24,6 +26,7 @@ public class Message {
         private Map<FieldName, FieldValue> fields;
         private Throwable error;
         private LinkName createdBy;
+        private boolean emit = true;
 
         public Builder() {
             this.fields = new HashMap<>();
@@ -73,7 +76,7 @@ public class Message {
          * @return
          */
         public Builder addField(FieldName name, String value) {
-            return addField(name, FieldValue.of(value));
+            return addField(name, StringFieldValue.of(value));
         }
 
         /**
@@ -83,7 +86,7 @@ public class Message {
          * @return
          */
         public Builder addField(String name, String value) {
-            return addField(FieldName.of(name), FieldValue.of(value));
+            return addField(FieldName.of(name), StringFieldValue.of(value));
         }
 
         /**
@@ -168,6 +171,10 @@ public class Message {
             return this;
         }
 
+        public Builder emit(boolean emit) {
+            this.emit = emit;
+            return this;
+        }
         /**
          * Builds a {@link Message}.
          * @return The message.
@@ -180,12 +187,14 @@ public class Message {
     private Map<FieldName, FieldValue> fields;
     private Throwable error;
     private LinkName createdBy;
+    private boolean emit;
 
     private Message(Builder builder) {
         this.fields = new HashMap<>();
         this.fields.putAll(builder.fields);
         this.error = builder.error;
         this.createdBy = builder.createdBy;
+        this.emit = builder.emit;
     }
 
     /**
@@ -220,37 +229,7 @@ public class Message {
         return createdBy;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Message message = (Message) o;
-        return new EqualsBuilder()
-                .append(fields, message.fields)
-                .append(error, message.error)
-                .append(createdBy, message.createdBy)
-                .isEquals();
-    }
-
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder(17, 37)
-                .append(fields)
-                .append(error)
-                .append(createdBy)
-                .toHashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "Message{" +
-                "fields=" + fields +
-                ", error=" + error +
-                ", createdBy=" + createdBy +
-                '}';
+    public boolean getEmit() {
+        return emit;
     }
 }

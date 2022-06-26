@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.entry;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.StringFieldValue;
 import com.google.common.collect.ImmutableMap;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -40,10 +41,10 @@ class AvroParserTest {
         Message parsedMessage = parser.parse(buildMessageFromFile(DATA_PATH));
 
         assertThat(parsedMessage.getFields()).contains(
-                entry(FieldName.of("name"), FieldValue.of("Ben")),
-                entry(FieldName.of("number"), FieldValue.of("7")),
-                entry(FieldName.of("innerRecord"), FieldValue.of("{\"age\": 13}")),
-                entry(FieldName.of("tes3"), FieldValue.of("{td3=1}")));
+                entry(FieldName.of("name"), StringFieldValue.of("Ben")),
+                entry(FieldName.of("number"), StringFieldValue.of("7")),
+                entry(FieldName.of("innerRecord"), StringFieldValue.of("{\"age\": 13}")),
+                entry(FieldName.of("tes3"), StringFieldValue.of("{td3=1}")));
     }
 
     @Test
@@ -54,10 +55,10 @@ class AvroParserTest {
         Message parsedMessage = parser.parse(buildMessage());
 
         assertThat(parsedMessage.getFields()).contains(
-                entry(FieldName.of("name"), FieldValue.of("Tom")),
-                entry(FieldName.of("number"), FieldValue.of("22")),
-                entry(FieldName.of("innerRecord"), FieldValue.of("{\"age\": 42}")),
-                entry(FieldName.of("tes3"), FieldValue.of("{key11=11, key22=22}")));
+                entry(FieldName.of("name"), StringFieldValue.of("Tom")),
+                entry(FieldName.of("number"), StringFieldValue.of("22")),
+                entry(FieldName.of("innerRecord"), StringFieldValue.of("{\"age\": 42}")),
+                entry(FieldName.of("tes3"), StringFieldValue.of("{key11=11, key22=22}")));
     }
 
     @Test
