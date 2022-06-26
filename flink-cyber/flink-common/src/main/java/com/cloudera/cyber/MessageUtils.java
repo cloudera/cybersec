@@ -28,7 +28,7 @@ public class MessageUtils {
                     .extensions(Stream.concat(
                             streamExtensions(message),
                             field.entrySet().stream()
-                    ).collect(toMap(Map.Entry::getKey, Map.Entry::getValue)))
+                    ).collect(toMap(Map.Entry::getKey, Map.Entry::getValue, MessageUtils::merge)))
                     .build();
         } else {
             return message;
@@ -48,7 +48,7 @@ public class MessageUtils {
     }
 
     private static Stream<Map.Entry<String,String>> prefixMap(Map<String, String> field, String prefix) {
-        return field.entrySet().stream().collect(toMap(k -> Joiner.on(MESSAGE_FIELD_DELIMITER).skipNulls().join(prefix, k.getKey()), Map.Entry::getValue)).entrySet().stream();
+        return field.entrySet().stream().collect(toMap(k -> Joiner.on(MESSAGE_FIELD_DELIMITER).skipNulls().join(prefix, k.getKey()), Map.Entry::getValue, MessageUtils::merge)).entrySet().stream();
     }
 
     public static Message enrich(Message message, Map<String, String> enrichmentExtensions, List<DataQualityMessage> dataQualityMessages) {
@@ -61,7 +61,7 @@ public class MessageUtils {
                     .extensions(Stream.concat(
                             streamExtensions(message),
                             prefixMap(enrichmentExtensions, prefix)
-                    ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+                    ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, MessageUtils::merge)))
                     .dataQualityMessages(Stream.concat(
                             streamDataQualityMessages(message),
                             dataQualityMessages.stream()
@@ -71,6 +71,9 @@ public class MessageUtils {
             // no changes to the message needed
             return message;
         }
+    }
+    public static String merge(String str1, String str2) {
+        return str2;
     }
 
     public static void addQualityMessage(List<DataQualityMessage> messages, DataQualityMessageLevel level, String errorMessage, String fieldName, String feature) {
