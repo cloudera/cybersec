@@ -19,7 +19,6 @@
         <module>flink-enrichment</module>
         <module>flink-sessions</module>
         <module>flink-dedupe</module>
-        <module>flink-profiler-sql</module>
         <module>flink-profiler-java</module>
         <module>flink-profiler</module>
         <module>flink-rules</module>
@@ -45,6 +44,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.verion>1.8</java.verion>
         <flink.version>1.14.0-csa1.6.1.0</flink.version>
+        <flink.hbase.version>2.2</flink.hbase.version>
         <cdh.version>7.1.6.0-297</cdh.version>
         <lombok.version>1.18.22</lombok.version>
         <lombok.plugin.version>1.18.16.0</lombok.plugin.version>
@@ -57,7 +57,7 @@
         <jackson.version>2.11.2</jackson.version>
         <jackson.datatype.version>2.10.1</jackson.datatype.version>
         <smm.intercepter.version>2.1.0.${cdh.version}</smm.intercepter.version>
-        <flink.format.parquet.version>1.10.0</flink.format.parquet.version>
+        <flink.format.parquet.version>1.11.1</flink.format.parquet.version>
         <slf4j.version>1.7.15</slf4j.version>
         <log4j.version>2.17.2</log4j.version>
         <multiline-string.version>0.1.2</multiline-string.version>
@@ -153,30 +153,35 @@
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-avro</artifactId>
                 <version>${flink.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-json</artifactId>
                 <version>${flink.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-csv</artifactId>
                 <version>${flink.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-orc_${scala.binary.version}</artifactId>
                 <version>${flink.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-parquet_${scala.binary.version}</artifactId>
                 <version>${flink.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>
@@ -290,6 +295,7 @@
                 <groupId>org.apache.avro</groupId>
                 <artifactId>avro</artifactId>
                 <version>${avro.version}</version>
+                <scope>provided</scope>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.hadoop</groupId>
