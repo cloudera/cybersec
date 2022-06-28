@@ -1,0 +1,12 @@
+node_modules
+e2e
+cypress
+coverage
+npm-debug.log
+.editorconfig
+.env.example
+.travis.yml
+.gitignore
+browserslist
+cypress.json
+README.md
