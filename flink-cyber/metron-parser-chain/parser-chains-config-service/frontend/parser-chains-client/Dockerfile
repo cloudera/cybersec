@@ -8,7 +8,7 @@ RUN apk --no-cache add --virtual native-deps \
 
 RUN npm ci
 
-COPY . .
+COPY parser-chains-client .
 RUN npx ng build --prod
 
 FROM node:12-alpine
