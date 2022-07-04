@@ -71,6 +71,13 @@
 		</file>
 
 		<file>
+			<source>../flink-indexing/flink-indexing-hive/target/flink-indexing-hive-${project.version}.jar</source>
+			<outputDirectory>jobs/</outputDirectory>
+			<destName>flink-indexing-hive-${cybersec.full.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
+
+		<file>
 			<source>../flink-commands/scoring-commands/target/scoring-commands-${project.version}.jar</source>
 			<outputDirectory>tools/</outputDirectory>
 			<destName>scoring-commands-${cybersec.full.version}.jar</destName>
