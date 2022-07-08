@@ -34,8 +34,8 @@
         <module>metron-common</module>
         <module>metron-hbase-common</module>
         <module>flink-commands</module>
-        <module>cyber-csd</module>
         <module>cyber-jobs</module>
+        <module>cyber-csd</module>
         <module>cyber-parcel</module>
         <module>flink-phoenix-jdbc</module>
     </modules>
