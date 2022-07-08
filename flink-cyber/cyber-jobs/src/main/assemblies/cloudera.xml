@@ -51,16 +51,16 @@
 		</file>
 
 		<file>
-			<source>../flink-enrichment/flink-enrichment-combined/target/flink-enrichment-loading-${project.version}.jar</source>
+			<source>../flink-enrichment/flink-enrichment-combined/target/flink-enrichment-combined-${project.version}.jar</source>
 			<outputDirectory>jobs/</outputDirectory>
-			<destName>flink-enrichment-loading-${cybersec.full.version}.jar</destName>
+			<destName>flink-enrichment-combined-${cybersec.full.version}.jar</destName>
 			<fileMode>0644</fileMode>
 		</file>
 
 		<file>
-			<source>../flink-enrichment/flink-enrichment-load/target/flink-enrichment-combined-${project.version}.jar</source>
+			<source>../flink-enrichment/flink-enrichment-load/target/flink-enrichment-loading-${project.version}.jar</source>
 			<outputDirectory>jobs/</outputDirectory>
-			<destName>flink-enrichment-combined-${cybersec.full.version}.jar</destName>
+			<destName>flink-enrichment-loading-${cybersec.full.version}.jar</destName>
 			<fileMode>0644</fileMode>
 		</file>
 
