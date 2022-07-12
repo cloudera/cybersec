@@ -24,6 +24,11 @@
     "group": "cybersec",
     "permissions": "0755"
   },
+  "bin/start-indexer": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
   "bin/send-scoring-command": {
     "user": "cybersec",
     "group": "cybersec",

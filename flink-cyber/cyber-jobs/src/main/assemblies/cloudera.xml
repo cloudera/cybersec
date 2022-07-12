@@ -58,6 +58,13 @@
 		</file>
 
 		<file>
+			<source>../flink-enrichment/flink-enrichment-load/target/flink-enrichment-loading-${project.version}.jar</source>
+			<outputDirectory>jobs/</outputDirectory>
+			<destName>flink-enrichment-loading-${cybersec.full.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
+
+		<file>
 			<source>../flink-profiler-java/target/flink-profiler-java-${project.version}.jar</source>
 			<outputDirectory>jobs/</outputDirectory>
 			<destName>flink-profiler-java-${cybersec.full.version}.jar</destName>
@@ -67,6 +74,13 @@
 			<source>../parser-chains-flink/target/parser-chains-flink-${project.version}.jar</source>
 			<outputDirectory>jobs/</outputDirectory>
 			<destName>parser-chains-flink-${cybersec.full.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
+
+		<file>
+			<source>../flink-indexing/flink-indexing-hive/target/flink-indexing-hive-${project.version}.jar</source>
+			<outputDirectory>jobs/</outputDirectory>
+			<destName>flink-indexing-hive-${cybersec.full.version}.jar</destName>
 			<fileMode>0644</fileMode>
 		</file>
 

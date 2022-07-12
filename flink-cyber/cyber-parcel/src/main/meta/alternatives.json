@@ -23,6 +23,12 @@
     "priority": 10,
     "isDirectory": false
   },
+  "start-indexer": {
+    "destination": "/usr/bin/start-indexer",
+    "source": "bin/start-indexer",
+    "priority": 10,
+    "isDirectory": false
+  },
   "send-scoring-command": {
     "destination": "/usr/bin/send-scoring-command",
     "source": "bin/send-scoring-command",
