@@ -35,6 +35,7 @@
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-test</artifactId>
             <version>2.7.1</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
@@ -170,7 +171,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
-            <version>3.6.1</version>
+            <version>${commons.math3.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-validator</groupId>
@@ -371,6 +372,10 @@
                                 <relocation>
                                     <pattern>org.apache.commons.beanutils</pattern>
                                     <shadedPattern>org.apache.metron.beanutils</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.math3</pattern>
+                                    <shadedPattern>com.cybersec.commons.math3</shadedPattern>
                                 </relocation>
                             </relocations>
                             <transformers>
