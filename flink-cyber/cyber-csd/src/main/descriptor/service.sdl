@@ -101,7 +101,7 @@
           "additionalConfigs": [
             {
               "key": "kafka.brokers.list",
-              "value": "kafka_brokers_list"
+              "value": "${kafka_brokers_list}"
             }
           ]
         },
