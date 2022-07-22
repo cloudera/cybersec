@@ -2,6 +2,7 @@ package com.cloudera.cyber.indexing;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.formats.parquet.avro.ParquetAvroWriters;
@@ -17,8 +18,8 @@ public class ParquetJobKafka extends ParquetJob {
     private static final String PARAMS_OUTPUT_BASEPATH = "index.basepath";
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        new ParquetJobKafka().createPipeline(ParameterTool.fromPropertiesFile(args[0])).execute("Indexing - Parquet");
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
+        new ParquetJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Indexing - Parquet");
     }
 
     @Override

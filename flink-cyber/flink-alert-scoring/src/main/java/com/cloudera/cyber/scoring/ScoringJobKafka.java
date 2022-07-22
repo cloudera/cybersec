@@ -2,6 +2,7 @@ package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -18,10 +19,10 @@ public class ScoringJobKafka extends ScoringJob {
     private static final String SCORING_RULES_GROUP_ID = "scoring-rules";
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            throw new RuntimeException("Path to the properties file is expected as the only argument.");
+        if (args.length >= 1) {
+            throw new RuntimeException("Path to the properties file(s) is expected as the only argument.");
         }
-        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        ParameterTool params = Utils.getParamToolsFromProperties(args);
         FlinkUtils.executeEnv(new ScoringJobKafka()
                 .createPipeline(params), "Flink Scoring", params);
     }

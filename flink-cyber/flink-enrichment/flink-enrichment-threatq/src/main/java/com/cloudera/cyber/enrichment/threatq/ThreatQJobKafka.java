@@ -2,6 +2,7 @@ package com.cloudera.cyber.enrichment.threatq;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.serialization.AbstractDeserializationSchema;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -24,8 +25,8 @@ public class ThreatQJobKafka extends ThreatQJob {
     private static final String THREATQ_PARSER_GROUP_ID = "threatq-parser";
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        new ThreatQJobKafka().createPipeline(ParameterTool.fromPropertiesFile(args[0])).execute("Enrichments - ThreatQ");
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
+        new ThreatQJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Enrichments - ThreatQ");
     }
 
     @Override

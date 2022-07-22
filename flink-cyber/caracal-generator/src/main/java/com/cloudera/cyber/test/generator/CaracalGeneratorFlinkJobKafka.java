@@ -13,10 +13,10 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            throw new IllegalArgumentException("Path to the properties file is expected as the only argument.");
+        if (args.length >= 1) {
+            throw new IllegalArgumentException("Path to the properties file(s) is expected as the only argument.");
         }
-        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        ParameterTool params = com.cloudera.cyber.flink.Utils.getParamToolsFromProperties(args);
 
         FlinkUtils.executeEnv(new CaracalGeneratorFlinkJobKafka()
                 .createPipeline(params), "Caracal Data generator", params);

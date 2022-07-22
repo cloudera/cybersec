@@ -95,8 +95,7 @@
             "ssl_client_truststore_password",
             "schema_registry_url",
             "kafka_acks",
-            "kafka_auto_offset_reset",
-            "schema_registry_url"
+            "kafka_auto_offset_reset"
           ],
           "additionalConfigs": [
             {
@@ -117,6 +116,14 @@
             {
               "key": "flink.job.name",
               "value": "Job Generator"
+            },
+            {
+              "key": "kafka.client.id",
+              "value": "kafka.generator.client.id"
+            },
+            {
+              "key": "kafka.group.id",
+              "value": "kafka.generator.group.id"
             }
           ]
         },
@@ -241,7 +248,15 @@
         "name": "generator_metrics",
         "label": "Generator metrics",
         "description": "Kafka topic for generator metrics.",
-        "configName": "generator.metrics=",
+        "configName": "generator.metrics",
+        "type": "string",
+        "default": "generator.count"
+      },
+      {
+        "name": "chain_file",
+        "label": "Chain file path",
+        "description": "Path to file with ",
+        "configName": "chain.file",
         "type": "string",
         "default": "generator.count"
       }

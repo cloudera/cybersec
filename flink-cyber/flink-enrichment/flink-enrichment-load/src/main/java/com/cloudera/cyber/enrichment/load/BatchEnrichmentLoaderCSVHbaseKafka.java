@@ -4,6 +4,7 @@ import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.enrichment.hbase.writer.HbaseEnrichmentCommandSink;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.hbase.sink.HBaseSinkFunction;
@@ -16,8 +17,8 @@ public class BatchEnrichmentLoaderCSVHbaseKafka extends BatchEnrichmentLoaderCSV
     private static final String PARAMS_TOPIC_ENRICHMENT_INPUT = "enrichment.topic.input";
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
+        ParameterTool params = Utils.getParamToolsFromProperties(args);
         FlinkUtils.executeEnv(new BatchEnrichmentLoaderCSVHbaseKafka().runPipeline(params),
                 String.format("Enrichment %s - batch load", params.get(ENRICHMENT_TYPE, "unspecified")),
                 params);

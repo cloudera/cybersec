@@ -2,6 +2,7 @@ package com.cloudera.cyber.enrichment.rest;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -14,8 +15,8 @@ public class RestLookupJobKafka extends RestLookupJob {
 
     private static final String DEFAULT_GROUP_ID = "enrichment-rest";
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        new RestLookupJobKafka().createPipeline(ParameterTool.fromPropertiesFile(args[0])).execute("Enrichment - REST");
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
+        new RestLookupJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Enrichment - REST");
     }
 
     @Override
