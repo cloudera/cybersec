@@ -2,7 +2,7 @@
   "name": "SYBERCES",
   "label": "Cybersec",
   "description": "Cyber security project.",
-  "version": "1.0",
+  "version": "2.3.0",
   "compatibility": {
     "cdhVersion": {
       "min": "7.1.6"
@@ -43,13 +43,42 @@
   "hdfsDirs": [
     {
       "name": "CreateCybersecUserDirCommand",
-      "label": "Create Cybersec User Directory",
+      "label": "Create cybersec user directory",
       "description": "Creates the directory in HDFS for the cybersec user.",
       "directoryDescription": "Cybersec User Directory (HDFS)",
       "path": "/user/cybersec/",
       "permissions": "1755"
+    },
+    {
+      "name": "CreateCybersecDataDirCommand",
+      "label": "Create cybersec data directory",
+      "description": "Creates the directory in HDFS for the cybersec data.",
+      "directoryDescription": "Cybersec data directory (HDFS)",
+      "path": "/user/cybersec/data",
+      "permissions": "1755"
+    },
+    {
+      "name": "CreateCybersecStellarDirCommand",
+      "label": "Create cybersec stellar directory",
+      "description": "Creates the directory in HDFS for the cybersec stellar configs.",
+      "directoryDescription": "Cybersec stellar directory (HDFS)",
+      "path": "/user/cybersec/data/stellar",
+      "permissions": "1755"
     }
   ],
+  "serviceInit" : {
+    "preStartSteps" : [
+      {
+        "commandName" : "CreateCybersecUserDirCommand"
+      },
+      {
+        "commandName" : "CreateCybersecDataDirCommand"
+      },
+      {
+        "commandName" : "CreateCybersecStellarDirCommand"
+      }
+    ]
+  },
   "kerberos": "${kerberos.auth.enabled}",
   "parameters": [
     {
@@ -110,7 +139,9 @@
           "includedParams": [
             "generator_eps",
             "generator_avro_flag",
-            "generator_metrics"
+            "generator_metrics",
+            "default_parallelism",
+            "default_checkpoint_interval_ms"
           ],
           "additionalConfigs": [
             {
@@ -119,11 +150,11 @@
             },
             {
               "key": "kafka.client.id",
-              "value": "kafka.generator.client.id"
+              "value": "generator.client.id"
             },
             {
               "key": "kafka.group.id",
-              "value": "kafka.generator.group.id"
+              "value": "generator.group.id"
             }
           ]
         },
@@ -131,23 +162,84 @@
           "filename": "cybersec-conf/parser.properties",
           "configFormat": "properties",
           "includedParams": [
+            "default_parallelism",
+            "default_checkpoint_interval_ms"
           ],
           "additionalConfigs": [
             {
               "key": "flink.job.name",
               "value": "Job Parser"
+            },
+            {
+              "key": "topic.output",
+              "value": "triage.input"
+            },
+            {
+              "key": "topic.error",
+              "value": "parser.error"
+            },
+            {
+              "key": "kafka.client.id",
+              "value": "parser.client.id"
+            },
+            {
+              "key": "kafka.group.id",
+              "value": "parser.group.id"
             }
           ]
         },
         {
-          "filename": "cybersec-conf/enrichment.properties",
+          "filename": "cybersec-conf/triage.properties",
           "configFormat": "properties",
           "includedParams": [
+            "default_parallelism",
+            "default_checkpoint_interval_ms",
+            "enrichment_topic_input",
+            "enrichment_topic_query_output",
+            "query_input_topic",
+            "query_output_topic",
+            "geo_enabled",
+            "geo_ip_fields",
+            "geo_database_path",
+            "asn_enabled",
+            "asn_ip_fields",
+            "asn_database_path",
+            "hbase_enabled",
+            "enrichments_config",
+            "lookups_config_file",
+            "rest_enabled",
+            "rest_config_file",
+            "stellar_enabled",
+            "stellar_config_dir",
+            "stix_enabled",
+            "stix_input_topic",
+            "stix_output_topic",
+            "stix_hbase_table",
+            "threatq_enabled",
+            "threatq_config_file",
+            "threatq_topic_input",
+            "rules_enabled"
           ],
           "additionalConfigs": [
             {
               "key": "flink.job.name",
               "value": "Job Triage"
+            },
+            {
+              "key": "kafka.client.id",
+              "value": "triage.client.id"
+            },
+            {
+              "key": "kafka.group.id",
+              "value": "triage.group.id"
+            },
+            {
+              "key": "topic.input",
+              "value": "triage.input"
+            },
+            {
+              "key": "topic.output",
+              "value": "triage.output"
             }
           ]
         },
@@ -155,23 +247,102 @@
           "filename": "cybersec-conf/profile.properties",
           "configFormat": "properties",
           "includedParams": [
+            "default_parallelism",
+            "default_checkpoint_interval_ms",
+            "query_input_topic",
+            "query_output_topic",
+            "profile_first_seen_table",
+            "profile_first_seen_column_family",
+            "phoenix_db_init",
+            "phoenix_db_thin_url",
+            "phoenix_db_thin_serialization",
+            "phoenix_db_thin_authentication",
+            "phoenix_db_thin_avatica_user",
+            "phoenix_db_thin_avatica_password",
+            "phoenix_db_batchSize",
+            "phoenix_db_query_param_measurement_data_table_name",
+            "phoenix_db_query_param_measurement_metadata_table_name",
+            "phoenix_db_query_param_measurement_sequence_name",
+            "phoenix_db_query_param_profile_metadata_table_name",
+            "phoenix_db_query_param_profile_profile_sequence_name",
+            "phoenix_db_query_param_measurement_sequence_start_with",
+            "phoenix_db_query_param_measurement_sequence_cache",
+            "phoenix_db_query_param_profile_sequence_start_with",
+            "phoenix_db_query_param_profile_sequence_cache",
+            "phoenix_db_query_param_field_key_count",
+            "phoenix_db_interval_millis",
+            "phoenix_db_max_retries_times"
           ],
           "additionalConfigs": [
             {
               "key": "flink.job.name",
               "value": "Job Profile"
+            },
+            {
+              "key": "kafka.client.id",
+              "value": "profile.client.id"
+            },
+            {
+              "key": "kafka.group.id",
+              "value": "profile.group.id"
+            },
+            {
+              "key": "topic.input",
+              "value": "triage.output"
+            },
+            {
+              "key": "topic.output",
+              "value": "profile.output"
             }
           ]
         },
         {
-          "filename": "cybersec-conf/indexing.properties",
+          "filename": "cybersec-conf/hive-indexing.properties",
           "configFormat": "properties",
           "includedParams": [
+            "default_parallelism",
+            "default_checkpoint_interval_ms",
+            "hive_catalog",
+            "hive_schema",
+            "hive_table",
+            "hive_confdir",
+            "hive_include_all",
+            "hive_transaction_messages"
           ],
           "additionalConfigs": [
             {
               "key": "flink.job.name",
               "value": "Job Hive Indexing"
+            },
+            {
+              "key": "kafka.client.id",
+              "value": "hive.indexing.client.id"
+            },
+            {
+              "key": "kafka.group.id",
+              "value": "hive.indexing.group.id"
+            },
+            {
+              "key": "topic.input",
+              "value": "triage.output"
+            }
+          ]
+        },
+        {
+          "filename": "cybersec-conf/load-enrichment.properties",
+          "configFormat": "properties",
+          "includedParams": [
+            "default_parallelism",
+            "default_checkpoint_interval_ms",
+            "enrichment_config_file",
+            "enrichment_source_file",
+            "enrichment_source_skipfirstline",
+            "enrichment_source_columns"
+          ],
+          "additionalConfigs": [
+            {
+              "key": "flink.job.name",
+              "value": "Job Enrichment Loading"
             }
           ]
         }
@@ -255,10 +426,524 @@
       {
         "name": "chain_file",
         "label": "Chain file path",
-        "description": "Path to file with ",
+        "description": "Path to file with chain configuration",
         "configName": "chain.file",
         "type": "string",
-        "default": "generator.count"
+        "default": ""
+      },
+      {
+        "name": "key_private_file",
+        "label": "Key private file",
+        "description": "Path to private key.",
+        "configName": "key.private.file",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "chain_topic_map",
+        "label": "Chain topic Map",
+        "description": "Map topic to a configuration.",
+        "configName": "chain.topic.map",
+        "type": "string",
+        "default": "{\"squid\" : {\"chainKey\": \"squid\", \"source\" : \"squid\"}}"
+      },
+      {
+        "name": "chain_enrichments_file",
+        "label": "Chain enrichments file",
+        "description": "File with enrichment configuration.",
+        "configName": "chain.enrichments.file",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "enrichments_table_default",
+        "label": "Batch loader hbase table",
+        "description": "The default table where the batch loader job puts enrichment data in hbase.",
+        "configName": "enrichments.table",
+        "type": "string",
+        "default": "simple_enrich"
+      },
+      {
+        "name": "enrichments_config",
+        "label": "Enrichment configuration",
+        "description": "The default path to enrichment configuration file.",
+        "configName": "enrichments.config",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "lookups_config_file",
+        "label": "Lookups configuration",
+        "description": "The default path to lookups configuration file.",
+        "configName": "lookups.config.file",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "signature_enabled",
+        "label": "Signature enabled",
+        "description": "Enable signature",
+        "configName": "signature.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "default_parallelism",
+        "label": "Job parallelism level",
+        "description": "The default number of slots that a TaskManager offers.",
+        "configName": "parallelism",
+        "type": "long",
+        "min": 0,
+        "default": 1
+      },
+      {
+        "name": "default_checkpoint_interval_ms",
+        "label": "Checkpoint interval ms",
+        "description": "Default checkpoint interval configures how often Flink will take these snapshots.",
+        "configName": "checkpoint.interval.ms",
+        "type": "long",
+        "min": 0,
+        "default": 60000
+      },
+      {
+        "name": "geo_enabled",
+        "label": "GEO feature",
+        "description": "Enable the geoenrichment feature by default.",
+        "configName": "geo.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "asn_enabled",
+        "label": "ASN feature",
+        "description": "Enable the asnenrichment feature by default.",
+        "configName": "asn.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "hbase_enabled",
+        "label": "Hbase enrichment feature",
+        "description": "Enable the hbase enrichment feature by default.",
+        "configName": "hbase.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "rest_enabled",
+        "label": "Rest enrichment feature",
+        "description": "Enable the rest enrichment feature by default.",
+        "configName": "rest.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "rules_enabled",
+        "label": "Rules enrichment feature",
+        "description": "Enable the rule enrichment feature by default.",
+        "configName": "rules.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "threatq_enabled",
+        "label": "Threatq enrichment feature",
+        "description": "Enable the threatq enrichment feature by default.",
+        "configName": "threatq.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "stellar_enabled",
+        "label": "Stellar enrichment feature",
+        "description": "Enable the stellar enrichment feature by default.",
+        "configName": "stellar.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "stellar_config_dir",
+        "label": "Path to stellar dir",
+        "description": "Path to directory with stellar configs.",
+        "configName": "stellar.config.dir",
+        "type": "string",
+        "default": "hdfs:/user/cybersec/data/stellar"
+      },
+      {
+        "name": "query_input_topic",
+        "label": "Scoring command input topic",
+        "description": "Default input topic for scoring command.",
+        "configName": "query.input.topic",
+        "type": "string",
+        "default": "scoring.rules.input"
+      },
+      {
+        "name": "query_output_topic",
+        "label": "Scoring command output topic",
+        "description": "Default output topic for scoring command.",
+        "configName": "query.output.topic",
+        "type": "string",
+        "default": "scoring.rules.out"
+      },
+      {
+        "name": "rest_config_file",
+        "label": "Rest config file",
+        "description": "The default path to rest config file.",
+        "configName": "rest.config.file",
+        "type": "string",
+        "default": "rest-config.json"
+      },
+      {
+        "name": "threatq_config_file",
+        "label": "Threatq config file",
+        "description": "The default path to threatq config file.",
+        "configName": "threatq.config.file",
+        "type": "string",
+        "default": "threatq.json"
+      },
+      {
+        "name": "threatq_topic_input",
+        "label": "Threatq topic ",
+        "description": "The default topic of threatq data.",
+        "configName": "threatq.topic.input",
+        "type": "string",
+        "default": "threats"
+      },
+      {
+        "name": "geo_ip_fields",
+        "label": "Geo fields",
+        "description": "The list of fields that is used for GEO enrichment.",
+        "configName": "geo.ip_fields",
+        "type": "string",
+        "default": "ip_src_addr,ip_dst_addr,ip_dst,ip_src"
+      },
+      {
+        "name": "geo_database_path",
+        "label": "Geo path",
+        "description": "The path to MaxMind geo city database.",
+        "configName": "geo.database_path",
+        "type": "string",
+        "default": "hdfs:/user/cybersec/data/GeoLite2-City.mmdb"
+      },
+      {
+        "name": "asn_ip_fields",
+        "label": "Asn fields",
+        "description": "The list of fields that is used for GEO enrichment.",
+        "configName": "asn.ip_fields",
+        "type": "string",
+        "default": "ip_src_addr,ip_dst_addr,ip_dst,ip_src"
+      },
+      {
+        "name": "asn_database_path",
+        "label": "Asn path",
+        "description": "The path to MaxMind asn database.",
+        "configName": "asn.database_path",
+        "type": "string",
+        "default": "hdfs:/user/cybersec/data/GeoLite2-ASN.mmdb"
+      },
+      {
+        "name": "stix_enabled",
+        "label": "Stix enrichment feature",
+        "description": "Enable the stix enrichment feature by default.",
+        "configName": "stix.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "stix_input_topic",
+        "label": "Stix input topic",
+        "description": "The default stix input topic.",
+        "configName": "stix.input.topic",
+        "type": "string",
+        "default": "stix.input"
+      },
+      {
+        "name": "stix_output_topic",
+        "label": "Stix output topic",
+        "description": "The default stix output topic.",
+        "configName": "stix.output.topic",
+        "type": "string",
+        "default": "stix.output"
+      },
+      {
+        "name": "stix_hbase_table",
+        "label": "Stix hbase table",
+        "description": "The default stix enrich hbase table.",
+        "configName": "stix.hbase.table",
+        "type": "string",
+        "default": "threatIntelligence"
+      },
+      {
+        "name": "enrichment_topic_input",
+        "label": "Enrichment input topic",
+        "description": "Default enrichment topic for triage job.",
+        "configName": "enrichment.topic.input",
+        "type": "string",
+        "default": "triage.enrichments"
+      },
+      {
+        "name": "enrichment_topic_query_output",
+        "label": "Enrichment output topic",
+        "description": "Default enrichment output topic for triage job.",
+        "configName": "enrichment.topic.query.output",
+        "type": "string",
+        "default": "triage.enrichments.response"
+      },
+      {
+        "name": "profile_first_seen_table",
+        "label": "Profile hbase table",
+        "description": "Default hbase table for profiling job.",
+        "configName": "profile.first.seen.table",
+        "type": "string",
+        "default": "enrichments"
+      },
+      {
+        "name": "profile_first_seen_column_family",
+        "label": "Profile hbase column family",
+        "description": "Default hbase column family for profiling job.",
+        "configName": "profile.first.seen.column.family",
+        "type": "string",
+        "default": "first_seen"
+      },
+      {
+        "name": "phoenix_db_init",
+        "label": "Phoenix initialize db",
+        "description": "Init the phoenix database.",
+        "configName": "phoenix.db.init",
+        "type": "boolean",
+        "default": true
+      },
+      {
+        "name": "phoenix_db_thin_url",
+        "label": "Phoenix db url",
+        "description": "Phoenix to the avatica url.",
+        "configName": "phoenix.db.thin.url",
+        "type": "uri",
+        "allowedSchemes": [ "http", "https" ],
+        "default": "http://localhost.localhost:8765"
+      },
+      {
+        "name": "phoenix_db_thin_serialization",
+        "label": "Phoenix db thin serialization",
+        "description": "Phoenix serialization schema.",
+        "configName": "phoenix.db.thin.serialization",
+        "type": "string",
+        "default": "PROTOBUF"
+      },
+      {
+        "name": "phoenix_db_thin_authentication",
+        "label": "Phoenix authentication",
+        "description": "Phoenix authentication mechanism.",
+        "configName": "phoenix.db.thin.authentication",
+        "type": "string",
+        "default": "SPNEGO"
+      },
+      {
+        "name": "phoenix_db_thin_avatica_user",
+        "label": "Phoenix thin client user",
+        "description": "Phoenix thin client user.",
+        "configName": "phoenix.db.thin.avatica_user",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "phoenix_db_thin_avatica_password",
+        "label": "Phoenix thin client password",
+        "description": "Phoenix thin client password.",
+        "configName": "phoenix.db.thin.avatica_password",
+        "type": "password",
+        "default": ""
+      },
+      {
+        "name": "phoenix_db_batchSize",
+        "label": "Phoenix thin client password",
+        "description": "Phoenix thin client password.",
+        "configName": "phoenix.db.batchSize",
+        "type": "long",
+        "min": 0,
+        "default": 40
+      },
+      {
+        "name": "phoenix_db_query_param_measurement_data_table_name",
+        "label": "Phoenix measurement data table",
+        "description": "Phoenix measurement data table.",
+        "configName": "phoenix.db.query.param.measurement_data_table_name",
+        "type": "string",
+        "default": "prf_measure"
+      },
+      {
+        "name": "phoenix_db_query_param_measurement_metadata_table_name",
+        "label": "Phoenix measurement meta data table",
+        "description": "Phoenix measurement meta data table.",
+        "configName": "phoenix.db.query.param.measurement_metadata_table_name",
+        "type": "string",
+        "default": "prf_measure_meta"
+      },
+      {
+        "name": "phoenix_db_query_param_measurement_sequence_name",
+        "label": "Phoenix sequence measurement id",
+        "description": "Phoenix sequence measurement id.",
+        "configName": "phoenix.db.query.param.measurement_sequence_name",
+        "type": "string",
+        "default": "prf_measure_seq"
+      },
+      {
+        "name": "phoenix_db_query_param_profile_metadata_table_name",
+        "label": "Phoenix profile meta data",
+        "description": "Phoenix profile meta data.",
+        "configName": "phoenix.db.query.param.profile_metadata_table_name",
+        "type": "string",
+        "default": "prf_meta"
+      },
+      {
+        "name": "phoenix_db_query_param_profile_profile_sequence_name",
+        "label": "Phoenix sequence for profile meta data",
+        "description": "Phoenix sequence for profile meta data.",
+        "configName": "phoenix.db.query.param.profile_sequence_name",
+        "type": "string",
+        "default": "prf_meta"
+      },
+      {
+        "name": "phoenix_db_query_param_measurement_sequence_start_with",
+        "label": "Phoenix measurement sequence start id",
+        "description": "Phoenix measurement sequence id starts from.",
+        "configName": "phoenix.db.query.param.measurement_sequence_start_with",
+        "type": "long",
+        "default": 0
+      },
+      {
+        "name": "phoenix_db_query_param_measurement_sequence_cache",
+        "label": "Phoenix sequence cache size",
+        "description": "Phoenix measurement sequence cache size.",
+        "configName": "phoenix.db.query.param.measurement_sequence_cache",
+        "type": "long",
+        "min": 0,
+        "default": 20
+      },
+      {
+        "name": "phoenix_db_query_param_profile_sequence_start_with",
+        "label": "Phoenix sequence profile id starts",
+        "description": "Phoenix sequence id starts from.",
+        "configName": "phoenix.db.query.param.profile_sequence_start_with",
+        "type": "long",
+        "default": 0
+      },
+      {
+        "name": "phoenix_db_query_param_profile_sequence_cache",
+        "label": "Phoenix profile sequence cache size",
+        "description": "Phoenix profile sequence cache size.",
+        "configName": "phoenix.db.query.param.profile_sequence_cache",
+        "type": "long",
+        "min": 0,
+        "default": 20
+      },
+      {
+        "name": "phoenix_db_query_param_field_key_count",
+        "label": "Phoenix field key count",
+        "description": "Number of fields for profile types in phoenix.",
+        "configName": "phoenix.db.query.param.field_key_count",
+        "type": "long",
+        "min": 0,
+        "default": 10
+      },
+      {
+        "name": "phoenix_db_interval_millis",
+        "label": "Phoenix db interval millis",
+        "description": "Phoenix minimal interval between transactions.",
+        "configName": "phoenix.db.interval_millis",
+        "type": "long",
+        "min": 0,
+        "default": 60000
+      },
+      {
+        "name": "phoenix_db_max_retries_times",
+        "label": "Phoenix minimal retries count",
+        "description": "Phoenix minimal retries count.",
+        "configName": "phoenix.db.max_retries_times",
+        "type": "long",
+        "min": 0,
+        "default": 3
+      },
+      {
+        "name": "hive_catalog",
+        "label": "Hive catalog",
+        "description": "Hive catalog.",
+        "configName": "hive.catalog",
+        "type": "string",
+        "default": "hive"
+      },
+      {
+        "name": "hive_schema",
+        "label": "Hive schema",
+        "description": "Hive catalog.",
+        "configName": "hive.schema",
+        "type": "string",
+        "default": "cyber"
+      },
+      {
+        "name": "hive_table",
+        "label": "Hive table",
+        "description": "Hive table.",
+        "configName": "hive.table",
+        "type": "string",
+        "default": "events"
+      },
+      {
+        "name": "hive_confdir",
+        "label": "Hive configuration directory",
+        "description": "Hive configuration directory.",
+        "configName": "hive.confdir",
+        "type": "string",
+        "default": "/etc/hive/conf/"
+      },
+      {
+        "name": "hive_include_all",
+        "label": "Hive include all",
+        "description": "Hive include all.",
+        "configName": "hive.include.all",
+        "type": "boolean",
+        "default": true
+      },
+      {
+        "name": "hive_transaction_messages",
+        "label": "Hive transaction messages",
+        "description": "Hive transaction messages.",
+        "configName": "hive.transaction.messages",
+        "type": "long",
+        "min": 0,
+        "default": 500
+      },
+      {
+        "name": "enrichment_config_file",
+        "label": "Enrichment loading file",
+        "description": "The default enrichment loading configuration file.",
+        "configName": "enrichment.config.file",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "enrichment_source_file",
+        "label": "Enrichment source file",
+        "description": "The default enrichment loading source file.",
+        "configName": "enrichment.source.file",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "enrichment_source_skipfirstline",
+        "label": "Skip first line",
+        "description": "Skip the first line of source csv file for enrichment loading.",
+        "configName": "enrichment.source.skipfirstline",
+        "type": "boolean",
+        "default": true
+      },
+      {
+        "name": "enrichment_source_columns",
+        "label": "Enrichment source columns",
+        "description": "The list of enrichment loading columns.",
+        "configName": "enrichment.source.columns",
+        "type": "string",
+        "default": "rank,,domain,,,,,,,,,"
       }
     ]
   }

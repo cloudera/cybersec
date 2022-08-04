@@ -53,15 +53,6 @@ under the License.
 		<flink.tar.gz.url>file://${cybersec.basedir}/cyber-jobs/target/cyber-jobs-${project.parent.version}.tar.gz</flink.tar.gz.url>
     </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.cloudera.cyber</groupId>
-            <artifactId>cyber-jobs</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
-
     <build>
         <plugins>
             <plugin>
