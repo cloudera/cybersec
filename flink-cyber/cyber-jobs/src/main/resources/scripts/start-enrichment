@@ -1,5 +1,0 @@
-#!/bin/bash
-
-flink run -yt /etc/hadoop/conf/core-site.xml  -yt /etc/hbase/conf/hbase-site.xml  -yt /etc/hadoop/conf/hdfs-site.xml \
- --jobmanager yarn-cluster -yjm 3072 -ytm 3072  --detached --yarnname "Enrichments combined" \
- /opt/cloudera/parcels/CYBERSEC/jobs/flink-enrichment-combined-${cybersec.full.version}.jar /opt/cloudera/parcels/CYBERSEC/etc/conf/enrichment.properties

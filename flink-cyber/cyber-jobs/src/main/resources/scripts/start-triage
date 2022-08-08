@@ -1,11 +1,10 @@
 #!/bin/bash
 
-PHOENIX_CLIENT_JAR=$(ls /opt/cloudera/parcels/CDH/lib/phoenix_queryserver/phoenix-queryserver-client-*.jar -1)
-
 YARN_JOB_MANAGER_MEMORY="2048"
 YARN_TASK_MANAGER_MEMORY="2048"
-YARN_NAME="yarn.profile.job"
-PROPERTIES_FILE=$(pwd)/profile.properties
+YARN_NAME="yarn.triage.job"
+PROPERTIES_FILE=$(pwd)/triage.properties
+savepoint=
 
 usage="$(basename "$0") [-h] [-s n] -- program to calculate the answer to life, the universe and everything
 
@@ -19,7 +18,7 @@ where:
     "
 
 
-while getopts "j:t:n:p:h" option; do
+while getopts "j:t:n:p:s:h" option; do
   case $option in
     j) YARN_JOB_MANAGER_MEMORY="$OPTARG"
     ;;
@@ -28,6 +27,8 @@ while getopts "j:t:n:p:h" option; do
     n) YARN_NAME="$OPTARG"
     ;;
     p) PROPERTIES_FILE="$OPTARG"
+    ;;
+    s) savepoint="-s $OPTARG"
     ;;
     h) echo $usage
        exit 0
@@ -44,6 +45,6 @@ while getopts "j:t:n:p:h" option; do
   esac
 done
 
-flink run --jobmanager yarn-cluster  -yjm $YARN_JOB_MANAGER_MEMORY -ytm $YARN_TASK_MANAGER_MEMORY  \
- --classpath file://${PHOENIX_CLIENT_JAR} \
- --detached --yarnname $YARN_NAME /opt/cloudera/parcels/CYBERSEC/jobs/flink-profiler-java-${cybersec.full.version}.jar /etc/cybersec/conf/kafka.properties /opt/cloudera/parcels/CYBERSEC/etc/conf/profile.properties $PROPERTIES_FILE
+flink run -yt /etc/hadoop/conf/core-site.xml  -yt /etc/hbase/conf/hbase-site.xml $savepoint \
+ --jobmanager yarn-cluster -yjm $YARN_JOB_MANAGER_MEMORY -ytm $YARN_TASK_MANAGER_MEMORY  --detached --yarnname $YARN_NAME \
+ /opt/cloudera/parcels/CYBERSEC/jobs/flink-enrichment-combined-${cybersec.full.version}.jar /etc/cybersec/conf/kafka.properties /opt/cloudera/parcels/CYBERSEC/etc/conf/triage.properties $PROPERTIES_FILE

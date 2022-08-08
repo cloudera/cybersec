@@ -6,7 +6,7 @@
     "isDirectory": false
   },
   "start-enrichment": {
-    "destination": "/usr/bin/start-enrichment",
+    "destination": "/usr/bin/start-triage",
     "source": "bin/start-enrichment",
     "priority": 10,
     "isDirectory": false
@@ -23,9 +23,9 @@
     "priority": 10,
     "isDirectory": false
   },
-  "start-indexer": {
-    "destination": "/usr/bin/start-indexer",
-    "source": "bin/start-indexer",
+  "start-hive-indexing": {
+    "destination": "/usr/bin/start-hive-indexing",
+    "source": "bin/start-hive-indexing",
     "priority": 10,
     "isDirectory": false
   },
