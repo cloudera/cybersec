@@ -9,7 +9,7 @@
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/start-enrichment": {
+  "bin/start-triage": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
@@ -24,7 +24,7 @@
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/start-indexer": {
+  "bin/start-hive-indexing": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"

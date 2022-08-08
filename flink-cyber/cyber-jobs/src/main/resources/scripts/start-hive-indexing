@@ -1,10 +1,11 @@
 #!/bin/bash
 
-CONFIG_DIR="chains"
+export HADOOP_CLASSPATH=`hadoop classpath`
+
 YARN_JOB_MANAGER_MEMORY="1024"
 YARN_TASK_MANAGER_MEMORY="1024"
-YARN_NAME="yarn.parser.job"
-PROPERTIES_FILE=$(pwd)/parser.properties
+YARN_NAME="yarn.hive.indexing.job"
+PROPERTIES_FILE=$(pwd)/profile.properties
 
 usage="$(basename "$0") [-h] [-s n] -- program to calculate the answer to life, the universe and everything
 
@@ -14,22 +15,21 @@ where:
     -y  CONFIG_DIR path
     -n  Yarn job name
     -p  Path to properties file
+    -s save point
     "
 
 
-while getopts "j:t:y:n:p:h" option; do
+while getopts "j:t:n:p:h" option; do
   case $option in
     j) YARN_JOB_MANAGER_MEMORY="$OPTARG"
     ;;
     t) YARN_TASK_MANAGER_MEMORY="$OPTARG"
     ;;
-    y) CONFIG_DIR="$OPTARG"
-    ;;
     n) YARN_NAME="$OPTARG"
     ;;
     p) PROPERTIES_FILE="$OPTARG"
     ;;
-    h) echo usage
+    h) echo $usage
        exit 0
     ;;
     \?) echo "Invalid option -$OPTARG" >&2
@@ -44,7 +44,8 @@ while getopts "j:t:y:n:p:h" option; do
   esac
 done
 
-
-flink run --jobmanager yarn-cluster -yjm $YARN_JOB_MANAGER_MEMORY -ytm $YARN_TASK_MANAGER_MEMORY -yt $CONFIG_DIR --detached --yarnname $YARN_NAME \
-    /opt/cloudera/parcels/CYBERSEC/jobs/parser-chains-flink-${cybersec.full.version}.jar /etc/cybersec/conf/kafka.properties /etc/cybersec/conf/parser.properties $PROPERTIES_FILE
-
+flink run \
+--classpath file:///etc/hive/conf/hive-site.xml \
+--classpath file:///etc/hadoop/conf/core-site.xml \
+--jobmanager yarn-cluster -yjm $YARN_JOB_MANAGER_MEMORY -ytm $YARN_TASK_MANAGER_MEMORY--detached --yarnname $YARN_NAME \
+ opt/cloudera/parcels/CYBERSEC/jobs/flink-indexing-hive-${cybersec.full.version}.jar /etc/cybersec/conf/kafka.properties /etc/cybersec/conf/hive-indexing.properties $PROPERTIES_FILE
