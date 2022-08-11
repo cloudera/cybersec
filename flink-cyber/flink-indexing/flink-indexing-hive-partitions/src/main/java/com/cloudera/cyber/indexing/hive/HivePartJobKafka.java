@@ -13,7 +13,6 @@ import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
 public class HivePartJobKafka extends HivePartJob {
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         new HivePartJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Indexing - Hive - File");
     }
 

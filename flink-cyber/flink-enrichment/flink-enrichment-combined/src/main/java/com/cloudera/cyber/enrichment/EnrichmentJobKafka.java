@@ -47,7 +47,6 @@ public class EnrichmentJobKafka extends EnrichmentJob {
 
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         ParameterTool params = Utils.getParamToolsFromProperties(args);
         FlinkUtils.executeEnv(new EnrichmentJobKafka().createPipeline(params),"Triaging Job - default",params);
     }

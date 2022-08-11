@@ -29,7 +29,6 @@ public class ElasticJobKafka extends ElasticJob {
     public static final String INDEXER_ELASTIC_GROUP_ID = "indexer-elastic";
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         ParameterTool params = Utils.getParamToolsFromProperties(args);
         new ElasticJobKafka().createPipeline(params).execute("Indexing - Elastic");
     }

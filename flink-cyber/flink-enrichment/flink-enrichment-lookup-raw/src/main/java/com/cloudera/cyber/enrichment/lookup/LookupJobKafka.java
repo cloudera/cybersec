@@ -21,7 +21,6 @@ public class LookupJobKafka extends LookupJob {
     public static final String PARAMS_QUERY_OUTPUT = "enrichment.topic.query.output";
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         new LookupJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Enrichments - Local Lookup");
     }
 

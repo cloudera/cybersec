@@ -46,9 +46,6 @@ public class SplitJobKafka extends SplitJob {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length >= 1) {
-            throw new RuntimeException("Path to the properties file(s) is expected as the only argument.");
-        }
 
         ParameterTool params = Utils.getParamToolsFromProperties(args);
         // need to load the config file locally and put in a property

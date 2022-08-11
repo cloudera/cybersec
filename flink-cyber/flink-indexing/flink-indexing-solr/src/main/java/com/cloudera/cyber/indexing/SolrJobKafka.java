@@ -26,7 +26,6 @@ public class SolrJobKafka extends SolrJob {
 
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length == 1, "Arguments must consist of a properties files");
         new SolrJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Indexing - Solr");
     }
 
