@@ -36,7 +36,6 @@ public class HbaseJobRawKafka extends HbaseJob {
     }
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         new HbaseJobRawKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Enrichments - HBase Lookup");
     }
 

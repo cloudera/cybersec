@@ -59,9 +59,6 @@ public class ProfileJobKafka extends ProfileJob {
     private FlinkKafkaProducer<ScoredMessage> sink;
 
     public static void main(String[] args) throws Exception {
-        if (args.length >= 1) {
-            throw new IllegalArgumentException("Path to the properties files are expected as the only arguments.");
-        }
         ParameterTool params = Utils.getParamToolsFromProperties(args);
         validatePhoenixParam(params);
         FlinkUtils.executeEnv(new ProfileJobKafka()

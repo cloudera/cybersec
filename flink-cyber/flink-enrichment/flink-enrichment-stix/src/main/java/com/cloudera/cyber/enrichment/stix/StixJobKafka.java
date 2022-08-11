@@ -27,7 +27,6 @@ public class StixJobKafka extends StixJob {
     private static final String PARAM_MARKED_OUTPUT_TOPIC = "output.topic";
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         new StixJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Stix");
     }
 

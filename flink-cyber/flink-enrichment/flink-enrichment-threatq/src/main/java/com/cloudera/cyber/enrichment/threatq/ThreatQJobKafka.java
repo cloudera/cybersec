@@ -25,7 +25,6 @@ public class ThreatQJobKafka extends ThreatQJob {
     private static final String THREATQ_PARSER_GROUP_ID = "threatq-parser";
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         new ThreatQJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Enrichments - ThreatQ");
     }
 

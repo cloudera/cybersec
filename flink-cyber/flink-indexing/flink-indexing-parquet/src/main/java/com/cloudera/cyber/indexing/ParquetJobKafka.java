@@ -18,7 +18,6 @@ public class ParquetJobKafka extends ParquetJob {
     private static final String PARAMS_OUTPUT_BASEPATH = "index.basepath";
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         new ParquetJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Indexing - Parquet");
     }
 

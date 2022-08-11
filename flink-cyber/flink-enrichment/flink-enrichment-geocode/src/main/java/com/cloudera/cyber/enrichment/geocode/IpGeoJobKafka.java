@@ -14,9 +14,6 @@ import java.util.List;
 
 public class IpGeoJobKafka extends IpGeoJob {
     public static void main(String[] args) throws Exception {
-        if (args.length >= 1) {
-            throw new RuntimeException("Path to the properties file(s) is expected as the only argument.");
-        }
         ParameterTool params = Utils.getParamToolsFromProperties(args);
         new IpGeoJobKafka()
                 .createPipeline(params)

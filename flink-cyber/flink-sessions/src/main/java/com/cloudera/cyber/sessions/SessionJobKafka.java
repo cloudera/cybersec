@@ -18,9 +18,6 @@ import static com.cloudera.cyber.flink.FlinkUtils.createKafkaSource;
 public class SessionJobKafka extends SessionJob {
 
     public static void main(String[] args) throws Exception {
-        if (args.length >= 1) {
-            throw new RuntimeException("Path to the properties files are expected as the only arguments.");
-        }
         ParameterTool params = Utils.getParamToolsFromProperties(args);
         StreamExecutionEnvironment env = new SessionJobKafka().createPipeline(params);
         env.execute("Flink Sessionizer");

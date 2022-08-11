@@ -18,7 +18,6 @@ public class HiveJobKafka extends HiveJob {
     private static final String DEFAULT_GROUP_ID = "indexer-hive";
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         ParameterTool params = Utils.getParamToolsFromProperties(args);
         FlinkUtils.executeEnv(new HiveJobKafka().createPipeline(params),"Indexing - Hive", params);
     }

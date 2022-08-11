@@ -15,7 +15,6 @@ public class RestLookupJobKafka extends RestLookupJob {
 
     private static final String DEFAULT_GROUP_ID = "enrichment-rest";
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         new RestLookupJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Enrichment - REST");
     }
 

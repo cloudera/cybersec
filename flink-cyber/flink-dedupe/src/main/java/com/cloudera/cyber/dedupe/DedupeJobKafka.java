@@ -19,9 +19,6 @@ import static com.cloudera.cyber.flink.FlinkUtils.createKafkaSource;
 
 public class DedupeJobKafka extends DedupeJob {
     public static void main(String[] args) throws Exception {
-        if (args.length >= 1) {
-            throw new RuntimeException("Path to the properties file(s) is expected as the only argument.");
-        }
         ParameterTool params = Utils.getParamToolsFromProperties(args);;
         new DedupeJobKafka()
             .createPipeline(params)
