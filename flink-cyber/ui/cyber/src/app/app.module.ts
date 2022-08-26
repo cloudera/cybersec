@@ -20,7 +20,7 @@ import { EntityDataModule } from '@ngrx/data';
 import { entityConfig } from './entity-metadata';
 import {ChainAddParserPageModule} from './chain-add-parser-page/chain-add-parser-page.module';
 import {ChainListPageModule} from './chain-list-page/chain-list-page.module';
-import { MonacoEditorModule } from '@dmlukichev/ngx-monaco-editor'
+import { MonacoEditorModule } from 'ngx-monaco-editor-v13';
 
 registerLocaleData(en);
 

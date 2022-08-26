@@ -23,7 +23,7 @@ import {NzButtonModule} from "ng-zorro-antd/button";
 import {NzToolTipModule} from "ng-zorro-antd/tooltip";
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { MonacoEditorModule } from '@dmlukichev/ngx-monaco-editor';
+import { MonacoEditorModule } from 'ngx-monaco-editor-v13';
 import { NzCollapseModule } from 'ng-zorro-antd/collapse';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzIconModule } from 'ng-zorro-antd/icon'
