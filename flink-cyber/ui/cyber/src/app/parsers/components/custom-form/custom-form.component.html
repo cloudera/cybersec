@@ -2,7 +2,7 @@
   <form nz-form [formGroup]="formGroup">
     <nz-form-item *ngFor="let formConfig of config; trackBy: trackByFn">
       <nz-form-label
-        *ngIf="formConfig.label != null"
+        *ngIf="formConfig.label !== null"
         [nzSm]="8"
         [nzXs]="24"
         [nzFor]="formConfig.id"

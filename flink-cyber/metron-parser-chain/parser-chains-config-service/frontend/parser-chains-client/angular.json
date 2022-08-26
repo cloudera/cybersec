@@ -135,7 +135,7 @@
               "src/assets",
               {
                 "glob": "**/*",
-                "input": "node_modules/ngx-monaco-editor/assets/monaco",
+                "input": "node_modules/ngx-monaco-editor-v13/assets/monaco",
                 "output": "./assets/monaco/"
               }
             ]
@@ -144,10 +144,14 @@
         "lint": {
           "builder": "@angular-eslint/builder:lint",
           "options": {
-            "lintFilePatterns": [
-              "src/**/*.ts",
-              "src/**/*.html"
-            ]
+            "eslintConfig": ".eslintrc.json",
+            "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+          },
+          "configurations": {
+            "dev": {
+              "builder": "@angular-eslint/builder:lint",
+              "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+            }
           }
         }
       }
