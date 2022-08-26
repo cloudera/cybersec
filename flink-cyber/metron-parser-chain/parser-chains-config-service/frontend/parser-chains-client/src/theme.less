@@ -163,9 +163,10 @@
 @background-color-base : hsv(0, 0, 96%); // Default grey background color
 
 // Disabled states
-@disabled-color : var(--cldr-light-grey);
+@disabled-color-var : var(--cldr-light-grey);
+@disabled-color : color(@{disabled-color-var});
 @disabled-bg : @background-color-base;
-@disabled-color-dark : fade(#fff, 35%);
+@disabled-color-dark : fade(color("#fff"), 35%);
 
 // Shadow
 @shadow-color : rgba(0, 0, 0, .15);

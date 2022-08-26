@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store, StoreModule } from '@ngrx/store';
 import { provideMockStore } from '@ngrx/store/testing';
-import { NgZorroAntdModule } from 'ng-zorro-antd';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 import { of } from 'rxjs';
 
 import * as fromChainPageReducers from '../chain-page/chain-page.reducers';
@@ -28,20 +28,20 @@ describe('ChainAddParserPageComponent', () => {
     TestBed.configureTestingModule({
       declarations: [ ChainAddParserPageComponent ],
       imports: [
-        NgZorroAntdModule,
+        NzModalModule,
         FormsModule,
         ReactiveFormsModule,
         NoopAnimationsModule,
         StoreModule.forRoot({
           'chain-add-parser-page': reducer,
-          'chain-page': fromChainPageReducers.reducer
+          'parsers': fromChainPageReducers.reducer
         }),
         RouterTestingModule
       ],
       providers: [
         provideMockStore({ initialState: {
           'chain-add-parser-page': {},
-          'chain-page': {
+          'parsers': {
             chains: {
               456: {}
             }

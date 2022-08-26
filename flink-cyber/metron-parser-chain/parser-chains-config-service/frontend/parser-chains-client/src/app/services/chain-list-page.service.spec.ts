@@ -4,12 +4,12 @@ import {
 } from '@angular/common/http/testing';
 import { getTestBed, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { NgZorroAntdModule } from 'ng-zorro-antd';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 
 import {
   ChainModel,
   ChainOperationalModel
-} from './../chain-list-page/chain.model';
+} from '../chain-list-page/chain.model';
 import { ChainListPageService } from './chain-list-page.service';
 
 let mockBackend: HttpTestingController;
@@ -32,7 +32,7 @@ describe('ChainListPageService', () => {
     TestBed.configureTestingModule({
       imports: [
         HttpClientTestingModule,
-        NgZorroAntdModule,
+        NzModalModule,
         NoopAnimationsModule
       ]
     });

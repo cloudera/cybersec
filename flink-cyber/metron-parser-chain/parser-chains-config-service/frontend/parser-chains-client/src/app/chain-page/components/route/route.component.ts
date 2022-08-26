@@ -15,7 +15,7 @@ export class RouteComponent implements OnInit, OnDestroy {
 
   @Input() routeId: string;
   @Input() parser: ParserModel;
-  @Output() chainClick = new EventEmitter<string>();
+  @Output() chainClick = new EventEmitter<string | ParserChainModel>();
 
   subchain: ParserChainModel;
   route: RouteModel;
@@ -41,7 +41,7 @@ export class RouteComponent implements OnInit, OnDestroy {
     });
   }
 
-  onChainClick(event: Event, chainId: string) {
+  onChainClick(event: Event, chainId: string | ParserChainModel) {
     this.chainClick.emit(chainId);
   }
 

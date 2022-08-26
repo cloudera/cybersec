@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Actions, Effect, ofType } from '@ngrx/effects';
 import { Action, Store } from '@ngrx/store';
-import { NzMessageService } from 'ng-zorro-antd';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { Observable, of } from 'rxjs';
 import { catchError, map, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { ChainPageService } from './../services/chain-page.service';
+import { ChainPageService } from '../services/chain-page.service';
 import * as fromActions from './chain-page.actions';
 import { ChainDetailsModel } from './chain-page.models';
 import { getChainPageState } from './chain-page.reducers';

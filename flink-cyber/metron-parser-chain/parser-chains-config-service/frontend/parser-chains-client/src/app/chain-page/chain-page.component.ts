@@ -2,7 +2,7 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/co
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { select, Store } from '@ngrx/store';
-import { NzModalService } from 'ng-zorro-antd';
+import { NzModalService } from 'ng-zorro-antd/modal';
 import { Observable, Observer, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 
@@ -181,7 +181,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
           nzTitle: 'You have unsaved changes',
           nzContent: 'Are you sure you want to leave this page?',
           nzOkText: 'Leave',
-          nzOkType: 'danger',
+          nzOkType: 'default',
           nzCancelText: 'Cancel',
           nzOnOk: () => allow(observer),
           nzOnCancel: () => deny(observer),
@@ -198,7 +198,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
       nzTitle: 'Your changes will be lost',
       nzContent: 'Are you sure you want to reset?',
       nzOkText: 'Reset',
-      nzOkType: 'danger',
+      nzOkType: 'default',
       nzCancelText: 'Cancel',
       nzOnOk: () => {
         this.store.dispatch(new fromActions.LoadChainDetailsAction({

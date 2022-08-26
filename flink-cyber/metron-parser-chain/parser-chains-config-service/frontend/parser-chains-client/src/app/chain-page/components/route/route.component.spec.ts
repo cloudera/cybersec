@@ -2,7 +2,8 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { DeleteFill, EditFill } from '@ant-design/icons-angular/icons';
 import { Store, StoreModule } from '@ngrx/store';
 import { provideMockStore } from '@ngrx/store/testing';
-import { NgZorroAntdModule, NZ_ICONS } from 'ng-zorro-antd';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NZ_ICONS } from 'ng-zorro-antd/icon'
 
 import * as fromActions from '../../chain-page.actions';
 import * as fromReducers from '../../chain-page.reducers';
@@ -37,7 +38,7 @@ describe('RouteComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        NgZorroAntdModule,
+        NzModalModule,
         StoreModule.forRoot({
           'chain-page': fromReducers.reducer
         })

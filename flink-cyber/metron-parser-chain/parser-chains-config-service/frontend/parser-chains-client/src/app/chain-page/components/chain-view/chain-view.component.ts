@@ -2,7 +2,8 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 
 import { ParserModel, PartialParserModel } from '../../chain-page.models';
 
-import { ChainPageService } from './../../../services/chain-page.service';
+import { ChainPageService } from '../../../services/chain-page.service';
+import {Observable} from "rxjs";
 
 @Component({
   selector: 'app-chain-view',
@@ -11,10 +12,10 @@ import { ChainPageService } from './../../../services/chain-page.service';
 })
 export class ChainViewComponent implements OnInit {
 
-  @Input() parsers: ParserModel[];
+  @Input() parsers: any [];
   @Input() dirtyParsers: string[];
   @Input() chainId: string;
-  @Input() failedParser: string;
+  @Input() failedParser: Observable<string>;
   @Output() removeParserEmitter = new EventEmitter<string>();
   @Output() chainLevelChange = new EventEmitter<string>();
   @Output() parserChange = new EventEmitter<PartialParserModel>();
@@ -45,8 +46,12 @@ export class ChainViewComponent implements OnInit {
     this.removeParserEmitter.emit(parserId);
   }
 
-  trackByFn(index: number, parserId: string): string {
-    return parserId;
+  trackByFn(index: number, parser: any): string {
+    return this.isParserMode(parser) ? parser.id : parser;
+  }
+
+  isParserMode(parser: ParserModel| string): parser is ParserModel {
+    return (<ParserModel>parser).id !== undefined;
   }
 
   collapseExpandAllParsers() {

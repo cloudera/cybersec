@@ -12,7 +12,7 @@
       <nz-tabset>
         <nz-tab nzTitle="Configuration">
           <app-custom-form
-            *ngIf="areFormsReadyToRender && configForm != null"
+            *ngIf="areFormsReadyToRender && configForm !== null"
             [config]="configForm"
             (valueChange)="onCustomFormChange(parser, $event)"
           ></app-custom-form>

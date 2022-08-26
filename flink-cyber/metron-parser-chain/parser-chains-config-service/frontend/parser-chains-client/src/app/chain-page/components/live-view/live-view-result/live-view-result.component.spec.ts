@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { NzCardModule } from 'ng-zorro-antd';
+import { NzCardModule } from 'ng-zorro-antd/card';
 
 import { LiveViewResultComponent } from './live-view-result.component';
 

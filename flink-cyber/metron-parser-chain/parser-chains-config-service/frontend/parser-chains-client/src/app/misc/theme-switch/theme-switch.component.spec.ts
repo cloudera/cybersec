@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { NgZorroAntdModule } from 'ng-zorro-antd';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 
 import { ThemeSwitchComponent } from './theme-switch.component';
 
@@ -11,7 +11,7 @@ describe('ThemeSwitchComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        NgZorroAntdModule,
+        NzModalModule,
         FormsModule
       ],
       declarations: [ ThemeSwitchComponent ]
