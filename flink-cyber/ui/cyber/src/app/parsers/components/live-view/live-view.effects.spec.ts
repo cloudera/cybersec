@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Action } from '@ngrx/store';
-import { NzMessageService } from 'ng-zorro-antd';
-import { of, Subject, throwError } from 'rxjs';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { Observable, of, Subject, throwError } from 'rxjs';
 
 import {
   executionTriggered,
@@ -76,10 +76,7 @@ describe('live-view.effects', () => {
     const testSubscriber = jasmine.createSpy('executionTriggeredSpy');
     liveViewEffects.execute$.subscribe(testSubscriber);
 
-    spyOn(fakeLiveViewService, 'execute').and.returnValue(of({
-      ...testPayload,
-      result: testResult,
-    }));
+    spyOn(fakeLiveViewService, 'execute').and.returnValue(Observable.create({results: testResult}));
 
     actions$.next(executionTriggered({ ...testPayload }));
 

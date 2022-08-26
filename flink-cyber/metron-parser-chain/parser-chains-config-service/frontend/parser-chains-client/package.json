@@ -79,8 +79,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint",
-      "pre-push": "ng test --watch false --browsers ChromeHeadless"
+      "pre-commit": "npm run lint"
     }
   }
 }
