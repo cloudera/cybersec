@@ -4,7 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { StoreModule } from '@ngrx/store';
 import { provideMockStore } from '@ngrx/store/testing';
-import { NgZorroAntdModule } from 'ng-zorro-antd';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 import { of, ReplaySubject } from 'rxjs';
 
 import { ChainPageService } from '../services/chain-page.service';
@@ -62,7 +62,7 @@ describe('chain parser page: effects', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        NgZorroAntdModule,
+        NzModalModule,
         RouterTestingModule,
         HttpClientTestingModule,
         StoreModule.forRoot({

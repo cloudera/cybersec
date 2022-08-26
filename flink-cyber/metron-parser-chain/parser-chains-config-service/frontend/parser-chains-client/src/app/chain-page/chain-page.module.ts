@@ -4,8 +4,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
-import { NgZorroAntdModule, NzMessageService } from 'ng-zorro-antd';
-import { MonacoEditorModule } from 'ngx-monaco-editor';
+import {  NzMessageService } from 'ng-zorro-antd/message';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { MonacoEditorModule } from 'ngx-monaco-editor-v13';
 
 import { AutofocusDirective } from '../misc/autofocus.directive';
 
@@ -21,6 +22,15 @@ import { AdvancedEditorComponent } from './components/parser/advanced-editor/adv
 import { ParserComponent } from './components/parser/parser.component';
 import { RouteComponent } from './components/route/route.component';
 import { RouterComponent } from './components/router/router.component';
+import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import { NzCollapseModule } from 'ng-zorro-antd/collapse';
+import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzPopoverModule } from 'ng-zorro-antd/popover';
+import { NzCardModule } from 'ng-zorro-antd/card';
+import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 
 @NgModule({
   declarations: [
@@ -36,17 +46,26 @@ import { RouterComponent } from './components/router/router.component';
     MultiInputComponent,
   ],
   entryComponents: [ ChainViewComponent ],
-  imports: [
-    NgZorroAntdModule,
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    RouterModule,
-    StoreModule.forFeature('chain-page', reducer),
-    EffectsModule.forFeature([ ChainPageEffects ]),
-    MonacoEditorModule,
-    LiveViewModule,
-  ],
+    imports: [
+        NzModalModule,
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        RouterModule,
+        StoreModule.forFeature('chain-page', reducer),
+        EffectsModule.forFeature([ChainPageEffects]),
+        MonacoEditorModule,
+        LiveViewModule,
+        NzTabsModule,
+        NzCollapseModule,
+        NzGridModule,
+        NzToolTipModule,
+        NzButtonModule,
+        NzInputModule,
+        NzPopoverModule,
+        NzCardModule,
+        NzBreadCrumbModule,
+    ],
   providers: [
     NzMessageService,
   ],

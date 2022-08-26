@@ -3,11 +3,10 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
-import uuidv1 from 'uuid/v1';
+import { v1 as uuidv1 } from 'uuid';
 
-import * as fromChainPageActions from '../chain-page/chain-page.actions';
-import { ParserModel } from '../chain-page/chain-page.models';
-import { ParserChainModel } from '../chain-page/chain-page.models';
+import * as fromParserPageAction from '../chain-page/chain-page.actions';
+import { ParserModel, ParserChainModel } from '../chain-page/chain-page.models';
 import { getChain } from '../chain-page/chain-page.reducers';
 
 import * as fromActions from './chain-add-parser-page.actions';
@@ -74,7 +73,7 @@ export class ChainAddParserPageComponent implements OnInit, OnDestroy {
 
     this.getChainSubscription = this.store.pipe(select(getChain, { id: this.chainId })).subscribe((chain: ParserChainModel) => {
       if (!chain) {
-        this.store.dispatch(new fromChainPageActions.LoadChainDetailsAction({
+        this.store.dispatch(new fromParserPageAction.LoadChainDetailsAction({
           id: this.chainId
         }));
       }

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NzSwitchModule } from 'ng-zorro-antd';
+import { NzSwitchModule } from 'ng-zorro-antd/switch';
 
 import { ThemeSwitchComponent } from './theme-switch.component';
 

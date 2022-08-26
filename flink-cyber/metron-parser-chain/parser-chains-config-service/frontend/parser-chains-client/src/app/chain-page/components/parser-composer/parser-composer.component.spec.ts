@@ -12,12 +12,12 @@ import { ParserComposerComponent } from './parser-composer.component';
 })
 class MockParserComponent {
   @Input() dirty = false;
-  @Input() parser;
-  @Input() configForm;
-  @Input() isolatedParserView;
-  @Input() parserType;
-  @Input() failedParser;
-  @Input() collapsed;
+  @Input() parser : any;
+  @Input() configForm : any;
+  @Input() isolatedParserView : any;
+  @Input() parserType : any;
+  @Input() failedParser : any;
+  @Input() collapsed : any;
 }
 
 @Component({

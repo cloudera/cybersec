@@ -1,7 +1,8 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MinusCircleFill, PlusCircleFill } from '@ant-design/icons-angular/icons';
-import { NgZorroAntdModule, NZ_ICONS } from 'ng-zorro-antd';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import {  NZ_ICONS } from 'ng-zorro-antd/icon';
 
 import { MultiInputComponent } from './multi-input.component';
 
@@ -12,7 +13,7 @@ describe('MultiInputComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        NgZorroAntdModule,
+        NzModalModule,
         ReactiveFormsModule
       ],
       declarations: [ MultiInputComponent ],

@@ -1,6 +1,6 @@
 import { async, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { NgZorroAntdModule } from 'ng-zorro-antd';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 
 import { AppComponent } from './app.component';
 import { ThemeSwitchModule } from './misc/theme-switch/theme-switch.module';
@@ -10,7 +10,7 @@ describe('AppComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
-        NgZorroAntdModule,
+        NzModalModule,
         ThemeSwitchModule
       ],
       declarations: [

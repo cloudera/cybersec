@@ -4,27 +4,44 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
-import { NgZorroAntdModule, NzInputModule, NzMessageService, NzTableModule } from 'ng-zorro-antd';
-import { MonacoEditorModule } from 'ngx-monaco-editor';
+import { NzTableModule } from 'ng-zorro-antd/table'
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzModalModule} from "ng-zorro-antd/modal";
 
 import { ChainListPageComponent } from './chain-list-page.component';
 import { ChainListEffects } from './chain-list-page.effects';
 import { reducer } from './chain-list-page.reducers';
+import {NzCardModule} from "ng-zorro-antd/card";
+import {NzDividerModule} from "ng-zorro-antd/divider";
+import {NzToolTipModule} from "ng-zorro-antd/tooltip";
+import {NzButtonModule} from "ng-zorro-antd/button";
+import {NzPopconfirmModule} from "ng-zorro-antd/popconfirm";
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzLayoutModule } from 'ng-zorro-antd/layout';
 
 @NgModule({
   declarations: [ ChainListPageComponent ],
-  imports: [
-    NgZorroAntdModule,
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    NzInputModule,
-    NzTableModule,
-    RouterModule,
-    StoreModule.forFeature('chain-list-page', reducer),
-    EffectsModule.forFeature([ ChainListEffects ]),
-    MonacoEditorModule,
-  ],
+    imports: [
+        NzModalModule,
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NzInputModule,
+        NzTableModule,
+        RouterModule,
+        StoreModule.forFeature('chain-list-page', reducer),
+        EffectsModule.forFeature([ChainListEffects]),
+        NzCardModule,
+        NzDividerModule,
+        NzToolTipModule,
+        NzButtonModule,
+        NzPopconfirmModule,
+        NzIconModule,
+        NzFormModule,
+        NzLayoutModule,
+    ],
   providers: [
     NzMessageService,
   ],

@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import produce from 'immer';
-import get from 'lodash.get';
-import set from 'lodash.set';
+import { get } from 'lodash';
+import { set } from 'lodash';
 
 import { ParserModel } from '../../chain-page.models';
 import { CustomFormConfig } from '../custom-form/custom-form.component';
@@ -62,7 +62,7 @@ export class ParserComponent implements OnInit, OnChanges {
     }
   }
 
-  updateFormValues(key, fields = []) {
+  updateFormValues(key:string, fields:any = []) : any {
     return produce(fields, (draft) => {
       draft.forEach(field => {
         if (field.path && field.path.split('.')[0] === key) {
@@ -91,9 +91,9 @@ export class ParserComponent implements OnInit, OnChanges {
     });
   }
 
-  setFormFieldValues(fields = []) {
-    return produce(fields, (draft) => {
-      draft.forEach(field => {
+  setFormFieldValues(fields:any = []) : any {
+    return produce(fields, (draft : any) => {
+      draft.forEach((field : any) => {
         field.id = [
           this.parser.id,
           field.path ? [field.path, field.name].join('.') : field.name

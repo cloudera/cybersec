@@ -41,7 +41,7 @@
             <a routerLink="/sources">Data Sources</a>
           </li>
           <li nz-menu-item nzMatchRouter>
-            <a routerLink="/parsers">Parser Types</a>
+            <a routerLink="/parserconfig">Parser Types</a>
           </li>
         </ul>
       </li>
@@ -57,10 +57,10 @@
             <a routerLink="/stix">STIX</a>
           </li>
           <li nz-menu-item nzMatchRouter>
-            <a routerLink="/geo">GEO</a>
+            <a routerLink="/maxmind/geo">GEO</a>
           </li>
           <li nz-menu-item nzMatchRouter>
-            <a routerLink="/asn">ASN</a>
+            <a routerLink="/maxmind/asn">ASN</a>
           </li>
           <li nz-menu-item nzMatchRouter>
             <a routerLink="/rest">REST APIs</a>
@@ -70,7 +70,6 @@
           </li>
         </ul>
       </li>
-
       <li nz-submenu nzOpen nzTitle="Rules" nzIcon="form">
         <ul>
           <li nz-menu-item nzMatchRouter>
@@ -78,7 +77,6 @@
           </li>
         </ul>
       </li>
-
       <li nz-submenu nzOpen nzTitle="Profiles" nzIcon="form">
         <ul>
           <li nz-menu-item nzMatchRouter>
@@ -86,8 +84,6 @@
           </li>          
         </ul>
       </li>
-
-
     </ul>
   </nz-sider>
   <nz-layout>
@@ -103,7 +99,7 @@
     </nz-header>
     <nz-content>
       <div class="inner-content">
-        <router-outlet></router-outlet>
+        <router-outlet ></router-outlet>
       </div>
     </nz-content>
   </nz-layout>

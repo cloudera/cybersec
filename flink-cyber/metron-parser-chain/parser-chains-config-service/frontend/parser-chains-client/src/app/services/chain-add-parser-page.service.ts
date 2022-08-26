@@ -4,7 +4,6 @@ import { map } from 'rxjs/operators';
 
 import { ParserModel } from '../chain-page/chain-page.models';
 
-
 @Injectable({
   providedIn: 'root'
 })
@@ -21,11 +20,11 @@ export class AddParserPageService {
   }
 
   public getParserTypes() {
-    return this.http.get(this.BASE_URL + `parser-types`);
+    return this.http.get<{ id: string, name: string }[]>(this.BASE_URL + `parser-types`);
   }
 
-  public getParsers(chainId: string) {
-    return this.http.get(this.BASE_URL + `chains/${chainId}/parsers`)
+  public getParsers(chainId: string){
+    return this.http.get<ParserModel[]>(this.BASE_URL + `chains/${chainId}/parsers`)
       .pipe(
         map((parsers: ParserModel[]) => {
           return parsers;

@@ -8,7 +8,7 @@ export const GET_PARSER_TYPES_SUCCESS = '[Chain Add Parser] get parser types suc
 export const GET_PARSER_TYPES_FAIL = '[Chain Add Parser] get parser types fail';
 
 export class NoopAction implements Action {
-  readonly type: '';
+  readonly type = '';
   constructor(public payload?: any) {}
 }
 

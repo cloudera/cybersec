@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 
-import uuidv1 from 'uuid/v1';
+import { v1 as uuidv1 } from 'uuid';
 
 import * as fromActions from '../../chain-page.actions';
 import { ParserModel, PartialParserModel } from '../../chain-page.models';

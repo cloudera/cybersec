@@ -7,7 +7,8 @@ import { IconDefinition } from '@ant-design/icons-angular';
 import { EditFill, PlusOutline } from '@ant-design/icons-angular/icons';
 import { StoreModule } from '@ngrx/store';
 import { Store } from '@ngrx/store';
-import { NgZorroAntdModule, NZ_ICONS } from 'ng-zorro-antd';
+import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NZ_ICONS } from 'ng-zorro-antd/icon';
 import { Observable, of } from 'rxjs';
 
 import * as fromActions from './chain-page.actions';
@@ -48,7 +49,7 @@ describe('ChainPageComponent', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       imports: [
-        NgZorroAntdModule,
+        NzModalModule,
         StoreModule.forRoot({
           'chain-page': fromReducers.reducer,
           'live-view': fromLiveViewReducers.reducer

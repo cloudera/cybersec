@@ -1,7 +1,7 @@
 <ng-template #AddButton>
   <button
     class="add-new-chain-button"
-    nz-tooltip
+    nz-tooltip="Add New Chain ToolTip"
     nzTooltipTitle="Add New Chain"
     nzTooltipPlacement="left"
     nz-button
@@ -19,17 +19,19 @@
   (nzOnOk)="pushChain()"
   [nzOkDisabled]="!newChainForm.valid"
 >
-  <form [formGroup]="newChainForm" (ngSubmit)='pushChain()'>
-    <input nz-input data-qe-id="chain-name" formControlName="chainName" type="text" id="chainName" placeholder="Parser Chain Name">
-    <nz-form-explain *ngIf="chainName.dirty && chainName.errors && (chainName.errors.required || chainName.errors.minlength)">
-      Chain Name is Required with atleast 3 characters
-    </nz-form-explain>
+  <form nz-form *nzModalContent [formGroup]="newChainForm" (ngSubmit)='pushChain()' [nzLayout]="'vertical'">
+    <nz-form-item>
+      <nz-form-label>Chain name:</nz-form-label>
+      <nz-form-control nzErrorTip="Chain Name is Required with atleast 3 characters" nzSpan="14">
+        <input nz-input data-qe-id="chain-name" formControlName="chainName" type="text" id="chainName" placeholder="Parser Chain Name" >
+      </nz-form-control>
+    </nz-form-item>
   </form>
 </nz-modal>
 
 <nz-card nzTitle="Parser Chains" [nzExtra]="AddButton">
-  <nz-table #basicTable [nzData]="chainDataSorted$ | async" [nzShowPagination]="false">
-    <thead (nzSortChange)="sortDescription$.next($event)">
+  <nz-table #basicTable [nzData]="$any(chainDataSorted$ | async)" [nzShowPagination]="false">
+    <thead>
       <tr>
         <th nzShowSort nzSortKey="name">Name</th>
         <th>Action</th>
@@ -46,7 +48,7 @@
               class="chain-delete-btn"
               nz-popconfirm
               nzTitle="Are you Sure to Delete?"
-              (nzOnConfirm)="deleteChain($event, data.id)"
+              (nzOnConfirm)="deleteChain(data.id)"
               nzCancelText="No"
               nzOkText="Yes"
               nzOkType="primary"

@@ -2,12 +2,10 @@ import { Component, Input } from '@angular/core';
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { CheckCircleOutline, CloseCircleOutline, WarningFill } from '@ant-design/icons-angular/icons';
-import {
-  NZ_ICONS,
-  NzCardModule,
-  NzResultModule,
-  NzTimelineModule
-} from 'ng-zorro-antd';
+import {  NZ_ICONS } from 'ng-zorro-antd/icon';
+import { NzCardModule } from 'ng-zorro-antd/card'
+import { NzResultModule } from 'ng-zorro-antd/result'
+import { NzTimelineModule } from 'ng-zorro-antd/timeline'
 
 import { ParserByParserComponent } from './parser-by-parser.component';
 
