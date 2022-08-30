@@ -8,7 +8,7 @@ export interface EntryParsingResultModel {
     parserId?: string;
     stackTrace: string;
   };
-  parserResults?: ParserResultsModel;
+  parserResults?: ParserResultsModel[];
 }
 
 export interface ParserResultsModel {

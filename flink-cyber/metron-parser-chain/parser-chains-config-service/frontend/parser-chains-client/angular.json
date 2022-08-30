@@ -25,6 +25,7 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
+            "preserveSymlinks": true,
             "allowedCommonJsDependencies": [
               "lodash",
               "uuid"
@@ -39,8 +40,13 @@
               },
               {
                 "glob": "**/*",
-                "input": "node_modules/ngx-monaco-editor-v13/assets/monaco",
-                "output": "./assets/monaco/"
+                "input": "node_modules/monaco-editor",
+                "output": "assets/monaco-editor"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/monaco-editor/min-maps",
+                "output": "./assets/min-maps/"
               }
             ],
             "styles": [
@@ -53,7 +59,6 @@
             "production": {
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,

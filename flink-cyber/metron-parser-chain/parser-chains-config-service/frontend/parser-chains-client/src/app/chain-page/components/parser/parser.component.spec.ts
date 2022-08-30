@@ -10,6 +10,7 @@ import {  NZ_ICONS } from 'ng-zorro-antd/icon';
 
 import { ConfigChangedEvent } from './advanced-editor/advanced-editor.component';
 import { ParserComponent } from './parser.component';
+import { MonacoEditorModule } from '@materia-ui/ngx-monaco-editor';
 
 @Component({
   selector: 'app-custom-form',
@@ -38,14 +39,7 @@ describe('ParserComponent', () => {
         FormsModule,
         NzModalModule,
         NoopAnimationsModule,
-        // MonacoEditorModule.forRoot({
-        //   onMonacoLoad() {
-        //     monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-        //       validate: true,
-        //       schemas: []
-        //     });
-        //   }
-        // }),
+        MonacoEditorModule,
       ],
       declarations: [
         ParserComponent,

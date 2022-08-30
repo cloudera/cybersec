@@ -24,7 +24,7 @@
       Return to Message Results View
     </button>
     <app-parser-by-parser *ngIf="parserByParserViewId === i"
-                          [parserResults]="[entry.parserResults]"
+                          [parserResults]="entry.parserResults"
                           [logMessage]="entry.log.message"
                           (investigateParser)="onInvestigateParserClicked($event)"></app-parser-by-parser>
   </div>

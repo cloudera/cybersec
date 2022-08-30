@@ -6,7 +6,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import {  NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule } from 'ng-zorro-antd/modal';
-import { MonacoEditorModule } from 'ngx-monaco-editor-v13';
+import { MonacoEditorModule } from '@materia-ui/ngx-monaco-editor';
 
 import { AutofocusDirective } from '../misc/autofocus.directive';
 
@@ -31,6 +31,10 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzPopoverModule } from 'ng-zorro-antd/popover';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 
 @NgModule({
   declarations: [
@@ -65,6 +69,10 @@ import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
         NzPopoverModule,
         NzCardModule,
         NzBreadCrumbModule,
+        NzFormModule,
+        NzIconModule,
+        NzPopconfirmModule,
+        NzSelectModule,
     ],
   providers: [
     NzMessageService,

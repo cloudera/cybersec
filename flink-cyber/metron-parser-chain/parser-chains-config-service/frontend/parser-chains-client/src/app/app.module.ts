@@ -12,7 +12,7 @@ import {  NzLayoutModule } from 'ng-zorro-antd/layout';
 import { en_US,  NZ_I18N } from 'ng-zorro-antd/i18n'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { storeFreeze } from 'ngrx-store-freeze';
-import { MonacoEditorModule } from 'ngx-monaco-editor-v13';
+import { MonacoEditorModule } from '@materia-ui/ngx-monaco-editor';
 
 import { environment } from '../environments/environment';
 
@@ -56,14 +56,7 @@ export const metaReducers: MetaReducer<{}>[] = !environment.production
         ChainListPageModule,
         ChainPageModule,
         ChainAddParserPageModule,
-        MonacoEditorModule.forRoot({
-            onMonacoLoad() {
-                monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-                    validate: true,
-                    schemas: []
-                });
-            }
-        }),
+        MonacoEditorModule,
         NzMenuModule,
         NzIconModule,
     ],
