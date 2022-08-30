@@ -47,11 +47,7 @@ export class ChainViewComponent implements OnInit {
   }
 
   trackByFn(index: number, parser: any): string {
-    return this.isParserMode(parser) ? parser.id : parser;
-  }
-
-  isParserMode(parser: ParserModel| string): parser is ParserModel {
-    return (<ParserModel>parser).id !== undefined;
+    return  (<ParserModel>parser).id !== undefined ? parser.id : parser;
   }
 
   collapseExpandAllParsers() {

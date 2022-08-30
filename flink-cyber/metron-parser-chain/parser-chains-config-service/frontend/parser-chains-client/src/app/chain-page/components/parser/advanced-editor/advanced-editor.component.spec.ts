@@ -1,6 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { MonacoEditorModule } from 'ngx-monaco-editor-v13';
+import { MonacoEditorModule } from '@materia-ui/ngx-monaco-editor';
 
 import { AdvancedEditorComponent } from './advanced-editor.component';
 
@@ -12,7 +12,7 @@ describe('AdvancedEditorComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         FormsModule,
-        MonacoEditorModule.forRoot(),
+        MonacoEditorModule,
       ],
       declarations: [ AdvancedEditorComponent ]
     })

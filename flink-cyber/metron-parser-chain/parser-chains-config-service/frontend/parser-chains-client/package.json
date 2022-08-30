@@ -41,6 +41,8 @@
     "immer": "^9.0.15",
     "ng-zorro-antd": "^13.4.0",
     "ngrx-store-freeze": "^0.2.4",
+    "@materia-ui/ngx-monaco-editor": "^6.0.0",
+    "monaco-editor": "^0.34.0",
     "ngx-monaco-editor-v13": "^13.2.0",
     "rxjs": "~6.5.3",
     "tslib": "^1.9.0",

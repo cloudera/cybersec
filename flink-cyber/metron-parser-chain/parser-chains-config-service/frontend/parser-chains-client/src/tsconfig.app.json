@@ -2,7 +2,19 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/app",
-    "types": []
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "es2021",
+      "dom",
+      "es5",
+      "es6"
+    ],
+    "module": "es2022",
+    "target": "es6",
+    "skipLibCheck": true,
+    "preserveSymlinks": true
   },
   "exclude": [
     "test.ts",
