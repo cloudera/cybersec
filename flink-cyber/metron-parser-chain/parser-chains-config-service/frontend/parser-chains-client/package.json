@@ -6,7 +6,7 @@
     "start": "node -r dotenv/config scripts/config-app-server.js",
     "start:dev": "ng serve --configuration dev",
     "start:production": "node scripts/config-app-server.js",
-    "build": "ng build",
+    "build": "ng build --baseHref=/ui/",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
