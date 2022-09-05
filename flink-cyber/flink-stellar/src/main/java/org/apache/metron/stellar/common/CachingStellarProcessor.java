@@ -175,8 +175,10 @@ public class CachingStellarProcessor extends StellarProcessor {
 
     // resolve each of the variables used by the expression
     Map<String, Object> input = new HashMap<>();
-    for(String v : variablesUsed) {
-      input.computeIfAbsent(v, resolver::resolve);
+    if (variablesUsed != null) {
+      for (String v : variablesUsed) {
+        input.computeIfAbsent(v, resolver::resolve);
+      }
     }
 
     Key cacheKey = new Key(expression, input);
@@ -186,7 +188,7 @@ public class CachingStellarProcessor extends StellarProcessor {
 
   /**
    * Create a cache given a config.  Note that if the cache size is {@literal <}= 0, then no cache will be returned.
-   * @param config
+   * @param config configuration for the cache
    * @return A cache.
    */
   public static Cache<Key, Object> createCache(Map<String, Object> config) {

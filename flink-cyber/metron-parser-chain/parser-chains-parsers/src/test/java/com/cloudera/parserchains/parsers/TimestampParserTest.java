@@ -1,8 +1,8 @@
 package com.cloudera.parserchains.parsers;
 
 import com.cloudera.parserchains.core.FieldName;
-import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.StringFieldValue;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,15 +27,15 @@ public class TimestampParserTest {
     void addTimestamp() {
         long time = 1426349294842L;
         Message input = Message.builder()
-                .addField(FieldName.of("field1"), FieldValue.of("value1"))
+                .addField(FieldName.of("field1"), StringFieldValue.of("value1"))
                 .build();
         Message output = new TimestampParser()
                 .withClock(new FixedClock(time))
                 .withOutputField("processing_timestamp")
                 .parse(input);
-        assertEquals(FieldValue.of(Long.toString(time)), output.getField(FieldName.of("processing_timestamp")).get(),
+        assertEquals(StringFieldValue.of(Long.toString(time)), output.getField(FieldName.of("processing_timestamp")).get(),
             "Expected a timestamp to have been added to the message.");
-        assertEquals(FieldValue.of("value1"), output.getField(FieldName.of("field1")).get(),
+        assertEquals(StringFieldValue.of("value1"), output.getField(FieldName.of("field1")).get(),
             "Expected the same input fields to be available on the output message.");
         assertFalse(output.getError().isPresent(),
             "Expected no errors to have occurred.");
@@ -45,16 +45,16 @@ public class TimestampParserTest {
     void defaultTimestampField() {
         long time = 1426349294842L;
         Message input = Message.builder()
-                .addField(FieldName.of("field1"), FieldValue.of("value1"))
+                .addField(FieldName.of("field1"), StringFieldValue.of("value1"))
                 .build();
         TimestampParser parser = new TimestampParser();
         Message output = parser
                 .withClock(new FixedClock(time))
                 .parse(input);
         FieldName defaultFieldName = parser.getOutputField();
-        assertEquals(FieldValue.of(Long.toString(time)), output.getField(defaultFieldName).get(),
+        assertEquals(StringFieldValue.of(Long.toString(time)), output.getField(defaultFieldName).get(),
                 "Expected a timestamp to have been added using the default field name.");
-        assertEquals(FieldValue.of("value1"), output.getField(FieldName.of("field1")).get(),
+        assertEquals(StringFieldValue.of("value1"), output.getField(FieldName.of("field1")).get(),
                 "Expected the same input fields to be available on the output message.");
         assertFalse(output.getError().isPresent(),
                 "Expected no errors to have occurred.");

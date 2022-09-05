@@ -112,7 +112,7 @@ public class XMLFlattener implements Parser {
     private FieldValue fieldValue(Object value) {
         // ignore an empty element like {}
         String fieldValue = Objects.toString(value).replaceFirst(EMPTY_ELEMENT_REGEX, "");
-        return FieldValue.of(fieldValue);
+        return StringFieldValue.of(fieldValue);
     }
 
     public class CustomJsonNodeDeserializer extends JsonNodeDeserializer {

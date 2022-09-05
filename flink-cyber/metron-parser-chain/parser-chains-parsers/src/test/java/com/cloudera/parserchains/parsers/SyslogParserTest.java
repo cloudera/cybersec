@@ -1,9 +1,6 @@
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.Constants;
-import com.cloudera.parserchains.core.FieldName;
-import com.cloudera.parserchains.core.FieldValue;
-import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.*;
 import com.github.palindromicity.syslog.SyslogSpecification;
 import org.junit.jupiter.api.Test;
 
@@ -28,22 +25,22 @@ public class SyslogParserTest {
                 .parse(input);
         Message expected = Message.builder()
                 .withFields(input)
-                .addField(FieldName.of(HEADER_PRI.getField()), FieldValue.of("14"))
-                .addField(FieldName.of(HEADER_VERSION.getField()), FieldValue.of("1"))
-                .addField(FieldName.of(HEADER_APPNAME.getField()), FieldValue.of("d0602076-b14a-4c55-852a-981e7afeed38"))
-                .addField(FieldName.of(HEADER_PROCID.getField()), FieldValue.of("DEA"))
-                .addField(FieldName.of(HEADER_TIMESTAMP.getField()), FieldValue.of("2014-06-20T09:14:07+00:00"))
-                .addField(FieldName.of(HEADER_PRI_FACILITY.getField()), FieldValue.of("1"))
-                .addField(FieldName.of(HEADER_HOSTNAME.getField()), FieldValue.of("loggregator"))
-                .addField(FieldName.of(HEADER_PRI_SEVERITY.getField()), FieldValue.of("6"))
-                .addField(FieldName.of(HEADER_MSGID.getField()), FieldValue.of("MSG-01"))
-                .addField(FieldName.of(STRUCTURED_BASE.getField() + ".exampleSDID@32473.iut"), FieldValue.of("3"))
-                .addField(FieldName.of(STRUCTURED_BASE.getField() + ".exampleSDID@32473.eventID"), FieldValue.of("1011"))
-                .addField(FieldName.of(STRUCTURED_BASE.getField() + ".exampleSDID@32473.eventSource"), FieldValue.of("Application"))
-                .addField(FieldName.of(STRUCTURED_BASE.getField() + ".exampleSDID@32480.iut"), FieldValue.of("4"))
-                .addField(FieldName.of(STRUCTURED_BASE.getField() + ".exampleSDID@32480.eventID"), FieldValue.of("2022"))
-                .addField(FieldName.of(STRUCTURED_BASE.getField() + ".exampleSDID@32480.eventSource"), FieldValue.of("Other Application"))
-                .addField(FieldName.of("syslog.message"), FieldValue.of("Removing instance"))
+                .addField(FieldName.of(HEADER_PRI.getField()), StringFieldValue.of("14"))
+                .addField(FieldName.of(HEADER_VERSION.getField()), StringFieldValue.of("1"))
+                .addField(FieldName.of(HEADER_APPNAME.getField()), StringFieldValue.of("d0602076-b14a-4c55-852a-981e7afeed38"))
+                .addField(FieldName.of(HEADER_PROCID.getField()), StringFieldValue.of("DEA"))
+                .addField(FieldName.of(HEADER_TIMESTAMP.getField()), StringFieldValue.of("2014-06-20T09:14:07+00:00"))
+                .addField(FieldName.of(HEADER_PRI_FACILITY.getField()), StringFieldValue.of("1"))
+                .addField(FieldName.of(HEADER_HOSTNAME.getField()), StringFieldValue.of("loggregator"))
+                .addField(FieldName.of(HEADER_PRI_SEVERITY.getField()), StringFieldValue.of("6"))
+                .addField(FieldName.of(HEADER_MSGID.getField()), StringFieldValue.of("MSG-01"))
+                .addField(FieldName.of(STRUCTURED_BASE.getField() + ".exampleSDID@32473.iut"), StringFieldValue.of("3"))
+                .addField(FieldName.of(STRUCTURED_BASE.getField() + ".exampleSDID@32473.eventID"), StringFieldValue.of("1011"))
+                .addField(FieldName.of(STRUCTURED_BASE.getField() + ".exampleSDID@32473.eventSource"), StringFieldValue.of("Application"))
+                .addField(FieldName.of(STRUCTURED_BASE.getField() + ".exampleSDID@32480.iut"), StringFieldValue.of("4"))
+                .addField(FieldName.of(STRUCTURED_BASE.getField() + ".exampleSDID@32480.eventID"), StringFieldValue.of("2022"))
+                .addField(FieldName.of(STRUCTURED_BASE.getField() + ".exampleSDID@32480.eventSource"), StringFieldValue.of("Other Application"))
+                .addField(FieldName.of("syslog.message"), StringFieldValue.of("Removing instance"))
                 .build();
         assertEquals(expected, output);
     }
@@ -61,12 +58,12 @@ public class SyslogParserTest {
                 .parse(input);
         Message expected = Message.builder()
                 .withFields(input)
-                .addField(FieldName.of(HEADER_PRI.getField()), FieldValue.of("181"))
-                .addField(FieldName.of(HEADER_PRI_SEVERITY.getField()), FieldValue.of("5"))
-                .addField(FieldName.of(HEADER_TIMESTAMP.getField()), FieldValue.of("2018-09-14T00:54:09+00:00"))
-                .addField(FieldName.of(HEADER_PRI_FACILITY.getField()), FieldValue.of("22"))
-                .addField(FieldName.of(HEADER_HOSTNAME.getField()), FieldValue.of("lzpqrst-admin.in.mycompany.com.lg"))
-                .addField(FieldName.of(MESSAGE.getField()), FieldValue.of("CISE_RADIUS_Accounting 0018032501 1 0 2018-09-14 10:54:09.095 +10:00"))
+                .addField(FieldName.of(HEADER_PRI.getField()), StringFieldValue.of("181"))
+                .addField(FieldName.of(HEADER_PRI_SEVERITY.getField()), StringFieldValue.of("5"))
+                .addField(FieldName.of(HEADER_TIMESTAMP.getField()), StringFieldValue.of("2018-09-14T00:54:09+00:00"))
+                .addField(FieldName.of(HEADER_PRI_FACILITY.getField()), StringFieldValue.of("22"))
+                .addField(FieldName.of(HEADER_HOSTNAME.getField()), StringFieldValue.of("lzpqrst-admin.in.mycompany.com.lg"))
+                .addField(FieldName.of(MESSAGE.getField()), StringFieldValue.of("CISE_RADIUS_Accounting 0018032501 1 0 2018-09-14 10:54:09.095 +10:00"))
                 .build();
         assertEquals(expected, output);
     }

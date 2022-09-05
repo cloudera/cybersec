@@ -17,6 +17,7 @@
  */
 package org.apache.metron.enrichment.adapters.simplehbase;
 
+import com.cloudera.cyber.hbase.HbaseConfiguration;
 import org.apache.metron.hbase.HTableProvider;
 import org.apache.metron.hbase.TableProvider;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,7 @@ public class SimpleHBaseConfigTest {
         SimpleHBaseConfig shc = new SimpleHBaseConfig();
         shc.withHBaseCF(cf);
         shc.withHBaseTable(table);
+        shc.withHbaseConfig(HbaseConfiguration.configureHbase());
         provider = new HTableProvider();
         assertEquals(cf, shc.getHBaseCF());
         assertEquals(table, shc.getHBaseTable());

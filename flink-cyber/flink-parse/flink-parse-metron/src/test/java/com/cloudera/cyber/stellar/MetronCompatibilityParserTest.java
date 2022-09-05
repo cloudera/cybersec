@@ -1,6 +1,7 @@
 package com.cloudera.cyber.stellar;
 
 
+import com.cloudera.parserchains.core.StringFieldValue;
 import org.apache.metron.parsers.interfaces.MessageParserResult;
 import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -19,12 +20,12 @@ public class MetronCompatibilityParserTest {
 
     @Test
     public void testParser() throws IOException {
-        MetronCompatibilityParser parser = MetronCompatibilityParser.of(configStream(CONFIG_FILE));
+        MetronCompatibilityParser parser = MetronCompatibilityParser.of("test", configStream(CONFIG_FILE));
         String timestamp = "1617059998456";
         String column1 = "value_1";
         String column2 = "value_2";
         String originalString = String.format("%s %s %s", timestamp, column1, column2);
-        Optional<MessageParserResult<JSONObject>> optionalResult = parser.parse(originalString.getBytes());
+        Optional<MessageParserResult<JSONObject>> optionalResult = parser.parse(StringFieldValue.of(originalString).toMessageToParse());
         assertTrue(optionalResult.isPresent());
         assertEquals(optionalResult.get().getMessages().size(), 1);
         JSONObject message = optionalResult.get().getMessages().get(0);
@@ -39,14 +40,14 @@ public class MetronCompatibilityParserTest {
     @Test
     public void testBadJsonConfig() {
         assertThrows(com.fasterxml.jackson.core.JsonParseException.class,
-                () -> MetronCompatibilityParser.of(configStream(BAD_SYNTAX_CONFIG_FILE)));
+                () -> MetronCompatibilityParser.of("badsyntax", configStream(BAD_SYNTAX_CONFIG_FILE)));
     }
 
     @Test
     public void testClassNotFoundConfig() {
         String expectedMessage = "Unable to instantiate connector: class not found";
         assertThrows(IllegalStateException.class,
-                () -> MetronCompatibilityParser.of(configStream(PARSER_CLASS_NOT_DEFINED)),
+                () -> MetronCompatibilityParser.of("parsernotdefined", configStream( PARSER_CLASS_NOT_DEFINED)),
                 expectedMessage);
     }
 

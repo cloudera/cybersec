@@ -1,5 +1,6 @@
 package com.cloudera.parserchains.core;
 
+import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.parserchains.core.model.define.ParserName;
 import lombok.extern.slf4j.Slf4j;
 
@@ -64,7 +65,7 @@ public class DefaultChainRunner implements ChainRunner {
     }
 
     @Override
-    public List<Message> run(byte[] toParse, ChainLink chain) {
+    public List<Message> run(MessageToParse toParse, ChainLink chain) {
         Message original = originalMessage(toParse);
         return parseMessage(original, chain);
     }
@@ -72,15 +73,15 @@ public class DefaultChainRunner implements ChainRunner {
     @Override
     public Message originalMessage(String toParse) {
         return Message.builder()
-                .addField(inputField, FieldValue.of(toParse))
+                .addField(inputField, StringFieldValue.of(toParse))
                 .createdBy(ORIGINAL_MESSAGE_NAME)
                 .build();
     }
 
     @Override
-    public Message originalMessage(byte[] toParse) {
+    public Message originalMessage(MessageToParse toParse) {
         return Message.builder()
-                .addField(inputField, FieldValue.of(toParse))
+                .addField(inputField, MessageToParseFieldValue.of(toParse))
                 .createdBy(ORIGINAL_MESSAGE_NAME)
                 .build();
     }
