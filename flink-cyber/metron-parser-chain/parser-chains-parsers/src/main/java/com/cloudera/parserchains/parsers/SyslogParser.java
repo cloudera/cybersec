@@ -81,7 +81,7 @@ public class SyslogParser implements Parser {
                     .forSpecification(specification)
                     .build()
                     .parseLine(valueToParse)
-                    .forEach((k, v) -> output.addField(FieldName.of(k), FieldValue.of(v.toString())));
+                    .forEach((k, v) -> output.addField(FieldName.of(k), StringFieldValue.of(v.toString())));
 
         } catch(Exception e) {
             output.withError(e);

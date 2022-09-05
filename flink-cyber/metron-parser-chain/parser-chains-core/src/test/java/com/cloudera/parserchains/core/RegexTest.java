@@ -28,9 +28,9 @@ public class RegexTest {
     @Test
     void matchFieldValue() {
         Regex regex = Regex.of("^[A-Z]{0,2}$");
-        assertTrue(regex.matches(FieldValue.of("B")));
-        assertTrue(regex.matches(FieldValue.of("BB")));
-        assertFalse(regex.matches(FieldValue.of("BBB")));
+        assertTrue(regex.matches(StringFieldValue.of("B")));
+        assertTrue(regex.matches(StringFieldValue.of("BB")));
+        assertFalse(regex.matches(StringFieldValue.of("BBB")));
     }
     
     @Test

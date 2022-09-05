@@ -21,7 +21,6 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -83,6 +82,10 @@
             <artifactId>cyber-functions</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.avro</groupId>
+            <artifactId>avro</artifactId>
         </dependency>
     </dependencies>
 

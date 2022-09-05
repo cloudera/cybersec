@@ -30,7 +30,7 @@ public class MapRowToEnrichmentCommand implements MapFunction<Row, EnrichmentCom
 
         Map<String, String> enrichmentValues = new HashMap<>();
         IntStream.range(numKeyFields, row.getArity()).
-                forEach(index -> enrichmentValues.put(fieldNames.get( index - 1), Objects.toString(row.getField(index), "null")));
+                forEach(index -> enrichmentValues.put(fieldNames.get( index - numKeyFields), Objects.toString(row.getField(index), "null")));
 
         EnrichmentEntry enrichmentEntry = EnrichmentEntry.builder().ts(MessageUtils.getCurrentTimestamp()).
                 type(enrichmentType).

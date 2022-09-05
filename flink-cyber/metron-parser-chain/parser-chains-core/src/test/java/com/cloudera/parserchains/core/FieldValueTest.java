@@ -15,28 +15,23 @@ public class FieldValueTest {
 
     @Test
     void valid() {
-        FieldValue.of(value);
+        StringFieldValue.of(value);
     }
 
     @Test
     void tooLong() {
-        String tooLong = StringUtils.repeat("A", FieldValue.MAX_LENGTH+1);
-        assertThrows(IllegalArgumentException.class, () -> FieldValue.of(tooLong));
+        String tooLong = StringUtils.repeat("A", StringFieldValue.MAX_LENGTH+1);
+        assertThrows(IllegalArgumentException.class, () -> StringFieldValue.of(tooLong));
     }
 
     @Test
     void notNullString() {
         String nullString = null;
-        assertThrows(IllegalArgumentException.class, () -> FieldValue.of(nullString));
+        assertThrows(IllegalArgumentException.class, () -> StringFieldValue.of(nullString));
     }
 
     @Test
-    void notNullBytest() {
-        byte[] nullBytes = null;
-        assertThrows(IllegalArgumentException.class, () -> FieldValue.of(nullBytes));
-    }
-    @Test
     void get() {
-        assertEquals(value, FieldValue.of(value).get());
+        assertEquals(value, StringFieldValue.of(value).get());
     }
 }

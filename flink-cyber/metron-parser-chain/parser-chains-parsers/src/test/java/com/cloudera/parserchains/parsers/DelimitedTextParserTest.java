@@ -1,9 +1,6 @@
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.FieldName;
-import com.cloudera.parserchains.core.FieldValue;
-import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Regex;
+import com.cloudera.parserchains.core.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +19,7 @@ public class DelimitedTextParserTest {
 
     @Test
     void parseCSV() {
-        FieldValue csvToParse = FieldValue.of("value1, value2, value3, value4");
+        FieldValue csvToParse = StringFieldValue.of("value1, value2, value3, value4");
         Message input = Message.builder()
                 .addField(FieldName.of("input"), csvToParse)
                 .build();
@@ -38,11 +35,11 @@ public class DelimitedTextParserTest {
 
         assertEquals(csvToParse, output.getField(FieldName.of("input")).get(),
             "Expected the 'input' field to remain in the output message.");
-        assertEquals(FieldValue.of("value1"), output.getField(FieldName.of("first")).get(),
+        assertEquals(StringFieldValue.of("value1"), output.getField(FieldName.of("first")).get(),
             "Expected the 'first' field to have been added to the message.");
-        assertEquals(FieldValue.of("value2"), output.getField(FieldName.of("second")).get(),
+        assertEquals(StringFieldValue.of("value2"), output.getField(FieldName.of("second")).get(),
             "Expected the 'second' field to have been added to the message.");
-        assertEquals(FieldValue.of("value3"), output.getField(FieldName.of("third")).get(),
+        assertEquals(StringFieldValue.of("value3"), output.getField(FieldName.of("third")).get(),
             "Expected the 'third' field to have been added to the message.");
         assertFalse(output.getError().isPresent(),
             "Expected no parsing errors.");
@@ -50,7 +47,7 @@ public class DelimitedTextParserTest {
 
     @Test
     void parseTSV() {
-        FieldValue tsvToParse = FieldValue.of("value1\t value2\t value3\t value4");
+        FieldValue tsvToParse = StringFieldValue.of("value1\t value2\t value3\t value4");
         Message input = Message.builder()
                 .addField(FieldName.of("input"), tsvToParse)
                 .build();
@@ -66,11 +63,11 @@ public class DelimitedTextParserTest {
 
         assertEquals(tsvToParse, output.getField(FieldName.of("input")).get(),
             "Expected the 'input' field to remain in the output message.");
-        assertEquals(FieldValue.of("value1"), output.getField(FieldName.of("first")).get(),
+        assertEquals(StringFieldValue.of("value1"), output.getField(FieldName.of("first")).get(),
             "Expected the 'first' field to have been added to the message.");
-        assertEquals(FieldValue.of("value2"), output.getField(FieldName.of("second")).get(),
+        assertEquals(StringFieldValue.of("value2"), output.getField(FieldName.of("second")).get(),
             "Expected the 'second' field to have been added to the message.");
-        assertEquals(FieldValue.of("value3"), output.getField(FieldName.of("third")).get(),
+        assertEquals(StringFieldValue.of("value3"), output.getField(FieldName.of("third")).get(),
             "Expected the 'third' field to have been added to the message.");
         assertFalse(output.getError().isPresent(),
             "Expected no parsing errors.");
@@ -94,7 +91,7 @@ public class DelimitedTextParserTest {
 
     @Test
     void missingOutputField() {
-        FieldValue csvToParse = FieldValue.of("value1, value2, value3, value4");
+        FieldValue csvToParse = StringFieldValue.of("value1, value2, value3, value4");
         Message input = Message.builder()
                 .addField(FieldName.of("input"), csvToParse)
                 .build();
@@ -116,7 +113,7 @@ public class DelimitedTextParserTest {
     @Test
     void emptyInputField() {
         // the input field is empty
-        FieldValue csvToParse = FieldValue.of("");
+        FieldValue csvToParse = StringFieldValue.of("");
         Message input = Message.builder()
                 .addField(FieldName.of("input"), csvToParse)
                 .build();
@@ -138,7 +135,7 @@ public class DelimitedTextParserTest {
 
     @Test
     void noWhitespaceTrim() {
-        FieldValue csvToParse = FieldValue.of(" value1, value2, value3, value4");
+        FieldValue csvToParse = StringFieldValue.of(" value1, value2, value3, value4");
         Message input = Message.builder()
                 .addField(FieldName.of("input"), csvToParse)
                 .build();
@@ -155,11 +152,11 @@ public class DelimitedTextParserTest {
 
         assertEquals(csvToParse, output.getField(FieldName.of("input")).get(),
             "Expected the 'input' field to remain in the output message.");
-        assertEquals(FieldValue.of(" value1"), output.getField(FieldName.of("first")).get(),
+        assertEquals(StringFieldValue.of(" value1"), output.getField(FieldName.of("first")).get(),
             "Expected the 'first' field to have been added to the message.");
-        assertEquals(FieldValue.of(" value2"), output.getField(FieldName.of("second")).get(),
+        assertEquals(StringFieldValue.of(" value2"), output.getField(FieldName.of("second")).get(),
             "Expected the 'second' field to have been added to the message.");
-        assertEquals(FieldValue.of(" value3"), output.getField(FieldName.of("third")).get(),
+        assertEquals(StringFieldValue.of(" value3"), output.getField(FieldName.of("third")).get(),
             "Expected the 'third' field to have been added to the message.");
         assertFalse(output.getError().isPresent(),
             "Expected no parsing errors.");

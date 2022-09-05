@@ -1,0 +1,8 @@
+#!/bin/bash
+
+export HADOOP_CLASSPATH=`hadoop classpath`
+
+flink run \
+--classpath file:///etc/hive/conf/hive-site.xml \
+--classpath file:///etc/hadoop/conf/core-site.xml \
+--jobmanager yarn-cluster -yjm 1024 -ytm 1024 --detached --yarnname "IndexerHive" ../sgope/flink-indexing-hive-${cybersec.full.version}.jar /opt/cloudera/parcels/CYBERSEC/etc/conf/indexing.properties

@@ -20,6 +20,7 @@ public class MessageToParseDeserializer implements KafkaDeserializationSchema<Me
                 .topic(consumerRecord.topic())
                 .offset(consumerRecord.offset())
                 .partition(consumerRecord.partition())
+                .key(consumerRecord.key())
                 .build();
     }
 

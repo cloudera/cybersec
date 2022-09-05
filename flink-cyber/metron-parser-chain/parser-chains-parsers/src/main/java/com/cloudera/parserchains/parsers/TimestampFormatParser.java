@@ -1,9 +1,6 @@
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.FieldName;
-import com.cloudera.parserchains.core.FieldValue;
-import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
+import com.cloudera.parserchains.core.*;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
@@ -43,7 +40,7 @@ public class TimestampFormatParser implements Parser {
             while (i.hasNext()) {
                 DateTimeFormatter formatter = i.next();
                 try {
-                    FieldValue value = FieldValue.of(parseDate(inputValue, formatter, c.tz).toString());
+                    FieldValue value = StringFieldValue.of(parseDate(inputValue, formatter, c.tz).toString());
                     builder.addField(fieldName, value);
                     break;
                 } catch (DateTimeParseException e) {
