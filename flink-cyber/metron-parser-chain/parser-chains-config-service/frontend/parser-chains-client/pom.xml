@@ -15,8 +15,27 @@
   <name>Parser Chains Config Angular Client</name>
   <packaging>jar</packaging>
 
+  <properties>
+    <angular-dist.directory>dist/tmo-parser-chaining</angular-dist.directory>
+  </properties>
+
   <build>
     <plugins>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.2.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>${angular-dist.directory}</directory>
+              <includes>
+                <include>**/*</include>
+              </includes>
+              <followSymlinks>false</followSymlinks>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
@@ -60,7 +79,7 @@
     <resources>
       <resource>
         <!-- we copy the content of the frontend directory in the final artifact -->
-        <directory>dist/tmo-parser-chaining</directory>
+        <directory>${angular-dist.directory}</directory>
       </resource>
     </resources>
   </build>
