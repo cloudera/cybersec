@@ -51,3 +51,4 @@ cypress/screenshots
 
 # Node Env File
 .env
+/node/
