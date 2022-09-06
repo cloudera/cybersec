@@ -130,7 +130,7 @@ describe('ChainListPage: effects', () => {
     const spyMsgSrv = spyOn(msgService, 'create').and.callThrough();
 
     actions = new ReplaySubject(1);
-    actions.next(new fromActions.DeleteChainAction('id1'));
+    actions.next(new fromActions.DeleteChainAction('id1', 'Chain 1'));
 
     effects.deleteChain$.subscribe(result => {
       expect(result).toEqual(
@@ -162,7 +162,7 @@ describe('ChainListPage: effects', () => {
     const spy = spyOn(service, 'deleteChain').and.callThrough();
     const spyMsgSrv = spyOn(msgService, 'create').and.callThrough();
     actions = new ReplaySubject(1);
-    actions.next(new fromActions.DeleteChainAction('id1'));
+    actions.next(new fromActions.DeleteChainAction('id1', 'Chain 1'));
 
     effects.deleteChain$.subscribe(result => {
       expect(result).toEqual(

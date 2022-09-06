@@ -131,7 +131,7 @@ describe('ChainListPageComponent', () => {
 
     clickOkOnPopConfirm();
     fixture.detectChanges();
-    const action = new fromActions.DeleteChainAction('id1');
+    const action = new fromActions.DeleteChainAction('id1', 'Chain 1');
 
     fixture.detectChanges();
     expect(store.dispatch).toHaveBeenCalledWith(action);

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
+import { Actions, createEffect, Effect, ofType } from '@ngrx/effects';
 import { Action } from '@ngrx/store';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Observable, of } from 'rxjs';
@@ -17,8 +17,7 @@ export class ChainListEffects {
     private chainListService: ChainListPageService
   ) { }
 
-  @Effect()
-  loadChains$: Observable<Action> = this.actions$.pipe(
+  loadChains$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.LOAD_CHAINS),
     switchMap((action: fromActions.LoadChainsAction) => {
       return this.chainListService.getChains()
@@ -32,10 +31,9 @@ export class ChainListEffects {
           })
         );
     })
-  );
+  ));
 
-  @Effect()
-  createChain$: Observable<Action> = this.actions$.pipe(
+  createChain$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.CREATE_CHAIN),
     switchMap((action: fromActions.CreateChainAction) => {
       return this.chainListService.createChain(action.newChain)
@@ -50,16 +48,23 @@ export class ChainListEffects {
           })
         );
     })
-  );
+  ));
 
-  @Effect()
-  deleteChain$: Observable<Action> = this.actions$.pipe(
+  hideCreateModal$: Observable<Action> = createEffect(() => this.actions$.pipe(
+      ofType(
+          fromActions.CREATE_CHAIN_SUCCESS,
+          fromActions.CREATE_CHAIN_FAIL
+      ),
+      map(() => new fromActions.HideCreateModalAction())
+  ))
+
+  deleteChain$: Observable<Action> = createEffect(()=> this.actions$.pipe(
     ofType(fromActions.DELETE_CHAIN),
     switchMap((action: fromActions.DeleteChainAction) => {
       return this.chainListService.deleteChain(action.chainId)
         .pipe(
           map(() => {
-            this.messageService.create('success', action.chainId + ' deleted Successfully');
+            this.messageService.create('success', 'Chain ' + action.chainName + ' deleted Successfully');
             return new fromActions.DeleteChainSuccessAction(action.chainId);
           }),
           catchError((error: { message: string }) => {
@@ -68,5 +73,5 @@ export class ChainListEffects {
           })
         );
     })
-  );
+  ));
 }
