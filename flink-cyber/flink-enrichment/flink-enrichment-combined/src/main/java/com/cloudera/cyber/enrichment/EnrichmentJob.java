@@ -120,8 +120,8 @@ public abstract class EnrichmentJob {
             stellarStream = tqed;
         }
 
-        // TODO - apply the rules based enrichments
-        DataStream<Message> ruled = params.getBoolean(PARAMS_ENABLE_RULES, true) ?
+        // disabled by default - NOT IMPLEMENTED
+        DataStream<Message> ruled = params.getBoolean(PARAMS_ENABLE_RULES, false) ?
                 doRules(stellarStream, params) : stellarStream;
 
         DataStream<ScoredMessage> scoring = doScoring(ruled, env, params);
