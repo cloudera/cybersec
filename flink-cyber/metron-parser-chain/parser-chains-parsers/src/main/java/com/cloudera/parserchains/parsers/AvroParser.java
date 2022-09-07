@@ -13,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
@@ -94,7 +95,7 @@ public class AvroParser implements Parser {
             GenericRecord genericRecord = genericDatumReader.read(null, binaryDecoder);
             genericRecord.getSchema().getFields().forEach(
                     field -> output.addField(field.name(), String.valueOf(genericRecord.get(field.name()))));
-        } catch (IOException exception) {
+        } catch (IOException | AvroRuntimeException exception) {
             output.withError(exception).build();
         }
         return output.build();

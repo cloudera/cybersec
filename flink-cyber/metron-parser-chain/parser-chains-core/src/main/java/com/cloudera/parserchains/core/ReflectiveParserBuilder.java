@@ -10,9 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedMethods;
@@ -50,18 +48,26 @@ public class ReflectiveParserBuilder implements ParserBuilder {
         Map<String, Method> configurationMethods = annotatedMethods
                 .entrySet()
                 .stream()
+                .sorted(Comparator.comparingInt(c -> c.getKey().orderPriority()))
                 .collect(Collectors.toMap(
                         entry -> entry.getKey().key(),
-                        entry -> entry.getValue()));
+                        Map.Entry::getValue,
+                        (first, second) -> first,
+                        LinkedHashMap::new));
 
-        for(Map.Entry<String, List<ConfigValueSchema>> entry: parserSchema.getConfig().entrySet()) {
-            String configKey = entry.getKey();
-            List<ConfigValueSchema> valuesSchema = entry.getValue();
+        final Map<String, List<ConfigValueSchema>> parserConfig = parserSchema.getConfig();
 
-            // find which method matches each configKey, this invoke it
-            for(ConfigValueSchema value: valuesSchema) {
-                Method method = configurationMethods.get(configKey);
-                invokeMethod(parser, parserSchema, configKey, method, value.getValues());
+        for (Map.Entry<String, Method> entry : configurationMethods.entrySet()) {
+            final String annotationKey = entry.getKey();
+            final Method method = entry.getValue();
+
+            final List<ConfigValueSchema> valuesSchema = parserConfig.get(annotationKey);
+
+            if (valuesSchema != null){
+                // execute each method with values present in schema
+                for(ConfigValueSchema value: valuesSchema) {
+                    invokeMethod(parser, parserSchema, annotationKey, method, value.getValues());
+                }
             }
         }
     }

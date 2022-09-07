@@ -76,6 +76,38 @@ public class JSONPathParserTest {
         assertThat(output, is(expected));
     }
 
+    //CYB-91
+    @Test
+    void handleSingleString() {
+        Message input = Message.builder()
+                .addField(DEFAULT_INPUT_FIELD, json)
+                .build();
+        Message output = parser
+                .expression("author", "$.store.book[1].author")
+                .parse(input);
+        Message expected = Message.builder()
+                .withFields(input)
+                .addField("author", "Evelyn Waugh")
+                .build();
+        assertThat(output, is(expected));
+    }
+
+    //CYB-91
+    @Test
+    void handleMap() {
+        Message input = Message.builder()
+                .addField(DEFAULT_INPUT_FIELD, json)
+                .build();
+        Message output = parser
+                .expression("book_info", "$.store.book[1]")
+                .parse(input);
+        Message expected = Message.builder()
+                .withFields(input)
+                .addField("book_info", "{\"category\":\"fiction\",\"author\":\"Evelyn Waugh\",\"title\":\"Sword of Honour\",\"price\":12.99}")
+                .build();
+        assertThat(output, is(expected));
+    }
+
     @Test
     void expressions() {
         Message input = Message.builder()
