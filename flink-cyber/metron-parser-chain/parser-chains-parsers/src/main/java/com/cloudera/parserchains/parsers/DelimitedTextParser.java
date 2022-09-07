@@ -24,7 +24,7 @@ public class DelimitedTextParser implements Parser {
     private static final String DEFAULT_TRIM = "true";
 
 //TODO doesn't understand comma in CSV inside "".
-// Probably needs to be implemented as a advanced separate parser
+// Probably needs to be implemented as an advanced separate parser
 
     /**
      * Defines an output field that is created by the parser.
