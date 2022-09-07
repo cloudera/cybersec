@@ -43,7 +43,7 @@ public @interface Configurable {
     /**
      * Defines the order in which corresponding config should be executed.
      */
-    int orderPriority() default 999;
+    int orderPriority() default Integer.MAX_VALUE;
 
     /**
      * The default value of this configurable parameter.

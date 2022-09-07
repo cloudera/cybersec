@@ -1,6 +1,10 @@
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.*;
+import com.cloudera.parserchains.core.FieldName;
+import com.cloudera.parserchains.core.FieldValue;
+import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.Parser;
+import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
@@ -104,7 +108,7 @@ public class JSONPathParser implements Parser {
                         .collect(Collectors.toList());
                 String value = String.join(",", strings);
                 result = StringFieldValue.of(value);
-            } else if (rawValue instanceof Map){
+            } else if (rawValue instanceof Map) {
                 String value = objectMapper.writeValueAsString(rawValue);
                 result = StringFieldValue.of(value);
             } else {

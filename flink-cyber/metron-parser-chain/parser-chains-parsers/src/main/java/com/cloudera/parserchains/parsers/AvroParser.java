@@ -1,17 +1,11 @@
 package com.cloudera.parserchains.parsers;
 
-import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
-import static java.lang.String.format;
-
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
@@ -23,6 +17,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.core.fs.FSDataInputStream;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Optional;
+
+import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
+import static java.lang.String.format;
 
 @MessageParser(
         name = "Simple Avro parser",
