@@ -7,6 +7,7 @@ import com.cloudera.parserchains.core.catalog.Parameter;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -43,16 +44,18 @@ public class TimestampFormatParser implements Parser {
                     FieldValue value = StringFieldValue.of(parseDate(inputValue, formatter, c.tz).toString());
                     builder.addField(fieldName, value);
                     break;
-                } catch (DateTimeParseException e) {
+                } catch (DateTimeException e) {
                     // if this is the last one, throw it.
-                    if (!i.hasNext()) throw (e);
+                    if (!i.hasNext()) {
+                        return builder.withError(e).build();
+                    }
                 }
             }
         }
         return builder.build();
     }
 
-    private Long parseDate(String inputValue, DateTimeFormatter format, String tz) {
+    private Long parseDate(String inputValue, DateTimeFormatter format, String tz) throws DateTimeException {
         TemporalAccessor parse = format.withZone(ZoneId.of(tz)).parse(inputValue);
         return Instant.from(parse).toEpochMilli();
     }
