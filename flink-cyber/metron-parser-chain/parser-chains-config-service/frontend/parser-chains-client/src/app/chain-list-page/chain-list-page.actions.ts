@@ -9,6 +9,8 @@ export const DELETE_CHAIN = '[Chain List] delete item';
 export const DELETE_CHAIN_SUCCESS = '[Chain List] delete item success';
 export const DELETE_CHAIN_FAIL = '[Chain List] delete item fail';
 export const CREATE_CHAIN = '[Chain List] create item';
+export const SHOW_CREATE_MODAL = '[Chain List] show create modal';
+export const HIDE_CREATE_MODAL = '[Chain List] hide create modal';
 export const CREATE_CHAIN_SUCCESS = '[Chain List] create item success';
 export const CREATE_CHAIN_FAIL = '[Chain List] create item fail';
 
@@ -33,7 +35,7 @@ export class LoadChainsFailAction implements Action {
 
 export class DeleteChainAction implements Action {
   readonly type = DELETE_CHAIN;
-  constructor(public chainId: string) {}
+  constructor(public chainId: string, public chainName: string) {}
 }
 
 export class DeleteChainSuccessAction implements Action {
@@ -50,6 +52,16 @@ export class CreateChainAction implements Action {
     readonly type = CREATE_CHAIN;
     constructor(public newChain: ChainOperationalModel) {}
   }
+
+export class ShowCreateModalAction implements Action {
+    readonly type = SHOW_CREATE_MODAL;
+    constructor() {}
+}
+
+export class HideCreateModalAction implements Action {
+    readonly type = HIDE_CREATE_MODAL;
+    constructor() {}
+}
 
 export class CreateChainSuccessAction implements Action {
     readonly type = CREATE_CHAIN_SUCCESS;
@@ -68,6 +80,8 @@ export type ChainListAction = LoadChainsAction
   | DeleteChainSuccessAction
   | DeleteChainFailAction
   | CreateChainAction
+  | ShowCreateModalAction
+  | HideCreateModalAction
   | CreateChainSuccessAction
   | CreateChainFailAction
   | NoopChainAction;
