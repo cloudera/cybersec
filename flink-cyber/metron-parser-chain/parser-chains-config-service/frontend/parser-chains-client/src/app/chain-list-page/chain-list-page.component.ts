@@ -1,13 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 import { LoadChainsAction } from './chain-list-page.actions';
 import * as fromActions from './chain-list-page.actions';
-import { ChainListPageState, getChains } from './chain-list-page.reducers';
+import {
+  ChainListPageState,
+  getChains,
+  getCreateModalVisible,
+  getLoading,
+} from './chain-list-page.reducers';
 import { ChainModel, ChainOperationalModel } from './chain.model';
 
 @Component({
@@ -16,8 +21,9 @@ import { ChainModel, ChainOperationalModel } from './chain.model';
   styleUrls: ['./chain-list-page.component.scss']
 })
 export class ChainListPageComponent implements OnInit {
-  isChainModalVisible = false;
-  isOkLoading = false;
+  isChainCreateModalVisible$: Observable<boolean>;
+  isVisibleDeleteModal: boolean = false;
+  isOkLoading$: Observable<boolean>;
   chains$: Observable<ChainModel[]>;
   totalRecords = 200;
   chainDataSorted$: Observable<ChainModel[]>;
@@ -32,6 +38,8 @@ export class ChainListPageComponent implements OnInit {
     this.route.queryParams.subscribe(() => {
       store.dispatch(new LoadChainsAction());
       this.chains$ = store.pipe(select(getChains));
+      this.isOkLoading$ = store.pipe(select(getLoading));
+      this.isChainCreateModalVisible$ = store.pipe(select(getCreateModalVisible));
     });
 
     this.chainDataSorted$ = combineLatest([
@@ -47,20 +55,29 @@ export class ChainListPageComponent implements OnInit {
   }
 
   showAddChainModal(): void {
-    this.isChainModalVisible = true;
+    this.store.dispatch(new fromActions.ShowCreateModalAction());
+  }
+
+  showDeleteModal(): void {
+    this.isVisibleDeleteModal = true;
   }
 
   pushChain(): void {
     const chainData: ChainOperationalModel = { name: this.chainName.value };
+    this.newChainForm.reset();
     this.store.dispatch(new fromActions.CreateChainAction(chainData));
-    this.isChainModalVisible = false;
   }
 
-  deleteChain(chainId: string): void {
-    this.store.dispatch(new fromActions.DeleteChainAction(chainId));
+  deleteChain(chainId: string, chainName): void {
+    this.store.dispatch(new fromActions.DeleteChainAction(chainId, chainName));
   }
-  handleCancel(): void {
-    this.isChainModalVisible = false;
+
+  handleCancelChainModal(): void {
+    this.store.dispatch(new fromActions.HideCreateModalAction());
+  }
+
+  handleCancelDeleteModal(): void {
+    this.isVisibleDeleteModal = false;
   }
 
   sortTable(data: ChainModel[], sortDescription: any): Observable<ChainModel[]> {

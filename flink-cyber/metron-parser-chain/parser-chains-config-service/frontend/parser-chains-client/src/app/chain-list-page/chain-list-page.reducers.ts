@@ -5,12 +5,14 @@ import { ChainModel } from './chain.model';
 
 export interface ChainListPageState {
   loading: boolean;
+  createModalVisible: boolean;
   error: string;
   items: ChainModel[];
 }
 
 export const initialState: ChainListPageState = {
   loading: false,
+  createModalVisible: false,
   items: [],
   error: ''
 };
@@ -30,12 +32,14 @@ export function reducer(
       return {
         ...state,
         loading: false,
+        createModalVisible: false,
         items: action.chains
       };
     }
     case chainListPageActions.LOAD_CHAINS_FAIL: {
       return {
         ...state,
+        createModalVisible: false,
         error: action.error.message,
         loading: false,
       };
@@ -45,6 +49,18 @@ export function reducer(
         ...state,
         loading: true,
       };
+    }
+    case chainListPageActions.SHOW_CREATE_MODAL: {
+      return {
+        ...state,
+        createModalVisible: true,
+      }
+    }
+    case chainListPageActions.HIDE_CREATE_MODAL: {
+      return {
+        ...state,
+        createModalVisible: false,
+      }
     }
     case chainListPageActions.CREATE_CHAIN_SUCCESS: {
       return {
@@ -93,4 +109,14 @@ export function getChainListPageState(state: any): ChainListPageState {
 export const getChains = createSelector(
   getChainListPageState,
   (state: ChainListPageState) => state.items
+);
+
+export const getLoading = createSelector(
+    getChainListPageState,
+    (state: ChainListPageState) => state.loading
+);
+
+export const getCreateModalVisible = createSelector(
+    getChainListPageState,
+    (state: ChainListPageState) => state.createModalVisible
 );
