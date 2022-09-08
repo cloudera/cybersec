@@ -63,7 +63,6 @@
         <mockito.version>3.2.4</mockito.version>
         <hamcrest.version>2.2</hamcrest.version>
         <multiline-string.version>0.1.2</multiline-string.version>
-        <json-path.version>2.4.0</json-path.version>
         <json-flattener.version>0.8.1</json-flattener.version>
         <assertj-core.version>3.17.2</assertj-core.version>
     </properties>
@@ -149,11 +148,6 @@
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-xml</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.jayway.jsonpath</groupId>
-                <artifactId>json-path</artifactId>
-                <version>${json-path.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.wnameless.json</groupId>

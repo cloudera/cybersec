@@ -8,20 +8,19 @@ import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.InvalidJsonException;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import com.jayway.jsonpath.ReadContext;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
 import static java.lang.String.format;
@@ -38,7 +37,6 @@ import static java.lang.String.format;
 public class JSONPathParser implements Parser {
     private FieldName inputField;
     private LinkedHashMap<FieldName, JsonPath> expressions;
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     public JSONPathParser() {
         inputField = FieldName.of(DEFAULT_INPUT_FIELD);
@@ -96,31 +94,38 @@ public class JSONPathParser implements Parser {
     }
 
     private FieldValue execute(JsonPath jsonPath, ReadContext readContext) {
-        FieldValue result = StringFieldValue.of("");
         try {
             // execute the path expression
             Object rawValue = readContext.read(jsonPath);
 
-            // convert the result to a string
             if (rawValue instanceof Collection) {
-                List<String> strings = ((Collection<Object>) rawValue).stream()
-                        .map(String::valueOf)
-                        .collect(Collectors.toList());
-                String value = String.join(",", strings);
-                result = StringFieldValue.of(value);
+                return toStringFieldValue((Collection<?>) rawValue, readContext);
             } else if (rawValue instanceof Map) {
-                String value = objectMapper.writeValueAsString(rawValue);
-                result = StringFieldValue.of(value);
+                return toStringFieldValue((Map<?, ?>) rawValue, readContext);
             } else {
-                String value = String.valueOf(rawValue);
-                result = StringFieldValue.of(value);
+                return StringFieldValue.of(String.valueOf(rawValue));
             }
-
         } catch (PathNotFoundException e) {
             log.debug("No results for path expression. Nothing to do. jsonPath={}", jsonPath.getPath());
-        } catch (JsonProcessingException e) {
-            log.debug("Error creating JSON from the Map. jsonPath={}", jsonPath.getPath());
         }
-        return result;
+        return StringFieldValue.of("");
+    }
+
+    private FieldValue toStringFieldValue(Map<?, ?> map, ReadContext readContext) {
+        if (MapUtils.isEmpty(map)) {
+            return StringFieldValue.of("");
+        }
+        return StringFieldValue.of(readContext.configuration().jsonProvider().toJson(map));
+    }
+
+    private FieldValue toStringFieldValue(Collection<?> collection, ReadContext readContext) {
+        ArrayList<?> arrayList = new ArrayList<>(collection);
+        if (CollectionUtils.isEmpty(arrayList)) {
+            return StringFieldValue.of("");
+        } else if (arrayList.size() == 1) {
+            return StringFieldValue.of(String.valueOf(arrayList.get(0)));
+        } else {
+            return StringFieldValue.of(readContext.configuration().jsonProvider().toJson(arrayList));
+        }
     }
 }
