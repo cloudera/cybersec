@@ -94,6 +94,125 @@ public class JSONPathParserTest {
 
     //CYB-91
     @Test
+    void handleListOfMaps() {
+        Message input = Message.builder()
+                .addField(DEFAULT_INPUT_FIELD, json)
+                .build();
+        Message output = parser
+                .expression("books", "$.store.book[*]")
+                .parse(input);
+
+        Message expected = Message.builder()
+                .withFields(input)
+                .addField("books", "[{\"category\":\"reference\",\"author\":\"Nigel Rees\",\"title\":\"Sayings of the Century\",\"price\":8.95},{\"category\":\"fiction\",\"author\":\"Evelyn Waugh\",\"title\":\"Sword of Honour\",\"price\":12.99},{\"category\":\"fiction\",\"author\":\"Herman Melville\",\"title\":\"Moby Dick\",\"isbn\":\"0-553-21311-3\",\"price\":8.99},{\"category\":\"fiction\",\"author\":\"J. R. R. Tolkien\",\"title\":\"The Lord of the Rings\",\"isbn\":\"0-395-19395-8\",\"price\":22.99}]")
+                .build();
+        assertThat(output, is(expected));
+    }
+
+    //CYB-91
+    @Test
+    void handleListOfMapsDeepScan() {
+        Message input = Message.builder()
+                .addField(DEFAULT_INPUT_FIELD, json)
+                .build();
+        Message output = parser
+                .expression("books", "$..store.book[*]")
+                .parse(input);
+
+        Message expected = Message.builder()
+                .withFields(input)
+                .addField("books", "[{\"category\":\"reference\",\"author\":\"Nigel Rees\",\"title\":\"Sayings of the Century\",\"price\":8.95},{\"category\":\"fiction\",\"author\":\"Evelyn Waugh\",\"title\":\"Sword of Honour\",\"price\":12.99},{\"category\":\"fiction\",\"author\":\"Herman Melville\",\"title\":\"Moby Dick\",\"isbn\":\"0-553-21311-3\",\"price\":8.99},{\"category\":\"fiction\",\"author\":\"J. R. R. Tolkien\",\"title\":\"The Lord of the Rings\",\"isbn\":\"0-395-19395-8\",\"price\":22.99}]")
+                .build();
+        assertThat(output, is(expected));
+    }
+
+    //CYB-91
+    @Test
+    void handleList() {
+        Message input = Message.builder()
+                .addField(DEFAULT_INPUT_FIELD, json)
+                .build();
+        Message output = parser
+                .expression("authors", "$.store.book[*].author")
+                .parse(input);
+
+        Message expected = Message.builder()
+                .withFields(input)
+                .addField("authors", "[\"Nigel Rees\",\"Evelyn Waugh\",\"Herman Melville\",\"J. R. R. Tolkien\"]")
+                .build();
+        assertThat(output, is(expected));
+    }
+
+    //CYB-91
+    @Test
+    void handleListDeepScan() {
+        Message input = Message.builder()
+                .addField(DEFAULT_INPUT_FIELD, json)
+                .build();
+        Message output = parser
+                .expression("authors", "$..store.book[*].author")
+                .parse(input);
+
+        Message expected = Message.builder()
+                .withFields(input)
+                .addField("authors", "[\"Nigel Rees\",\"Evelyn Waugh\",\"Herman Melville\",\"J. R. R. Tolkien\"]")
+                .build();
+        assertThat(output, is(expected));
+    }
+
+    //CYB-91
+    @Test
+    void handleSet() {
+        Message input = Message.builder()
+                .addField(DEFAULT_INPUT_FIELD, json)
+                .build();
+        Message output = parser
+                .expression("bookKeys", "$.store.book[0].keys()")
+                .parse(input);
+
+        Message expected = Message.builder()
+                .withFields(input)
+                .addField("bookKeys", "[\"category\",\"author\",\"title\",\"price\"]")
+                .build();
+        assertThat(output, is(expected));
+    }
+
+    //CYB-91
+    @Test
+    void handleSetDeepScan() {
+        Message input = Message.builder()
+                .addField(DEFAULT_INPUT_FIELD, json)
+                .build();
+        Message output = parser
+                .expression("rootKeys", "$..store.book[0].keys()")
+                .parse(input);
+
+        Message expected = Message.builder()
+                .withFields(input)
+                .addField("rootKeys", "[\"store\",\"expensive\"]")
+                .build();
+        assertThat(output, is(expected));
+    }
+
+    //CYB-91
+    @Test
+    void handleDouble() {
+        Message input = Message.builder()
+                .addField(DEFAULT_INPUT_FIELD, json)
+                .build();
+        Message output = parser
+                .expression("maxPrice", "$..store.book[*].price.max()")
+                .parse(input);
+
+        Message expected = Message.builder()
+                .withFields(input)
+                .addField("maxPrice", "22.99")
+                .build();
+        assertThat(output, is(expected));
+    }
+
+    //CYB-91
+    @Test
     void handleMap() {
         Message input = Message.builder()
                 .addField(DEFAULT_INPUT_FIELD, json)
@@ -124,7 +243,7 @@ public class JSONPathParserTest {
                 .addField("book2", "Sword of Honour")
                 .addField("book3", "Moby Dick")
                 .build();
-        assertThat( output, is(expected));
+        assertThat(output, is(expected));
     }
 
     @Test
