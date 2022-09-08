@@ -9,9 +9,10 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.stream.Collectors;
 
 public class AnnotationUtils {
 
@@ -28,15 +29,11 @@ public class AnnotationUtils {
     }
 
     public static Map<Configurable, Method> getAnnotatedMethodsInOrder(Class<? extends Parser> clazz) {
-        Map<Configurable, Method> results = new TreeMap<>(Comparator.comparing(Configurable::orderPriority));
-        for (Method method : clazz.getDeclaredMethods()) {
-            for (Annotation annotation : method.getDeclaredAnnotations()) {
-                if (annotation instanceof Configurable) {
-                    results.put((Configurable) annotation, method);
-                }
-            }
-        }
-        return results;
+        return getAnnotatedMethods(clazz).entrySet().stream()
+                .sorted(Comparator.comparing(entry -> entry.getKey().orderPriority()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (first, second) -> first,
+                        LinkedHashMap::new));
     }
 
     public static List<Parameter> getAnnotatedParameters(Method method) {
