@@ -11,6 +11,7 @@ import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.cloudera.parserchains.core.utils.StringUtils.getFirstChar;
 import static java.lang.String.format;
@@ -50,6 +52,7 @@ public class CsvTextParser implements Parser {
     }
 
     private final CsvMapper mapper;
+    private ObjectReader reader;
     private CsvSchema schema;
 
     private final List<OutputField> outputFields;
@@ -61,13 +64,13 @@ public class CsvTextParser implements Parser {
         outputFields = new ArrayList<>();
         trimWhitespace = Boolean.parseBoolean(DEFAULT_TRIM);
         mapper = new CsvMapper();
-        schema = mapper
+        updateSchema(() -> mapper
                 .schemaFor(new TypeReference<List<String>>() {
                 })
                 .withoutHeader()
                 .withLineSeparator("\n")
                 .withColumnSeparator(getFirstChar(DEFAULT_DELIMITER))
-                .withQuoteChar(getFirstChar(DEFAULT_QUOTE_CHAR));
+                .withQuoteChar(getFirstChar(DEFAULT_QUOTE_CHAR)));
     }
 
     /**
@@ -97,7 +100,7 @@ public class CsvTextParser implements Parser {
      * @param quoteChar A character replacing the quote character used for escaping when parsing CSV.
      */
     public CsvTextParser withQuoteChar(char quoteChar) {
-        this.schema = this.schema.withQuoteChar(quoteChar);
+        updateSchema(() -> this.schema.withQuoteChar(quoteChar));
         return this;
     }
 
@@ -119,7 +122,7 @@ public class CsvTextParser implements Parser {
      * @param delimiter A character defining the delimiter used to split the text.
      */
     public CsvTextParser withDelimiter(char delimiter) {
-        this.schema = this.schema.withColumnSeparator(delimiter);
+        updateSchema(() -> this.schema.withColumnSeparator(delimiter));
         return this;
     }
 
@@ -188,17 +191,14 @@ public class CsvTextParser implements Parser {
         if (!field.isPresent()) {
             output.withError(format("Message missing expected input field '%s'", inputField.toString()));
         } else {
-            field.ifPresent(val -> doParse(val.toString(), output));
+            doParse(field.get().toString(), output);
         }
         return output.build();
     }
 
     private void doParse(String valueToParse, Message.Builder output) {
         try {
-            final List<String> valueList = mapper
-                    .readerFor(new TypeReference<List<String>>() {
-                    })
-                    .with(schema)
+            final List<String> valueList = reader
                     .readValue(valueToParse);
 
             for (OutputField outputField : outputFields) {
@@ -217,5 +217,13 @@ public class CsvTextParser implements Parser {
         } catch (JsonProcessingException e) {
             output.withError(e);
         }
+    }
+
+    private void updateSchema(Supplier<CsvSchema> csvSchemaConsumer) {
+        this.schema = csvSchemaConsumer.get();
+        this.reader = mapper
+                .readerFor(new TypeReference<List<String>>() {
+                })
+                .with(schema);
     }
 }
