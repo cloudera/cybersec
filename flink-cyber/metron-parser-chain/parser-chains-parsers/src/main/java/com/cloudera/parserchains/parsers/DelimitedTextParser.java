@@ -2,6 +2,7 @@ package com.cloudera.parserchains.parsers;
 
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
+import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.Regex;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.lang.String.format;
 
@@ -27,9 +29,6 @@ import static java.lang.String.format;
 public class DelimitedTextParser implements Parser {
     private static final String DEFAULT_DELIMITER = ",";
     private static final String DEFAULT_TRIM = "true";
-
-//TODO doesn't understand comma in CSV inside "".
-// Probably needs to be implemented as an advanced separate parser
 
     /**
      * Defines an output field that is created by the parser.
@@ -148,10 +147,11 @@ public class DelimitedTextParser implements Parser {
     @Override
     public Message parse(Message input) {
         Message.Builder output = Message.builder().withFields(input);
-        if (!input.getField(inputField).isPresent()) {
+        final Optional<FieldValue> field = input.getField(inputField);
+        if (!field.isPresent()) {
             output.withError(format("Message missing expected input field '%s'", inputField.toString()));
         } else {
-            input.getField(inputField).ifPresent(val -> doParse(val.toString(), output));
+            doParse(field.get().toString(), output);
         }
         return output.build();
     }
