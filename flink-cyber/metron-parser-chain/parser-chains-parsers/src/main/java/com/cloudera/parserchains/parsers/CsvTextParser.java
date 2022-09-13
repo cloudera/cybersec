@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static com.cloudera.parserchains.core.utils.StringUtils.getFirstChar;
+import static com.cloudera.parserchains.core.utils.StringUtils.unescapeJava;
 import static java.lang.String.format;
 
 /**
@@ -191,7 +192,7 @@ public class CsvTextParser implements Parser {
         if (!field.isPresent()) {
             output.withError(format("Message missing expected input field '%s'", inputField.toString()));
         } else {
-            doParse(field.get().toString(), output);
+            doParse(unescapeJava(field.get().toString()), output);
         }
         return output.build();
     }
@@ -199,6 +200,10 @@ public class CsvTextParser implements Parser {
     private void doParse(String valueToParse, Message.Builder output) {
         try {
             final List<String> valueList = reader
+                    .readValue(valueToParse);
+            final Object result = mapper.readerFor(new TypeReference<List<String>>() {
+                    })
+                    .with(schema)
                     .readValue(valueToParse);
 
             for (OutputField outputField : outputFields) {
