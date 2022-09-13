@@ -201,10 +201,6 @@ public class CsvTextParser implements Parser {
         try {
             final List<String> valueList = reader
                     .readValue(valueToParse);
-            final Object result = mapper.readerFor(new TypeReference<List<String>>() {
-                    })
-                    .with(schema)
-                    .readValue(valueToParse);
 
             for (OutputField outputField : outputFields) {
                 final int index = outputField.index;
