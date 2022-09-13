@@ -7,7 +7,11 @@ import org.apache.commons.lang3.StringEscapeUtils;
 public final class StringUtils {
 
     public static char getFirstChar(String delimiter) {
-        return StringEscapeUtils.unescapeJava(delimiter).charAt(0);
+        return unescapeJava(delimiter).charAt(0);
+    }
+
+    public static String unescapeJava(String text) {
+        return StringEscapeUtils.unescapeJava(text);
     }
 
 }
