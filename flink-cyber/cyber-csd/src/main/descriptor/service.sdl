@@ -90,6 +90,53 @@
       "configurableInWizard": true
     }
   ],
+  "roles" : [
+    {
+      "name" : "FLINK_HISTORY_SERVER",
+      "label" : "Flink Dashboard",
+      "pluralLabel" : "Flink Dashboards",
+      "jvmBased": true,
+      "startRunner" : {
+        "program" : "scripts/control.sh",
+        "args" : [ "start-parser-ui" ]
+      },
+      "externalLink" : {
+        "name" : "parser_web_ui",
+        "label" : "Parser Chains",
+        "url" : "http://${host}:3344}",
+        "secureUrl": "https://${host}:3344"
+      },
+      "topology" : { "minInstances" : 1, "maxInstances" : 1 },
+      "logging" : {
+        "configFilename" : "cybersec-conf/log4j-console.properties",
+        "loggingType" : "log4j",
+        "filename": "parser-chains.log",
+        "dir": "/var/log/cybersec",
+        "configName" : "log.dir",
+        "modifiable" : true
+      },
+      "parameters" : [ ],
+      "kerberosPrincipals": [
+      ],
+      "sslServer": {
+      },
+      "sslClient": {
+
+      },
+      "configWriter" : {
+        "generators" : [
+          {
+            "filename": "cybersec-conf/parser-ui.properties",
+            "configFormat": "properties",
+            "kerberosPrincipals": [
+            ],
+            "additionalConfigs": [
+            ]
+          }
+        ]
+      }
+    }
+  ],
   "gateway": {
     "alternatives": {
       "name": "cybersec-conf",
