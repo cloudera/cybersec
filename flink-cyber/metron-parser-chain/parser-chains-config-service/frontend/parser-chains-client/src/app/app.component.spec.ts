@@ -25,9 +25,9 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'TMO Parser Chaining'`, () => {
+  it(`should have as title 'Parser Chaining'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.debugElement.componentInstance;
-    expect(app.title).toEqual('TMO Parser Chaining');
+    expect(app.title).toEqual('Parser Chaining');
   });
 });

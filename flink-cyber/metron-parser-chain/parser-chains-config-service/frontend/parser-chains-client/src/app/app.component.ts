@@ -6,7 +6,7 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'TMO Parser Chaining';
+  title = 'Parser Chaining';
   isReverseArrow = false;
   width: string | number = 200;
   isCollapsed = false;

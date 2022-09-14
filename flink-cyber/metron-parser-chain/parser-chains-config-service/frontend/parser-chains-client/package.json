@@ -1,5 +1,5 @@
 {
-  "name": "tmo-parser-chaining",
+  "name": "parser-chaining",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",

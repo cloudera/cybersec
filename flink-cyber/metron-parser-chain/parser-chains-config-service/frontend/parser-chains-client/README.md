@@ -1,4 +1,4 @@
-# TMO Parser Chaining
+# Parser Chaining
 
 This project was initialized from a skeleton version of [the Enrichment UI prototype](https://github.com/hortonworks/hcp-enrichment_private).
 
