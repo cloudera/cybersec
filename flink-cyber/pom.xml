@@ -28,7 +28,6 @@
         <module>caracal-generator</module>
         <module>caracal-parser</module>
         <module>data-management</module>
-        <module>flink-web</module>
         <module>flink-parse</module>
         <module>flink-stellar</module>
         <module>flink-hbase-common</module>
