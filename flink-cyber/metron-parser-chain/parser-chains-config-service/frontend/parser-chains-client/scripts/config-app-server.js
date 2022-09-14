@@ -1,5 +1,5 @@
 const path = require("path");
-const html = path.join(__dirname, "../dist/tmo-parser-chaining/");
+const html = path.join(__dirname, "../dist/parser-chaining/");
 const bodyParser = require("body-parser");
 const compression = require("compression");
 const express = require("express");

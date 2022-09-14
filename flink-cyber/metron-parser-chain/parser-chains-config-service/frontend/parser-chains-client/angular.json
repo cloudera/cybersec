@@ -6,7 +6,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "tmo-parser-chaining": {
+    "parser-chaining": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -20,7 +20,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/tmo-parser-chaining",
+            "outputPath": "dist/parser-chaining",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -109,19 +109,19 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "tmo-parser-chaining:build",
+            "browserTarget": "parser-chaining:build",
             "proxyConfig": "src/proxy.conf.json"
           },
           "configurations": {
             "dev": {
-              "browserTarget": "tmo-parser-chaining:build:dev"
+              "browserTarget": "parser-chaining:build:dev"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "tmo-parser-chaining:build"
+            "browserTarget": "parser-chaining:build"
           }
         },
         "test": {
@@ -161,7 +161,7 @@
         }
       }
     },
-    "tmo-parser-chaining-e2e": {
+    "parser-chaining-e2e": {
       "root": "e2e/",
       "projectType": "application",
       "prefix": "",
@@ -170,11 +170,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "tmo-parser-chaining:serve"
+            "devServerTarget": "parser-chaining:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "tmo-parser-chaining:serve:production"
+              "devServerTarget": "parser-chaining:serve:production"
             }
           }
         },
@@ -194,5 +194,5 @@
       }
     }
   },
-  "defaultProject": "tmo-parser-chaining"
+  "defaultProject": "parser-chaining"
 }
