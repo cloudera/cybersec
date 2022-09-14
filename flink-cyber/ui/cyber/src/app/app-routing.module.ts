@@ -9,8 +9,8 @@ const routes: Routes = [
 
   { path: 'rules', loadChildren: () => import('./rules/rules.module').then(m => m.RulesModule) },
 
-  { path: 'asn', loadChildren: () => import('./maxmind/maxmind.module').then(m => m.MaxmindModule) },
-  { path: 'geo', loadChildren: () => import('./maxmind/maxmind.module').then(m => m.MaxmindModule) },
+  { path: 'maxmind', loadChildren: () => import('./maxmind/maxmind.module').then(m => m.MaxmindModule) },
+  { path: 'maxmind', loadChildren: () => import('./maxmind/maxmind.module').then(m => m.MaxmindModule) },
   { path: 'lists', loadChildren: () => import('./enrichments/enrichments.module').then(m => m.EnrichmentsModule) },
   { path: 'hbase', loadChildren: () => import('./hbase/hbase.module').then(m => m.HbaseModule) },
   { path: 'enrichments', loadChildren: () => import('./enrichments/enrichments.module').then(m => m.EnrichmentsModule) },
@@ -19,7 +19,7 @@ const routes: Routes = [
 
   { path: 'profiles', loadChildren: () => import('./profiles/profiles.module').then(m => m.ProfilesModule) },
 
-  { path: 'parsers', loadChildren: () => import('./parsers/parsers.module').then(m => m.ParsersModule) },
+  { path: 'parserconfig', loadChildren: () => import('./parsers/parsers.module').then(m => m.ParsersModule) },
   { path: 'sources', loadChildren: () => import('./sources/sources.module').then(m => m.SourcesModule) },
 
 ];

@@ -1,0 +1,9 @@
+.stack-trace-block {
+  width: 40vw;
+  height: 40vh;
+  overflow: scroll;
+
+  pre {
+    overflow: visible;
+  }
+}
