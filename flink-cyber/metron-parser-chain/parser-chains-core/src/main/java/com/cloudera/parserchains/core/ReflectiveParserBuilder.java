@@ -13,9 +13,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedMethods;
+import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedMethodsInOrder;
 import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedParameters;
 
 /**
@@ -36,32 +35,35 @@ public class ReflectiveParserBuilder implements ParserBuilder {
             Constructor<? extends Parser> constructor = parserInfo.getParserClass().getConstructor();
             return constructor.newInstance();
 
-        } catch(NoSuchMethodException e) {
+        } catch (NoSuchMethodException e) {
             throw new InvalidParserException(parserSchema, "A default constructor is missing.", e);
 
-        } catch(InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new InvalidParserException(parserSchema, "Unable to instantiate the parser.", e);
         }
     }
 
     private void configure(Parser parser, ParserSchema parserSchema) throws InvalidParserException {
         // which methods need to be invoked to configure this parser?
-        Map<Configurable, Method> annotatedMethods = getAnnotatedMethods(parser.getClass());
-        Map<String, Method> configurationMethods = annotatedMethods
-                .entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        entry -> entry.getKey().key(),
-                        entry -> entry.getValue()));
+        Map<Configurable, Method> annotatedMethods = getAnnotatedMethodsInOrder(parser.getClass());
 
-        for(Map.Entry<String, List<ConfigValueSchema>> entry: parserSchema.getConfig().entrySet()) {
-            String configKey = entry.getKey();
-            List<ConfigValueSchema> valuesSchema = entry.getValue();
+        final Map<String, List<ConfigValueSchema>> parserConfig = parserSchema.getConfig();
 
-            // find which method matches each configKey, this invoke it
-            for(ConfigValueSchema value: valuesSchema) {
-                Method method = configurationMethods.get(configKey);
-                invokeMethod(parser, parserSchema, configKey, method, value.getValues());
+        for (Map.Entry<Configurable, Method> entry : annotatedMethods.entrySet()) {
+            final Configurable key = entry.getKey();
+            final String annotationKey = key.key();
+            final Method method = entry.getValue();
+
+            final List<ConfigValueSchema> valuesSchema = parserConfig.get(annotationKey);
+
+            if (valuesSchema != null) {
+                // execute each method with values present in schema
+                for (ConfigValueSchema value : valuesSchema) {
+                    invokeMethod(parser, parserSchema, annotationKey, method, value.getValues());
+                }
+            } else if (key.required()) {
+                throw new InvalidParserException(parserSchema,
+                        String.format("Required field isn't provided: %s", annotationKey));
             }
         }
     }
@@ -88,7 +90,7 @@ public class ReflectiveParserBuilder implements ParserBuilder {
     private List<String> buildMethodArgs(List<Parameter> parameterAnnotations,
                                          Map<String, String> configValues) {
         List<String> methodArgs = new ArrayList<>();
-        if(parameterAnnotations.size() > 0) {
+        if (parameterAnnotations.size() > 0) {
             // use the parameter annotations, if they exist
             for (Parameter annotation : parameterAnnotations) {
                 String value = configValues.get(annotation.key());

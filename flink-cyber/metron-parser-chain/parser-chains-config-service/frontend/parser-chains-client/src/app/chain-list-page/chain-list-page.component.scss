@@ -1,0 +1,42 @@
+@import "../../../node_modules/ng-zorro-antd/table/style/index.css";
+
+.chain-delete-btn {
+    background:transparent;
+    border: 0;
+    justify-content: center;
+    padding-right: 12px;
+    width: 50px;
+    z-index: 100;
+    color: rgb(213, 46, 46);
+    opacity: 0.8;
+}
+.chain-delete-btn .anticon-delete {
+    padding:2px;
+}
+.chain-delete-btn:hover {
+    opacity: 1;
+}
+
+.chain-open-btn {
+    background:transparent;
+    border: 0;
+    justify-content: center;
+    padding-right: 12px;
+    width: 50px;
+    z-index: 100;
+    color: #3e508c;
+}
+.chain-open-btn .anticon-right-square {
+    opacity: 0.8;
+    padding:2px;
+}
+.chain-open-btn:hover .anticon-right-square {
+    opacity: 1;
+}
+
+.add-new-chain-button {
+    border-radius: 100%;
+    width: 30px;
+    height: 30px;
+    font-size: 20px;
+}

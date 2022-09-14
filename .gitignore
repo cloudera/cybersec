@@ -15,10 +15,17 @@ buildNumber.properties
 
 # User-specific stuff
 .idea/**/workspace.xml
+.idea/workspace.xml
+.idea/sonarlint
+.idea/cybersec.iml
 .idea/**/tasks.xml
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/encodings.xml
+.idea/misc.xml
+.idea/inspectionProfiles/Project_Default.xml
+.idea/modules.xml
 
 # Generated files
 .idea/**/contentModel.xml
@@ -35,17 +42,14 @@ buildNumber.properties
 # Gradle
 .idea/**/gradle.xml
 .idea/**/libraries
+.idea/workspace.xml
 
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,
 # since they will be recreated, and may cause churn.  Uncomment if using
 auto-import.
-.idea/artifacts
-.idea/compiler.xml
-.idea/jarRepositories.xml
-.idea/modules.xml
-.idea/*.iml
-.idea/modules
+.idea
+**/.angular
 *.iml
 *.ipr
 

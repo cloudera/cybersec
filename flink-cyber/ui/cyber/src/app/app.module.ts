@@ -8,7 +8,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { IconsProviderModule } from './icons-provider.module';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NZ_I18N } from 'ng-zorro-antd/i18n';
@@ -18,6 +18,9 @@ import en from '@angular/common/locales/en';
 import { StoreModule } from '@ngrx/store';
 import { EntityDataModule } from '@ngrx/data';
 import { entityConfig } from './entity-metadata';
+import {ChainAddParserPageModule} from './chain-add-parser-page/chain-add-parser-page.module';
+import {ChainListPageModule} from './chain-list-page/chain-list-page.module';
+import { MonacoEditorModule } from 'ngx-monaco-editor-v13';
 
 registerLocaleData(en);
 
@@ -33,11 +36,22 @@ registerLocaleData(en);
     IconsProviderModule,
     NzLayoutModule,
     NzMenuModule,
+    ChainAddParserPageModule,
+    ChainListPageModule,
     FormsModule,
     HttpClientModule,
     BrowserAnimationsModule,
+    ReactiveFormsModule,
     StoreModule.forRoot({}, {}),
-    EntityDataModule.forRoot(entityConfig)
+    EntityDataModule.forRoot(entityConfig),
+    // MonacoEditorModule.forRoot( {
+    //   onMonacoLoad() {
+    //     monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+    //       validate: true,
+    //       schemas: []
+    //     });
+    //   }
+    // })
   ],
   providers: [{ provide: NZ_I18N, useValue: en_US }],
   bootstrap: [AppComponent]

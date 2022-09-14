@@ -1,0 +1,21 @@
+.route-subchain {
+  margin-right: 10px;
+}
+
+.route-actions {
+  display: flex;
+}
+
+.route-matching-value {
+  padding: 0 10px;
+}
+
+.set-as-default,
+.default-route {
+  font-size: 12px;
+}
+
+.default-route {
+  font-style: italic;
+  color: dimgrey;
+}

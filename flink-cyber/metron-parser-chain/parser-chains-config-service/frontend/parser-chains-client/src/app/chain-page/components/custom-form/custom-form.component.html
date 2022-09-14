@@ -1,0 +1,54 @@
+<div class="custom-form">
+  <form nz-form [formGroup]="formGroup">
+    <nz-form-item *ngFor="let formConfig of config; trackBy: trackByFn">
+      <nz-form-label
+        *ngIf="formConfig.label !== null"
+        [nzSm]="8"
+        [nzXs]="24"
+        [nzFor]="formConfig.id"
+        [nzRequired]="formConfig.required"
+      >
+        {{ formConfig.label }}
+      </nz-form-label>
+
+      <nz-form-control *ngIf="formConfig.type === 'text' && formConfig.multiple !== true" [nzSm]="14" [nzXs]="24">
+        <input
+          id="{{ formConfig.id }}"
+          nz-input
+          formControlName="{{ formConfig.name }}"
+          (keyup)="onChange($event, formConfig)"
+          placeholder="{{ formConfig.placeholder }}"
+        />
+      </nz-form-control>
+      <nz-form-control *ngIf="['textarea', 'text'].includes(formConfig.type) && formConfig.multiple === true" [nzSm]="14" [nzXs]="24">
+        <app-multi-input
+          [config]="formConfig"
+          [value]="formConfig.value"
+          (changeValue)="onChange($event, formConfig)"
+        >
+        </app-multi-input>
+      </nz-form-control>
+      <nz-form-control *ngIf="formConfig.type === 'textarea' && formConfig.multiple !== true" [nzSm]="14" [nzXs]="24">
+        <textarea
+          id="{{ formConfig.id }}"
+          rows="4"
+          nz-input
+          formControlName="{{ formConfig.name }}"
+          (keyup)="onChange($event, formConfig)"
+        >
+          {{ formConfig.value }}
+        </textarea>
+      </nz-form-control>
+      <nz-form-control *ngIf="formConfig.type === 'select'" [nzSm]="14" [nzXs]="24">
+        <nz-select
+          id="{{ formConfig.id }}"
+          [formControlName]="formConfig.name"
+          [nzPlaceHolder]="formConfig.placeholder"
+          (ngModelChange)="onChange($event, formConfig)"
+        >
+          <nz-option *ngFor="let option of formConfig.options" [nzValue]="option.id" [nzLabel]="option.name"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item >
+  </form>
+</div>

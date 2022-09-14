@@ -21,6 +21,7 @@
         <module>parser-chains-core</module>
         <module>parser-chains-parsers</module>
         <module>parser-chains-config-service</module>
+        <module>parser-chains-config-service/frontend/parser-chains-client</module>
     </modules>
 
     <properties>
@@ -40,6 +41,8 @@
         <maven-source-plugin.version>3.2.0</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
         <maven-assembly-plugin.version>3.2.0</maven-assembly-plugin.version>
+        <frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
+        <frontend-maven-plugin.nodeVersion>v14.16.0</frontend-maven-plugin.nodeVersion>
 
         <!-- main dependency versions -->
         <lombok.version>1.18.12</lombok.version>
@@ -60,7 +63,6 @@
         <mockito.version>3.2.4</mockito.version>
         <hamcrest.version>2.2</hamcrest.version>
         <multiline-string.version>0.1.2</multiline-string.version>
-        <json-path.version>2.4.0</json-path.version>
         <json-flattener.version>0.8.1</json-flattener.version>
         <assertj-core.version>3.17.2</assertj-core.version>
     </properties>
@@ -146,11 +148,6 @@
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-xml</artifactId>
                 <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.jayway.jsonpath</groupId>
-                <artifactId>json-path</artifactId>
-                <version>${json-path.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.wnameless.json</groupId>
