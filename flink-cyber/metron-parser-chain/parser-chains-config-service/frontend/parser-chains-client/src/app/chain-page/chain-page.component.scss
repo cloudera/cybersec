@@ -1,0 +1,38 @@
+
+.add-parser {
+  text-align: right;
+  position: relative;
+  margin-top: 10px;
+}
+
+.chain-actions button {
+  margin-left: 10px;
+}
+
+.investigate-breadcrumb {
+  cursor: pointer;
+}
+
+.error-breadcrumb {
+  color: var(--warning);
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.custom-form-group {
+  margin: 5px auto !important;
+  text-align: right;
+}
+
+.chain-edit-btn {
+  background: transparent;
+  border: 0px;
+}
+.add-new-parser-button {
+  border-radius: 100%;
+  width: 60px;
+  height: 60px;
+  font-size: 25px;
+}
