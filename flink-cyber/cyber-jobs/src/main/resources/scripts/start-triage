@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 YARN_JOB_MANAGER_MEMORY="2048"
 YARN_TASK_MANAGER_MEMORY="2048"
@@ -30,7 +30,7 @@ while getopts "j:t:n:p:s:h" option; do
     ;;
     s) savepoint="-s $OPTARG"
     ;;
-    h) echo $usage
+    h) echo "$usage"
        exit 0
     ;;
     \?) echo "Invalid option -$OPTARG" >&2

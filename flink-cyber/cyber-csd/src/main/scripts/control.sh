@@ -7,8 +7,9 @@ export CYBERSEC_CONF_DIR=${CONF_DIR}/cybersec-conf
 
 
 case $CMD in
-  (client)
+  (start-parser-ui)
     echo "Client echo"
+    exec ${CYBERSEC_BIN}/start-parser-ui start-foreground
     ;;
   (*)
     echo "Don't understand [$CMD]"

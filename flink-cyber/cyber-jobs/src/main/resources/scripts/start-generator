@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 YARN_JOB_MANAGER_MEMORY="1024"
 YARN_TASK_MANAGER_MEMORY="1024"
@@ -25,7 +25,7 @@ while getopts "j:t:n:p:h" option; do
     ;;
     p) PROPERTIES_FILE="$OPTARG"
     ;;
-    h) echo $usage
+    h) echo "$usage"
        exit 0
     ;;
     \?) echo "Invalid option -$OPTARG" >&2
