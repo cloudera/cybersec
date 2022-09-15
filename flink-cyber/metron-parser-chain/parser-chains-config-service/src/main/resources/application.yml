@@ -19,3 +19,11 @@ logging:
       apache:
         tomcat: INFO
         catalina: INFO
+
+
+# Swagger
+springdoc:
+  api-doc:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui
