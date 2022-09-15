@@ -46,7 +46,7 @@
 
         <!-- main dependency versions -->
         <lombok.version>1.18.12</lombok.version>
-        <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
+        <spring-boot.version>2.7.3</spring-boot.version>
         <evo-inflector.version>1.2.2</evo-inflector.version>
         <slf4j.version>1.7.15</slf4j.version>
 
@@ -55,7 +55,7 @@
         <commons-io.version>2.6</commons-io.version>
         <commons-lang3.version>3.9</commons-lang3.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <swagger.version>2.9.2</swagger.version>
+        <springdoc-openapi.version>1.6.9</springdoc-openapi.version>
         <jackson.version>2.10.1</jackson.version>
 
         <!-- test dependency versions -->
@@ -130,14 +130,9 @@
                 <version>${commons-collections4.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger2</artifactId>
-                <version>${swagger.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.springfox</groupId>
-                <artifactId>springfox-swagger-ui</artifactId>
-                <version>${swagger.version}</version>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-ui</artifactId>
+                <version>${springdoc-openapi.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
