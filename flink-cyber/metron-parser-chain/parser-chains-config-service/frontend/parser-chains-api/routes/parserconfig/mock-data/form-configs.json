@@ -1,0 +1,154 @@
+{
+  "Syslog": {
+    "id": "Syslog",
+    "name": "Syslog",
+    "schemaItems": [
+      {
+        "name":"inputField",
+        "type":"text",
+        "label":"Input field",
+        "description":"The name of the input field to parse.",
+        "required":true,
+        "path":"config"
+      },
+      {
+        "name":"specification",
+        "type":"select",
+        "label":"Specification",
+        "description":"The Syslog specification; RFC_5424 or RFC_3164. Defaults to RFC_5424",
+        "value":"RFC_5424",
+        "defaultValue":"RFC_5424",
+        "path":"config",
+        "options":[
+          {
+            "id":"RFC_5424",
+            "name":"RFC_5424"
+          },
+          {
+            "id":"RFC_3164",
+            "name":"RFC_3164"
+          }
+        ]
+      }
+  ]},
+  "RenameField":{
+    "id": "RenameField",
+    "name": "Rename field(s)",
+    "schemaItems": [
+      {
+        "name":"renameFrom",
+        "type":"text",
+        "label":"From",
+        "value":"",
+        "description":"The name(s) of field(s) to rename from",
+        "required":true,
+        "path":"config.renameField",
+        "multiple": true
+      },
+      {
+        "name":"renameTo",
+        "type":"text",
+        "label":"To",
+        "value":"",
+        "description":"The name(s) of field(s) to rename to",
+        "required":true,
+        "path":"config.renameField",
+        "multiple": true
+      }
+  ]},
+  "RemoveField":{
+    "id": "RemoveField",
+    "name": "Remove Field(s)",
+    "schemaItems": [
+      {
+        "name":"fieldToRemove",
+        "type":"text",
+        "label":"Field name",
+        "value":"",
+        "description":"The name(s) of fields to remove from the message",
+        "required":true,
+        "path":"config.fieldToRemove",
+        "multiple": true
+      }
+  ]},
+  "Timestamp":{
+    "id": "Timestamp",
+    "name": "Timestamp",
+    "schemaItems": [
+      {
+        "name":"timestampField",
+        "type":"text",
+        "label":"Timestamp field",
+        "value":"timestamp",
+        "defaultValue":"timestamp",
+        "description":"The name of the field that will contain the timestamp. Defaults to ‘timestamp’",
+        "path":"config"
+      }
+  ]},
+  "DelimitedText":{
+    "id": "DelimitedText",
+    "name": "Delimited Text",
+    "schemaItems": [
+      {
+        "name":"inputField",
+        "type":"text",
+        "label":"Input field",
+        "description":"The name of the input field to parse.",
+        "required":true,
+        "path":"config"
+      },
+      {
+        "name":"fieldName",
+        "type":"textarea",
+        "label":"Output field name",
+        "description":"",
+        "required":true,
+        "multiple": true,
+        "path":"config.outputFields"
+      },
+      {
+        "name":"fieldIndex",
+        "type":"textarea",
+        "label":"Output field index",
+        "description":"",
+        "required":true,
+        "multiple": true,
+        "path":"config.outputFields"
+      },
+      {
+        "name":"delimiter",
+        "type":"text",
+        "label":"Delimiter",
+        "description":"A regular expression used to split the text. Defaults to comma",
+        "defaultValue": [{
+          "delimiter": ","
+        }],
+        "required":false,
+        "multiple": true,
+        "path":"config.delimiter"
+      },
+      {
+        "name":"trim",
+        "type":"text",
+        "label":"Trim",
+        "description":"Trim whitespace from each value. Defaults to true",
+        "value":"true",
+        "defaultValue":"true",
+        "required":false,
+        "path":"config"
+      }
+  ]},
+  "Error":{
+    "id": "Error",
+    "name": "Error",
+    "schemaItems": [
+      {
+        "name":"error",
+        "type":"text",
+        "label":"Error message",
+        "value":"",
+        "description":"The error message thrown",
+        "path":"config"
+      }
+  ]}
+}

@@ -1,0 +1,161 @@
+[
+  {
+    "id": "111",
+    "name": "Dummy Chain A",
+    "parsers": [
+      {"id":"111","name":"Syslog","type":"Grok","config": {},"outputs":"bro_tag\nbro_foo\nbro_bar"},
+      {"id":"222","name":"Asa","type":"Grok","config": {},"outputs":"sadasdsad"},
+      {"id":"333","name":"Bro","type":"Grok","config": {},"outputs":"adsasdasdasdsa"}
+    ]
+  },
+  {
+    "id": "222",
+    "name": "Dummy Chain B",
+    "parsers": [
+      {"id":"444","name":"Syslog","type":"Grok","config": {},"outputs":""},
+      {"id":"555","name":"Asa","type":"Grok","config": {},"outputs":""},
+      {"id":"666","name":"Bro","type":"Grok","config": {},"outputs":""}
+    ]
+  },
+  {
+    "id": "333",
+    "name": "Dummy Chain C",
+    "parsers": [
+      {"id":"777","name":"Syslog","type":"Grok","config": {},"outputs":""},
+      {"id":"888","name":"Asa","type":"Grok","config": {},"outputs":""},
+      {"id":"999","name":"Bro","type":"Grok","config": {},"outputs":["bro_tag", "bro_foo", "bro_bar"]},
+      {
+        "id": "9999r",
+        "name": "My first Router",
+        "type": "Router",
+        "routing": {
+          "matchingField": "bro_tag",
+          "routes": [
+            {
+              "id": "1234r",
+              "name": "Dummy Route 1",
+              "matchingValue": "%ASA-7-609001",
+              "default": true,
+              "subchain": {
+                "id": "444",
+                "name": "Dummy SubChain A",
+                "parsers": [
+                  {"id":"1111","name":"Syslog","type":"Grok","config": {},"outputs":""},
+                  {"id":"2222","name":"Asa","type":"Grok","config": {},"outputs":""},
+                  {"id":"3333","name":"Bro","type":"Grok","config": {},"outputs":["bro_tag", "bro_foo", "bro_bar"]},
+                  {
+                    "id": "4444",
+                    "name": "My Second (and also nested) Router",
+                    "type": "Router",
+                    "routing": {
+                      "matchingField": "bro_tag",
+                      "routes": [
+                        {
+                          "id": "4567r",
+                          "name": "Dummy Route 1",
+                          "matchingValue": "%ASA-7-609001",
+                          "default": false,
+                          "subchain": {
+                            "id": "555",
+                            "name": "Dummy Chain A",
+                            "parsers": [
+                              {"id":"5555","name":"Syslog","type":"Grok","config": {},"outputs":""},
+                              {"id":"6666","name":"Asa","type":"Grok","config": {},"outputs":""},
+                              {"id":"7777","name":"Bro","type":"Grok","config": {},"outputs":""}
+                            ]
+
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "id": "22232445r",
+              "name": "Dummy Route 2",
+              "matchingValue": "%ASA-8-609002",
+              "subchain": {
+                "id": "666",
+                "name": "Dummy SubChain A",
+                "parsers": [
+                  {"id":"1111-","name":"Syslog","type":"Grok","config": {},"outputs":""},
+                  {"id":"2222-","name":"Asa","type":"Grok","config": {},"outputs":""},
+                  {"id":"3333-","name":"Bro","type":"Grok","config": {},"outputs":["bro_tag", "bro_foo", "bro_bar"]},
+                  {
+                    "id": "4444-",
+                    "name": "Third Router",
+                    "type": "Router",
+                    "routing": {
+                      "matchingField": "bro_tag",
+                      "routes": [
+                        {
+                          "id": "891011r",
+                          "name": "Dummy Route 1",
+                          "matchingValue": "%ASA-7-609001",
+                          "default": false,
+                          "subchain": {
+                            "id": "777",
+                            "name": "Dummy Chain A",
+                            "parsers": [
+                              {"id":"5555-","name":"Syslog","type":"Grok","config": {},"outputs":""},
+                              {"id":"6666-","name":"Asa","type":"Grok","config": {},"outputs":""},
+                              {"id":"7777-","name":"Bro","type":"Grok","config": {},"outputs":""}
+                            ]
+
+                          }
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "id": "888",
+    "name": "Demo chain with real parsers",
+    "parsers": [{
+      "id": "8888",
+      "name": "Syslog",
+      "type": "Syslog",
+      "config": {},
+      "outputs": ""
+    }, {
+      "id": "9999",
+      "name": "Rename field",
+      "type": "RenameField",
+      "config": {},
+      "outputs": ""
+    }, {
+      "id": "10101010",
+      "name": "Remove field",
+      "type": "RemoveField",
+      "config": {},
+      "outputs": ""
+    }, {
+      "id": "11111111",
+      "name": "Timestamp",
+      "type": "Timestamp",
+      "config": {},
+      "outputs": ""
+    }, {
+      "id": "12121212",
+      "name": "Error",
+      "type": "Error",
+      "config": {},
+      "outputs": ""
+    }, {
+      "id": "13131313",
+      "name": "Delimited text",
+      "type": "DelimitedText",
+      "config": {},
+      "outputs": ""
+    }]
+  }
+]
