@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-
+echo "start-parser-ui script"
 # Determine the location of the script to locate parcel
 # Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 SOURCE="${BASH_SOURCE[0]}"
-BIN_DIR="$( dirname "$SOURCE" )"
+BIN_DIR="$(dirname "$SOURCE")"
 while [ -h "$SOURCE" ]
 do
   SOURCE="$(readlink "$SOURCE")"
@@ -24,9 +24,11 @@ USAGE="Usage: flink-daemon.sh (start|stop|stop-all) (taskexecutor|zookeeper|hist
 
 STARTSTOP=$1
 
-pid=/tmp/cybersecparser-ui-$IDENT_STRING.pid
+CYBERSEC_PID_DIR=/tmp/cybersec/
 
-mkdir -p "$FLINK_PID_DIR"
+pid=$CYBERSEC_PID_DIR/parser-ui-$IDENT_STRING.pid
+
+mkdir -p "$CYBERSEC_PID_DIR"
 
 # Log files for daemons are indexed from the process ID's position in the PID
 # file. The following lock prevents a race condition during daemon startup
@@ -36,7 +38,7 @@ mkdir -p "$FLINK_PID_DIR"
 # active in this script until the script exits.
 command -v flock >/dev/null 2>&1
 if [[ $? -eq 0 ]]; then
-    exec 200<"$FLINK_PID_DIR"
+    exec 200<"$CYBERSEC_PID_DIR"
     flock 200
 fi
 
@@ -90,7 +92,8 @@ case $STARTSTOP in
         fi
 
         echo "Starting Parser UI daemon on host $HOSTNAME."
-        "$JAVA_RUN" -jar "${log_setting[@]}" -Dserver.port=3344 "$CYBERSEC_OPT_DIR/tools/parser-chains-config-service-*.jar" > "$out" 200<&- 2>&1 < /dev/null &
+        UI_JAR="$(ls $CYBERSEC_OPT_DIR/tools/parser-chains-config-service-*.jar)"
+        "$JAVA_RUN" -jar -Dserver.port=3344 $UI_JAR > "$out" 200<&- 2>&1 < /dev/null &
 
         mypid=$!
 
