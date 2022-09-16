@@ -90,11 +90,12 @@
       "configurableInWizard": true
     }
   ],
+  "rolesWithExternalLinks" : ["PARSER_CHAINING"],
   "roles" : [
     {
-      "name" : "FLINK_HISTORY_SERVER",
-      "label" : "Flink Dashboard",
-      "pluralLabel" : "Flink Dashboards",
+      "name" : "PARSER_CHAINING",
+      "label" : "Parser Chaining",
+      "pluralLabel" : "Parser Chaining",
       "jvmBased": true,
       "startRunner" : {
         "program" : "scripts/control.sh",
@@ -102,8 +103,8 @@
       },
       "externalLink" : {
         "name" : "parser_web_ui",
-        "label" : "Parser Chains",
-        "url" : "http://${host}:3344}",
+        "label" : "Parser Chaining",
+        "url" : "http://${host}:3344",
         "secureUrl": "https://${host}:3344"
       },
       "topology" : { "minInstances" : 1, "maxInstances" : 1 },
@@ -116,13 +117,6 @@
         "modifiable" : true
       },
       "parameters" : [ ],
-      "kerberosPrincipals": [
-      ],
-      "sslServer": {
-      },
-      "sslClient": {
-
-      },
       "configWriter" : {
         "generators" : [
           {

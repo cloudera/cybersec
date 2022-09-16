@@ -52,7 +52,7 @@ fi
 # Set environment variables
 export HADOOP_HOME=${HADOOP_HOME:-/usr/lib/hadoop}
 export HADOOP_CONF_DIR=${HADOOP_CONF_DIR:-/etc/hadoop/conf}
-export CYBERSEC_OPT_DIR=${CYBERSEC_OPT_DIR:-/opt/cloudera/parcels//cybersec}
+export CYBERSEC_OPT_DIR=${CYBERSEC_OPT_DIR:-/opt/cloudera/parcels/CYBERSEC}
 export CYBERSEC_HOME=${CYBERSEC_HOME:-/var/lib/cybersec}
 export CYBERSEC_LOG_DIR=${CYBERSEC_LOG_DIR:-$CYBERSEC_HOME/log}
 export CYBERSEC_CONF_DIR=${CYBERSEC_CONF_DIR:-$DEFAULT_CYBERSEC_CONF_DIR}
