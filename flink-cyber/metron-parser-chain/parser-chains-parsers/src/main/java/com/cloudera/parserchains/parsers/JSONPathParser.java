@@ -1,6 +1,10 @@
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.*;
+import com.cloudera.parserchains.core.FieldName;
+import com.cloudera.parserchains.core.FieldValue;
+import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.Parser;
+import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
@@ -9,12 +13,14 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import com.jayway.jsonpath.ReadContext;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
 import static java.lang.String.format;
@@ -25,8 +31,8 @@ import static java.lang.String.format;
  * <p>See https://github.com/json-path/JsonPath.
  */
 @MessageParser(
-        name="JSON Path",
-        description="Parse JSON using JSONPath expressions.")
+        name = "JSON Path",
+        description = "Parse JSON using JSONPath expressions.")
 @Slf4j
 public class JSONPathParser implements Parser {
     private FieldName inputField;
@@ -42,14 +48,15 @@ public class JSONPathParser implements Parser {
      * Add a JSONPath expression that will be executed. The result of the JSONPath expression
      * is used to add or modify a field.
      * <p>Multiple expressions can be provided to create or modify multiple fields.
+     *
      * @param fieldName The name of the field to create or modify.
-     * @param expr The JSONPath expression to execute.
+     * @param expr      The JSONPath expression to execute.
      */
-    @Configurable(key="expr")
+    @Configurable(key = "expr")
     public JSONPathParser expression(
-            @Parameter(key="field", label="Field Name", description="The field to create or modify.") String fieldName,
-            @Parameter(key="expr", label="Path Expression", description="The path expression.") String expr) {
-        if(StringUtils.isNoneBlank(fieldName, expr)) {
+            @Parameter(key = "field", label = "Field Name", description = "The field to create or modify.") String fieldName,
+            @Parameter(key = "expr", label = "Path Expression", description = "The path expression.") String expr) {
+        if (StringUtils.isNoneBlank(fieldName, expr)) {
             expressions.put(FieldName.of(fieldName), JsonPath.compile(expr));
         }
         return this;
@@ -58,7 +65,7 @@ public class JSONPathParser implements Parser {
     @Override
     public Message parse(Message input) {
         Message.Builder output = Message.builder().withFields(input);
-        if(!input.getField(inputField).isPresent()) {
+        if (!input.getField(inputField).isPresent()) {
             output.withError(format("Message missing expected input field '%s'", inputField.toString()));
         } else {
             input.getField(inputField).ifPresent(val -> doParse(val.toString(), output));
@@ -81,25 +88,44 @@ public class JSONPathParser implements Parser {
                 output.addField(fieldName, fieldValue);
             }
 
-        } catch(InvalidJsonException e) {
+        } catch (InvalidJsonException e) {
             output.withError(e);
         }
     }
 
     private FieldValue execute(JsonPath jsonPath, ReadContext readContext) {
-        FieldValue result = StringFieldValue.of("");
         try {
             // execute the path expression
-            List<Object> values = readContext.read(jsonPath);
+            Object rawValue = readContext.read(jsonPath);
 
-            // convert the result to a a string
-            List<String> strings = values.stream().map(v -> v.toString()).collect(Collectors.toList());
-            String value = String.join(",", strings);
-            result = StringFieldValue.of(value);
-
-        } catch(PathNotFoundException e) {
+            if (rawValue instanceof Collection) {
+                return toStringFieldValue((Collection<?>) rawValue, readContext);
+            } else if (rawValue instanceof Map) {
+                return toStringFieldValue((Map<?, ?>) rawValue, readContext);
+            } else {
+                return StringFieldValue.of(String.valueOf(rawValue));
+            }
+        } catch (PathNotFoundException e) {
             log.debug("No results for path expression. Nothing to do. jsonPath={}", jsonPath.getPath());
         }
-        return result;
+        return StringFieldValue.of("");
+    }
+
+    private FieldValue toStringFieldValue(Map<?, ?> map, ReadContext readContext) {
+        if (MapUtils.isEmpty(map)) {
+            return StringFieldValue.of("");
+        }
+        return StringFieldValue.of(readContext.configuration().jsonProvider().toJson(map));
+    }
+
+    private FieldValue toStringFieldValue(Collection<?> collection, ReadContext readContext) {
+        ArrayList<?> arrayList = new ArrayList<>(collection);
+        if (CollectionUtils.isEmpty(arrayList)) {
+            return StringFieldValue.of("");
+        } else if (arrayList.size() == 1) {
+            return StringFieldValue.of(String.valueOf(arrayList.get(0)));
+        } else {
+            return StringFieldValue.of(readContext.configuration().jsonProvider().toJson(arrayList));
+        }
     }
 }

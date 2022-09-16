@@ -1,0 +1,12 @@
+<button nz-button nz-popover *ngIf="stackTraceMsg"
+  nzPopoverTrigger="click"
+  nzPopoverTitle="Error Stack Trace"
+  [nzPopoverContent]="stackTracePre"
+  data-qe-id="stack-trace-btn"
+  >Show stack trace</button>
+
+<ng-template #stackTracePre>
+  <div class="stack-trace-block">
+    <pre data-qe-id="stack-trace-msg">{{ stackTraceMsg }}</pre>
+  </div>
+</ng-template>
