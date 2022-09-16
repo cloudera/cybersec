@@ -62,11 +62,13 @@ public class GrokParser implements Parser {
         }
     }
 
-    @Configurable(key="grokPattern", description="Define a Grok pattern that can be referenced from an expression.")
+    @Configurable(key = "grokPattern",
+            description = "Define a Grok pattern that can be referenced from an expression.",
+            orderPriority = 1)
     public GrokParser pattern(
-            @Parameter(key="name", label="Pattern Name") String patternName,
-            @Parameter(key="regex", label="Pattern Regex", widgetType= WidgetType.TEXTAREA) String patternRegex) {
-        if(StringUtils.isNoneBlank(patternName, patternRegex)) {
+            @Parameter(key = "name", label = "Pattern Name") String patternName,
+            @Parameter(key = "regex", label = "Pattern Regex", widgetType = WidgetType.TEXTAREA) String patternRegex) {
+        if (StringUtils.isNoneBlank(patternName, patternRegex)) {
             grokCompiler.register(patternName, patternRegex);
         }
         return this;
@@ -76,7 +78,7 @@ public class GrokParser implements Parser {
             label = "Grok Expression(s)",
             description = "The grok expression to execute.")
     public GrokParser expression(String grokExpression) {
-        if(StringUtils.isNotBlank(grokExpression)) {
+        if (StringUtils.isNotBlank(grokExpression)) {
             Grok grok = grokCompiler.compile(grokExpression, zoneOffset, false);
             this.grokExpressions.add(grok);
         }
@@ -97,7 +99,7 @@ public class GrokParser implements Parser {
             description = "The name of the input field to parse.",
             defaultValue = Constants.DEFAULT_INPUT_FIELD)
     public GrokParser inputField(String inputField) {
-        if(StringUtils.isNotBlank(inputField)) {
+        if (StringUtils.isNotBlank(inputField)) {
             this.inputField = FieldName.of(inputField);
         }
         return this;
@@ -117,7 +119,7 @@ public class GrokParser implements Parser {
             description = "Set the zone offset. For example \"+02:00\".",
             defaultValue = DEFAULT_ZONE_OFFSET)
     public void zoneOffset(String offset) {
-        if(StringUtils.isNotBlank(offset)) {
+        if (StringUtils.isNotBlank(offset)) {
             zoneOffset(ZoneOffset.of(offset));
         }
     }

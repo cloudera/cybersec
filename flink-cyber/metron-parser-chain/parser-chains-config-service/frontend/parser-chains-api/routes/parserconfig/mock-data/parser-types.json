@@ -1,0 +1,19 @@
+[{
+  "id": "Syslog",
+  "name": "Syslog"
+}, {
+  "id": "RenameField",
+  "name": "Rename Field"
+}, {
+  "id": "RemoveField",
+  "name": "Remove Field"
+}, {
+  "id": "Timestamp",
+  "name": "Timestamp"
+}, {
+  "id": "DelimitedText",
+  "name": "Delimited Text"
+}, {
+  "id": "Error",
+  "name": "Error"
+}]
