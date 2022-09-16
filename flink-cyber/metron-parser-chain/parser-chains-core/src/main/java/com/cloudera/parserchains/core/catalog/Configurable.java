@@ -41,6 +41,11 @@ public @interface Configurable {
     boolean required() default false;
 
     /**
+     * Defines the order in which corresponding config should be executed.
+     */
+    int orderPriority() default Integer.MAX_VALUE;
+
+    /**
      * The default value of this configurable parameter.
      * <p>This value is optional.
      */

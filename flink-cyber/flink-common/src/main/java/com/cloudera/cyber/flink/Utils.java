@@ -7,9 +7,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.client.cli.CliFrontend;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.core.fs.FSDataInputStream;
-import org.apache.flink.core.fs.FileSystem;
-import org.apache.flink.core.fs.Path;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.encrypttool.EncryptTool;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -48,8 +45,7 @@ public class Utils {
     public static final String K_TRUSTSTORE_PATH = "trustStorePath";
     public static final String K_TRUSTSTORE_PASSWORD = "trustStorePassword";
     public static final String K_KEYSTORE_PASSWORD = "keyStorePassword";
-
-    public static final String K_PROPERTIES_FILE = "properties.file";
+    public static final String PASSWORD = "password";
 
     public static Properties readProperties(Properties properties, String prefix) {
         Properties targetProperties = new Properties();
@@ -91,7 +87,6 @@ public class Utils {
             kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, String.format("%s-consumer-%d", groupId, nextKafkaClientId.incrementAndGet()));
         }
 
-        log.info(String.format("Kafka Properties: %s", kafkaProperties));
         return kafkaProperties;
     }
 
@@ -121,10 +116,7 @@ public class Utils {
 
             //schemaRegistryConf.put(K_SCHEMA_REG_SSL_CLIENT_KEY, sslClientConfig);
         }
-        log.info("### Schema Registry parameters:");
-        for (String key : schemaRegistryConf.keySet()) {
-            log.info(String.format("Schema Registry param: %s=%s", key, isSensitive(key) ? MASK : schemaRegistryConf.get(key)));
-        }
+
         return schemaRegistryConf;
     }
 
@@ -146,10 +138,6 @@ public class Utils {
             if (saslConfig != null) {
                 schemaRegistryConf.put(SASL_JAAS_CONFIG.name(), saslConfig);
             }
-        }
-        log.info("### Schema Registry parameters:");
-        for (String key : schemaRegistryConf.keySet()) {
-            log.info(String.format("Schema Registry param: %s=%s", key, isSensitive(key, params) ? MASK : schemaRegistryConf.get(key)));
         }
         return schemaRegistryConf;
     }
@@ -193,6 +181,10 @@ public class Utils {
         if (value == null) {
             return false;
         }
+        if(key.toLowerCase().contains(PASSWORD)){
+            return true;
+        }
+
         String keyInLower = key.toLowerCase();
         String[] sensitiveKeys = value.split(",");
 

@@ -1,0 +1,74 @@
+<ng-template #AddButton>
+    <button
+            class="add-new-chain-button"
+            nz-tooltip="Add New Chain ToolTip"
+            nzTooltipTitle="Add New Chain"
+            nzTooltipPlacement="left"
+            nz-button
+            data-qe-id="add-chain-btn"
+            nzType="primary"
+            (click)="showAddChainModal()"
+    >
+        <i nz-icon nzType="plus" nzTheme="outline"></i>
+    </button>
+</ng-template>
+<nz-modal
+        [nzVisible]="isChainCreateModalVisible$ | async"
+        nzTitle="Add Chain Name"
+        (nzOnCancel)="handleCancelChainModal()"
+        (nzOnOk)="pushChain()"
+        [nzOkDisabled]="!newChainForm.valid"
+        [nzOkLoading]="isOkLoading$ | async"
+>
+    <form nz-form *nzModalContent [formGroup]="newChainForm"  (ngSubmit)='pushChain()' [nzLayout]="'vertical'">
+        <nz-form-item>
+            <nz-form-label>Chain name:</nz-form-label>
+            <nz-form-control nzErrorTip="Chain Name is Required with at least 3 characters" nzSpan="14">
+                <input nz-input data-qe-id="chain-name" formControlName="chainName" type="text" id="chainName"
+                       placeholder="Parser Chain Name">
+            </nz-form-control>
+        </nz-form-item>
+    </form>
+</nz-modal>
+
+<nz-card nzTitle="Parser Chains" [nzExtra]="AddButton">
+    <nz-table #basicTable [nzData]="$any(chainDataSorted$ | async)" [nzShowPagination]="false">
+        <thead>
+        <tr>
+            <th nzShowSort nzSortKey="name">Name</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let data of basicTable.data">
+            <td>{{ data.name }}</td>
+            <td>
+                <a routerLink="{{ 'chains/' + data.id }}" class="chain-open-btn"><i nz-icon nzType="right-square"
+                                                                                    nzTheme="fill"></i>Open</a>
+                <nz-divider nzType="vertical"></nz-divider>
+                <span nz-tooltip nzTitle="Remove" nzPlacement="right">
+            <a
+                    class="chain-delete-btn"
+                    nz-popconfirm
+                    nzTitle="Are you Sure to Delete?"
+                    (click)="showDeleteModal()"
+                    nzOkType="primary"
+                    nzPlacement="right"
+            >
+              <i nz-icon nzType="delete" nzTheme="fill"></i> <span>Delete</span>
+          </a>
+        </span>
+                <nz-modal
+                        nzModalType="confirm"
+                        [(nzVisible)]="isVisibleDeleteModal"
+                        nzTitle="Delete Chain Name"
+                        (nzOnCancel)="handleCancelDeleteModal()"
+                        (nzOnOk)="deleteChain(data.id, data.name)"
+                        [nzOkLoading]="isOkLoading$ | async">
+                    <p *nzModalContent>Are you sure you want to delete the chain '{{data.name}}'?</p>
+                </nz-modal>
+            </td>
+        </tr>
+        </tbody>
+    </nz-table>
+</nz-card>

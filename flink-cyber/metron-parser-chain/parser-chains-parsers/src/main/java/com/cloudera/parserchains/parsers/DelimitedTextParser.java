@@ -1,6 +1,11 @@
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.*;
+import com.cloudera.parserchains.core.Constants;
+import com.cloudera.parserchains.core.FieldName;
+import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.Parser;
+import com.cloudera.parserchains.core.Regex;
+import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
@@ -17,11 +22,14 @@ import static java.lang.String.format;
  * Parses delimited text like CSV.
  */
 @MessageParser(
-    name="Delimited Text",
-    description="Parses delimited text like CSV or TSV.")
+        name = "Delimited Text",
+        description = "Parses delimited text like CSV or TSV.")
 public class DelimitedTextParser implements Parser {
     private static final String DEFAULT_DELIMITER = ",";
     private static final String DEFAULT_TRIM = "true";
+
+//TODO doesn't understand comma in CSV inside "".
+// Probably needs to be implemented as an advanced separate parser
 
     /**
      * Defines an output field that is created by the parser.
@@ -56,12 +64,12 @@ public class DelimitedTextParser implements Parser {
         return this;
     }
 
-    @Configurable(key="inputField",
-            label="Input Field",
-            description="The name of the input field to parse.",
+    @Configurable(key = "inputField",
+            label = "Input Field",
+            description = "The name of the input field to parse.",
             defaultValue = Constants.DEFAULT_INPUT_FIELD)
     public DelimitedTextParser withInputField(String fieldName) {
-        if(StringUtils.isNotEmpty(fieldName)) {
+        if (StringUtils.isNotEmpty(fieldName)) {
             withInputField(FieldName.of(fieldName));
         }
         return this;
@@ -79,12 +87,12 @@ public class DelimitedTextParser implements Parser {
         return this;
     }
 
-    @Configurable(key="delimiter",
-            label="Delimiter",
-            description="A regex used to split the text. Defaults to comma.",
-            defaultValue=DEFAULT_DELIMITER)
+    @Configurable(key = "delimiter",
+            label = "Delimiter",
+            description = "A regex used to split the text. Defaults to comma.",
+            defaultValue = DEFAULT_DELIMITER)
     public void withDelimiter(String delimiter) {
-        if(StringUtils.isNotEmpty(delimiter)) {
+        if (StringUtils.isNotEmpty(delimiter)) {
             withDelimiter(Regex.of(delimiter));
         }
     }
@@ -95,18 +103,18 @@ public class DelimitedTextParser implements Parser {
 
     /**
      * @param fieldName The name of a field to create.
-     * @param index The 0-based index defining which delimited element is added to the field.
+     * @param index     The 0-based index defining which delimited element is added to the field.
      */
     public DelimitedTextParser withOutputField(FieldName fieldName, int index) {
         outputFields.add(new OutputField(fieldName, index));
         return this;
     }
 
-    @Configurable(key="outputField", label="Output Field")
+    @Configurable(key = "outputField", label = "Output Field")
     public void withOutputField(
-            @Parameter(key="fieldName", label="Field Name", description="The name of the output field.") String fieldName,
-            @Parameter(key="fieldIndex", label="Column Index", description="The index of the column containing the data.") String index) {
-        if(StringUtils.isNoneBlank(fieldName, index)) {
+            @Parameter(key = "fieldName", label = "Field Name", description = "The name of the output field.") String fieldName,
+            @Parameter(key = "fieldIndex", label = "Column Index", description = "The index of the column containing the data.") String index) {
+        if (StringUtils.isNoneBlank(fieldName, index)) {
             withOutputField(FieldName.of(fieldName), Integer.parseInt(index));
         }
     }
@@ -123,12 +131,12 @@ public class DelimitedTextParser implements Parser {
         return this;
     }
 
-    @Configurable(key="trim",
-            label="Trim Whitespace",
-            description="Trim whitespace from each value. Defaults to true.",
-            defaultValue=DEFAULT_TRIM)
+    @Configurable(key = "trim",
+            label = "Trim Whitespace",
+            description = "Trim whitespace from each value. Defaults to true.",
+            defaultValue = DEFAULT_TRIM)
     public void trimWhitespace(String trimWhitespace) {
-        if(StringUtils.isNotBlank(trimWhitespace)) {
+        if (StringUtils.isNotBlank(trimWhitespace)) {
             trimWhitespace(Boolean.valueOf(trimWhitespace));
         }
     }
@@ -140,7 +148,7 @@ public class DelimitedTextParser implements Parser {
     @Override
     public Message parse(Message input) {
         Message.Builder output = Message.builder().withFields(input);
-        if(!input.getField(inputField).isPresent()) {
+        if (!input.getField(inputField).isPresent()) {
             output.withError(format("Message missing expected input field '%s'", inputField.toString()));
         } else {
             input.getField(inputField).ifPresent(val -> doParse(val.toString(), output));
@@ -151,11 +159,11 @@ public class DelimitedTextParser implements Parser {
     private void doParse(String valueToParse, Message.Builder output) {
         String[] columns = valueToParse.split(delimiter.toString());
         int width = columns.length;
-        for(OutputField outputField : outputFields) {
-            if(width > outputField.index) {
+        for (OutputField outputField : outputFields) {
+            if (width > outputField.index) {
                 // create a new output field
                 String column = columns[outputField.index];
-                if(trimWhitespace) {
+                if (trimWhitespace) {
                     column = column.trim();
                 }
                 output.addField(outputField.fieldName, StringFieldValue.of(column));

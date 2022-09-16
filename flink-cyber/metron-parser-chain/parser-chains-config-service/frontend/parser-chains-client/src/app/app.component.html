@@ -1,0 +1,26 @@
+<nz-layout>
+  <nz-sider [nzWidth]="width" [nzReverseArrow]="isReverseArrow">
+    <div class="logo">
+      <img src="https://www.cloudera.com/content/dam/www/marketing/media-kit/logo-assets/cloudera_logo_WHITE.png" alt="Cloudera" />
+    </div>
+    <ul nz-menu [nzMode]="'inline'" [nzInlineCollapsed]="isCollapsed" [nzTheme]="'dark'">
+      <li nz-submenu>
+        <span title><i nz-icon nzType="setting"></i><span class="nav-text">Configuration</span></span>
+        <ul>
+          <li nz-menu-item routerLink="parserconfig" >Parsers</li>
+        </ul>
+      </li>
+    </ul>
+  </nz-sider>
+  <nz-layout>
+    <nz-header>
+      <h1 class="header-page-title">
+        Parser Configuration
+      </h1>
+      <!-- <app-theme-switch></app-theme-switch> -->
+    </nz-header>
+    <nz-content>
+      <router-outlet></router-outlet>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

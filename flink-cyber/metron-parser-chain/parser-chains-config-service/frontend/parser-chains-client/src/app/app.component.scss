@@ -1,0 +1,31 @@
+.ant-layout { min-height: 100vh; }
+
+.logo {
+  background: var(--logo-background);
+  display: flex;
+  height: 64px;
+  padding: 1rem;
+
+  img {
+    align-self: center;
+    width: 100%;
+  }
+}
+
+.ant-layout-header {
+  background-color: var(--background);
+  display: flex;
+}
+
+.ant-layout-content {
+  padding: 1rem;
+}
+
+.ant-layout-sider {
+  background-color: var(--cldr-almost-black);
+  background-image: var(--sider-background);
+}
+
+.header-page-title {
+  margin-bottom: 0;
+}
