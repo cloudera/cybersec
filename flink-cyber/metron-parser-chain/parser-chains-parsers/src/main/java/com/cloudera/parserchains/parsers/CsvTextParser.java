@@ -5,11 +5,15 @@ import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
-import com.cloudera.parserchains.core.Regex;
 import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -17,17 +21,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
+import static com.cloudera.parserchains.core.utils.StringUtils.getFirstChar;
+import static com.cloudera.parserchains.core.utils.StringUtils.unescapeJava;
 import static java.lang.String.format;
 
 /**
  * Parses delimited text like CSV.
  */
 @MessageParser(
-        name = "Delimited Text",
+        name = "CSV/TSV Parser",
         description = "Parses delimited text like CSV or TSV.")
-public class DelimitedTextParser implements Parser {
+public class CsvTextParser implements Parser {
+
     private static final String DEFAULT_DELIMITER = ",";
+    private static final String DEFAULT_QUOTE_CHAR = "\"";
     private static final String DEFAULT_TRIM = "true";
 
     /**
@@ -43,22 +52,32 @@ public class DelimitedTextParser implements Parser {
         }
     }
 
+    private final CsvMapper mapper;
+    private ObjectReader reader;
+    private CsvSchema schema;
+
+    private final List<OutputField> outputFields;
     private FieldName inputField;
-    private Regex delimiter;
-    private List<OutputField> outputFields;
     private boolean trimWhitespace;
 
-    public DelimitedTextParser() {
+    public CsvTextParser() {
         inputField = FieldName.of(Constants.DEFAULT_INPUT_FIELD);
         outputFields = new ArrayList<>();
-        delimiter = Regex.of(DEFAULT_DELIMITER);
-        trimWhitespace = Boolean.valueOf(DEFAULT_TRIM);
+        trimWhitespace = Boolean.parseBoolean(DEFAULT_TRIM);
+        mapper = new CsvMapper();
+        updateSchema(() -> mapper
+                .schemaFor(new TypeReference<List<String>>() {
+                })
+                .withoutHeader()
+                .withLineSeparator("\n")
+                .withColumnSeparator(getFirstChar(DEFAULT_DELIMITER))
+                .withQuoteChar(getFirstChar(DEFAULT_QUOTE_CHAR)));
     }
 
     /**
      * @param inputField The name of the field containing the text to parse.
      */
-    public DelimitedTextParser withInputField(FieldName inputField) {
+    public CsvTextParser withInputField(FieldName inputField) {
         this.inputField = Objects.requireNonNull(inputField, "An input field name is required.");
         return this;
     }
@@ -67,7 +86,7 @@ public class DelimitedTextParser implements Parser {
             label = "Input Field",
             description = "The name of the input field to parse.",
             defaultValue = Constants.DEFAULT_INPUT_FIELD)
-    public DelimitedTextParser withInputField(String fieldName) {
+    public CsvTextParser withInputField(String fieldName) {
         if (StringUtils.isNotEmpty(fieldName)) {
             withInputField(FieldName.of(fieldName));
         }
@@ -79,32 +98,54 @@ public class DelimitedTextParser implements Parser {
     }
 
     /**
-     * @param delimiter A character or regular expression defining the delimiter used to split the text.
+     * @param quoteChar A character replacing the quote character used for escaping when parsing CSV.
      */
-    public DelimitedTextParser withDelimiter(Regex delimiter) {
-        this.delimiter = Objects.requireNonNull(delimiter, "A valid delimited is required.");
+    public CsvTextParser withQuoteChar(char quoteChar) {
+        updateSchema(() -> this.schema.withQuoteChar(quoteChar));
+        return this;
+    }
+
+    @Configurable(key = "quoteChar",
+            label = "Quote character",
+            description = "A character used escape commas in text. Defaults to double-quote.",
+            defaultValue = DEFAULT_QUOTE_CHAR)
+    public void withQuoteChar(String quoteChar) {
+        if (StringUtils.isNotEmpty(quoteChar)) {
+            withQuoteChar(getFirstChar(quoteChar));
+        }
+    }
+
+    public char getQuoteChar() {
+        return (char) this.schema.getQuoteChar();
+    }
+
+    /**
+     * @param delimiter A character defining the delimiter used to split the text.
+     */
+    public CsvTextParser withDelimiter(char delimiter) {
+        updateSchema(() -> this.schema.withColumnSeparator(delimiter));
         return this;
     }
 
     @Configurable(key = "delimiter",
             label = "Delimiter",
-            description = "A regex used to split the text. Defaults to comma.",
+            description = "A character used to split the text. Defaults to comma.",
             defaultValue = DEFAULT_DELIMITER)
     public void withDelimiter(String delimiter) {
         if (StringUtils.isNotEmpty(delimiter)) {
-            withDelimiter(Regex.of(delimiter));
+            withDelimiter(getFirstChar(delimiter));
         }
     }
 
-    public Regex getDelimiter() {
-        return delimiter;
+    public char getDelimiter() {
+        return this.schema.getColumnSeparator();
     }
 
     /**
      * @param fieldName The name of a field to create.
      * @param index     The 0-based index defining which delimited element is added to the field.
      */
-    public DelimitedTextParser withOutputField(FieldName fieldName, int index) {
+    public CsvTextParser withOutputField(FieldName fieldName, int index) {
         outputFields.add(new OutputField(fieldName, index));
         return this;
     }
@@ -125,7 +166,7 @@ public class DelimitedTextParser implements Parser {
     /**
      * @param trimWhitespace True, if whitespace should be trimmed from each value. Otherwise, false.
      */
-    public DelimitedTextParser trimWhitespace(boolean trimWhitespace) {
+    public CsvTextParser trimWhitespace(boolean trimWhitespace) {
         this.trimWhitespace = trimWhitespace;
         return this;
     }
@@ -136,7 +177,7 @@ public class DelimitedTextParser implements Parser {
             defaultValue = DEFAULT_TRIM)
     public void trimWhitespace(String trimWhitespace) {
         if (StringUtils.isNotBlank(trimWhitespace)) {
-            trimWhitespace(Boolean.valueOf(trimWhitespace));
+            trimWhitespace(Boolean.parseBoolean(trimWhitespace));
         }
     }
 
@@ -151,27 +192,39 @@ public class DelimitedTextParser implements Parser {
         if (!field.isPresent()) {
             output.withError(format("Message missing expected input field '%s'", inputField.toString()));
         } else {
-            doParse(field.get().toString(), output);
+            doParse(unescapeJava(field.get().toString()), output);
         }
         return output.build();
     }
 
     private void doParse(String valueToParse, Message.Builder output) {
-        String[] columns = valueToParse.split(delimiter.toString());
-        int width = columns.length;
-        for (OutputField outputField : outputFields) {
-            if (width > outputField.index) {
-                // create a new output field
-                String column = columns[outputField.index];
-                if (trimWhitespace) {
-                    column = column.trim();
-                }
-                output.addField(outputField.fieldName, StringFieldValue.of(column));
+        try {
+            final List<String> valueList = reader
+                    .readValue(valueToParse);
 
-            } else {
-                String err = format("Found %d column(s), index %d does not exist.", width, outputField.index);
-                output.withError(err);
+            for (OutputField outputField : outputFields) {
+                final int index = outputField.index;
+                if (valueList.size() > index) {
+                    String value = valueList.get(index);
+                    if (trimWhitespace) {
+                        value = value.trim();
+                    }
+                    output.addField(outputField.fieldName, StringFieldValue.of(value));
+                } else {
+                    final String err = format("Column index %d is out of bounds for %s", index, outputField.fieldName);
+                    output.withError(err);
+                }
             }
+        } catch (JsonProcessingException e) {
+            output.withError(e);
         }
+    }
+
+    private void updateSchema(Supplier<CsvSchema> csvSchemaConsumer) {
+        this.schema = csvSchemaConsumer.get();
+        this.reader = mapper
+                .readerFor(new TypeReference<List<String>>() {
+                })
+                .with(schema);
     }
 }
