@@ -36,7 +36,7 @@
     },
     "hwx": {
         "platforms": [
-            "centos7"
+            "centos7", "redhat8", "sles12", "ubuntu18"
         ],
         "poll-frequency": "360",
         "stack-version": "2.3.0.0"
