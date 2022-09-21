@@ -104,19 +104,35 @@
       "externalLink" : {
         "name" : "parser_web_ui",
         "label" : "Parser Chaining",
-        "url" : "http://${host}:3344",
-        "secureUrl": "https://${host}:3344"
+        "url" : "http://${host}:${parser_ui_port}",
+        "secureUrl": "https://${host}:${parser_ui_port}"
       },
       "topology" : { "minInstances" : 1, "maxInstances" : 1 },
       "logging" : {
-        "configFilename" : "cybersec-conf/log4j-console.properties",
-        "loggingType" : "log4j",
-        "filename": "parser-chains.log",
         "dir": "/var/log/cybersec",
-        "configName" : "log.dir",
+        "loggingType": "log4j",
+        "filename": "parser-ui-${host}.log",
+        "configName": "cybersec.log4j.dir",
         "modifiable" : true
       },
-      "parameters" : [ ],
+      "parameters" : [
+        {
+          "name": "parser_ui_port",
+          "label": "Parser Chaining UI port",
+          "description": "Port of the Parser Chaining web interface.",
+          "configName": "server.port",
+          "type": "string",
+          "default": "28922"
+        },
+        {
+          "name": "config_path",
+          "label": "Parser Chaining UI port",
+          "description": "Port of the Parser Chaining web interface.",
+          "configName": "config.path",
+          "type": "string",
+          "default": "/var/lib/cybersec"
+        }
+      ],
       "configWriter" : {
         "generators" : [
           {
@@ -124,8 +140,10 @@
             "configFormat": "properties",
             "kerberosPrincipals": [
             ],
-            "additionalConfigs": [
-            ]
+            "includedParams": [
+              "parser_ui_port",
+              "config_path"
+             ]
           }
         ]
       }
