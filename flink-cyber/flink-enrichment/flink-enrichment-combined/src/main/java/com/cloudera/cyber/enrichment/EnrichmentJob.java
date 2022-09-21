@@ -81,7 +81,11 @@ public abstract class EnrichmentJob {
         // write the hbase enrichments to hbase
         if (params.getBoolean(PARAMS_ENABLE_HBASE, true)) {
             DataStream<EnrichmentCommandResponse> hbaseEnrichmentResponses = new HbaseJobRawKafka().writeEnrichments(env, params, hbaseEnrichments);
-            enrichmentCommandResponses = enriched.f1.union(hbaseEnrichmentResponses);
+            if (enrichmentCommandResponses != null) {
+                enrichmentCommandResponses = enriched.f1.union(hbaseEnrichmentResponses);
+            } else {
+                enrichmentCommandResponses = hbaseEnrichmentResponses;
+            }
         }
 
         writeEnrichmentQueryResults(env, params, enrichmentCommandResponses);
