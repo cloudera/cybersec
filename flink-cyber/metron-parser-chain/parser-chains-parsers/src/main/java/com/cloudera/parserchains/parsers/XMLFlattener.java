@@ -1,6 +1,11 @@
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.*;
+import com.cloudera.parserchains.core.Constants;
+import com.cloudera.parserchains.core.FieldName;
+import com.cloudera.parserchains.core.FieldValue;
+import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.Parser;
+import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.fasterxml.jackson.core.JsonParser;
@@ -23,13 +28,14 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @MessageParser(
-        name="XML Flattener",
-        description="Flattens XML data."
+        name = "XML Flattener",
+        description = "Flattens XML data."
 )
 @Slf4j
 public class XMLFlattener implements Parser {
@@ -43,24 +49,24 @@ public class XMLFlattener implements Parser {
         separator(DEFAULT_SEPARATOR);
     }
 
-    @Configurable(key="inputField",
-            label="Input Field",
-            description="The name of the input field to parse.",
-            defaultValue=Constants.DEFAULT_INPUT_FIELD)
+    @Configurable(key = "inputField",
+            label = "Input Field",
+            description = "The name of the input field to parse.",
+            defaultValue = Constants.DEFAULT_INPUT_FIELD)
     public XMLFlattener inputField(String fieldName) {
-        if(StringUtils.isNotEmpty(fieldName)) {
+        if (StringUtils.isNotEmpty(fieldName)) {
             this.inputField = FieldName.of(fieldName);
         }
         return this;
     }
 
-    @Configurable(key="separator",
-            label="Separator",
-            description="The character used to separate each nested XML element.",
-            defaultValue=DEFAULT_SEPARATOR
+    @Configurable(key = "separator",
+            label = "Separator",
+            description = "The character used to separate each nested XML element.",
+            defaultValue = DEFAULT_SEPARATOR
     )
     public XMLFlattener separator(String separator) {
-        if(StringUtils.isNotEmpty(separator)) {
+        if (StringUtils.isNotEmpty(separator)) {
             this.separator = separator.charAt(0);
         }
         return this;
@@ -69,10 +75,11 @@ public class XMLFlattener implements Parser {
     @Override
     public Message parse(Message input) {
         Message.Builder output = Message.builder().withFields(input);
-        if(!input.getField(inputField).isPresent()) {
+        final Optional<FieldValue> field = input.getField(inputField);
+        if (!field.isPresent()) {
             output.withError(format("Message missing expected input field '%s'", inputField.toString()));
         } else {
-            input.getField(inputField).ifPresent(val -> doParse(val.toString(), output));
+            doParse(field.get().toString(), output);
         }
         return output.build();
     }
@@ -98,7 +105,7 @@ public class XMLFlattener implements Parser {
                     .filter(e -> e.getValue() != null && isNotBlank(e.getKey()))
                     .forEach(e -> output.addField(fieldName(e.getKey()), fieldValue(e.getValue())));
 
-        } catch(JsonProcessingException e) {
+        } catch (JsonProcessingException e) {
             output.withError("Unable to convert XML to JSON.", e);
         }
     }
@@ -119,9 +126,9 @@ public class XMLFlattener implements Parser {
 
         @Override
         public JsonNode deserialize(JsonParser p, DeserializationContext context) throws IOException {
-            // ensures that we do not lose the name of the root XML element
-            String rootName = ((FromXmlParser)p).getStaxReader().getLocalName();
             JsonNode rootNode = super.deserialize(p, context);
+            // ensures that we do not lose the name of the root XML element
+            String rootName = ((FromXmlParser) p).getStaxReader().getLocalName();
             return context.getNodeFactory().objectNode().set(rootName, rootNode);
         }
 
@@ -135,7 +142,7 @@ public class XMLFlattener implements Parser {
                                              JsonNode newValue) {
             // adds duplicate fields to an array
             ArrayNode node;
-            if(oldValue instanceof ArrayNode){
+            if (oldValue instanceof ArrayNode) {
                 node = (ArrayNode) oldValue;
             } else {
                 node = nodeFactory.arrayNode();
