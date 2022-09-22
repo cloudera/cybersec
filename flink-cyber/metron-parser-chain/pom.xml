@@ -56,7 +56,7 @@
         <commons-lang3.version>3.9</commons-lang3.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <springdoc-openapi.version>1.6.9</springdoc-openapi.version>
-        <jackson.version>2.10.1</jackson.version>
+        <jackson.version>2.13.4</jackson.version>
 
         <!-- test dependency versions -->
         <junit.jupiter.version>5.5.2</junit.jupiter.version>
@@ -142,6 +142,11 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-xml</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-csv</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
             <dependency>
