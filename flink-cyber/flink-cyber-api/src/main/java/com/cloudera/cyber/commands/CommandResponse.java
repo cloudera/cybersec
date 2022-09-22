@@ -2,15 +2,18 @@ package com.cloudera.cyber.commands;
 
 import com.cloudera.cyber.flink.HasHeaders;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificRecordBase;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
 
+@EqualsAndHashCode(callSuper = false)
 @Data
 @NoArgsConstructor
 public abstract class CommandResponse<T> extends SpecificRecordBase implements HasHeaders {
@@ -40,7 +43,6 @@ public abstract class CommandResponse<T> extends SpecificRecordBase implements H
     }
 
     // Used by DatumReader.  Applications should not call.
-    @SuppressWarnings(value="unchecked")
     public void put(int field$, java.lang.Object value$) {
         switch (field$) {
             case 0: success = (boolean) value$; break;
@@ -57,7 +59,7 @@ public abstract class CommandResponse<T> extends SpecificRecordBase implements H
         private boolean success;
         private String message;
         private List<T> content;
-        private Map<String, String> headers;
+        private Map<String, String> headers = Collections.emptyMap();
 
         public B success(boolean success) {
             this.success = success;
@@ -75,7 +77,9 @@ public abstract class CommandResponse<T> extends SpecificRecordBase implements H
         }
 
         public B headers(Map<String, String> headers) {
-            this.headers = headers;
+            if (headers != null) {
+                this.headers = headers;
+            }
             return self();
         }
 

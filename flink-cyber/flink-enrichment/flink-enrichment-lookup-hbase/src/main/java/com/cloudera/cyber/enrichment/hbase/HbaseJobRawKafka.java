@@ -4,6 +4,7 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageTypeFactory;
 import com.cloudera.cyber.commands.CommandType;
 import com.cloudera.cyber.commands.EnrichmentCommand;
+import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.enrichment.hbase.writer.HbaseEnrichmentCommandSink;
 import com.cloudera.cyber.flink.FlinkUtils;
@@ -13,6 +14,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
 
+import java.util.Collections;
 import java.util.List;
 
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
@@ -20,10 +22,11 @@ import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_OUTPUT;
 
 public class HbaseJobRawKafka extends HbaseJob {
     private static final String PARAMS_TOPIC_ENRICHMENT_INPUT = "enrichment.topic.input";
+    public static final String PARAMS_QUERY_OUTPUT = "enrichment.topic.query.output";
     private static final String PARAMS_ENRICHMENT_CONFIG = "enrichments.config";
     private static final String DEFAULT_GROUP_ID = "enrichment-lookups-hbase";
 
-    public static void enrichmentCommandsToHbase(ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource, EnrichmentsConfig enrichmentsConfig, List<String> tables) {
+    public static DataStream<EnrichmentCommandResponse> enrichmentCommandsToHbase(ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource, EnrichmentsConfig enrichmentsConfig, List<String> tables) {
         // filter out commands that don't require changes to Hbase
         DataStream<EnrichmentCommand> hbaseMods = enrichmentSource.filter(c -> (c.getType().equals(CommandType.ADD) || c.getType().equals(CommandType.DELETE))).name("ADD-DELETE CommandType Filter");
 
@@ -32,6 +35,14 @@ public class HbaseJobRawKafka extends HbaseJob {
             HBaseSinkFunction<EnrichmentCommand> tableSink = new HbaseEnrichmentCommandSink(table, enrichmentsConfig, params);
             hbaseMods.filter(command -> table.equals(enrichmentsConfig.getStorageForEnrichmentType(command.getPayload().getType()).getHbaseTableName())).name("Hbase Table ".concat(table).concat(" Filter")).addSink(tableSink).name("Enrichment ".concat(table).concat(" HBase Sink"));
         });
+
+
+        return hbaseMods.map(c -> EnrichmentCommandResponse.builder()
+                .success(true)
+                .message(c.getType().name().concat(" HBase Enrichment"))
+                .content(Collections.singletonList(c.getPayload()))
+                .headers(c.getHeaders())
+                .build());
     }
 
     public static void main(String[] args) throws Exception {
@@ -59,10 +70,16 @@ public class HbaseJobRawKafka extends HbaseJob {
     }
 
     @Override
-    public void writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource) {
+    public DataStream<EnrichmentCommandResponse> writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource) {
         EnrichmentsConfig enrichmentsConfig = EnrichmentsConfig.load(params.getRequired(PARAMS_ENRICHMENT_CONFIG));
 
         List<String> tables = enrichmentsConfig.getReferencedTables();
-        enrichmentCommandsToHbase(params, enrichmentSource, enrichmentsConfig, tables);
+        return enrichmentCommandsToHbase(params, enrichmentSource, enrichmentsConfig, tables);
     }
+
+    protected void writeQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> enrichmentResults) {
+        enrichmentResults.addSink(new FlinkUtils<>(EnrichmentCommandResponse.class).createKafkaSink(params.getRequired(PARAMS_QUERY_OUTPUT), "enrichment-combined-command", params))
+                .name("HBase Enrichment Response Sink").uid("kafka-enrichment-query-sink");
+    }
+
 }

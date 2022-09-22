@@ -3,6 +3,7 @@ package com.cloudera.cyber.enrichment.hbase;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.commands.EnrichmentCommand;
+import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.google.common.collect.ImmutableMap;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -21,18 +22,23 @@ import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
 @Ignore
 public class HbaseJobTest extends HbaseJob {
     private transient ManualSource<Message> source;
-    private transient ManualSource<EnrichmentCommand> enrichmentsSource;
-    private CollectingSink<Message> sink = new CollectingSink<>();
+    private final CollectingSink<EnrichmentCommandResponse> enrichmentResponseSink = new CollectingSink<>();
+    private final CollectingSink<Message> sink = new CollectingSink<>();
 
     @Override
     protected DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
-        enrichmentsSource = JobTester.createManualSource(env, TypeInformation.of(EnrichmentCommand.class));
-        return enrichmentsSource.getDataStream();
+        return JobTester.createManualSource(env, TypeInformation.of(EnrichmentCommand.class)).getDataStream();
     }
 
     @Override
-    public void writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource) {
+    public DataStream<EnrichmentCommandResponse> writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource) {
         // usually this would send to hbase
+        return null;
+    }
+
+    @Override
+    protected void writeQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> enrichmentResults) {
+        enrichmentResults.addSink(enrichmentResponseSink);
     }
 
     @Override
