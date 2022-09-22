@@ -13,7 +13,6 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.BroadcastStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -32,9 +31,9 @@ import static com.cloudera.cyber.enrichment.ConfigUtils.*;
 @Slf4j
 public abstract class LookupJob implements CyberJob {
 
-    public static final OutputTag<EnrichmentCommandResponse> QUERY_RESULT = new OutputTag<EnrichmentCommandResponse>("query-result", TypeInformation.of(EnrichmentCommandResponse.class));
+    public static final OutputTag<EnrichmentCommandResponse> QUERY_RESULT = new OutputTag<>("query-result", TypeInformation.of(EnrichmentCommandResponse.class));
 
-    public static SingleOutputStreamOperator<Message> enrich(DataStream<EnrichmentCommand> baseEnrichmentSource,
+    public static Tuple2<SingleOutputStreamOperator<Message>, DataStream<EnrichmentCommandResponse>> enrich(DataStream<EnrichmentCommand> baseEnrichmentSource,
                                                              SingleOutputStreamOperator<Message> source,
                                                              List<EnrichmentConfig> configs
     ) {
@@ -59,28 +58,33 @@ public abstract class LookupJob implements CyberJob {
                 )
                 .collect(Collectors.toMap(v -> v.f0, k -> k.f1));
 
-        /**
+        /*
          * Apply all the configs as a series of broadcast connections that the messages pass through
          *
          * Note this is done as a reduction to ensure a single pipeline graph is built and a broadcast processor
          * is created for each relevant message key
          */
-        SingleOutputStreamOperator<Message> pipeline = typeToFields.entrySet().stream().reduce(source,
-                (out, entry) -> {
-                    List<String> fields = entry.getValue();
-                    String type = entry.getKey();
-                    return out.connect(enrichmentBroadcasts.get(type))
-                            .process(new EnrichmentBroadcastProcessFunction(type, fields, broadcastDescriptors)).name("Process: " + type).uid("broadcast-process-" + type);
-                }, (a, b) -> a); // TODO - does the combiner really make sense?
+        SingleOutputStreamOperator<Message> pipeline = source;
+        DataStream<EnrichmentCommandResponse> enrichmentCommandResponses = null;
+        for (Map.Entry<String, List<String>> enrichmentBroadcast : typeToFields.entrySet()) {
+            List<String> fields = enrichmentBroadcast.getValue();
+            String type = enrichmentBroadcast.getKey();
+            pipeline = pipeline.connect(enrichmentBroadcasts.get(type))
+                    .process(new EnrichmentBroadcastProcessFunction(type, fields, broadcastDescriptors)).name("Process: " + type).uid("broadcast-process-" + type);
+            if (enrichmentCommandResponses == null) {
+                enrichmentCommandResponses = pipeline.getSideOutput(QUERY_RESULT);
+            } else {
+                enrichmentCommandResponses = enrichmentCommandResponses.union(pipeline.getSideOutput(QUERY_RESULT));
+            }
+        }
         
-        return pipeline;
+        return Tuple2.of(pipeline, enrichmentCommandResponses);
     }
 
 
     @Override
     public StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         FlinkUtils.setupEnv(env, params);
 
         SingleOutputStreamOperator<Message> source = createSource(env, params);
@@ -88,9 +92,9 @@ public abstract class LookupJob implements CyberJob {
 
         byte[] configJson = Files.readAllBytes(Paths.get(params.getRequired(PARAMS_CONFIG_FILE)));
 
-        SingleOutputStreamOperator<Message> pipeline = enrich(enrichmentSource, source, allConfigs(configJson));
-        writeResults(env, params, pipeline);
-        writeQueryResults(env, params, pipeline.getSideOutput(QUERY_RESULT));
+        Tuple2<SingleOutputStreamOperator<Message>, DataStream<EnrichmentCommandResponse>> pipeline = enrich(enrichmentSource, source, allConfigs(configJson));
+        writeResults(env, params, pipeline.f0);
+        writeQueryResults(env, params, pipeline.f1);
         return env;
     }
 
