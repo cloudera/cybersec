@@ -69,7 +69,7 @@ public class EnrichmentJobKafka extends EnrichmentJob {
     protected DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.addSource(
                 new FlinkUtils<>(EnrichmentCommand.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
-        ).name("Kafka Triaging").uid("kafka-enrichment-source");
+        ).name("Kafka Enrichments").uid("kafka-enrichment-source");
     }
 
     @Override

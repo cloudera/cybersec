@@ -11,7 +11,6 @@ import com.cloudera.cyber.enrichment.hbase.HbaseJobRawKafka;
 import com.cloudera.cyber.enrichment.lookup.LookupJob;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
-import com.cloudera.cyber.enrichment.rest.RestEnrichmentConfig;
 import com.cloudera.cyber.enrichment.rest.RestLookupJob;
 import com.cloudera.cyber.enrichment.stix.StixJob;
 import com.cloudera.cyber.enrichment.stix.StixResults;
@@ -26,6 +25,7 @@ import com.cloudera.cyber.scoring.ScoringRuleCommand;
 import com.cloudera.cyber.scoring.ScoringRuleCommandResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.*;
@@ -54,8 +53,6 @@ public abstract class EnrichmentJob {
     private static final String PARAMS_ENABLE_THREATQ = "threatq.enabled";
     private static final String PARAMS_ENABLE_RULES = "rules.enabled";
     private static final String PARAMS_ENABLE_STELLAR = "stellar.enabled";
-
-    private DataStream<Message> messages;
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws IOException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -77,16 +74,24 @@ public abstract class EnrichmentJob {
                         Arrays.asList(params.getRequired(PARAM_ASN_FIELDS).split(",")),
                         params.getRequired(PARAM_ASN_DATABASE_PATH)) : geoEnriched;
 
-        SingleOutputStreamOperator<Message> enriched = LookupJob.enrich(localEnrichments, asnEnriched, enrichmentConfigs);
+        Tuple2<SingleOutputStreamOperator<Message>, DataStream<EnrichmentCommandResponse>> enriched = LookupJob.enrich(localEnrichments, asnEnriched, enrichmentConfigs);
 
-        writeEnrichmentQueryResults(env, params, enriched.getSideOutput(LookupJob.QUERY_RESULT));
+        DataStream<EnrichmentCommandResponse> enrichmentCommandResponses = enriched.f1;
 
         // write the hbase enrichments to hbase
         if (params.getBoolean(PARAMS_ENABLE_HBASE, true)) {
-            new HbaseJobRawKafka().writeEnrichments(env, params, hbaseEnrichments);
+            DataStream<EnrichmentCommandResponse> hbaseEnrichmentResponses = new HbaseJobRawKafka().writeEnrichments(env, params, hbaseEnrichments);
+            if (enrichmentCommandResponses != null) {
+                enrichmentCommandResponses = enriched.f1.union(hbaseEnrichmentResponses);
+            } else {
+                enrichmentCommandResponses = hbaseEnrichmentResponses;
+            }
         }
+
+        writeEnrichmentQueryResults(env, params, enrichmentCommandResponses);
+
         DataStream<Message> hbased = params.getBoolean(PARAMS_ENABLE_HBASE, true) ?
-                HbaseJob.enrich(enriched, enrichmentConfigs) : enriched;
+                HbaseJob.enrich(enriched.f0, enrichmentConfigs) : enriched.f0;
 
         // rest based enrichments
         DataStream<Message> rested = params.getBoolean(PARAMS_ENABLE_REST, true) ?
@@ -119,8 +124,8 @@ public abstract class EnrichmentJob {
             stellarStream = tqed;
         }
 
-        // TODO - apply the rules based enrichments
-        DataStream<Message> ruled = params.getBoolean(PARAMS_ENABLE_RULES, true) ?
+        // disabled by default - NOT IMPLEMENTED
+        DataStream<Message> ruled = params.getBoolean(PARAMS_ENABLE_RULES, false) ?
                 doRules(stellarStream, params) : stellarStream;
 
         DataStream<ScoredMessage> scoring = doScoring(ruled, env, params);
@@ -133,8 +138,7 @@ public abstract class EnrichmentJob {
     /**
      * @param in     Messages incoming for rules processing
      * @param params Global Job Parameters
-     * @return
-     * @TODO - Add the rules processing engine
+     * @return incoming stream for now.  Not implemented.
      */
     private DataStream<Message> doRules(DataStream<Message> in, ParameterTool params) {
         return in;

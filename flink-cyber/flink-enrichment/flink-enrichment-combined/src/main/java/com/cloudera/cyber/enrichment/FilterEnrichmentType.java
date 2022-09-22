@@ -2,21 +2,24 @@ package com.cloudera.cyber.enrichment;
 
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
+import com.cloudera.cyber.enrichment.lookup.config.EnrichmentField;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
 import org.apache.flink.api.common.functions.FilterFunction;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-
 public class FilterEnrichmentType implements FilterFunction<EnrichmentCommand> {
-    private final List<String> enrichmentTypes;
+    private final List<String> enrichmentTypes = new ArrayList<>();
 
     public FilterEnrichmentType(List<EnrichmentConfig> enrichmentConfigStream, EnrichmentKind kind) {
-        this.enrichmentTypes =  enrichmentConfigStream.stream()
-                .filter(e -> e.getKind().equals(kind))
-                .map(e -> e.getType())
-                .collect(toList());
+        for(EnrichmentConfig enrichmentConfig : enrichmentConfigStream) {
+            if (enrichmentConfig.getKind().equals(kind)) {
+                for(EnrichmentField field : enrichmentConfig.getFields()) {
+                    enrichmentTypes.add(field.getEnrichmentType());
+                }
+            }
+        }
     }
 
     @Override

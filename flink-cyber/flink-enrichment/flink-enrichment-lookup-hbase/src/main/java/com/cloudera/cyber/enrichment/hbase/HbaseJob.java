@@ -2,6 +2,7 @@ package com.cloudera.cyber.enrichment.hbase;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.commands.EnrichmentCommand;
+import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.flink.FlinkUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -35,12 +36,15 @@ public abstract class HbaseJob {
 
         DataStream<Message> result = enrich(source, allConfigs(configJson));
         writeResults(env, params, result);
-        writeEnrichments(env, params, enrichmentSource);
+        DataStream<EnrichmentCommandResponse> enrichmentCommandResponses = writeEnrichments(env, params, enrichmentSource);
+        writeQueryResults(env, params, enrichmentCommandResponses);
 
         return env;
     }
 
-    public abstract void writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource);
+    public abstract DataStream<EnrichmentCommandResponse> writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource);
+
+    protected abstract void writeQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> sideOutput);
 
     protected abstract void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> result);
 
