@@ -24,6 +24,10 @@ import com.fasterxml.jackson.dataformat.xml.deser.FromXmlParser;
 import com.github.wnameless.json.flattener.JsonFlattener;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.XML;
+import org.json.XMLParserConfiguration;
 
 import java.io.IOException;
 import java.util.Map;
@@ -41,6 +45,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class XMLFlattener implements Parser {
     private static final String DEFAULT_SEPARATOR = ".";
     private static final String EMPTY_ELEMENT_REGEX = "\\{ *\\}";
+    private static final XMLParserConfiguration XML_CONFIG = XMLParserConfiguration.KEEP_STRINGS.withcDataTagName("");
     private FieldName inputField;
     private char separator = '|';
 
@@ -87,14 +92,10 @@ public class XMLFlattener implements Parser {
     private void doParse(String valueToParse, Message.Builder output) {
         try {
             // parse the XML
-            Module customModule = new SimpleModule()
-                    .addDeserializer(JsonNode.class, new CustomJsonNodeDeserializer());
-            JsonNode node = new XmlMapper()
-                    .registerModule(customModule)
-                    .readTree(valueToParse);
+            final JSONObject result = XML.toJSONObject(valueToParse, XML_CONFIG);
 
             // flatten the JSON
-            String json = new ObjectMapper().writeValueAsString(node);
+            final String json = result.toString();
             Map<String, Object> values = new JsonFlattener(json)
                     .withSeparator(separator)
                     .flattenAsMap();
@@ -105,7 +106,7 @@ public class XMLFlattener implements Parser {
                     .filter(e -> e.getValue() != null && isNotBlank(e.getKey()))
                     .forEach(e -> output.addField(fieldName(e.getKey()), fieldValue(e.getValue())));
 
-        } catch (JsonProcessingException e) {
+        } catch (JSONException e) {
             output.withError("Unable to convert XML to JSON.", e);
         }
     }
@@ -122,34 +123,4 @@ public class XMLFlattener implements Parser {
         return StringFieldValue.of(fieldValue);
     }
 
-    public class CustomJsonNodeDeserializer extends JsonNodeDeserializer {
-
-        @Override
-        public JsonNode deserialize(JsonParser p, DeserializationContext context) throws IOException {
-            JsonNode rootNode = super.deserialize(p, context);
-            // ensures that we do not lose the name of the root XML element
-            String rootName = ((FromXmlParser) p).getStaxReader().getLocalName();
-            return context.getNodeFactory().objectNode().set(rootName, rootNode);
-        }
-
-        @Override
-        protected void _handleDuplicateField(JsonParser p,
-                                             DeserializationContext context,
-                                             JsonNodeFactory nodeFactory,
-                                             String fieldName,
-                                             ObjectNode objectNode,
-                                             JsonNode oldValue,
-                                             JsonNode newValue) {
-            // adds duplicate fields to an array
-            ArrayNode node;
-            if (oldValue instanceof ArrayNode) {
-                node = (ArrayNode) oldValue;
-            } else {
-                node = nodeFactory.arrayNode();
-                node.add(oldValue);
-            }
-            node.add(newValue);
-            objectNode.set(fieldName, node);
-        }
-    }
 }

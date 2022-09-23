@@ -57,6 +57,7 @@
         <commons-collections4.version>4.4</commons-collections4.version>
         <springdoc-openapi.version>1.6.9</springdoc-openapi.version>
         <jackson.version>2.13.4</jackson.version>
+        <json.version>20220320</json.version>
 
         <!-- test dependency versions -->
         <junit.jupiter.version>5.5.2</junit.jupiter.version>
@@ -140,9 +141,9 @@
                 <version>${jackson.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-xml</artifactId>
-                <version>${jackson.version}</version>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${json.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.dataformat</groupId>
