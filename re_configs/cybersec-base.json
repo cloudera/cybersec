@@ -31,7 +31,7 @@
             "os": "centos7",
             "poll": false,
             "stack-name": "CDH",
-            "stack-version": "7.1.6.0-297"
+            "stack-version": "7.1.6.0-296"
         }
     },
     "hwx": {
