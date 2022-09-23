@@ -18,22 +18,13 @@
     "repoUrl": "https://archive.cloudera.com/p/csa/1.6/parcels",
     "requiredTags": [
       "cybersec",
+      "flink",
       "cdh"
     ],
     "optionalTags": [
       "cybersec-plugin"
     ]
   },
-  "serviceDependencies": [
-    {
-      "name": "FLINK",
-      "required": "false"
-    },
-    {
-      "name": "KAFKA",
-      "required": "false"
-    }
-  ],
   "dependencyExtensions": [
     {
       "type": "kafkaDependency",
@@ -95,7 +86,7 @@
     {
       "name" : "PARSER_CHAINING",
       "label" : "Parser Chaining",
-      "pluralLabel" : "Parser Chaining",
+      "pluralLabel" : "Parser Chainings",
       "jvmBased": true,
       "startRunner" : {
         "program" : "scripts/control.sh",
@@ -111,8 +102,9 @@
       "logging" : {
         "dir": "/var/log/cybersec",
         "loggingType": "log4j",
+        "configFilename" : "cybersec-conf/log4j-parser.properties",
         "filename": "parser-ui-${host}.log",
-        "configName": "cybersec.log4j.dir",
+        "configName": "logging.config",
         "modifiable" : true
       },
       "parameters" : [
@@ -133,6 +125,31 @@
           "default": "/var/lib/cybersec"
         }
       ],
+      "kerberosPrincipals": [
+        {
+          "name": "flink_service_principal",
+          "primary": "${principal}",
+          "instance": "${host}"
+        },
+        {
+          "name": "spnego_service_principal",
+          "primary": "HTTP",
+          "instance": "${host}"
+        }
+      ],
+      "sslServer": {
+        "keyIdentifier" : "parser_ui_chaining",
+        "enabledConfigName" : "ssl_enabled",
+        "keystoreLocationConfigName" : "security.ssl.rest.keystore",
+        "keystorePasswordConfigName" : "security.ssl.rest.keystore-password",
+        "keyPasswordOptionality" : "required",
+        "keystoreKeyPasswordConfigName" : "security.ssl.rest.key-password",
+        "autoTlsMode": "auto"
+      },
+      "sslClient": {
+        "truststoreLocationConfigName" : "security.ssl.rest.truststore",
+        "truststorePasswordConfigName" : "security.ssl.rest.truststore-password"
+      },
       "configWriter" : {
         "generators" : [
           {
@@ -143,7 +160,13 @@
             "includedParams": [
               "parser_ui_port",
               "config_path"
-             ]
+             ],
+            "additionalConfigs": [
+              {
+                "key": "logging.config",
+                "value": "cybersec-conf/log4j-parser.properties"
+              }
+            ]
           }
         ]
       }
