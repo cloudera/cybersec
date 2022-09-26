@@ -36,7 +36,7 @@
     "hwx": {
         "platforms": [
             "centos7",
-            "centos8",
+            "redhat8",
             "sles12",
             "ubuntu18"
         ],
