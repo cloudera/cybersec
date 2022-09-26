@@ -20,7 +20,7 @@ package org.apache.metron.parsers.syslog;
 
 import com.github.palindromicity.syslog.dsl.SyslogFieldKeys;
 import org.apache.metron.parsers.interfaces.MessageParserResult;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -33,7 +33,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Syslog3164ParserTest {
 
@@ -138,7 +140,7 @@ public class Syslog3164ParserTest {
     test( "not valid", (message) -> assertTrue(false));
   }
 
-  public void test( String line, Consumer<JSONObject> msgIdChecker) {
+  public void test( String line, Consumer<JSONMapObject> msgIdChecker) {
     Syslog3164Parser parser = new Syslog3164Parser();
     Map<String, Object> config = new HashMap<>();
     parser.configure(config);
@@ -157,11 +159,11 @@ public class Syslog3164ParserTest {
             .append(SYSLOG_LINE_MISSING)
             .append("\n")
             .append(SYSLOG_LINE_ALL);
-    Optional<MessageParserResult<JSONObject>> resultOptional = parser.parseOptionalResult(builder.toString().getBytes(
+    Optional<MessageParserResult<JSONMapObject>> resultOptional = parser.parseOptionalResult(builder.toString().getBytes(
         StandardCharsets.UTF_8));
     assertNotNull(resultOptional);
     assertTrue(resultOptional.isPresent());
-    List<JSONObject> parsedList = resultOptional.get().getMessages();
+    List<JSONMapObject> parsedList = resultOptional.get().getMessages();
     assertEquals(3,parsedList.size());
   }
 
@@ -180,7 +182,7 @@ public class Syslog3164ParserTest {
             .append("BOOM!\n")
             .append(SYSLOG_LINE_ALL)
             .append("\nOHMY!");
-    Optional<MessageParserResult<JSONObject>> output = parser.parseOptionalResult(builder.toString().getBytes(
+    Optional<MessageParserResult<JSONMapObject>> output = parser.parseOptionalResult(builder.toString().getBytes(
         StandardCharsets.UTF_8));
     assertTrue(output.isPresent());
     assertEquals(3,output.get().getMessages().size());

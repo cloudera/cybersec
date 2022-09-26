@@ -3,14 +3,16 @@ package com.cloudera.cyber.stellar;
 
 import com.cloudera.parserchains.core.StringFieldValue;
 import org.apache.metron.parsers.interfaces.MessageParserResult;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class MetronCompatibilityParserTest {
@@ -25,10 +27,10 @@ public class MetronCompatibilityParserTest {
         String column1 = "value_1";
         String column2 = "value_2";
         String originalString = String.format("%s %s %s", timestamp, column1, column2);
-        Optional<MessageParserResult<JSONObject>> optionalResult = parser.parse(StringFieldValue.of(originalString).toMessageToParse());
+        Optional<MessageParserResult<JSONMapObject>> optionalResult = parser.parse(StringFieldValue.of(originalString).toMessageToParse());
         assertTrue(optionalResult.isPresent());
         assertEquals(optionalResult.get().getMessages().size(), 1);
-        JSONObject message = optionalResult.get().getMessages().get(0);
+        JSONMapObject message = optionalResult.get().getMessages().get(0);
         assertEquals(message.get("timestamp"), Long.valueOf(timestamp));
         assertEquals(message.get("original_string"), originalString);
         assertTrue((boolean) message.get("initialized"));

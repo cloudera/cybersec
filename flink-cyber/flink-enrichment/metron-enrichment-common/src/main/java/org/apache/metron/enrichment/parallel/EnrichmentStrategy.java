@@ -20,7 +20,7 @@ package org.apache.metron.enrichment.parallel;
 import org.apache.metron.common.configuration.enrichment.EnrichmentConfig;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
 import org.apache.metron.stellar.common.Constants;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
 /**
  * Enrichment strategy.  This interface provides a mechanism to interface with the enrichment config and any
@@ -61,7 +61,7 @@ public interface EnrichmentStrategy {
    * @param context The enrichment context
    * @return
    */
-  default JSONObject postProcess(JSONObject message, SensorEnrichmentConfig config, EnrichmentContext context) {
+  default JSONMapObject postProcess(JSONMapObject message, SensorEnrichmentConfig config, EnrichmentContext context) {
     return message;
   }
 }

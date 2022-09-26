@@ -19,9 +19,9 @@ import org.apache.metron.parsers.interfaces.MessageParser;
 import org.apache.metron.parsers.interfaces.MessageParserResult;
 import org.apache.metron.stellar.common.CachingStellarProcessor;
 import org.apache.metron.stellar.common.Constants;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.StellarFunctions;
-import org.json.simple.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,8 +44,8 @@ public class MetronCompatibilityParser {
             STELLAR_SEARCH_INCLUDES_KEY.param(), "org.apache.metron.*"
     );
     private final SensorParserConfig parserConfig;
-    private final MessageFilter<JSONObject> filter;
-    private final MessageParser<JSONObject> parser;
+    private final MessageFilter<JSONMapObject> filter;
+    private final MessageParser<JSONMapObject> parser;
     private final Context stellarContext;
     private final String sensorType;
 
@@ -53,7 +53,7 @@ public class MetronCompatibilityParser {
         SensorParserConfig parserConfig = SensorParserConfig.fromBytes(IOUtils.toByteArray(configStream));
         String parserClassName = parserConfig.getParserClassName();
 
-        MessageFilter<JSONObject> filter = null;
+        MessageFilter<JSONMapObject> filter = null;
         if (!StringUtils.isEmpty(parserConfig.getFilterClassName())) {
             filter = Filters.get(
                     parserConfig.getFilterClassName(),
@@ -61,7 +61,7 @@ public class MetronCompatibilityParser {
             );
         }
         log.info("Loading parser class {}", parserClassName);
-        MessageParser<JSONObject> parser = ReflectionUtils.createInstance(parserClassName);
+        MessageParser<JSONMapObject> parser = ReflectionUtils.createInstance(parserClassName);
         log.info("Configuring Stellar parser with config {}", parserConfig.getParserConfig().toString());
         parser.configure(parserConfig.getParserConfig());
         log.info("Initializing parser");
@@ -77,16 +77,16 @@ public class MetronCompatibilityParser {
         return new MetronCompatibilityParser(parserConfig, filter, parser, stellarContext, sensorType);
     }
 
-    public Optional<MessageParserResult<JSONObject>> parse(MessageToParse messageToParse) {
+    public Optional<MessageParserResult<JSONMapObject>> parse(MessageToParse messageToParse) {
         RawMessage metronRawMessage = MetronRawDataExtractor.INSTANCE.getRawMessage(parserConfig.getRawMessageStrategy(), messageToParse, parserConfig.getReadMetadata(),
                 parserConfig.getRawMessageStrategyConfig());
 
-        Optional<MessageParserResult<JSONObject>> result = parser.parseOptionalResult(metronRawMessage.getMessage());
+        Optional<MessageParserResult<JSONMapObject>> result = parser.parseOptionalResult(metronRawMessage.getMessage());
         if (result.isPresent()) {
             // this parser can only return a single message - return the first message
-            List<JSONObject> parsedMessages = result.get().getMessages();
+            List<JSONMapObject> parsedMessages = result.get().getMessages();
             if (CollectionUtils.isNotEmpty(parsedMessages)) {
-                JSONObject parsedMessage = parsedMessages.get(0);
+                JSONMapObject parsedMessage = parsedMessages.get(0);
                 parserConfig.getRawMessageStrategy().mergeMetadata(
                         parsedMessage,
                         metronRawMessage.getMetadata(),
@@ -96,7 +96,7 @@ public class MetronCompatibilityParser {
                 parsedMessage.put(Constants.SENSOR_TYPE, sensorType);
 
                 parsedMessage.putIfAbsent(Constants.Fields.ORIGINAL.getName(),
-                        new String(metronRawMessage.getMessage(), parser.getReadCharset()));
+                            new String(metronRawMessage.getMessage(), parser.getReadCharset()));
                 applyFieldTransformations(parsedMessage, metronRawMessage);
 
                 // return empty message - message should be filtered
@@ -117,7 +117,7 @@ public class MetronCompatibilityParser {
      * @param message            Message parsed by the MessageParser
      * @param rawMessage         Raw message including metadata
      */
-    private void applyFieldTransformations(JSONObject message, RawMessage rawMessage) {
+    private void applyFieldTransformations(JSONMapObject message, RawMessage rawMessage) {
         for (FieldTransformer handler : parserConfig.getFieldTransformations()) {
             if (handler != null) {
                 if (!parserConfig.getMergeMetadata()) {

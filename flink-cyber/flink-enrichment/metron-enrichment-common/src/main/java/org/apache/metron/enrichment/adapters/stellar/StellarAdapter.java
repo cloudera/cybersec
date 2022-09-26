@@ -17,8 +17,19 @@
  */
 package org.apache.metron.enrichment.adapters.stellar;
 
-import static org.apache.metron.stellar.common.Constants.STELLAR_CONTEXT_CONF;
-
+import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
+import org.apache.metron.common.configuration.enrichment.handler.ConfigHandler;
+import org.apache.metron.enrichment.cache.CacheKey;
+import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.apache.metron.stellar.common.StellarProcessor;
+import org.apache.metron.stellar.common.utils.ConversionUtils;
+import org.apache.metron.stellar.dsl.Context;
+import org.apache.metron.stellar.dsl.MapVariableResolver;
+import org.apache.metron.stellar.dsl.StellarFunctions;
+import org.apache.metron.stellar.dsl.VariableResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.lang.invoke.MethodHandles;
@@ -28,19 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
-import org.apache.metron.common.configuration.enrichment.handler.ConfigHandler;
-import org.apache.metron.enrichment.cache.CacheKey;
-import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
-import org.apache.metron.stellar.common.StellarProcessor;
-import org.apache.metron.stellar.common.utils.ConversionUtils;
-import org.apache.metron.stellar.dsl.Context;
-import org.apache.metron.stellar.dsl.MapVariableResolver;
-import org.apache.metron.stellar.dsl.StellarFunctions;
-import org.apache.metron.stellar.dsl.VariableResolver;
-import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.apache.metron.stellar.common.Constants.STELLAR_CONTEXT_CONF;
 
 public class StellarAdapter implements EnrichmentAdapter<CacheKey>,Serializable {
   public static class Perf {}
@@ -95,7 +94,7 @@ public class StellarAdapter implements EnrichmentAdapter<CacheKey>,Serializable 
   }
 
 
-  public static JSONObject process( Map<String, Object> message
+  public static JSONMapObject process(Map<String, Object> message
                                            , ConfigHandler handler
                                            , String field
                                            , Long slowLogThreshold
@@ -104,7 +103,7 @@ public class StellarAdapter implements EnrichmentAdapter<CacheKey>,Serializable 
                                            , Context stellarContext
                                            )
   {
-    JSONObject ret = new JSONObject();
+    JSONMapObject ret = new JSONMapObject();
     Iterable<Map.Entry<String, Object>> stellarStatements = getStellarStatements(handler, field);
 
     _LOG.debug("message := {}", message);
@@ -171,14 +170,14 @@ public class StellarAdapter implements EnrichmentAdapter<CacheKey>,Serializable 
   }
 
   @Override
-  public JSONObject enrich(CacheKey value) {
+  public JSONMapObject enrich(CacheKey value) {
     Context stellarContext = (Context) value.getConfig().getConfiguration().get(STELLAR_CONTEXT_CONF);
     ConfigHandler handler = getHandler.apply(value.getConfig());
     Map<String, Object> globalConfig = value.getConfig().getConfiguration();
     Map<String, Object> sensorConfig = value.getConfig().getEnrichment().getConfig();
     if(handler == null) {
       _LOG.trace("Stellar ConfigHandler is null.");
-      return new JSONObject();
+      return new JSONMapObject();
     }
     Long slowLogThreshold = null;
     if(_PERF_LOG.isDebugEnabled()) {
@@ -189,7 +188,7 @@ public class StellarAdapter implements EnrichmentAdapter<CacheKey>,Serializable 
     Map<String, Object> message = new HashMap<>(value.getValue(Map.class));
     VariableResolver resolver = new MapVariableResolver(message, sensorConfig, globalConfig);
     StellarProcessor processor = new StellarProcessor();
-    JSONObject enriched = process(message
+    JSONMapObject enriched = process(message
                                  , handler
                                  , value.getField()
                                  , slowLogThreshold

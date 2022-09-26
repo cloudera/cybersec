@@ -18,26 +18,26 @@
 
 package org.apache.metron.parsers.csv;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.Level;
 import org.apache.metron.common.configuration.SensorParserConfig;
 import org.apache.metron.common.utils.JSONUtils;
 import org.apache.metron.parsers.interfaces.MessageParser;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.test.utils.UnitTestHelper;
-import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CSVParserTest {
   /**
@@ -74,9 +74,9 @@ public class CSVParserTest {
     }
     {
       String line = "foo,bar,grok";
-      List<JSONObject> results = parser.parse(Bytes.toBytes(line));
+      List<JSONMapObject> results = parser.parse(Bytes.toBytes(line));
       assertEquals(1, results.size());
-      JSONObject o = results.get(0);
+      JSONMapObject o = results.get(0);
       assertTrue(parser.validate(o));
       assertEquals(5, o.size());
       assertEquals("foo", o.get("col1"));
@@ -85,9 +85,9 @@ public class CSVParserTest {
     }
     {
       String line = "\"foo\", \"bar\",\"grok\"";
-      List<JSONObject> results = parser.parse(Bytes.toBytes(line));
+      List<JSONMapObject> results = parser.parse(Bytes.toBytes(line));
       assertEquals(1, results.size());
-      JSONObject o = results.get(0);
+      JSONMapObject o = results.get(0);
       assertTrue(parser.validate(o));
       assertEquals(5, o.size());
       assertEquals("foo", o.get("col1"));
@@ -96,9 +96,9 @@ public class CSVParserTest {
     }
     {
       String line = "foo, bar, grok";
-      List<JSONObject> results = parser.parse(Bytes.toBytes(line));
+      List<JSONMapObject> results = parser.parse(Bytes.toBytes(line));
       assertEquals(1, results.size());
-      JSONObject o = results.get(0);
+      JSONMapObject o = results.get(0);
       assertTrue(parser.validate(o));
       assertEquals(5, o.size());
       assertEquals("foo", o.get("col1"));
@@ -107,9 +107,9 @@ public class CSVParserTest {
     }
     {
       String line = " foo , bar , grok ";
-      List<JSONObject> results = parser.parse(Bytes.toBytes(line));
+      List<JSONMapObject> results = parser.parse(Bytes.toBytes(line));
       assertEquals(1, results.size());
-      JSONObject o = results.get(0);
+      JSONMapObject o = results.get(0);
       assertTrue(parser.validate(o));
       assertEquals(5, o.size());
       assertEquals("foo", o.get("col1"));

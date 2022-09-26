@@ -18,17 +18,17 @@
 
 package org.apache.metron.parsers.lancope;
 
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.invoke.MethodHandles;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.apache.metron.parsers.BasicParser;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 public class BasicLancopeParser extends BasicParser {
@@ -49,15 +49,15 @@ public class BasicLancopeParser extends BasicParser {
 
 	//@SuppressWarnings("unchecked")
 	@Override
-	public List<JSONObject> parse(byte[] msg) {
+	public List<JSONMapObject> parse(byte[] msg) {
 
-		JSONObject payload = null;
-		List<JSONObject> messages = new ArrayList<>();
+		JSONMapObject payload = null;
+		List<JSONMapObject> messages = new ArrayList<>();
 		try {
 			
 			String raw_message = new String(msg, getReadCharset());
 			
-			payload = (JSONObject) JSONValue.parse(raw_message);
+			payload = new JSONMapObject(raw_message);
 			
 			
 

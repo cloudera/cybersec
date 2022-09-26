@@ -23,8 +23,8 @@ import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.common.configuration.FieldTransformer;
 import org.apache.metron.common.configuration.SensorParserConfig;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.dsl.Context;
-import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public class RegexSelectTransformationTest {
   private String transform(String in, String config) throws Exception {
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(config));
     FieldTransformer handler = Iterables.getFirst(c.getFieldTransformations(), null);
-    JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+    JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
       put("in_field", in);
       put("dummy_field", "dummy"); //this is added to ensure that it looks like something approaching a real message
     }});

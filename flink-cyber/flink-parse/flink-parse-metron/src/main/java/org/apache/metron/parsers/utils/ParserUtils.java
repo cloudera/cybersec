@@ -17,14 +17,12 @@
  */
 package org.apache.metron.parsers.utils;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import org.apache.commons.io.IOUtils;
-import org.json.simple.JSONObject;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

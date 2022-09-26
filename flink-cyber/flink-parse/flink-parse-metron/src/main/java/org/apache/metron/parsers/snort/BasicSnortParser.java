@@ -18,6 +18,14 @@
 package org.apache.metron.parsers.snort;
 
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.metron.common.Constants;
+import org.apache.metron.common.csv.CSVConverter;
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -28,13 +36,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.metron.common.Constants;
-import org.apache.metron.common.csv.CSVConverter;
-import org.apache.metron.parsers.BasicParser;
-import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 public class BasicSnortParser extends BasicParser {
@@ -135,10 +136,10 @@ public class BasicSnortParser extends BasicParser {
   }
 
   @Override
-  public List<JSONObject> parse(byte[] rawMessage) {
+  public List<JSONMapObject> parse(byte[] rawMessage) {
 
-    JSONObject jsonMessage = new JSONObject();
-    List<JSONObject> messages = new ArrayList<>();
+    JSONMapObject jsonMessage = new JSONMapObject();
+    List<JSONMapObject> messages = new ArrayList<>();
     try {
       // snort alerts expected as csv records
       String csvMessage = new String(rawMessage, getReadCharset());

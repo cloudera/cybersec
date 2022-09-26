@@ -1,7 +1,7 @@
 package com.cloudera.cyber.stellar;
 
 import org.apache.metron.parsers.BasicParser;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,11 +22,11 @@ public class ExampleMetronParser extends BasicParser {
     }
 
     @Override
-    public List<JSONObject> parse(byte[] rawMessage) {
+    public List<JSONMapObject> parse(byte[] rawMessage) {
 
 
         String originalString = new String(rawMessage);
-        JSONObject parsedMessage = new JSONObject();
+        JSONMapObject parsedMessage = new JSONMapObject();
         String[] parts = originalString.split("\\s+");
         parsedMessage.put("timestamp", Long.valueOf(parts[0]));
         for (int i = 1; i < parts.length; i++) {

@@ -22,6 +22,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.metron.stellar.common.JSONMapObject;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -32,10 +34,6 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
-
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 
 public enum JSONUtils {
@@ -65,9 +63,6 @@ public enum JSONUtils {
 
   public final static ReferenceSupplier<Map<String, Object>> MAP_SUPPLIER = new ReferenceSupplier<Map<String, Object>>(){};
   public final static ReferenceSupplier<List<Object>> LIST_SUPPLIER = new ReferenceSupplier<List<Object>>(){};
-
-  private static ThreadLocal<JSONParser> _parser = ThreadLocal.withInitial(() ->
-          new JSONParser());
 
   private static ThreadLocal<ObjectMapper> _mapper = ThreadLocal.withInitial(() ->
           new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL));
@@ -115,11 +110,11 @@ public enum JSONUtils {
   /**
    * Transforms a bean (aka POJO) to a JSONObject.
    */
-  public JSONObject toJSONObject(Object o) throws JsonProcessingException, ParseException {
+  public JSONMapObject toJSONObject(Object o) throws JsonProcessingException {
     return toJSONObject(toJSON(o, false));
   }
 
-  public JSONObject toJSONObject(String json) throws ParseException {
-    return (JSONObject) _parser.get().parse(json);
+  public JSONMapObject toJSONObject(String json) {
+    return new JSONMapObject(json);
   }
 }

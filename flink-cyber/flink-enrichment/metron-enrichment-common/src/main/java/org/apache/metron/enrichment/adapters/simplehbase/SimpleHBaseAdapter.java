@@ -20,12 +20,6 @@ package org.apache.metron.enrichment.adapters.simplehbase;
 
 
 import com.google.common.collect.Iterables;
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.invoke.MethodHandles;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.metron.common.utils.LazyLogger;
 import org.apache.metron.common.utils.LazyLoggerFactory;
@@ -37,7 +31,13 @@ import org.apache.metron.enrichment.lookup.EnrichmentLookup;
 import org.apache.metron.enrichment.lookup.LookupKV;
 import org.apache.metron.enrichment.lookup.accesstracker.NoopAccessTracker;
 import org.apache.metron.enrichment.utils.EnrichmentUtils;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
+import java.util.List;
+import java.util.Map;
 
 public class SimpleHBaseAdapter implements EnrichmentAdapter<CacheKey>,Serializable {
   protected static final LazyLogger LOG = LazyLoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -65,8 +65,8 @@ public class SimpleHBaseAdapter implements EnrichmentAdapter<CacheKey>,Serializa
     return lookup != null && lookup.getTable() != null;
   }
   @Override
-  public JSONObject enrich(CacheKey value) {
-    JSONObject enriched = new JSONObject();
+  public JSONMapObject enrich(CacheKey value) {
+    JSONMapObject enriched = new JSONMapObject();
     if(!isInitialized()) {
       initializeAdapter(null);
     }

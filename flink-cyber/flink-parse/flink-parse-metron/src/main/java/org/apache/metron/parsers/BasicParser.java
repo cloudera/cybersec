@@ -17,23 +17,23 @@
  */
 package org.apache.metron.parsers;
 
-import static org.apache.metron.stellar.common.Constants.Fields.DST_ADDR;
-import static org.apache.metron.stellar.common.Constants.Fields.ORIGINAL;
-import static org.apache.metron.stellar.common.Constants.Fields.SRC_ADDR;
-import static org.apache.metron.stellar.common.Constants.Fields.TIMESTAMP;
+import org.apache.metron.parsers.interfaces.MessageParser;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-import org.apache.metron.parsers.interfaces.MessageParser;
-import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.apache.metron.stellar.common.Constants.Fields.DST_ADDR;
+import static org.apache.metron.stellar.common.Constants.Fields.ORIGINAL;
+import static org.apache.metron.stellar.common.Constants.Fields.SRC_ADDR;
+import static org.apache.metron.stellar.common.Constants.Fields.TIMESTAMP;
 
 public abstract class BasicParser implements
-        MessageParser<JSONObject>,
+        MessageParser<JSONMapObject>,
         Serializable {
 
   protected static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -41,8 +41,8 @@ public abstract class BasicParser implements
   private Charset readCharset;
 
   @Override
-  public boolean validate(JSONObject message) {
-    JSONObject value = message;
+  public boolean validate(JSONMapObject message) {
+    JSONMapObject value = message;
     final String invalidMessageTemplate = "[Metron] Message does not have {}: {}";
     if (!(value.containsKey(ORIGINAL.getName()))) {
       LOG.trace(invalidMessageTemplate, ORIGINAL.getName(), message);
@@ -56,7 +56,7 @@ public abstract class BasicParser implements
     }
   }
 
-  public String getKey(JSONObject value) {
+  public String getKey(JSONMapObject value) {
     try {
       String ipSrcAddr = null;
       String ipDstAddr = null;

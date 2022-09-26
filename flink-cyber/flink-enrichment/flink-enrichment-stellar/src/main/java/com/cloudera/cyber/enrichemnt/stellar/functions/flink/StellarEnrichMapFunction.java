@@ -22,9 +22,9 @@ import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
 import org.apache.metron.enrichment.parallel.EnrichmentStrategies;
 import org.apache.metron.enrichment.parallel.EnrichmentStrategy;
 import org.apache.metron.stellar.common.Constants;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.StellarFunctions;
-import org.json.simple.JSONObject;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -101,9 +101,9 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
     }
 
 
-    private Map<String, List<JSONObject>> generateTasks(JSONObject message, SensorEnrichmentConfig config
+    private Map<String, List<JSONMapObject>> generateTasks(JSONMapObject message, SensorEnrichmentConfig config
     ) {
-        Map<String, List<JSONObject>> streamMessageMap = new HashMap<>();
+        Map<String, List<JSONMapObject>> streamMessageMap = new HashMap<>();
         Map<String, Object> enrichmentFieldMap = EnrichmentStrategies.ENRICHMENT.getUnderlyingConfig(config).getFieldMap();
         Map<String, ConfigHandler> fieldToHandler = EnrichmentStrategies.ENRICHMENT.getUnderlyingConfig(config).getEnrichmentConfigs();
 
@@ -119,7 +119,7 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
             ConfigHandler retriever = fieldToHandler.get(enrichmentType);
 
             //How this is split depends on the ConfigHandler
-            List<JSONObject> enrichmentObject = retriever.getType()
+            List<JSONMapObject> enrichmentObject = retriever.getType()
                     .splitByFields(message
                             , fields
                             , field -> ((EnrichmentStrategy) EnrichmentStrategies.ENRICHMENT).fieldToEnrichmentKey(enrichmentType, field)
@@ -140,12 +140,12 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
         if (sensorEnrichmentConfig != null) {
             extensions.put(Constants.SENSOR_TYPE, source);
             extensions.put(Constants.Fields.TIMESTAMP.getName(), String.valueOf(Instant.now().toEpochMilli()));
-            JSONObject obj = new JSONObject(extensions);
+            JSONMapObject obj = new JSONMapObject(extensions);
             Map<String, String> tmpMap = new HashMap<>();
-            Map<String, List<JSONObject>> tasks = generateTasks(obj, sensorEnrichmentConfig);
-            for (Map.Entry<String, List<JSONObject>> task : tasks.entrySet()) {
+            Map<String, List<JSONMapObject>> tasks = generateTasks(obj, sensorEnrichmentConfig);
+            for (Map.Entry<String, List<JSONMapObject>> task : tasks.entrySet()) {
                 EnrichmentAdapter<CacheKey> adapter = adapterMap.get(task.getKey());
-                for (JSONObject m : task.getValue()) {
+                for (JSONMapObject m : task.getValue()) {
                     collectData(sensorEnrichmentConfig, task, adapter, m, tmpMap, dataQualityMessages);
                 }
             }
@@ -155,14 +155,14 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
         }
     }
 
-    private void collectData(SensorEnrichmentConfig sensorEnrichmentConfig, Map.Entry<String, List<JSONObject>> task, EnrichmentAdapter<CacheKey> adapter, JSONObject m, Map<String, String> tmpMap, List<DataQualityMessage> dataQualityMessages) {
+    private void collectData(SensorEnrichmentConfig sensorEnrichmentConfig, Map.Entry<String, List<JSONMapObject>> task, EnrichmentAdapter<CacheKey> adapter, JSONMapObject m, Map<String, String> tmpMap, List<DataQualityMessage> dataQualityMessages) {
         for (Object fieldValue : m.entrySet()) {
             Map.Entry<String, Object> fieldValueEntry = (Map.Entry<String, Object>) fieldValue;
             String field = fieldValueEntry.getKey();
             Object value = fieldValueEntry.getValue();
             CacheKey cacheKey = new CacheKey(field, value, sensorEnrichmentConfig);
             try {
-                JSONObject enrichmentResults = adapter.enrich(cacheKey);
+                JSONMapObject enrichmentResults = adapter.enrich(cacheKey);
                 enrichmentResults.forEach((k, v) -> {
                     tmpMap.put((String) k, ObjectUtils.toString(v, "null"));
                 });

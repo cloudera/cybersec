@@ -17,7 +17,8 @@
  */
 package org.apache.metron.common.message.metadata;
 
-import org.json.simple.JSONObject;
+
+import org.apache.metron.stellar.common.JSONMapObject;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -57,7 +58,7 @@ public interface RawMessageStrategy extends Serializable {
    * @param mergeMetadata Whether to merge the metadata or not
    * @param config The config for the message strategy.
    */
-  void mergeMetadata( JSONObject message
+  void mergeMetadata( JSONMapObject message
                     , Map<String, Object> metadata
                     , boolean mergeMetadata
                     , Map<String, Object> config

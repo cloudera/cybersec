@@ -17,16 +17,16 @@
  */
 package org.apache.metron.parsers.filters;
 
-import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.parsers.interfaces.MessageFilter;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.apache.metron.stellar.dsl.Context;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class BroMessageFilter implements MessageFilter<JSONObject>{
+public class BroMessageFilter implements MessageFilter<JSONMapObject>{
 
   /**
    * Filter protocols based on whitelists and blacklists
@@ -67,7 +67,7 @@ public class BroMessageFilter implements MessageFilter<JSONObject>{
    */
 
   @Override
-  public boolean emit(JSONObject message, Context context) {
+  public boolean emit(JSONMapObject message, Context context) {
     String protocol = (String) message.get(_key);
     return _known_protocols.contains(protocol);
   }

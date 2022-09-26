@@ -23,7 +23,7 @@ import org.apache.metron.parsers.BasicParser;
 import org.apache.metron.parsers.DefaultMessageParserResult;
 import org.apache.metron.parsers.interfaces.MessageParser;
 import org.apache.metron.parsers.interfaces.MessageParserResult;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -33,9 +33,13 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class BasicParserTest {
 
@@ -54,12 +58,12 @@ public class BasicParserTest {
     }
 
     @Override
-    public Optional<MessageParserResult<JSONObject>> parseOptionalResult(byte[] parseMessage) {
+    public Optional<MessageParserResult<JSONMapObject>> parseOptionalResult(byte[] parseMessage) {
       String message = new String(parseMessage, getReadCharset());
       Map<String, Object> out = new HashMap<>();
       out.put(KEY1, message);
-      MessageParserResult<JSONObject> result = new DefaultMessageParserResult<>(
-              Collections.singletonList(new JSONObject(out)));
+      MessageParserResult<JSONMapObject> result = new DefaultMessageParserResult<>(
+              Collections.singletonList(new JSONMapObject(out)));
       return Optional.of(result);
     }
   }
@@ -123,9 +127,9 @@ public class BasicParserTest {
   public void parses_with_specified_encoding() {
     parserConfig.put(MessageParser.READ_CHARSET, StandardCharsets.UTF_16.toString());
     parserWithCharset.configure(parserConfig);
-    Optional<MessageParserResult<JSONObject>> result = parserWithCharset
+    Optional<MessageParserResult<JSONMapObject>> result = parserWithCharset
         .parseOptionalResult(SAMPLE_DATA.getBytes(StandardCharsets.UTF_16));
-    MessageParserResult<JSONObject> json = result.get();
+    MessageParserResult<JSONMapObject> json = result.get();
     assertEquals(json.getMessages().size(), 1);
     assertEquals(json.getMessages().get(0).get(KEY1), SAMPLE_DATA);
   }
@@ -134,9 +138,9 @@ public class BasicParserTest {
   public void values_will_not_match_when_specified_encoding_is_wrong() {
     parserConfig.put(MessageParser.READ_CHARSET, StandardCharsets.UTF_8.toString());
     parserWithCharset.configure(parserConfig);
-    Optional<MessageParserResult<JSONObject>> result = parserWithCharset
+    Optional<MessageParserResult<JSONMapObject>> result = parserWithCharset
         .parseOptionalResult(SAMPLE_DATA.getBytes(StandardCharsets.UTF_16));
-    MessageParserResult<JSONObject> json = result.get();
+    MessageParserResult<JSONMapObject> json = result.get();
     assertEquals(json.getMessages().size(), 1);
     assertNotEquals(json.getMessages().get(0).get(KEY1), SAMPLE_DATA);
   }
@@ -144,9 +148,9 @@ public class BasicParserTest {
   @Test
   public void parses_with_default_encoding_when_not_configured() {
     parserWithCharset.configure(parserConfig);
-    Optional<MessageParserResult<JSONObject>> result = parserWithCharset
+    Optional<MessageParserResult<JSONMapObject>> result = parserWithCharset
         .parseOptionalResult(SAMPLE_DATA.getBytes(StandardCharsets.UTF_8));
-    MessageParserResult<JSONObject> json = result.get();
+    MessageParserResult<JSONMapObject> json = result.get();
     assertEquals(json.getMessages().size(), 1);
     assertEquals(json.getMessages().get(0).get(KEY1), SAMPLE_DATA);
   }
@@ -154,9 +158,9 @@ public class BasicParserTest {
   @Test
   public void parses_with_default_encoding_from_basic_parser() {
     parserNoCharset.configure(parserConfig);
-    Optional<MessageParserResult<JSONObject>> result = parserNoCharset
+    Optional<MessageParserResult<JSONMapObject>> result = parserNoCharset
         .parseOptionalResult(SAMPLE_DATA.getBytes(StandardCharsets.UTF_8));
-    MessageParserResult<JSONObject> json = result.get();
+    MessageParserResult<JSONMapObject> json = result.get();
     assertEquals(json.getMessages().size(), 1);
     assertEquals(json.getMessages().get(0).get(KEY1), SAMPLE_DATA);
   }

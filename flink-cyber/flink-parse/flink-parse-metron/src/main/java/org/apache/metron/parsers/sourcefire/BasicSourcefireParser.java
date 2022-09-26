@@ -18,15 +18,16 @@
 
 package org.apache.metron.parsers.sourcefire;
 
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.metron.parsers.BasicParser;
-import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 public class BasicSourcefireParser extends BasicParser {
@@ -53,11 +54,11 @@ public class BasicSourcefireParser extends BasicParser {
 
 	@Override
 	@SuppressWarnings({ "unchecked", "unused" })
-	public List<JSONObject> parse(byte[] msg) {
+	public List<JSONMapObject> parse(byte[] msg) {
 
-		JSONObject payload = new JSONObject();
+		JSONMapObject payload = new JSONMapObject();
 		String toParse = "";
-		List<JSONObject> messages = new ArrayList<>();
+		List<JSONMapObject> messages = new ArrayList<>();
 		try {
 
 			toParse = new String(msg, getReadCharset());

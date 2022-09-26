@@ -17,7 +17,7 @@
  */
 package org.apache.metron.common.message.metadata;
 
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ public class DefaultRawMessageStrategy implements RawMessageStrategy {
    * @param config The config for the message strategy.
    */
   @Override
-  public void mergeMetadata(JSONObject message, Map<String, Object> metadata, boolean mergeMetadata, Map<String, Object> config) {
+  public void mergeMetadata(JSONMapObject message, Map<String, Object> metadata, boolean mergeMetadata, Map<String, Object> config) {
     if(mergeMetadata) {
       message.putAll(metadata);
     }

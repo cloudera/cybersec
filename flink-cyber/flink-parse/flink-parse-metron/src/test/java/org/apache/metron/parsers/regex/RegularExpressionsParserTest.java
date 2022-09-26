@@ -16,9 +16,7 @@ package org.apache.metron.parsers.regex;
 
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.parsers.interfaces.MessageParser;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +27,9 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RegularExpressionsParserTest {
 
@@ -114,9 +114,9 @@ public class RegularExpressionsParserTest {
         String message =
             "<38>Jun 20 15:01:17 deviceName sshd[11672]: Accepted publickey for prod from 22.22.22.22 port 55555 ssh2";
 
-        JSONObject parserConfig = (JSONObject) new JSONParser().parse(parserConfig1);
+        JSONMapObject parserConfig = new JSONMapObject(parserConfig1);
         regularExpressionsParser.configure(parserConfig);
-        JSONObject parsed = parse(message);
+        JSONMapObject parsed = parse(message);
         // Expected
         Map<String, Object> expectedJson = new HashMap<>();
         assertEquals(parsed.get("device_name"), "deviceName");
@@ -203,9 +203,9 @@ public class RegularExpressionsParserTest {
     public void testNoMessageHeaderRegex() throws Exception {
         String message =
             "<38>Jun 20 15:01:17 deviceName sshd[11672]: Accepted publickey for prod from 22.22.22.22 port 55555 ssh2";
-        JSONObject parserConfig = (JSONObject) new JSONParser().parse(parserConfigNoMessageHeader);
+        JSONMapObject parserConfig = new JSONMapObject(parserConfigNoMessageHeader);
         regularExpressionsParser.configure(parserConfig);
-        JSONObject parsed = parse(message);
+        JSONMapObject parsed = parse(message);
         // Expected
 
         assertEquals(parsed.get("dst_process_name"), "sshd");
@@ -239,7 +239,7 @@ public class RegularExpressionsParserTest {
 
     @Test
     public void testMalformedRegex() throws Exception {
-        JSONObject parserConfig = (JSONObject) new JSONParser().parse(invalidParserConfig);
+        JSONMapObject parserConfig = new JSONMapObject(invalidParserConfig);
         assertThrows(IllegalStateException.class, () -> regularExpressionsParser.configure(parserConfig));
     }
 
@@ -260,13 +260,13 @@ public class RegularExpressionsParserTest {
     //@formatter:on
 
     @Test
-    public void testNoRecordTypeRegex() throws Exception {
-        JSONObject parserConfig = (JSONObject) new JSONParser().parse(noRecordTypeParserConfig);
+    public void testNoRecordTypeRegex() {
+        JSONMapObject parserConfig = new JSONMapObject(noRecordTypeParserConfig);
         assertThrows(IllegalStateException.class, () -> regularExpressionsParser.configure(parserConfig));
     }
 
-    private JSONObject parse(String message) throws Exception {
-        List<JSONObject> result = regularExpressionsParser.parse(message.getBytes(
+    private JSONMapObject parse(String message) throws Exception {
+        List<JSONMapObject> result = regularExpressionsParser.parse(message.getBytes(
             StandardCharsets.UTF_8));
         if (result.size() > 0) {
             return result.get(0);
@@ -275,18 +275,18 @@ public class RegularExpressionsParserTest {
     }
 
     @Test
-    public void getsReadCharsetFromConfig() throws ParseException {
-        JSONObject config = (JSONObject) new JSONParser().parse(parserConfig1);
+    public void getsReadCharsetFromConfig() {
+        JSONMapObject config = new JSONMapObject(parserConfig1);
         config.put(MessageParser.READ_CHARSET, StandardCharsets.UTF_16.toString());
         regularExpressionsParser.configure(config);
         assertThat(regularExpressionsParser.getReadCharset(), equalTo(StandardCharsets.UTF_16));
     }
 
     @Test
-    public void getsReadCharsetFromDefault() throws ParseException {
-      JSONObject config = (JSONObject) new JSONParser().parse(parserConfig1);
-      regularExpressionsParser.configure(config);
-      assertThat(regularExpressionsParser.getReadCharset(), equalTo(StandardCharsets.UTF_8));
+    public void getsReadCharsetFromDefault() {
+        JSONMapObject config = new JSONMapObject(parserConfig1);
+        regularExpressionsParser.configure(config);
+        assertThat(regularExpressionsParser.getReadCharset(), equalTo(StandardCharsets.UTF_8));
     }
 
 }

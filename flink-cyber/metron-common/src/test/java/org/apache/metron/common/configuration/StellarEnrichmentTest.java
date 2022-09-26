@@ -20,7 +20,7 @@ package org.apache.metron.common.configuration;
 import com.google.common.collect.ImmutableList;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.utils.JSONUtils;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
 import java.io.IOException;
 import java.util.List;
@@ -219,9 +219,9 @@ public class StellarEnrichmentTest {
   @Multiline
   public static String message;
 
-  public static JSONObject getMessage() throws IOException {
+  public static JSONMapObject getMessage() throws IOException {
     Map<String, Object> ret = JSONUtils.INSTANCE.load(message, JSONUtils.MAP_SUPPLIER);
-    return new JSONObject(ret);
+    return new JSONMapObject(ret);
   }
 
 }

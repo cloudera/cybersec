@@ -23,9 +23,6 @@ package org.apache.metron.stellar.common;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.functions.resolver.ClasspathFunctionResolver;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -58,15 +55,14 @@ public class DefaultStellarStatefulExecutorTest {
   @Multiline
   private String input;
 
-  private JSONObject message;
+  private JSONMapObject message;
   private DefaultStellarStatefulExecutor executor;
 
   @BeforeEach
-  public void setup() throws ParseException {
+  public void setup() {
 
     // parse the input message
-    JSONParser parser = new JSONParser();
-    message = (JSONObject) parser.parse(input);
+    message = new JSONMapObject(input);
 
     // create the executor to test
     executor = new DefaultStellarStatefulExecutor();

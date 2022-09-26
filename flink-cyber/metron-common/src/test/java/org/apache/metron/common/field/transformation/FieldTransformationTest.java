@@ -26,8 +26,8 @@ import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.common.configuration.FieldTransformer;
 import org.apache.metron.common.configuration.SensorParserConfig;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.dsl.Context;
-import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -35,7 +35,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FieldTransformationTest {
   public static class TestTransformation implements FieldTransformation {
@@ -116,7 +118,7 @@ public class FieldTransformationTest {
 
     assertNotNull(handler);
     assertEquals(ImmutableMap.of("output", "field1=value1,field2=value2")
-                       ,handler.transform(new JSONObject(ImmutableMap.of("field1", "value1"
+                       ,handler.transform(new JSONMapObject(ImmutableMap.of("field1", "value1"
                                                                   ,"field2", "value2"
                                                                   )
                                                   )
@@ -132,7 +134,7 @@ public class FieldTransformationTest {
 
     assertNotNull(handler);
     assertEquals(ImmutableMap.of("protocol", "TCP")
-                       ,handler.transform(new JSONObject(ImmutableMap.of("protocol", 6))
+                       ,handler.transform(new JSONMapObject(ImmutableMap.of("protocol", 6))
                                          , Context.EMPTY_CONTEXT()
                                          , c.getParserConfig()
                                          )

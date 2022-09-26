@@ -17,16 +17,17 @@
  */
 package org.apache.metron.enrichment.adapters.geo;
 
+import org.apache.metron.enrichment.adapters.maxmind.geo.GeoLiteCityDatabase;
+import org.apache.metron.enrichment.cache.CacheKey;
+import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.metron.enrichment.adapters.maxmind.geo.GeoLiteCityDatabase;
-import org.apache.metron.enrichment.cache.CacheKey;
-import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
-import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GeoAdapter implements EnrichmentAdapter<CacheKey>, Serializable {
   protected static final Logger _LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -41,14 +42,14 @@ public class GeoAdapter implements EnrichmentAdapter<CacheKey>, Serializable {
   }
 
   @Override
-  public JSONObject enrich(CacheKey value) {
-    JSONObject enriched = new JSONObject();
+  public JSONMapObject enrich(CacheKey value) {
+    JSONMapObject enriched;
     Optional<Map<String, String>> result = GeoLiteCityDatabase.INSTANCE.get(value.coerceValue(String.class));
     if(!result.isPresent()) {
-      return new JSONObject();
+      return new JSONMapObject();
     }
 
-    enriched = new JSONObject(result.get());
+    enriched = new JSONMapObject(result.get());
     _LOG.trace("GEO Enrichment success: {}", enriched);
     return enriched;
   }

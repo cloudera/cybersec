@@ -20,6 +20,16 @@ package org.apache.metron.parsers.syslog;
 
 import com.github.palindromicity.syslog.SyslogParser;
 import com.github.palindromicity.syslog.dsl.SyslogFieldKeys;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.metron.parsers.DefaultMessageParserResult;
+import org.apache.metron.parsers.ParseException;
+import org.apache.metron.parsers.interfaces.MessageParser;
+import org.apache.metron.parsers.interfaces.MessageParserResult;
+import org.apache.metron.parsers.utils.SyslogUtils;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
@@ -38,26 +48,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.metron.parsers.DefaultMessageParserResult;
-import org.apache.metron.parsers.ParseException;
-import org.apache.metron.parsers.interfaces.MessageParser;
-import org.apache.metron.parsers.interfaces.MessageParserResult;
-import org.apache.metron.parsers.utils.SyslogUtils;
-import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
  * Parser for well structured RFC 5424 messages.
  */
-public abstract class BaseSyslogParser implements MessageParser<JSONObject>, Serializable {
+public abstract class BaseSyslogParser implements MessageParser<JSONMapObject>, Serializable {
 
   protected static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
   private Charset readCharset;
-  private Optional<Consumer<JSONObject>> messageProcessorOptional = Optional.empty();
+  private Optional<Consumer<JSONMapObject>> messageProcessorOptional = Optional.empty();
   private transient SyslogParser syslogParser;
   protected Clock deviceClock;
 
@@ -65,7 +66,7 @@ public abstract class BaseSyslogParser implements MessageParser<JSONObject>, Ser
     this.syslogParser = syslogParser;
   }
 
-  protected void setMessageProcessor(Consumer<JSONObject> function) {
+  protected void setMessageProcessor(Consumer<JSONMapObject> function) {
     this.messageProcessorOptional = Optional.of(function);
   }
 
@@ -89,7 +90,7 @@ public abstract class BaseSyslogParser implements MessageParser<JSONObject>, Ser
   public void init(){}
 
   @Override
-  public boolean validate(JSONObject message) {
+  public boolean validate(JSONMapObject message) {
     if (!(message.containsKey("original_string"))) {
       LOG.trace("[Metron] Message does not have original_string: {}", message);
       return false;
@@ -104,18 +105,18 @@ public abstract class BaseSyslogParser implements MessageParser<JSONObject>, Ser
 
   @Override
   @SuppressWarnings("unchecked")
-  public Optional<MessageParserResult<JSONObject>> parseOptionalResult(byte[] rawMessage) {
+  public Optional<MessageParserResult<JSONMapObject>> parseOptionalResult(byte[] rawMessage) {
     try {
       if (rawMessage == null || rawMessage.length == 0) {
         return Optional.empty();
       }
 
       String originalString = new String(rawMessage, getReadCharset());
-      final List<JSONObject> returnList = new ArrayList<>();
+      final List<JSONMapObject> returnList = new ArrayList<>();
       Map<Object,Throwable> errorMap = new HashMap<>();
       try (Reader reader = new BufferedReader(new StringReader(originalString))) {
         syslogParser.parseLines(reader, (m) -> {
-          JSONObject jsonObject = new JSONObject(m);
+          JSONMapObject jsonObject = new JSONMapObject(m);
           // be sure to put in the original string, and the timestamp.
           // we wil just copy over the timestamp from the syslog
           jsonObject.put("original_string", originalString);
@@ -129,17 +130,17 @@ public abstract class BaseSyslogParser implements MessageParser<JSONObject>, Ser
           returnList.add(jsonObject);
         },errorMap::put);
 
-        return Optional.of(new DefaultMessageParserResult<JSONObject>(returnList,errorMap));
+        return Optional.of(new DefaultMessageParserResult<JSONMapObject>(returnList,errorMap));
       }
     } catch (IOException e) {
       String message = "Unable to read buffer " + new String(rawMessage, StandardCharsets.UTF_8) + ": " + e.getMessage();
       LOG.error(message, e);
-      return Optional.of(new DefaultMessageParserResult<JSONObject>( new IllegalStateException(message, e)));
+      return Optional.of(new DefaultMessageParserResult<JSONMapObject>( new IllegalStateException(message, e)));
     }
   }
 
   @SuppressWarnings("unchecked")
-  private void setTimestamp(JSONObject message) throws ParseException {
+  private void setTimestamp(JSONMapObject message) throws ParseException {
     String timeStampString = (String) message.get(SyslogFieldKeys.HEADER_TIMESTAMP.getField());
     if (!StringUtils.isBlank(timeStampString) && !timeStampString.equals("-")) {
       message.put("timestamp", SyslogUtils.parseTimestampToEpochMillis(timeStampString, deviceClock));

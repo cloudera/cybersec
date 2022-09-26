@@ -17,14 +17,12 @@
  */
 package org.apache.metron.parsers.bro;
 
+import org.apache.metron.stellar.common.JSONMapObject;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 public class JSONCleaner implements Serializable {
 
@@ -37,17 +35,13 @@ public class JSONCleaner implements Serializable {
 	/**
 	 * @param jsonString
 	 * @return
-	 * @throws ParseException
 	 * Takes a json String as input and modifies the keys to remove any characters other than . _ a-z A-Z or 0-9
 	 */
 	@SuppressWarnings({"unchecked","rawtypes"})
-	public JSONObject clean(String jsonString) throws ParseException
+	public JSONMapObject clean(String jsonString)
 	{
-		JSONParser parser = new JSONParser();
-		
-		
-		Map json = (Map) parser.parse(jsonString);
-		JSONObject output = new JSONObject();
+		Map json = new JSONMapObject(jsonString);
+		JSONMapObject output = new JSONMapObject();
 	    Iterator iter = json.entrySet().iterator();
 
 		 while(iter.hasNext()){
@@ -76,8 +70,8 @@ public class JSONCleaner implements Serializable {
 			  obj.put("nickname",null);
 			Map obj1 = new HashMap();
 			obj1.put("sourcefile", obj);
-			
-			JSONObject json = new JSONObject(obj1);
+
+			JSONMapObject json = new JSONMapObject(obj1);
 			System.out.println(json);
 			  
 			  

@@ -23,10 +23,8 @@ import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.dsl.Context;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -74,7 +72,7 @@ public class GeoLiteCityDatabaseTest {
    */
   @Multiline
   private static String expectedNoDmaMessageString;
-  private static JSONObject expectedNoDmaMessage;
+  private static JSONMapObject expectedNoDmaMessage;
 
   /**
    * {
@@ -90,7 +88,7 @@ public class GeoLiteCityDatabaseTest {
    */
   @Multiline
   private static String expectedDmaMessageString;
-  private static JSONObject expectedDmaMessage;
+  private static JSONMapObject expectedDmaMessage;
 
 
   /**
@@ -107,7 +105,7 @@ public class GeoLiteCityDatabaseTest {
    */
   @Multiline
   private static String expectedMessageStringTarGz;
-  private static JSONObject expectedMessageTarGz;
+  private static JSONMapObject expectedMessageTarGz;
 
   private static FileSystem fs;
 
@@ -115,11 +113,10 @@ public class GeoLiteCityDatabaseTest {
   public TemporaryFolder testFolder = new TemporaryFolder();
 
   @BeforeAll
-  public static void setupOnce() throws ParseException, IOException {
-    JSONParser jsonParser = new JSONParser();
-    expectedNoDmaMessage = (JSONObject) jsonParser.parse(expectedNoDmaMessageString);
-    expectedDmaMessage = (JSONObject) jsonParser.parse(expectedDmaMessageString);
-    expectedMessageTarGz = (JSONObject) jsonParser.parse(expectedMessageStringTarGz);
+  public static void setupOnce() throws IOException {
+    expectedNoDmaMessage = new JSONMapObject(expectedNoDmaMessageString);
+    expectedDmaMessage = new JSONMapObject(expectedDmaMessageString);
+    expectedMessageTarGz = new JSONMapObject(expectedMessageStringTarGz);
 
     String baseDir = TestUtils.findDir("GeoLite");
     geoHdfsFile = new File(new File(baseDir), GEO_CITY_FILE_NAME);

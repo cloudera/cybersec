@@ -17,30 +17,28 @@
  */
 package org.apache.metron.parsers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
-
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
+import org.apache.metron.parsers.interfaces.MessageParserResult;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.junit.jupiter.api.Test;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.metron.parsers.interfaces.MessageParserResult;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public abstract class GrokParserTest {
 
   @Test
-  public void test() throws ParseException {
+  public void test() throws ParseException, org.json.simple.parser.ParseException {
 
     Map<String, Object> parserConfig = new HashMap<>();
     parserConfig.put("grokPath", getGrokPath());
@@ -53,23 +51,22 @@ public abstract class GrokParserTest {
     grokParser.configure(parserConfig);
     grokParser.init();
 
-    JSONParser jsonParser = new JSONParser();
     Map<String,String> testData = getTestData();
     for( Map.Entry<String,String> e : testData.entrySet() ){
 
-      JSONObject expected = (JSONObject) jsonParser.parse(e.getValue());
+      JSONMapObject expected = new JSONMapObject(e.getValue());
       byte[] rawMessage = e.getKey().getBytes(StandardCharsets.UTF_8);
-      Optional<MessageParserResult<JSONObject>> resultOptional = grokParser.parseOptionalResult(rawMessage);
+      Optional<MessageParserResult<JSONMapObject>> resultOptional = grokParser.parseOptionalResult(rawMessage);
       assertNotNull(resultOptional);
       assertTrue(resultOptional.isPresent());
-      List<JSONObject> parsedList = resultOptional.get().getMessages();
+      List<JSONMapObject> parsedList = resultOptional.get().getMessages();
       assertEquals(1, parsedList.size());
       compare(expected, parsedList.get(0));
     }
 
   }
 
-  public boolean compare(JSONObject expected, JSONObject actual) {
+  public boolean compare(JSONMapObject expected, JSONMapObject actual) {
     MapDifference mapDifferences = Maps.difference(expected, actual);
     if (mapDifferences.entriesOnlyOnLeft().size() > 0) {
       fail("Expected JSON has extra parameters: " + mapDifferences.entriesOnlyOnLeft());

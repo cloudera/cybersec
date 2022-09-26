@@ -29,22 +29,23 @@ import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
 import com.jayway.jsonpath.spi.json.JsonProvider;
 import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.metron.common.utils.JSONUtils;
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.stellar.common.JSONMapObject;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.metron.common.utils.JSONUtils;
-import org.apache.metron.parsers.BasicParser;
-import org.json.simple.JSONObject;
 
 public class JSONMapParser extends BasicParser {
 
   private interface Handler {
 
-    JSONObject handle(String key, Map value, JSONObject obj);
+    JSONMapObject handle(String key, Map value, JSONMapObject obj);
   }
 
   @SuppressWarnings("unchecked")
@@ -65,7 +66,7 @@ public class JSONMapParser extends BasicParser {
     }
 
     @SuppressWarnings("unchecked")
-    private static JSONObject recursiveUnfold(String key, Map value, JSONObject obj) {
+    private static JSONMapObject recursiveUnfold(String key, Map value, JSONMapObject obj) {
       Set<Map.Entry<Object, Object>> entrySet = value.entrySet();
       for (Map.Entry<Object, Object> kv : entrySet) {
         String newKey = Joiner.on(".").join(key, kv.getKey().toString());
@@ -79,7 +80,7 @@ public class JSONMapParser extends BasicParser {
     }
 
     @Override
-    public JSONObject handle(String key, Map value, JSONObject obj) {
+    public JSONMapObject handle(String key, Map value, JSONMapObject obj) {
       return handler.handle(key, value, obj);
     }
 
@@ -168,7 +169,7 @@ public class JSONMapParser extends BasicParser {
    */
   @Override
   @SuppressWarnings("unchecked")
-  public List<JSONObject> parse(byte[] rawMessage) {
+  public List<JSONMapObject> parse(byte[] rawMessage) {
     try {
       String rawString = new String(rawMessage, getReadCharset());
       List<Map<String, Object>> messages = new ArrayList<>();
@@ -187,13 +188,13 @@ public class JSONMapParser extends BasicParser {
         messages.add(JSONUtils.INSTANCE.load(rawString, JSONUtils.MAP_SUPPLIER));
       }
 
-      ArrayList<JSONObject> parsedMessages = new ArrayList<>();
+      ArrayList<JSONMapObject> parsedMessages = new ArrayList<>();
       for (Map<String, Object> rawMessageMap : messages) {
-        JSONObject ret = normalizeJson(rawMessageMap);
+        JSONMapObject ret = normalizeJson(rawMessageMap);
         if (overrideOriginalString) {
           // override the global system default, which is to add the raw message as original_string
           // the original string is the original for THIS sub message
-          JSONObject originalJsonObject = new JSONObject(rawMessageMap);
+          JSONMapObject originalJsonObject = new JSONMapObject(rawMessageMap);
           ret.put("original_string", originalJsonObject.toJSONString());
         }
         if (!ret.containsKey("timestamp")) {
@@ -214,8 +215,8 @@ public class JSONMapParser extends BasicParser {
    * We have standardized on one-dimensional maps as our data model.
    */
   @SuppressWarnings("unchecked")
-  private JSONObject normalizeJson(Map<String, Object> map) {
-    JSONObject ret = new JSONObject();
+  private JSONMapObject normalizeJson(Map<String, Object> map) {
+    JSONMapObject ret = new JSONMapObject();
     for (Map.Entry<String, Object> kv : map.entrySet()) {
       if (kv.getValue() instanceof Map) {
         mapStrategy.handle(kv.getKey(), (Map) kv.getValue(), ret);

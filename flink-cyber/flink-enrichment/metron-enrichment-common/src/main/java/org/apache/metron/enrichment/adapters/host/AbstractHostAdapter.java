@@ -18,15 +18,14 @@
 
 package org.apache.metron.enrichment.adapters.host;
 
-import java.io.Serializable;
-import java.util.Map;
-
 import org.apache.metron.enrichment.cache.CacheKey;
-import org.json.simple.JSONObject;
+import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
+import java.io.Serializable;
+import java.util.Map;
 
 public abstract class AbstractHostAdapter implements EnrichmentAdapter<CacheKey>,
 				Serializable{
@@ -41,7 +40,7 @@ public abstract class AbstractHostAdapter implements EnrichmentAdapter<CacheKey>
 	@Override
 	abstract public boolean initializeAdapter(Map<String, Object> config);
 	@Override
-	abstract public JSONObject enrich(CacheKey metadata);
+	abstract public JSONMapObject enrich(CacheKey metadata);
 
 	@Override
 	public void cleanup() {

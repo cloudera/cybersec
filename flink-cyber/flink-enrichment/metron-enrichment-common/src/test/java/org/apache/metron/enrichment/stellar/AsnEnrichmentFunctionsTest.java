@@ -21,11 +21,11 @@ package org.apache.metron.enrichment.stellar;
 import com.cloudera.cyber.TestUtils;
 import com.google.common.collect.ImmutableMap;
 import org.apache.metron.enrichment.adapters.maxmind.asn.GeoLiteAsnDatabase;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.common.StellarProcessor;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.DefaultVariableResolver;
 import org.apache.metron.stellar.dsl.StellarFunctions;
-import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,15 +35,18 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AsnEnrichmentFunctionsTest {
 
   private static Context context;
   private static File asnHdfsFile;
 
-  private static JSONObject expectedMessage = new JSONObject();
-  private static JSONObject expectedSubsetMessage = new JSONObject();
+  private static JSONMapObject expectedMessage = new JSONMapObject();
+  private static JSONMapObject expectedSubsetMessage = new JSONMapObject();
 
   @BeforeAll
   @SuppressWarnings("unchecked")

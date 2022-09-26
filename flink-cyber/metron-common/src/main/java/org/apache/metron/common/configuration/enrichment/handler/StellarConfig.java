@@ -17,14 +17,20 @@
  */
 package org.apache.metron.common.configuration.enrichment.handler;
 
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.common.StellarAssignment;
 import org.apache.metron.stellar.common.StellarProcessor;
 import org.apache.metron.stellar.dsl.VariableResolver;
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 public class StellarConfig implements Config {
@@ -73,33 +79,33 @@ public class StellarConfig implements Config {
   }
 
   @Override
-  public List<JSONObject> splitByFields( JSONObject message
+  public List<JSONMapObject> splitByFields( JSONMapObject message
                                  , Object fields
                                  , Function<String, String> fieldToEnrichmentKey
                                  , Iterable<Map.Entry<String, Object>> config
                                  )
   {
     StellarProcessor processor = new StellarProcessor();
-    List<JSONObject> messages = new ArrayList<>();
+    List<JSONMapObject> messages = new ArrayList<>();
     List<String> defaultStellarStatementGroup = new ArrayList<>();
     for(Map.Entry<String, Object> kv : config) {
       if(kv.getValue() instanceof String) {
         defaultStellarStatementGroup.add((String)kv.getValue());
       }
       else if(kv.getValue() instanceof Map) {
-        JSONObject ret = new JSONObject();
+        JSONMapObject ret = new JSONMapObject();
         ret.put(kv.getKey(), getMessage(getFields(processor, (Map)kv.getValue()), message));
         messages.add(ret);
       }
       else if(kv.getValue() instanceof List) {
-        JSONObject ret = new JSONObject();
+        JSONMapObject ret = new JSONMapObject();
         ret.put(kv.getKey(), getMessage(getFields(processor, (List)kv.getValue()), message));
         messages.add(ret);
       }
     }
     if(defaultStellarStatementGroup.size() > 0)
     {
-      JSONObject ret = new JSONObject();
+      JSONMapObject ret = new JSONMapObject();
       ret.put("", getMessage(getFields(processor, defaultStellarStatementGroup), message));
       messages.add(ret);
     }
@@ -138,7 +144,7 @@ public class StellarConfig implements Config {
   }
 
   private Map<String, Object> getMessage( Set<String> stellarFields
-                                        , JSONObject message
+                                        , JSONMapObject message
                                         )
   {
 

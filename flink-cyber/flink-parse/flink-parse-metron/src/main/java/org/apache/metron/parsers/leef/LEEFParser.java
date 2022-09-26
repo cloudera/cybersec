@@ -17,6 +17,18 @@
  */
 package org.apache.metron.parsers.leef;
 
+import org.apache.metron.common.Constants.Fields;
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.parsers.DefaultMessageParserResult;
+import org.apache.metron.parsers.ParseException;
+import org.apache.metron.parsers.cef.CEFParser;
+import org.apache.metron.parsers.interfaces.MessageParserResult;
+import org.apache.metron.parsers.utils.DateUtils;
+import org.apache.metron.parsers.utils.SyslogUtils;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -30,17 +42,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.metron.common.Constants.Fields;
-import org.apache.metron.parsers.BasicParser;
-import org.apache.metron.parsers.DefaultMessageParserResult;
-import org.apache.metron.parsers.ParseException;
-import org.apache.metron.parsers.cef.CEFParser;
-import org.apache.metron.parsers.interfaces.MessageParserResult;
-import org.apache.metron.parsers.utils.DateUtils;
-import org.apache.metron.parsers.utils.SyslogUtils;
-import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * LEEF Parser
@@ -129,8 +130,8 @@ public class LEEFParser extends BasicParser {
     pattern = Pattern.compile(sb.toString());
   }
 
-  public Optional<MessageParserResult<JSONObject>> parseOptionalResult(byte[] rawMessage) {
-    List<JSONObject> messages = new ArrayList<>();
+  public Optional<MessageParserResult<JSONMapObject>> parseOptionalResult(byte[] rawMessage) {
+    List<JSONMapObject> messages = new ArrayList<>();
     Map<Object,Throwable> errors = new HashMap<>();
     String originalMessage = null;
 
@@ -138,7 +139,7 @@ public class LEEFParser extends BasicParser {
       while ((originalMessage = reader.readLine()) != null) {
         Matcher matcher = pattern.matcher(originalMessage);
         while (matcher.find()) {
-          JSONObject obj = new JSONObject();
+          JSONMapObject obj = new JSONMapObject();
           if (!matcher.matches()) {
             break;
           }
@@ -256,7 +257,7 @@ public class LEEFParser extends BasicParser {
   }
 
   @SuppressWarnings("unchecked")
-  private JSONObject convertToInt(JSONObject obj, String key) {
+  private JSONMapObject convertToInt(JSONMapObject obj, String key) {
     if (obj.containsKey(key)) {
       obj.put(key, Integer.valueOf((String) obj.get(key)));
     }
@@ -273,7 +274,7 @@ public class LEEFParser extends BasicParser {
   }
 
   @SuppressWarnings("unchecked")
-  private JSONObject mutate(JSONObject json, String oldKey, String newKey) {
+  private JSONMapObject mutate(JSONMapObject json, String oldKey, String newKey) {
     if (json.containsKey(oldKey)) {
       json.put(newKey, json.remove(oldKey));
     }

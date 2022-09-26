@@ -17,14 +17,14 @@
  */
 package org.apache.metron.parsers.logstash;
 
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.stellar.common.JSONMapObject;
+
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.metron.parsers.BasicParser;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 
 public class BasicLogstashParser extends BasicParser {
 
@@ -39,8 +39,8 @@ public class BasicLogstashParser extends BasicParser {
 	}
 
 	@Override
-	public List<JSONObject> parse(byte[] raw_message) {
-		List<JSONObject> messages = new ArrayList<>();
+	public List<JSONMapObject> parse(byte[] raw_message) {
+		List<JSONMapObject> messages = new ArrayList<>();
 		try {
 			
 			/*
@@ -48,9 +48,8 @@ public class BasicLogstashParser extends BasicParser {
 			 * not serializable and the parser is created on the storm nimbus
 			 * node, then transfered to the workers.
 			 */
-			JSONParser jsonParser = new JSONParser();
 			String rawString = new String(raw_message, StandardCharsets.UTF_8);
-			JSONObject rawJson = (JSONObject) jsonParser.parse(rawString);
+			JSONMapObject rawJson = new JSONMapObject(rawString);
 			
 			// remove logstash meta fields
 			rawJson.remove("@version");
@@ -77,7 +76,7 @@ public class BasicLogstashParser extends BasicParser {
 		}	
 	}
 	
-	private JSONObject mutate(JSONObject json, String oldKey, String newKey) {
+	private JSONMapObject mutate(JSONMapObject json, String oldKey, String newKey) {
 		if (json.containsKey(oldKey)) {
 			json.put(newKey, json.remove(oldKey));
 		}	

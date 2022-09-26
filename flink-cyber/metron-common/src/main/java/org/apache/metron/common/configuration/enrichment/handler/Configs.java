@@ -17,9 +17,9 @@
  */
 package org.apache.metron.common.configuration.enrichment.handler;
 
-import org.json.simple.JSONObject;
 
-import java.util.Collection;
+import org.apache.metron.stellar.common.JSONMapObject;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -34,7 +34,7 @@ public enum Configs implements Config {
   }
 
   @Override
-  public List<JSONObject> splitByFields(JSONObject message
+  public List<JSONMapObject> splitByFields(JSONMapObject message
                                  , Object fields
                                  , Function<String, String> fieldToEnrichmentKey
                                  , Iterable<Map.Entry<String, Object>> config

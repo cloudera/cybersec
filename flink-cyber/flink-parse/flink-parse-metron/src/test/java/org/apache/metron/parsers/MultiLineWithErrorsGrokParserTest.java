@@ -19,17 +19,23 @@ package org.apache.metron.parsers;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.metron.parsers.interfaces.MessageParserResult;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MultiLineWithErrorsGrokParserTest {
 
@@ -53,7 +59,6 @@ public class MultiLineWithErrorsGrokParserTest {
     grokParser.configure(parserConfig);
     grokParser.init();
 
-    JSONParser jsonParser = new JSONParser();
     Map<String, String> testData = getTestData();
     for (Map.Entry<String, String> e : testData.entrySet()) {
       byte[] rawMessage = e.getKey().getBytes(StandardCharsets.UTF_8);
@@ -82,14 +87,13 @@ public class MultiLineWithErrorsGrokParserTest {
     grokParser.configure(parserConfig);
     grokParser.init();
 
-    JSONParser jsonParser = new JSONParser();
     Map<String, String> testData = getTestData();
     for (Map.Entry<String, String> e : testData.entrySet()) {
       byte[] rawMessage = e.getKey().getBytes(StandardCharsets.UTF_8);
-      Optional<MessageParserResult<JSONObject>> resultOptional = grokParser.parseOptionalResult(rawMessage);
+      Optional<MessageParserResult<JSONMapObject>> resultOptional = grokParser.parseOptionalResult(rawMessage);
       assertTrue(resultOptional.isPresent());
       Optional<Throwable> throwableOptional = resultOptional.get().getMasterThrowable();
-      List<JSONObject>  resultList = resultOptional.get().getMessages();
+      List<JSONMapObject>  resultList = resultOptional.get().getMessages();
       Map<Object,Throwable> errorMap = resultOptional.get().getMessageThrowables();
       assertFalse(throwableOptional.isPresent());
       assertEquals(3, errorMap.size());

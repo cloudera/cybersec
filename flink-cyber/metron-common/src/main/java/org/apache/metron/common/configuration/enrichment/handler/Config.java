@@ -18,10 +18,8 @@
 package org.apache.metron.common.configuration.enrichment.handler;
 
 
-import com.google.common.collect.ImmutableList;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -38,13 +36,13 @@ public interface Config {
    * @param config The config to use
    * @return A list of Json objects that have been split from the message.
    */
-  List<JSONObject> splitByFields( JSONObject message
+  List<JSONMapObject> splitByFields( JSONMapObject message
                           , Object fields
                           , Function<String, String> fieldToEnrichmentKey
                           , Iterable<Map.Entry<String, Object>> config
                           );
 
-  default List<JSONObject> splitByFields( JSONObject message
+  default List<JSONMapObject> splitByFields( JSONMapObject message
                           , Object fields
                           , Function<String, String> fieldToEnrichmentKey
                           , ConfigHandler handler

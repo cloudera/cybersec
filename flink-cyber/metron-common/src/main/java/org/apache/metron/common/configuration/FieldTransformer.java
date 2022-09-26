@@ -20,16 +20,17 @@ package org.apache.metron.common.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ImmutableList;
+import org.apache.metron.common.field.transformation.FieldTransformation;
+import org.apache.metron.common.field.transformation.FieldTransformations;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.apache.metron.stellar.dsl.Context;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.metron.common.field.transformation.FieldTransformation;
-import org.apache.metron.common.field.transformation.FieldTransformations;
-import org.apache.metron.stellar.dsl.Context;
-import org.json.simple.JSONObject;
 
 /**
  * Performs an {@link FieldTransformation} on Json.
@@ -134,7 +135,7 @@ public class FieldTransformer implements Serializable {
    * @param sensorConfig Map of the sensor config
    * @return A map of field -> value
    */
-  public Map<String, Object> transform(JSONObject input, Context context, Map<String, Object>... sensorConfig) {
+  public Map<String, Object> transform(JSONMapObject input, Context context, Map<String, Object>... sensorConfig) {
     if(getInput() == null || getInput().isEmpty()) {
       return transformation.map(input, getOutput(), config, context, sensorConfig);
     }
@@ -155,7 +156,7 @@ public class FieldTransformer implements Serializable {
    * @param context The Stellar context of the transformation
    * @param sensorConfig Map of the sensor config
    */
-  public void transformAndUpdate(JSONObject message, Context context, Map<String, Object>... sensorConfig) {
+  public void transformAndUpdate(JSONMapObject message, Context context, Map<String, Object>... sensorConfig) {
     Map<String, Object> currentValue = transform(message, context, sensorConfig);
     if(currentValue != null) {
       for(Map.Entry<String, Object> kv : currentValue.entrySet()) {

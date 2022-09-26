@@ -19,9 +19,7 @@ package org.apache.metron.parsers.fireeye;
 
 import org.apache.metron.parsers.AbstractParserConfigTest;
 import org.apache.metron.parsers.interfaces.MessageParser;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +33,9 @@ import java.util.Map.Entry;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class BasicFireEyeParserTest extends AbstractParserConfigTest {
 
@@ -47,14 +47,13 @@ public class BasicFireEyeParserTest extends AbstractParserConfigTest {
 
   @SuppressWarnings({"rawtypes"})
   @Test
-  public void testParse() throws ParseException {
+  public void testParse()  {
     for (String inputString : inputStrings) {
-      JSONObject parsed = parser.parse(inputString.getBytes(StandardCharsets.UTF_8)).get(0);
+      JSONMapObject parsed = parser.parse(inputString.getBytes(StandardCharsets.UTF_8)).get(0);
       assertNotNull(parsed);
 
-      JSONParser parser = new JSONParser();
 
-      Map json = (Map) parser.parse(parsed.toJSONString());
+      Map json = new JSONMapObject(parsed.toJSONString());
 
       assertNotNull(json);
       assertFalse(json.isEmpty());
@@ -72,10 +71,10 @@ public class BasicFireEyeParserTest extends AbstractParserConfigTest {
 
   @SuppressWarnings("rawtypes")
   @Test
-  public void testTimestampParsing() throws ParseException {
-    JSONObject parsed = parser.parse(fireeyeMessage.getBytes(StandardCharsets.UTF_8)).get(0);
-    JSONParser parser = new JSONParser();
-    Map json = (Map) parser.parse(parsed.toJSONString());
+  public void testTimestampParsing() {
+    JSONMapObject parsed = parser.parse(fireeyeMessage.getBytes(StandardCharsets.UTF_8)).get(0);
+
+    Map json = new JSONMapObject(parsed.toJSONString());
     long expectedTimestamp = ZonedDateTime.of(Year.now(ZoneOffset.UTC).getValue(), 3, 19, 5, 24, 39, 0, ZoneOffset.UTC).toInstant().toEpochMilli();
     assertEquals(expectedTimestamp, json.get("timestamp"));
   }

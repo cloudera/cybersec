@@ -19,15 +19,16 @@
 package org.apache.metron.common.configuration;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.metron.common.field.validation.FieldValidation;
+import org.apache.metron.common.field.validation.FieldValidations;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.apache.metron.stellar.dsl.Context;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.metron.common.field.validation.FieldValidation;
-import org.apache.metron.common.field.validation.FieldValidations;
-import org.apache.metron.stellar.dsl.Context;
-import org.json.simple.JSONObject;
 
 /**
  * Allows for the ability to run validations across messages that are being passed through the
@@ -123,7 +124,7 @@ public class FieldValidator implements Serializable {
    * @param context The Stellar context of the validation
    * @return true if valid, false otherwise
    */
-  public boolean isValid(JSONObject inputData, Map<String, Object> globalConfig, Context context) {
+  public boolean isValid(JSONMapObject inputData, Map<String, Object> globalConfig, Context context) {
     Map<String, Object> in = inputData;
     if(input != null && !input.isEmpty()) {
       in = new HashMap<>();

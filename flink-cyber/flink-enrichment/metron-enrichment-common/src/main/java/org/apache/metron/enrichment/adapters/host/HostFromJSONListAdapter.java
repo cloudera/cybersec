@@ -18,9 +18,8 @@
 package org.apache.metron.enrichment.adapters.host;
 
 import org.apache.metron.enrichment.cache.CacheKey;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.json.JSONArray;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,13 +27,13 @@ import java.util.Map;
 
 public class HostFromJSONListAdapter extends AbstractHostAdapter {
 
-  Map<String, JSONObject> _known_hosts = new HashMap<>();
+  Map<String, JSONMapObject> _known_hosts = new HashMap<>();
 
   public HostFromJSONListAdapter(String jsonList) {
-    JSONArray jsonArray = (JSONArray) JSONValue.parse(jsonList);
+    JSONArray jsonArray = new JSONArray(jsonList);
     Iterator jsonArrayIterator = jsonArray.iterator();
     while(jsonArrayIterator.hasNext()) {
-      JSONObject jsonObject = (JSONObject) jsonArrayIterator.next();
+      JSONMapObject jsonObject = (JSONMapObject) jsonArrayIterator.next();
       String host = (String) jsonObject.remove("ip");
       _known_hosts.put(host, jsonObject);
     }
@@ -66,15 +65,15 @@ public class HostFromJSONListAdapter extends AbstractHostAdapter {
 
   @SuppressWarnings("unchecked")
   @Override
-  public JSONObject enrich(CacheKey k) {
+  public JSONMapObject enrich(CacheKey k) {
     String metadata = k.coerceValue(String.class);
 
     if(!_known_hosts.containsKey(metadata))
-      return new JSONObject();
+      return new JSONMapObject();
 
-    JSONObject enrichment = new JSONObject();
+    JSONMapObject enrichment = new JSONMapObject();
     String prefix = "known_info.";
-    JSONObject knownInfo = _known_hosts.get(metadata);
+    JSONMapObject knownInfo = _known_hosts.get(metadata);
     for(Object key: knownInfo.keySet()) {
       enrichment.put(prefix + key, knownInfo.get(key));
     }

@@ -20,9 +20,7 @@ package org.apache.metron.parsers.lancope;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import org.apache.metron.parsers.AbstractParserConfigTest;
 import org.apache.metron.parsers.interfaces.MessageParser;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -50,14 +48,12 @@ public class BasicLancopeParserTest extends AbstractParserConfigTest {
   }
 
   @Test
-  public void testParse() throws ParseException, IOException, ProcessingException {
+  public void testParse() throws IOException, ProcessingException {
     for (String inputString : inputStrings) {
-      JSONObject parsed = parser.parse(inputString.getBytes(StandardCharsets.UTF_8)).get(0);
+      JSONMapObject parsed = parser.parse(inputString.getBytes(StandardCharsets.UTF_8)).get(0);
       assertNotNull(parsed);
 
-      JSONParser parser = new JSONParser();
-
-      Map<?, ?> json = (Map<?, ?>) parser.parse(parsed.toJSONString());
+      Map<?, ?> json = new JSONMapObject(parsed.toJSONString());
       assertTrue(validateJsonData(getSchemaJsonString(), json.toString()));
     }
   }

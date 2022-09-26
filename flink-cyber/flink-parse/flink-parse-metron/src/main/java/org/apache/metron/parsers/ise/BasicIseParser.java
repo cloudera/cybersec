@@ -20,14 +20,15 @@
 package org.apache.metron.parsers.ise;
 
 import com.esotericsoftware.minlog.Log;
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.metron.parsers.BasicParser;
-import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 public class BasicIseParser extends BasicParser {
@@ -48,10 +49,10 @@ public class BasicIseParser extends BasicParser {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<JSONObject> parse(byte[] msg) {
+	public List<JSONMapObject> parse(byte[] msg) {
 	
 		String raw_message = "";
-		List<JSONObject> messages = new ArrayList<>();
+		List<JSONMapObject> messages = new ArrayList<>();
 		try {
 
 			raw_message = new String(msg, getReadCharset());
@@ -62,7 +63,7 @@ public class BasicIseParser extends BasicParser {
 			 */
 			_parser.ReInit(new StringReader("header=" + raw_message.trim()));
 
-			JSONObject payload = _parser.parseObject();
+			JSONMapObject payload = _parser.parseObject();
 
 			String ip_src_addr = (String) payload.get("Device IP Address");
 			String ip_src_port = (String) payload.get("Device Port");
@@ -92,7 +93,7 @@ public class BasicIseParser extends BasicParser {
 	}
 
 	@Override
-	public boolean validate(JSONObject message) {
+	public boolean validate(JSONMapObject message) {
 		return true;
 	}
 

@@ -17,10 +17,11 @@
  */
 package org.apache.metron.common.error;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.metron.stellar.common.Constants.ERROR_TYPE;
-import static org.apache.metron.stellar.common.Constants.ErrorFields;
-import static org.apache.metron.stellar.common.Constants.ErrorType;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.metron.common.utils.HashUtils;
+import org.apache.metron.stellar.common.Constants;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.json.JSONArray;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -34,11 +35,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.metron.common.utils.HashUtils;
-import org.apache.metron.stellar.common.Constants;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.metron.stellar.common.Constants.ERROR_TYPE;
+import static org.apache.metron.stellar.common.Constants.ErrorFields;
+import static org.apache.metron.stellar.common.Constants.ErrorType;
 
 public class MetronError {
 
@@ -115,8 +115,8 @@ public class MetronError {
    * @return The resulting json object
    */
   @SuppressWarnings({"unchecked"})
-  public JSONObject getJSONObject() {
-    JSONObject errorMessage = new JSONObject();
+  public JSONMapObject getJSONObject() {
+    JSONMapObject errorMessage = new JSONMapObject();
     errorMessage.put(Constants.GUID, UUID.randomUUID().toString());
     errorMessage.put(Constants.SENSOR_TYPE, ERROR_TYPE);
     errorMessage.put(Constants.ErrorFields.ERROR_TYPE.getName(), errorType.getType());
@@ -132,16 +132,16 @@ public class MetronError {
     return errorMessage;
   }
 
-  private void addFailedSensorType(JSONObject errorMessage) {
+  private void addFailedSensorType(JSONMapObject errorMessage) {
     if (sensorTypes.size() == 1) {
       errorMessage.put(ErrorFields.FAILED_SENSOR_TYPE.getName(), sensorTypes.iterator().next());
     } else {
-      errorMessage.put(ErrorFields.FAILED_SENSOR_TYPE.getName(), new JSONArray().addAll(sensorTypes));
+      errorMessage.put(ErrorFields.FAILED_SENSOR_TYPE.getName(), new JSONArray().putAll(sensorTypes));
     }
   }
 
   @SuppressWarnings({"unchecked"})
-  private void addMessageString(JSONObject errorMessage) {
+  private void addMessageString(JSONMapObject errorMessage) {
     if (message != null) {
       errorMessage.put(ErrorFields.MESSAGE.getName(), message);
     } else if (throwable != null) {
@@ -150,7 +150,7 @@ public class MetronError {
   }
 
   @SuppressWarnings({"unchecked"})
-  private void addStacktrace(JSONObject errorMessage) {
+  private void addStacktrace(JSONMapObject errorMessage) {
     if (throwable != null) {
       String stackTrace = ExceptionUtils.getStackTrace(throwable);
       String exception = throwable.toString();
@@ -160,12 +160,12 @@ public class MetronError {
   }
 
   @SuppressWarnings({"unchecked"})
-  private void addTimestamp(JSONObject errorMessage) {
+  private void addTimestamp(JSONMapObject errorMessage) {
     errorMessage.put(ErrorFields.TIMESTAMP.getName(), System.currentTimeMillis());
   }
 
   @SuppressWarnings({"unchecked"})
-  private void addHostname(JSONObject errorMessage) {
+  private void addHostname(JSONMapObject errorMessage) {
     try {
       errorMessage.put(ErrorFields.HOSTNAME.getName(), InetAddress.getLocalHost().getHostName());
     } catch (UnknownHostException ex) {
@@ -174,7 +174,7 @@ public class MetronError {
   }
 
   @SuppressWarnings({"unchecked"})
-  private void addRawMessages(JSONObject errorMessage) {
+  private void addRawMessages(JSONMapObject errorMessage) {
     if(rawMessages != null) {
       for(int i = 0; i < rawMessages.size(); i++) {
         Object rawMessage = rawMessages.get(i);
@@ -185,8 +185,8 @@ public class MetronError {
         if(rawMessage instanceof byte[]) {
           errorMessage.put(rawMessageField, new String((byte[])rawMessage, UTF_8));
           //errorMessage.put(rawMessageBytesField, com.google.common.primitives.Bytes.asList((byte[])rawMessage));
-        } else if (rawMessage instanceof JSONObject) {
-          JSONObject rawMessageJSON = (JSONObject) rawMessage;
+        } else if (rawMessage instanceof JSONMapObject) {
+          JSONMapObject rawMessageJSON = (JSONMapObject) rawMessage;
           String rawMessageJSONString = rawMessageJSON.toJSONString();
           errorMessage.put(rawMessageField, rawMessageJSONString);
           //errorMessage.put(rawMessageBytesField, com.google.common.primitives.Bytes.asList(rawMessageJSONString.getBytes(UTF_8)));
@@ -199,11 +199,11 @@ public class MetronError {
   }
 
   @SuppressWarnings({"unchecked"})
-  private void addErrorHash(JSONObject errorMessage) {
+  private void addErrorHash(JSONMapObject errorMessage) {
     if (rawMessages != null && rawMessages.size() == 1) {
       Object rawMessage = rawMessages.get(0);
-      if (rawMessage instanceof JSONObject) {
-        JSONObject rawJSON = (JSONObject) rawMessage;
+      if (rawMessage instanceof JSONMapObject) {
+        JSONMapObject rawJSON = (JSONMapObject) rawMessage;
         if (errorFields != null) {
           errorMessage.put(ErrorFields.ERROR_FIELDS.getName(), String.join(",", errorFields));
           errorMessage.put(ErrorFields.ERROR_HASH.getName(), HashUtils.getMessageHash(rawJSON, errorFields));
@@ -218,7 +218,7 @@ public class MetronError {
     }
   }
 
-  private void addMetadata(JSONObject errorMessage) {
+  private void addMetadata(JSONMapObject errorMessage) {
     if(metadata != null && metadata.keySet().size() > 0) {
       // add each metadata element directly to the message. each metadata key already has
       // a standard prefix, no need to add another prefix to avoid collisions. this mimics

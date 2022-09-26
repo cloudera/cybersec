@@ -20,6 +20,19 @@ package org.apache.metron.parsers;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import oi.thekraken.grok.api.Grok;
+import oi.thekraken.grok.api.Match;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.metron.common.utils.LazyLogger;
+import org.apache.metron.common.utils.LazyLoggerFactory;
+import org.apache.metron.parsers.interfaces.MessageParser;
+import org.apache.metron.parsers.interfaces.MessageParserResult;
+import org.apache.metron.stellar.common.Constants;
+import org.apache.metron.stellar.common.JSONMapObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,21 +51,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
-import oi.thekraken.grok.api.Grok;
-import oi.thekraken.grok.api.Match;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.apache.metron.stellar.common.Constants;
-import org.apache.metron.common.utils.LazyLogger;
-import org.apache.metron.common.utils.LazyLoggerFactory;
-import org.apache.metron.parsers.interfaces.MessageParser;
-import org.apache.metron.parsers.interfaces.MessageParserResult;
-import org.json.simple.JSONObject;
 
 
-public class GrokParser implements MessageParser<JSONObject>, Serializable {
+public class GrokParser implements MessageParser<JSONMapObject>, Serializable {
 
   protected static final LazyLogger LOG = LazyLoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
@@ -145,7 +146,7 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
 
   @SuppressWarnings("unchecked")
   @Override
-  public Optional<MessageParserResult<JSONObject>> parseOptionalResult(byte[] rawMessage) {
+  public Optional<MessageParserResult<JSONMapObject>> parseOptionalResult(byte[] rawMessage) {
     if (grok == null) {
       init();
     }
@@ -156,8 +157,8 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
   }
 
   @SuppressWarnings("unchecked")
-  private Optional<MessageParserResult<JSONObject>> parseMultiLine(byte[] rawMessage) {
-    List<JSONObject> messages = new ArrayList<>();
+  private Optional<MessageParserResult<JSONMapObject>> parseMultiLine(byte[] rawMessage) {
+    List<JSONMapObject> messages = new ArrayList<>();
     Map<Object,Throwable> errors = new HashMap<>();
     String originalMessage = null;
     // read the incoming raw data as if it may have multiple lines of logs
@@ -168,7 +169,7 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
         try {
           Match gm = grok.match(originalMessage);
           gm.captures();
-          JSONObject message = new JSONObject();
+          JSONMapObject message = new JSONMapObject();
           message.putAll(gm.toMap());
 
           if (message.size() == 0) {
@@ -209,8 +210,8 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
   }
 
   @SuppressWarnings("unchecked")
-  private Optional<MessageParserResult<JSONObject>> parseSingleLine(byte[] rawMessage) {
-    List<JSONObject> messages = new ArrayList<>();
+  private Optional<MessageParserResult<JSONMapObject>> parseSingleLine(byte[] rawMessage) {
+    List<JSONMapObject> messages = new ArrayList<>();
     Map<Object,Throwable> errors = new HashMap<>();
     String originalMessage = null;
     try {
@@ -218,7 +219,7 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
       LOG.debug("Grok parser parsing message: {}",originalMessage);
       Match gm = grok.match(originalMessage);
       gm.captures();
-      JSONObject message = new JSONObject();
+      JSONMapObject message = new JSONMapObject();
       message.putAll(gm.toMap());
 
       if (message.size() == 0) {
@@ -250,11 +251,11 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
               + originalMessage, e);
       return Optional.of(new DefaultMessageParserResult<>(innerException));
     }
-    return Optional.of(new DefaultMessageParserResult<JSONObject>(messages, errors));
+    return Optional.of(new DefaultMessageParserResult<JSONMapObject>(messages, errors));
   }
 
   @Override
-  public boolean validate(JSONObject message) {
+  public boolean validate(JSONMapObject message) {
     LOG.debug("Grok parser validating message: {}", message);
 
     Object timestampObject = message.get(Constants.Fields.TIMESTAMP.getName());
@@ -270,7 +271,7 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
     return false;
   }
 
-  protected void postParse(JSONObject message) {}
+  protected void postParse(JSONMapObject message) {}
 
   protected long toEpoch(String datetime) throws ParseException {
     LOG.debug("Grok parser converting timestamp to epoch: {}", datetime);

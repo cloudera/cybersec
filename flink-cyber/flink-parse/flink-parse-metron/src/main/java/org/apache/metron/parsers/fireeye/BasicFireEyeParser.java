@@ -21,6 +21,13 @@ package org.apache.metron.parsers.fireeye;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.parsers.utils.ParserUtils;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.invoke.MethodHandles;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
@@ -30,12 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.metron.parsers.BasicParser;
-import org.apache.metron.parsers.utils.ParserUtils;
-import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 
@@ -65,9 +66,9 @@ public class BasicFireEyeParser extends BasicParser {
 
   @Override
   @SuppressWarnings("unchecked")
-  public List<JSONObject> parse(byte[] rawMessage) {
+  public List<JSONMapObject> parse(byte[] rawMessage) {
     String toParse;
-    List<JSONObject> messages = new ArrayList<>();
+    List<JSONMapObject> messages = new ArrayList<>();
     try {
 
       toParse = new String(rawMessage, getReadCharset());
@@ -91,7 +92,7 @@ public class BasicFireEyeParser extends BasicParser {
       }
 
       // parse the main message
-      JSONObject toReturn = parseMessage(toParse);
+      JSONMapObject toReturn = parseMessage(toParse);
       toReturn.put("timestamp", getTimeStamp(toParse));
       messages.add(toReturn);
       return messages;
@@ -120,9 +121,9 @@ public class BasicFireEyeParser extends BasicParser {
   }
 
   @SuppressWarnings("unchecked")
-  private JSONObject parseMessage(String toParse) {
+  private JSONMapObject parseMessage(String toParse) {
 
-    JSONObject toReturn = new JSONObject();
+    JSONMapObject toReturn = new JSONMapObject();
     String[] messageTokens = toParse.split("\\s+");
     String id = messageTokens[4];
 

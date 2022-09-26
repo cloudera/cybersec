@@ -22,8 +22,8 @@ import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.common.configuration.FieldTransformer;
 import org.apache.metron.common.configuration.SensorParserConfig;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.dsl.Context;
-import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -52,7 +52,7 @@ public class RenameTransformationTest {
   public void smokeTest() throws Exception {
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(smoketestConfig));
     FieldTransformer handler = Iterables.getFirst(c.getFieldTransformations(), null);
-    JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+    JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
       for(int i = 1;i <= 10;++i) {
         put("old_field" + i, "f" + i);
       }
@@ -86,7 +86,7 @@ public class RenameTransformationTest {
   public void renameMissingField() throws Exception {
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(renameMissingField));
     FieldTransformer handler = Iterables.getFirst(c.getFieldTransformations(), null);
-    JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+    JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
       for(int i = 2;i <= 10;++i) {
         put("old_field" + i, "f" + i);
       }

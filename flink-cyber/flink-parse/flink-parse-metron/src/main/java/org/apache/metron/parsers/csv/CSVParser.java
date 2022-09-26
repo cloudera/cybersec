@@ -19,17 +19,18 @@
 package org.apache.metron.parsers.csv;
 
 import com.google.common.collect.ImmutableList;
+import org.apache.metron.common.csv.CSVConverter;
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.apache.metron.stellar.common.utils.ConversionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.invoke.MethodHandles;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.apache.metron.common.csv.CSVConverter;
-import org.apache.metron.parsers.BasicParser;
-import org.apache.metron.stellar.common.utils.ConversionUtils;
-import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CSVParser extends BasicParser {
   protected static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -55,7 +56,7 @@ public class CSVParser extends BasicParser {
 
 
   @Override
-  public List<JSONObject> parse(byte[] rawMessage) {
+  public List<JSONMapObject> parse(byte[] rawMessage) {
     try {
       String msg = new String(rawMessage, getReadCharset());
       Map<String, String> value = converter.toMap(msg);
@@ -79,7 +80,7 @@ public class CSVParser extends BasicParser {
             }
           }
         }
-        JSONObject jsonVal = new JSONObject(value);
+        JSONMapObject jsonVal = new JSONMapObject(value);
         if(timestamp != null) {
           jsonVal.put("timestamp", timestamp);
         }
