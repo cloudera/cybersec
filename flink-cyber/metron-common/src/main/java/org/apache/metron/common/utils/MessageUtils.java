@@ -18,15 +18,15 @@
 package org.apache.metron.common.utils;
 
 import org.apache.metron.stellar.common.Constants;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
 public class MessageUtils {
 
-  public static String getGuid(JSONObject message) {
+  public static String getGuid(JSONMapObject message) {
     return (String) message.get(Constants.GUID);
   }
 
-  public static String getSensorType(JSONObject message) {
+  public static String getSensorType(JSONMapObject message) {
     return (String) message.get(Constants.SENSOR_TYPE);
   }
 }

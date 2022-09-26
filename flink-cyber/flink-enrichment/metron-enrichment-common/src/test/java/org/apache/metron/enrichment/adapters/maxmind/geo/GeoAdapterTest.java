@@ -22,9 +22,7 @@ import com.google.common.collect.ImmutableMap;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.enrichment.adapters.geo.GeoAdapter;
 import org.apache.metron.enrichment.cache.CacheKey;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -51,15 +49,14 @@ public class GeoAdapterTest {
   @Multiline
   private static String expectedMessageString;
 
-  private static JSONObject expectedMessage;
+  private static JSONMapObject expectedMessage;
 
   private static GeoAdapter geo;
   private static File geoHdfsFile;
 
   @BeforeAll
-  public static void setupOnce() throws ParseException {
-    JSONParser jsonParser = new JSONParser();
-    expectedMessage = (JSONObject) jsonParser.parse(expectedMessageString);
+  public static void setupOnce()  {
+    expectedMessage = new JSONMapObject(expectedMessageString);
 
     String baseDir = TestUtils.findDir("GeoLite");
     geoHdfsFile = new File(new File(baseDir), "GeoLite2-City.mmdb.gz");
@@ -70,7 +67,7 @@ public class GeoAdapterTest {
 
   @Test
   public void testEnrich() {
-    JSONObject actualMessage = geo.enrich(new CacheKey("dummy", IP, null));
+    JSONMapObject actualMessage = geo.enrich(new CacheKey("dummy", IP, null));
 
     assertNotNull(actualMessage.get("locID"));
     assertEquals(expectedMessage, actualMessage);
@@ -78,7 +75,7 @@ public class GeoAdapterTest {
 
   @Test
   public void testEnrichNonString() {
-    JSONObject actualMessage = geo.enrich(new CacheKey("dummy", 10L, null));
-    assertEquals(new JSONObject(), actualMessage);
+    JSONMapObject actualMessage = geo.enrich(new CacheKey("dummy", 10L, null));
+    assertEquals(new JSONMapObject(), actualMessage);
   }
 }

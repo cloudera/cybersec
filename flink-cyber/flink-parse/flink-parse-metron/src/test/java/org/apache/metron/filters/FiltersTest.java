@@ -21,14 +21,16 @@ package org.apache.metron.filters;
 import com.google.common.collect.ImmutableMap;
 import org.apache.metron.parsers.filters.Filters;
 import org.apache.metron.parsers.interfaces.MessageFilter;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.dsl.Context;
-import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FiltersTest {
   @Test
@@ -42,9 +44,9 @@ public class FiltersTest {
       Map<String, Object> config = new HashMap<String, Object>() {{
         put("filter.query", "exists(foo)");
       }};
-      MessageFilter<JSONObject> filter = Filters.get(Filters.STELLAR.name(), config);
-      assertTrue(filter.emit(new JSONObject(ImmutableMap.of("foo", 1)), Context.EMPTY_CONTEXT()));
-      assertFalse(filter.emit(new JSONObject(ImmutableMap.of("bar", 1)), Context.EMPTY_CONTEXT()));
+      MessageFilter<JSONMapObject> filter = Filters.get(Filters.STELLAR.name(), config);
+      assertTrue(filter.emit(new JSONMapObject(ImmutableMap.of("foo", 1)), Context.EMPTY_CONTEXT()));
+      assertFalse(filter.emit(new JSONMapObject(ImmutableMap.of("bar", 1)), Context.EMPTY_CONTEXT()));
     }
   }
 

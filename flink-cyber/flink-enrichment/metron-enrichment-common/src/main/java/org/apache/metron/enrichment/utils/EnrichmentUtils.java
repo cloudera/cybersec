@@ -21,10 +21,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
-import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.metron.common.configuration.enrichment.EnrichmentConfig;
@@ -32,7 +28,12 @@ import org.apache.metron.enrichment.converter.EnrichmentKey;
 import org.apache.metron.enrichment.lookup.EnrichmentLookup;
 import org.apache.metron.enrichment.lookup.handler.KeyWithContext;
 import org.apache.metron.hbase.TableProvider;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
+
+import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EnrichmentUtils {
 
@@ -117,14 +118,14 @@ public class EnrichmentUtils {
     }
   }
 
-  public static JSONObject adjustKeys(JSONObject enrichedMessage, JSONObject enrichedField, String field, String prefix) {
+  public static JSONMapObject adjustKeys(JSONMapObject enrichedMessage, JSONMapObject enrichedField, String field, String prefix) {
     if ( !enrichedField.isEmpty()) {
       for (Object enrichedKey : enrichedField.keySet()) {
         if(!StringUtils.isEmpty(prefix)) {
           enrichedMessage.put(field + "." + enrichedKey, enrichedField.get(enrichedKey));
         }
         else {
-          enrichedMessage.put(enrichedKey, enrichedField.get(enrichedKey));
+          enrichedMessage.put(enrichedKey == null ? null : enrichedKey.toString(), enrichedField.get(enrichedKey));
         }
       }
     }

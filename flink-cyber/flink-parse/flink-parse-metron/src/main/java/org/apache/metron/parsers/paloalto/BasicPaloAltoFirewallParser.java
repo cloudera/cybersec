@@ -20,16 +20,17 @@ package org.apache.metron.parsers.paloalto;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-import org.apache.metron.parsers.BasicParser;
-import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class BasicPaloAltoFirewallParser extends BasicParser {
 
@@ -169,11 +170,11 @@ public class BasicPaloAltoFirewallParser extends BasicParser {
 
   @Override
   @SuppressWarnings({"unchecked", "unused"})
-  public List<JSONObject> parse(byte[] msg) {
+  public List<JSONMapObject> parse(byte[] msg) {
 
-    JSONObject outputMessage = new JSONObject();
+    JSONMapObject outputMessage = new JSONMapObject();
     String toParse = "";
-    List<JSONObject> messages = new ArrayList<>();
+    List<JSONMapObject> messages = new ArrayList<>();
     try {
 
       toParse = new String(msg, getReadCharset());
@@ -192,7 +193,7 @@ public class BasicPaloAltoFirewallParser extends BasicParser {
   }
 
   @SuppressWarnings("unchecked")
-  private void parseMessage(String message, JSONObject outputMessage) {
+  private void parseMessage(String message, JSONMapObject outputMessage) {
 
     String[] tokens = Iterables.toArray(Splitter.on(Pattern.compile(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)")).split(message), String.class);
 

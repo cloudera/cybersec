@@ -20,8 +20,8 @@ package org.apache.metron.enrichment.adapters.maxmind.asn;
 import com.cloudera.cyber.TestUtils;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.io.FileUtils;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.dsl.Context;
-import org.json.simple.JSONObject;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -51,7 +51,7 @@ public class GeoLiteAsnDatabaseTest {
   private static final String GEO_ASN_FILE_NAME = GEO_ASN + EXTENSION_TAR_GZ;
   private static final String GEO_ASN_COPY_FILE_NAME = GEO_ASN + "-2" + EXTENSION_TAR_GZ;
 
-  private static JSONObject expectedAsnMessage = new JSONObject();
+  private static JSONMapObject expectedAsnMessage = new JSONMapObject();
 
   @Rule
   public TemporaryFolder testFolder = new TemporaryFolder();

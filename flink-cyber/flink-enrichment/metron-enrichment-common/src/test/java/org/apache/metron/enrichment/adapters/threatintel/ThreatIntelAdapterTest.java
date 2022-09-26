@@ -35,8 +35,7 @@ import org.apache.metron.enrichment.lookup.accesstracker.PersistentAccessTracker
 import org.apache.metron.hbase.TableProvider;
 import org.apache.metron.hbase.mock.MockHBaseTableProvider;
 import org.apache.metron.hbase.mock.MockHTable;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +43,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 public class ThreatIntelAdapterTest {
@@ -95,7 +96,7 @@ public class ThreatIntelAdapterTest {
   @Multiline
   private static String sourceConfigStr;
 
-  private JSONObject expectedMessage;
+  private JSONMapObject expectedMessage;
 
   @BeforeEach
   public void setup() throws Exception {
@@ -109,8 +110,7 @@ public class ThreatIntelAdapterTest {
     BloomAccessTracker bat = new BloomAccessTracker(threatIntelTableName, 100, 0.03);
     PersistentAccessTracker pat = new PersistentAccessTracker(threatIntelTableName, "0", trackerTable, cf, bat, 0L);
     lookup = new EnrichmentLookup(threatIntelTable, cf, pat);
-    JSONParser jsonParser = new JSONParser();
-    expectedMessage = (JSONObject) jsonParser.parse(expectedMessageString);
+    expectedMessage = new JSONMapObject(expectedMessageString);
   }
 
 
@@ -119,7 +119,7 @@ public class ThreatIntelAdapterTest {
     ThreatIntelAdapter tia = new ThreatIntelAdapter();
     tia.lookup = lookup;
     SensorEnrichmentConfig broSc = JSONUtils.INSTANCE.load(sourceConfigStr, SensorEnrichmentConfig.class);
-    JSONObject actualMessage = tia.enrich(new CacheKey("ip_dst_addr", "10.0.2.3", broSc));
+    JSONMapObject actualMessage = tia.enrich(new CacheKey("ip_dst_addr", "10.0.2.3", broSc));
     assertNotNull(actualMessage);
     assertEquals(expectedMessage, actualMessage);
   }
@@ -129,12 +129,12 @@ public class ThreatIntelAdapterTest {
     ThreatIntelAdapter tia = new ThreatIntelAdapter();
     tia.lookup = lookup;
     SensorEnrichmentConfig broSc = JSONUtils.INSTANCE.load(sourceConfigStr, SensorEnrichmentConfig.class);
-    JSONObject actualMessage = tia.enrich(new CacheKey("ip_dst_addr", "10.0.2.3", broSc));
+    JSONMapObject actualMessage = tia.enrich(new CacheKey("ip_dst_addr", "10.0.2.3", broSc));
     assertNotNull(actualMessage);
     assertEquals(expectedMessage, actualMessage);
 
     actualMessage = tia.enrich(new CacheKey("ip_dst_addr", 10L, broSc));
-    assertEquals(actualMessage,new JSONObject());
+    assertEquals(actualMessage,new JSONMapObject());
   }
 
   @Test

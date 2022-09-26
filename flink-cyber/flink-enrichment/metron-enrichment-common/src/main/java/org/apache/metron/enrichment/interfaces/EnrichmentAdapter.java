@@ -18,14 +18,14 @@
 
 package org.apache.metron.enrichment.interfaces;
 
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
 import java.util.Map;
 
 public interface EnrichmentAdapter<T>
 {
 	void logAccess(T value);
-	JSONObject enrich(T value);
+	JSONMapObject enrich(T value);
 	boolean initializeAdapter(Map<String, Object> config);
 	void updateAdapter(Map<String, Object> config);
 	void cleanup();

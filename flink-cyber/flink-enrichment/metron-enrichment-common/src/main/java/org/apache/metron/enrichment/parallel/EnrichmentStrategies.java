@@ -22,7 +22,7 @@ import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
 import org.apache.metron.enrichment.utils.EnrichmentUtils;
 import org.apache.metron.enrichment.utils.ThreatIntelUtils;
 import org.apache.metron.stellar.common.Constants;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
 /**
  * The specific strategies to interact with the sensor enrichment config.
@@ -71,7 +71,7 @@ public enum EnrichmentStrategies implements EnrichmentStrategy {
     }
 
     @Override
-    public JSONObject postProcess(JSONObject message, SensorEnrichmentConfig config, EnrichmentContext context) {
+    public JSONMapObject postProcess(JSONMapObject message, SensorEnrichmentConfig config, EnrichmentContext context) {
       return ThreatIntelUtils.triage(message, config, context.getFunctionResolver(), context.getStellarContext());
     }
   })
@@ -96,7 +96,7 @@ public enum EnrichmentStrategies implements EnrichmentStrategy {
   }
 
 
-  public JSONObject postProcess(JSONObject message, SensorEnrichmentConfig config, EnrichmentContext context)  {
+  public JSONMapObject postProcess(JSONMapObject message, SensorEnrichmentConfig config, EnrichmentContext context)  {
     return enrichmentStrategy.postProcess(message, config, context);
   }
 

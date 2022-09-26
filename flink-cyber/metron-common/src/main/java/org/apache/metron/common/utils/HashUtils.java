@@ -18,7 +18,7 @@
 package org.apache.metron.common.utils;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
 import java.util.Collection;
 import java.util.List;
@@ -39,13 +39,13 @@ public class HashUtils {
    * @param hashFields The fields to hash
    * @return A string containing the resulting hash
    */
-  public static String getMessageHash(JSONObject message, Collection<String> hashFields) {
+  public static String getMessageHash(JSONMapObject message, Collection<String> hashFields) {
     List<String> hashElements = hashFields.stream().map(errorField ->
             String.format("%s-%s", errorField, message.get(errorField))).collect(Collectors.toList());
     return DigestUtils.sha256Hex(String.join("|", hashElements).getBytes(UTF_8));
   }
 
-  public static String getMessageHash(JSONObject message) {
+  public static String getMessageHash(JSONMapObject message) {
     return DigestUtils.sha256Hex(message.toJSONString().getBytes(UTF_8));
   }
 

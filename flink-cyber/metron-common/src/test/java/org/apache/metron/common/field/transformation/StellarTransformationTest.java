@@ -18,21 +18,21 @@
 
 package org.apache.metron.common.field.transformation;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-
 import com.google.common.collect.Iterables;
-import java.util.HashMap;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.common.configuration.FieldTransformer;
 import org.apache.metron.common.configuration.SensorParserConfig;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.dsl.Context;
-import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StellarTransformationTest {
   /**
@@ -69,7 +69,7 @@ public class StellarTransformationTest {
   @Test
   public void testConfigAll() throws Exception {
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(configAll));
-    JSONObject input = new JSONObject();
+    JSONMapObject input = new JSONMapObject();
     input.put("source.type", "test");
     for (FieldTransformer handler : c.getFieldTransformations()) {
       handler.transformAndUpdate(input, Context.EMPTY_CONTEXT());
@@ -100,7 +100,7 @@ public class StellarTransformationTest {
 
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(configRename));
     {
-      JSONObject input = new JSONObject();
+      JSONMapObject input = new JSONMapObject();
       input.put("old_field", "val");
       input.put("old_field2", "val2");
       for (FieldTransformer handler : c.getFieldTransformations()) {
@@ -114,7 +114,7 @@ public class StellarTransformationTest {
       assertTrue(!input.containsKey("old_field2"));
     }
     {
-      JSONObject input = new JSONObject();
+      JSONMapObject input = new JSONMapObject();
       input.put("old_field", "val");
       for (FieldTransformer handler : c.getFieldTransformations()) {
         handler.transformAndUpdate(input, Context.EMPTY_CONTEXT());
@@ -149,7 +149,7 @@ public class StellarTransformationTest {
      */
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(configNumericDomain));
     FieldTransformer handler = Iterables.getFirst(c.getFieldTransformations(), null);
-    JSONObject input = new JSONObject();
+    JSONMapObject input = new JSONMapObject();
     handler.transformAndUpdate(input,  Context.EMPTY_CONTEXT());
     assertTrue(input.containsKey("full_hostname"));
     assertEquals("1234567890123456789012345678901234567890123456789012345678901234567890", input.get("full_hostname"));
@@ -162,7 +162,7 @@ public class StellarTransformationTest {
 
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(badConfig));
     FieldTransformer handler = Iterables.getFirst(c.getFieldTransformations(), null);
-    JSONObject input = new JSONObject();
+    JSONMapObject input = new JSONMapObject();
 
     IllegalStateException ex =
         assertThrows(
@@ -211,7 +211,7 @@ public class StellarTransformationTest {
 
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(intermediateValuesConfig));
     FieldTransformer handler = Iterables.getFirst(c.getFieldTransformations(), null);
-    JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+    JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
     }});
     handler.transformAndUpdate(input, Context.EMPTY_CONTEXT());
     int expected = 3;
@@ -243,7 +243,7 @@ public class StellarTransformationTest {
 
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(stellarConfigEspecial));
     FieldTransformer handler = Iterables.getFirst(c.getFieldTransformations(), null);
-    JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+    JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
       put("timestamp", "2016-01-05 17:02:30");
     }});
     handler.transformAndUpdate(input, Context.EMPTY_CONTEXT());
@@ -262,7 +262,7 @@ public class StellarTransformationTest {
 
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(stellarConfig));
     FieldTransformer handler = Iterables.getFirst(c.getFieldTransformations(), null);
-    JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+    JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
       put("timestamp", "2016-01-05 17:02:30");
     }});
     handler.transformAndUpdate(input, Context.EMPTY_CONTEXT());
@@ -282,7 +282,7 @@ public class StellarTransformationTest {
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(stellarConfig));
     FieldTransformer handler = Iterables.getFirst(c.getFieldTransformations(), null);
     //no input fields => no transformation
-    JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+    JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
     }});
     handler.transformAndUpdate(input,  Context.EMPTY_CONTEXT());
     assertFalse(input.containsKey("utc_timestamp"));
@@ -329,7 +329,7 @@ public class StellarTransformationTest {
     FieldTransformer handler = Iterables.getFirst(c.getFieldTransformations(), null);
     {
       //We need a timestamp field, a URL field and a data center field
-      JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+      JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
         put("timestamp", "2016-01-05 17:02:30");
         put("url", "https://caseystella.com/blog");
         //looking up the data center in portland, which doesn't exist in the map, so we default to UTC
@@ -345,7 +345,7 @@ public class StellarTransformationTest {
     }
     {
       //now we see what happens when we change the data center to london, which is in the map
-      JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+      JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
         put("timestamp", "2016-01-05 17:02:30");
         put("url", "https://caseystella.com/blog");
         put("dc", "london");
@@ -360,7 +360,7 @@ public class StellarTransformationTest {
     }
     //now we ensure that because we don't have a data center field at all, it's defaulted to UTC.
     {
-      JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+      JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
         put("timestamp", "2016-01-05 17:02:30");
         put("url", "https://caseystella.com/blog");
       }});

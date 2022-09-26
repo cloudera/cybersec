@@ -21,19 +21,18 @@ package org.apache.metron.enrichment.adapters.simplehbase;
 import com.google.common.collect.ImmutableMap;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
+import org.apache.metron.common.utils.JSONUtils;
 import org.apache.metron.enrichment.cache.CacheKey;
+import org.apache.metron.enrichment.converter.EnrichmentHelper;
 import org.apache.metron.enrichment.converter.EnrichmentKey;
 import org.apache.metron.enrichment.converter.EnrichmentValue;
 import org.apache.metron.enrichment.lookup.EnrichmentLookup;
-import org.apache.metron.enrichment.converter.EnrichmentHelper;
-import org.apache.metron.hbase.mock.MockHTable;
-import org.apache.metron.hbase.mock.MockHBaseTableProvider;
 import org.apache.metron.enrichment.lookup.LookupKV;
 import org.apache.metron.enrichment.lookup.accesstracker.BloomAccessTracker;
 import org.apache.metron.enrichment.lookup.accesstracker.PersistentAccessTracker;
-import org.apache.metron.common.utils.JSONUtils;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.apache.metron.hbase.mock.MockHBaseTableProvider;
+import org.apache.metron.hbase.mock.MockHTable;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +40,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SimpleHBaseAdapterTest {
 
@@ -100,7 +101,7 @@ public class SimpleHBaseAdapterTest {
    */
   @Multiline
   private String sourceConfigWithCFStr;
-  private JSONObject expectedMessage;
+  private JSONMapObject expectedMessage;
 
   @BeforeEach
   public void setup() throws Exception {
@@ -121,8 +122,7 @@ public class SimpleHBaseAdapterTest {
     BloomAccessTracker bat = new BloomAccessTracker(hbaseTableName, 100, 0.03);
     PersistentAccessTracker pat = new PersistentAccessTracker(hbaseTableName, "0", trackerTable, cf, bat, 0L);
     lookup = new EnrichmentLookup(hbaseTable, cf, pat);
-    JSONParser jsonParser = new JSONParser();
-    expectedMessage = (JSONObject) jsonParser.parse(expectedMessageString);
+    expectedMessage = new JSONMapObject(expectedMessageString);
   }
 
   @Test
@@ -130,8 +130,8 @@ public class SimpleHBaseAdapterTest {
     SimpleHBaseAdapter sha = new SimpleHBaseAdapter();
     sha.lookup = lookup;
     SensorEnrichmentConfig broSc = JSONUtils.INSTANCE.load(sourceConfigStr, SensorEnrichmentConfig.class);
-    JSONObject actualMessage = sha.enrich(new CacheKey("test", "test", broSc));
-    assertEquals(actualMessage, new JSONObject());
+    JSONMapObject actualMessage = sha.enrich(new CacheKey("test", "test", broSc));
+    assertEquals(actualMessage, new JSONMapObject());
     actualMessage = sha.enrich(new CacheKey("ip_dst_addr", "10.0.2.3", broSc));
     assertNotNull(actualMessage);
     assertEquals(expectedMessage, actualMessage);
@@ -142,10 +142,10 @@ public class SimpleHBaseAdapterTest {
     SimpleHBaseAdapter sha = new SimpleHBaseAdapter();
     sha.lookup = lookup;
     SensorEnrichmentConfig broSc = JSONUtils.INSTANCE.load(sourceConfigStr, SensorEnrichmentConfig.class);
-    JSONObject actualMessage = sha.enrich(new CacheKey("test", "test", broSc));
-    assertEquals(actualMessage, new JSONObject());
+    JSONMapObject actualMessage = sha.enrich(new CacheKey("test", "test", broSc));
+    assertEquals(actualMessage, new JSONMapObject());
     actualMessage = sha.enrich(new CacheKey("ip_dst_addr", 10L, broSc));
-    assertEquals(actualMessage,new JSONObject());
+    assertEquals(actualMessage,new JSONMapObject());
   }
 
   @Test
@@ -153,11 +153,11 @@ public class SimpleHBaseAdapterTest {
     SimpleHBaseAdapter sha = new SimpleHBaseAdapter();
     sha.lookup = lookup;
     SensorEnrichmentConfig broSc = JSONUtils.INSTANCE.load(sourceConfigWithCFStr, SensorEnrichmentConfig.class);
-    JSONObject actualMessage = sha.enrich(new CacheKey("test", "test", broSc));
-    assertEquals(actualMessage, new JSONObject());
+    JSONMapObject actualMessage = sha.enrich(new CacheKey("test", "test", broSc));
+    assertEquals(actualMessage, new JSONMapObject());
     actualMessage = sha.enrich(new CacheKey("ip_dst_addr", "10.0.2.4", broSc));
     assertNotNull(actualMessage);
-    assertEquals(new JSONObject(ImmutableMap.of("cf1.key", "value")), actualMessage);
+    assertEquals(new JSONMapObject(ImmutableMap.of("cf1.key", "value")), actualMessage);
   }
 
   @Test
@@ -165,11 +165,11 @@ public class SimpleHBaseAdapterTest {
     SimpleHBaseAdapter sha = new SimpleHBaseAdapter();
     sha.lookup = lookup;
     SensorEnrichmentConfig broSc = JSONUtils.INSTANCE.load(sourceConfigStr, SensorEnrichmentConfig.class);
-    JSONObject actualMessage = sha.enrich(new CacheKey("test", "test", broSc));
-    assertEquals(actualMessage, new JSONObject());
+    JSONMapObject actualMessage = sha.enrich(new CacheKey("test", "test", broSc));
+    assertEquals(actualMessage, new JSONMapObject());
     actualMessage = sha.enrich(new CacheKey("ip_dst_addr", "10.0.2.4", broSc));
     assertNotNull(actualMessage);
-    assertEquals(new JSONObject(new HashMap<String, Object>()), actualMessage);
+    assertEquals(new JSONMapObject(new HashMap<String, Object>()), actualMessage);
   }
   @Test
   public void testInitializeAdapter() {

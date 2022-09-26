@@ -2,7 +2,10 @@ package com.cloudera.parserchains.parsers;
 
 import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.cyber.stellar.MetronCompatibilityParser;
-import com.cloudera.parserchains.core.*;
+import com.cloudera.parserchains.core.FieldName;
+import com.cloudera.parserchains.core.FieldValue;
+import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +15,7 @@ import org.apache.flink.core.fs.FSDataInputStream;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
 import org.apache.metron.parsers.interfaces.MessageParserResult;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
 import java.io.IOException;
 import java.util.List;
@@ -85,17 +88,17 @@ public class StellarParser implements Parser {
 
     private Message doParse(FieldValue toParse, Message.Builder output) {
         MessageToParse messageToParse = toParse.toMessageToParse();
-        Optional<MessageParserResult<JSONObject>> optionalResult = metronCompatibilityParser.parse(messageToParse);
+        Optional<MessageParserResult<JSONMapObject>> optionalResult = metronCompatibilityParser.parse(messageToParse);
         if (optionalResult.isPresent()) {
-            MessageParserResult<JSONObject> result = optionalResult.get();
+            MessageParserResult<JSONMapObject> result = optionalResult.get();
             Optional<Throwable> messageException = result.getMasterThrowable();
             if (messageException.isPresent()) {
                 output.withError(messageException.get().getMessage());
             } else {
                 // this parser can only return a single message - return the first message
-                List<JSONObject> parsedMessages = result.getMessages();
+                List<JSONMapObject> parsedMessages = result.getMessages();
                 if (CollectionUtils.isNotEmpty(parsedMessages)) {
-                    JSONObject jsonMessage = parsedMessages.get(0);
+                    JSONMapObject jsonMessage = parsedMessages.get(0);
                     Set<Map.Entry<String, Object>> entries = jsonMessage.entrySet();
                     for (Map.Entry<String, Object> entry : entries) {
                         output.addField(entry.getKey(), String.valueOf(entry.getValue()));

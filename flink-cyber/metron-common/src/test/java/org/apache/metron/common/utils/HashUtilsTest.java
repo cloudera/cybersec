@@ -17,7 +17,7 @@
  */
 package org.apache.metron.common.utils;
 
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -31,7 +31,7 @@ public class HashUtilsTest {
 
   @Test
   public void getMessageHashShouldReturnHashForHashFields() {
-    JSONObject message = new JSONObject();
+    JSONMapObject message = new JSONMapObject();
     message.put("field1", "value1");
     message.put("field2", "value2");
     message.put("field3", "value3");
@@ -41,7 +41,7 @@ public class HashUtilsTest {
 
   @Test
   public void getMessageHashShouldReturnHashForMessage() {
-    JSONObject message = new JSONObject();
+    JSONMapObject message = new JSONMapObject();
     message.put("field1", "value1");
     message.put("field2", "value2");
     message.put("field3", "value3");

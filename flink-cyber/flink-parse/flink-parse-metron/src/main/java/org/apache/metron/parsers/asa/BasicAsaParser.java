@@ -18,6 +18,17 @@
 package org.apache.metron.parsers.asa;
 
 import com.google.common.collect.ImmutableMap;
+import oi.thekraken.grok.api.Grok;
+import oi.thekraken.grok.api.Match;
+import oi.thekraken.grok.api.exception.GrokException;
+import org.apache.metron.common.Constants;
+import org.apache.metron.common.utils.LazyLogger;
+import org.apache.metron.common.utils.LazyLoggerFactory;
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.parsers.ParseException;
+import org.apache.metron.parsers.utils.SyslogUtils;
+import org.apache.metron.stellar.common.JSONMapObject;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.invoke.MethodHandles;
@@ -29,16 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import oi.thekraken.grok.api.Grok;
-import oi.thekraken.grok.api.Match;
-import oi.thekraken.grok.api.exception.GrokException;
-import org.apache.metron.common.Constants;
-import org.apache.metron.common.utils.LazyLogger;
-import org.apache.metron.common.utils.LazyLoggerFactory;
-import org.apache.metron.parsers.BasicParser;
-import org.apache.metron.parsers.ParseException;
-import org.apache.metron.parsers.utils.SyslogUtils;
-import org.json.simple.JSONObject;
 
 public class BasicAsaParser extends BasicParser {
 
@@ -138,11 +139,11 @@ public class BasicAsaParser extends BasicParser {
   }
 
   @Override
-  public List<JSONObject> parse(byte[] rawMessage) {
+  public List<JSONMapObject> parse(byte[] rawMessage) {
     String logLine = "";
     String messagePattern = "";
-    JSONObject metronJson = new JSONObject();
-    List<JSONObject> messages = new ArrayList<>();
+    JSONMapObject metronJson = new JSONMapObject();
+    List<JSONMapObject> messages = new ArrayList<>();
     Map<String, Object> syslogJson = new HashMap<String, Object>();
 
     logLine = new String(rawMessage, StandardCharsets.UTF_8);

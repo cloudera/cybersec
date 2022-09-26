@@ -18,18 +18,19 @@
 
 package org.apache.metron.parsers.bro;
 
+import org.apache.metron.common.Constants;
+import org.apache.metron.common.utils.LazyLogger;
+import org.apache.metron.common.utils.LazyLoggerFactory;
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.json.JSONArray;
+
 import java.lang.invoke.MethodHandles;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import org.apache.metron.common.Constants;
-import org.apache.metron.common.utils.LazyLogger;
-import org.apache.metron.common.utils.LazyLoggerFactory;
-import org.apache.metron.parsers.BasicParser;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 
 @SuppressWarnings("serial")
 public class BasicBroParser extends BasicParser {
@@ -55,17 +56,17 @@ public class BasicBroParser extends BasicParser {
 
   @Override
   @SuppressWarnings("unchecked")
-  public List<JSONObject> parse(byte[] msg) {
+  public List<JSONMapObject> parse(byte[] msg) {
 
     _LOG.trace("[Metron] Starting to parse incoming message");
 
     String rawMessage = null;
-    List<JSONObject> messages = new ArrayList<>();
+    List<JSONMapObject> messages = new ArrayList<>();
     try {
       rawMessage = new String(msg, getReadCharset());
       _LOG.trace("[Metron] Received message: {}", rawMessage);
 
-      JSONObject cleanedMessage = cleaner.clean(rawMessage);
+      JSONMapObject cleanedMessage = cleaner.clean(rawMessage);
       _LOG.debug("[Metron] Cleaned message: {}", cleanedMessage);
 
       if (cleanedMessage == null || cleanedMessage.isEmpty()) {
@@ -73,7 +74,7 @@ public class BasicBroParser extends BasicParser {
       }
 
       String key;
-      JSONObject payload;
+      JSONMapObject payload;
       if (cleanedMessage.containsKey("type")) {
         key = cleanedMessage.get("type").toString();
         payload = cleanedMessage;
@@ -85,7 +86,7 @@ public class BasicBroParser extends BasicParser {
                   + rawMessage);
         }
 
-        payload = (JSONObject) cleanedMessage.get(key);
+        payload = (JSONMapObject) cleanedMessage.get(key);
       }
 
       if (payload == null) {
@@ -151,7 +152,7 @@ public class BasicBroParser extends BasicParser {
     return ((Double) (timestampSeconds * 1000)).longValue();
   }
 
-  private boolean replaceKey(JSONObject payload, String toKey, String[] fromKeys) {
+  private boolean replaceKey(JSONMapObject payload, String toKey, String[] fromKeys) {
     for (String fromKey : fromKeys) {
       if (payload.containsKey(fromKey)) {
         Object value = payload.remove(fromKey);
@@ -163,7 +164,7 @@ public class BasicBroParser extends BasicParser {
     return false;
   }
 
-  private boolean replaceKeyArray(JSONObject payload, String toKey, String[] fromKeys) {
+  private boolean replaceKeyArray(JSONMapObject payload, String toKey, String[] fromKeys) {
     for (String fromKey : fromKeys) {
       if (payload.containsKey(fromKey)) {
         JSONArray value = (JSONArray) payload.remove(fromKey);

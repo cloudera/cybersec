@@ -18,18 +18,9 @@
 
 package org.apache.metron.enrichment.adapters.cif;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.invoke.MethodHandles;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.cloudera.cyber.hbase.HbaseConfiguration;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.Cell;
-import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
@@ -39,9 +30,16 @@ import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.enrichment.cache.CacheKey;
 import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 @SuppressWarnings("unchecked")
 public class CIFHbaseAdapter implements EnrichmentAdapter<CacheKey>,Serializable {
@@ -65,9 +63,9 @@ public class CIFHbaseAdapter implements EnrichmentAdapter<CacheKey>,Serializable
 	}
 
 	@Override
-	public JSONObject enrich(CacheKey k) {
+	public JSONMapObject enrich(CacheKey k) {
 		String metadata = k.coerceValue(String.class);
-		JSONObject output = new JSONObject();
+		JSONMapObject output = new JSONMapObject();
 		LOGGER.debug("=======Looking Up For: {}", metadata);
 		output.putAll(getCIFObject(metadata));
 

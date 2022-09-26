@@ -20,7 +20,7 @@ package org.apache.metron.parsers.filters;
 
 import org.apache.metron.common.utils.ReflectionUtils;
 import org.apache.metron.parsers.interfaces.MessageFilter;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
 import java.util.Map;
 
@@ -33,7 +33,7 @@ public enum Filters {
   Filters(Class<? extends MessageFilter> clazz) {
     this.clazz = clazz;
   }
-  public static MessageFilter<JSONObject> get(String filterName, Map<String, Object> config) {
+  public static MessageFilter<JSONMapObject> get(String filterName, Map<String, Object> config) {
     if(filterName == null || filterName.trim().isEmpty()) {
       return null;
     }
@@ -50,7 +50,7 @@ public enum Filters {
       }
     }
     if(filterClass != null) {
-      MessageFilter<JSONObject> filter = ReflectionUtils.createInstance(filterClass);
+      MessageFilter<JSONMapObject> filter = ReflectionUtils.createInstance(filterClass);
       filter.configure(config);
       return filter;
     }

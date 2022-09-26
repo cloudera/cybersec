@@ -22,11 +22,11 @@ import org.apache.metron.common.configuration.StellarEnrichmentTest;
 import org.apache.metron.common.configuration.enrichment.EnrichmentConfig;
 import org.apache.metron.common.configuration.enrichment.handler.ConfigHandler;
 import org.apache.metron.common.utils.JSONUtils;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.common.StellarProcessor;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.MapVariableResolver;
 import org.apache.metron.stellar.dsl.VariableResolver;
-import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class StellarAdapterTest extends StellarEnrichmentTest {
   StellarProcessor processor = new StellarProcessor();
 
-  private JSONObject enrich(JSONObject message, String field, ConfigHandler handler) {
+  private JSONMapObject enrich(JSONMapObject message, String field, ConfigHandler handler) {
     VariableResolver resolver = new MapVariableResolver(message);
     return StellarAdapter.process( message
                                  , handler
@@ -50,11 +50,11 @@ public class StellarAdapterTest extends StellarEnrichmentTest {
   @Test
   public void test_default() throws Exception {
     for(String c : DEFAULT_CONFIGS) {
-      JSONObject message = getMessage();
+      JSONMapObject message = getMessage();
       EnrichmentConfig enrichmentConfig = JSONUtils.INSTANCE.load(c, EnrichmentConfig.class);
       assertNotNull(enrichmentConfig.getEnrichmentConfigs().get("stellar"));
       ConfigHandler handler = enrichmentConfig.getEnrichmentConfigs().get("stellar");
-      JSONObject enriched = enrich(message, "", handler);
+      JSONMapObject enriched = enrich(message, "", handler);
       assertEquals("STELLAR_TEST", enriched.get("stmt1"));
       assertEquals("stellar_test", enriched.get("stmt2"));
       assertEquals("foo", enriched.get("stmt3"));
@@ -65,18 +65,18 @@ public class StellarAdapterTest extends StellarEnrichmentTest {
   @Test
   public void test_grouped() throws Exception {
     for(String c : GROUPED_CONFIGS) {
-      JSONObject message = getMessage();
+      JSONMapObject message = getMessage();
       EnrichmentConfig enrichmentConfig = JSONUtils.INSTANCE.load(c, EnrichmentConfig.class);
       assertNotNull(enrichmentConfig.getEnrichmentConfigs().get("stellar"));
       ConfigHandler handler = enrichmentConfig.getEnrichmentConfigs().get("stellar");
       {
-        JSONObject enriched = enrich(message, "group1", handler);
+        JSONMapObject enriched = enrich(message, "group1", handler);
         assertEquals("STELLAR_TEST", enriched.get("stmt1"));
         assertEquals("stellar_test", enriched.get("stmt2"));
         assertEquals(2, enriched.size());
       }
       {
-        JSONObject enriched = enrich(message, "group2", handler);
+        JSONMapObject enriched = enrich(message, "group2", handler);
         assertEquals("foo", enriched.get("stmt3"));
         assertEquals(1, enriched.size());
       }
@@ -86,23 +86,23 @@ public class StellarAdapterTest extends StellarEnrichmentTest {
   @Test
   public void test_mixed() throws Exception {
     for(String c : MIXED_CONFIGS) {
-      JSONObject message = getMessage();
+      JSONMapObject message = getMessage();
       EnrichmentConfig enrichmentConfig = JSONUtils.INSTANCE.load(c, EnrichmentConfig.class);
       assertNotNull(enrichmentConfig.getEnrichmentConfigs().get("stellar"));
       ConfigHandler handler = enrichmentConfig.getEnrichmentConfigs().get("stellar");
       {
-        JSONObject enriched = enrich(message, "group1", handler);
+        JSONMapObject enriched = enrich(message, "group1", handler);
         assertEquals("STELLAR_TEST", enriched.get("stmt1"));
         assertEquals("stellar_test", enriched.get("stmt2"));
         assertEquals(2, enriched.size());
       }
       {
-        JSONObject enriched = enrich(message, "group2", handler);
+        JSONMapObject enriched = enrich(message, "group2", handler);
         assertEquals("foo", enriched.get("stmt3"));
         assertEquals(1, enriched.size());
       }
       {
-        JSONObject enriched = enrich(message, "", handler);
+        JSONMapObject enriched = enrich(message, "", handler);
         assertEquals(2, enriched.get("stmt4"));
         assertEquals("stellar_test", enriched.get("stmt5"));
         assertEquals(2, enriched.size());
@@ -112,22 +112,22 @@ public class StellarAdapterTest extends StellarEnrichmentTest {
 
   @Test
   public void test_tempVariable() throws Exception {
-    JSONObject message = getMessage();
+    JSONMapObject message = getMessage();
     EnrichmentConfig enrichmentConfig = JSONUtils.INSTANCE.load(tempVarStellarConfig_list, EnrichmentConfig.class);
     assertNotNull(enrichmentConfig.getEnrichmentConfigs().get("stellar"));
     ConfigHandler handler = enrichmentConfig.getEnrichmentConfigs().get("stellar");
     {
-      JSONObject enriched = enrich(message, "group1", handler);
+      JSONMapObject enriched = enrich(message, "group1", handler);
       assertEquals("stellar_test", enriched.get("stmt2"));
       assertEquals(1, enriched.size());
     }
     {
-      JSONObject enriched = enrich(message, "group2", handler);
+      JSONMapObject enriched = enrich(message, "group2", handler);
       assertEquals("foo", enriched.get("stmt3"));
       assertEquals(1, enriched.size());
     }
     {
-      JSONObject enriched = enrich(message, "", handler);
+      JSONMapObject enriched = enrich(message, "", handler);
       assertEquals(2, enriched.get("stmt4"));
       assertEquals("stellar_test", enriched.get("stmt5"));
       assertEquals(2, enriched.size());
@@ -167,11 +167,11 @@ public class StellarAdapterTest extends StellarEnrichmentTest {
 
 
   private void testMapEnrichment(String config, String field) throws Exception {
-    JSONObject message = getMessage();
+    JSONMapObject message = getMessage();
     EnrichmentConfig enrichmentConfig = JSONUtils.INSTANCE.load(config, EnrichmentConfig.class);
     assertNotNull(enrichmentConfig.getEnrichmentConfigs().get("stellar"));
     ConfigHandler handler = enrichmentConfig.getEnrichmentConfigs().get("stellar");
-    JSONObject enriched = enrich(message, field, handler);
+    JSONMapObject enriched = enrich(message, field, handler);
     assertEquals(2, enriched.size());
     assertEquals("stellar_test", enriched.get("stmt2.foo"));
     assertEquals("stellar_test".toUpperCase(), enriched.get("stmt1"));
@@ -203,11 +203,11 @@ public class StellarAdapterTest extends StellarEnrichmentTest {
 
   @Test
   public void testAllVariableUsage() throws Exception {
-    JSONObject message = getMessage();
+    JSONMapObject message = getMessage();
     EnrichmentConfig enrichmentConfig = JSONUtils.INSTANCE.load(allVariableConfig, EnrichmentConfig.class);
     assertNotNull(enrichmentConfig.getEnrichmentConfigs().get("stellar"));
     ConfigHandler handler = enrichmentConfig.getEnrichmentConfigs().get("stellar");
-    JSONObject enriched = enrich(message, "", handler);
+    JSONMapObject enriched = enrich(message, "", handler);
     assertEquals("stellar_test", enriched.get("stmt1"));
   }
 

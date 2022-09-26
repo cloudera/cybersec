@@ -19,12 +19,12 @@
 package org.apache.metron.parsers.filters;
 
 import org.apache.metron.parsers.interfaces.MessageFilter;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
 import java.io.Serializable;
 import java.util.Map;
 
-public abstract class AbstractMessageFilter implements MessageFilter<JSONObject>, Serializable{
+public abstract class AbstractMessageFilter implements MessageFilter<JSONMapObject>, Serializable{
   public AbstractMessageFilter(Map<String, Object> config) {
   }
 }

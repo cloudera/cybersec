@@ -19,11 +19,8 @@ package org.apache.metron.enrichment.adapters.host;
 
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.enrichment.cache.CacheKey;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.json.JSONArray;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +28,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class HostFromPropertiesFileAdapterTest {
@@ -58,45 +58,44 @@ public class HostFromPropertiesFileAdapterTest {
     @Multiline
     private String expectedMessageString;
 
-    private JSONObject expectedMessage;
+    private JSONMapObject expectedMessage;
     private String ip = "10.0.2.15";
     private String ip1 = "10.0.22.22";
 
     @BeforeEach
-    public void parseJSON() throws ParseException {
-        JSONParser jsonParser = new JSONParser();
-        expectedMessage = (JSONObject) jsonParser.parse(expectedMessageString);
+    public void parseJSON()  {
+        expectedMessage = new JSONMapObject(expectedMessageString);
     }
 
     @Test
     public void testEnrich() {
-        Map<String, JSONObject> mapKnownHosts = new HashMap<>();
-        JSONArray jsonArray = (JSONArray) JSONValue.parse(expectedKnownHostsString);
+        Map<String, JSONMapObject> mapKnownHosts = new HashMap<>();
+        JSONArray jsonArray = new JSONArray(expectedKnownHostsString);
         Iterator jsonArrayIterator = jsonArray.iterator();
         while(jsonArrayIterator.hasNext()) {
-            JSONObject jsonObject = (JSONObject) jsonArrayIterator.next();
+            JSONMapObject jsonObject = (JSONMapObject) jsonArrayIterator.next();
             String host = (String) jsonObject.remove("ip");
             mapKnownHosts.put(host, jsonObject);
         }
         HostFromPropertiesFileAdapter hfa = new HostFromPropertiesFileAdapter(mapKnownHosts);
-        JSONObject actualMessage = hfa.enrich(new CacheKey("dummy", ip, null));
+        JSONMapObject actualMessage = hfa.enrich(new CacheKey("dummy", ip, null));
         assertNotNull(actualMessage);
         assertEquals(expectedMessage, actualMessage);
         actualMessage = hfa.enrich(new CacheKey("dummy", ip1, null));
-        JSONObject emptyJson = new JSONObject();
+        JSONMapObject emptyJson = new JSONMapObject();
         assertEquals(emptyJson, actualMessage);
     }
 
 
     @Test
     public void testInitializeAdapter() {
-        Map<String, JSONObject> mapKnownHosts = new HashMap<>();
+        Map<String, JSONMapObject> mapKnownHosts = new HashMap<>();
         HostFromPropertiesFileAdapter hfa = new HostFromPropertiesFileAdapter(mapKnownHosts);
         assertFalse(hfa.initializeAdapter(null));
-        JSONArray jsonArray = (JSONArray) JSONValue.parse(expectedKnownHostsString);
+        JSONArray jsonArray = new JSONArray(expectedKnownHostsString);
         Iterator jsonArrayIterator = jsonArray.iterator();
         while(jsonArrayIterator.hasNext()) {
-            JSONObject jsonObject = (JSONObject) jsonArrayIterator.next();
+            JSONMapObject jsonObject = (JSONMapObject) jsonArrayIterator.next();
             String host = (String) jsonObject.remove("ip");
             mapKnownHosts.put(host, jsonObject);
         }

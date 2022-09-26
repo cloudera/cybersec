@@ -21,7 +21,7 @@ package org.apache.metron.parsers.syslog;
 import com.github.palindromicity.syslog.NilPolicy;
 import com.github.palindromicity.syslog.dsl.SyslogFieldKeys;
 import org.apache.metron.parsers.interfaces.MessageParserResult;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -34,7 +34,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Syslog5424ParserTest {
   private static final String SYSLOG_LINE_ALL = "<14>1 2014-06-20T09:14:07+00:00 loggregator"
@@ -132,7 +136,7 @@ public class Syslog5424ParserTest {
     test(null, "not valid", (message) -> assertTrue(false));
   }
 
-  public void test(NilPolicy nilPolicy, String line, Consumer<JSONObject> msgIdChecker) {
+  public void test(NilPolicy nilPolicy, String line, Consumer<JSONMapObject> msgIdChecker) {
     Syslog5424Parser parser = new Syslog5424Parser();
     Map<String, Object> config = new HashMap<>();
     if (nilPolicy != null) {
@@ -156,11 +160,11 @@ public class Syslog5424ParserTest {
             .append(SYSLOG_LINE_MISSING)
             .append("\n")
             .append(SYSLOG_LINE_ALL);
-    Optional<MessageParserResult<JSONObject>> resultOptional = parser.parseOptionalResult(builder.toString().getBytes(
+    Optional<MessageParserResult<JSONMapObject>> resultOptional = parser.parseOptionalResult(builder.toString().getBytes(
         StandardCharsets.UTF_8));
     assertNotNull(resultOptional);
     assertTrue(resultOptional.isPresent());
-    List<JSONObject> parsedList = resultOptional.get().getMessages();
+    List<JSONMapObject> parsedList = resultOptional.get().getMessages();
     assertEquals(3,parsedList.size());
   }
 
@@ -180,7 +184,7 @@ public class Syslog5424ParserTest {
             .append("BOOM!\n")
             .append(SYSLOG_LINE_ALL)
             .append("\nOHMY!");
-    Optional<MessageParserResult<JSONObject>> output = parser.parseOptionalResult(builder.toString().getBytes(
+    Optional<MessageParserResult<JSONMapObject>> output = parser.parseOptionalResult(builder.toString().getBytes(
         StandardCharsets.UTF_8));
     assertTrue(output.isPresent());
     assertEquals(3,output.get().getMessages().size());
@@ -194,7 +198,7 @@ public class Syslog5424ParserTest {
     String timeStampString = null;
     config.put(Syslog5424Parser.NIL_POLICY_CONFIG, NilPolicy.DASH.name());
     parser.configure(config);
-    Optional<MessageParserResult<JSONObject>> output  = parser.parseOptionalResult(SYSLOG_LINE_MISSING_DATE.getBytes(
+    Optional<MessageParserResult<JSONMapObject>> output  = parser.parseOptionalResult(SYSLOG_LINE_MISSING_DATE.getBytes(
         StandardCharsets.UTF_8));
     assertNotNull(output);
     assertTrue(output.isPresent());

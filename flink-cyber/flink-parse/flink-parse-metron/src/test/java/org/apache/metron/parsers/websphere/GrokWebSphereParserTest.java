@@ -20,7 +20,7 @@ package org.apache.metron.parsers.websphere;
 
 import org.apache.metron.parsers.interfaces.MessageParser;
 import org.apache.metron.parsers.interfaces.MessageParserResult;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +35,9 @@ import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GrokWebSphereParserTest {
 
@@ -53,17 +55,17 @@ public class GrokWebSphereParserTest {
     parser = new GrokWebSphereParser();
     parser.configure(parserConfig);
 	}
-	
+
 	@Test
 	public void testParseLoginLine() {
 		String testString = "<133>Apr 15 17:47:28 ABCXML1413 [rojOut][0x81000033][auth][notice] user(rick007): "
 				+ "[120.43.200.6]: User logged into 'cohlOut'.";
-		Optional<MessageParserResult<JSONObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
+		Optional<MessageParserResult<JSONMapObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
         StandardCharsets.UTF_8));
 		assertNotNull(resultOptional);
 		assertTrue(resultOptional.isPresent());
-		List<JSONObject> result = resultOptional.get().getMessages();
-		JSONObject parsedJSON = result.get(0);
+		List<JSONMapObject> result = resultOptional.get().getMessages();
+		JSONMapObject parsedJSON = result.get(0);
 
 		long expectedTimestamp = ZonedDateTime.of(Year.now(UTC).getValue(), 4, 15, 17, 47, 28, 0, UTC).toInstant().toEpochMilli();
 
@@ -79,20 +81,20 @@ public class GrokWebSphereParserTest {
 		assertEquals("rick007", parsedJSON.get("username"));
 		assertEquals("120.43.200.6", parsedJSON.get("ip_src_addr"));
 	}
-	
+
 	@Test
 	public void testParseLogoutLine() {
 		String testString = "<134>Apr 15 18:02:27 PHIXML3RWD [0x81000019][auth][info] [14.122.2.201]: "
 				+ "User 'hjpotter' logged out from 'default'.";
-		Optional<MessageParserResult<JSONObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
+		Optional<MessageParserResult<JSONMapObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
         StandardCharsets.UTF_8));
 		assertNotNull(resultOptional);
 		assertTrue(resultOptional.isPresent());
-		List<JSONObject> result = resultOptional.get().getMessages();
-		JSONObject parsedJSON = result.get(0);
+		List<JSONMapObject> result = resultOptional.get().getMessages();
+		JSONMapObject parsedJSON = result.get(0);
 
 		long expectedTimestamp = ZonedDateTime.of(Year.now(UTC).getValue(), 4, 15, 18, 2, 27, 0, UTC).toInstant().toEpochMilli();
-		
+
 		//Compare fields
 		assertEquals(134, parsedJSON.get("priority"));
 		assertEquals(expectedTimestamp, parsedJSON.get("timestamp"));
@@ -104,20 +106,20 @@ public class GrokWebSphereParserTest {
 		assertEquals("hjpotter", parsedJSON.get("username"));
 		assertEquals("default", parsedJSON.get("security_domain"));
 	}
-	
+
 	@Test
 	public void testParseRBMLine() {
 		String testString = "<131>Apr 15 17:36:35 ROBXML3QRS [0x80800018][auth][error] rbm(RBM-Settings): "
 				+ "trans(3502888135)[request] gtid(3502888135): RBM: Resource access denied.";
-		Optional<MessageParserResult<JSONObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
+		Optional<MessageParserResult<JSONMapObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
         StandardCharsets.UTF_8));
 		assertNotNull(resultOptional);
 		assertTrue(resultOptional.isPresent());
-		List<JSONObject> result = resultOptional.get().getMessages();
-		JSONObject parsedJSON = result.get(0);
+		List<JSONMapObject> result = resultOptional.get().getMessages();
+		JSONMapObject parsedJSON = result.get(0);
 
 		long expectedTimestamp = ZonedDateTime.of(Year.now(UTC).getValue(), 4, 15, 17, 36, 35, 0, UTC).toInstant().toEpochMilli();
-		
+
 		//Compare fields
 		assertEquals(131, parsedJSON.get("priority"));
 		assertEquals(expectedTimestamp, parsedJSON.get("timestamp"));
@@ -128,19 +130,19 @@ public class GrokWebSphereParserTest {
 		assertEquals("rbm", parsedJSON.get("process"));
 		assertEquals("trans(3502888135)[request] gtid(3502888135): RBM: Resource access denied.", parsedJSON.get("message"));
 	}
-	
+
 	@Test
 	public void testParseOtherLine() {
 		String testString = "<134>Apr 15 17:17:34 SAGPXMLQA333 [0x8240001c][audit][info] trans(191): (admin:default:system:*): "
 				+ "ntp-service 'NTP Service' - Operational state down";
-		Optional<MessageParserResult<JSONObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
+		Optional<MessageParserResult<JSONMapObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
         StandardCharsets.UTF_8));
 		assertNotNull(resultOptional);
 		assertTrue(resultOptional.isPresent());
-		List<JSONObject> result = resultOptional.get().getMessages();
-		JSONObject parsedJSON = result.get(0);
+		List<JSONMapObject> result = resultOptional.get().getMessages();
+		JSONMapObject parsedJSON = result.get(0);
 		long expectedTimestamp = ZonedDateTime.of(Year.now(UTC).getValue(), 4, 15, 17, 17, 34, 0, UTC).toInstant().toEpochMilli();
-		
+
 		//Compare fields
 		assertEquals(134, parsedJSON.get("priority"));
 		assertEquals(expectedTimestamp, parsedJSON.get("timestamp"));
@@ -151,17 +153,17 @@ public class GrokWebSphereParserTest {
 		assertEquals("trans", parsedJSON.get("process"));
 		assertEquals("(admin:default:system:*): ntp-service 'NTP Service' - Operational state down", parsedJSON.get("message"));
 	}
-	
+
 	@Test
 	public void testParseMalformedLoginLine() {
 		String testString = "<133>Apr 15 17:47:28 ABCXML1413 [rojOut][0x81000033][auth][notice] rick007): "
 				+ "[120.43.200. User logged into 'cohlOut'.";
-		Optional<MessageParserResult<JSONObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
+		Optional<MessageParserResult<JSONMapObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
         StandardCharsets.UTF_8));
 		assertNotNull(resultOptional);
 		assertTrue(resultOptional.isPresent());
-		List<JSONObject> result = resultOptional.get().getMessages();
-		JSONObject parsedJSON = result.get(0);
+		List<JSONMapObject> result = resultOptional.get().getMessages();
+		JSONMapObject parsedJSON = result.get(0);
 
 		long expectedTimestamp = ZonedDateTime.of(Year.now(UTC).getValue(), 4, 15, 17, 47, 28, 0, UTC).toInstant().toEpochMilli();
 
@@ -177,20 +179,20 @@ public class GrokWebSphereParserTest {
 		assertEquals(null, parsedJSON.get("username"));
 		assertEquals(null, parsedJSON.get("ip_src_addr"));
 	}
-	
+
 	@Test
 	public void testParseMalformedLogoutLine() {
 		String testString = "<134>Apr 15 18:02:27 PHIXML3RWD [0x81000019][auth][info] [14.122.2.201: "
 				+ "User 'hjpotter' logged out from 'default.";
-		Optional<MessageParserResult<JSONObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
+		Optional<MessageParserResult<JSONMapObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
         StandardCharsets.UTF_8));
 		assertNotNull(resultOptional);
 		assertTrue(resultOptional.isPresent());
-		List<JSONObject> result = resultOptional.get().getMessages();
-		JSONObject parsedJSON = result.get(0);
+		List<JSONMapObject> result = resultOptional.get().getMessages();
+		JSONMapObject parsedJSON = result.get(0);
 
 		long expectedTimestamp = ZonedDateTime.of(Year.now(UTC).getValue(), 4, 15, 18, 2, 27, 0, UTC).toInstant().toEpochMilli();
-		
+
 		//Compare fields
 		assertEquals(134, parsedJSON.get("priority"));
 		assertEquals(expectedTimestamp, parsedJSON.get("timestamp"));
@@ -202,20 +204,20 @@ public class GrokWebSphereParserTest {
 		assertEquals(null, parsedJSON.get("username"));
 		assertEquals(null, parsedJSON.get("security_domain"));
 	}
-	
+
 	@Test
 	public void testParseMalformedRBMLine() {
 		String testString = "<131>Apr 15 17:36:35 ROBXML3QRS [0x80800018][auth][error] rbmRBM-Settings): "
 				+ "trans3502888135)[request] gtid3502888135) RBM: Resource access denied.";
-		Optional<MessageParserResult<JSONObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
+		Optional<MessageParserResult<JSONMapObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
         StandardCharsets.UTF_8));
 		assertNotNull(resultOptional);
 		assertTrue(resultOptional.isPresent());
-		List<JSONObject> result = resultOptional.get().getMessages();
-		JSONObject parsedJSON = result.get(0);
+		List<JSONMapObject> result = resultOptional.get().getMessages();
+		JSONMapObject parsedJSON = result.get(0);
 
 		long expectedTimestamp = ZonedDateTime.of(Year.now(UTC).getValue(), 4, 15, 17, 36, 35, 0, UTC).toInstant().toEpochMilli();
-		
+
 		//Compare fields
 		assertEquals(131, parsedJSON.get("priority"));
 		assertEquals(expectedTimestamp, parsedJSON.get("timestamp"));
@@ -226,17 +228,17 @@ public class GrokWebSphereParserTest {
 		assertEquals(null, parsedJSON.get("process"));
 		assertEquals("rbmRBM-Settings): trans3502888135)[request] gtid3502888135) RBM: Resource access denied.", parsedJSON.get("message"));
 	}
-	
+
 	@Test
 	public void testParseMalformedOtherLine() {
 		String testString = "<134>Apr 15 17:17:34 SAGPXMLQA333 [0x8240001c][audit][info] trans 191)  admindefaultsystem*): "
 				+ "ntp-service 'NTP Service' - Operational state down:";
-		Optional<MessageParserResult<JSONObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
+		Optional<MessageParserResult<JSONMapObject>> resultOptional = parser.parseOptionalResult(testString.getBytes(
         StandardCharsets.UTF_8));
 		assertNotNull(resultOptional);
 		assertTrue(resultOptional.isPresent());
-		List<JSONObject> result = resultOptional.get().getMessages();
-		JSONObject parsedJSON = result.get(0);
+		List<JSONMapObject> result = resultOptional.get().getMessages();
+		JSONMapObject parsedJSON = result.get(0);
 
 		long expectedTimestamp = ZonedDateTime.of(Year.now(UTC).getValue(), 4, 15, 17, 17, 34, 0, UTC).toInstant().toEpochMilli();
 		

@@ -20,23 +20,30 @@ package org.apache.metron.parsers;
 
 import org.apache.metron.parsers.interfaces.MessageParser;
 import org.apache.metron.parsers.interfaces.MessageParserResult;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MessageParserTest {
 
-  abstract class TestMessageParser implements MessageParser<JSONObject> {
+  abstract class TestMessageParser implements MessageParser<JSONMapObject> {
     @Override
     public void init() {
     }
 
     @Override
-    public boolean validate(JSONObject message) {
+    public boolean validate(JSONMapObject message) {
       return false;
     }
 
@@ -50,7 +57,7 @@ public class MessageParserTest {
   public void testNullable() {
     MessageParser parser = new TestMessageParser() {
       @Override
-      public List<JSONObject> parse(byte[] rawMessage) {
+      public List<JSONMapObject> parse(byte[] rawMessage) {
         return null;
       }
     };
@@ -60,28 +67,28 @@ public class MessageParserTest {
 
   @Test
   public void testNotNullable() {
-    MessageParser<JSONObject> parser = new TestMessageParser() {
+    MessageParser<JSONMapObject> parser = new TestMessageParser() {
       @Override
-      public List<JSONObject> parse(byte[] rawMessage) {
+      public List<JSONMapObject> parse(byte[] rawMessage) {
         return new ArrayList<>();
       }
     };
     assertNotNull(parser.parseOptionalResult(null));
-    Optional<MessageParserResult<JSONObject>> ret = parser.parseOptionalResult(null);
+    Optional<MessageParserResult<JSONMapObject>> ret = parser.parseOptionalResult(null);
     assertTrue(ret.isPresent());
     assertEquals(0, ret.get().getMessages().size());
   }
 
   @Test
   public void testParse() {
-    JSONObject message = new JSONObject();
-    MessageParser<JSONObject> parser = new TestMessageParser() {
+    JSONMapObject message = new JSONMapObject();
+    MessageParser<JSONMapObject> parser = new TestMessageParser() {
       @Override
-      public List<JSONObject> parse(byte[] rawMessage) {
+      public List<JSONMapObject> parse(byte[] rawMessage) {
         return Collections.singletonList(message);
       }
     };
-    Optional<MessageParserResult<JSONObject>> ret = parser.parseOptionalResult("message".getBytes(
+    Optional<MessageParserResult<JSONMapObject>> ret = parser.parseOptionalResult("message".getBytes(
         StandardCharsets.UTF_8));
     assertTrue(ret.isPresent());
     assertEquals(1, ret.get().getMessages().size());
@@ -90,14 +97,14 @@ public class MessageParserTest {
 
   @Test
   public void testParseOptional() {
-    JSONObject message = new JSONObject();
-    MessageParser<JSONObject> parser = new TestMessageParser() {
+    JSONMapObject message = new JSONMapObject();
+    MessageParser<JSONMapObject> parser = new TestMessageParser() {
       @Override
-      public Optional<List<JSONObject>> parseOptional(byte[] rawMessage) {
+      public Optional<List<JSONMapObject>> parseOptional(byte[] rawMessage) {
         return Optional.of(Collections.singletonList(message));
       }
     };
-    Optional<MessageParserResult<JSONObject>> ret = parser.parseOptionalResult("message".getBytes(
+    Optional<MessageParserResult<JSONMapObject>> ret = parser.parseOptionalResult("message".getBytes(
         StandardCharsets.UTF_8));
     assertTrue(ret.isPresent());
     assertEquals(1, ret.get().getMessages().size());
@@ -106,13 +113,13 @@ public class MessageParserTest {
 
   @Test
   public void testParseException() {
-    MessageParser<JSONObject> parser = new TestMessageParser() {
+    MessageParser<JSONMapObject> parser = new TestMessageParser() {
       @Override
-      public List<JSONObject> parse(byte[] rawMessage) {
+      public List<JSONMapObject> parse(byte[] rawMessage) {
         throw new RuntimeException("parse exception");
       }
     };
-    Optional<MessageParserResult<JSONObject>> ret = parser.parseOptionalResult("message".getBytes(
+    Optional<MessageParserResult<JSONMapObject>> ret = parser.parseOptionalResult("message".getBytes(
         StandardCharsets.UTF_8));
     assertTrue(ret.isPresent());
     assertTrue(ret.get().getMasterThrowable().isPresent());
@@ -121,13 +128,13 @@ public class MessageParserTest {
 
   @Test
   public void testParseOptionalException() {
-    MessageParser<JSONObject> parser = new TestMessageParser() {
+    MessageParser<JSONMapObject> parser = new TestMessageParser() {
       @Override
-      public Optional<List<JSONObject>> parseOptional(byte[] rawMessage) {
+      public Optional<List<JSONMapObject>> parseOptional(byte[] rawMessage) {
         throw new RuntimeException("parse exception");
       }
     };
-    Optional<MessageParserResult<JSONObject>> ret = parser.parseOptionalResult("message".getBytes(
+    Optional<MessageParserResult<JSONMapObject>> ret = parser.parseOptionalResult("message".getBytes(
         StandardCharsets.UTF_8));
     assertTrue(ret.isPresent());
     assertTrue(ret.get().getMasterThrowable().isPresent());

@@ -17,7 +17,7 @@
  */
 package org.apache.metron.common.message.metadata;
 
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
 import java.util.Map;
 
@@ -63,7 +63,7 @@ public enum RawMessageStrategies implements RawMessageStrategy {
    * @param config The config for the message strategy.
    */
   @Override
-  public void mergeMetadata(JSONObject message, Map<String, Object> metadata, boolean mergeMetadata, Map<String, Object> config) {
+  public void mergeMetadata(JSONMapObject message, Map<String, Object> metadata, boolean mergeMetadata, Map<String, Object> config) {
     this.supplier.mergeMetadata(message, metadata, mergeMetadata, config);
   }
 

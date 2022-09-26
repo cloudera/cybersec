@@ -22,13 +22,11 @@ import com.cloudera.cyber.TestUtils;
 import com.google.common.collect.ImmutableMap;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.enrichment.adapters.maxmind.geo.GeoLiteCityDatabase;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.common.StellarProcessor;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.DefaultVariableResolver;
 import org.apache.metron.stellar.dsl.StellarFunctions;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,7 +36,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GeoEnrichmentFunctionsTest {
   private static Context context;
@@ -59,7 +60,7 @@ public class GeoEnrichmentFunctionsTest {
   @Multiline
   private static String expectedMessageString;
 
-  private static JSONObject expectedMessage;
+  private static JSONMapObject expectedMessage;
 
   /**
    * {
@@ -72,14 +73,13 @@ public class GeoEnrichmentFunctionsTest {
   @Multiline
   private static String expectedSubsetString;
 
-  private static JSONObject expectedSubsetMessage;
+  private static JSONMapObject expectedSubsetMessage;
 
   @BeforeAll
-  public static void setupOnce() throws ParseException {
-    JSONParser jsonParser = new JSONParser();
-    expectedMessage = (JSONObject) jsonParser.parse(expectedMessageString);
+  public static void setupOnce() {
+    expectedMessage = new JSONMapObject(expectedMessageString);
 
-    expectedSubsetMessage = (JSONObject) jsonParser.parse(expectedSubsetString);
+    expectedSubsetMessage = new JSONMapObject(expectedSubsetString);
 
     String baseDir = TestUtils.findDir("GeoLite");
     geoHdfsFile = new File(new File(baseDir), "GeoLite2-City.mmdb.gz");

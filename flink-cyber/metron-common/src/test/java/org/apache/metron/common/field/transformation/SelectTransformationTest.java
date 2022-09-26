@@ -22,13 +22,15 @@ import com.google.common.collect.Iterables;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.common.configuration.FieldTransformer;
 import org.apache.metron.common.configuration.SensorParserConfig;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.dsl.Context;
-import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SelectTransformationTest {
 	
@@ -40,7 +42,7 @@ public class SelectTransformationTest {
 	public void testSingleFieldReturned() throws Exception {
 		SensorParserConfig sensorConfig = SensorParserConfig.fromBytes(Bytes.toBytes(selectSingleFieldConfig));
 		FieldTransformer handler = Iterables.getFirst(sensorConfig.getFieldTransformations(), null);
-		JSONObject input = new JSONObject(new HashMap<String, Object>() {
+		JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {
 			{
 				put("field1", "foo");
 				put("field2", "bar");
@@ -57,7 +59,7 @@ public class SelectTransformationTest {
 	public void testMulitpleFieldReturned() throws Exception {
 		SensorParserConfig sensorConfig = SensorParserConfig.fromBytes(Bytes.toBytes(selectMultiFieldConfig));
 		FieldTransformer handler = Iterables.getFirst(sensorConfig.getFieldTransformations(), null);
-		JSONObject input = new JSONObject(new HashMap<String, Object>() {
+		JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {
 			{
 				put("field1", "foo");
 				put("field2", "bar");
@@ -76,7 +78,7 @@ public class SelectTransformationTest {
 	public void testPreserveSystemFields() throws Exception { 
 		SensorParserConfig sensorConfig = SensorParserConfig.fromBytes(Bytes.toBytes(selectSingleFieldConfig));
 		FieldTransformer handler = Iterables.getFirst(sensorConfig.getFieldTransformations(), null);
-		JSONObject input = new JSONObject(new HashMap<String, Object>() {
+		JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {
 			{
 				put("timestamp", 12345);
 				put("original_string", "foo,bar");

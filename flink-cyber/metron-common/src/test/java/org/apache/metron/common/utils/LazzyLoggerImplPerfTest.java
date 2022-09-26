@@ -21,7 +21,7 @@ package org.apache.metron.common.utils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummary;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -54,8 +54,8 @@ public class LazzyLoggerImplPerfTest {
     for (int i = 0; i < 500; i++) {
       largeMap.put("key" + i, RandomStringUtils.randomAlphabetic(1000));
     }
-    JSONObject largeObject = new JSONObject(largeMap);
-    JSONObject smallObject = new JSONObject(smallMap);
+    JSONMapObject largeObject = new JSONMapObject(largeMap);
+    JSONMapObject smallObject = new JSONMapObject(smallMap);
     int reps = 1000;
 
     StatisticalSummary summary = runTrial(reps, () -> {

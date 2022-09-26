@@ -18,6 +18,14 @@
 
 package org.apache.metron.parsers.cef;
 
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.parsers.ParseException;
+import org.apache.metron.parsers.utils.DateUtils;
+import org.apache.metron.parsers.utils.SyslogUtils;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.invoke.MethodHandles;
 import java.time.Clock;
 import java.util.ArrayList;
@@ -27,13 +35,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.metron.parsers.BasicParser;
-import org.apache.metron.parsers.ParseException;
-import org.apache.metron.parsers.utils.DateUtils;
-import org.apache.metron.parsers.utils.SyslogUtils;
-import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CEFParser extends BasicParser {
 	private static final long serialVersionUID = 1L;
@@ -94,7 +95,7 @@ public class CEFParser extends BasicParser {
 
 	}
 
-	public static void parseExtensions(String ext, JSONObject obj) {
+	public static void parseExtensions(String ext, JSONMapObject obj) {
 		Matcher m = patternExtensions.matcher(ext);
 
 		int index = 0;
@@ -139,15 +140,15 @@ public class CEFParser extends BasicParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<JSONObject> parse(byte[] rawMessage) {
-		List<JSONObject> messages = new ArrayList<>();
+	public List<JSONMapObject> parse(byte[] rawMessage) {
+		List<JSONMapObject> messages = new ArrayList<>();
 
 		String cefString = new String(rawMessage, getReadCharset());
 
 		Matcher matcher = p.matcher(cefString);
 
 		while (matcher.find()) {
-			JSONObject obj = new JSONObject();
+			JSONMapObject obj = new JSONMapObject();
 			if (matcher.matches()) {
 				LOG.debug("Found %d groups", matcher.groupCount());
 				obj.put("DeviceVendor", matcher.group("DeviceVendor"));
@@ -211,7 +212,7 @@ public class CEFParser extends BasicParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	private JSONObject convertToInt(JSONObject obj, String key) {
+	private JSONMapObject convertToInt(JSONMapObject obj, String key) {
 		if (obj.containsKey(key)) {
 			obj.put(key, Integer.valueOf((String) obj.get(key)));
 		}
@@ -262,7 +263,7 @@ public class CEFParser extends BasicParser {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static JSONObject mutate(JSONObject json, String oldKey, String newKey) {
+	private static JSONMapObject mutate(JSONMapObject json, String oldKey, String newKey) {
 		if (json.containsKey(oldKey)) {
 			json.put(newKey, json.remove(oldKey));
 		}

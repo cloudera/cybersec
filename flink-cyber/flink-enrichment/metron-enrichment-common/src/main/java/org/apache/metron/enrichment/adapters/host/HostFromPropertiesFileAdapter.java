@@ -18,17 +18,17 @@
 
 package org.apache.metron.enrichment.adapters.host;
 
-import java.util.Map;
-
 import org.apache.metron.enrichment.cache.CacheKey;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
+
+import java.util.Map;
 
 @SuppressWarnings("serial")
 public class HostFromPropertiesFileAdapter extends AbstractHostAdapter {
 	
-	Map<String, JSONObject> _known_hosts;
+	Map<String, JSONMapObject> _known_hosts;
 	
-	public HostFromPropertiesFileAdapter(Map<String, JSONObject> known_hosts)
+	public HostFromPropertiesFileAdapter(Map<String, JSONMapObject> known_hosts)
 	{
 		_known_hosts = known_hosts;
 	}
@@ -59,14 +59,14 @@ public class HostFromPropertiesFileAdapter extends AbstractHostAdapter {
 
 	@SuppressWarnings("unchecked")
     @Override
-	public JSONObject enrich(CacheKey metadata) {
+	public JSONMapObject enrich(CacheKey metadata) {
 		
 		
 		if(!_known_hosts.containsKey(metadata.getValue()))
-			return new JSONObject();
-		
-		JSONObject enrichment = new JSONObject();
-		enrichment.put("known_info", (JSONObject) _known_hosts.get(metadata.getValue()));
+			return new JSONMapObject();
+
+		JSONMapObject enrichment = new JSONMapObject();
+		enrichment.put("known_info", _known_hosts.get(metadata.getValue()));
 		return enrichment;
 	}
 	

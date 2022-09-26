@@ -19,8 +19,8 @@ package org.apache.metron.parsers.asa;
 
 import org.apache.log4j.Level;
 import org.apache.metron.parsers.interfaces.MessageParser;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.test.utils.UnitTestHelper;
-import org.json.simple.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -34,7 +34,10 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BasicAsaParserTest {
 
@@ -82,7 +85,7 @@ public class BasicAsaParserTest {
     @Test
     public void testCISCOFW106023() {
         String rawMessage = "<164>Aug 05 2016 01:01:34: %ASA-4-106023: Deny tcp src Inside:10.30.9.121/54580 dst Outside:192.168.135.51/42028 by access-group \"Inside_access_in\" [0x962df600, 0x0]";
-        JSONObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
+        JSONMapObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
         assertEquals(asaJson.get("original_string"), rawMessage);
         assertEquals("10.30.9.121", asaJson.get("ip_src_addr"));
         assertEquals("192.168.135.51", asaJson.get("ip_dst_addr"));
@@ -94,7 +97,7 @@ public class BasicAsaParserTest {
     @Test
     public void testCISCOFW106006() {
         String rawMessage = "<162>Aug 05 2016 01:02:25: %ASA-2-106006: Deny inbound UDP from 10.25.177.164/63279 to 10.2.52.71/161 on interface Inside";
-        JSONObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
+        JSONMapObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
         assertEquals(asaJson.get("original_string"), rawMessage);
         assertEquals("10.25.177.164", asaJson.get("ip_src_addr"));
         assertEquals("10.2.52.71", asaJson.get("ip_dst_addr"));
@@ -115,7 +118,7 @@ public class BasicAsaParserTest {
         fixedClockParser.deviceClock = fixedClock;
         fixedClockParser.init();
 
-        JSONObject asaJson = fixedClockParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
+        JSONMapObject asaJson = fixedClockParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
         assertEquals(asaJson.get("original_string"), rawMessage);
         assertEquals("10.22.8.110", asaJson.get("ip_src_addr"));
         assertEquals("192.111.72.8", asaJson.get("ip_dst_addr"));
@@ -127,7 +130,7 @@ public class BasicAsaParserTest {
     @Test
     public void testNoPatternForTag() {
         String rawMessage = "<165>Aug 16 2016 04:08:36: %ASA-5-713049: Group = 172.22.136.20, IP = 172.22.136.20, Security negotiation complete for LAN-to-LAN Group (172.22.136.20)  Initiator, Inbound SPI = 0x891fb03f, Outbound SPI = 0xbe4b5d8d";
-        JSONObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
+        JSONMapObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
         assertEquals(asaJson.get("original_string"), rawMessage);
         assertEquals(1471320516000L, (long) asaJson.get("timestamp"));
     }
@@ -135,7 +138,7 @@ public class BasicAsaParserTest {
     @Test
     public void testInvalidIpAddr() {
         String rawMessage = "<164>Aug 05 2016 01:01:34: %ASA-4-106023: Deny tcp src Inside:10.30.9.121/54580 dst Outside:192.168.256.51/42028 by access-group \"Inside_access_in\" [0x962df600, 0x0]";
-        JSONObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
+        JSONMapObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
         assertEquals(asaJson.get("original_string"), rawMessage);
         assertEquals(1470358894000L, (long) asaJson.get("timestamp"));
         assertNull(asaJson.get("ip_dst_addr"));
@@ -144,7 +147,7 @@ public class BasicAsaParserTest {
     @Test
     public void testIp6Addr() {
         String rawMessage = "<174>Jan 05 2016 14:52:35 10.22.8.212 %ASA-6-302015: Built inbound UDP connection 76245506 for outside:2001:db8:85a3::8a2e:370:7334/49886 (10.22.8.110/49886) to inside:2001:0db8:85a3:0000:0000:8a2e:0370:7334/8612 (192.111.72.8/8612) (user.name)";
-        JSONObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
+        JSONMapObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
         assertEquals(rawMessage, asaJson.get("original_string"));
         assertEquals("2001:db8:85a3::8a2e:370:7334", asaJson.get("ip_src_addr"));
         assertEquals("2001:0db8:85a3:0000:0000:8a2e:0370:7334", asaJson.get("ip_dst_addr"));
@@ -156,21 +159,21 @@ public class BasicAsaParserTest {
     @Test
     public void testSyslogIpHost() {
     	String rawMessage = "<174>Jan  5 14:52:35 10.22.8.212 %ASA-6-302015: Built inbound UDP connection 76245506 for outside:10.22.8.110/49886 (10.22.8.110/49886) to inside:192.111.72.8/8612 (192.111.72.8/8612) (user.name)";
-    	JSONObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
+    	JSONMapObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
         assertEquals("10.22.8.212", asaJson.get("syslog_host"));
     }
 
     @Test
     public void testSyslogHost() {
     	String rawMessage = "<174>Jan  5 14:52:35 hostname-2 %ASA-6-302015: Built inbound UDP connection 76245506 for outside:10.22.8.110/49886 (10.22.8.110/49886) to inside:192.111.72.8/8612 (192.111.72.8/8612) (user.name)";
-    	JSONObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
+    	JSONMapObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
         assertEquals("hostname-2", asaJson.get("syslog_host"));
     }
 
     @Test
     public void testSyslogHostAndProg() {
     	String rawMessage = "<174>Jan  5 14:52:35 hostname-2 progName-2 %ASA-6-302015: Built inbound UDP connection 76245506 for outside:10.22.8.110/49886 (10.22.8.110/49886) to inside:192.111.72.8/8612 (192.111.72.8/8612) (user.name)";
-    	JSONObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
+    	JSONMapObject asaJson = asaParser.parse(rawMessage.getBytes(StandardCharsets.UTF_8)).get(0);
     	assertEquals("hostname-2", asaJson.get("syslog_host"));
     	assertEquals("progName-2", asaJson.get("syslog_prog"));
     }

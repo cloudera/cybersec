@@ -25,14 +25,17 @@ import org.apache.metron.common.configuration.enrichment.EnrichmentConfig;
 import org.apache.metron.common.configuration.enrichment.handler.ConfigHandler;
 import org.apache.metron.common.configuration.enrichment.handler.Configs;
 import org.apache.metron.common.utils.JSONUtils;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class StellarEnrichmentConfigTest extends StellarEnrichmentTest {
 
@@ -59,11 +62,11 @@ public class StellarEnrichmentConfigTest extends StellarEnrichmentTest {
 
   @Test
   public void testSplitter_listWithTemporaryVariables() throws IOException {
-    JSONObject message = new JSONObject(ImmutableMap.of("domain_without_subdomains", "yahoo.com"));
+    JSONMapObject message = new JSONMapObject(ImmutableMap.of("domain_without_subdomains", "yahoo.com"));
     EnrichmentConfig enrichmentConfig = JSONUtils.INSTANCE.load(conf, EnrichmentConfig.class);
     assertNotNull(enrichmentConfig.getEnrichmentConfigs().get("stellar"));
     ConfigHandler handler = enrichmentConfig.getEnrichmentConfigs().get("stellar");
-    List<JSONObject> splits = Configs.STELLAR.splitByFields(message, null, x -> null, handler );
+    List<JSONMapObject> splits = Configs.STELLAR.splitByFields(message, null, x -> null, handler );
     assertEquals(1, splits.size());
     Map<String, Object> split = (Map<String, Object>)(splits.get(0)).get("");
     assertEquals("yahoo.com", split.get("domain_without_subdomains"));
@@ -74,12 +77,12 @@ public class StellarEnrichmentConfigTest extends StellarEnrichmentTest {
 
   @Test
   public void testSplitter_default() throws IOException {
-    JSONObject message = getMessage();
+    JSONMapObject message = getMessage();
     for(String c : DEFAULT_CONFIGS) {
       EnrichmentConfig enrichmentConfig = JSONUtils.INSTANCE.load(c, EnrichmentConfig.class);
       assertNotNull(enrichmentConfig.getEnrichmentConfigs().get("stellar"));
       ConfigHandler handler = enrichmentConfig.getEnrichmentConfigs().get("stellar");
-      List<JSONObject> splits = Configs.STELLAR.splitByFields(message, null, x -> null, handler );
+      List<JSONMapObject> splits = Configs.STELLAR.splitByFields(message, null, x -> null, handler );
       assertEquals(1, splits.size());
       Map<String, Object> split = (Map<String, Object>) splits.get(0).get("");
       assertEquals(3, split.size());
@@ -103,12 +106,12 @@ public class StellarEnrichmentConfigTest extends StellarEnrichmentTest {
 
   @Test
   public void testSplitter_grouped() throws IOException {
-    JSONObject message = getMessage();
+    JSONMapObject message = getMessage();
     for(String c : GROUPED_CONFIGS) {
       EnrichmentConfig enrichmentConfig = JSONUtils.INSTANCE.load(c, EnrichmentConfig.class);
       assertNotNull(enrichmentConfig.getEnrichmentConfigs().get("stellar"));
       ConfigHandler handler = enrichmentConfig.getEnrichmentConfigs().get("stellar");
-      List<JSONObject> splits = Configs.STELLAR.splitByFields(message, null, x -> null, handler );
+      List<JSONMapObject> splits = Configs.STELLAR.splitByFields(message, null, x -> null, handler );
       assertEquals(2, splits.size());
       {
         Map<String, Object> split = (Map<String, Object>) splits.get(0).get("group1");
@@ -140,12 +143,12 @@ public class StellarEnrichmentConfigTest extends StellarEnrichmentTest {
 
   @Test
   public void testSplitter_mixed() throws IOException {
-    JSONObject message = getMessage();
+    JSONMapObject message = getMessage();
     for(String c : Iterables.concat(MIXED_CONFIGS, ImmutableList.of(tempVarStellarConfig_list))) {
       EnrichmentConfig enrichmentConfig = JSONUtils.INSTANCE.load(c, EnrichmentConfig.class);
       assertNotNull(enrichmentConfig.getEnrichmentConfigs().get("stellar"));
       ConfigHandler handler = enrichmentConfig.getEnrichmentConfigs().get("stellar");
-      List<JSONObject> splits = Configs.STELLAR.splitByFields(message, null, x -> null, handler );
+      List<JSONMapObject> splits = Configs.STELLAR.splitByFields(message, null, x -> null, handler );
       assertEquals(3, splits.size());
       {
         Map<String, Object> split = (Map<String, Object>) splits.get(0).get("group1");

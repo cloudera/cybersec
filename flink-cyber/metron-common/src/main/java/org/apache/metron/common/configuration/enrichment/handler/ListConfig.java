@@ -18,10 +18,9 @@
 package org.apache.metron.common.configuration.enrichment.handler;
 
 import com.google.common.collect.ImmutableList;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -29,14 +28,14 @@ import java.util.function.Function;
 public class ListConfig implements Config {
 
   @Override
-  public List<JSONObject> splitByFields( JSONObject message
+  public List<JSONMapObject> splitByFields(JSONMapObject message
                                  , Object fieldsObj
                                  , Function<String, String> fieldToEnrichmentKey
                                  , Iterable<Map.Entry<String, Object>> config
                                  )
   {
     List<String> fields = (List<String>)fieldsObj;
-    JSONObject enrichmentObject = new JSONObject();
+    JSONMapObject enrichmentObject = new JSONMapObject();
     if (fields != null && fields.size() > 0) {
       for (String field : fields) {
         enrichmentObject.put(fieldToEnrichmentKey.apply(field), message.get(field));

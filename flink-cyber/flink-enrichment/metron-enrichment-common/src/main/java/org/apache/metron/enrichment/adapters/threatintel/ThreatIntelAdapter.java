@@ -18,14 +18,7 @@
 package org.apache.metron.enrichment.adapters.threatintel;
 
 import com.google.common.collect.Iterables;
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.invoke.MethodHandles;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.metron.enrichment.cache.CacheKey;
 import org.apache.metron.enrichment.converter.EnrichmentKey;
@@ -34,9 +27,16 @@ import org.apache.metron.enrichment.lookup.EnrichmentLookup;
 import org.apache.metron.enrichment.lookup.accesstracker.BloomAccessTracker;
 import org.apache.metron.enrichment.lookup.accesstracker.PersistentAccessTracker;
 import org.apache.metron.enrichment.utils.EnrichmentUtils;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class ThreatIntelAdapter implements EnrichmentAdapter<CacheKey>,Serializable {
   protected static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -67,11 +67,11 @@ public class ThreatIntelAdapter implements EnrichmentAdapter<CacheKey>,Serializa
 
 
   @Override
-  public JSONObject enrich(CacheKey value) {
+  public JSONMapObject enrich(CacheKey value) {
     if(!isInitialized()) {
       initializeAdapter(null);
     }
-    JSONObject enriched = new JSONObject();
+    JSONMapObject enriched = new JSONMapObject();
     List<String> enrichmentTypes = value.getConfig()
                                         .getThreatIntel().getFieldToTypeMap()
                                         .get(EnrichmentUtils.toTopLevelField(value.getField()));

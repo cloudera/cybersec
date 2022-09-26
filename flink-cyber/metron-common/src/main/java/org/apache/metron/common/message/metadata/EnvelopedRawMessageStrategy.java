@@ -17,16 +17,15 @@
  */
 package org.apache.metron.common.message.metadata;
 
-import java.nio.charset.StandardCharsets;
-
 import org.apache.metron.common.utils.JSONUtils;
 import org.apache.metron.stellar.common.Constants;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -113,7 +112,7 @@ public class EnvelopedRawMessageStrategy implements RawMessageStrategy {
    * @param config The config for the message strategy.
    */
   @Override
-  public void mergeMetadata(JSONObject message, Map<String, Object> metadata, boolean mergeMetadata, Map<String, Object> config) {
+  public void mergeMetadata(JSONMapObject message, Map<String, Object> metadata, boolean mergeMetadata, Map<String, Object> config) {
     //we want to ensure the original string from the metadata, if provided is used
     String prefix = MetadataUtil.INSTANCE.getMetadataPrefix(config);
     String originalStringFromMetadata = (String)metadata.get(MetadataUtil.INSTANCE.prefixKey(prefix, Constants.Fields.ORIGINAL.getName()));

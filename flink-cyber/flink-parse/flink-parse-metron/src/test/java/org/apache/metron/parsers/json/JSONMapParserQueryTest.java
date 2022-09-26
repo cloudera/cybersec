@@ -22,8 +22,8 @@ import org.adrianwalker.multilinestring.Multiline;
 import org.apache.log4j.Level;
 import org.apache.metron.parsers.BasicParser;
 import org.apache.metron.stellar.common.Constants.Fields;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.test.utils.UnitTestHelper;
-import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -32,7 +32,10 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JSONMapParserQueryTest {
 
@@ -66,9 +69,9 @@ public class JSONMapParserQueryTest {
     parser.configure(new HashMap<String, Object>() {{
       put(JSONMapParser.JSONP_QUERY, "$.foo");
     }});
-    List<JSONObject> output = parser.parse(JSON_LIST.getBytes(StandardCharsets.UTF_8));
+    List<JSONMapObject> output = parser.parse(JSON_LIST.getBytes(StandardCharsets.UTF_8));
     assertEquals(2, output.size());
-    JSONObject message = output.get(0);
+    JSONMapObject message = output.get(0);
     // account for timestamp field in the size
     assertEquals(4, message.size());
     assertEquals("foo1", message.get("name"));
@@ -102,10 +105,10 @@ public class JSONMapParserQueryTest {
       put(JSONMapParser.JSONP_QUERY, "$.foo");
       put(JSONMapParser.OVERRIDE_ORIGINAL_STRING, true);
     }});
-    List<JSONObject> output = parser.parse(JSON_LIST.getBytes(StandardCharsets.UTF_8));
+    List<JSONMapObject> output = parser.parse(JSON_LIST.getBytes(StandardCharsets.UTF_8));
     assertEquals(2, output.size());
 
-    JSONObject message = output.get(0);
+    JSONMapObject message = output.get(0);
     // account for timestamp field in the size
     assertEquals(5, message.size());
     assertEquals("foo1", message.get("name"));
@@ -147,7 +150,7 @@ public class JSONMapParserQueryTest {
     parser.configure(new HashMap<String, Object>() {{
       put(JSONMapParser.JSONP_QUERY, "$.foo");
     }});
-    List<JSONObject> output = parser.parse(JSON_SINGLE.getBytes(StandardCharsets.UTF_8));
+    List<JSONMapObject> output = parser.parse(JSON_SINGLE.getBytes(StandardCharsets.UTF_8));
     assertEquals(0, output.size());
   }
 
@@ -173,13 +176,13 @@ public class JSONMapParserQueryTest {
     parser.configure(new HashMap<String, Object>() {{
       put(JSONMapParser.JSONP_QUERY, "$.foo");
     }});
-    List<JSONObject> output = parser.parse(collectionHandlingJSON.getBytes(StandardCharsets.UTF_8));
+    List<JSONMapObject> output = parser.parse(collectionHandlingJSON.getBytes(StandardCharsets.UTF_8));
     assertEquals(output.size(), 2);
 
     //don't forget the timestamp field!
     assertEquals(output.get(0).size(), 1);
 
-    JSONObject message = output.get(0);
+    JSONMapObject message = output.get(0);
     assertNotNull(message.get("timestamp"));
     assertTrue(message.get("timestamp") instanceof Number);
 
@@ -206,10 +209,10 @@ public class JSONMapParserQueryTest {
     parser.configure(ImmutableMap
         .of(JSONMapParser.MAP_STRATEGY_CONFIG, JSONMapParser.MapStrategy.ALLOW.name(),
             JSONMapParser.JSONP_QUERY, "$.foo"));
-    List<JSONObject> output = parser.parse(collectionHandlingJSON.getBytes(StandardCharsets.UTF_8));
+    List<JSONMapObject> output = parser.parse(collectionHandlingJSON.getBytes(StandardCharsets.UTF_8));
     assertEquals(output.size(), 2);
     assertEquals(output.get(0).size(), 2);
-    JSONObject message = output.get(0);
+    JSONMapObject message = output.get(0);
     assertNotNull(message.get("timestamp"));
     assertTrue(message.get("timestamp") instanceof Number);
 
@@ -225,10 +228,10 @@ public class JSONMapParserQueryTest {
     parser.configure(ImmutableMap
         .of(JSONMapParser.MAP_STRATEGY_CONFIG, JSONMapParser.MapStrategy.UNFOLD.name(),
             JSONMapParser.JSONP_QUERY, "$.foo"));
-    List<JSONObject> output = parser.parse(collectionHandlingJSON.getBytes(StandardCharsets.UTF_8));
+    List<JSONMapObject> output = parser.parse(collectionHandlingJSON.getBytes(StandardCharsets.UTF_8));
     assertEquals(output.size(), 2);
     assertEquals(output.get(0).size(), 5);
-    JSONObject message = output.get(0);
+    JSONMapObject message = output.get(0);
     assertEquals(message.get("collection.blah"), 7);
     assertEquals(message.get("collection.blah2"), "foo");
     assertEquals(message.get("collection.bigblah.innerBlah"), "baz");

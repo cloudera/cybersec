@@ -16,6 +16,13 @@
 package org.apache.metron.parsers.regex;
 
 import com.google.common.base.CaseFormat;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.stellar.common.Constants;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.invoke.MethodHandles;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,12 +36,6 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.metron.stellar.common.Constants;
-import org.apache.metron.parsers.BasicParser;
-import org.json.simple.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 //@formatter:off
 /**
@@ -156,21 +157,21 @@ public class RegularExpressionsParser extends BasicParser {
      * @return List of json parsed json objects. In this case list will have a single element only.
      */
     @Override
-    public List<JSONObject> parse(byte[] rawMessage) {
+    public List<JSONMapObject> parse(byte[] rawMessage) {
         String originalMessage = null;
         try {
             originalMessage = new String(rawMessage, getReadCharset()).trim();
             LOG.debug(" raw message. {}", originalMessage);
             if (originalMessage.isEmpty()) {
                 LOG.warn("Message is empty.");
-                return Arrays.asList(new JSONObject());
+                return Arrays.asList(new JSONMapObject());
             }
         } catch (Exception e) {
             LOG.error("[Metron] Could not read raw message. {} " + originalMessage, e);
             throw new RuntimeException(e.getMessage(), e);
         }
 
-        JSONObject parsedJson = new JSONObject();
+        JSONMapObject parsedJson = new JSONMapObject();
         if (messageHeaderPatternsMap.size() > 0) {
             parsedJson.putAll(extractHeaderFields(originalMessage));
         }
@@ -184,7 +185,7 @@ public class RegularExpressionsParser extends BasicParser {
         return Arrays.asList(parsedJson);
     }
 
-    private void applyFieldTransformations(JSONObject parsedJson) {
+    private void applyFieldTransformations(JSONMapObject parsedJson) {
         if (getParserConfig().get(ParserConfigConstants.CONVERT_CAMELCASE_TO_UNDERSCORE.getName())
             != null && (Boolean) getParserConfig()
             .get(ParserConfigConstants.CONVERT_CAMELCASE_TO_UNDERSCORE.getName())) {
@@ -287,8 +288,8 @@ public class RegularExpressionsParser extends BasicParser {
         }
     }
 
-    private JSONObject parse(String originalMessage) {
-        JSONObject parsedJson = new JSONObject();
+    private JSONMapObject parse(String originalMessage) {
+        JSONMapObject parsedJson = new JSONMapObject();
         Optional<String> recordIdentifier = getField(recordTypePattern, originalMessage);
         if (recordIdentifier.isPresent()) {
             extractNamedGroups(parsedJson, recordIdentifier.get(), originalMessage);
@@ -351,7 +352,7 @@ public class RegularExpressionsParser extends BasicParser {
     }
 
     private Map<String, Object> extractHeaderFields(String originalMessage) {
-        Map<String, Object> messageHeaderJson = new JSONObject();
+        Map<String, Object> messageHeaderJson = new JSONMapObject();
         for (Map.Entry<Pattern, Set<String>> syslogPatternEntry : messageHeaderPatternsMap
             .entrySet()) {
             Matcher m = syslogPatternEntry.getKey().matcher(originalMessage);

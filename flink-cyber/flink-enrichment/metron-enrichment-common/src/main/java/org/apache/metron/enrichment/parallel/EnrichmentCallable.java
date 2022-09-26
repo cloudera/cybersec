@@ -19,7 +19,7 @@ package org.apache.metron.enrichment.parallel;
 
 import org.apache.metron.enrichment.cache.CacheKey;
 import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
-import org.json.simple.JSONObject;
+import org.apache.metron.stellar.common.JSONMapObject;
 
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -27,7 +27,7 @@ import java.util.function.Function;
 /**
  * Enrich based on a key and enrichment adapter.  The CacheKey contains all necessary input information for an enrichment.
  */
-public class EnrichmentCallable implements Callable<JSONObject>, Function<CacheKey, JSONObject> {
+public class EnrichmentCallable implements Callable<JSONMapObject>, Function<CacheKey, JSONMapObject> {
   CacheKey key;
   EnrichmentAdapter<CacheKey> adapter;
 
@@ -46,7 +46,7 @@ public class EnrichmentCallable implements Callable<JSONObject>, Function<CacheK
    * @throws Exception if unable to compute a result
    */
   @Override
-  public JSONObject call() throws Exception {
+  public JSONMapObject call() throws Exception {
     //Log access for this key.
     adapter.logAccess(key);
     return adapter.enrich(key);
@@ -59,7 +59,7 @@ public class EnrichmentCallable implements Callable<JSONObject>, Function<CacheK
    * @return the function result
    */
   @Override
-  public JSONObject apply(CacheKey cacheKey) {
+  public JSONMapObject apply(CacheKey cacheKey) {
     adapter.logAccess(key);
     return adapter.enrich(cacheKey);
   }

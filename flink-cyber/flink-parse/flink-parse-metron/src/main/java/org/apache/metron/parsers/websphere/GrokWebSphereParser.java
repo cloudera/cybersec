@@ -18,11 +18,12 @@
 
 package org.apache.metron.parsers.websphere;
 
+import org.apache.metron.parsers.GrokParser;
+import org.apache.metron.stellar.common.JSONMapObject;
+
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Iterator;
-import org.apache.metron.parsers.GrokParser;
-import org.json.simple.JSONObject;
 
 public class GrokWebSphereParser extends GrokParser {
 
@@ -42,7 +43,7 @@ public class GrokWebSphereParser extends GrokParser {
   }
 
   @Override
-  protected void postParse(JSONObject message) {
+  protected void postParse(JSONMapObject message) {
     removeEmptyFields(message);
     message.remove("timestamp_string");
     if (message.containsKey("message")) {
@@ -60,10 +61,10 @@ public class GrokWebSphereParser extends GrokParser {
   }
 
   @SuppressWarnings("unchecked")
-  private void removeEmptyFields(JSONObject json) {
-    Iterator<Object> keyIter = json.keySet().iterator();
+  private void removeEmptyFields(JSONMapObject json) {
+    Iterator<String> keyIter = json.keySet().iterator();
     while (keyIter.hasNext()) {
-      Object key = keyIter.next();
+      String key = keyIter.next();
       Object value = json.get(key);
       if (null == value || "".equals(value.toString())) {
         keyIter.remove();
@@ -73,7 +74,7 @@ public class GrokWebSphereParser extends GrokParser {
 
   //Extracts the appropriate fields from login messages
   @SuppressWarnings("unchecked")
-  private void parseLoginMessage(JSONObject json) {
+  private void parseLoginMessage(JSONMapObject json) {
     json.put("event_subtype", "login");
     String message = (String) json.get("message");
     if (message.contains(":")) {
@@ -96,7 +97,7 @@ public class GrokWebSphereParser extends GrokParser {
 
   //Extracts the appropriate fields from logout messages
   @SuppressWarnings("unchecked")
-  private void parseLogoutMessage(JSONObject json) {
+  private void parseLogoutMessage(JSONMapObject json) {
     json.put("event_subtype", "logout");
     String message = (String) json.get("message");
     if (message.matches(".*'.*'.*'.*'.*")) {
@@ -115,7 +116,7 @@ public class GrokWebSphereParser extends GrokParser {
 
   //Extracts the appropriate fields from RBM messages
   @SuppressWarnings("unchecked")
-  private void parseRBMMessage(JSONObject json) {
+  private void parseRBMMessage(JSONMapObject json) {
     String message = (String) json.get("message");
     if (message.contains("(")) {
       json.put("process", message.substring(0, message.indexOf("(")));
@@ -127,7 +128,7 @@ public class GrokWebSphereParser extends GrokParser {
 
   //Extracts the appropriate fields from other messages
   @SuppressWarnings("unchecked")
-  private void parseOtherMessage(JSONObject json) {
+  private void parseOtherMessage(JSONMapObject json) {
     String message = (String) json.get("message");
     if (message.contains("(")) {
       json.put("process", message.substring(0, message.indexOf("(")));

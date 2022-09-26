@@ -18,18 +18,18 @@
 
 package org.apache.metron.parsers.filters;
 
+import org.apache.metron.parsers.interfaces.MessageFilter;
+import org.apache.metron.stellar.common.JSONMapObject;
+import org.apache.metron.stellar.common.StellarPredicateProcessor;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.MapVariableResolver;
 import org.apache.metron.stellar.dsl.StellarFunctions;
 import org.apache.metron.stellar.dsl.VariableResolver;
 import org.apache.metron.stellar.dsl.functions.resolver.FunctionResolver;
-import org.apache.metron.stellar.common.StellarPredicateProcessor;
-import org.apache.metron.parsers.interfaces.MessageFilter;
-import org.json.simple.JSONObject;
 
 import java.util.Map;
 
-public class StellarFilter implements MessageFilter<JSONObject> {
+public class StellarFilter implements MessageFilter<JSONMapObject> {
   public static final String QUERY_STRING_CONF = "filter.query";
   private StellarPredicateProcessor processor = new StellarPredicateProcessor();
   private String query;
@@ -54,7 +54,7 @@ public class StellarFilter implements MessageFilter<JSONObject> {
   }
 
   @Override
-  public boolean emit(JSONObject message, Context context) {
+  public boolean emit(JSONMapObject message, Context context) {
     VariableResolver resolver = new MapVariableResolver(message);
     return processor.parse(query, resolver, functionResolver, context);
   }

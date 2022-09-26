@@ -23,8 +23,8 @@ import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.common.configuration.FieldTransformer;
 import org.apache.metron.common.configuration.SensorParserConfig;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.dsl.Context;
-import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -50,7 +50,7 @@ public class RemoveTransformationTest {
   public void testUnconditionalRemove() throws Exception{
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(removeUnconditionalConfig));
     FieldTransformer handler = Iterables.getFirst(c.getFieldTransformations(), null);
-    JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+    JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
       put("field1", "foo");
     }});
     handler.transformAndUpdate(input, Context.EMPTY_CONTEXT());
@@ -77,7 +77,7 @@ public class RemoveTransformationTest {
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(removeConditionalConfig));
     FieldTransformer handler = Iterables.getFirst(c.getFieldTransformations(), null);
     {
-      JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+      JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
         put("field1", "foo");
       }});
       handler.transformAndUpdate(input, Context.EMPTY_CONTEXT());
@@ -86,7 +86,7 @@ public class RemoveTransformationTest {
       assertFalse(input.containsKey("field2"));
     }
     {
-      JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+      JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
         put("field1", "foo");
         put("field2", "bar");
       }});
@@ -96,7 +96,7 @@ public class RemoveTransformationTest {
       assertTrue(input.containsKey("field2"));
     }
     {
-      JSONObject input = new JSONObject(new HashMap<String, Object>() {{
+      JSONMapObject input = new JSONMapObject(new HashMap<String, Object>() {{
         put("field1", "bar");
         put("field2", "foo");
       }});

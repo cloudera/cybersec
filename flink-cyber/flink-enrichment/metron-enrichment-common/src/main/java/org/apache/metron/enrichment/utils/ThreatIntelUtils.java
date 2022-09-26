@@ -23,11 +23,11 @@ import org.apache.metron.common.configuration.enrichment.threatintel.RuleScore;
 import org.apache.metron.common.configuration.enrichment.threatintel.ThreatScore;
 import org.apache.metron.common.configuration.enrichment.threatintel.ThreatTriageConfig;
 import org.apache.metron.common.utils.MessageUtils;
+import org.apache.metron.stellar.common.JSONMapObject;
 import org.apache.metron.stellar.common.utils.ConversionUtils;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.functions.resolver.FunctionResolver;
 import org.apache.metron.threatintel.triage.ThreatTriageProcessor;
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +72,7 @@ public class ThreatIntelUtils {
     return Joiner.on(".").join(new String[]{KEY_PREFIX, threatIntelName, field});
   }
 
-public static JSONObject triage(JSONObject ret, SensorEnrichmentConfig config, FunctionResolver functionResolver, Context stellarContext) {
+public static JSONMapObject triage(JSONMapObject ret, SensorEnrichmentConfig config, FunctionResolver functionResolver, Context stellarContext) {
     LOG.trace("Received joined messages: {}", ret);
     boolean isAlert = ret.containsKey("is_alert");
     if(!isAlert) {
@@ -141,7 +141,7 @@ public static JSONObject triage(JSONObject ret, SensorEnrichmentConfig config, F
    * @param threatScore The threat triage score
    * @param message The telemetry message being triaged.
    */
-  private static void appendThreatScore(ThreatScore threatScore, JSONObject message) {
+  private static void appendThreatScore(ThreatScore threatScore, JSONMapObject message) {
 
     // append the overall threat score
     message.put(THREAT_TRIAGE_SCORE_KEY, threatScore.getScore());
