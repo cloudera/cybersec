@@ -88,6 +88,7 @@
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
         <commons.math3.version>3.6.1</commons.math3.version>
         <json-path.version>2.7.0</json-path.version>
+        <commons-validator.version>1.7</commons-validator.version>
     </properties>
 
     <repositories>
@@ -368,7 +369,7 @@
             <dependency>
                 <groupId>commons-validator</groupId>
                 <artifactId>commons-validator</artifactId>
-                <version>1.6</version>
+                <version>${commons-validator.version}</version>
             </dependency>
 
             <!-- Libraries -->
