@@ -17,4 +17,4 @@ source $BIN_DIR/env.sh
 
 UI_JAR="$(ls "$CYBERSEC_OPT_DIR"/tools/parser-chains-config-service-*.jar)"
 
-exec "$JAVA_RUN" ${GENERIC_JAVA_OPTS} -Dspring.config.location=file:./cybersec-conf/parser-ui.properties -XX:MetaspaceSize=100m -XX:MaxMetaspaceSize=256m -Xmx1024m -Xms1024m -jar "$UI_JAR"
+exec "$JAVA_RUN" ${GENERIC_JAVA_OPTS} -Dspring.config.location=file:./cybersec-conf/parser-ui.properties -Dlogging.config=./cybersec-conf/log4j-parser.properties -XX:MetaspaceSize=100m -XX:MaxMetaspaceSize=256m -Xmx1024m -Xms1024m -jar "$UI_JAR"
