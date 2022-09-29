@@ -5,9 +5,15 @@ import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.core.fs.FSDataInputStream;
+import org.apache.flink.core.fs.FileStatus;
+import org.apache.flink.core.fs.FileSystem;
+import org.apache.flink.core.fs.Path;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -23,6 +29,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +43,10 @@ public abstract class ParserJob {
 
     protected static final String PARAM_CHAIN_CONFIG = "chain";
     protected static final String PARAM_CHAIN_CONFIG_FILE = "chain.file";
+    protected static final String PARAM_CHAIN_CONFIG_DIRECTORY = "chain.dir";
+    protected static final List<String> PARAM_CHAIN_CONFIG_EXCLUSIVE_LIST = Arrays.asList(
+            PARAM_CHAIN_CONFIG, PARAM_CHAIN_CONFIG_FILE, PARAM_CHAIN_CONFIG_DIRECTORY);
+
     protected static final String PARAM_TOPIC_MAP_CONFIG = "chain.topic.map";
     protected static final String PARAM_TOPIC_MAP_CONFIG_FILE = "chain.topic.map.file";
     public static final String PARAM_PRIVATE_KEY_FILE = "key.private.file";
@@ -48,8 +59,9 @@ public abstract class ParserJob {
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         FlinkUtils.setupEnv(env, params);
+        validateParams(params);
 
-        String chainConfig = readConfigMap(PARAM_CHAIN_CONFIG_FILE, PARAM_CHAIN_CONFIG, params, null);
+        String chainConfig = readConfigChainMap(PARAM_CHAIN_CONFIG_FILE, PARAM_CHAIN_CONFIG, PARAM_CHAIN_CONFIG_DIRECTORY, params, null);
         String topicConfig = readConfigMap(PARAM_TOPIC_MAP_CONFIG_FILE, PARAM_TOPIC_MAP_CONFIG, params, "{}");
 
 
@@ -99,12 +111,55 @@ public abstract class ParserJob {
             DataStream<Message> streamingEnrichmentMessages = results.filter(streamingEnrichFilter).name("Streaming Enrichment Sources Filter");
             SingleOutputStreamOperator<EnrichmentCommand> enrichmentCommands = streamingEnrichmentMessages.process(new MessageToEnrichmentCommandFunction(streamingSourcesProduced, streamingEnrichmentsConfig)).name("Message to EnrichmentCommand");
             errorMessages = errorMessages.union(enrichmentCommands.getSideOutput(errorMessageSideOutput));
-            writeEnrichments(params, enrichmentCommands, streamingSourcesProduced,  streamingEnrichmentsConfig);
+            writeEnrichments(params, enrichmentCommands, streamingSourcesProduced, streamingEnrichmentsConfig);
         }
 
         writeErrors(params, errorMessages);
 
         return env;
+    }
+
+    private void validateParams(ParameterTool params) {
+        //Check for mutually exclusive chain params
+        final long chainParamAmount = PARAM_CHAIN_CONFIG_EXCLUSIVE_LIST.stream()
+                .filter(params::has)
+                .count();
+        if (chainParamAmount > 1) {
+            throw new RuntimeException("It's not allowed to provide more than one chain param! " +
+                    "Select one of the following: " + PARAM_CHAIN_CONFIG_EXCLUSIVE_LIST);
+        }
+    }
+
+    private String readConfigChainMap(String fileParamKey, String inlineConfigKey, String directoryConfigKey,
+                                      ParameterTool params, String defaultConfig) throws IOException {
+        if (params.has(directoryConfigKey)) {
+            final ParserChainMap result = new ParserChainMap();
+
+            final Path path = new Path(params.getRequired(directoryConfigKey));
+            final FileSystem fileSystem = path.getFileSystem();
+
+            for (FileStatus fileStatus : fileSystem.listStatus(path)) {
+                final Path filePath = fileStatus.getPath();
+                if (filePath.getName().endsWith(".json")) {
+                    final ParserChainSchema chainSchema;
+
+                    try (FSDataInputStream fsDataInputStream = fileSystem.open(filePath)) {
+                        final String chainString = IOUtils.toString(fsDataInputStream, StandardCharsets.UTF_8);
+                        chainSchema = JSONUtils.INSTANCE.load(chainString, ParserChainSchema.class);
+                    } catch (Exception e) {
+                        throw new RuntimeException(String.format("Wasn't able to read the chain file [%s]!", filePath));
+                    }
+
+                    final String schemaName = chainSchema.getName();
+                    if (result.containsKey(schemaName)) {
+                        throw new RuntimeException(String.format("Found a duplicate schema named [%s] in the [%s] file, which isn't allowed!", schemaName, filePath));
+                    }
+                    result.put(schemaName, chainSchema);
+                }
+            }
+            return JSONUtils.INSTANCE.toJSON(result, false);
+        }
+        return readConfigMap(fileParamKey, inlineConfigKey, params, defaultConfig);
     }
 
     private String readConfigMap(String fileParamKey, String inlineConfigKey, ParameterTool params,
@@ -126,6 +181,6 @@ public abstract class ParserJob {
     protected abstract void writeErrors(ParameterTool params, DataStream<Message> errors);
 
     protected abstract DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params,
-                                                                     TopicPatternToChainMap topicPatternToChainMap);
+                                                               TopicPatternToChainMap topicPatternToChainMap);
 
 }
