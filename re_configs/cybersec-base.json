@@ -30,7 +30,7 @@
             ],
             "poll": false,
             "stack-name": "CDH",
-            "stack-version": "7.1.6.0-296"
+            "stack-version": "7.1.7.0-549"
         }
     },
     "hwx": {
