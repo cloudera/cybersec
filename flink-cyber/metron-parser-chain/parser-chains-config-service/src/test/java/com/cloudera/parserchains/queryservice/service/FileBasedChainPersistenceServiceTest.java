@@ -6,9 +6,9 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -34,10 +34,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
 public class FileBasedChainPersistenceServiceTest {
@@ -49,7 +51,7 @@ public class FileBasedChainPersistenceServiceTest {
 
   @BeforeEach
   public void beforeEach() throws IOException {
-    when(idGenerator.incrementAndGet()).thenReturn(1L, 2L, 3L, 4L, 5L);
+    lenient().when(idGenerator.incrementAndGet()).thenReturn(1L, 2L, 3L, 4L, 5L);
     service = new FileBasedChainPersistenceService(idGenerator);
     String tempDirPrefix = this.getClass().getName();
     configPath = Files.createTempDirectory(tempDirPrefix);
@@ -126,7 +128,7 @@ public class FileBasedChainPersistenceServiceTest {
   public void deletes_parser_chain_by_id() throws IOException {
     List<String> names = Arrays.asList("chain1", "chain2", "chain3");
     for (String name : names) {
-      ParserChainSchema chain = new ParserChainSchema().setName("chain1");
+      ParserChainSchema chain = new ParserChainSchema().setName(name);
       service.create(chain, configPath);
     }
     final String idToDelete = "2";
@@ -141,5 +143,60 @@ public class FileBasedChainPersistenceServiceTest {
         service.delete(idToDelete, configPath), equalTo(false));
     assertThat("Should still have 2 parser chains.", service.findAll(configPath),
         hasSize(names.size() - 1));
+  }
+
+  @Test
+  public void dont_allow_create_duplicate_chain_names() throws IOException {
+    List<String> names = Arrays.asList("chain1", "chain1");
+    for (String name : names) {
+      ParserChainSchema chain = new ParserChainSchema().setName(name);
+      try {
+        service.create(chain, configPath);
+      } catch (Exception e) {
+        assertThat("Exception message not expected", e.getMessage(), is("Duplicate chain names are restricted!"));
+        assertThat("Exception type not expected", e.getClass(), is(RuntimeException.class));
+      }
+    }
+    assertThat("Should have 1 parser chains.", service.findAll(configPath), hasSize(1));
+  }
+
+  @Test
+  public void dont_allow_create_null_chain_names() throws IOException {
+    try {
+      service.create(null, configPath);
+    } catch (Exception e) {
+      assertThat("Exception message not expected", e.getMessage(), is("Provided chain can't be null!"));
+      assertThat("Exception type not expected", e.getClass(), is(RuntimeException.class));
+    }
+    assertThat("Should have 0 parser chains.", service.findAll(configPath), hasSize(0));
+  }
+
+  @Test
+  public void dont_allow_update_duplicate_chain_names() throws IOException {
+    List<String> names = Arrays.asList("chain1", "chain2");
+    for (String name : names) {
+      ParserChainSchema chain = new ParserChainSchema().setName(name);
+      service.create(chain, configPath);
+    }
+    assertThat("Should have 2 parser chains.", service.findAll(configPath), hasSize(2));
+    try {
+      service.update("2", new ParserChainSchema().setName(names.get(0)), configPath);
+    } catch (Exception e) {
+      assertThat("Exception message not expected", e.getMessage(), is("Duplicate chain names are restricted!"));
+      assertThat("Exception type not expected", e.getClass(), is(RuntimeException.class));
+    }
+    assertThat("Chain name shouldn't update!", service.findAll(configPath).get(1).getName(), is(names.get(1)));
+  }
+
+  @Test
+  public void allow_update_duplicate_chain_name_same_chain() throws IOException {
+    List<String> names = Arrays.asList("chain1", "chain2");
+    for (String name : names) {
+      ParserChainSchema chain = new ParserChainSchema().setName(name);
+      service.create(chain, configPath);
+    }
+    assertThat("Should have 2 parser chains.", service.findAll(configPath), hasSize(2));
+    //shouldn't throw any exceptions when updating the same chain with the same name
+    service.update("2", new ParserChainSchema().setName(names.get(1)), configPath);
   }
 }

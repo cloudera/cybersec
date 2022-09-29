@@ -1,0 +1,30 @@
+{
+  "id": "2",
+  "name": "test",
+  "parsers": [
+    {
+      "id": "6a20a910-32b8-11ed-9de1-a788d56a5f88",
+      "name": "tss",
+      "type": "com.cloudera.parserchains.parsers.TimestampParser",
+      "config": {
+        "outputField": [
+          {
+            "outputField": "timestamp"
+          }
+        ]
+      }
+    },
+    {
+      "id": "6a20a910-32b8-11ed-9de1-a74638729fsh",
+      "name": "tss2",
+      "type": "com.cloudera.parserchains.parsers.TimestampParser",
+      "config": {
+        "outputField": [
+          {
+            "outputField": "timestamp_new"
+          }
+        ]
+      }
+    }
+  ]
+}
