@@ -31,6 +31,7 @@ import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 
 @Service
 @Slf4j
@@ -93,10 +94,29 @@ public class FileBasedChainPersistenceService implements ChainPersistenceService
 
   @Override
   public ParserChainSchema create(ParserChainSchema chain, Path path) throws IOException {
+    validateChain(chain, path);
+
     String newId = Long.toString(idGenerator.incrementAndGet());
     chain.setId(newId);
     writeChain(chain, path);
     return chain;
+  }
+
+  private void validateChain(ParserChainSchema chain, Path path) throws IOException {
+    validateChain(null, chain, path);
+  }
+
+  private void validateChain(String id, ParserChainSchema chain, Path path) throws IOException {
+    if (chain == null){
+      throw new RuntimeException("Provided chain can't be null!");
+    }
+
+    final boolean duplicateName = findAll(path).stream()
+            //If we're changing the chain without changing its name, it won't be counted as a duplicate
+            .anyMatch(chainSummary -> !chainSummary.getId().equals(id) && chainSummary.getName().equals(chain.getName()));
+    if (duplicateName){
+      throw new RuntimeException("Duplicate chain names are restricted!");
+    }
   }
 
   private void writeChain(ParserChainSchema chain, Path outPath) throws IOException {
@@ -132,6 +152,8 @@ public class FileBasedChainPersistenceService implements ChainPersistenceService
 
   @Override
   public ParserChainSchema update(String id, ParserChainSchema chain, Path path) throws IOException {
+    validateChain(id, chain, path);
+
     ParserChainSchema readChain = read(id, path);
     if (null == readChain) {
       return null;
