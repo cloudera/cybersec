@@ -41,9 +41,8 @@ import java.util.TimeZone;
 import oi.thekraken.grok.api.Grok;
 import oi.thekraken.grok.api.Match;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.flink.core.fs.FileSystem;
+import org.apache.flink.core.fs.Path;
 import org.apache.metron.stellar.common.Constants;
 import org.apache.metron.common.utils.LazyLogger;
 import org.apache.metron.common.utils.LazyLoggerFactory;
@@ -96,10 +95,10 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
   }
 
   public InputStream openInputStream(String streamName) throws IOException {
-    FileSystem fs = FileSystem.get(new Configuration());
     Path path = new Path(streamName);
+    FileSystem fs = path.getFileSystem();
     if (fs.exists(path)) {
-      LOG.info("Loading {} from HDFS.", streamName);
+      LOG.info("Loading {} from file system.", streamName);
       return fs.open(path);
     } else {
       LOG.info("File not found in HDFS, attempting to load {} from classpath using classloader for {}.", streamName, getClass());
@@ -143,7 +142,6 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public Optional<MessageParserResult<JSONObject>> parseOptionalResult(byte[] rawMessage) {
     if (grok == null) {
@@ -250,7 +248,7 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
               + originalMessage, e);
       return Optional.of(new DefaultMessageParserResult<>(innerException));
     }
-    return Optional.of(new DefaultMessageParserResult<JSONObject>(messages, errors));
+    return Optional.of(new DefaultMessageParserResult<>(messages, errors));
   }
 
   @Override
