@@ -41,6 +41,11 @@
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-logging</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-cyber-api</artifactId>
             <version>${project.parent.version}</version>
             <scope>compile</scope>
@@ -107,6 +112,7 @@
             <artifactId>commons-net</artifactId>
             <version>3.6</version>
         </dependency>
+
     </dependencies>
     <build>
         <plugins>

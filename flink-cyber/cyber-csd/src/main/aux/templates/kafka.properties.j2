@@ -1,0 +1,37 @@
+{#
+# Licensed to Cloudera, Inc. under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  Cloudera, Inc. licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#}
+kafka.bootstrap.servers={{globals['kafka.brokers.list']}}
+kafka.client.id=client_id
+kafka.group.id=group_id
+kafka.auto.offset.reset={{globals['kafka.auto.offset.reset']}}
+kafka.acks={{globals['kafka.acks']}}
+{% if globals['schema.registry.url']|length %}
+schema.registry.url={{globals['schema.registry.url']}}
+{% else %}
+#schema.registry.url=
+{% endif %}
+
+{%- if  globals['ssl.client.truststore.location']|length and globals['ssl.client.truststore.password']|length  %}
+kafka.security.protocol=SASL_SSL
+kafka.ssl.truststore.location={{globals['ssl.client.truststore.location']}}
+kafka.ssl.truststore.password={{globals['ssl.client.truststore.password']}}
+
+schema.registry.client.ssl.trustStorePath={{globals['ssl.client.truststore.location']}}
+schema.registry.client.ssl.trustStorePassword={{globals['ssl.client.truststore.password']}}
+
+{%- endif %}

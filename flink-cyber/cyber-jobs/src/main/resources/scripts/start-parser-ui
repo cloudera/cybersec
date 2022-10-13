@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# Determine the location of the script to locate parcel
+# Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$(dirname "$SOURCE")"
+while [ -h "$SOURCE" ]
+do
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Populate necessary environment variables
+source $BIN_DIR/env.sh
+
+UI_JAR="$(ls "$CYBERSEC_OPT_DIR"/tools/parser-chains-config-service-*.jar)"
+
+exec "$JAVA_RUN" ${GENERIC_JAVA_OPTS} -Dspring.config.location=file:./cybersec-conf/parser-ui.properties -XX:MetaspaceSize=100m -XX:MaxMetaspaceSize=256m -Xmx1024m -Xms1024m -jar "$UI_JAR"

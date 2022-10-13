@@ -7,6 +7,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.client.cli.CliFrontend;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.core.fs.FSDataInputStream;
+import org.apache.flink.core.fs.FileSystem;
+import org.apache.flink.core.fs.Path;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.encrypttool.EncryptTool;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -17,7 +20,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -175,7 +184,7 @@ public class Utils {
         if (value == null) {
             return false;
         }
-        if(key.toLowerCase().contains(PASSWORD)){
+        if (key.toLowerCase().contains(PASSWORD)) {
             return true;
         }
 
@@ -212,6 +221,23 @@ public class Utils {
         } catch (IOException e) {
             return null;
         }
+    }
+
+    public static ParameterTool getParamToolsFromProperties(String[] pathToPropertyFiles) {
+        return Arrays.stream(pathToPropertyFiles).filter(pathToPropertyFile -> pathToPropertyFile.endsWith(".properties")).map(Path::new).reduce(ParameterTool.fromMap(new HashMap<>()), (parameterTool, path) -> {
+            try {
+                FileSystem fileSystem = path.getFileSystem();
+                if (fileSystem.exists(path)) {
+                    try (FSDataInputStream fsDataInputStream = fileSystem.open(path)) {
+                        ParameterTool nextParamTool = ParameterTool.fromPropertiesFile(fsDataInputStream);
+                        return parameterTool.mergeWith(nextParamTool);
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            return parameterTool;
+        }, ParameterTool::mergeWith);
     }
 
 

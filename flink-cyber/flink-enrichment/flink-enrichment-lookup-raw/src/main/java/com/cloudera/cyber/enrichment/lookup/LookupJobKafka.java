@@ -5,6 +5,7 @@ import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.SourcesWithHeaders;
+import com.cloudera.cyber.flink.Utils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -20,8 +21,8 @@ public class LookupJobKafka extends LookupJob {
     public static final String PARAMS_QUERY_OUTPUT = "enrichment.topic.query.output";
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        new LookupJobKafka().createPipeline(ParameterTool.fromPropertiesFile(args[0])).execute("Enrichments - Local Lookup");
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
+        new LookupJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Enrichments - Local Lookup");
     }
 
     @Override

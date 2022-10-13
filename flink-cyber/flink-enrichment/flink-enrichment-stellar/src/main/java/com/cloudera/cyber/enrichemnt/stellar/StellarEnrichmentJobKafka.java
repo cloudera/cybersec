@@ -2,6 +2,7 @@ package com.cloudera.cyber.enrichemnt.stellar;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -14,8 +15,8 @@ public class StellarEnrichmentJobKafka extends StellarEnrichmentJob {
 
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
+        ParameterTool params = Utils.getParamToolsFromProperties(args);
         FlinkUtils.executeEnv(new StellarEnrichmentJobKafka().createPipeline(params), "Enrichments - Stellar", params);
     }
 

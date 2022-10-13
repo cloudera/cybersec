@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-PHOENIX_CLIENT_JAR=$(ls /opt/cloudera/parcels/CDH/lib/phoenix_queryserver/phoenix-queryserver-client-*.jar -1)
+export HADOOP_CLASSPATH=`hadoop classpath`
 
-YARN_JOB_MANAGER_MEMORY="2048"
-YARN_TASK_MANAGER_MEMORY="2048"
-YARN_NAME="yarn.profile.job"
+YARN_JOB_MANAGER_MEMORY="1024"
+YARN_TASK_MANAGER_MEMORY="1024"
+YARN_NAME="yarn.hive.indexing.job"
 PROPERTIES_FILE=$(pwd)/profile.properties
 
 usage="$(basename "$0") [-h] [-s n] -- program to calculate the answer to life, the universe and everything
@@ -44,6 +44,8 @@ while getopts "j:t:n:p:h" option; do
   esac
 done
 
-flink run --jobmanager yarn-cluster  -yjm $YARN_JOB_MANAGER_MEMORY -ytm $YARN_TASK_MANAGER_MEMORY  \
- --classpath file://${PHOENIX_CLIENT_JAR} \
- --detached --yarnname $YARN_NAME /opt/cloudera/parcels/CYBERSEC/jobs/flink-profiler-java-${cybersec.full.version}.jar /etc/cybersec/conf/kafka.properties /opt/cloudera/parcels/CYBERSEC/etc/conf/profile.properties $PROPERTIES_FILE
+flink run \
+--classpath file:///etc/hive/conf/hive-site.xml \
+--classpath file:///etc/hadoop/conf/core-site.xml \
+--jobmanager yarn-cluster -yjm $YARN_JOB_MANAGER_MEMORY -ytm $YARN_TASK_MANAGER_MEMORY--detached --yarnname $YARN_NAME \
+ opt/cloudera/parcels/CYBERSEC/jobs/flink-indexing-hive-${cybersec.full.version}.jar /etc/cybersec/conf/kafka.properties /etc/cybersec/conf/hive-indexing.properties $PROPERTIES_FILE

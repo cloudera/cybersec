@@ -2,6 +2,7 @@ package com.cloudera.cyber.indexing.elastic;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.indexing.CollectionField;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +29,8 @@ public class ElasticJobKafka extends ElasticJob {
     public static final String INDEXER_ELASTIC_GROUP_ID = "indexer-elastic";
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
+        ParameterTool params = Utils.getParamToolsFromProperties(args);
         new ElasticJobKafka().createPipeline(params).execute("Indexing - Elastic");
     }
 
