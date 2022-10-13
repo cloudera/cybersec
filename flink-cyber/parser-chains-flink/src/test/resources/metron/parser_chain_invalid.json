@@ -1,0 +1,21 @@
+{
+  "oraclelogon": {
+    "id": "330ee8c5-07d7-48d9-8df5-7d23376cb664",
+    "name": "Stellar Parser",
+    "parsers": [
+      {
+        "id": "ff12c6dc-40cc-4c77-abf8-e15fccdfea32",
+        "name": "Oracle logon parser",
+        "type": "com.cloudera.parserchains.parsers.StellarParser",
+        "config": {
+          "input": {
+            "input": "original_string"
+          },
+          "configurationPath": {
+            "configurationPath": "src/test/resources/metron/parsers/oraclelogon_invalid.json"
+          }
+        }
+      }
+    ]
+  }
+}

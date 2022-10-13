@@ -20,6 +20,18 @@ package org.apache.metron.parsers;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import oi.thekraken.grok.api.Grok;
+import oi.thekraken.grok.api.Match;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.core.fs.FileSystem;
+import org.apache.flink.core.fs.Path;
+import org.apache.metron.common.utils.LazyLogger;
+import org.apache.metron.common.utils.LazyLoggerFactory;
+import org.apache.metron.parsers.interfaces.MessageParser;
+import org.apache.metron.parsers.interfaces.MessageParserResult;
+import org.apache.metron.stellar.common.Constants;
+import org.json.simple.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,17 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
-import oi.thekraken.grok.api.Grok;
-import oi.thekraken.grok.api.Match;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.core.fs.FileSystem;
-import org.apache.flink.core.fs.Path;
-import org.apache.metron.stellar.common.Constants;
-import org.apache.metron.common.utils.LazyLogger;
-import org.apache.metron.common.utils.LazyLoggerFactory;
-import org.apache.metron.parsers.interfaces.MessageParser;
-import org.apache.metron.parsers.interfaces.MessageParserResult;
-import org.json.simple.JSONObject;
 
 
 public class GrokParser implements MessageParser<JSONObject>, Serializable {
@@ -127,6 +128,12 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
                 + " from either classpath or HDFS");
       }
       grok.addPatternFromReader(new InputStreamReader(patterInputStream, getReadCharset()));
+
+      if (!grok.getPatterns().containsKey(patternLabel)){
+        throw new RuntimeException(
+                String.format("Grok parser init error: not able to find pattern [%s] in the [%s]",
+                        patternLabel, grokPath));
+      }
 
       LOG.info("Grok parser set the following grok expression for '{}': {}", () ->patternLabel,
               () -> grok.getPatterns().get(patternLabel));
