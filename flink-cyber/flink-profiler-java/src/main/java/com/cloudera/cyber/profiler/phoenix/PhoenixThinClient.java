@@ -2,7 +2,6 @@ package com.cloudera.cyber.profiler.phoenix;
 
 import com.cloudera.cyber.flink.Utils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.calcite.avatica.AvaticaPreparedStatement;
 import org.apache.flink.api.java.utils.ParameterTool;
 
 import java.sql.Connection;
@@ -11,7 +10,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +30,8 @@ public class PhoenixThinClient {
     public static final String PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD = "phoenix.db.thin.avatica_password";
     public static final String PHOENIX_THIN_PROPERTY_TRUSTSTORE = "phoenix.db.thin.truststore";
     public static final String PHOENIX_THIN_PROPERTY_TRUSTSTORE_PASSWORD = "phoenix.db.thin.truststore_password";
+    public static final String PHOENIX_THIN_PROPERTY_PRINCIPAL = "phoenix.db.thin.principal";
+    public static final String PHOENIX_THIN_PROPERTY_KEYTAB = "phoenix.db.thin.keytab";
 
     public PhoenixThinClient(ParameterTool params) {
         this.userName = params.get(PHOENIX_THIN_PROPERTY_AVATICA_USER);
@@ -42,6 +42,8 @@ public class PhoenixThinClient {
                 Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_AUTHENTICATION)).map(str -> String.format("authentication=%s;", str)).orElse("authentication=BASIC;") +
                 Optional.ofNullable(userName).map(str -> String.format("avatica_user=%s;", str)).orElse("") +
                 Optional.ofNullable(password).map(str -> String.format("avatica_password=%s;", str)).orElse("") +
+                Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_PRINCIPAL)).map(str -> String.format("principal=%s;", str)).orElse("") +
+                Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_KEYTAB)).map(str -> String.format("keytab=%s;", str)).orElse("") +
                 Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE)).map(str -> String.format("truststore=%s;", str)).orElse("") +
                 Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE_PASSWORD)).map(str -> String.format("truststore_password=%s;", str)).orElse("");
     }
