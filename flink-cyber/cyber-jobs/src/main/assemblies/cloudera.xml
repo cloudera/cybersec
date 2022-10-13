@@ -98,6 +98,13 @@
 			<fileMode>0644</fileMode>
 		</file>
 
+		<file>
+			<source>../metron-parser-chain/parser-chains-config-service/target/parser-chains-config-service-${project.version}.jar</source>
+			<outputDirectory>tools/</outputDirectory>
+			<destName>parser-chains-config-service-${project.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
+
 	</files>
 
 	<fileSets>

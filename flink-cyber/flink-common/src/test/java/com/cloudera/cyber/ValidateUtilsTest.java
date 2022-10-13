@@ -1,9 +1,10 @@
 package com.cloudera.cyber;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
+import com.cloudera.cyber.flink.Utils;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.*;
 
 
 public class ValidateUtilsTest {
@@ -28,5 +29,20 @@ public class ValidateUtilsTest {
         assertThatThrownBy(() -> ValidateUtils.validatePhoenixName("!name1", testParam)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> ValidateUtils.validatePhoenixName("n###ame1", testParam)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> ValidateUtils.validatePhoenixName("__________", testParam)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void testPropToolsMerge() {
+        ParameterTool parameterTool = Utils.getParamToolsFromProperties(
+                new String[]{"src/test/resources/test.properties", "src/test/resources/test1.properties", "src/test/resources/test2.properties"});
+
+        assertThat(parameterTool.toMap()).containsOnly(
+                entry("test.property", "test-property-rewrited"),
+                entry("test.property1", "test-property1"),
+                entry("test1.property", "test1-property"),
+                entry("test1.property1", "test1-property1-rewrited"),
+                entry("test2.property", "test2-property"),
+                entry("test2.property1", "test2-property1")
+                );
     }
 }

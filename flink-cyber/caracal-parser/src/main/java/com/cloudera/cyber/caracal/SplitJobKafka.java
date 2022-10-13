@@ -2,6 +2,7 @@ package com.cloudera.cyber.caracal;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.parser.MessageToParse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
@@ -18,6 +19,7 @@ import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
+import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.util.DigestUtils;
 
@@ -45,11 +47,9 @@ public class SplitJobKafka extends SplitJob {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            throw new RuntimeException("Path to the properties file is expected as the only argument.");
-        }
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
 
-        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        ParameterTool params = Utils.getParamToolsFromProperties(args);
         // need to load the config file locally and put in a property
         String configJson = new String(Files.readAllBytes(Paths.get(params.get(PARAMS_CONFIG_FILE, DEFAULT_CONFIG_FILE))), StandardCharsets.UTF_8);
 

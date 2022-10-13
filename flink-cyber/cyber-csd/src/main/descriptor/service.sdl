@@ -1,62 +1,77 @@
 {
-  "name" : "SYBERCES",
-  "label" : "Cybersec",
-  "description" : "Cyber security project.",
-  "version" : "1.0",
-  "compatibility" : { "cdhVersion" : { "min" : "7.1.6" } },
-  "runAs" : {
-    "user" : "cybersec",
-    "group" : "cybersec",
-    "principal" : "cybersec"
-   },
-   "icon" : "images/cybersec.svg",
-   "parcel" : {
-    "repoUrl" : "https://archive.cloudera.com/p/csa/1.6/parcels",
-    "requiredTags" : ["cybersec", "cdh"],
-    "optionalTags" : ["cybersec-plugin"]
+  "name": "CYBERSEC",
+  "label": "Cybersec",
+  "description": "Cyber security project.",
+  "version": "2.3.0",
+  "compatibility": {
+    "cdhVersion": {
+      "min": "7.1.6"
+    }
   },
-  "serviceDependencies" : [
-    {
-          "name" : "FLINK",
-          "required" : "false"
-     },
-     {
-          "name" : "HDFS",
-          "required" : "false"
-     },
-     {
-          "name" : "YARN",
-          "required" : "false"
-      },
-      {
-            "name": "ZOOKEEPER",
-            "required": "false"
-      },
-      {
-           "name": "HIVE",
-           "required": "false"
-      },
-      {
-           "name": "ATLAS",
-           "required": "false"
-      },
-      {
-           "name": "SCHEMAREGISTRY",
-           "required": "false"
-      }
-  ],
+  "runAs": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "principal": "cybersec"
+  },
+  "icon": "images/cybersec.svg",
+  "parcel": {
+    "repoUrl": "https://archive.cloudera.com/p/csa/1.6/parcels",
+    "requiredTags": [
+      "cybersec",
+      "flink",
+      "cdh"
+    ],
+    "optionalTags": [
+      "cybersec-plugin"
+    ]
+  },
   "dependencyExtensions": [
-    {
-      "type": "atlasDependency",
-      "extensionId": "atlas_dependency"
-    },
     {
       "type": "kafkaDependency",
       "extensionId": "kafka_dependency"
     }
   ],
+  "hdfsDirs": [
+    {
+      "name": "CreateCybersecUserDirCommand",
+      "label": "Create cybersec user directory",
+      "description": "Creates the directory in HDFS for the cybersec user.",
+      "directoryDescription": "Cybersec User Directory (HDFS)",
+      "path": "/user/cybersec/",
+      "permissions": "1755"
+    },
+    {
+      "name": "CreateCybersecDataDirCommand",
+      "label": "Create cybersec data directory",
+      "description": "Creates the directory in HDFS for the cybersec data.",
+      "directoryDescription": "Cybersec data directory (HDFS)",
+      "path": "/user/cybersec/data",
+      "permissions": "1755"
+    },
+    {
+      "name": "CreateCybersecStellarDirCommand",
+      "label": "Create cybersec stellar directory",
+      "description": "Creates the directory in HDFS for the cybersec stellar configs.",
+      "directoryDescription": "Cybersec stellar directory (HDFS)",
+      "path": "/user/cybersec/data/stellar",
+      "permissions": "1755"
+    }
+  ],
+  "serviceInit" : {
+    "preStartSteps" : [
+      {
+        "commandName" : "CreateCybersecUserDirCommand"
+      },
+      {
+        "commandName" : "CreateCybersecDataDirCommand"
+      },
+      {
+        "commandName" : "CreateCybersecStellarDirCommand"
+      }
+    ]
+  },
   "kerberos": "${kerberos.auth.enabled}",
-  "parameters" : [
+  "parameters": [
     {
       "name": "kerberos.auth.enabled",
       "label": "Enable Kerberos Authentication",
@@ -64,492 +79,1075 @@
       "type": "boolean",
       "default": "false",
       "configurableInWizard": true
-    },
-    {
-      "name" : "jobmanager_heap_size",
-      "label" : "JobManager Heap Size",
-      "description" : "JVM heap size for the JobManager",
-      "configName" : "jobmanager.heap.size",
-      "default" : "1073741824",
-      "type" : "memory",
-      "unit" : "bytes",
-      "required" : "true"
-    },
-    {
-      "name" : "taskmanager_memory_process_size",
-      "label" : "TaskManager Process Memory Size",
-      "description" : "This includes all the memory that a TaskExecutor consumes, consisting of Total Cybersec Memory, JVM Metaspace, and JVM Overhead. On containerized setups, this should be set to the container memory. See also 'taskmanager.memory.cybersec.size' for total Cybersec memory size configuration.",
-      "configName" : "taskmanager.memory.process.size",
-      "default" : "2147483648",
-      "type" : "memory",
-      "unit" : "bytes",
-      "required" : "true"
-    },
-    {
-      "name" : "taskmanager_managed_memory_fraction",
-      "label" : "TaskManager Managed Memory Fraction",
-      "description" : "Fraction of Total Cybersec Memory to be used as Managed Memory, if Managed Memory size is not explicitly specified. Managed memory is used by Cybersec operators (caching, sorting, hashtables) and state backends (RocksDB).",
-      "configName" : "taskmanager.memory.managed.fraction",
-      "default" : "0.4",
-      "type" : "double",
-      "required" : "true"
-    },
-    {
-      "name" : "taskmanager_number_of_task_slots",
-      "label" : "TaskManager Number of Task Slots",
-      "description" : "The number of parallel operator or user function instances that a single TaskManager can run. If this value is larger than 1, a single TaskManager takes multiple instances of a function or operator. That way, the TaskManager can utilize multiple CPU cores, but at the same time, the available memory is divided between the different operator or function instances. This value is typically proportional to the number of physical CPU cores that the TaskManager's machine has (e.g., equal to the number of cores, or half the number of cores).",
-      "configName" : "taskmanager.numberOfTaskSlots",
-      "default" : "1",
-      "type" : "long",
-      "required" : "true"
-    },
-    {
-      "name" : "parallelism_default",
-      "label" : "Default Parallelism",
-      "description" : "Default parallelism for jobs",
-      "configName" : "parallelism.default",
-      "default" : "1",
-      "type" : "long",
-      "required" : "true"
-    },
-    {
-      "name" : "yarn_maximum_failed_containers",
-      "label" : "Maximum Failed Containers for YARN",
-      "description" : "Maximum number of containers the system is going to reallocate in case of a failure.",
-      "configName" : "yarn.maximum-failed-containers",
-      "default" : "100",
-      "type" : "long",
-      "required" : "false"
-    },
-    {
-      "name" : "yarn_application_attempts",
-      "label" : "Maximum ApplicationMaster Attempts for YARN",
-      "description" : "Number of ApplicationMaster restarts. Note that that the entire Cybersec cluster will restart and the YARN Client will loose the connection. Also, the JobManager address will change and you’ll need to set the JM host:port manually. It is recommended to leave this option at 1.",
-      "configName" : "yarn.application-attempts",
-      "default" : "5",
-      "type" : "long",
-      "required" : "false"
-    },
-    {
-      "name" : "yarn_container_start_command_template",
-      "label" : "Yarn Container Command template",
-      "description" : "Specifies the command template for yarn container starts. Should only be overriden by expert users.",
-      "configName" : "yarn.container-start-command-template",
-      "default" : "%java% %jvmmem% %jvmopts% -DyarnContainerId=$CONTAINER_ID %logging% %class% %args% %redirects%",
-      "type" : "string",
-      "required" : "false"
-    },
-    {
-      "name" : "yarn_tags",
-      "label" : "YARN Tags",
-      "description" : "A comma-separated list of tags to apply to the Cybersec YARN application.",
-      "configName" : "yarn.tags",
-      "default" : "cybersec",
-      "type" : "string",
-      "required" : "false"
-    },
-    {
-      "name" : "state_backend",
-      "label" : "State Backend",
-      "description" : "The state backend to be used to store and checkpoint state.",
-      "configName" : "state.backend",
-      "default" : "FILESYSTEM",
-      "type" : "string_enum",
-      "validValues" : ["FILESYSTEM", "ROCKSDB"],
-      "required" : "false"
-    },
-    {
-      "name" : "state_checkpoints_dir",
-      "label" : "State Checkpoints Directory (HDFS)",
-      "description" : "The default directory used for storing the data files and meta data of checkpoints in a Cybersec supported filesystem. After changing this location please execute the `Create State Checkpoint Directory` action of the Cybersec service.",
-      "configName" : "state.checkpoints.dir",
-      "default" : "/user/cybersec/checkpoints",
-      "type" : "path",
-      "pathType" : "serviceSpecific",
-      "required" : "false",
-      "translateToBaseHdfs" : "true"
-    },
-    {
-      "name" : "state_savepoints_dir",
-      "label" : "State Savepoints Directory (HDFS)",
-      "description" : "The default directory used for storing the data files and meta data of checkpoints in a Cybersec supported filesystem. After changing this location please execute the `Create State Savepoint Directory` action of the Cybersec service.",
-      "configName" : "state.savepoints.dir",
-      "default" : "/user/cybersec/savepoints",
-      "type" : "path",
-      "pathType" : "serviceSpecific",
-      "required" : "false",
-      "translateToBaseHdfs" : "true"
-    },
-    {
-      "name" : "state_backend_incremental",
-      "label" : "Incremental Checkpoints",
-      "description" : "Option whether the state backend should create incremental checkpoints, if possible. For an incremental checkpoint, only a diff from the previous checkpoint is stored, rather than the complete checkpoint state. Some state backends may not support incremental checkpoints and ignore this option.",
-      "configName" : "state.backend.incremental",
-      "default" : "true",
-      "type" : "boolean",
-      "required" : "true"
-    },
-    {
-      "name" : "state_backend_local_recovery",
-      "label" : "Local State Recovery",
-      "description" : "This option configures local recovery for this state backend. By default, local recovery is deactivated. Local recovery currently only covers keyed state backends. Currently, MemoryStateBackend does not support local recovery and ignore this option.",
-      "configName" : "state.backend.local-recovery",
-      "default" : "true",
-      "type" : "boolean",
-      "required" : "true"
-    },
-    {
-      "name" : "state_backend_rocksdb_memory_managed",
-      "label" : "RocksDB Memory Management",
-      "description" : "If set, the RocksDB state backend will automatically configure itself to use the managed memory budget of the task slot, and divide the memory over write buffers, indexes, block caches, etc. That way, the three major uses of memory of RocksDB will be capped.",
-      "configName" : "state.backend.rocksdb.memory.managed",
-      "default" : "true",
-      "type" : "boolean",
-      "required" : "true"
-    },
-    {
-      "name" : "state_backend_rocksdb_memory_high_prio_ratio",
-      "label" : "RocksDB High-Prio Memory Fraction",
-      "description" : "The fraction of cache memory that is reserved for high-priority data like index, filter, and compression dictionary blocks. This option only has an effect when 'state.backend.rocksdb.memory.managed' or 'state.backend.rocksdb.memory.fixed-per-slot' are configured.",
-      "configName" : "state.backend.rocksdb.memory.high-prio-pool-ratio",
-      "default" : "0.1",
-      "type" : "double",
-      "required" : "true"
-    },
-    {
-      "name" : "state_backend_rocksdb_memory_write_buffer_ratio",
-      "label" : "RocksDB Write Buffer Memory Fraction",
-      "description" : "The maximum amount of memory that write buffers may take, as a fraction of the total shared memory. This option only has an effect when 'state.backend.rocksdb.memory.managed' or 'state.backend.rocksdb.memory.fixed-per-slot' are configured.",
-      "configName" : "state.backend.rocksdb.memory.write-buffer-ratio",
-      "default" : "0.5",
-      "type" : "double",
-      "required" : "true"
-    },
-    {
-      "name" : "state_backend_rocksdb_timer_service_factory",
-      "label" : "RocksDB StateBackend Timer Service Factory",
-      "description" : "This determines the factory for timer service state implementation. Options are either HEAP (heap-based, default) or ROCKSDB for an implementation based on RocksDB.",
-      "configName" : "state.backend.rocksdb.timer-service.factory",
-      "default" : "ROCKSDB",
-      "type" : "string_enum",
-      "validValues" : ["HEAP", "ROCKSDB"],
-      "required" : "true"
-    },
-    {
-      "name" : "state_backend_rocksdb_predefined_options",
-      "label" : "Predefined options for RocksDB state backend",
-      "description" : "The predefined settings for RocksDB DBOptions and ColumnFamilyOptions by Cybersec community. Current supported candidate predefined-options are DEFAULT, SPINNING_DISK_OPTIMIZED, SPINNING_DISK_OPTIMIZED_HIGH_MEM or FLASH_SSD_OPTIMIZED. Note that user customized options and options from the RocksDBOptionsFactory are applied on top of these predefined ones.",
-      "configName" : "state.backend.rocksdb.predefined-options",
-      "default" : "DEFAULT",
-      "type" : "string_enum",
-      "validValues" : ["DEFAULT", "SPINNING_DISK_OPTIMIZED", "SPINNING_DISK_OPTIMIZED_HIGH_MEM", "FLASH_SSD_OPTIMIZED"],
-      "required" : "true"
-    },
-    {
-      "name" : "state_checkpoints_num_retained",
-      "label" : "Number of Checkpoints to Retain",
-      "description" : "The maximum number of completed checkpoints to retain.",
-      "configName" : "state.checkpoints.num-retained",
-      "default" : "3",
-      "type" : "long",
-      "required" : "false"
-    },
-    {
-      "name" : "jobmanager_archive_fs_dir",
-      "label" : "JobManager Archive Directory (HDFS)",
-      "description" : "Directory to upload completed jobs to. (Add this directory to the list of monitored directories of the HistoryServer as well.) After changing this location please execute the `Create JobManager Archive Directory` action of the Cybersec service.",
-      "configName" : "jobmanager.archive.fs.dir",
-      "default" : "/user/cybersec/applicationHistory",
-      "type" : "path",
-      "pathType" : "serviceSpecific",
-      "required" : "true",
-      "translateToBaseHdfs" : "true"
-    },
-    {
-      "name" : "security_kerberos_login_contexts",
-      "label" : "Kerberos Login Contexts",
-      "description" : "A comma-separated list of login contexts to provide the Kerberos credentials to (for example, `Client,KafkaClient` to use the credentials for ZooKeeper authentication and for Kafka authentication)",
-      "configName" : "security.kerberos.login.contexts",
-      "default" : ["Client", "KafkaClient", "RegistryClient"],
-      "type" : "string_array",
-      "separator" : ",",
-      "required" : "false"
-    },
-    {
-      "name" : "security_kerberos_login_use_ticket_cache",
-      "label" : "Kerberos Use Ticket Cache",
-      "description" : "Indicates whether to read from your Kerberos ticket cache.",
-      "configName" : "security.kerberos.login.use-ticket-cache",
-      "type" : "boolean",
-      "default" : "true",
-      "required" : "false"
-    },
-    {
-      "name" : "execution.target",
-      "label" : "Executor",
-      "description" : "The name of the executor to be used for executing the given job.",
-      "configName" : "execution.target",
-      "default" : "yarn-per-job",
-      "type" : "string_enum",
-      "validValues" : ["yarn-per-job", "yarn-session"],
-      "required" : "true"
-    },
-    {
-      "name" : "high_availability",
-      "label" : "High Availability Service",
-      "description" : "Defines high-availability mode used for the cluster execution. To enable high-availability, set this mode to 'ZOOKEEPER' or specify FQN of factory class.",
-      "configName" : "high-availability",
-      "default" : "ZOOKEEPER",
-      "type" : "string_enum",
-      "validValues" : ["NONE", "ZOOKEEPER"],
-      "required" : "false"
-    },
-    {
-      "name" : "high_availability_storage_dir",
-      "label" : "High Availability Storage Directory",
-      "description" : "File system path (URI) where Cybersec persists metadata in high-availability setups. After changing this location please execute the `Create HA Directory` action of the Cybersec service.",
-      "configName" : "high-availability.storageDir",
-      "default" : "/user/cybersec/ha",
-      "type" : "path",
-      "pathType" : "serviceSpecific",
-      "required" : "false",
-      "translateToBaseHdfs" : "true"
-    },
-    {
-      "name" : "high_availability_zookeeper_client_acl",
-      "label" : "High Availability Zookeeper client ACL",
-      "description" : "Defines the ACL (open|creator) to be configured on ZK node. The configuration value can be set to 'creator' if the ZooKeeper server configuration has the 'authProvider' property mapped to use SASLAuthenticationProvider and the cluster is configured to run in secure mode (Kerberos).",
-      "configName" : "high-availability.zookeeper.client.acl",
-      "default" : "open",
-      "type" : "string",
-      "required" : "false"
-    },
-    {
-      "name" : "taskmanager_network_memory_fraction",
-      "label" : "Network Buffer JVM Memory Fraction",
-      "description" : "Fraction of JVM memory to use for network buffers. This determines how many streaming data exchange channels a TaskManager can have at the same time and how well buffered the channels are. If a job is rejected or you get a warning that the system has not enough buffers available, increase this value or the min/max values below. Also note, that 'taskmanager.memory.network.min' and 'taskmanager.memory.network.max' may override this fraction.",
-      "configName" : "taskmanager.memory.network.fraction",
-      "default" : "0.1",
-      "type" : "double",
-      "required" : "true"
-    },
-    {
-      "name" : "taskmanager_network_memory_max",
-      "label" : "Network Buffer Memory Max",
-      "description" : "Max Network Memory size for TaskExecutors. Network Memory is off-heap memory reserved for ShuffleEnvironment (e.g., network buffers). Network Memory size is derived to make up the configured fraction of the Total Cybersec Memory. If the derived size is less/greater than the configured min/max size, the min/max size will be used. The exact size of Network Memory can be explicitly specified by setting the min/max to the same value.",
-      "configName" : "taskmanager.memory.network.max",
-      "default" : "2147483648",
-      "type" : "memory",
-      "unit" : "bytes",
-      "required" : "true"
-    },
-    {
-      "name" : "env_java_opts_jobmanager",
-      "label" : "JobManager JVM Options",
-      "description" : "Java options to start the JVM of the JobManager with.",
-      "configName" : "env.java.opts.jobmanager",
-      "default" : "",
-      "type" : "string",
-      "required" : "false"
-    },
-    {
-      "name" : "env_java_opts_taskmanager",
-      "label" : "TaskManager JVM Options",
-      "description" : "Java options to start the JVM of the TaskManager with.",
-      "configName" : "env.java.opts.taskmanager",
-      "default" : "",
-      "type" : "string",
-      "required" : "false"
-    },
-    {
-      "name" : "historyserver_cli_fallback",
-      "label" : "CLI global dashboard fallback",
-      "description" : "Allow the CLI to fall back to the global dashboard endpoint to access Cybersec jobs when the jobmanager address or yarn appId are not defined.",
-      "configName" : "historyserver.cli.fallback",
-      "default" : "true",
-      "type" : "boolean",
-      "required" : "false"
-    },
-    {
-      "name" : "execution_buffer_timeout",
-      "label" : "Network Buffer Timeout (milliseconds)",
-      "description" : "The maximum time frequency (ms) for the flushing of the output buffers. By default the output buffers flush frequently to provide low latency and to aid smooth developer experience.",
-      "configName" : "execution.buffer-timeout",
-      "default" : "100",
-      "type" : "long",
-      "required" : "true"
-    },
-    {
-      "name" : "execution_snapshot_compression",
-      "label" : "Enable Checkpoint Compression",
-      "description" : "Tells if we should use compression for the state snapshot data or not.",
-      "configName" : "execution.checkpointing.snapshot-compression",
-      "default" : "false",
-      "type" : "boolean",
-      "required" : "true"
-    },
-    {
-      "name" : "pipeline_auto_watermark_interval",
-      "label" : "Automatic Watermark Interval (milliseconds)",
-      "description" : "The interval of the automatic watermark emission. Watermarks are used throughout the streaming system to keep track of the progress of time. They are used, for example, for time based windowing.",
-      "configName" : "pipeline.auto-watermark-interval",
-      "default" : "200",
-      "type" : "long",
-      "required" : "true"
-    },
-    {
-      "name" : "pipeline_generic_types",
-      "label" : "Allow Generic Types",
-      "description" : "If the use of generic types is disabled, Cybersec will throw an UnsupportedOperationException whenever it encounters a data type that would go through Kryo for serialization.",
-      "configName" : "pipeline.generic-types",
-      "default" : "true",
-      "type" : "boolean",
-      "required" : "true"
-    },
-    {
-      "name" : "pipeline_max_parallelism",
-      "label" : "Max Parallelism",
-      "description" : "The program-wide maximum parallelism used for operators which haven't specified a maximum parallelism. The maximum parallelism specifies the upper limit for dynamic scaling and the number of key groups used for partitioned state.",
-      "configName" : "pipeline.max-parallelism",
-      "type" : "long",
-      "required" : "false"
-    },
-    {
-      "name" : "pipeline_object_reuse",
-      "label" : "Enable Object Reuse",
-      "description" : "When enabled objects that Cybersec internally uses for deserialization and passing data to user-code functions will be reused. Keep in mind that this can lead to bugs when the user-code function of an operation is not aware of this behaviour.",
-      "configName" : "pipeline.object-reuse",
-      "default" : "false",
-      "type" : "boolean",
-      "required" : "true"
-    },
-    {
-      "name" : "externalized_checkpoint_retention",
-      "label" : "Externalized Checkpoint Retention",
-      "description" : "The mode defines how an externalized checkpoint should be cleaned up on job cancellation. If you choose to retain externalized checkpoints on cancellation you have to handle checkpoint clean up manually when you cancel the job as well",
-      "configName" : "execution.checkpointing.externalized-checkpoint-retention",
-      "default" : "RETAIN_ON_CANCELLATION",
-      "type" : "string_enum",
-      "validValues" : ["RETAIN_ON_CANCELLATION", "DELETE_ON_CANCELLATION"],
-      "required" : "true"
-    },
-    {
-      "name" : "checkpointing_interval",
-      "label" : "Checkpointing Interval (milliseconds)",
-      "description" : "Gets the interval in which checkpoints are periodically scheduled. This setting defines the base interval. Checkpoint triggering may be delayed by the settings execution.checkpointing.max-concurrent-checkpoints and execution.checkpointing.min-pause",
-      "configName" : "execution.checkpointing.interval",
-      "type" : "long",
-      "required" : "false"
-    },
-    {
-      "name" : "max_concurrent_checkpoints",
-      "label" : "Max Concurrent Checkpoints",
-      "description" : "The maximum number of checkpoint attempts that may be in progress at the same time. If this value is n, then no checkpoints will be triggered while n checkpoint attempts are currently in flight. For the next checkpoint to be triggered, one checkpoint attempt would need to finish or expire.",
-      "configName" : "execution.checkpointing.max-concurrent-checkpoints",
-      "default" : "1",
-      "type" : "long",
-      "required" : "true"
-    },
-    {
-      "name" : "checkpointing_min_pause",
-      "label" : "Min Pause Between Checkpoints (milliseconds)",
-      "description" : "The minimal pause between checkpointing attempts. This setting defines how soon thecheckpoint coordinator may trigger another checkpoint after it becomes possible to triggeranother checkpoint with respect to the maximum number of concurrent checkpoints(see execution.checkpointing.max-concurrent-checkpoints).",
-      "configName" : "execution.checkpointing.min-pause",
-      "default" : "0",
-      "type" : "long",
-      "required" : "true"
-    },
-    {
-      "name" : "checkpointing_mode",
-      "label" : "Checkpointing Mode",
-      "description" : "The checkpointing mode (exactly-once vs. at-least-once).",
-      "configName" : "execution.checkpointing.mode",
-      "default" : "EXACTLY_ONCE",
-      "type" : "string_enum",
-      "validValues" : ["EXACTLY_ONCE", "AT_LEAST_ONCE"],
-      "required" : "true"
-    },
-    {
-      "name" : "checkpointing_timeout",
-      "label" : "Checkpointing Timeout (milliseconds)",
-      "description" : "The maximum time that a checkpoint may take before being discarded.",
-      "configName" : "execution.checkpointing.timeout",
-      "default" : "60000",
-      "type" : "long",
-      "required" : "true"
-    },
-    {
-      "name" : "jobmanager_per_user_archive",
-      "label" : "Enable user specific archive subdirectory",
-      "description" : "Boolean flag indicating whether the job archive should be written to a user specific subdirectory.",
-      "configName" : "jobmanager.archive.per-user",
-      "default" : "true",
-      "type" : "boolean"
-    },
-    {
-      "name" : "atlas_collection_enabled",
-      "label" : "Enable Atlas Metadata Collection",
-      "description" : "When enabling this make sure that your Cybersec gateway nodes also have the Atlas gateway role assigned.",
-      "configName" : "atlas.collection.enabled",
-      "default" : "false",
-      "type" : "boolean",
-      "required" : "false"
-    },
-    {
-      "name" : "atlas_metadata_namespace",
-      "label" : "Atlas Metadata Namespace",
-      "description" : "Metadata Namespace used in Atlas for Cybersec applications.",
-      "configName" : "atlas.metadata.namespace",
-      "default" : "cm",
-      "type" : "string",
-      "required" : "true"
     }
   ],
-  "gateway" : {
-    "alternatives" : {
-      "name" : "cybersec-conf",
-      "linkRoot" : "/etc/cybersec",
-      "priority" : 50
-    },
-    "scriptRunner" : {
-      "program" : "scripts/control.sh",
-      "environmentVariables" : {
-         "HIVE_SERVICE" : "${dependency:HIVE}",
-         "ATLAS_SERVICE" : "${dependency:ATLAS}",
-         "ATLAS_REST_URL": "${atlas_rest_url}",
-         "ATLAS_KAFKA_BOOTSTRAP_SERVERS": "${atlas_kafka_bootstrap_servers}",
-         "ATLAS_KAFKA_SECURITY_PROTOCOL": "${atlas_kafka_security_protocol}",
-         "ATLAS_KAFKA_ZK_CONNECT": "${atlas_kafka_zk_connect}",
-         "ATLAS_METADATA_NAMESPACE": "${atlas_metadata_namespace}",
-         "KERBEROS_ENABLED": "${kerberos.auth.enabled}"
+  "rolesWithExternalLinks" : ["PARSER_CHAINING"],
+  "roles" : [
+    {
+      "name" : "PARSER_CHAINING",
+      "label" : "Parser Chaining",
+      "pluralLabel" : "Parser Chainings",
+      "jvmBased": true,
+      "startRunner" : {
+        "program" : "scripts/control.sh",
+        "args" : [ "start-parser-ui" ],
+        "environmentVariables": {
+          "SERVER_SSL_KEY_STORE": "${ssl_server_keystore_location}",
+          "SERVER_SSL_KEY_STORE_PASSWORD": "${ssl_server_keystore_password}",
+          "SERVER_SSL_KEY_PASSWORD": "${ssl_server_keystore_keypassword}",
+          "SERVER_SSL_KEY_STORE_TYPE": "jks",
+          "SERVER_SSL_ENABLED": "${ssl_enabled}"
+        }
       },
-      "args" : [ "client" ]
+      "externalLink" : {
+        "name" : "parser_web_ui",
+        "label" : "Parser Chaining",
+        "url" : "http://${host}:${parser_ui_port}",
+        "secureUrl": "https://${host}:${parser_ui_port}"
+      },
+      "topology" : { "minInstances" : 0, "maxInstances" : 1 },
+      "logging" : {
+        "dir": "/var/log/cybersec",
+        "configFilename" : "cybersec-conf/logback.xml",
+        "filename": "parser-ui-${host}.log",
+        "configName": "logging.config",
+        "modifiable" : true,
+        "loggingType": "logback",
+        "additionalConfigs": [
+          {
+            "key": "logger1",
+            "value": "<logger  name=\"org.springframework\" level=\"${logging.org.springframework.level}\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
+          },
+          {
+            "key": "logger2",
+            "value": "<logger name=\"com.cloudera.cyber\" level=\"${logging.com.cloudera.cyber.level}\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
+          },
+          {
+            "key": "logger3",
+            "value": "<logger name=\"com.cloudera.parserchains\" level=\"${logging.com.cloudera.parserchains.level}\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
+          },
+
+          {
+            "key": "logger4",
+            "value": "<logger name=\"org.apache.metron\" level=\"${logging.org.apache.metron.level}\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
+          },
+          {
+            "key": "logger5",
+            "value": "<logger name=\"org.apache.flink\" level=\"${logging.org.apache.flink.level}\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
+          },
+          {
+            "key": "logger6",
+            "value": "<logger name=\"org.apache\" level=\"INFO\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
+          }
+        ]
+      },
+      "parameters" : [
+        {
+          "name": "parser_ui_port",
+          "label": "Parser Chaining UI port",
+          "description": "Port of the Parser Chaining web interface.",
+          "configName": "server.port",
+          "type": "string",
+          "default": "28922"
+        },
+        {
+          "name": "config_path",
+          "label": "Parser Chaining UI port",
+          "description": "Port of the Parser Chaining web interface.",
+          "configName": "config.path",
+          "type": "string",
+          "default": "/var/lib/cybersec"
+        },
+        {
+          "name": "logging.org.springframework.level",
+          "label": "Logger org.springframework Logging Level",
+          "description": "Logger org.springframework logging level.",
+          "required": "false",
+          "default": "INFO",
+          "type": "string_enum",
+          "validValues": [
+            "INFO",
+            "ERROR",
+            "TRACE",
+            "DEBUG",
+            "WARN",
+            "ALL",
+            "OFF"
+          ]
+        },
+        {
+          "name": "logging.com.cloudera.cyber.level",
+          "label": "Logger com.cloudera.cyber Logging Level",
+          "description": "Logger com.cloudera.cyber logging level.",
+          "required": "false",
+          "default": "INFO",
+          "type": "string_enum",
+          "validValues": [
+            "INFO",
+            "ERROR",
+            "TRACE",
+            "DEBUG",
+            "WARN",
+            "ALL",
+            "OFF"
+          ]
+        },
+        {
+          "name": "logging.com.cloudera.parserchains.level",
+          "label": "Logger com.cloudera.parserchains Logging Level",
+          "description": "Logger com.cloudera.parserchains logging level.",
+          "required": "false",
+          "default": "INFO",
+          "type": "string_enum",
+          "validValues": [
+            "INFO",
+            "ERROR",
+            "TRACE",
+            "DEBUG",
+            "WARN",
+            "ALL",
+            "OFF"
+          ]
+        },
+        {
+          "name": "logging.org.apache.metron.level",
+          "label": "Loggerorg.apache.metron Logging Level",
+          "description": "Logger org.apache.metron logging level.",
+          "required": "false",
+          "default": "INFO",
+          "type": "string_enum",
+          "validValues": [
+            "INFO",
+            "ERROR",
+            "TRACE",
+            "DEBUG",
+            "WARN",
+            "ALL",
+            "OFF"
+          ]
+        },
+        {
+          "name": "logging.smm.kafka.webservice.common.level",
+          "label": "Logger smm.kafka.webservice.common Logging Level",
+          "description": "Logger smm.kafka.webservice.common logging level.",
+          "required": "false",
+          "default": "DEBUG",
+          "type": "string_enum",
+          "validValues": [
+            "INFO",
+            "ERROR",
+            "TRACE",
+            "DEBUG",
+            "WARN",
+            "ALL",
+            "OFF"
+          ]
+        },
+        {
+          "name": "logging.org.apache.flink.level",
+          "label": "Logger org.apache.flink Logging Level",
+          "description": "Logger org.apache.flink logging level.",
+          "required": "false",
+          "default": "INFO",
+          "type": "string_enum",
+          "validValues": [
+            "INFO",
+            "ERROR",
+            "TRACE",
+            "DEBUG",
+            "WARN",
+            "ALL",
+            "OFF"
+          ]
+        }
+      ],
+      "kerberosPrincipals": [
+        {
+          "name": "cybersec_service_principal",
+          "primary": "${principal}",
+          "instance": "${host}"
+        },
+        {
+          "name": "spnego_service_principal",
+          "primary": "HTTP",
+          "instance": "${host}"
+        }
+      ],
+      "sslServer": {
+        "keyIdentifier" : "parser_ui_chaining",
+        "enabledConfigName" : "ssl_enabled",
+        "keystoreLocationConfigName" : "ssl_server_keystore_location",
+        "keystorePasswordConfigName" : "ssl_server_keystore_password",
+        "keyPasswordOptionality" : "required",
+        "keystoreKeyPasswordConfigName" : "ssl_server_keystore_keypassword",
+        "autoTlsMode": "auto"
+      },
+      "sslClient": {
+        "truststoreLocationConfigName" : "security.ssl.rest.truststore",
+        "truststorePasswordConfigName" : "security.ssl.rest.truststore-password"
+      },
+      "configWriter" : {
+        "generators" : [
+          {
+            "filename": "cybersec-conf/parser-ui.properties",
+            "configFormat": "properties",
+            "kerberosPrincipals": [
+            ],
+            "includedParams": [
+              "parser_ui_port",
+              "config_path"
+             ],
+            "additionalConfigs": [
+              {
+                "key": "logging.config",
+                "value": "cybersec-conf/logback.xml"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "gateway": {
+    "alternatives": {
+      "name": "cybersec-conf",
+      "linkRoot": "/etc/cybersec",
+      "priority": 50
+    },
+    "scriptRunner": {
+      "program": "scripts/control.sh",
+      "environmentVariables": {
+        "KERBEROS_ENABLED": "${kerberos.auth.enabled}"
+      },
+      "args": [
+        "client"
+      ]
     },
     "sslClient": {
-      "truststoreLocationConfigName" : "security.ssl.rest.truststore",
-      "truststorePasswordConfigName" : "security.ssl.rest.truststore-password"
+      "truststoreFormat": "jks",
+      "truststoreLocationConfigName": "ssl.client.truststore.location",
+      "truststorePasswordConfigName": "ssl.client.truststore.password",
+      "truststorePasswordCredentialProviderCompatible": true,
+      "autoTlsMode": "auto"
     },
-    "configWriter" : {
-      "generators" : [
+    "configWriter": {
+      "generators": [
+        {
+          "filename": "cybersec-conf/kafka.properties",
+          "configFormat": "jinja",
+          "template": "aux/templates/kafka.properties.j2",
+          "includedParams": [
+            "ssl_client_truststore_location",
+            "ssl_client_truststore_password",
+            "schema_registry_url",
+            "kafka_acks",
+            "kafka_auto_offset_reset"
+          ],
+          "additionalConfigs": [
+            {
+              "key": "kafka.brokers.list",
+              "value": "${kafka_brokers_list}"
+            }
+          ]
+        },
         {
           "filename": "cybersec-conf/generator.properties",
           "configFormat": "properties",
           "includedParams": [
-            "ssl_client_truststore_location",
-            "ssl_client_truststore_password"
+            "generator_eps",
+            "generator_avro_flag",
+            "generator_metrics",
+            "default_parallelism",
+            "default_checkpoint_interval_ms"
           ],
-            "additionalConfigs": [
-              {
-                "key": "schema.registry.service.name.2",
-                "value": "${dependency:SCHEMAREGISTRY}"
-              },
-              {
-                  "key": "kafka.bootstrap.servers",
-                  "value": "${kafka_brokers_list}"
-              }
-            ]
+          "additionalConfigs": [
+            {
+              "key": "flink.job.name",
+              "value": "Job Generator"
+            },
+            {
+              "key": "kafka.client.id",
+              "value": "generator.client.id"
+            },
+            {
+              "key": "kafka.group.id",
+              "value": "generator.group.id"
+            }
+          ]
+        },
+        {
+          "filename": "cybersec-conf/parser.properties",
+          "configFormat": "properties",
+          "includedParams": [
+            "default_parallelism",
+            "default_checkpoint_interval_ms"
+          ],
+          "additionalConfigs": [
+            {
+              "key": "flink.job.name",
+              "value": "Job Parser"
+            },
+            {
+              "key": "topic.output",
+              "value": "triage.input"
+            },
+            {
+              "key": "topic.error",
+              "value": "parser.error"
+            },
+            {
+              "key": "kafka.client.id",
+              "value": "parser.client.id"
+            },
+            {
+              "key": "kafka.group.id",
+              "value": "parser.group.id"
+            }
+          ]
+        },
+        {
+          "filename": "cybersec-conf/triage.properties",
+          "configFormat": "properties",
+          "includedParams": [
+            "default_parallelism",
+            "default_checkpoint_interval_ms",
+            "enrichment_topic_input",
+            "enrichment_topic_query_output",
+            "query_input_topic",
+            "query_output_topic",
+            "geo_enabled",
+            "geo_ip_fields",
+            "geo_database_path",
+            "asn_enabled",
+            "asn_ip_fields",
+            "asn_database_path",
+            "hbase_enabled",
+            "enrichments_config",
+            "lookups_config_file",
+            "rest_enabled",
+            "rest_config_file",
+            "stellar_enabled",
+            "stellar_config_dir",
+            "stix_enabled",
+            "stix_input_topic",
+            "stix_output_topic",
+            "stix_hbase_table",
+            "threatq_enabled",
+            "threatq_config_file",
+            "threatq_topic_input",
+            "rules_enabled"
+          ],
+          "additionalConfigs": [
+            {
+              "key": "flink.job.name",
+              "value": "Job Triage"
+            },
+            {
+              "key": "kafka.client.id",
+              "value": "triage.client.id"
+            },
+            {
+              "key": "kafka.group.id",
+              "value": "triage.group.id"
+            },
+            {
+              "key": "topic.input",
+              "value": "triage.input"
+            },
+            {
+              "key": "topic.output",
+              "value": "triage.output"
+            }
+          ]
+        },
+        {
+          "filename": "cybersec-conf/profile.properties",
+          "configFormat": "properties",
+          "includedParams": [
+            "default_parallelism",
+            "default_checkpoint_interval_ms",
+            "query_input_topic",
+            "query_output_topic",
+            "profile_first_seen_table",
+            "profile_first_seen_column_family",
+            "phoenix_db_init",
+            "phoenix_db_thin_url",
+            "phoenix_db_thin_serialization",
+            "phoenix_db_thin_authentication",
+            "phoenix_db_thin_avatica_user",
+            "phoenix_db_thin_avatica_password",
+            "phoenix_db_batchSize",
+            "phoenix_db_query_param_measurement_data_table_name",
+            "phoenix_db_query_param_measurement_metadata_table_name",
+            "phoenix_db_query_param_measurement_sequence_name",
+            "phoenix_db_query_param_profile_metadata_table_name",
+            "phoenix_db_query_param_profile_profile_sequence_name",
+            "phoenix_db_query_param_measurement_sequence_start_with",
+            "phoenix_db_query_param_measurement_sequence_cache",
+            "phoenix_db_query_param_profile_sequence_start_with",
+            "phoenix_db_query_param_profile_sequence_cache",
+            "phoenix_db_query_param_field_key_count",
+            "phoenix_db_interval_millis",
+            "phoenix_db_max_retries_times"
+          ],
+          "additionalConfigs": [
+            {
+              "key": "flink.job.name",
+              "value": "Job Profile"
+            },
+            {
+              "key": "kafka.client.id",
+              "value": "profile.client.id"
+            },
+            {
+              "key": "kafka.group.id",
+              "value": "profile.group.id"
+            },
+            {
+              "key": "topic.input",
+              "value": "triage.output"
+            },
+            {
+              "key": "topic.output",
+              "value": "profile.output"
+            }
+          ]
+        },
+        {
+          "filename": "cybersec-conf/hive-indexing.properties",
+          "configFormat": "properties",
+          "includedParams": [
+            "default_parallelism",
+            "default_checkpoint_interval_ms",
+            "hive_catalog",
+            "hive_schema",
+            "hive_table",
+            "hive_confdir",
+            "hive_include_all",
+            "hive_transaction_messages"
+          ],
+          "additionalConfigs": [
+            {
+              "key": "flink.job.name",
+              "value": "Job Hive Indexing"
+            },
+            {
+              "key": "kafka.client.id",
+              "value": "hive.indexing.client.id"
+            },
+            {
+              "key": "kafka.group.id",
+              "value": "hive.indexing.group.id"
+            },
+            {
+              "key": "topic.input",
+              "value": "triage.output"
+            }
+          ]
+        },
+        {
+          "filename": "cybersec-conf/load-enrichment.properties",
+          "configFormat": "properties",
+          "includedParams": [
+            "default_parallelism",
+            "default_checkpoint_interval_ms",
+            "enrichment_config_file",
+            "enrichment_source_file",
+            "enrichment_source_skipfirstline",
+            "enrichment_source_columns"
+          ],
+          "additionalConfigs": [
+            {
+              "key": "flink.job.name",
+              "value": "Job Enrichment Loading"
+            }
+          ]
         }
       ]
-    }
+    },
+    "parameters": [
+      {
+        "name": "schema_registry_url",
+        "label": "Schema registry url",
+        "description": "Schema registry server URL in the format http(s)://{schema-registry-host}:{schema-registry-port}/api/v1",
+        "configName": "schema.registry.url",
+        "type" : "uri",
+        "allowedSchemes": [ "http", "https" ],
+        "default" : "",
+        "configurableInWizard": true
+      },
+      {
+        "name": "kafka_auto_offset_reset",
+        "label": " Kafka offset reset policy",
+        "description": "The auto offset reset kafka consumer configuration defines how the kafka consumer should behave when consuming from a topic partition when there is no initial offset.",
+        "configName": "kafka.auto.offset.reset",
+        "type": "string_enum",
+        "validValues": [
+          "earliest",
+          "latest"
+        ],
+        "default": "earliest"
+      },
+      {
+        "name": "kafka_acks",
+        "label": " Kafka client acknowledgements",
+        "description": "Indicates the number of brokers that must receive a record before it is marked as a successful record.",
+        "configName": "kafka.acks",
+        "type": "string_enum",
+        "validValues": [
+          "0",
+          "1",
+          "all"
+        ],
+        "default": "all"
+      },
+      {
+        "name": "generator_eps",
+        "label": "Generator eps",
+        "description": "Indicates the number of records generated by the generator per second.",
+        "configName": "generator.eps",
+        "type": "long",
+        "min": 0,
+        "default": 100
+      },
+      {
+        "name": "generator_avro_flag",
+        "label": "Generator Avro",
+        "description": "Specifies whether the generator should create records in avro format.",
+        "configName": "generator.avro.flag",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "generator_metrics",
+        "label": "Generator metrics",
+        "description": "Kafka topic for generator metrics.",
+        "configName": "generator.metrics",
+        "type": "string",
+        "default": "generator.count"
+      },
+      {
+        "name": "chain_file",
+        "label": "Chain file path",
+        "description": "Path to file with chain configuration",
+        "configName": "chain.file",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "key_private_file",
+        "label": "Key private file",
+        "description": "Path to private key.",
+        "configName": "key.private.file",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "chain_topic_map",
+        "label": "Chain topic Map",
+        "description": "Map topic to a configuration.",
+        "configName": "chain.topic.map",
+        "type": "string",
+        "default": "{\"squid\" : {\"chainKey\": \"squid\", \"source\" : \"squid\"}}"
+      },
+      {
+        "name": "chain_enrichments_file",
+        "label": "Chain enrichments file",
+        "description": "File with enrichment configuration.",
+        "configName": "chain.enrichments.file",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "enrichments_table_default",
+        "label": "Batch loader hbase table",
+        "description": "The default table where the batch loader job puts enrichment data in hbase.",
+        "configName": "enrichments.table",
+        "type": "string",
+        "default": "simple_enrich"
+      },
+      {
+        "name": "enrichments_config",
+        "label": "Enrichment configuration",
+        "description": "The default path to enrichment configuration file.",
+        "configName": "enrichments.config",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "lookups_config_file",
+        "label": "Lookups configuration",
+        "description": "The default path to lookups configuration file.",
+        "configName": "lookups.config.file",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "signature_enabled",
+        "label": "Signature enabled",
+        "description": "Enable signature",
+        "configName": "signature.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "default_parallelism",
+        "label": "Job parallelism level",
+        "description": "The default number of slots that a TaskManager offers.",
+        "configName": "parallelism",
+        "type": "long",
+        "min": 0,
+        "default": 1
+      },
+      {
+        "name": "default_checkpoint_interval_ms",
+        "label": "Checkpoint interval ms",
+        "description": "Default checkpoint interval configures how often Flink will take these snapshots.",
+        "configName": "checkpoint.interval.ms",
+        "type": "long",
+        "min": 0,
+        "default": 60000
+      },
+      {
+        "name": "geo_enabled",
+        "label": "GEO feature",
+        "description": "Enable the geoenrichment feature by default.",
+        "configName": "geo.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "asn_enabled",
+        "label": "ASN feature",
+        "description": "Enable the asnenrichment feature by default.",
+        "configName": "asn.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "hbase_enabled",
+        "label": "Hbase enrichment feature",
+        "description": "Enable the hbase enrichment feature by default.",
+        "configName": "hbase.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "rest_enabled",
+        "label": "Rest enrichment feature",
+        "description": "Enable the rest enrichment feature by default.",
+        "configName": "rest.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "rules_enabled",
+        "label": "Rules enrichment feature",
+        "description": "Enable the rule enrichment feature by default.",
+        "configName": "rules.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "threatq_enabled",
+        "label": "Threatq enrichment feature",
+        "description": "Enable the threatq enrichment feature by default.",
+        "configName": "threatq.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "stellar_enabled",
+        "label": "Stellar enrichment feature",
+        "description": "Enable the stellar enrichment feature by default.",
+        "configName": "stellar.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "stellar_config_dir",
+        "label": "Path to stellar dir",
+        "description": "Path to directory with stellar configs.",
+        "configName": "stellar.config.dir",
+        "type": "string",
+        "default": "hdfs:/user/cybersec/data/stellar"
+      },
+      {
+        "name": "query_input_topic",
+        "label": "Scoring command input topic",
+        "description": "Default input topic for scoring command.",
+        "configName": "query.input.topic",
+        "type": "string",
+        "default": "scoring.rules.input"
+      },
+      {
+        "name": "query_output_topic",
+        "label": "Scoring command output topic",
+        "description": "Default output topic for scoring command.",
+        "configName": "query.output.topic",
+        "type": "string",
+        "default": "scoring.rules.out"
+      },
+      {
+        "name": "rest_config_file",
+        "label": "Rest config file",
+        "description": "The default path to rest config file.",
+        "configName": "rest.config.file",
+        "type": "string",
+        "default": "rest-config.json"
+      },
+      {
+        "name": "threatq_config_file",
+        "label": "Threatq config file",
+        "description": "The default path to threatq config file.",
+        "configName": "threatq.config.file",
+        "type": "string",
+        "default": "threatq.json"
+      },
+      {
+        "name": "threatq_topic_input",
+        "label": "Threatq topic ",
+        "description": "The default topic of threatq data.",
+        "configName": "threatq.topic.input",
+        "type": "string",
+        "default": "threats"
+      },
+      {
+        "name": "geo_ip_fields",
+        "label": "Geo fields",
+        "description": "The list of fields that is used for GEO enrichment.",
+        "configName": "geo.ip_fields",
+        "type": "string",
+        "default": "ip_src_addr,ip_dst_addr,ip_dst,ip_src"
+      },
+      {
+        "name": "geo_database_path",
+        "label": "Geo path",
+        "description": "The path to MaxMind geo city database.",
+        "configName": "geo.database_path",
+        "type": "string",
+        "default": "hdfs:/user/cybersec/data/GeoLite2-City.mmdb"
+      },
+      {
+        "name": "asn_ip_fields",
+        "label": "Asn fields",
+        "description": "The list of fields that is used for GEO enrichment.",
+        "configName": "asn.ip_fields",
+        "type": "string",
+        "default": "ip_src_addr,ip_dst_addr,ip_dst,ip_src"
+      },
+      {
+        "name": "asn_database_path",
+        "label": "Asn path",
+        "description": "The path to MaxMind asn database.",
+        "configName": "asn.database_path",
+        "type": "string",
+        "default": "hdfs:/user/cybersec/data/GeoLite2-ASN.mmdb"
+      },
+      {
+        "name": "stix_enabled",
+        "label": "Stix enrichment feature",
+        "description": "Enable the stix enrichment feature by default.",
+        "configName": "stix.enabled",
+        "type": "boolean",
+        "default": false
+      },
+      {
+        "name": "stix_input_topic",
+        "label": "Stix input topic",
+        "description": "The default stix input topic.",
+        "configName": "stix.input.topic",
+        "type": "string",
+        "default": "stix.input"
+      },
+      {
+        "name": "stix_output_topic",
+        "label": "Stix output topic",
+        "description": "The default stix output topic.",
+        "configName": "stix.output.topic",
+        "type": "string",
+        "default": "stix.output"
+      },
+      {
+        "name": "stix_hbase_table",
+        "label": "Stix hbase table",
+        "description": "The default stix enrich hbase table.",
+        "configName": "stix.hbase.table",
+        "type": "string",
+        "default": "threatIntelligence"
+      },
+      {
+        "name": "enrichment_topic_input",
+        "label": "Enrichment input topic",
+        "description": "Default enrichment topic for triage job.",
+        "configName": "enrichment.topic.input",
+        "type": "string",
+        "default": "triage.enrichments"
+      },
+      {
+        "name": "enrichment_topic_query_output",
+        "label": "Enrichment output topic",
+        "description": "Default enrichment output topic for triage job.",
+        "configName": "enrichment.topic.query.output",
+        "type": "string",
+        "default": "triage.enrichments.response"
+      },
+      {
+        "name": "profile_first_seen_table",
+        "label": "Profile hbase table",
+        "description": "Default hbase table for profiling job.",
+        "configName": "profile.first.seen.table",
+        "type": "string",
+        "default": "enrichments"
+      },
+      {
+        "name": "profile_first_seen_column_family",
+        "label": "Profile hbase column family",
+        "description": "Default hbase column family for profiling job.",
+        "configName": "profile.first.seen.column.family",
+        "type": "string",
+        "default": "first_seen"
+      },
+      {
+        "name": "phoenix_db_init",
+        "label": "Phoenix initialize db",
+        "description": "Init the phoenix database.",
+        "configName": "phoenix.db.init",
+        "type": "boolean",
+        "default": true
+      },
+      {
+        "name": "phoenix_db_thin_url",
+        "label": "Phoenix db url",
+        "description": "Phoenix to the avatica url.",
+        "configName": "phoenix.db.thin.url",
+        "type": "uri",
+        "allowedSchemes": [ "http", "https" ],
+        "default": "http://localhost.localhost:8765"
+      },
+      {
+        "name": "phoenix_db_thin_serialization",
+        "label": "Phoenix db thin serialization",
+        "description": "Phoenix serialization schema.",
+        "configName": "phoenix.db.thin.serialization",
+        "type": "string",
+        "default": "PROTOBUF"
+      },
+      {
+        "name": "phoenix_db_thin_authentication",
+        "label": "Phoenix authentication",
+        "description": "Phoenix authentication mechanism.",
+        "configName": "phoenix.db.thin.authentication",
+        "type": "string",
+        "default": "SPNEGO"
+      },
+      {
+        "name": "phoenix_db_thin_avatica_user",
+        "label": "Phoenix thin client user",
+        "description": "Phoenix thin client user.",
+        "configName": "phoenix.db.thin.avatica_user",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "phoenix_db_thin_avatica_password",
+        "label": "Phoenix thin client password",
+        "description": "Phoenix thin client password.",
+        "configName": "phoenix.db.thin.avatica_password",
+        "type": "password",
+        "default": ""
+      },
+      {
+        "name": "phoenix_db_batchSize",
+        "label": "Phoenix thin client password",
+        "description": "Phoenix thin client password.",
+        "configName": "phoenix.db.batchSize",
+        "type": "long",
+        "min": 0,
+        "default": 40
+      },
+      {
+        "name": "phoenix_db_query_param_measurement_data_table_name",
+        "label": "Phoenix measurement data table",
+        "description": "Phoenix measurement data table.",
+        "configName": "phoenix.db.query.param.measurement_data_table_name",
+        "type": "string",
+        "default": "prf_measure"
+      },
+      {
+        "name": "phoenix_db_query_param_measurement_metadata_table_name",
+        "label": "Phoenix measurement meta data table",
+        "description": "Phoenix measurement meta data table.",
+        "configName": "phoenix.db.query.param.measurement_metadata_table_name",
+        "type": "string",
+        "default": "prf_measure_meta"
+      },
+      {
+        "name": "phoenix_db_query_param_measurement_sequence_name",
+        "label": "Phoenix sequence measurement id",
+        "description": "Phoenix sequence measurement id.",
+        "configName": "phoenix.db.query.param.measurement_sequence_name",
+        "type": "string",
+        "default": "prf_measure_seq"
+      },
+      {
+        "name": "phoenix_db_query_param_profile_metadata_table_name",
+        "label": "Phoenix profile meta data",
+        "description": "Phoenix profile meta data.",
+        "configName": "phoenix.db.query.param.profile_metadata_table_name",
+        "type": "string",
+        "default": "prf_meta"
+      },
+      {
+        "name": "phoenix_db_query_param_profile_profile_sequence_name",
+        "label": "Phoenix sequence for profile meta data",
+        "description": "Phoenix sequence for profile meta data.",
+        "configName": "phoenix.db.query.param.profile_sequence_name",
+        "type": "string",
+        "default": "prf_meta"
+      },
+      {
+        "name": "phoenix_db_query_param_measurement_sequence_start_with",
+        "label": "Phoenix measurement sequence start id",
+        "description": "Phoenix measurement sequence id starts from.",
+        "configName": "phoenix.db.query.param.measurement_sequence_start_with",
+        "type": "long",
+        "default": 0
+      },
+      {
+        "name": "phoenix_db_query_param_measurement_sequence_cache",
+        "label": "Phoenix sequence cache size",
+        "description": "Phoenix measurement sequence cache size.",
+        "configName": "phoenix.db.query.param.measurement_sequence_cache",
+        "type": "long",
+        "min": 0,
+        "default": 20
+      },
+      {
+        "name": "phoenix_db_query_param_profile_sequence_start_with",
+        "label": "Phoenix sequence profile id starts",
+        "description": "Phoenix sequence id starts from.",
+        "configName": "phoenix.db.query.param.profile_sequence_start_with",
+        "type": "long",
+        "default": 0
+      },
+      {
+        "name": "phoenix_db_query_param_profile_sequence_cache",
+        "label": "Phoenix profile sequence cache size",
+        "description": "Phoenix profile sequence cache size.",
+        "configName": "phoenix.db.query.param.profile_sequence_cache",
+        "type": "long",
+        "min": 0,
+        "default": 20
+      },
+      {
+        "name": "phoenix_db_query_param_field_key_count",
+        "label": "Phoenix field key count",
+        "description": "Number of fields for profile types in phoenix.",
+        "configName": "phoenix.db.query.param.field_key_count",
+        "type": "long",
+        "min": 0,
+        "default": 10
+      },
+      {
+        "name": "phoenix_db_interval_millis",
+        "label": "Phoenix db interval millis",
+        "description": "Phoenix minimal interval between transactions.",
+        "configName": "phoenix.db.interval_millis",
+        "type": "long",
+        "min": 0,
+        "default": 60000
+      },
+      {
+        "name": "phoenix_db_max_retries_times",
+        "label": "Phoenix minimal retries count",
+        "description": "Phoenix minimal retries count.",
+        "configName": "phoenix.db.max_retries_times",
+        "type": "long",
+        "min": 0,
+        "default": 3
+      },
+      {
+        "name": "hive_catalog",
+        "label": "Hive catalog",
+        "description": "Hive catalog.",
+        "configName": "hive.catalog",
+        "type": "string",
+        "default": "hive"
+      },
+      {
+        "name": "hive_schema",
+        "label": "Hive schema",
+        "description": "Hive catalog.",
+        "configName": "hive.schema",
+        "type": "string",
+        "default": "cyber"
+      },
+      {
+        "name": "hive_table",
+        "label": "Hive table",
+        "description": "Hive table.",
+        "configName": "hive.table",
+        "type": "string",
+        "default": "events"
+      },
+      {
+        "name": "hive_confdir",
+        "label": "Hive configuration directory",
+        "description": "Hive configuration directory.",
+        "configName": "hive.confdir",
+        "type": "string",
+        "default": "/etc/hive/conf/"
+      },
+      {
+        "name": "hive_include_all",
+        "label": "Hive include all",
+        "description": "Hive include all.",
+        "configName": "hive.include.all",
+        "type": "boolean",
+        "default": true
+      },
+      {
+        "name": "hive_transaction_messages",
+        "label": "Hive transaction messages",
+        "description": "Hive transaction messages.",
+        "configName": "hive.transaction.messages",
+        "type": "long",
+        "min": 0,
+        "default": 500
+      },
+      {
+        "name": "enrichment_config_file",
+        "label": "Enrichment loading file",
+        "description": "The default enrichment loading configuration file.",
+        "configName": "enrichment.config.file",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "enrichment_source_file",
+        "label": "Enrichment source file",
+        "description": "The default enrichment loading source file.",
+        "configName": "enrichment.source.file",
+        "type": "string",
+        "default": ""
+      },
+      {
+        "name": "enrichment_source_skipfirstline",
+        "label": "Skip first line",
+        "description": "Skip the first line of source csv file for enrichment loading.",
+        "configName": "enrichment.source.skipfirstline",
+        "type": "boolean",
+        "default": true
+      },
+      {
+        "name": "enrichment_source_columns",
+        "label": "Enrichment source columns",
+        "description": "The list of enrichment loading columns.",
+        "configName": "enrichment.source.columns",
+        "type": "string",
+        "default": "rank,,domain,,,,,,,,,"
+      }
+    ]
   }
 }

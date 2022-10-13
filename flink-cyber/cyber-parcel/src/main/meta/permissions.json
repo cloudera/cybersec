@@ -9,7 +9,7 @@
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/start-enrichment": {
+  "bin/start-triage": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
@@ -24,7 +24,7 @@
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/start-indexer": {
+  "bin/start-hive-indexing": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
@@ -34,7 +34,12 @@
     "group": "cybersec",
     "permissions": "0755"
   },
-  "etc/conf/enrichment.properties": {
+  "bin/start-parser-ui": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/triage.properties": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
@@ -50,6 +55,11 @@
     "permissions": "0755"
   },
   "etc/conf/profile.properties": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/hive-indexing.properties": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
