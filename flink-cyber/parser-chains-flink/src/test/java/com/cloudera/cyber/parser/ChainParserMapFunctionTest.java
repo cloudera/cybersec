@@ -15,16 +15,22 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.net.URL;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.Signature;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static com.cloudera.cyber.parser.ChainParserMapFunction.*;
+import static com.cloudera.cyber.parser.ChainParserMapFunction.CHAIN_PARSER_FEATURE;
+import static com.cloudera.cyber.parser.ChainParserMapFunction.EMPTY_SIGNATURE;
+import static com.cloudera.cyber.parser.ChainParserMapFunction.NO_TIMESTAMP_FIELD_MESSAGE;
+import static com.cloudera.cyber.parser.ChainParserMapFunction.TIMESTAMP_NOT_EPOCH;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -67,6 +73,12 @@ public class ChainParserMapFunctionTest {
         assertThat(messages.size()).isEqualTo(1);
         assertThat(messages.get(0).getExtensions().get("oracle_user")).isEqualTo("SYSMAN");
         assertThat(harness.getSideOutput(ERROR_OUTPUT)).isNull();
+    }
+
+    @Test
+    public void testExceptionThrownWhenPatternAbsent() {
+        assertThatThrownBy(() -> createTestHarness("metron/parser_chain_invalid.json", "metron/topic_map.json", null))
+                .isInstanceOf(InvalidParserException.class);
     }
 
     private void testMessageWithError(String messageText, String timestampNotEpoch) throws Exception {

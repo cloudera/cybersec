@@ -1,0 +1,59 @@
+{
+  "parserClassName": "org.apache.metron.parsers.GrokParser",
+  "filterClassName": "STELLAR",
+  "sensorTopic": "oraclelogon",
+  "outputTopic": null,
+  "errorTopic": null,
+  "writerClassName": null,
+  "errorWriterClassName": null,
+  "readMetadata": true,
+  "mergeMetadata": true,
+  "numWorkers": null,
+  "numAckers": null,
+  "spoutParallelism": 1,
+  "spoutNumTasks": 1,
+  "parserParallelism": 1,
+  "parserNumTasks": 1,
+  "errorWriterParallelism": 1,
+  "errorWriterNumTasks": 1,
+  "spoutConfig": {},
+  "securityProtocol": null,
+  "stormConfig": {},
+  "parserConfig": {
+    "grokPath": "src/test/resources/metron/patterns/oraclelogon_invalid",
+    "patternLabel": "ORACLELOGON",
+    "filter.query": "oracle_user == 'SYSMAN' || oracle_user == 'DBSNMP' || oracle_user == 'RMGPDA' || oracle_user == 'A_ORA_ACCREC' || oracle_user == 'APPQOSSYS' || oracle_user == 'AUDSYS' || oracle_user == 'CA_008E_P_PSO_ORA01' || oracle_user == 'CA_ACC_PROBE' || oracle_user == 'CA_ORA_ACCREC' || oracle_user == 'CDD_PRIV' || oracle_user == 'CTXSYS' || oracle_user == 'DBA_OWNER' || oracle_user == 'DIP' || oracle_user == 'DBSTARTUP' || oracle_user == 'GSMADMIN_INTERNAL' || oracle_user == 'GSMCATUSER' || oracle_user == 'GSMUSER' || oracle_user == 'L005' || oracle_user == 'L006' || oracle_user == 'LBOAUD_PRIV' || oracle_user == 'LBOREP_PRIV' || oracle_user == 'ORACLE_OCM' || oracle_user == 'ORDSYS' || oracle_user == 'OUTLN' || oracle_user == 'PSOAUTO_BATCH' || oracle_user == 'STAGE_OWNER' || oracle_user == 'STATS_OWNER'|| oracle_user == 'SYS'|| oracle_user == 'SYSBACKUP' || oracle_user == 'SYSRAC' || oracle_user == 'SYSKM' || oracle_user == 'SYSDG' || oracle_user == 'SYSTEM' || oracle_user == 'XDB' || oracle_user == 'XS$NULL' || oracle_user == 'XS\t$NULL'"
+  },
+  "fieldTransformations": [
+    {
+      "input": [
+        "oraclesyslog.timestamp"
+      ],
+      "output": [
+        "timestamp"
+      ],
+      "transformation": "STELLAR",
+      "config": {
+        "timestamp": "oraclesyslog.timestamp"
+      }
+    },
+    {
+      "input": [
+        "oraclesyslog.original_string"
+      ],
+      "output": [
+        "oraclesyslog.original_string"
+      ],
+      "transformation": "STELLAR",
+      "config": {
+        "oraclesyslog.original_string": " "
+      }
+    }
+  ],
+  "cacheConfig": {},
+  "rawMessageStrategy": "ENVELOPE",
+  "rawMessageStrategyConfig": {
+    "messageField": "message",
+    "metadataPrefix": "oraclesyslog"
+  }
+}
