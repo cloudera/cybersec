@@ -13,12 +13,12 @@ import java.io.IOException;
 @Configuration
 public class AngularForwardingConfig implements WebMvcConfigurer {
 
-    @Value("${spring.mvc.static-path-pattern:/ui/**}")
-    private String uiPath;
+    @Value("${spring.mvc.static-path-pattern:/ui/}")
+    private String baseUiPath;
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler(uiPath)
+        registry.addResourceHandler(baseUiPath, baseUiPath + "**")
                 .addResourceLocations("classpath:/static/")
                 .resourceChain(true)
                 .addResolver(new PathResourceResolver() {
