@@ -3,7 +3,7 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 
 import { LoadChainsAction } from './chain-list-page.actions';
 import * as fromActions from './chain-list-page.actions';
@@ -14,6 +14,7 @@ import {
   getLoading,
 } from './chain-list-page.reducers';
 import { ChainModel, ChainOperationalModel } from './chain.model';
+import {NzMessageService} from "ng-zorro-antd/message";
 
 @Component({
   selector: 'app-chain-list-page',
@@ -34,7 +35,8 @@ export class ChainListPageComponent implements OnInit {
     private store: Store<ChainListPageState>,
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    ) {
+    private messageService: NzMessageService,
+  ) {
     this.route.queryParams.subscribe(() => {
       store.dispatch(new LoadChainsAction());
       this.chains$ = store.pipe(select(getChains));
@@ -63,9 +65,19 @@ export class ChainListPageComponent implements OnInit {
   }
 
   pushChain(): void {
-    const chainData: ChainOperationalModel = { name: this.chainName.value };
-    this.newChainForm.reset();
-    this.store.dispatch(new fromActions.CreateChainAction(chainData));
+    let chainName = this.chainName.value;
+    this.chains$.pipe(take(1)).subscribe(chainArr => {
+      const duplicate = chainArr.some(value => {
+        return value.name == chainName;
+      });
+      if (!duplicate) {
+        const chainData: ChainOperationalModel = {name: chainName};
+        this.newChainForm.reset();
+        this.store.dispatch(new fromActions.CreateChainAction(chainData));
+      } else {
+        this.messageService.create('Error', "Duplicate chain names aren't allowed!");
+      }
+    })
   }
 
   deleteChain(chainId: string, chainName): void {
