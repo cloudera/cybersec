@@ -1,6 +1,7 @@
 package com.cloudera.cyber.indexing.hive;
 
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -17,8 +18,8 @@ public class HiveJobKafka extends HiveJob {
     private static final String DEFAULT_GROUP_ID = "indexer-hive";
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
+        ParameterTool params = Utils.getParamToolsFromProperties(args);
         FlinkUtils.executeEnv(new HiveJobKafka().createPipeline(params),"Indexing - Hive", params);
     }
 

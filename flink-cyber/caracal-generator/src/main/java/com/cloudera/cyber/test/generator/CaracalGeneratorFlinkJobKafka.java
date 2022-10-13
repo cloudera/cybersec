@@ -8,16 +8,14 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
+import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            throw new IllegalArgumentException("Path to the properties file is expected as the only argument.");
-        }
-        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
-
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
+        ParameterTool params = com.cloudera.cyber.flink.Utils.getParamToolsFromProperties(args);
         FlinkUtils.executeEnv(new CaracalGeneratorFlinkJobKafka()
                 .createPipeline(params), "Caracal Data generator", params);
     }

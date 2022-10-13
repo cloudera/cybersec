@@ -47,8 +47,8 @@ public class ParserJobKafka extends ParserJob {
     public static final String PARAMS_CONFIG_TOPIC = "config.topic";
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length == 1, "Path to the properties file is expected as the only argument.");
-        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
+        ParameterTool params = Utils.getParamToolsFromProperties(args);
         FlinkUtils.executeEnv(new ParserJobKafka()
                 .createPipeline(params), "Flink Parser", params);
 

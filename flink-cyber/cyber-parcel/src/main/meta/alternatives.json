@@ -6,7 +6,7 @@
     "isDirectory": false
   },
   "start-enrichment": {
-    "destination": "/usr/bin/start-enrichment",
+    "destination": "/usr/bin/start-triage",
     "source": "bin/start-enrichment",
     "priority": 10,
     "isDirectory": false
@@ -23,15 +23,21 @@
     "priority": 10,
     "isDirectory": false
   },
-  "start-indexer": {
-    "destination": "/usr/bin/start-indexer",
-    "source": "bin/start-indexer",
+  "start-hive-indexing": {
+    "destination": "/usr/bin/start-hive-indexing",
+    "source": "bin/start-hive-indexing",
     "priority": 10,
     "isDirectory": false
   },
   "send-scoring-command": {
     "destination": "/usr/bin/send-scoring-command",
     "source": "bin/send-scoring-command",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "start-parser-ui": {
+    "destination": "/usr/bin/start-parser-ui",
+    "source": "bin/start-parser-ui",
     "priority": 10,
     "isDirectory": false
   }

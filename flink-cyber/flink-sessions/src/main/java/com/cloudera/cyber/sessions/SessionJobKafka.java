@@ -3,11 +3,13 @@ package com.cloudera.cyber.sessions;
 import com.cloudera.cyber.GroupedMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.flink.util.Preconditions;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,10 +19,8 @@ import static com.cloudera.cyber.flink.FlinkUtils.createKafkaSource;
 public class SessionJobKafka extends SessionJob {
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 1) {
-            throw new RuntimeException("Path to the properties file is expected as the only argument.");
-        }
-        ParameterTool params = ParameterTool.fromPropertiesFile(args[0]);
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
+        ParameterTool params = Utils.getParamToolsFromProperties(args);
         StreamExecutionEnvironment env = new SessionJobKafka().createPipeline(params);
         env.execute("Flink Sessionizer");
     }

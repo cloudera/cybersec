@@ -2,6 +2,7 @@ package com.cloudera.cyber.indexing;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.formats.avro.registry.cloudera.ClouderaRegistryKafkaSerializationSchema;
@@ -25,8 +26,8 @@ public class SolrJobKafka extends SolrJob {
 
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        new SolrJobKafka().createPipeline(ParameterTool.fromPropertiesFile(args[0])).execute("Indexing - Solr");
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
+        new SolrJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Indexing - Solr");
     }
 
     @Override

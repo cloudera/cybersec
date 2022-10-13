@@ -8,6 +8,7 @@ import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.enrichment.hbase.writer.HbaseEnrichmentCommandSink;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.flink.Utils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.hbase.sink.HBaseSinkFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -46,8 +47,8 @@ public class HbaseJobRawKafka extends HbaseJob {
     }
 
     public static void main(String[] args) throws Exception {
-        Preconditions.checkArgument(args.length == 1, "Arguments must consist of a single properties file");
-        new HbaseJobRawKafka().createPipeline(ParameterTool.fromArgs(args)).execute("Enrichments - HBase Lookup");
+        Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
+        new HbaseJobRawKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Enrichments - HBase Lookup");
     }
 
     @Override
