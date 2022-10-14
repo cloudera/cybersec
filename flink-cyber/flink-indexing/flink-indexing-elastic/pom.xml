@@ -50,6 +50,14 @@
             <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
         </dependency>
 
+        <!-- Replacing httpclient in other dependencies -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${global.httpclient.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-elasticsearch7_${scala.binary.version}</artifactId>
