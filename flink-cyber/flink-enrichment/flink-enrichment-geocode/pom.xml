@@ -125,6 +125,13 @@
             </exclusions>
         </dependency>
 
+        <!-- Replacing httpclient in other dependencies -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${global.httpclient.version}</version>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>com.maxmind.geoip2</groupId>
             <artifactId>geoip2</artifactId>
