@@ -82,7 +82,7 @@
         <dependency>
             <groupId>de.javakaffee</groupId>
             <artifactId>kryo-serializers</artifactId>
-            <version>${global_kryo_serializers_version}</version>
+            <version>${global.kryo-serializers.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.aesh</groupId>

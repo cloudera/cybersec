@@ -78,9 +78,10 @@
         <antlr.version>4.7.2</antlr.version>
         <metrics.version>3.0.2</metrics.version>
         <pcap.version>1.7.1</pcap.version>
-        <global_kryo_version>3.0.3</global_kryo_version>
-        <global_kryo_serializers_version>0.38</global_kryo_serializers_version>
-        <global_jar_version>3.0.2</global_jar_version>
+        <global.kryo.version>3.0.3</global.kryo.version>
+        <global.kryo-serializers.version>0.38</global.kryo-serializers.version>
+        <global.jar.version>3.0.2</global.jar.version>
+        <global.httpclient.version>4.5.13</global.httpclient.version>
         <cybersec.full.version>${project.parent.version}-${flink.version}-cdh${cdh.version}-${timestamp}</cybersec.full.version>
         <simple-syslog.version>0.0.6</simple-syslog.version>
         <testng.version>7.5</testng.version>
