@@ -24,6 +24,11 @@
             <artifactId>parser-chains-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>metron-enrichment-common</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 
 
         <dependency>
@@ -194,6 +199,14 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
             </plugin>
         </plugins>
     </build>

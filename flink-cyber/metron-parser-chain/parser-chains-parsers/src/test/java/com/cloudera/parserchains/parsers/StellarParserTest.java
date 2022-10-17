@@ -10,7 +10,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.entry;
 
 public class StellarParserTest {
 
@@ -109,7 +111,7 @@ public class StellarParserTest {
         return output;
     }
 
-    private static File getFileFromResource(String path) {
+    static File getFileFromResource(String path) {
         return new File(StellarParserTest.class.getResource(path).getFile());
     }
 
