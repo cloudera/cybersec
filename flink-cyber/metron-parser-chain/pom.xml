@@ -64,7 +64,7 @@
         <mockito.version>3.2.4</mockito.version>
         <hamcrest.version>2.2</hamcrest.version>
         <multiline-string.version>0.1.2</multiline-string.version>
-        <json-flattener.version>0.8.1</json-flattener.version>
+        <json-flattener.version>0.14.2</json-flattener.version>
         <assertj-core.version>3.17.2</assertj-core.version>
     </properties>
 
@@ -146,7 +146,7 @@
             <dependency>
                 <groupId>com.github.wnameless.json</groupId>
                 <artifactId>json-flattener</artifactId>
-                <version>0.8.1</version>
+                <version>${json-flattener.version}</version>
             </dependency>
 
             <!-- Test Deps -->
