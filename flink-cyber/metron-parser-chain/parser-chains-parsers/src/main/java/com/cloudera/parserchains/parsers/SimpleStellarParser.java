@@ -4,6 +4,7 @@ import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
+import com.cloudera.parserchains.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.flink.core.fs.FSDataInputStream;
@@ -26,7 +27,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @MessageParser(
-        name = "Metron Stellar parser",
+        name = "Simple Stellar parser",
         description = "Metron compatibility parser.")
 @Slf4j
 public class SimpleStellarParser implements Parser {
@@ -76,7 +77,7 @@ public class SimpleStellarParser implements Parser {
     public Message parse(Message input) {
         Message.Builder builder = Message.builder().withFields(input);
         final Map<String, Object> fieldMap = input.getFields().entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().get(), e -> e.getValue().get()));
+                .collect(Collectors.toMap(e -> e.getKey().get(), e -> StringUtils.parseProperType(e.getValue().get())));
         return doParse(fieldMap, builder);
     }
 
