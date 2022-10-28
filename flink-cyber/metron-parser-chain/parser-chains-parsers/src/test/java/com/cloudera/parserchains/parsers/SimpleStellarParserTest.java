@@ -7,7 +7,6 @@ import com.cloudera.parserchains.core.StringFieldValue;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -44,8 +43,8 @@ class SimpleStellarParserTest {
         String configPath = getFileFromResource(COMPLEX_STELLAR_PATH).getAbsolutePath();
 
         final SimpleStellarParser simpleStellarParser = new SimpleStellarParser().stellarPath(configPath);
-        final LocalDateTime now = LocalDateTime.now(Clock.systemUTC()).minusHours(1);
-        final String ts = String.valueOf(now.atZone(ZoneId.of("UTC")).toInstant().toEpochMilli());
+        final LocalDateTime now = LocalDateTime.now().minusHours(1);
+        final String ts = String.valueOf(now.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
         final String tsSolr = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").format(now);
         final String url = "https://www.subdomain.domain.com";
         final String fullHostname = "www.subdomain.domain.com";
