@@ -25,7 +25,7 @@
         <appender-ref ref="Console"/>
         <appender-ref ref="RFA"/>
     </root>
-    <logger name="org.springframework" level="debug" additivity="false">
+    <logger name="org.springframework" level="info" additivity="false">
         <appender-ref ref="Console"/>
         <appender-ref ref="RFA"/>
     </logger>

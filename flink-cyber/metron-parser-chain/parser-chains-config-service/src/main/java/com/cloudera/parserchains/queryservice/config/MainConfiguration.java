@@ -24,7 +24,7 @@ import com.cloudera.parserchains.core.catalog.ParserCatalog;
 import com.cloudera.parserchains.core.catalog.ParserInfo;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.cloudera.parserchains.queryservice.common.utils.IDGenerator;
-import com.cloudera.parserchains.queryservice.common.utils.UniqueIDGenerator;
+import com.cloudera.parserchains.queryservice.common.utils.UUIDGenerator;
 import com.cloudera.parserchains.queryservice.model.summary.ObjectMapper;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummary;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummaryMapper;
@@ -47,8 +47,8 @@ public class MainConfiguration {
   }
 
   @Bean
-  public IDGenerator<Long> idGenerator(AppProperties appProperties) {
-    return new UniqueIDGenerator(Paths.get(appProperties.getConfigPath()));
+  public IDGenerator<?> idGenerator() {
+    return new UUIDGenerator();
   }
 
   @Bean
