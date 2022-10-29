@@ -38,7 +38,7 @@ import java.util.function.Predicate;
 public class FileBasedChainPersistenceService implements ChainPersistenceService {
 
   @Autowired
-  private IDGenerator<Long> idGenerator;
+  private IDGenerator<?> idGenerator;
 
   /**
    * Only return json files.
@@ -53,7 +53,7 @@ public class FileBasedChainPersistenceService implements ChainPersistenceService
   };
 
   @Autowired
-  public FileBasedChainPersistenceService(IDGenerator<Long> idGenerator) {
+  public FileBasedChainPersistenceService(IDGenerator<?> idGenerator) {
     this.idGenerator = idGenerator;
   }
 
@@ -95,8 +95,7 @@ public class FileBasedChainPersistenceService implements ChainPersistenceService
   @Override
   public ParserChainSchema create(ParserChainSchema chain, Path path) throws IOException {
     validateChain(chain, path);
-
-    String newId = Long.toString(idGenerator.incrementAndGet());
+    String newId = String.valueOf(idGenerator.incrementAndGet());
     chain.setId(newId);
     writeChain(chain, path);
     return chain;
