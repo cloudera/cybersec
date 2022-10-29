@@ -102,6 +102,23 @@ public class TestParserJobChainDirectory extends AbstractParserJobTest {
                 hasEntry(equalTo("timestamp_new"), Matchers.any(String.class)));
     }
 
+    @Test
+    public void testParserFail() throws Exception {
+        final String path = Resources.getResource(CHAIN_DIR_SUCCESS).getPath() + "-not-existing";
+        ParameterTool params = ParameterTool.fromMap(new HashMap<String, String>() {{
+            put(PARAM_CHAIN_CONFIG_DIRECTORY, path);
+            put(PARAM_PRIVATE_KEY, getKeyBase64());
+        }});
+
+        try {
+            createPipeline(params);
+        } catch (RuntimeException e) {
+            final String message = String.format("Provided config directory doesn't exist or empty [%s]!", path);
+            assertThat("Exception message not expected", e.getMessage(), is(message));
+            assertThat("Exception type not expected", e.getClass(), is(RuntimeException.class));
+        }
+    }
+
     @ParameterizedTest
     @MethodSource("mutuallyExclusiveParams")
     public void testParserMutuallyExclusiveConfig(ParameterTool params) throws Exception {
