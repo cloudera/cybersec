@@ -9,6 +9,7 @@ import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.fs.FSDataInputStream;
 import org.apache.flink.core.fs.FileStatus;
@@ -138,7 +139,11 @@ public abstract class ParserJob {
             final Path path = new Path(params.getRequired(directoryConfigKey));
             final FileSystem fileSystem = path.getFileSystem();
 
-            for (FileStatus fileStatus : fileSystem.listStatus(path)) {
+            final FileStatus[] fileStatusList = fileSystem.listStatus(path);
+            if (ArrayUtils.isEmpty(fileStatusList)){
+                throw new RuntimeException(String.format("Provided config directory doesn't exist or empty [%s]!", path));
+            }
+            for (FileStatus fileStatus : fileStatusList) {
                 final Path filePath = fileStatus.getPath();
                 if (filePath.getName().endsWith(".json")) {
                     final ParserChainSchema chainSchema;
