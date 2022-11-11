@@ -1,0 +1,67 @@
+[ {
+  "endpointTemplate" : "${protocol}://${server}/model",
+  "entityTemplate" : "{\"accessKey\":\"${dga_access_key}\",\"request\":{\"domain\":\"${full_hostname}\"}}",
+  "method" : "POST",
+  "tls" : null,
+  "sources" : [ "ANY" ],
+  "authorization" : {
+    "type" : "token",
+    "bearerTokenTemplate" : "${bearer_token}"
+  },
+  "headers" : {
+    "Content-Type" : "application/json"
+  },
+  "properties" : {
+    "server" : "",
+    "protocol" : "",
+    "dga_access_key" : "",
+    "bearer_token" : ""
+  },
+  "capacity" : "4",
+  "prefix" : "dga_model",
+  "successJsonPath" : "$['success']",
+  "resultsJsonPath" : "$['response']"
+},
+  {
+    "endpointTemplate" : "${protocol}://${server}/model",
+    "entityTemplate" : "{\"accessKey\":\"${other_access_key}\",\"request\":{\"domain\":\"${full_hostname}\"}}",
+    "method" : "POST",
+    "tls" : null,
+    "sources" : [ "ANY" ],
+    "authorization" : {
+      "type" : "token",
+      "bearerTokenTemplate" : "${bearer_token}"
+    },
+    "headers" : {
+      "Content-Type" : "application/json"
+    },
+    "properties" : {
+      "server" : "",
+      "protocol" : "",
+      "other_access_key" : "",
+      "bearer_token" : "",
+      "empty_prop" : ""
+    },
+    "capacity" : "4",
+    "prefix" : "other_model",
+    "successJsonPath" : "$['success']",
+    "resultsJsonPath" : "$['response']"
+  },
+  {
+    "endpointTemplate" : "https://externalhost.com/asset?id=${id}",
+    "entityTemplate" : null,
+    "method" : "GET",
+    "tls" : null,
+    "sources" : [ "ANY" ],
+    "authorization" : null,
+    "headers" : { },
+    "properties" : null,
+    "timeoutMillis" : 1000,
+    "capacity" : 3,
+    "cacheSize" : 10000,
+    "successCacheExpirationSeconds" : 1800,
+    "failureCacheExpirationSeconds" : 300,
+    "prefix" : "asset_info",
+    "successJsonPath" : null,
+    "resultsJsonPath" : "$"
+  }]

@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+stage="triage"
+
+usage="$(basename "$0") -- upserts triage or profile scoring rule
+
+where:
+    -h  show help
+    --branch branch of pipeline
+    --pipe pipeline name
+    --profile Name of profile for profile scoring rules - omit for triage
+    --rule Rule .json file
+    "
+
+opts=$(getopt \
+    --longoptions "pipe:,branch:,profile:,rule:,help::" \
+    --options "p:b:n:r:h::" \
+    --name "$(basename "$0")" \
+    -- "$@"
+)
+
+if [ $? -ne 0 ]
+then
+    echo "$usage"
+    exit 1
+fi
+
+eval set --$opts
+while [ : ]; do
+  case "$1" in
+    -p | --pipe) pipeline="$2"
+    shift 2
+    ;;
+    -b | --branch) branch="$2"
+    shift 2
+    ;;
+    -n | --profile) profile="$2"
+    stage="profile/$profile"
+    shift 2
+    ;;
+    -r | --rule) rule_file="$2"
+    shift 2
+    ;;
+    -h | --help) echo "$usage"
+       exit 0
+    ;;
+    --) shift; break;;
+    *) echo "Illegal option"; exit 1;;
+  esac
+done
+
+if [ ! -d "$pipeline" ]; then
+  echo "ERROR: $0 Pipeline $pipeline does not exist" >&2
+  exit 1
+fi
+
+if [ -z "$branch" ]; then
+  echo "ERROR: $0  Specify branch with -b or --branch option. " >&2
+  exit 1
+fi
+
+if [ -z "$profile" ]; then
+  property_file=$pipeline/triage/triage.properties.template
+  generated_dir=generated/$pipeline/triage
+else
+  if [ ! -d "$pipeline/profile/$profile" ]; then
+    echo "ERROR: $0 Profile $profile does not exist" >&2
+    exit 1
+  fi
+  property_file=$pipeline/profile/$profile/profile.properties.template
+  generated_dir=generated/$pipeline/profile/$profile
+fi
+
+rule=$pipeline/$stage/rules/$rule_file
+if [ ! -f "$rule" ]; then
+  echo "ERROR: $0 Rule  $rule does not exist" >&2
+  exit 1
+fi
+
+mkdir -p "$generated_dir"
+upsert_props=$generated_dir/upsert.properties
+cat kafka.properties > "$upsert_props"
+cat "$property_file" | grep query. |  sed -e s/BRANCH/main/g >> "$upsert_props"
+
+cs-run-java 'scoring-commands*.jar' com.cloudera.cyber.scoring.UpsertScoringRule "$upsert_props" "$rule"

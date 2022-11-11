@@ -1,0 +1,9 @@
+{
+  "storageConfigs": {
+    "default": {
+      "format": "HBASE_SIMPLE",
+      "hbaseTableName": "enrichments"
+    }
+  }
+}
+

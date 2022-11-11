@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+if [ "$#" -lt 2 ]; then
+    echo "Usage: $0 jar_prefix class_name {options}" >&2
+    exit 1
+fi
+
+jar_prefix=$1
+class_name=$2
+options=()
+
+i=0;
+for arg in "$@"
+do
+    if [ "$i" -gt 1 ]; then
+        options+=("$arg")
+    fi
+    ((i+=1))
+done
+
+
+# Autodetect JAVA_HOME if not defined
+if [ -e /usr/bin/bigtop-detect-javahome ] ; then
+    . /usr/bin/bigtop-detect-javahome
+fi
+
+if [[ -d "$JAVA_HOME" ]]; then
+    JAVA_RUN="$JAVA_HOME"/bin/java
+else
+    JAVA_RUN=java
+fi
+
+
+jar_path=$(cs-lookup-jar "$jar_prefix")
+flink_dist=$(cs-lookup-jar "flink_dist")
+log4j_config=$(cs-lookup-jar "log4j.properties")
+lib_jars=$(ls -d -1 /opt/cloudera/parcels/CYBERSEC/lib/*.jar | tr '\n' ':' | sed 's/:$/\n/')
+flink_dist=$(find /opt/cloudera/parcels/FLINK/ -name "flink-dist*.jar")
+
+"$JAVA_RUN" -Dlog4j.configuration="$log4j_config" -Dlog4j.configurationFile="$log4j_config" -cp "$jar_path:$lib_jars:$flink_dist" $class_name "${options[@]}"

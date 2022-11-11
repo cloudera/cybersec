@@ -1,0 +1,4 @@
+kafka.bootstrap.servers=${BROKER_HOST_1}:9092,${BROKER_HOST_1}:9092,${BROKER_HOST_1}:9092
+
+schema.registry.url=http://${SCHEMA_REGISTRY_HOST}:7788/api/v1
+

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+script_dir=${BASH_SOURCE[0]}
+while [ -L "$script_dir" ]; do # follow symbolic links 
+  DIR=$( cd -P "$( dirname "$script_dir" )" >/dev/null 2>&1 && pwd )
+  script_dir=$(readlink "$script_dir")
+  [[ $script_dir != /* ]] && script_dir=$DIR/$script_dir # handle relative symbolic links
+done
+script_dir=$( cd -P "$( dirname "$script_dir" )" >/dev/null 2>&1 && pwd )
+echo $(dirname "$script_dir/../etc/conf/templates")/templates
+

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 branch pipeline " >&2
+  exit 1
+fi
+
+branch=$1
+pipeline=$2
+
+if [ ! -d "$pipeline" ]; then
+    echo "pipeline $pipeline does not exist"
+    exit 1
+fi
+
+generated_dir=generated/$pipeline/index
+mkdir -p "$generated_dir"
+generated_index_props=$generated_dir/index.properties
+echo "# GENERATED FILE - EDITS WILL BE OVERWRITTEN - EDIT index.properties.template instead." > "$generated_index_props"
+sed -e s/BRANCH/$branch/g $pipeline/index/index.properties.template >> "$generated_index_props"
+job_name=${branch}.${pipeline}.index
+
+ship_configs=()
+local_hive_conf_dir="hive-conf"
+if [ -d "$local_hive_conf_dir" ]; then
+    ship_configs+=("-y" "$local_hive_conf_dir")
+    echo "hive.confdir=$local_hive_conf_dir" >> "$generated_index_props"
+fi
+
+cs-cancel-job ${job_name}
+
+cs-start-job -j flink-indexing-hive -p /etc/cybersec/conf/triage.properties -p kafka.properties -p "$generated_index_props" "${ship_configs[@]}"

@@ -1,0 +1,22 @@
+[
+  {
+    "source": "message_source",
+    "kind": "LOCAL",
+    "fields": [
+      {
+        "name": "field_name",
+        "enrichmentType": "enrichment_type"
+      }
+    ] 
+  },    
+  {     
+    "source": "message_source",
+    "kind": "HBASE",
+    "fields": [
+      {
+        "name": "field_name",
+        "enrichmentType": "enrichment_type"
+      }
+    ]
+  }
+]

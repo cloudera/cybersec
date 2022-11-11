@@ -1,0 +1,15 @@
+hive.catalog=hive
+hive.schema=cyber
+hive.table=events
+
+#hive.confdir=/etc/hive/conf/
+
+#hive.transaction.messages=500
+
+kafka.group.id=BRANCH.PIPELINE.index
+
+topic.input=BRANCH.PIPELINE.triage.output
+
+parallelism=1
+checkpoint.interval.ms=60000
+flink.job.name=BRANCH.PIPELINE.index
