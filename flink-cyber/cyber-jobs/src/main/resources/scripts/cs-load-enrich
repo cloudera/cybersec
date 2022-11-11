@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+usage="$(basename "$0") -- loads enrichment name value pairs into hbase or flink state
+
+where:
+    -h  show help
+    --pipe pipeline name
+    --enrich enrichment type to load
+    --file Path to enrichment file in local storage or hdfs
+    "
+
+opts=$(getopt \
+    --longoptions "branch:,pipe:,enrich:,file:,help::" \
+    --options "b:p:e:f:h::" \
+    --name "$(basename "$0")" \
+    -- "$@"
+)
+
+if [ $? -ne 0 ]
+then
+    echo "$usage"
+    exit 1
+fi
+
+eval set --$opts
+while [ : ]; do
+  case "$1" in
+    -b | --branch) branch="$2"
+    shift 2
+    ;;
+    -p | --pipe) pipeline="$2"
+    shift 2
+    ;;
+    -e | --enrich) enrichment_type="$2"
+    shift 2
+    ;;
+    -f | --file) enrichment_file="$2"
+    shift 2
+    ;;
+    -h | --help) echo "$usage"
+       exit 0
+    ;;
+    --) shift; break;;
+    *) echo "Illegal option"; exit 1;;
+  esac
+done
+
+if [ ! -d "$pipeline" ]; then
+  echo "ERROR: $0 Pipeline $pipeline does not exist" >&2
+  exit 1
+fi
+
+if [ -z "$branch" ]; then
+  echo "ERROR: $0  Specify branch with -b or --branch option. " >&2
+  exit 1
+fi
+
+enrichment_prop_template="$pipeline/triage/load_$enrichment_type.properties.template"
+if [ ! -f "$enrichment_prop_template" ]; then
+  echo "ERROR: $0 Enrichment type $enrichment_type does not exist" >&2
+  exit 1
+fi
+
+ship_enrichment_file=()
+configure_enrich_file=$enrichment_file
+if [ "$enrichment_file" != hdfs* ]; then
+  if [ -f "$enrichment_file" ]; then
+      ship_enrichment_file+=("-y" "$enrichment_file")
+      configure_enrich_file=$(basename "$enrichment_file")
+  else
+      echo "ERROR: $0 Enrichment file $enrichment_file does not exist" >&2
+      exit 1
+  fi
+else
+  hdfs dfs -test -f "$enrichment_file"
+  if [ "$?" -ne 0 ]; then
+     echo "ERROR: $0 Enrichment file $enrichment_file does not exist" >&2
+    exit 1
+  fi
+fi
+
+generated_load_dir="generated/$pipeline/triage"
+mkdir -p "$generated_load_dir"
+generated_load_props="$generated_load_dir/load_$enrichment_type.properties"
+echo "# GENERATED FILE - EDITS WILL BE OVERWRITTEN - EDIT load_$enrichment_type.properties.template instead." > $generated_load_props
+echo "enrichment.source.file=$configure_enrich_file" >> $generated_load_props
+sed -e s/BRANCH/$branch/g $enrichment_prop_template >> $generated_load_props
+
+generated_enrichment_storage_file="enrichments-storage.json"
+enrichment_storage_template="${generated_enrichment_storage_file}.template"
+generated_enrichment_storage="$generated_load_dir/$generated_enrichment_storage_file"
+sed -e s/BRANCH/$branch/g "$pipeline/triage/$enrichment_storage_template" > $generated_enrichment_storage
+
+source cs-override-hbase
+override_hbase
+
+cs-start-job -j flink-enrichment-loading "${ship_enrichment_file[@]}" "${ship_configs[@]}" -p kafka.properties -p /etc/cybersec/conf/load-enrichment.properties -p "$generated_load_props"

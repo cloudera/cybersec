@@ -1,0 +1,15 @@
+chain.dir=PIPELINE/parse/chains
+chain.topic.map.file=PIPELINE/parse/PARSER_NAME/chain-topic-map.json
+#chain.enrichments.file=generated/PIPELINE/parse/PARSER_NAME/enrichments-storage.json
+
+kafka.group.id=BRANCH.PIPELINE.parse.PARSER_NAME
+
+topic.output=BRANCH.PIPELINE.triage.input
+topic.error=BRANCH.PIPELINE.parser.error
+
+parallelism=1
+flink.job.name=BRANCH.PIPELINE.parse.PARSER_NAME
+
+signature.enabled=false
+original.enabled=false
+

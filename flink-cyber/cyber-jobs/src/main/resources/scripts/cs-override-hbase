@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+ship_configs=()
+ship_config() {
+  if [ -f "$1" ]; then
+    echo "INFO: HBase Configuration: adding file $1"
+    ship_configs+=("-y" "$1")
+  fi
+}
+
+override_hbase() {
+    ship_config "core-site.xml"
+    ship_config "hdfs-site.xml"
+    ship_config "hbase-site.xml"
+
+    if [ "${#ship_configs[@]}" -eq 0 ]; then
+        if [ -f "hbase-conf/hbase-site.xml" ]; then
+            hbase_conf_dir="$(pwd)/hbase-conf"
+            echo "INFO: HBase Configuration: using directory $hbase_conf_dir"
+            export "HBASE_CONF_DIR=$hbase_conf_dir"
+        else
+            echo "INFO: HBase Configuration: using default"
+        fi
+    fi
+}

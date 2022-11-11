@@ -52,6 +52,46 @@
         </fileSet>
 
         <fileSet>
+            <directory>${basedir}/target/cyber-jobs-${project.parent.version}/conf/templates</directory>
+            <outputDirectory>/etc/conf/templates</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/target/cyber-jobs-${project.parent.version}/conf/templates/index</directory>
+            <outputDirectory>/etc/conf/templates/index</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/target/cyber-jobs-${project.parent.version}/conf/templates/parse</directory>
+            <outputDirectory>/etc/conf/templates/parse</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/target/cyber-jobs-${project.parent.version}/conf/templates/profile</directory>
+            <outputDirectory>/etc/conf/templates/profile</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/target/cyber-jobs-${project.parent.version}/conf/templates/triage</directory>
+            <outputDirectory>/etc/conf/templates/triage</outputDirectory>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
             <directory>${basedir}/target/cyber-jobs-${project.parent.version}/bin</directory>
             <outputDirectory>/bin</outputDirectory>
             <includes>
