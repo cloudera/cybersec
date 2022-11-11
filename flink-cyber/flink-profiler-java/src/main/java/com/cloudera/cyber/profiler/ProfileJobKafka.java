@@ -13,6 +13,8 @@
 package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.ValidateUtils;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageConfig;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat;
 import com.cloudera.cyber.flink.ConfigConstants;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
@@ -57,6 +59,7 @@ public class ProfileJobKafka extends ProfileJob {
     private static final String PROFILE_GROUP_ID = "profile";
     private static final String PARAMS_FIRST_SEEN_HBASE_TABLE = "profile.first.seen.table";
     private static final String PARAMS_FIRST_SEEN_HBASE_COLUMN_FAMILY = "profile.first.seen.column.family";
+    private static final String PARAMS_FIRST_SEEN_HBASE_FORMAT = "profile.first.seen.format";
     private static final String PARAMS_PHOENIX_DB_BATCH_SIZE = "phoenix.db.batchSize";
 
     private static final String PARAMS_PHOENIX_DB_INTERVAL_MILLIS = "phoenix.db.interval_millis";
@@ -123,12 +126,15 @@ public class ProfileJobKafka extends ProfileJob {
                                                          ProfileGroupConfig profileGroupConfig) {
         String tableName = params.getRequired(PARAMS_FIRST_SEEN_HBASE_TABLE);
         String columnFamilyName = params.getRequired(PARAMS_FIRST_SEEN_HBASE_COLUMN_FAMILY);
+        String storageFormatString = params.get(PARAMS_FIRST_SEEN_HBASE_FORMAT, EnrichmentStorageFormat.HBASE_METRON.name());
+        EnrichmentStorageFormat storageFormat = EnrichmentStorageFormat.valueOf(storageFormatString);
+        EnrichmentStorageConfig enrichmentStorageConfig = new EnrichmentStorageConfig(storageFormat, tableName, columnFamilyName);
         // look up the previous first seen timestamp and update the profile message
         DataStream<ProfileMessage> updatedProfileMessages = results
-                .map(new FirstSeenHbaseLookup(tableName, columnFamilyName, profileGroupConfig));
+                .map(new FirstSeenHbaseLookup(enrichmentStorageConfig, profileGroupConfig));
 
         // write the new first and last seen timestamps in hbase
-        HBaseSinkFunction<ProfileMessage> hbaseSink = new FirstSeenHbaseSink(tableName, columnFamilyName, profileGroupConfig,
+        HBaseSinkFunction<ProfileMessage> hbaseSink = new FirstSeenHbaseSink(enrichmentStorageConfig, profileGroupConfig,
                 params);
         updatedProfileMessages.addSink(hbaseSink).name("HBase First Seen Profile Sink");
         return updatedProfileMessages;

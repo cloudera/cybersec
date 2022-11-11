@@ -19,6 +19,7 @@ import com.cloudera.cyber.enrichemnt.stellar.StellarEnrichmentJob;
 import com.cloudera.cyber.enrichment.geocode.IpGeo;
 import com.cloudera.cyber.enrichment.hbase.HbaseJob;
 import com.cloudera.cyber.enrichment.hbase.HbaseJobRawKafka;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.enrichment.lookup.LookupJob;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
@@ -49,6 +50,7 @@ import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_ASN_DATABASE_
 import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_ASN_FIELDS;
 import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_GEO_DATABASE_PATH;
 import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_GEO_FIELDS;
+import static com.cloudera.cyber.enrichment.hbase.HbaseJob.PARAMS_ENRICHMENT_CONFIG;
 
 @Slf4j
 public abstract class EnrichmentJob {
@@ -88,9 +90,17 @@ public abstract class EnrichmentJob {
 
         DataStream<EnrichmentCommandResponse> enrichmentCommandResponses = enriched.f1;
 
+        boolean hbaseEnabled = params.getBoolean(PARAMS_ENABLE_HBASE, true);
+        boolean threatqEnabled = params.getBoolean(PARAMS_ENABLE_THREATQ, true);
+
+        EnrichmentsConfig enrichmentsStorageConfig = null;
+        if (hbaseEnabled || threatqEnabled) {
+            enrichmentsStorageConfig = EnrichmentsConfig.load(params.getRequired(PARAMS_ENRICHMENT_CONFIG));
+        }
+
         // write the hbase enrichments to hbase
-        if (params.getBoolean(PARAMS_ENABLE_HBASE, true)) {
-            DataStream<EnrichmentCommandResponse> hbaseEnrichmentResponses = new HbaseJobRawKafka().writeEnrichments(env, params, hbaseEnrichments);
+        if (hbaseEnabled) {
+            DataStream<EnrichmentCommandResponse> hbaseEnrichmentResponses = new HbaseJobRawKafka().writeEnrichments(env, params, hbaseEnrichments, enrichmentsStorageConfig);
             if (enrichmentCommandResponses != null) {
                 enrichmentCommandResponses = enriched.f1.union(hbaseEnrichmentResponses);
             } else {
@@ -100,8 +110,8 @@ public abstract class EnrichmentJob {
 
         writeEnrichmentQueryResults(env, params, enrichmentCommandResponses);
 
-        DataStream<Message> hbased = params.getBoolean(PARAMS_ENABLE_HBASE, true) ?
-                HbaseJob.enrich(enriched.f0, enrichmentConfigs) : enriched.f0;
+        DataStream<Message> hbased = hbaseEnabled ?
+                HbaseJob.enrich(enriched.f0, enrichmentConfigs, enrichmentsStorageConfig) : enriched.f0;
 
         // rest based enrichments
         DataStream<Message> rested = params.getBoolean(PARAMS_ENABLE_REST, true) ?
@@ -109,11 +119,11 @@ public abstract class EnrichmentJob {
 
         // Run threatQ integrations
         DataStream<Message> tqed;
-        if (params.getBoolean(PARAMS_ENABLE_THREATQ, true)) {
+        if (threatqEnabled) {
             List<ThreatQConfig> threatQconfigs = ThreatQJob.parseConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_THREATQ_CONFIG_FILE))));
             log.info("ThreatQ Configs {}", threatQconfigs);
-            tqed = ThreatQJob.enrich(rested, threatQconfigs);
-            ThreatQJob.ingest(createThreatQSource(env, params), threatQconfigs);
+            tqed = ThreatQJob.enrich(rested, threatQconfigs, enrichmentsStorageConfig);
+            ThreatQJob.ingest(createThreatQSource(env, params));
         } else {
             tqed = rested;
         }

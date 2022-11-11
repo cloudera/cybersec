@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -51,18 +52,15 @@ public abstract class AbstractHbaseMapFunction<IN, OUT> extends RichMapFunction<
     protected transient Counter realResultCounter;
     private transient Connection connection;
 
-    protected abstract String getTableName();
+    private Cache<LookupKey, Map<String, Object>> cache;
 
-    private Cache<LookupKey, Map<String, String>> cache;
-
-    protected Map<String, String> fetch(LookupKey key) {
+    protected Map<String, Object> fetch(LookupKey key) {
         try {
             fetchCounter.inc();
 
-            Get get = new Get(key.getKey());
-            get.addFamily(key.getCf());
+            Get get = key.toGet();
 
-            Table table = connection.getTable(TableName.valueOf(getTableName()));
+            Table table = connection.getTable(TableName.valueOf(key.getTableName()));
             Result result = table.get(get);
             if (result.isEmpty()) {
                 emptyResultCounter.inc();
@@ -70,12 +68,7 @@ public abstract class AbstractHbaseMapFunction<IN, OUT> extends RichMapFunction<
             }
             realResultCounter.inc();
 
-            Map<String, String> hbaseMap = new HashMap<>();
-            result.getFamilyMap(key.getCf()).forEach((k,v) ->{{
-                String keyString = Bytes.toString(k);
-                hbaseMap.put( Bytes.toString(k), columnConversionFunction.getOrDefault(keyString, AbstractHbaseMapFunction::stringBytesToString).apply(v));
-            }});
-            return hbaseMap;
+            return key.resultToMap(result);
         } catch (IOException e) {
             log.error("Error with HBase fetch", e);
             throw new RuntimeException(e);
@@ -124,11 +117,15 @@ public abstract class AbstractHbaseMapFunction<IN, OUT> extends RichMapFunction<
         return Collections.emptyMap();
     }
 
+    private static String objectToString(Object objectValue) {
+        return objectValue != null ? objectValue.toString() : "";
+    }
+
     public final Map<String, String> hbaseLookup(long ts, LookupKey key, String prefix) {
-        return cache.get(key, this::fetch).entrySet().stream()
+        return Objects.requireNonNull(cache.get(key, this::fetch)).entrySet().stream()
                 .collect(toMap(
                         k -> prefix + "." + k.getKey(),
-                        Map.Entry::getValue)
+                        v -> objectToString(v.getValue()))
                 );
     }
 

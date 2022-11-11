@@ -13,13 +13,15 @@
 package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.MessageUtils;
+import com.cloudera.cyber.enrichment.hbase.SimpleLookupKey;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageConfig;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat;
 import com.cloudera.cyber.hbase.LookupKey;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.flink.metrics.SimpleCounter;
-import org.apache.hadoop.hbase.util.Bytes;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -48,7 +50,7 @@ public class FirstSeenHbaseLookupTest extends FirstSeenHbaseLookup {
     private static final String KEY_1_BAD_LAST_SEEN = "bad_last_key_1";
     private static final String KEY_2_BAD_LAST_SEEN = "bad_last_key_2";
 
-    private static final Map<String, Map<String, String>> mockHbaseResults = new HashMap<String, Map<String, String>>() {{
+    private static final Map<String, Map<String, Object>> mockHbaseResults = new HashMap<String, Map<String, Object>>() {{
         put(Joiner.on(":").join(PROFILE_GROUP_NAME, KEY_1_PREVIOUS_OBS, KEY_2_PREVIOUS_OBS), ImmutableMap.of(FIRST_SEEN_PROPERTY_NAME, Long.toString(EXPECTED_PREVIOUS_OBSERVATION),
                                                                                  LAST_SEEN_PROPERTY_NAME, Long.toString(CURRENT_TIMESTAMP - 50)));
         put(Joiner.on(":").join(PROFILE_GROUP_NAME, KEY_1_EXPIRED_OBS, KEY_2_EXPIRED_OBS), ImmutableMap.of(FIRST_SEEN_PROPERTY_NAME, Long.toString(CURRENT_TIMESTAMP - 1050),
@@ -61,7 +63,7 @@ public class FirstSeenHbaseLookupTest extends FirstSeenHbaseLookup {
     private static final String EXPECTED_HBASE_TABLE_NAME = "enrichments";
 
     public FirstSeenHbaseLookupTest() {
-        super(EXPECTED_HBASE_TABLE_NAME, EXPECTED_COLUMN_FAMILY, createProfileGroupConfig());
+        super(new EnrichmentStorageConfig(EnrichmentStorageFormat.HBASE_SIMPLE, EXPECTED_HBASE_TABLE_NAME, EXPECTED_COLUMN_FAMILY), createProfileGroupConfig());
         messageCounter = new SimpleCounter();
     }
 
@@ -119,10 +121,10 @@ public class FirstSeenHbaseLookupTest extends FirstSeenHbaseLookup {
                 periodDurationUnit("SECONDS").sources(Lists.newArrayList("ANY")).measurements(measurements).build();
     }
 
-    protected Map<String, String> fetch(LookupKey key) {
-        Assert.assertEquals(EXPECTED_HBASE_TABLE_NAME, getTableName());
-        Assert.assertArrayEquals(Bytes.toBytes(EXPECTED_COLUMN_FAMILY), key.getCf());
-        String keyString = Bytes.toString(key.getKey());
-        return mockHbaseResults.getOrDefault(keyString, Collections.emptyMap());
+    protected Map<String, Object> fetch(LookupKey key) {
+        Assert.assertTrue(key instanceof SimpleLookupKey);
+        Assert.assertEquals(EXPECTED_HBASE_TABLE_NAME, key.getTableName());
+        Assert.assertEquals(EXPECTED_COLUMN_FAMILY, key.getCf());
+        return mockHbaseResults.getOrDefault(key.getKey(), Collections.emptyMap());
     }
 }

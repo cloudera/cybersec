@@ -36,7 +36,6 @@ import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_OUTPUT;
 public class HbaseJobRawKafka extends HbaseJob {
     private static final String PARAMS_TOPIC_ENRICHMENT_INPUT = "enrichment.topic.input";
     public static final String PARAMS_QUERY_OUTPUT = "enrichment.topic.query.output";
-    private static final String PARAMS_ENRICHMENT_CONFIG = "enrichments.config";
     private static final String DEFAULT_GROUP_ID = "enrichment-lookups-hbase";
 
     public static DataStream<EnrichmentCommandResponse> enrichmentCommandsToHbase(ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource, EnrichmentsConfig enrichmentsConfig, List<String> tables) {
@@ -83,8 +82,8 @@ public class HbaseJobRawKafka extends HbaseJob {
     }
 
     @Override
-    public DataStream<EnrichmentCommandResponse> writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource) {
-        EnrichmentsConfig enrichmentsConfig = EnrichmentsConfig.load(params.getRequired(PARAMS_ENRICHMENT_CONFIG));
+    public DataStream<EnrichmentCommandResponse> writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource,
+                                                                  EnrichmentsConfig enrichmentsConfig) {
 
         List<String> tables = enrichmentsConfig.getReferencedTables();
         return enrichmentCommandsToHbase(params, enrichmentSource, enrichmentsConfig, tables);
