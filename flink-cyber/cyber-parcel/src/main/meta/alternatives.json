@@ -40,5 +40,143 @@
     "source": "bin/start-parser-ui",
     "priority": 10,
     "isDirectory": false
+  },
+  "cs-add-enrich": {
+    "destination": "/usr/bin/cs-add-enrich",
+    "source": "bin/cs-add-enrich",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-add-index": {
+    "destination": "/usr/bin/cs-add-index",
+    "source": "bin/cs-add-index",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-add-parser": {
+    "destination": "/usr/bin/cs-add-parser",
+    "source": "bin/cs-add-parser",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-add-profile": {
+    "destination": "/usr/bin/cs-add-profile",
+    "source": "bin/cs-add-profile",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-add-triage": {
+    "destination": "/usr/bin/cs-add-triage",
+    "source": "bin/cs-add-triage",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-cancel-job": {
+    "destination": "/usr/bin/cs-cancel-job",
+    "source": "bin/cs-cancel-job",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-create-pipeline": {
+    "destination": "/usr/bin/cs-create-pipeline",
+    "source": "bin/cs-create-pipeline",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-get-template-dir": {
+    "destination": "/usr/bin/cs-get-template-dir",
+    "source": "bin/cs-get-template-dir",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-init-keystore": {
+    "destination": "/usr/bin/cs-init-keystore",
+    "source": "bin/cs-init-keystore",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-load-enrich": {
+    "destination": "/usr/bin/cs-load-enrich",
+    "source": "bin/cs-load-enrich",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-lookup-jar": {
+    "destination": "/usr/bin/cs-lookup-jar",
+    "source": "bin/cs-lookup-jar",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-print-topic": {
+    "destination": "/usr/bin/cs-print-topic",
+    "source": "bin/cs-print-topic",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-publish-samples": {
+    "destination": "/usr/bin/cs-publish-samples",
+    "source": "bin/cs-publish-samples",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-restart-index": {
+    "destination": "/usr/bin/cs-restart-index",
+    "source": "bin/cs-restart-index",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-restart-parser": {
+    "destination": "/usr/bin/cs-restart-parser",
+    "source": "bin/cs-restart-parser",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-restart-profile": {
+    "destination": "/usr/bin/cs-restart-profile",
+    "source": "bin/cs-restart-profile",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-restart-triage": {
+    "destination": "/usr/bin/cs-restart-triage",
+    "source": "bin/cs-restart-triage",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-run-java": {
+    "destination": "/usr/bin/cs-run-java",
+    "source": "bin/cs-run-java",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-override-hbase": {
+    "destination": "/usr/bin/cs-override-hbase",
+    "source": "bin/cs-override-hbase",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-start-job": {
+    "destination": "/usr/bin/cs-start-job",
+    "source": "bin/cs-start-job",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-stop-job": {
+    "destination": "/usr/bin/cs-stop-job",
+    "source": "bin/cs-stop-job",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-truststore-location": {
+    "destination": "/usr/bin/cs-truststore-location",
+    "source": "bin/cs-truststore-location",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-upsert-rule": {
+    "destination": "/usr/bin/cs-upsert-rule",
+    "source": "bin/cs-upsert-rule",
+    "priority": 10,
+    "isDirectory": false
   }
 }

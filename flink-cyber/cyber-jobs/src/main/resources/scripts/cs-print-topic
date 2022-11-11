@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 topic " >&2
+  exit 1
+fi
+
+topic=$1
+cs-run-java kafka-commands com.cloudera.cyber.kafka.TopicAvroToJson kafka.properties $topic

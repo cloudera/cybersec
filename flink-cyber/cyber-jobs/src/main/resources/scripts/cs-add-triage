@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 pipeline_name " >&2
+  exit 1
+fi
+
+pipeline=$1
+
+triage_dir=$pipeline/triage
+template_dir=$(cs-get-template-dir)
+
+mkdir -p $triage_dir/stellar
+mkdir -p $triage_dir/samples
+mkdir -p $triage_dir/rules
+for FILE in $template_dir/triage/*; do 
+    sed -e s/PIPELINE/$pipeline/g $FILE > $pipeline/triage/${FILE##*/}
+done

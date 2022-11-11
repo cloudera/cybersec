@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 jar_prefix" >&2
+    exit 1
+fi
+jar_prefix=$1
+
+## Build the jar path
+#  current directory
+jar_paths=(".")
+# CYBERSEC_HOME/jobs if defined
+if [[ ! -z "${CYBERSEC_HOME}" ]]; then
+    jar_paths+=("${CYBERSEC_HOME}/jobs")
+    jar_paths+=("${CYBERSEC_HOME}/tools")
+fi
+# parcel directory
+jar_paths+=("/opt/cloudera/parcels/CYBERSEC/jobs")
+jar_paths+=("/opt/cloudera/parcels/CYBERSEC/tools")
+jar_paths+=("/opt/cloudera/parcels/FLINK/lib/flink/lib/")
+
+for jar_path in "${jar_paths[@]}";
+do
+   if [[ -d "$jar_path" ]]; then
+       found_jar=$(find "$jar_path" -maxdepth 1 -name ${jar_prefix}*)
+       if [ ! -z "$found_jar" ]; then
+           echo "$found_jar"
+           break
+       fi
+   fi
+done

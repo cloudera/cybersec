@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+
+stage="parse"
+date_format='%s'
+
+usage="$(basename "$0") -- publishes sample parser or threatq data to specified topic
+
+where:
+    -h  show help
+    --pipe pipeline name
+    --topic topic to publish sample to 
+    --stage parse(default) or triage 
+    --file Name of sample file 
+    --date Unix date format(default: +\"%s\")
+    "
+
+opts=$(getopt \
+    --longoptions "pipe:,topic:,stage:,file:,date:,help::" \
+    --options "p:t:s:f:d:h::" \
+    --name "$(basename "$0")" \
+    -- "$@"
+)
+
+if [ $? -ne 0 ]
+then
+    echo "$usage"
+    exit 1
+fi
+
+eval set --$opts
+while [ : ]; do
+  case "$1" in
+    -p | --pipe) pipeline="$2"
+    shift 2
+    ;;
+    -t | --topic) topic="$2"
+    shift 2
+    ;;
+    -s | --stage) stage="$2"
+    shift 2
+    ;;
+    -f | --file) sample_file="$2"
+    shift 2
+    ;;
+    -d | --date) date_format="$2"
+    shift 2
+    ;;
+    -h | --help) echo "$usage"
+       exit 0
+    ;;
+    --) shift; break;;
+    *) echo "Illegal option"; exit 1;; 
+  esac
+done
+
+
+
+today=`date +$date_format`
+
+if [ -z "$pipeline" ]; then
+   echo "The --pipe option is not set"
+   exit 1
+fi
+
+if [ -z "$topic" ]; then
+   echo "The --topic option is not set"
+   exit 1
+fi
+
+if [[ ("$stage" != "parse")  &&  ("$stage" != "triage") ]]; then
+   echo "The --stage should be one of parse or triage" 
+   exit 1
+fi
+
+if [ -z "$sample_file" ]; then
+   echo "The --file option is not set"
+   exit 1
+fi
+
+if [ -z "$date_format" ]; then
+   echo "The --date option is empty."
+   exit 1
+fi
+
+samples_path=$pipeline/$stage/samples/$sample_file
+if [ ! -f "$samples_path" ]; then
+    echo "sample file $samples_path does not exist"
+    exit 1
+fi
+
+mkdir -p generated
+kafka_console_properties=generated/kafka_console.properties
+echo "# GENERATED - DO NOT EDIT - modify kafka.properties instead" > $kafka_console_properties
+cat kafka.properties | sed -e s/kafka.//g >> $kafka_console_properties
+
+broker_list=$(cat kafka.properties | grep kafka.bootstrap.servers | awk -F= '{print $2}')
+
+echo "TODAY IS " $today
+cat $samples_path | sed -e s/TODAY/${today}/g | kafka-console-producer --topic $topic --broker-list $broker_list --producer.config $kafka_console_properties
+

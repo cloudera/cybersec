@@ -1,0 +1,12 @@
+enrichment.type=ENRICHMENT_TYPE
+enrichment.config.file=generated/PIPELINE/triage/enrichments-storage.json
+
+enrichment.source.skipfirstline=true
+enrichment.source.columns=column_1,column_2
+
+parallelism=1
+
+# uncomment for local enrichment
+# enrichment.topic.input=BRANCH.PIPELINE.enrichments.input
+
+flink.job.name=BRANCH.PIPELINE.load.ENRICHMENT_TYPE

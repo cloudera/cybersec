@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 pipeline_name" >&2
+  exit 1
+fi
+
+pipeline=$1
+cs-add-parser $pipeline main
+cs-add-triage $pipeline
+cs-add-index $pipeline
+cs-add-profile $pipeline main

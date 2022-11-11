@@ -15,6 +15,7 @@
     <modules>
         <module>scoring-commands</module>
         <module>kafka-commands</module>
+        <module>json-commands</module>
     </modules>
 
 </project>

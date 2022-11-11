@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 pipeline_name enrichment_type" >&2
+  exit 1
+fi
+
+pipeline=$1
+enrichment_type=$2
+
+template_dir=$(cs-get-template-dir)
+triage_dir=$pipeline/triage
+
+if [ ! -d "$triage_dir" ]; then
+  echo "ERROR: $0 Pipeline $pipeline does not exist" >&2
+  exit 1
+fi
+
+sed -e s/ENRICHMENT_TYPE/$enrichment_type/g -e s/PIPELINE/$pipeline/g $template_dir/triage/load.properties.template > $pipeline/triage/load_${enrichment_type}.properties.template
