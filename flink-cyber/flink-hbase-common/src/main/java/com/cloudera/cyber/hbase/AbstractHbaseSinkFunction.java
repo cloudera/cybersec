@@ -21,6 +21,7 @@ public class AbstractHbaseSinkFunction<T> extends HBaseSinkFunction<T> {
     }
 
     public void open(org.apache.flink.configuration.Configuration parameters) throws Exception {
+        log.info("HBase Zookeeper quorum: {}", getHBaseConfig().get("hbase.zookeeper.quorum"));
         super.open(parameters);
         this.hbaseWriteCounter = getRuntimeContext().getMetricGroup().counter(counterName);
     }
