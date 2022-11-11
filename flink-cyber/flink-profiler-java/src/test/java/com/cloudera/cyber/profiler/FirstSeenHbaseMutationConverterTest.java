@@ -1,6 +1,7 @@
 package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.MessageUtils;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageConfig;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils;
 import com.google.common.base.Joiner;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 
+import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_SIMPLE;
 import static java.util.concurrent.TimeUnit.MINUTES;
 
 public class FirstSeenHbaseMutationConverterTest {
@@ -40,7 +42,9 @@ public class FirstSeenHbaseMutationConverterTest {
                 sources(Lists.newArrayList("ANY")).profileGroupName(FIRST_SEEN_PROFILE_GROUP).
                 measurements(measurements).
                 build();
-         FirstSeenHbaseMutationConverter converter = new FirstSeenHbaseMutationConverter("table", FIRST_SEEN_COLUMN_FAMILY, profileGroupConfig);
+
+        EnrichmentStorageConfig enrichmentStorageConfig = new EnrichmentStorageConfig(HBASE_SIMPLE, "table", FIRST_SEEN_COLUMN_FAMILY);
+         FirstSeenHbaseMutationConverter converter = new FirstSeenHbaseMutationConverter(enrichmentStorageConfig, profileGroupConfig);
          converter.open();
          String startPeriod = "1618338583000";
          String endPeriod = "1618338590010";
@@ -53,29 +57,27 @@ public class FirstSeenHbaseMutationConverterTest {
          String expectedRowKey = Joiner.on(":").join(FIRST_SEEN_PROFILE_GROUP, KEY_FIELD_1_VALUE, KEY_FIELD_2_VALUE);
          NavigableMap<byte[], List<Cell>> familyCellMap = mutation.getFamilyCellMap();
          Assert.assertEquals(2, familyCellMap.size());
-         familyCellMap.forEach((k,v) -> {{
-             v.forEach(c -> {{
-                 Assert.assertEquals(Cell.Type.Put, c.getType());
-                 String value = Bytes.toString(c.getValueArray(), c.getValueOffset(), c.getValueLength());
-                 String columnFamily = Bytes.toString(c.getFamilyArray(), c.getFamilyOffset(), c.getFamilyLength());
-                 String qualifier = Bytes.toString(c.getQualifierArray(), c.getQualifierOffset(), c.getQualifierLength());
-                 String rowKey = Bytes.toString(c.getRowArray(), c.getRowOffset(), c.getRowLength());
+         familyCellMap.forEach((k,v) -> v.forEach(c -> {{
+             Assert.assertEquals(Cell.Type.Put, c.getType());
+             String value = Bytes.toString(c.getValueArray(), c.getValueOffset(), c.getValueLength());
+             String columnFamily = Bytes.toString(c.getFamilyArray(), c.getFamilyOffset(), c.getFamilyLength());
+             String qualifier = Bytes.toString(c.getQualifierArray(), c.getQualifierOffset(), c.getQualifierLength());
+             String rowKey = Bytes.toString(c.getRowArray(), c.getRowOffset(), c.getRowLength());
 
-                 Assert.assertEquals(expectedRowKey, rowKey);
-                 if (columnFamily.equals("id")) {
-                     Assert.assertEquals("key", qualifier);
-                     Assert.assertEquals(expectedRowKey, value);
+             Assert.assertEquals(expectedRowKey, rowKey);
+             if (columnFamily.equals("id")) {
+                 Assert.assertEquals("key", qualifier);
+                 Assert.assertEquals(expectedRowKey, value);
+             } else {
+                 Assert.assertEquals(FIRST_SEEN_COLUMN_FAMILY, columnFamily);
+                 if (qualifier.equals("firstSeen")) {
+                     Assert.assertEquals(startPeriod, value);
+                 } else if (qualifier.equals("lastSeen")) {
+                     Assert.assertEquals(endPeriod, value);
                  } else {
-                     Assert.assertEquals(FIRST_SEEN_COLUMN_FAMILY, columnFamily);
-                     if (qualifier.equals("firstSeen")) {
-                         Assert.assertEquals(startPeriod, value);
-                     } else if (qualifier.equals("lastSeen")) {
-                         Assert.assertEquals(endPeriod, value);
-                     } else {
-                         Assert.fail(String.format("Unknown qualifier %s", qualifier));
-                     }
+                     Assert.fail(String.format("Unknown qualifier %s", qualifier));
                  }
-             }});
-         }});
+             }
+         }}));
     }
 }

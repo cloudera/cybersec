@@ -1,5 +1,6 @@
 package com.cloudera.cyber.profiler;
 
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageConfig;
 import com.cloudera.cyber.hbase.AbstractHbaseMapFunction;
 import com.cloudera.cyber.hbase.LookupKey;
 import lombok.Data;
@@ -21,30 +22,27 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction<ProfileMessag
     public static final String FIRST_SEEN_TIME_SUFFIX = ".time";
     private FirstSeenHBase firstSeenHBaseInfo;
     private Duration firstSeenExpireDuration;
+    private EnrichmentStorageConfig enrichmentStorageConfig;
 
-    public FirstSeenHbaseLookup(String tableName, String columnFamilyName, ProfileGroupConfig profileGroupConfig) throws IllegalStateException {
-        this.firstSeenHBaseInfo = new FirstSeenHBase(tableName, columnFamilyName, profileGroupConfig);
+    public FirstSeenHbaseLookup(EnrichmentStorageConfig enrichmentStorageConfig, ProfileGroupConfig profileGroupConfig) throws IllegalStateException {
+        this.firstSeenHBaseInfo = new FirstSeenHBase(enrichmentStorageConfig, profileGroupConfig);
         ProfileMeasurementConfig measurementConfig = profileGroupConfig.getMeasurements().stream().filter(m -> m.getAggregationMethod().equals(ProfileAggregationMethod.FIRST_SEEN)).
                 findFirst().orElseThrow(() -> new NullPointerException("Expected at least one first seen measurement but none was found."));
 
         this.firstSeenExpireDuration = Duration.of(measurementConfig.getFirstSeenExpirationDuration(), ChronoUnit.valueOf(profileGroupConfig.getPeriodDurationUnit()));
-    }
-
-    @Override
-    protected String getTableName() {
-        return firstSeenHBaseInfo.getTableName();
+        this.enrichmentStorageConfig = enrichmentStorageConfig;
     }
 
     @Override
     public ProfileMessage map(ProfileMessage message) {
         messageCounter.inc(1);
         LookupKey lookupKey = firstSeenHBaseInfo.getKey(message);
-        Map<String, String> previousFirstLastSeen = fetch(lookupKey);
+        Map<String, Object> previousFirstLastSeen = fetch(lookupKey);
         boolean first = previousFirstLastSeen.isEmpty();
         Map<String, String> firstSeenExtensions = new HashMap<>();
         if (!first) {
-            String previousFirstTimestamp = mergeFirstLastSeen(previousFirstLastSeen.get(FIRST_SEEN_PROPERTY_NAME),
-                    previousFirstLastSeen.get(LAST_SEEN_PROPERTY_NAME), firstSeenHBaseInfo.getFirstSeen(message));
+            String previousFirstTimestamp = mergeFirstLastSeen((String)previousFirstLastSeen.get(FIRST_SEEN_PROPERTY_NAME),
+                    (String)previousFirstLastSeen.get(LAST_SEEN_PROPERTY_NAME), firstSeenHBaseInfo.getFirstSeen(message));
             if (previousFirstTimestamp != null) {
                 // there was a previous observation - send the first timestamp
                 firstSeenExtensions.put(firstSeenHBaseInfo.getFirstSeenResultName().concat(FIRST_SEEN_TIME_SUFFIX), previousFirstTimestamp);
