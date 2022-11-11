@@ -56,7 +56,6 @@
         <commons-lang3.version>3.9</commons-lang3.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <springdoc-openapi.version>1.6.11</springdoc-openapi.version>
-        <jackson.version>2.13.4</jackson.version>
         <json.version>20220320</json.version>
 
         <!-- test dependency versions -->
