@@ -39,8 +39,8 @@ public class TopicAvroToJson {
         Config config = new Config();
         try {
             config.load(applicationPropertiesFile);
-            boolean prettyOutput = config.getBoolean("output.pretty", true);
-            int maxRetries = config.getInteger("max.retries", 5);
+            boolean prettyOutput = config.getBoolean("print.output.pretty", true);
+            int maxRetries = config.getInteger("print.max.retries", 5);
 
             consume( config.getKafkaConsumerProperties(), topicToDump, prettyOutput, maxRetries);
         } catch (IOException e) {

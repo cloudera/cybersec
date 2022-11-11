@@ -23,8 +23,10 @@ public class Config {
     public static final String K_TRUSTSTORE_PATH = "trustStorePath";
     public static final String K_TRUSTSTORE_PASSWORD = "trustStorePassword";
     public static final String K_KEYSTORE_PASSWORD = "keyStorePassword";
+    public static final String PRINT_PROPERTY_PREFIX = "print.";
 
     private static final String KAFKA_PREFIX = "kafka.";
+    public static final String PRINT_KAFKA_PROPERTY_PREFIX = PRINT_PROPERTY_PREFIX.concat(KAFKA_PREFIX);
 
     private final Properties properties = new Properties();
 
@@ -39,11 +41,16 @@ public class Config {
         kafkaConsumerProperties.putAll(readSchemaRegistryProperties(properties));
         kafkaConsumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         kafkaConsumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
-        kafkaConsumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "flink_cyber_command_line".concat(UUID.randomUUID().toString()));
-        kafkaConsumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        overridePrintDefault(kafkaConsumerProperties, ConsumerConfig.GROUP_ID_CONFIG, "flink_cyber_command_line".concat(UUID.randomUUID().toString()));
+        overridePrintDefault(kafkaConsumerProperties, ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         kafkaConsumerProperties.put("specific.avro.reader", false);
 
         return kafkaConsumerProperties;
+    }
+
+    private void overridePrintDefault(Properties kafkaConsumerProperties, String kafkaProperty, String defaultValue) {
+        kafkaConsumerProperties.put(kafkaProperty, properties.getOrDefault(PRINT_KAFKA_PROPERTY_PREFIX.concat(kafkaProperty), defaultValue));
     }
 
     private Properties getPropertiesWithKafkaPrefix() {
