@@ -3,16 +3,15 @@ package com.cloudera.cyber.profiler;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import com.cloudera.cyber.generator.FreemarkerImmediateGenerator;
 import com.cloudera.cyber.profiler.dto.MeasurementDto;
 import com.cloudera.cyber.profiler.dto.ProfileDto;
-import com.cloudera.cyber.profiler.phoenix.PhoenixThickClient;
 import com.cloudera.cyber.profiler.phoenix.PhoenixThinClient;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import com.cloudera.cyber.scoring.ScoredMessageWatermarkedStream;
 import com.cloudera.cyber.scoring.ScoringJob;
 import com.cloudera.cyber.scoring.ScoringRuleCommand;
 import com.cloudera.cyber.scoring.ScoringRuleCommandResult;
-import com.cloudera.cyber.generator.FreemarkerImmediateGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -209,7 +208,8 @@ public abstract class ProfileJob {
                 }
             });
             if (profileDtoDb == null) {
-                Integer profileId = client.selectResultWithParams(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_ID, propertiesMap), FIRST_VALUE_MAPPER, preparedStatement -> {});
+                Integer profileId = client.selectResultWithParams(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_ID, propertiesMap), FIRST_VALUE_MAPPER, preparedStatement -> {
+                });
                 client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPDATE_PROFILE, propertiesMap), getUpdateProfileConsumer(profileDto, profileId));
                 profileDto.setId(profileId);
             } else {
@@ -329,7 +329,7 @@ public abstract class ProfileJob {
         config.put("format", measurementDto.getFormat());
         config.put("first_seen_expiration_duration", Optional.ofNullable(measurementDto.getFirstSeenExpirationDuration()).map(Objects::toString).orElse(null));
         config.put("first_seen_expiration_duration_unit", measurementDto.getFirstSeenExpirationDurationUnit());
-        config.put("profile_id",  Optional.ofNullable(measurementDto.getProfileId()).map(Objects::toString).orElse(null));
+        config.put("profile_id", Optional.ofNullable(measurementDto.getProfileId()).map(Objects::toString).orElse(null));
         return config;
     }
 
@@ -352,6 +352,11 @@ public abstract class ProfileJob {
 
         if (profileGroupConfig.hasStats()) {
             MessageKeySelector profileKeySelector = new MessageKeySelector(Collections.singletonList(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION));
+            if (profileGroupConfig.getStatsSlide() == null || profileGroupConfig.getStatsSlideUnit() == null) {
+                final String errorMessage = String.format("Either the 'statsSlide' or 'statsSlideUnit' parameters " +
+                        "are not provided while the 'calculateStats' is enabled in the [%s] profile group", profileGroupConfig.getProfileGroupName());
+                throw new IllegalStateException(errorMessage);
+            }
             Time statsSlide = Time.of(profileGroupConfig.getStatsSlide(), TimeUnit.valueOf(profileGroupConfig.getStatsSlideUnit()));
 
             DataStream<ProfileMessage> statsStream = ProfileMessage.watermarkedStreamOf(profileMessages, allowedLatenessMillis).
