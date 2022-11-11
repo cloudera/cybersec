@@ -6,8 +6,10 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.connector.hbase.util.HBaseConfigurationUtil;
 import org.apache.flink.metrics.Counter;
 import org.apache.flink.metrics.MetricGroup;
+import org.apache.flink.util.StringUtils;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -29,6 +31,7 @@ public abstract class AbstractHbaseMapFunction<IN, OUT> extends RichMapFunction<
         put("touchedAt", AbstractHbaseMapFunction::longBytesToString);
         put("score", AbstractHbaseMapFunction::floatBytesToString);
     }};
+    private final byte[] serializedHbaseConfig;
     protected transient MetricGroup metricsGroup;
     protected transient Counter messageCounter;
     protected transient Counter fetchCounter;
@@ -79,6 +82,10 @@ public abstract class AbstractHbaseMapFunction<IN, OUT> extends RichMapFunction<
         return Bytes.toString(bytesValue);
     }
 
+    public AbstractHbaseMapFunction() {
+        serializedHbaseConfig = HBaseConfigurationUtil.serializeConfiguration(HbaseConfiguration.configureHbase());
+    }
+
     @Override
     public final void open(Configuration parameters) throws Exception {
         super.open(parameters);
@@ -88,8 +95,10 @@ public abstract class AbstractHbaseMapFunction<IN, OUT> extends RichMapFunction<
         this.realResultCounter = metricsGroup.counter("realResult");
         this.fetchCounter = metricsGroup.counter("fetchCounter");
 
-        org.apache.hadoop.conf.Configuration hbaseConfig = HbaseConfiguration.configureHbase();
+        org.apache.hadoop.conf.Configuration hbaseConfig = HBaseConfigurationUtil.deserializeConfiguration(serializedHbaseConfig, HbaseConfiguration.configureHbase());
+        log.info("Start connection to hbase zookeeper quorum: {}",hbaseConfig.get("hbase.zookeeper.quorum"));
         connection = ConnectionFactory.createConnection(hbaseConfig);
+        log.info("Connected to hbase zookeeper quorum: {}",hbaseConfig.get("hbase.zookeeper.quorum"));
 
         cache = Caffeine.newBuilder()
                 .expireAfterAccess(60, TimeUnit.SECONDS)
