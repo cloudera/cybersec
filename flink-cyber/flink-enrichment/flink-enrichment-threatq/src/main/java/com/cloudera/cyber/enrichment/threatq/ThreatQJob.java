@@ -1,11 +1,10 @@
 package com.cloudera.cyber.enrichment.threatq;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.flink.FlinkUtils;
-import com.cloudera.cyber.hbase.AbstractHbaseSinkFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -19,18 +18,20 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
+import static com.cloudera.cyber.enrichment.hbase.HbaseJob.PARAMS_ENRICHMENT_CONFIG;
 
 @Slf4j
 public abstract class ThreatQJob {
     private static final String tableName = "threatq";
 
     public static DataStream<Message> enrich(DataStream<Message> source,
-                                             List<ThreatQConfig> configs
+                                             List<ThreatQConfig> configs,
+                                             EnrichmentsConfig enrichmentStorageConfig
     ) {
-        return source.map(new ThreatQHBaseMap(configs)).name("Apply ThreatQ").uid("threatq-enrich");
+        return source.map(new ThreatQHBaseMap(configs, enrichmentStorageConfig)).name("Apply ThreatQ").uid("threatq-enrich");
     }
 
-    public static DataStreamSink<ThreatQEntry> ingest(DataStream<ThreatQEntry> enrichmentSource, List<ThreatQConfig> configs) {
+    public static DataStreamSink<ThreatQEntry> ingest(DataStream<ThreatQEntry> enrichmentSource) {
         ParameterTool params = ParameterTool.fromMap(Collections.emptyMap());
 
         return enrichmentSource.addSink(new ThreatQEntryHbaseSink(tableName, params)).
@@ -56,9 +57,15 @@ public abstract class ThreatQJob {
         List<ThreatQConfig> configs = parseConfigs(configJson);
         log.info("ThreatQ Configs {}", configs);
 
-        ingest(enrichmentSource, configs);
+        ingest(enrichmentSource);
 
-        DataStream<Message> pipeline = enrich(source,configs);
+        String enrichmentsStorageConfigFileName = params.get(PARAMS_ENRICHMENT_CONFIG);
+        EnrichmentsConfig enrichmentStorageConfig = new EnrichmentsConfig(Collections.emptyMap(), Collections.emptyMap());
+        if (enrichmentsStorageConfigFileName != null) {
+            enrichmentStorageConfig = EnrichmentsConfig.load(enrichmentsStorageConfigFileName);
+        }
+
+        DataStream<Message> pipeline = enrich(source,configs, enrichmentStorageConfig);
         writeResults(env, params, pipeline);
         return env;
     }
