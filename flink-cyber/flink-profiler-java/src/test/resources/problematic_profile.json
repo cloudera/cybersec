@@ -1,0 +1,40 @@
+[
+  {
+    "profileGroupName": "ip_out",
+    "sources": [
+      "netflow",
+      "squid"
+    ],
+    "keyFieldNames": [
+      "ip_src_addr"
+    ],
+    "periodDuration": 1,
+    "periodDurationUnit": "MINUTES",
+    "measurements": [
+      {
+        "fieldName": "dst_bytes",
+        "resultExtensionName": "total_bytes_out",
+        "aggregationMethod": "SUM",
+        "calculateStats": true
+      },
+      {
+        "fieldName": "ip_dst_addr",
+        "resultExtensionName": "distinct_dest",
+        "aggregationMethod": "COUNT_DISTINCT",
+        "calculateStats": true
+      },
+      {
+        "fieldName": "total_transfer_bytes",
+        "resultExtensionName": "transfer_size",
+        "aggregationMethod": "SUM",
+        "calculateStats": true
+      },
+      {
+        "fieldName": "full_hostname",
+        "resultExtensionName": "distict_domains",
+        "aggregationMethod": "COUNT_DISTINCT",
+        "calculateStats": true
+      }
+    ]
+  }
+]
