@@ -1,6 +1,7 @@
 package com.cloudera.cyber.profiler;
 
 import lombok.*;
+import org.apache.flink.util.Preconditions;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
@@ -11,6 +12,9 @@ import java.text.DecimalFormat;
 @AllArgsConstructor
 @NoArgsConstructor(force = true, access = AccessLevel.PUBLIC)
 public class ProfileMeasurementConfig implements Serializable {
+    public static final String NULL_FIELD_VALUE_ERROR = "Profile group %s: measurement %d has a null %s";
+    public static final String EMPTY_FIELD_VALUE_ERROR = "Profile group %s: measurement %d has an empty %s";
+    public static final String FIRST_SEEN_ON_NUMERIC = "Profile group %s: measurement offset %d has firstSeenExpiration but the aggregationMethod is not FIRST_SEEN.";
     private Integer id;
     private String fieldName;
     private String resultExtensionName;
@@ -30,5 +34,27 @@ public class ProfileMeasurementConfig implements Serializable {
         } else {
             return ProfileAggregationMethod.defaultFormat.get(aggregationMethod);
         }
+    }
+
+    public void verify(ProfileGroupConfig profileGroupConfig, int offset) {
+        String profileGroupName = profileGroupConfig.getProfileGroupName();
+        Preconditions.checkNotNull(aggregationMethod, String.format(NULL_FIELD_VALUE_ERROR, profileGroupName, offset, "aggregationMethod"));
+        if (!aggregationMethod.equals(ProfileAggregationMethod.COUNT) && !aggregationMethod.equals(ProfileAggregationMethod.FIRST_SEEN)) {
+            checkString(profileGroupName, offset, "fieldName", fieldName);
+        }
+        checkString(profileGroupName, offset, "resultExtensionName", resultExtensionName);
+        if (ProfileAggregationMethod.FIRST_SEEN.equals(aggregationMethod)) {
+            if (firstSeenExpirationDuration != null || firstSeenExpirationDurationUnit != null ) {
+                profileGroupConfig.verifyTime("firstSeenExpirationDuration", firstSeenExpirationDuration, firstSeenExpirationDurationUnit);
+            }
+         } else {
+            Preconditions.checkState(firstSeenExpirationDuration == null && firstSeenExpirationDurationUnit == null, String.format(FIRST_SEEN_ON_NUMERIC, profileGroupName, offset));
+        }
+
+    }
+
+    private void checkString(String profileGroupName, int offset, String name, String value) {
+        Preconditions.checkNotNull(value, String.format(NULL_FIELD_VALUE_ERROR, profileGroupName, offset, name));
+        Preconditions.checkState(!value.isEmpty(), String.format(EMPTY_FIELD_VALUE_ERROR, profileGroupName, offset, name));
     }
 }

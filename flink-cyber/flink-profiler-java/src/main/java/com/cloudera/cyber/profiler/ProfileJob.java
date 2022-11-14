@@ -352,11 +352,6 @@ public abstract class ProfileJob {
 
         if (profileGroupConfig.hasStats()) {
             MessageKeySelector profileKeySelector = new MessageKeySelector(Collections.singletonList(ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION));
-            if (profileGroupConfig.getStatsSlide() == null || profileGroupConfig.getStatsSlideUnit() == null) {
-                final String errorMessage = String.format("Either the 'statsSlide' or 'statsSlideUnit' parameters " +
-                        "are not provided while the 'calculateStats' is enabled in the [%s] profile group", profileGroupConfig.getProfileGroupName());
-                throw new IllegalStateException(errorMessage);
-            }
             Time statsSlide = Time.of(profileGroupConfig.getStatsSlide(), TimeUnit.valueOf(profileGroupConfig.getStatsSlideUnit()));
 
             DataStream<ProfileMessage> statsStream = ProfileMessage.watermarkedStreamOf(profileMessages, allowedLatenessMillis).

@@ -35,6 +35,12 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-avro</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 

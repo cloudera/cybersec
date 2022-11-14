@@ -43,7 +43,6 @@ import static com.cloudera.cyber.rules.DynamicRuleCommandType.UPSERT;
 import static com.cloudera.cyber.rules.RuleType.JS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.withPrecision;
 import static org.hamcrest.Matchers.equalTo;
 
@@ -130,24 +129,6 @@ public class ProfileJobTest extends ProfileJob {
 
         messages.forEach(message -> verifyProfileMessages(currentTimestamp, message, profileGroupConfigs, possibleKeyValues, rule));
         IntStream.range(0, 10).forEach(i -> verifyProfileMessages(currentTimestamp, messages.get(i), profileGroupConfigs, possibleKeyValues, rule));
-    }
-
-    @Test
-    public void testPipelineInvalidProfile() {
-        String profileConfigFilePath = ClassLoader.getSystemResource("problematic_profile.json").getPath();
-        ImmutableMap<String, String> props = ImmutableMap.<String, String>builder()
-                .put(PARAMS_PARALLELISM, "1")
-                .put(PARAM_PROFILE_CONFIG, profileConfigFilePath)
-                .put(PARAM_LATENESS_TOLERANCE_MILLIS, "5")
-                .put(PARAMS_PHOENIX_DB_INIT, "false")
-                .build();
-        String problematicGroup = "ip_out";
-
-        String errorMessage = String.format("Either the 'statsSlide' or 'statsSlideUnit' parameters " +
-                "are not provided while the 'calculateStats' is enabled in the [%s] profile group", problematicGroup);
-        assertThatThrownBy(() -> createPipeline(ParameterTool.fromMap(props)))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage(errorMessage);
     }
 
     private void verifyProfileMessages(long currentTimestamp, ScoredMessage profile, List<ProfileGroupConfig> profileGroupConfigs, Map<String, List<String>> possibleKeyValues, ScoringRule rule) {
