@@ -36,7 +36,8 @@ public abstract class ScoringJob {
         final DataStream<ScoringRuleCommand> ruleCommands = createRulesSource(env, params);
         final DataStream<Message> data = createSource(env, params);
 
-        final SingleOutputStreamOperator<ScoredMessage> results = score(data, ruleCommands, Descriptors.rulesResultSink, Descriptors.rulesState).name("Process Rules")
+        final SingleOutputStreamOperator<ScoredMessage> results = score(data, ruleCommands, Descriptors.rulesResultSink, Descriptors.rulesState, params)
+                .name("Process Rules")
                 .uid("process-rules");
 
         writeResults(params, results);
@@ -46,8 +47,8 @@ public abstract class ScoringJob {
         return env;
     }
 
-    public static SingleOutputStreamOperator<ScoredMessage> enrich(DataStream<Message> source,  DataStream<ScoringRuleCommand> ruleCommands) {
-        return score(source, ruleCommands, Descriptors.rulesResultSink, Descriptors.rulesState).name("Process Rules")
+    public static SingleOutputStreamOperator<ScoredMessage> enrich(DataStream<Message> source, DataStream<ScoringRuleCommand> ruleCommands, ParameterTool params) {
+        return score(source, ruleCommands, Descriptors.rulesResultSink, Descriptors.rulesState, params).name("Process Rules")
                 .uid("process-rules");
     }
 
@@ -66,9 +67,10 @@ public abstract class ScoringJob {
     public static SingleOutputStreamOperator<ScoredMessage> score(DataStream<Message> data,
                                                                   DataStream<ScoringRuleCommand> ruleCommands,
                                                                   OutputTag<ScoringRuleCommandResult> rulesResultSink,
-                                                                  MapStateDescriptor<RulesForm, List<ScoringRule>> rulesState) {
+                                                                  MapStateDescriptor<RulesForm, List<ScoringRule>> rulesState,
+                                                                  ParameterTool params) {
         BroadcastStream<ScoringRuleCommand> rulesStream = ruleCommands.broadcast(rulesState);
-        return data.connect(rulesStream).process(new ScoringProcessFunction(rulesResultSink, rulesState));
+        return data.connect(rulesStream).process(new ScoringProcessFunction(rulesResultSink, rulesState,params));
     }
 
     protected abstract void writeResults(ParameterTool params, DataStream<ScoredMessage> results);

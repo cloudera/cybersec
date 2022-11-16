@@ -4,6 +4,7 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.rules.DynamicRuleCommandType;
 import com.cloudera.cyber.rules.RuleType;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.streaming.util.BroadcastOperatorTestHarness;
 import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
@@ -11,7 +12,13 @@ import org.junit.Test;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static org.junit.Assert.assertEquals;
@@ -184,7 +191,7 @@ public class TestScoringRulesProcessFunction {
 
     private BroadcastOperatorTestHarness<Message, ScoringRuleCommand, ScoredMessage> createTestHarness() throws Exception {
         BroadcastOperatorTestHarness<Message, ScoringRuleCommand, ScoredMessage> harness = ProcessFunctionTestHarnesses
-                .forBroadcastProcessFunction(new ScoringProcessFunction(ScoringJob.Descriptors.rulesResultSink, ScoringJob.Descriptors.rulesState ), ScoringJob.Descriptors.rulesState);
+                .forBroadcastProcessFunction(new ScoringProcessFunction(ScoringJob.Descriptors.rulesResultSink, ScoringJob.Descriptors.rulesState, ParameterTool.fromMap(new HashMap<>())), ScoringJob.Descriptors.rulesState);
         harness.open();
 
         return harness;

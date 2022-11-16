@@ -5,12 +5,12 @@ import com.cloudera.cyber.rules.DynamicRuleProcessFunction;
 import com.cloudera.cyber.rules.RulesForm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.state.MapStateDescriptor;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 
 import java.util.Collections;
-import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,8 +21,11 @@ import static com.cloudera.cyber.scoring.ScoringRule.RESULT_SCORE;
 @Slf4j
 public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRule, ScoringRuleCommand, ScoringRuleCommandResult, ScoredMessage> {
 
-    public ScoringProcessFunction(OutputTag<ScoringRuleCommandResult> rulesResultSink, MapStateDescriptor<RulesForm, List<ScoringRule>> rulesDescriptor) {
+    private final ParameterTool params;
+
+    public ScoringProcessFunction(OutputTag<ScoringRuleCommandResult> rulesResultSink, MapStateDescriptor<RulesForm, List<ScoringRule>> rulesDescriptor, ParameterTool params) {
         super(rulesResultSink, rulesDescriptor);
+        this.params = params;
     }
 
     @Override
@@ -51,14 +54,22 @@ public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRu
                     .filter(f -> f != null)
                     .collect(Collectors.toList());
 
-            DoubleSummaryStatistics scoreSummary = scores.stream().collect(Collectors.summarizingDouble(s -> s.getScore()));
+            //TODO remove if not needed. Was unused, which resulted to additional calculations for each message
+            //DoubleSummaryStatistics scoreSummary = scores.stream().collect(Collectors.summarizingDouble(s -> s.getScore()));
         }
         if (log.isDebugEnabled()) {
             log.debug("Scored Message: {}, {}", message, rules);
         }
+        final List<Double> scoreValues = scores.stream().map(Scores::getScore).collect(Collectors.toList());
         collector.collect(ScoredMessage.builder()
                 .message(message)
                 .cyberScoresDetails(scores)
+                .cyberScore(getScoringSummarizationMode(params).calculateScore(scoreValues))
                 .build());
+    }
+
+    protected static ScoringSummarizationMode getScoringSummarizationMode(ParameterTool params) {
+        return ScoringSummarizationMode.valueOf(
+                params.get(ScoringJobKafka.SCORING_SUMMATION_NAME(), ScoringSummarizationMode.DEFAULT().name()));
     }
 }

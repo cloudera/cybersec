@@ -2,14 +2,18 @@ package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.IdentifiedMessage;
 import com.cloudera.cyber.Message;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 
-import java.util.DoubleSummaryStatistics;
 import java.util.List;
 
 import static com.cloudera.cyber.AvroTypes.toListOf;
@@ -23,21 +27,7 @@ import static com.cloudera.cyber.AvroTypes.toListOf;
 public class ScoredMessage extends SpecificRecordBase implements IdentifiedMessage, SpecificRecord {
     private Message message;
     private List<Scores> cyberScoresDetails;
-
-    public DoubleSummaryStatistics getSummaryPositive() {
-        return cyberScoresDetails.stream().mapToDouble(s -> s.getScore()).filter(d -> d > 0).summaryStatistics();
-    }
-
-    public DoubleSummaryStatistics getSummaryNegative() {
-        return cyberScoresDetails.stream().mapToDouble(s -> s.getScore()).filter(d -> d > 0).summaryStatistics();
-    }
-    public boolean isCyberAlert() {
-        return (getSummaryPositive().getAverage() > -getSummaryNegative().getAverage());
-    }
-
-    public Double getCyberScore() {
-        return isCyberAlert() ? getSummaryPositive().getAverage(): 0.0;
-    }
+    private Double cyberScore;
 
     @Override
     public String getId() {
@@ -54,6 +44,7 @@ public class ScoredMessage extends SpecificRecordBase implements IdentifiedMessa
             .fields()
             .name("message").type(Message.SCHEMA$).noDefault()
             .name("cyberScoresDetails").type(Schema.createArray(Scores.SCHEMA$)).noDefault()
+            .optionalDouble("cyberScore")
             .endRecord();
 
     @Override
@@ -68,6 +59,8 @@ public class ScoredMessage extends SpecificRecordBase implements IdentifiedMessa
                 return message;
             case 1:
                 return cyberScoresDetails;
+            case 2:
+                return cyberScore;
             default:
                 throw new AvroRuntimeException("Bad index");
         }
@@ -81,6 +74,9 @@ public class ScoredMessage extends SpecificRecordBase implements IdentifiedMessa
                 break;
             case 1:
                 this.cyberScoresDetails = toListOf(Scores.class, value$);
+                break;
+            case 2:
+                this.cyberScore = (Double) value$;
                 break;
             default:
                 throw new AvroRuntimeException("Bad index");
