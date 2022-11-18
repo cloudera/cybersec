@@ -52,7 +52,6 @@ public class PhoenixThinClient {
         try {
             Class.forName(DRIVER);
             try (Connection conn = DriverManager.getConnection(dbUrl)) {
-                conn.setAutoCommit(true);
                 return function.apply(conn);
             } catch (SQLException e) {
                 log.error("Connection exception SQL State: {}\n{}", e.getSQLState(), e.getMessage());
@@ -78,7 +77,6 @@ public class PhoenixThinClient {
 
     public void executeSql(String sql) throws SQLException {
         try (Connection conn = DriverManager.getConnection(dbUrl)) {
-            conn.setAutoCommit(true);
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.execute();
             }
@@ -91,7 +89,6 @@ public class PhoenixThinClient {
 
     public void insertIntoTable(String sql, Consumer<PreparedStatement> consumer) throws SQLException {
         try (Connection conn = DriverManager.getConnection(dbUrl)) {
-            conn.setAutoCommit(true);
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 consumer.accept(ps);
                 ps.executeUpdate();
@@ -107,7 +104,6 @@ public class PhoenixThinClient {
     public <T> List<T> selectListResultWithParams(String sql, Function<ResultSet, T> mapper, Consumer<PreparedStatement> consumer) throws SQLException {
         List<T> results = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(dbUrl)) {
-            conn.setAutoCommit(true);
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 consumer.accept(ps);
                 try (ResultSet resultSet = ps.executeQuery()) {
@@ -125,7 +121,6 @@ public class PhoenixThinClient {
 
     public <T> T selectResultWithParams(String sql, Function<ResultSet, T> mapper, Consumer<PreparedStatement> consumer) throws SQLException {
         try (Connection conn = DriverManager.getConnection(dbUrl)) {
-            conn.setAutoCommit(true);
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 consumer.accept(ps);
                 try (ResultSet resultSet = ps.executeQuery()) {
