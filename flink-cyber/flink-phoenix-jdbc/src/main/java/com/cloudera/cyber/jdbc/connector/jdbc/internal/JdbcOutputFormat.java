@@ -158,17 +158,19 @@ public class JdbcOutputFormat<In, JdbcIn, JdbcExec extends JdbcBatchStatementExe
 
         for (int i = 0; i <= executionOptions.getMaxRetries(); i++) {
             try {
+                // make sure that a new connection was used for every flush to the database
+                reconnect();
                 attemptFlush();
                 batchCount = 0;
                 break;
-            } catch (SQLException e) {
+            } catch (SQLException | ClassNotFoundException e) {
                 LOG.error("JDBC executeBatch error, retry times = {}", i, e);
                 if (i >= executionOptions.getMaxRetries()) {
                     throw new IOException(e);
                 }
                 try {
                     if (!connectionProvider.isConnectionValid()) {
-                        updateExecutor(true);
+                        reconnect();
                     }
                 } catch (Exception exception) {
                     LOG.error(
@@ -222,12 +224,10 @@ public class JdbcOutputFormat<In, JdbcIn, JdbcExec extends JdbcBatchStatementExe
         checkFlushException();
     }
 
-    public void updateExecutor(boolean reconnect) throws SQLException, ClassNotFoundException {
+    public void reconnect() throws SQLException, ClassNotFoundException {
+        LOG.debug("Reestablishing connection to the database.");
         jdbcStatementExecutor.closeStatements();
-        jdbcStatementExecutor.prepareStatements(
-                reconnect
-                        ? connectionProvider.reestablishConnection()
-                        : connectionProvider.getConnection());
+        jdbcStatementExecutor.prepareStatements(getConnection());
     }
 
     @VisibleForTesting
