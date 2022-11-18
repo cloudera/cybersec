@@ -173,8 +173,8 @@ public class ProfileJobKafka extends ProfileJob {
                 Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_AVATICA_USER)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_AVATICA_USER);
                 Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD);
             } else {
-                Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_PRINCIPAL)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_AVATICA_USER);
-                Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_KEYTAB)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD);
+                Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_PRINCIPAL)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_PRINCIPAL);
+                Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_KEYTAB)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_KEYTAB);
 
             }
             ValidateUtils.validatePhoenixName(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_DATA_TABLE_NAME), PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_DATA_TABLE_NAME);
