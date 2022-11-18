@@ -70,7 +70,7 @@ public class PhoenixJdbcConnectionProvider implements JdbcConnectionProvider, Se
 
     @Override
     public boolean isConnectionValid() {
-        return true;
+        return false;
     }
 
     private static Driver loadDriver(String driverName)
@@ -105,8 +105,10 @@ public class PhoenixJdbcConnectionProvider implements JdbcConnectionProvider, Se
     @Override
     public Connection getOrEstablishConnection() throws SQLException, ClassNotFoundException {
         if (jdbcOptions.getDriverName() == null) {
-           return DriverManager.getConnection(jdbcOptions.getDbURL());
+            LOG.debug("Establishing anonymous connection to the {}.", jdbcOptions.getDbURL());
+            return DriverManager.getConnection(jdbcOptions.getDbURL());
         } else {
+            LOG.debug("Establishing connection to the {}.", jdbcOptions.getDbURL());
             Driver driver = getLoadedDriver();
             Properties info = new Properties();
             jdbcOptions.getUsername().ifPresent(user -> info.setProperty("user", user));
