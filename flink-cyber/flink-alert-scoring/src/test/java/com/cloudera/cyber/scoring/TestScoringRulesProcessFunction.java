@@ -53,8 +53,10 @@ public class TestScoringRulesProcessFunction {
         List<ScoredMessage> expectedScoredMessages = new ArrayList<>();
         sendMessage(expectedScoredMessages, new HashMap<String,String>() {{ put(FIRST_RULE_EXTENSION_KEY, "key value");}},
                 Collections.singletonList(Scores.builder().ruleId(ruleV0.getId()).score(expectedScore).reason(MATCH_REASON).build()), harness);
+        expectedScoredMessages.get(0).setCyberScore(expectedScore);
         sendMessage(expectedScoredMessages, Collections.emptyMap(),
                 Collections.singletonList(Scores.builder().ruleId(ruleV0.getId()).score(0.0).reason(NO_MATCH_REASON).build()), harness);
+        expectedScoredMessages.get(1).setCyberScore(0.0);
 
         // update the rule script
         expectedScore = 70.0;
@@ -64,6 +66,7 @@ public class TestScoringRulesProcessFunction {
         // trigger the rule again and make sure the results match the new version
         sendMessage(expectedScoredMessages, new HashMap<String,String>() {{ put(FIRST_RULE_EXTENSION_KEY, "key value");}},
                 Collections.singletonList(Scores.builder().ruleId(ruleV0.getId()).score(expectedScore).reason(MATCH_REASON).build()), harness);
+        expectedScoredMessages.get(2).setCyberScore(expectedScore);
 
         assertEquals(expectedScoredMessages, harness.extractOutputValues());
         harness.snapshot(1L, 1L);
@@ -114,6 +117,9 @@ public class TestScoringRulesProcessFunction {
         // triggering the rule again - scores should be returned
         sendMessage(expectedScoredMessages, extensionsToTriggerRule, allScores, harness);
 
+        expectedScoredMessages.get(0).setCyberScore(firstExpectedScore);
+        expectedScoredMessages.get(1).setCyberScore(0.0);
+        expectedScoredMessages.get(2).setCyberScore(firstExpectedScore);
         assertEquals(expectedScoredMessages, harness.extractOutputValues());
     }
 
@@ -146,6 +152,9 @@ public class TestScoringRulesProcessFunction {
         sendMessage(expectedScoredMessages, extensionsToTriggerRule,
                 Collections.emptyList(), harness);
 
+        expectedScoredMessages.get(0).setCyberScore(expectedScore);
+        expectedScoredMessages.get(1).setCyberScore(0.0);
+        expectedScoredMessages.get(2).setCyberScore(0.0);
         assertEquals(expectedScoredMessages, harness.extractOutputValues());
     }
 
@@ -177,6 +186,7 @@ public class TestScoringRulesProcessFunction {
         sendMessage(expectedScoredMessages, extensionsToTriggerRule,
                 Collections.singletonList(Scores.builder().ruleId(rule.getId()).score(expectedScore).reason(MATCH_REASON).build()), harness);
 
+        expectedScoredMessages.forEach(sm -> sm.setCyberScore(expectedScore));
         assertEquals(expectedScoredMessages, harness.extractOutputValues());
     }
 
