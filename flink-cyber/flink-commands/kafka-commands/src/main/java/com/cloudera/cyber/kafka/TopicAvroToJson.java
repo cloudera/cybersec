@@ -40,9 +40,10 @@ public class TopicAvroToJson {
         try {
             config.load(applicationPropertiesFile);
             boolean prettyOutput = config.getBoolean("print.output.pretty", true);
+            int maxRecords = config.getInteger("print.output.max.records", 500);
             int maxRetries = config.getInteger("print.max.retries", 5);
 
-            consume( config.getKafkaConsumerProperties(), topicToDump, prettyOutput, maxRetries);
+            consume(config.getKafkaConsumerProperties(), topicToDump, prettyOutput, maxRetries, maxRecords);
         } catch (IOException e) {
             fail("Could not read config properties file: " + args[0]);
         } catch (Exception e) {
@@ -50,24 +51,32 @@ public class TopicAvroToJson {
         }
     }
 
-    private static void consume(Properties consumerProperties, String topic, boolean pretty, int maxRetries) {
+    private static void consume(Properties consumerProperties, String topic, boolean pretty, int maxRetries, int maxRecords) {
 
         try (KafkaConsumer<String, GenericRecord> consumer = new KafkaConsumer<>(consumerProperties)) {
             boolean gotResponse = false;
             int retries = maxRetries;
-            while (!gotResponse && retries > 0) {
-                consumer.subscribe(Collections.singletonList(topic));
+            int recordAmount = maxRecords;
+            consumer.subscribe(Collections.singletonList(topic));
+            while (recordAmount > 0 && retries > 0) {
                 ConsumerRecords<String, GenericRecord> records = consumer.poll(Duration.ofSeconds(5));
                 for (ConsumerRecord<String, GenericRecord> rec : records) {
+                    System.out.println("Offset: " + rec.offset());
                     Schema schema = rec.value().getSchema();
                     DatumWriter<Object> writer = new GenericDatumWriter<>(schema);
                     JsonEncoder encoder = EncoderFactory.get().jsonEncoder(schema, System.out, pretty);
                     writer.write(rec.value(), encoder);
                     encoder.flush();
                     System.out.println();
+                    recordAmount--;
                 }
-                gotResponse = !records.isEmpty();
-                retries--;
+                boolean responsePresent = !records.isEmpty();
+                gotResponse = gotResponse || responsePresent;
+                if (responsePresent) {
+                    retries = maxRetries;
+                } else {
+                    retries--;
+                }
                 Thread.sleep(1000);
             }
             if (!gotResponse) {
