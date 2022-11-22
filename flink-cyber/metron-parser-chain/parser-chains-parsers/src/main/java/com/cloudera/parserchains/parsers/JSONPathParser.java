@@ -52,7 +52,7 @@ public class JSONPathParser implements Parser {
      * @param fieldName The name of the field to create or modify.
      * @param expr      The JSONPath expression to execute.
      */
-    @Configurable(key = "expr")
+    @Configurable(key = "expr", multipleValues = true)
     public JSONPathParser expression(
             @Parameter(key = "field", label = "Field Name", description = "The field to create or modify.") String fieldName,
             @Parameter(key = "expr", label = "Path Expression", description = "The path expression.") String expr) {

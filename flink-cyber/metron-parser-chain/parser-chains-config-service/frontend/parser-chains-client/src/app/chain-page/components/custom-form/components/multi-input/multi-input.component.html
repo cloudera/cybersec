@@ -22,6 +22,16 @@
                 ></textarea>
             </nz-input-group>
             <button
+                    class="add-field-button"
+                    nz-button
+                    nzSize="small"
+                    nzType="primary"
+                    nzShape="circle"
+                    (click)="onAddClick()"
+                    *ngIf="i === 0 && config.multipleValues"
+                    title="Add field"
+            ><i nz-icon nzType="plus-circle" nzTheme="fill"></i></button>
+            <button
                     class="remove-field-button"
                     nz-button
                     nzType="primary"
@@ -39,12 +49,5 @@
             <i *ngIf="i === 0" nz-icon nzType="info-circle" nzTheme="outline" nzTooltipTitle="{{ config.description }}"
                nzTooltipPlacement="right" nz-tooltip></i>
         </ng-template>
-    </nz-form-control>
-    <nz-form-control [nzSm]="24"
-                     [nzXs]="20">
-        <button nz-button nzType="dashed" class="add-button ant-btn-block" (click)="onAddClick()">
-            <span nz-icon nzType="plus"></span>
-            Add value
-        </button>
     </nz-form-control>
 </div>

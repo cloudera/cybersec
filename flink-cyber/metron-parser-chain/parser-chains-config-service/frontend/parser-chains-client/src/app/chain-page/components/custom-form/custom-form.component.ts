@@ -1,5 +1,5 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {FormControl, FormGroup} from '@angular/forms';
 
 export interface CustomFormConfig {
   name: string;
@@ -12,6 +12,7 @@ export interface CustomFormConfig {
   options?: { id: string, name: string }[];
   onChange?: (config: any) => {};
   required?: boolean;
+  multipleValues?: boolean;
   description?: string;
   placeholder?: string;
   defaultValue?: string;

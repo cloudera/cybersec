@@ -41,6 +41,11 @@ public @interface Configurable {
     boolean required() default false;
 
     /**
+     * Defines whether the user is able to enter multiple values per parameter.
+     */
+    boolean multipleValues() default false;
+
+    /**
      * Defines the order in which corresponding config should be executed.
      */
     int orderPriority() default Integer.MAX_VALUE;

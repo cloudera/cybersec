@@ -47,7 +47,9 @@ public class RenameFieldParser implements Parser {
         return output.build();
     }
 
-    @Configurable(key="fieldToRename")
+    @Configurable(
+            key="fieldToRename",
+            multipleValues=true)
     public void renameField(
             @Parameter(key="from", label="Rename From", description="The original name of the field.") String from,
             @Parameter(key="to", label="Rename To", description="The new name of the field.") String to) {
