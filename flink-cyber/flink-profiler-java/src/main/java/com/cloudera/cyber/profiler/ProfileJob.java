@@ -21,6 +21,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import freemarker.template.TemplateException;
+import java.util.function.BiFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -41,7 +42,6 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -78,7 +78,6 @@ public abstract class ProfileJob {
                             allowIfSubType(java.util.concurrent.TimeUnit.class).
                             build())
                     .enable(SerializationFeature.INDENT_OUTPUT);
-    private static final String UPSERT_INTO_MEASUREMENT_METADATA_TABLE = "UPSERT INTO ${measurement_metadata_table_name} (ID,FIELD_NAME,RESULT_EXTENSION_NAME,AGGREGATION_METHOD,CALCULATE_STATS,FORMAT,FIRST_SEEN_EXPIRATION_DURATION, FIRST_SEEN_EXPIRATION_DURATION_UNIT, PROFILE_ID) VALUES (NEXT VALUE FOR ${measurement_sequence_name},?,?,?,?,?,?,?,?) ON DUPLICATE KEY IGNORE";
     private static final Function<ResultSet, Integer> ID_MAPPER = rs -> {
         try {
             return rs.getInt("ID");
@@ -95,7 +94,7 @@ public abstract class ProfileJob {
         }
         return null;
     };
-    private static final Function<ResultSet, ProfileDto> PROFILE_MAPPER = rs -> {
+    private static final Function<ResultSet, ProfileDto> PROFILE_META_MAPPER = rs -> {
         try {
             return ProfileDto.builder().id(rs.getInt("ID"))
                     .profileGroupName(rs.getString("PROFILE_GROUP_NAME"))
@@ -110,19 +109,50 @@ public abstract class ProfileJob {
         }
         return null;
     };
+
+    private static final Function<ResultSet, MeasurementDto> MEASUREMENT_META_MAPPER = rs -> {
+        try {
+            return MeasurementDto.builder()
+                .id(rs.getInt("ID"))
+                .resultExtensionName("RESULT_EXTENSION_NAME")
+                .calculateStats(rs.getBoolean("CALCULATE_STATS"))
+                .aggregationMethod(rs.getString("AGGREGATION_METHOD"))
+                .fieldName(rs.getString("FIELD_NAME"))
+                .format(rs.getString("FORMAT"))
+                .firstSeenExpirationDuration(rs.getLong("FIRST_SEEN_EXPIRATION_DURATION"))
+                .firstSeenExpirationDurationUnit(rs.getString("FIRST_SEEN_EXPIRATION_DURATION_UNIT"))
+                .profileId(rs.getInt("PROFILE_ID"))
+                .build();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return null;
+    };
     protected final FreemarkerImmediateGenerator freemarkerGenerator = new FreemarkerImmediateGenerator();
-    private static final String SELECT_MEASUREMENT_CONFIG_ID = "SELECT ID FROM ${measurement_metadata_table_name} WHERE FIELD_NAME <#if field_name??> = ?<#else> IS NULL</#if>\n" +
-            "        AND RESULT_EXTENSION_NAME <#if result_extension_name??> = ?<#else> IS NULL</#if>\n" +
-            "        AND AGGREGATION_METHOD <#if aggregation_method??> = ?<#else> IS NULL</#if>\n" +
-            "        AND CALCULATE_STATS <#if calculate_stats??> = ?<#else> IS NULL</#if>\n" +
-            "        AND FORMAT <#if format??> = ?<#else> IS NULL</#if>\n" +
-            "        AND FIRST_SEEN_EXPIRATION_DURATION <#if first_seen_expiration_duration??> = ?<#else> IS NULL</#if>\n" +
-            "        AND FIRST_SEEN_EXPIRATION_DURATION_UNIT <#if first_seen_expiration_duration_unit??> = ?<#else> IS NULL</#if>" +
-            "        AND PROFILE_ID <#if profile_id??> = ?<#else> IS NULL</#if>";
-    private static final String SELECT_PROFILE_BY_ID = "SELECT * FROM ${profile_metadata_table_name} WHERE PROFILE_GROUP_NAME = ?";
-    private static final String UPDATE_PROFILE = "UPSERT INTO ${profile_metadata_table_name} (ID,PROFILE_GROUP_NAME,KEY_FIELD_NAMES,PERIOD_DURATION,PERIOD_DURATION_UNIT,STATS_SLIDE,STATS_SLIDE_UNIT) VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY IGNORE";
+    private static final String SELECT_PROFILE_BY_NAME = "SELECT * FROM ${profile_metadata_table_name} WHERE PROFILE_GROUP_NAME = ?";
+    private static final String SELECT_MEASUREMENT_BY_NAME = "SELECT * FROM ${measurement_metadata_table_name} WHERE RESULT_EXTENSION_NAME = ? AND PROFILE_ID = ?";
+    private static final String UPSERT_PROFILE_META = "UPSERT INTO ${profile_metadata_table_name} (ID,PROFILE_GROUP_NAME,KEY_FIELD_NAMES,PERIOD_DURATION,PERIOD_DURATION_UNIT,STATS_SLIDE,STATS_SLIDE_UNIT) VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY IGNORE";
+    private static final String UPSERT_MEASUREMENT_META = "UPSERT INTO ${measurement_metadata_table_name} (ID,FIELD_NAME,RESULT_EXTENSION_NAME,AGGREGATION_METHOD,CALCULATE_STATS,FORMAT,FIRST_SEEN_EXPIRATION_DURATION, FIRST_SEEN_EXPIRATION_DURATION_UNIT, PROFILE_ID) VALUES (?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY IGNORE";
     private static final String SELECT_PROFILE_ID = "SELECT NEXT VALUE FOR ${profile_sequence_name}";
+    private static final String SELECT_MEASUREMENT_ID = "SELECT NEXT VALUE FOR ${measurement_sequence_name}";
     private static final String SELECT_METADATA_FROM_MEASUREMENT_DATA_TABLE = "SELECT * FROM ${measurement_data_table_name} LIMIT 1";
+
+    private static final Function<String,Consumer<PreparedStatement>> PROFILE_PS_CONSUMER_FUNCTION = profileGroupName -> ps -> {
+        try {
+            ps.setString(1, profileGroupName);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    };
+
+    private static final BiFunction<String,Integer,Consumer<PreparedStatement>> MEASUREMENT_PS_CONSUMER_FUNCTION = (resultExtensionName, profileId) -> ps -> {
+        try {
+            ps.setString(1, resultExtensionName);
+            ps.setInt(1, profileId);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+    };
 
     protected List<ProfileGroupConfig> parseConfigFile(String configJson) throws JsonProcessingException {
         List<ProfileGroupConfig> profileGroupConfigs = jsonObjectMapper.readValue(
@@ -175,10 +205,6 @@ public abstract class ProfileJob {
         return Collections.emptyList();
     }
 
-    private void phoenixParamValidate(ParameterTool param) {
-
-    }
-
     private void validate(ParameterTool params, ResultSetMetaData tableMetadata) throws SQLException {
         int keyCount = params.getInt(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT, 0);
         boolean valid = false;
@@ -198,61 +224,89 @@ public abstract class ProfileJob {
 
     protected List<ProfileDto> persistProfileMeasurementConfigMeta(List<ProfileGroupConfig> profileGroups, PhoenixThinClient client, Properties properties) throws SQLException, IOException, TemplateException {
         ImmutableMap<String, String> propertiesMap = Maps.fromProperties(properties);
-        List<ProfileDto> profileDtos = profileGroups.stream().map(ProfileDto::of).collect(Collectors.toList());
-        for (ProfileDto profileDto : profileDtos) {
-            ProfileDto profileDtoDb = client.selectResultWithParams(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_BY_ID, propertiesMap), PROFILE_MAPPER, ps -> {
-                try {
-                    ps.setString(1, profileDto.getProfileGroupName());
-                } catch (SQLException throwables) {
-                    throwables.printStackTrace();
-                }
-            });
-            if (profileDtoDb == null) {
-                Integer profileId = client.selectResultWithParams(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_ID, propertiesMap), FIRST_VALUE_MAPPER, preparedStatement -> {
-                });
-                client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPDATE_PROFILE, propertiesMap), getUpdateProfileConsumer(profileDto, profileId));
-                profileDto.setId(profileId);
-            } else {
-                if (!StringUtils.equals(profileDto.getKeyFieldNames(), profileDtoDb.getKeyFieldNames())) {
-                    throw new IllegalStateException("Key fields cannot be changed for the profile.");
-                }
-                profileDto.setId(profileDtoDb.getId());
-                client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPDATE_PROFILE, propertiesMap), getUpdateProfileConsumer(profileDto, profileDtoDb.getId()));
-            }
-            for (MeasurementDto measurement : profileDto.getMeasurementDtos()) {
-                measurement.setProfileId(profileDto.getId());
-                Map<String, String> params = getFreemarkerParams(measurement);
-                params.putAll(propertiesMap);
-                Integer id = client.selectResultWithParams(freemarkerGenerator.replceByTemplate(SELECT_MEASUREMENT_CONFIG_ID, params), ID_MAPPER, getSelectMeasurementConfigConsumer(measurement));
-                if (id == null) {
-                    client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_INTO_MEASUREMENT_METADATA_TABLE, params), getInsertMeasurementConfigConsumer(measurement, profileDto.getId()));
-                    id = client.selectResultWithParams(freemarkerGenerator.replceByTemplate(SELECT_MEASUREMENT_CONFIG_ID, params), ID_MAPPER, getSelectMeasurementConfigConsumer(measurement));
-                }
-                measurement.setId(id);
-            }
+        List<ProfileDto> profiles = profileGroups.stream().map(ProfileDto::of).collect(Collectors.toList());
+        for (ProfileDto profile : profiles) {
+            processProfile(client, propertiesMap, profile);
         }
-        return profileDtos;
+        return profiles;
     }
 
-    private Consumer<PreparedStatement> getInsertMeasurementConfigConsumer(MeasurementDto measurement, Integer profileId) {
+    private MeasurementDto processMeasurement(PhoenixThinClient client, ImmutableMap<String, String> propertiesMap, ProfileDto profile, MeasurementDto measurement) throws SQLException, IOException, TemplateException {
+        MeasurementDto measurementEntity = client.selectResult(freemarkerGenerator.replceByTemplate(SELECT_MEASUREMENT_BY_NAME, propertiesMap), MEASUREMENT_META_MAPPER, MEASUREMENT_PS_CONSUMER_FUNCTION.apply(measurement.getResultExtensionName(),profile.getId()));
+        if (measurementEntity == null) {
+            return createMeasurement(client, propertiesMap, measurement);
+        } else {
+            return updateMeasurement(client, propertiesMap, measurement, measurementEntity);
+        }
+    }
+
+    private MeasurementDto createMeasurement(PhoenixThinClient client, Map<String, String> params, MeasurementDto measurement) throws SQLException, IOException, TemplateException {
+        Integer measurementId = client.selectResult(freemarkerGenerator.replceByTemplate(SELECT_MEASUREMENT_ID, params), FIRST_VALUE_MAPPER);
+        client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_MEASUREMENT_META, params), getUpdateMeasurementMetaConsumer(measurement, measurementId));
+        return measurement.toBuilder().id(measurementId).build();
+    }
+
+    private MeasurementDto updateMeasurement(PhoenixThinClient client, Map<String, String> params, MeasurementDto measurement, MeasurementDto measurementDtoDb) throws SQLException, IOException, TemplateException {
+        if (!measurementDtoDb.equals(measurement)) {
+            throw new IllegalStateException("Key fields cannot be changed for the measurement.");
+        }
+        Integer measurementId = measurementDtoDb.getId();
+        client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_PROFILE_META, params), getUpdateMeasurementMetaConsumer(measurement, measurementId));
+        return measurement.toBuilder().id(measurementId).build();
+    }
+
+    private ProfileDto processProfile(PhoenixThinClient client, ImmutableMap<String, String> propertiesMap, ProfileDto profile) throws SQLException, IOException, TemplateException {
+        ProfileDto profileDtoDb = client.selectResult(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_BY_NAME, propertiesMap), PROFILE_META_MAPPER, PROFILE_PS_CONSUMER_FUNCTION.apply(profile.getProfileGroupName()));
+        if (profileDtoDb == null) {
+            return createProfile(client, propertiesMap, profile);
+        } else {
+            return updateProfile(client, propertiesMap, profile, profileDtoDb);
+        }
+    }
+
+    private ProfileDto updateProfile(PhoenixThinClient client, ImmutableMap<String, String> propertiesMap, ProfileDto profile, ProfileDto profileDtoDb) throws SQLException, IOException, TemplateException {
+        if (!profileDtoDb.equals(profile)) {
+            throw new IllegalStateException("Key fields cannot be changed for the profile.");
+        }
+        Integer profileId = profileDtoDb.getId();
+        client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_PROFILE_META, propertiesMap), getUpdateProfileConsumer(profile, profileId));
+        ArrayList<MeasurementDto> measurementDtos = new ArrayList<>();
+        for (MeasurementDto measurementDto : profile.getMeasurementDtos()) {
+            measurementDtos.add(processMeasurement(client,propertiesMap,profile,measurementDto));
+        }
+        return profile.toBuilder().id(profileId).measurementDtos(measurementDtos).build();
+    }
+
+    private ProfileDto createProfile(PhoenixThinClient client, ImmutableMap<String, String> propertiesMap, ProfileDto profile) throws SQLException, IOException, TemplateException {
+        Integer profileId = client.selectResult(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_ID, propertiesMap), FIRST_VALUE_MAPPER);
+        client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_PROFILE_META, propertiesMap), getUpdateProfileConsumer(profile, profileId));
+        ArrayList<MeasurementDto> measurementDtos = new ArrayList<>();
+        for (MeasurementDto measurementDto : profile.getMeasurementDtos()) {
+            measurementDtos.add(createMeasurement(client,propertiesMap, measurementDto));
+        }
+        return profile.toBuilder().id(profileId).measurementDtos(measurementDtos).build();
+    }
+
+    private Consumer<PreparedStatement> getUpdateMeasurementMetaConsumer(MeasurementDto measurement, Integer measurementId) {
         return ps -> {
             try {
-                ps.setString(1, measurement.getFieldName());
-                ps.setString(2, measurement.getResultExtensionName());
-                ps.setString(3, Optional.ofNullable(measurement.getAggregationMethod()).map(Objects::toString).orElse(null));
+                ps.setInt(1, measurementId);
+                ps.setString(2, measurement.getFieldName());
+                ps.setString(3, measurement.getResultExtensionName());
+                ps.setString(4, Optional.ofNullable(measurement.getAggregationMethod()).map(Objects::toString).orElse(null));
                 if (measurement.getCalculateStats() == null) {
-                    ps.setNull(4, Types.BOOLEAN);
+                    ps.setNull(5, Types.BOOLEAN);
                 } else {
-                    ps.setBoolean(4, measurement.getCalculateStats());
+                    ps.setBoolean(5, measurement.getCalculateStats());
                 }
-                ps.setString(5, measurement.getFormat());
+                ps.setString(6, measurement.getFormat());
                 if (measurement.getFirstSeenExpirationDuration() == null) {
-                    ps.setNull(6, Types.BIGINT);
+                    ps.setNull(7, Types.BIGINT);
                 } else {
-                    ps.setLong(6, measurement.getFirstSeenExpirationDuration());
+                    ps.setLong(7, measurement.getFirstSeenExpirationDuration());
                 }
-                ps.setString(7, measurement.getFirstSeenExpirationDurationUnit());
-                ps.setInt(8, profileId);
+                ps.setString(8, measurement.getFirstSeenExpirationDurationUnit());
+                ps.setInt(9, measurement.getProfileId());
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
@@ -282,55 +336,6 @@ public abstract class ProfileJob {
                 throw throwables;
             }
         };
-    }
-
-
-    private ThrowingConsumer<PreparedStatement> getSelectMeasurementConfigConsumer(MeasurementDto measurement) {
-        return ps -> {
-            try {
-                int count = 1;
-                if (measurement.getFieldName() != null) {
-                    ps.setString(count++, measurement.getFieldName());
-                }
-                if (measurement.getResultExtensionName() != null) {
-                    ps.setString(count++, measurement.getResultExtensionName());
-                }
-                if (measurement.getAggregationMethod() != null) {
-                    ps.setString(count++, measurement.getAggregationMethod());
-                }
-                if (measurement.getCalculateStats() != null) {
-                    ps.setBoolean(count++, measurement.getCalculateStats());
-                }
-                if (measurement.getFormat() != null) {
-                    ps.setString(count++, measurement.getFormat());
-                }
-                if (measurement.getFirstSeenExpirationDuration() != null) {
-                    ps.setLong(count++, measurement.getFirstSeenExpirationDuration());
-                }
-                if (measurement.getFirstSeenExpirationDurationUnit() != null) {
-                    ps.setString(count++, measurement.getFirstSeenExpirationDurationUnit());
-                }
-                if (measurement.getProfileId() != null) {
-                    ps.setLong(count, measurement.getProfileId());
-                }
-            } catch (SQLException throwables) {
-                log.error(throwables.getMessage());
-                throw throwables;
-            }
-        };
-    }
-
-    private Map<String, String> getFreemarkerParams(MeasurementDto measurementDto) {
-        Map<String, String> config = new HashMap<>();
-        config.put("field_name", measurementDto.getFieldName());
-        config.put("result_extension_name", measurementDto.getResultExtensionName());
-        config.put("aggregation_method", Optional.ofNullable(measurementDto.getAggregationMethod()).map(Objects::toString).orElse(null));
-        config.put("calculate_stats", Optional.ofNullable(measurementDto.getCalculateStats()).map(Objects::toString).orElse(null));
-        config.put("format", measurementDto.getFormat());
-        config.put("first_seen_expiration_duration", Optional.ofNullable(measurementDto.getFirstSeenExpirationDuration()).map(Objects::toString).orElse(null));
-        config.put("first_seen_expiration_duration_unit", measurementDto.getFirstSeenExpirationDurationUnit());
-        config.put("profile_id", Optional.ofNullable(measurementDto.getProfileId()).map(Objects::toString).orElse(null));
-        return config;
     }
 
     /**

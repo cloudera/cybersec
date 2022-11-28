@@ -2,6 +2,7 @@ package com.cloudera.cyber.flink;
 
 import com.google.common.io.Resources;
 import com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -10,6 +11,7 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.core.fs.FSDataInputStream;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
+import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.encrypttool.EncryptTool;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -207,6 +209,10 @@ public class Utils {
 
     public static Configuration getConfiguration() {
         return ConfigHolder.INSTANCE;
+    }
+
+    public static boolean timeCompare(long unit1, String unitType1, long unit2, String unitType2) {
+        return Time.of(unit1, TimeUnit.valueOf(unitType1)).toMilliseconds() == Time.of(unit2, TimeUnit.valueOf(unitType2)).toMilliseconds();
     }
 
     private static class ConfigHolder {

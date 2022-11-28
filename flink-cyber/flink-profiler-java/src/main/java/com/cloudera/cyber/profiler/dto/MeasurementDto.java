@@ -1,18 +1,17 @@
 package com.cloudera.cyber.profiler.dto;
 
 import com.cloudera.cyber.profiler.ProfileMeasurementConfig;
+import java.io.Serializable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-
 @Data
 @NoArgsConstructor(force = true, access = AccessLevel.PUBLIC)
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class MeasurementDto implements Serializable {
     private Integer id;
     private Integer profileId;
