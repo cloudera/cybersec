@@ -13,7 +13,6 @@
 package com.cloudera.cyber.enrichment;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.ThreatIntelligence;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.cloudera.cyber.enrichemnt.stellar.StellarEnrichmentJob;
@@ -25,9 +24,6 @@ import com.cloudera.cyber.enrichment.lookup.LookupJob;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
 import com.cloudera.cyber.enrichment.rest.RestLookupJob;
-import com.cloudera.cyber.enrichment.stix.StixJob;
-import com.cloudera.cyber.enrichment.stix.StixResults;
-import com.cloudera.cyber.enrichment.stix.parsing.ThreatIntelligenceDetails;
 import com.cloudera.cyber.enrichment.threatq.ThreatQConfig;
 import com.cloudera.cyber.enrichment.threatq.ThreatQEntry;
 import com.cloudera.cyber.enrichment.threatq.ThreatQJob;
@@ -68,7 +64,6 @@ public abstract class EnrichmentJob {
     private static final String PARAMS_ENABLE_CIDR = "cidr.enabled";
     private static final String PARAMS_ENABLE_HBASE = "hbase.enabled";
     private static final String PARAMS_ENABLE_REST = "rest.enabled";
-    private static final String PARAMS_ENABLE_STIX = "stix.enabled";
     private static final String PARAMS_ENABLE_THREATQ = "threatq.enabled";
     private static final String PARAMS_ENABLE_RULES = "rules.enabled";
     private static final String PARAMS_ENABLE_STELLAR = "stellar.enabled";
@@ -121,21 +116,15 @@ public abstract class EnrichmentJob {
         DataStream<Message> rested = params.getBoolean(PARAMS_ENABLE_REST, true) ?
                 RestLookupJob.enrich(hbased, params.getRequired(PARAMS_REST_CONFIG_FILE)) : hbased;
 
-
-        // stix process parses incoming stix sources and stores locally, can use long term backup
-        // also outputs multiple streams which need sending somewhere
-        DataStream<Message> tied = params.getBoolean(PARAMS_ENABLE_STIX, true) ?
-                doStix(rested, env, params) : rested;
-
         // Run threatQ integrations
         DataStream<Message> tqed;
         if (params.getBoolean(PARAMS_ENABLE_THREATQ, true)) {
             List<ThreatQConfig> threatQconfigs = ThreatQJob.parseConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_THREATQ_CONFIG_FILE))));
             log.info("ThreatQ Configs {}", threatQconfigs);
-            tqed = ThreatQJob.enrich(tied, threatQconfigs);
+            tqed = ThreatQJob.enrich(rested, threatQconfigs);
             ThreatQJob.ingest(createThreatQSource(env, params), threatQconfigs);
         } else {
-            tqed = tied;
+            tqed = rested;
         }
 
         DataStream<Message> stellarStream;
@@ -168,14 +157,6 @@ public abstract class EnrichmentJob {
         return in;
     }
 
-    private DataStream<Message> doStix(DataStream<Message> in, StreamExecutionEnvironment env, ParameterTool params) {
-        DataStream<String> stixSource = createStixSource(env, params);
-        StixResults stix = StixJob.enrich(in, stixSource, getLongTermLookupFunction(), params);
-        writeStixThreats(params, stix.getThreats());
-        writeStixDetails(params, stix.getDetails());
-        return stix.getResults();
-    }
-
     private DataStream<ScoredMessage> doScoring(DataStream<Message> in, StreamExecutionEnvironment env, ParameterTool params) {
         DataStream<ScoringRuleCommand> rulesSource = createRulesSource(env, params);
         SingleOutputStreamOperator<ScoredMessage> results = ScoringJob.enrich(in, rulesSource, params);
@@ -192,13 +173,6 @@ public abstract class EnrichmentJob {
     protected abstract void writeEnrichmentQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> sideOutput);
 
     protected abstract DataStream<ThreatQEntry> createThreatQSource(StreamExecutionEnvironment env, ParameterTool params);
-
-    /* STIX related parts */
-    protected abstract DataStream<String> createStixSource(StreamExecutionEnvironment env, ParameterTool params);
-
-    protected abstract void writeStixThreats(ParameterTool params, DataStream<ThreatIntelligence> results);
-
-    protected abstract void writeStixDetails(ParameterTool params, DataStream<ThreatIntelligenceDetails> results);
 
     protected MapFunction<Message, Message> getLongTermLookupFunction() {
         return null;

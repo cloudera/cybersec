@@ -99,22 +99,11 @@ flink run -yt hbase-site.xml -yt hdfs-site.xml -yt core-site.xml flink-enrichmen
 |enrichment.topic.query.output | string | Publish enrichment command results to this topic.  | required | my_pipeline.enrichments.output |
 
 ## Rest Service Results
+
 | Property Name | Type                                    | Description                                  | Required/Default |Example             |
 |---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
 |rest.enabled | boolean | If true, enrich messages with key-value mappings stored in HBase | true | false |
 |rest.config.file | string |Path to the [rest configuration file](../flink-enrichment-lookup-rest/README.md) specifying the res enrichments to apply to each source.  | required | rest-enrichments.json|
-
-## Stix 1.x Threat Intelligence Indicators
-
-NOTE: This feature is experimental and for development environments only.  Do not use in production.
-
-| Property Name | Type                                    | Description                                  | Required/Default |Example             |
-|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
-|stix.enabled| boolean | If true, enrich message with Stix threat intelligence | true | false|
-|stix.input.topic| string | Topic to consume new Stix 1.x threat intelligence indicators. | stix|my_pipeline.stix.input|
-|stix.output.topic|string | Topic to publish results of Stix threat indicators | stix.output | my_pipeline.stix.output|
-|stix.hbase.table| string | Store Stix threat intelligence in this hbase table | threatIntelligence | stix_ti |
-
 
 ## Threatq Threat Intelligence Indicators
     
@@ -186,7 +175,6 @@ stellar.enabled=true
 stellar.config.dir=enrichments
 
 # disabled enrichments
-stix.enabled=false
 rules.enabled=false
 threatq.enabled=false
 ```
