@@ -4,6 +4,7 @@
 Applies selected enrichments to a message in the following order:
 1. Maxmind IP Geolocation.
 2. Maxmind IP ASN.
+<<<<<<< HEAD
 3. IP Cidr
 4. Local Flink state lookup.
 5. HBase key lookup.
@@ -11,6 +12,13 @@ Applies selected enrichments to a message in the following order:
 7. Experimental Feature: [Stix 1.x](https://oasis-open.github.io/cti-documentation/stix/compare) threat intelligence indicators.
 8. Threatq threat intelligence indicators.
 9. Stellar.
+=======
+3. Local Flink state lookup.
+4. HBase key lookup.
+5. Rest service results.
+6. Threatq threat intelligence indicators.
+7. Stellar.
+>>>>>>> [CYB-124] Stix removed from the rest of the logic
 
 After applying all enrichments, the triaging job runs all scoring rules and attaches the scores to the event.
 The triaging job publishes the scored event to the output topic.

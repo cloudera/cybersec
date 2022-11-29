@@ -854,38 +854,6 @@
         "default": "hdfs:/user/cybersec/data/GeoLite2-ASN.mmdb"
       },
       {
-        "name": "stix_enabled",
-        "label": "Stix enrichment feature",
-        "description": "Enable the stix enrichment feature by default.",
-        "configName": "stix.enabled",
-        "type": "boolean",
-        "default": false
-      },
-      {
-        "name": "stix_input_topic",
-        "label": "Stix input topic",
-        "description": "The default stix input topic.",
-        "configName": "stix.input.topic",
-        "type": "string",
-        "default": "stix.input"
-      },
-      {
-        "name": "stix_output_topic",
-        "label": "Stix output topic",
-        "description": "The default stix output topic.",
-        "configName": "stix.output.topic",
-        "type": "string",
-        "default": "stix.output"
-      },
-      {
-        "name": "stix_hbase_table",
-        "label": "Stix hbase table",
-        "description": "The default stix enrich hbase table.",
-        "configName": "stix.hbase.table",
-        "type": "string",
-        "default": "threatIntelligence"
-      },
-      {
         "name": "enrichment_topic_input",
         "label": "Enrichment input topic",
         "description": "Default enrichment topic for triage job.",
