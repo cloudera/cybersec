@@ -57,11 +57,14 @@ class SimpleBatchStatementExecutor<T, V> implements JdbcBatchStatementExecutor<T
 
     @Override
     public void addToBatch(T rec) {
-        batch.add(valueTransformer.apply(rec));
+        V value = valueTransformer.apply(rec);
+        LOG.debug("Added a new record to the batch. Record={}.", value);
+        batch.add(value);
     }
 
     @Override
     public void executeBatch() throws SQLException {
+        LOG.debug("Start executing batch for {} records.", batch.size());
         if (!batch.isEmpty()) {
             for (V r : batch) {
                 parameterSetter.accept(st, r);
