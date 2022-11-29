@@ -17,7 +17,9 @@ import java.time.Instant;
 import java.util.Collections;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -47,7 +49,6 @@ public class TestMessageSerializer {
                 .fields(Collections.singletonMap("test", "value"))
                 .observableType("testType")
                 .observable("testObservable")
-                .stixReference("stix")
                 .build();
     }
 
@@ -109,6 +110,6 @@ public class TestMessageSerializer {
 
 
         byte[] serialize = avroSnapshotSerializer.serialize(test, schemaMetadata);
-        assertThat("Bytes are made", serialize.length, equalTo(91));
+        assertThat("Bytes are made", serialize.length, equalTo(85));
     }
 }

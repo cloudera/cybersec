@@ -22,7 +22,6 @@ threatq.config.file=PIPELINE/triage/enrichments-threatq.json
 stellar.enabled=false
 stellar.config.dir=PIPELINE/triage/stellar
 
-stix.enabled=false
 rules.enabled=false
 
 kafka.group.id=BRANCH.PIPELINE.triage

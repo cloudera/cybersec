@@ -7,9 +7,8 @@ Applies selected enrichments to a message in the following order:
 3. Local Flink state lookup.
 4. HBase key lookup.
 5. Rest service results.
-6. Experimental Feature: [Stix 1.x](https://oasis-open.github.io/cti-documentation/stix/compare) threat intelligence indicators.
-7. Threatq threat intelligence indicators.
-8. Stellar.
+6. Threatq threat intelligence indicators.
+7. Stellar.
 
 After applying all enrichments, the triaging job runs all scoring rules and attaches the scores to the event.
 The triaging job publishes the scored event to the output topic.
