@@ -104,6 +104,7 @@
         <commons-validator.version>1.7</commons-validator.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-text.version>1.10.0</commons-text.version>
+        <java-grok.version>0.1.9</java-grok.version>
     </properties>
 
     <repositories>
