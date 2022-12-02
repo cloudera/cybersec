@@ -25,7 +25,6 @@
 
     <properties>
         <!-- main dependency versions -->
-        <antlr4.version>${antlr.version}</antlr4.version>
         <java-grok.version>0.1.9</java-grok.version>
         <global_shade_version>3.2.0</global_shade_version>
     </properties>
@@ -58,14 +57,20 @@
 
         <!-- syslog parser dependencies -->
         <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+            <version>${antlr.version}</version>
+        </dependency>
+<!--        Overwriting vulnerable altlr4-runtime in the simple-syslog-->
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>${antlr.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.palindromicity</groupId>
             <artifactId>simple-syslog</artifactId>
             <version>${simple-syslog.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4</artifactId>
-            <version>${antlr4.version}</version>
         </dependency>
 
         <!-- json path parser dependencies -->
