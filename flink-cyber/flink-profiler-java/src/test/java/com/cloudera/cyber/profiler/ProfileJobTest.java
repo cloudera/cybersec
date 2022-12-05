@@ -1,13 +1,28 @@
+/*
+ * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+ *
+ * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. Refer to the License for the specific permissions and
+ * limitations governing your use of the file.
+ */
+
 package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.profiler.dto.ProfileDto;
 import com.cloudera.cyber.rules.DynamicRuleCommandResult;
-import com.cloudera.cyber.scoring.*;
+import com.cloudera.cyber.scoring.ScoredMessage;
+import com.cloudera.cyber.scoring.Scores;
+import com.cloudera.cyber.scoring.ScoringRule;
+import com.cloudera.cyber.scoring.ScoringRuleCommand;
+import com.cloudera.cyber.scoring.ScoringRuleCommandResult;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -22,17 +37,25 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
 import static com.cloudera.cyber.flink.FlinkUtils.PARAMS_PARALLELISM;
 import static com.cloudera.cyber.profiler.ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION;
 import static com.cloudera.cyber.profiler.StatsProfileAggregateFunction.STATS_PROFILE_GROUP_SUFFIX;
-import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.*;
+import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.END_PERIOD_EXTENSION;
+import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.START_PERIOD_EXTENSION;
+import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.STATS_EXTENSION_SUFFIXES;
 import static com.cloudera.cyber.rules.DynamicRuleCommandType.UPSERT;
 import static com.cloudera.cyber.rules.RuleType.JS;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.withPrecision;
 import static org.hamcrest.Matchers.equalTo;
 
 public class ProfileJobTest extends ProfileJob {
@@ -45,7 +68,7 @@ public class ProfileJobTest extends ProfileJob {
     private static final String MAX_FIELD_NAME = "max_field";
     private static final String SUM_FIELD_NAME = "sum_field";
     private static final String TEST_PROFILE_GROUP = "test_profile";
-    private static final String BYTE_COUNT_PROFILE_GROUP ="region_byte_count";
+    private static final String BYTE_COUNT_PROFILE_GROUP = "region_byte_count";
     private static final String REGION_1 = "region_1";
     private static final String REGION_2 = "region_2";
     private static final String IP_SRC_1 = "1.1.1.1";
@@ -88,7 +111,7 @@ public class ProfileJobTest extends ProfileJob {
 
         sendSumMessage(currentTimestamp + 5, REGION_1, IP_SRC_1, 1024);
         sendSumMessage(currentTimestamp + 6, REGION_1, IP_SRC_1, 512);
-        sendSumMessage(currentTimestamp + 4, REGION_2, IP_SRC_2,128);
+        sendSumMessage(currentTimestamp + 4, REGION_2, IP_SRC_2, 128);
         sendSumMessage(currentTimestamp + 2500, REGION_1, IP_SRC_3, 1000);
 
         sendSumMessage(currentTimestamp + 6000, REGION_1, IP_SRC_3, 50000);
@@ -159,7 +182,7 @@ public class ProfileJobTest extends ProfileJob {
     private void checkMeasurementValues(Map<String, String> extensions, ProfileGroupConfig profileGroupConfig, ProfileMeasurementConfig measurement) {
         checkMeasurementValue(extensions, measurement.getResultExtensionName());
         if (profileGroupConfig.hasStats()) {
-            profileGroupConfig.getMeasurements().forEach( m -> STATS_EXTENSION_SUFFIXES.forEach(suffix -> checkMeasurementValue(extensions, m.getResultExtensionName().concat(suffix))));
+            profileGroupConfig.getMeasurements().forEach(m -> STATS_EXTENSION_SUFFIXES.forEach(suffix -> checkMeasurementValue(extensions, m.getResultExtensionName().concat(suffix))));
         }
     }
 
@@ -167,7 +190,7 @@ public class ProfileJobTest extends ProfileJob {
         String measurementString = extensions.get(name);
         assertThat(measurementString).isNotNull();
         //noinspection ResultOfMethodCallIgnored
-        assertThatCode(() ->Double.parseDouble(measurementString)).doesNotThrowAnyException();
+        assertThatCode(() -> Double.parseDouble(measurementString)).doesNotThrowAnyException();
     }
 
     private void sendMaxMessage(long timestamp, String keyFieldValue, long maxFieldValue) {
@@ -175,7 +198,7 @@ public class ProfileJobTest extends ProfileJob {
                 KEY_FIELD_NAME, keyFieldValue,
                 MAX_FIELD_NAME, Long.toString(maxFieldValue)
         );
-        ScoredMessage message = ScoredMessage.builder().cyberScoresDetails( Collections.emptyList()).message(TestUtils.createMessage(timestamp, "test", extensions)).build();
+        ScoredMessage message = ScoredMessage.builder().cyberScoresDetails(Collections.emptyList()).message(TestUtils.createMessage(timestamp, "test", extensions)).build();
         source.sendRecord(message);
     }
 
@@ -187,8 +210,8 @@ public class ProfileJobTest extends ProfileJob {
         );
 
         Map<String, Double> ipToScore = ImmutableMap.of(IP_SRC_1, 7.0,
-                                                        IP_SRC_2, 13.0,
-                                                        IP_SRC_3, 31.0);
+                IP_SRC_2, 13.0,
+                IP_SRC_3, 31.0);
 
         List<Scores> scores = Collections.singletonList(Scores.builder().ruleId(RULE_UUID).reason("my reason").score(ipToScore.get(secondKeyField)).build());
         ScoredMessage message = ScoredMessage.builder().cyberScoresDetails(scores).

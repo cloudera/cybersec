@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+#
+# Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+#
+# This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+# except in compliance with the License. You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0.
+#
+# This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. Refer to the License for the specific permissions and
+# limitations governing your use of the file.
+#
+
+if [ "$#" -ne 3 ]; then
+  echo "Usage: $0 branch pipeline parser" >&2
+  exit 1
+fi
+
+branch=$1
+pipeline=$2
+parser=$3
+
+if [ ! -d "$pipeline" ]; then
+    echo "pipeline $pipeline does not exist"
+    exit 1
+fi
+
+if [ ! -f "$pipeline/parse/$parser/parser.properties.template" ]; then
+    echo "pipeline $pipeline parser $parser does not exist"
+    exit 1
+fi
+
+generated_dir=generated/$pipeline/parse/$parser
+mkdir -p "$generated_dir"
+generated_parser_props=$generated_dir/parser.properties
+echo "# GENERATED FILE - EDITS WILL BE OVERWRITTEN - EDIT parser.properties.template instead." > $generated_parser_props
+sed -e s/BRANCH/$branch/g $pipeline/parse/$parser/parser.properties.template >> $generated_parser_props
+job_name=${branch}.${pipeline}.parse.${parser}
+
+generated_enrichment_storage_file="enrichments-storage.json"
+enrichment_storage_template="${generated_enrichment_storage_file}.template"
+generated_enrichment_storage="$generated_dir/$generated_enrichment_storage_file"
+sed -e s/BRANCH/$branch/g "$pipeline/triage/$enrichment_storage_template" > $generated_enrichment_storage
+
+source cs-override-hbase
+override_hbase
+
+cs-cancel-job ${job_name}
+
+cs-start-job -j parser-chains-flink -y $pipeline/parse/stellar -y $pipeline/parse/patterns -y $pipeline/parse/schemas "${ship_configs[@]}" -p /etc/cybersec/conf/parser.properties -p kafka.properties -p "${generated_parser_props}"
+

@@ -4,32 +4,117 @@
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/start-generator": {
+  "bin/cs-add-enrich": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/start-triage": {
+  "bin/cs-add-index": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/start-parser": {
+  "bin/cs-add-parser": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/start-profile": {
+  "bin/cs-add-profile": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/start-hive-indexing": {
+  "bin/cs-add-triage": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/send-scoring-command": {
+  "bin/cs-cancel-job": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-create-pipeline": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-get-template-dir": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-init-keystore": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-load-enrich": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-lookup-jar": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-print-topic": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-publish-samples": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-restart-index": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-restart-parser": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-restart-profile": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-restart-triage": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-run-java": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-override-hbase": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-start-job": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-stop-job": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-truststore-location": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-upsert-rule": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
@@ -65,6 +150,96 @@
     "permissions": "0755"
   },
   "etc/conf/scoring-command-rule.properties": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/index": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/parse": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/profile": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/triage": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/kafka.properties.template.kerberos": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/kafka.properties.template.open": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/index/index.properties.template": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/parse/chain-topic-map.json": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/parse/parser.properties.template": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/profile/profile.json": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/profile/profile.properties.template": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/triage/enrichments-lookups.json": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/triage/enrichments-rest.json.template": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/triage/enrichments-storage.json.template": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/triage/enrichments-threatq.json": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/triage/load.properties.template": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/triage/triage.properties.template": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"

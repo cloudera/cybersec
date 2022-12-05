@@ -1,3 +1,15 @@
+/*
+ * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+ *
+ * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. Refer to the License for the specific permissions and
+ * limitations governing your use of the file.
+ */
+
 package com.cloudera.cyber.jdbc.connector.jdbc.internal;
 
 import com.cloudera.cyber.jdbc.connector.jdbc.JdbcExecutionOptions;
@@ -158,17 +170,19 @@ public class JdbcOutputFormat<In, JdbcIn, JdbcExec extends JdbcBatchStatementExe
 
         for (int i = 0; i <= executionOptions.getMaxRetries(); i++) {
             try {
+                // make sure that a new connection was used for every flush to the database
+                reconnect();
                 attemptFlush();
                 batchCount = 0;
                 break;
-            } catch (SQLException e) {
+            } catch (SQLException | ClassNotFoundException e) {
                 LOG.error("JDBC executeBatch error, retry times = {}", i, e);
                 if (i >= executionOptions.getMaxRetries()) {
                     throw new IOException(e);
                 }
                 try {
                     if (!connectionProvider.isConnectionValid()) {
-                        updateExecutor(true);
+                        reconnect();
                     }
                 } catch (Exception exception) {
                     LOG.error(
@@ -222,12 +236,10 @@ public class JdbcOutputFormat<In, JdbcIn, JdbcExec extends JdbcBatchStatementExe
         checkFlushException();
     }
 
-    public void updateExecutor(boolean reconnect) throws SQLException, ClassNotFoundException {
+    public void reconnect() throws SQLException, ClassNotFoundException {
+        LOG.debug("Reestablishing connection to the database.");
         jdbcStatementExecutor.closeStatements();
-        jdbcStatementExecutor.prepareStatements(
-                reconnect
-                        ? connectionProvider.reestablishConnection()
-                        : connectionProvider.getConnection());
+        jdbcStatementExecutor.prepareStatements(getConnection());
     }
 
     @VisibleForTesting

@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+#
+# Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+#
+# This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+# except in compliance with the License. You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0.
+#
+# This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. Refer to the License for the specific permissions and
+# limitations governing your use of the file.
+#
+
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 branch pipeline" >&2
+  exit 1
+fi
+
+branch=$1
+pipeline=$2
+
+if [ ! -d "$pipeline" ]; then
+    echo "pipeline $pipeline does not exist"
+    exit 1
+fi
+
+generated_dir="generated/$pipeline/triage"
+mkdir -p "$generated_dir"
+
+generated_triage_props=$generated_dir/triage.properties
+echo "# GENERATED FILE - EDITS WILL BE OVERWRITTEN - EDIT triage.properties.template instead." > $generated_triage_props
+sed -e s/BRANCH/$branch/g $pipeline/triage/triage.properties.template >> $generated_triage_props
+
+generated_enrichment_storage_file="enrichments-storage.json"
+enrichment_storage_template="${generated_enrichment_storage_file}.template"
+generated_enrichment_storage="$generated_dir/$generated_enrichment_storage_file"
+sed -e s/BRANCH/$branch/g "$pipeline/triage/$enrichment_storage_template" > $generated_enrichment_storage
+
+generated_enrichment_rest_file="enrichments-rest.json"
+enrichment_rest_template="${generated_enrichment_rest_file}.template"
+cs-run-java json-commands com.cloudera.cyber.json.ReplaceJsonProperties "$pipeline/triage/$enrichment_rest_template" rest.properties "$generated_dir/$generated_enrichment_rest_file"
+
+job_name=${branch}.${pipeline}.triage
+
+savepoint_options=()
+savepoint=$(cs-stop-job ${job_name})
+if [ ! -z "$savepoint" ]; then
+   savepoint_options+=("-s" "$savepoint")
+fi
+
+source cs-override-hbase
+override_hbase
+
+cs-start-job -j flink-enrichment-combined -y "$pipeline/triage/stellar" "${ship_configs[@]}" -p /etc/cybersec/conf/triage.properties  -p kafka.properties -p "$generated_triage_props" "${savepoint_options[@]}"

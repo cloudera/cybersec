@@ -1,18 +1,29 @@
+/*
+ * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+ *
+ * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. Refer to the License for the specific permissions and
+ * limitations governing your use of the file.
+ */
+
 package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import com.cloudera.cyber.generator.FreemarkerImmediateGenerator;
 import com.cloudera.cyber.profiler.dto.MeasurementDto;
 import com.cloudera.cyber.profiler.dto.ProfileDto;
-import com.cloudera.cyber.profiler.phoenix.PhoenixThickClient;
 import com.cloudera.cyber.profiler.phoenix.PhoenixThinClient;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import com.cloudera.cyber.scoring.ScoredMessageWatermarkedStream;
 import com.cloudera.cyber.scoring.ScoringJob;
 import com.cloudera.cyber.scoring.ScoringRuleCommand;
 import com.cloudera.cyber.scoring.ScoringRuleCommandResult;
-import com.cloudera.cyber.generator.FreemarkerImmediateGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -209,7 +220,8 @@ public abstract class ProfileJob {
                 }
             });
             if (profileDtoDb == null) {
-                Integer profileId = client.selectResultWithParams(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_ID, propertiesMap), FIRST_VALUE_MAPPER, preparedStatement -> {});
+                Integer profileId = client.selectResultWithParams(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_ID, propertiesMap), FIRST_VALUE_MAPPER, preparedStatement -> {
+                });
                 client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPDATE_PROFILE, propertiesMap), getUpdateProfileConsumer(profileDto, profileId));
                 profileDto.setId(profileId);
             } else {
@@ -329,7 +341,7 @@ public abstract class ProfileJob {
         config.put("format", measurementDto.getFormat());
         config.put("first_seen_expiration_duration", Optional.ofNullable(measurementDto.getFirstSeenExpirationDuration()).map(Objects::toString).orElse(null));
         config.put("first_seen_expiration_duration_unit", measurementDto.getFirstSeenExpirationDurationUnit());
-        config.put("profile_id",  Optional.ofNullable(measurementDto.getProfileId()).map(Objects::toString).orElse(null));
+        config.put("profile_id", Optional.ofNullable(measurementDto.getProfileId()).map(Objects::toString).orElse(null));
         return config;
     }
 

@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+#
+# Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+#
+# This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+# except in compliance with the License. You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0.
+#
+# This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. Refer to the License for the specific permissions and
+# limitations governing your use of the file.
+#
+
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 pipeline_name profile_name" >&2
+  exit 1
+fi
+
+pipeline=$1
+profile_name=$2
+profile_dir=$pipeline/profile/$profile_name
+
+if [ -e "$profile_dir" ]; then
+  echo "ERROR: $0 Profile $profile_name exists already." >&2
+  exit 1
+fi
+
+template_dir=$(cs-get-template-dir)
+mkdir -p $profile_dir
+for FILE in $template_dir/profile/*; do
+    sed -e s/PIPELINE/$pipeline/g  -e s/PROFILE_NAME/$profile_name/g $FILE > $profile_dir/${FILE##*/}
+done
+mkdir -p $profile_dir/rules

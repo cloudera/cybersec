@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+#
+# Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+#
+# This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+# except in compliance with the License. You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0.
+#
+# This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. Refer to the License for the specific permissions and
+# limitations governing your use of the file.
+#
+
+if [ "$#" -ne 3 ]; then
+  echo "Usage: $0 branch pipeline profile_name" >&2
+  exit 1
+fi
+
+branch=$1
+pipeline=$2
+profile_name=$3
+
+if [ ! -d "$pipeline" ]; then
+    echo "pipeline $pipeline does not exist"
+    exit 1
+fi
+
+if [ ! -d "$pipeline/profile/$profile_name" ]; then
+    echo "profile $profile_name does not exist"
+    exit 1
+fi
+
+generated_dir="generated/$pipeline/profile/$profile_name"
+mkdir -p "$generated_dir"
+
+generated_profile_props=$generated_dir/profile.properties
+echo "# GENERATED FILE - EDITS WILL BE OVERWRITTEN - EDIT profile.properties.template instead." > $generated_profile_props
+sed -e s/BRANCH/$branch/g "$pipeline/profile/$profile_name/profile.properties.template" >> $generated_profile_props
+
+
+job_name=${branch}.${pipeline}.profile.${profile_name}
+
+savepoint_options=()
+savepoint=$(cs-stop-job ${job_name})
+if [ ! -z "$savepoint" ]; then
+   savepoint_options+=("-s" "$savepoint")
+fi
+
+source cs-override-hbase
+override_hbase
+
+phoenix_client_jar=$(ls /opt/cloudera/parcels/CDH/lib/phoenix_queryserver/phoenix-queryserver-client-*.jar -1)
+
+cs-start-job -j flink-profiler-java -c "$phoenix_client_jar" "${ship_configs[@]}" -p /etc/cybersec/conf/profile.properties -p kafka.properties -p phoenix.properties -p "$generated_profile_props" "${savepoint_options[@]}"

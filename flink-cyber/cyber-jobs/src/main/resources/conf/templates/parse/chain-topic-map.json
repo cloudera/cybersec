@@ -1,0 +1,10 @@
+{
+  "<topic_pattern 1>":{
+     "chainKey":"<chain_name_1>",
+     "source":"<message_source_name_2>"
+  },
+  "<topic_pattern 2>":{
+     "chainKey":"<chain_name_2>",
+     "source":"<message_source_name_2>"
+  }
+}

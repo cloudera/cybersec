@@ -1,3 +1,15 @@
+/*
+ * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+ *
+ * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. Refer to the License for the specific permissions and
+ * limitations governing your use of the file.
+ */
+
 package com.cloudera.cyber.hbase;
 
 import com.cloudera.cyber.flink.CacheMetrics;
@@ -6,8 +18,10 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.connector.hbase.util.HBaseConfigurationUtil;
 import org.apache.flink.metrics.Counter;
 import org.apache.flink.metrics.MetricGroup;
+import org.apache.flink.util.StringUtils;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -29,6 +43,7 @@ public abstract class AbstractHbaseMapFunction<IN, OUT> extends RichMapFunction<
         put("touchedAt", AbstractHbaseMapFunction::longBytesToString);
         put("score", AbstractHbaseMapFunction::floatBytesToString);
     }};
+    private final byte[] serializedHbaseConfig;
     protected transient MetricGroup metricsGroup;
     protected transient Counter messageCounter;
     protected transient Counter fetchCounter;
@@ -79,6 +94,10 @@ public abstract class AbstractHbaseMapFunction<IN, OUT> extends RichMapFunction<
         return Bytes.toString(bytesValue);
     }
 
+    public AbstractHbaseMapFunction() {
+        serializedHbaseConfig = HBaseConfigurationUtil.serializeConfiguration(HbaseConfiguration.configureHbase());
+    }
+
     @Override
     public final void open(Configuration parameters) throws Exception {
         super.open(parameters);
@@ -88,8 +107,10 @@ public abstract class AbstractHbaseMapFunction<IN, OUT> extends RichMapFunction<
         this.realResultCounter = metricsGroup.counter("realResult");
         this.fetchCounter = metricsGroup.counter("fetchCounter");
 
-        org.apache.hadoop.conf.Configuration hbaseConfig = HbaseConfiguration.configureHbase();
+        org.apache.hadoop.conf.Configuration hbaseConfig = HBaseConfigurationUtil.deserializeConfiguration(serializedHbaseConfig, HbaseConfiguration.configureHbase());
+        log.info("Start connection to hbase zookeeper quorum: {}",hbaseConfig.get("hbase.zookeeper.quorum"));
         connection = ConnectionFactory.createConnection(hbaseConfig);
+        log.info("Connected to hbase zookeeper quorum: {}",hbaseConfig.get("hbase.zookeeper.quorum"));
 
         cache = Caffeine.newBuilder()
                 .expireAfterAccess(60, TimeUnit.SECONDS)

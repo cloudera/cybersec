@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+  ~
+  ~ This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+  ~ except in compliance with the License. You may obtain a copy of the License at
+  ~ http://www.apache.org/licenses/LICENSE-2.0.
+  ~
+  ~ This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+  ~ either express or implied. Refer to the License for the specific permissions and
+  ~ limitations governing your use of the file.
+  -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -124,7 +136,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
-            <version>1.1</version>
+            <version>${commons-text.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-validator</groupId>
@@ -334,10 +346,17 @@
                 <artifactId>antlr4-maven-plugin</artifactId>
                 <version>${global_antlr_version}</version>
                 <configuration>
-                    <outputDirectory>${basedir}/src/main/java</outputDirectory>
+                    <arguments>
+                        <argument>-package</argument>
+                        <argument>org.apache.metron.stellar.common.generated</argument>
+                    </arguments>
+                    <libDirectory>${basedir}/src/main/antlr4/imports</libDirectory>
+                    <sourceDirectory>${basedir}/src/main/antlr4</sourceDirectory>
+                    <outputDirectory>${basedir}/src/main/java/org/apache/metron/stellar/common/generated</outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>antlr4</goal>
                         </goals>

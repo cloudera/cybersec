@@ -1,3 +1,15 @@
+/*
+ * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+ *
+ * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. Refer to the License for the specific permissions and
+ * limitations governing your use of the file.
+ */
+
 package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.ValidateUtils;
@@ -173,8 +185,8 @@ public class ProfileJobKafka extends ProfileJob {
                 Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_AVATICA_USER)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_AVATICA_USER);
                 Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD);
             } else {
-                Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_PRINCIPAL)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_AVATICA_USER);
-                Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_KEYTAB)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD);
+                Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_PRINCIPAL)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_PRINCIPAL);
+                Preconditions.checkArgument(StringUtils.isNotEmpty(params.get(PHOENIX_THIN_PROPERTY_KEYTAB)), EMPTY_ERROR_MESSAGE_TEMPLATE, PHOENIX_THIN_PROPERTY_KEYTAB);
 
             }
             ValidateUtils.validatePhoenixName(params.get(PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_DATA_TABLE_NAME), PARAMS_PHOENIX_DB_QUERY_MEASUREMENT_DATA_TABLE_NAME);

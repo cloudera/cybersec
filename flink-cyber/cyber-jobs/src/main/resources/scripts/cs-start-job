@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+#
+# Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+#
+# This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+# except in compliance with the License. You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0.
+#
+# This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. Refer to the License for the specific permissions and
+# limitations governing your use of the file.
+#
+
+SHIP_DIRS=""
+YARN_JOB_MANAGER_MEMORY="2048"
+YARN_TASK_MANAGER_MEMORY="2048"
+
+savepoint_options=()
+classpath_options=()
+job_properties=()
+ship_options=()
+
+# get_property_value <file name> <property_name>
+# get the value of a property from a file
+get_property_value() {
+  echo $(cat "$1" | grep -v "^.*#" | grep "$2" | cut -d '=' -f 2-)
+}
+
+# include_job_properties <file name>
+# Include the specified file in the list of property files sent to the job.
+# Extract any settings to use as job command line options
+include_job_properties() {
+  job_properties+=("$1")
+
+  property_setting=$(get_property_value "$1" "flink.job.manager.memory.mb")
+  YARN_JOB_MANAGER_MEMORY=${property_setting:-"${YARN_JOB_MANAGER_MEMORY}"}
+  echo  "INFO: $1: Job Manager Memory = $YARN_JOB_MANAGER_MEMORY" >&2
+
+  property_setting=$(get_property_value "$1" "flink.task.manager.memory.mb")
+  YARN_TASK_MANAGER_MEMORY=${property_setting:-"${YARN_TASK_MANAGER_MEMORY}"}
+  echo  "INFO: $1: Task Manager Memory = $YARN_TASK_MANAGER_MEMORY" >&2
+
+  property_setting=$(get_property_value "$1" "flink.job.name")
+  FLINK_JOB_NAME=${property_setting:-"${FLINK_JOB_NAME}"}
+  echo  "INFO: $1: Flink Job Name = $FLINK_JOB_NAME" >&2
+}
+
+# ship_path <file or directory path>
+# If the path is either a file or directory, include a -yt option on the job command line
+ship_path() {
+  if [ -e "$1" ]; then
+      ship_options+=("-yt" "$1")
+  else
+      echo "WARN: Could not ship $1 because it does not exist." >&2
+  fi
+}
+
+usage="$(basename "$0")  -- starts cybersec job
+
+where:
+    -h show help
+    -j flink job jar
+    -y directory to ship
+    -c add file or directory to classpath
+    -n Yarn job name
+    -p property file name
+    -s save point
+    "
+
+while getopts "j:y:c:n:p:s:h" option; do
+  case $option in
+  j)
+    JOB_JAR=$(cs-lookup-jar "$OPTARG")
+    ;;
+  y)
+    ship_path "$OPTARG"
+    ;;
+  c)
+    classpath_options+=("--classpath" 'file://'"$OPTARG")
+    ;;
+  n)
+    YARN_NAME="$OPTARG"
+    ;;
+  p)
+    include_job_properties "$OPTARG"
+    ;;
+  s)
+    savepoint_options=("--allowNonRestoredState" "-s" "$OPTARG")
+    ;;
+  h)
+    echo "$usage"
+    exit 0
+    ;;
+  \?)
+    echo "Invalid option -$OPTARG" >&2
+    exit 1
+    ;;
+  esac
+
+  case $OPTARG in
+  -*)
+    echo "Option $option needs a valid argument"
+    exit 1
+    ;;
+  esac
+done
+
+if [ -z "$JOB_JAR" ]; then
+  echo "ERROR: Specify job jar with -j option." >&2
+  exit 1
+fi
+
+if [ "${#job_properties[@]}" -eq 0 ]; then
+  echo "ERROR: Specify at least one job property file with -p option" >&2
+  exit 1
+fi
+
+YARN_NAME=${YARN_NAME:-$FLINK_JOB_NAME}
+if [ -z "$YARN_NAME" ]; then
+  echo "ERROR: Set flink.job.name in job property file or use -n option" >&2
+  exit 1
+fi
+
+# read_properties_into_variables <property_file_name>
+# Read the name value pairs
+#   split at first equals to key and value
+#   convert property name to legal shell variable name
+#   set shell variable to property variable
+read_properties_into_variables() {
+  while read -r line; do
+    [[ "$line" =~ ^([[:space:]]*|[[:space:]]*#.*)$ ]] && continue
+    value=${line#*=}
+    key=${line%"=$value"}
+    key=$(echo $key | tr '.' '_')
+    eval ${key}=\${value}
+  done <$1
+}
+
+cs-init-keystore
+kerberos_properties="kerberos.properties"
+internal_ssl_properties="generated/internal_ssl.properties"
+
+security_options=()
+if [ -f "${kerberos_properties}" ]; then
+  read_properties_into_variables "${kerberos_properties}"
+  read_properties_into_variables "${internal_ssl_properties}"
+  security_options+=("-yD" "security.kerberos.login.keytab=${kerberos_keytab}")
+  security_options+=("-yD" "security.kerberos.login.principal=${kerberos_principal}")
+  security_options+=("-yD" "security.ssl.internal.enabled=true")
+  security_options+=("-yD" "security.ssl.internal.keystore=${flink_internal_keystore}")
+  security_options+=("-yD" "security.ssl.internal.key-password=${flink_internal_password}")
+  security_options+=("-yD" "security.ssl.internal.keystore-password=${flink_internal_password}")
+  security_options+=("-yD" "security.ssl.internal.truststore=${flink_internal_keystore}")
+  security_options+=("-yD" "security.ssl.internal.truststore-password=${flink_internal_password}")
+  security_options+=("-yt" "generated/${flink_internal_keystore}")
+fi
+
+flink run \
+  "${savepoint_options[@]}" \
+  "${classpath_options[@]}" \
+  "${ship_options[@]}" \
+  --jobmanager yarn-cluster -yjm "$YARN_JOB_MANAGER_MEMORY" -ytm "$YARN_TASK_MANAGER_MEMORY" --detached --yarnname "$YARN_NAME" \
+  "${security_options[@]}" \
+  "${JOB_JAR}" "${job_properties[@]}"

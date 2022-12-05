@@ -1,3 +1,15 @@
+/*
+ * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+ *
+ * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. Refer to the License for the specific permissions and
+ * limitations governing your use of the file.
+ */
+
 package com.cloudera.cyber.kafka;
 
 import com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient;
@@ -23,8 +35,10 @@ public class Config {
     public static final String K_TRUSTSTORE_PATH = "trustStorePath";
     public static final String K_TRUSTSTORE_PASSWORD = "trustStorePassword";
     public static final String K_KEYSTORE_PASSWORD = "keyStorePassword";
+    public static final String PRINT_PROPERTY_PREFIX = "print.";
 
     private static final String KAFKA_PREFIX = "kafka.";
+    public static final String PRINT_KAFKA_PROPERTY_PREFIX = PRINT_PROPERTY_PREFIX.concat(KAFKA_PREFIX);
 
     private final Properties properties = new Properties();
 
@@ -39,11 +53,16 @@ public class Config {
         kafkaConsumerProperties.putAll(readSchemaRegistryProperties(properties));
         kafkaConsumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         kafkaConsumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
-        kafkaConsumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "flink_cyber_command_line".concat(UUID.randomUUID().toString()));
-        kafkaConsumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        overridePrintDefault(kafkaConsumerProperties, ConsumerConfig.GROUP_ID_CONFIG, "flink_cyber_command_line".concat(UUID.randomUUID().toString()));
+        overridePrintDefault(kafkaConsumerProperties, ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         kafkaConsumerProperties.put("specific.avro.reader", false);
 
         return kafkaConsumerProperties;
+    }
+
+    private void overridePrintDefault(Properties kafkaConsumerProperties, String kafkaProperty, String defaultValue) {
+        kafkaConsumerProperties.put(kafkaProperty, properties.getOrDefault(PRINT_KAFKA_PROPERTY_PREFIX.concat(kafkaProperty), defaultValue));
     }
 
     private Properties getPropertiesWithKafkaPrefix() {

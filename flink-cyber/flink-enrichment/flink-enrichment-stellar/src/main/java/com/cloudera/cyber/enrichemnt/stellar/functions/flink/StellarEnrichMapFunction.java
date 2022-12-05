@@ -1,3 +1,15 @@
+/*
+ * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+ *
+ * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. Refer to the License for the specific permissions and
+ * limitations governing your use of the file.
+ */
+
 package com.cloudera.cyber.enrichemnt.stellar.functions.flink;
 
 import com.cloudera.cyber.DataQualityMessage;
@@ -12,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.connector.hbase.util.HBaseConfigurationUtil;
 import org.apache.metron.common.configuration.EnrichmentConfigurations;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
 import org.apache.metron.common.configuration.enrichment.handler.ConfigHandler;
@@ -45,6 +58,7 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
     private final Map<String, String> stringEnrichmentConfigs;
     private final String geoDatabasePath;
     private final String asnDatabasePath;
+    private final byte[] serializedHbaseConfig;
     private static final String ENRICHMENT = "ENRICHMENT";
     private transient Map<String, SensorEnrichmentConfig> sensorEnrichmentConfigs;
     private transient Map<String, EnrichmentAdapter<CacheKey>> adapterMap;
@@ -53,6 +67,7 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
         this.stringEnrichmentConfigs = new HashMap<>(configs);
         this.geoDatabasePath = geoDatabasePath;
         this.asnDatabasePath = asnDatabasePath;
+        this.serializedHbaseConfig = HBaseConfigurationUtil.serializeConfiguration(HbaseConfiguration.configureHbase());
     }
 
     @Override
@@ -88,10 +103,11 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
     }
 
     private Context initializeStellarContext(EnrichmentConfigurations enrichmentConfigurations) {
+        org.apache.hadoop.conf.Configuration hbaseConfig = HBaseConfigurationUtil.deserializeConfiguration(serializedHbaseConfig, HBaseConfigurationUtil.createHBaseConf());
         Context stellarContext = new Context.Builder()
                 .with(Context.Capabilities.GLOBAL_CONFIG, () -> ImmutableMap.builder()
                         .putAll(enrichmentConfigurations.getGlobalConfig())
-                        .put(HbaseConfiguration.HBASE_CONFIG_NAME, HbaseConfiguration.configureHbase())
+                        .put(HbaseConfiguration.HBASE_CONFIG_NAME, hbaseConfig)
                         .build())
                 .with(Context.Capabilities.STELLAR_CONFIG, enrichmentConfigurations::getGlobalConfig)
                 .build();

@@ -1,3 +1,15 @@
+/*
+ * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+ *
+ * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file 
+ * except in compliance with the License. You may obtain a copy of the License at 
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, 
+ * either express or implied. Refer to the License for the specific permissions and 
+ * limitations governing your use of the file.
+ */
+
 package com.cloudera.cyber.parser;
 
 import com.cloudera.cyber.Message;
@@ -100,6 +112,23 @@ public class TestParserJobChainDirectory extends AbstractParserJobTest {
         // all other fields present and correct
         assertThat("name correct", out.getExtensions(),
                 hasEntry(equalTo("timestamp_new"), Matchers.any(String.class)));
+    }
+
+    @Test
+    public void testParserFail() throws Exception {
+        final String path = Resources.getResource(CHAIN_DIR_SUCCESS).getPath() + "-not-existing";
+        ParameterTool params = ParameterTool.fromMap(new HashMap<String, String>() {{
+            put(PARAM_CHAIN_CONFIG_DIRECTORY, path);
+            put(PARAM_PRIVATE_KEY, getKeyBase64());
+        }});
+
+        try {
+            createPipeline(params);
+        } catch (RuntimeException e) {
+            final String message = String.format("Provided config directory doesn't exist or empty [%s]!", path);
+            assertThat("Exception message not expected", e.getMessage(), is(message));
+            assertThat("Exception type not expected", e.getClass(), is(RuntimeException.class));
+        }
     }
 
     @ParameterizedTest

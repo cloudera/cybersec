@@ -147,3 +147,4 @@ local.properties
 # Uncomment this line if you wish to ignore the project description file.
 # Typically, this file would be tracked if it contains build/dependency configurations:
 .project
+/flink-cyber/flink-stellar/src/main/java/org/apache/metron/stellar/common/generated/*
