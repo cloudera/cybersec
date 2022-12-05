@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
-import static com.cloudera.parserchains.parsers.StellarParserTest.getFileFromResource;
+import static com.cloudera.parserchains.parsers.ResourceTestUtil.getFileFromResource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 

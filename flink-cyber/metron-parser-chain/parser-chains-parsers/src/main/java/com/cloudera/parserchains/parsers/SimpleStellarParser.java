@@ -57,7 +57,7 @@ public class SimpleStellarParser implements Parser {
         Path configPath = new Path(pathToConfig);
         try (FSDataInputStream fsDataInputStream = fileSystem.open(configPath)) {
             final String fileContents = IOUtils.toString(fsDataInputStream, StandardCharsets.UTF_8);
-            final List<String> expressionList = Arrays.asList(fileContents.split("\n"));
+            final List<String> expressionList = Arrays.asList(fileContents.split("\r?\n"));
 
             updateExpressionList(expressionList);
         } catch (Exception e) {

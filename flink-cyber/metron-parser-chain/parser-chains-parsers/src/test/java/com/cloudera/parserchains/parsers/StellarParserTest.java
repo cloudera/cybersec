@@ -17,11 +17,11 @@ import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.StringFieldValue;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
+import static com.cloudera.parserchains.parsers.ResourceTestUtil.getFileFromResource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
@@ -121,10 +121,6 @@ public class StellarParserTest {
                 entry(FieldName.of("original_string"), StringFieldValue.of(originalString)));
 
         return output;
-    }
-
-    static File getFileFromResource(String path) {
-        return new File(StellarParserTest.class.getResource(path).getFile());
     }
 
 }
