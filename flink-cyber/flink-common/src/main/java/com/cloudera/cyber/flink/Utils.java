@@ -3,6 +3,7 @@ package com.cloudera.cyber.flink;
 import com.google.common.io.Resources;
 import com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -211,8 +212,17 @@ public class Utils {
         return ConfigHolder.INSTANCE;
     }
 
-    public static boolean timeCompare(long unit1, String unitType1, long unit2, String unitType2) {
+    public static boolean timeCompare(Long unit1, String unitType1, Long unit2, String unitType2) {
+        if (unit1 == null && unitType1 == null && unit2 == null && unitType2 == null) {
+            return true;
+        }else if (unit1 == null || unitType1 == null || unit2 == null || unitType2 == null) {
+            return false;
+        }
         return Time.of(unit1, TimeUnit.valueOf(unitType1)).toMilliseconds() == Time.of(unit2, TimeUnit.valueOf(unitType2)).toMilliseconds();
+    }
+
+    public static <T> boolean timeCompare(T object1, T object2, Function<T,Long> timeUnitSelector, Function<T, String> timeUnitTypeSelector) {
+        return timeCompare(timeUnitSelector.apply(object1),timeUnitTypeSelector.apply(object1),timeUnitSelector.apply(object1), timeUnitTypeSelector.apply(object2));
     }
 
     private static class ConfigHolder {

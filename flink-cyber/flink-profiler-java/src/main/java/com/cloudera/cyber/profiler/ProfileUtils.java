@@ -3,6 +3,8 @@ package com.cloudera.cyber.profiler;
 import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.profiler.dto.MeasurementDto;
 import com.cloudera.cyber.profiler.dto.ProfileDto;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.experimental.UtilityClass;
@@ -18,13 +20,17 @@ public class ProfileUtils {
             return true;
         }
 
-        profileDto1.getMeasurementDtos().stream().forEach(measurementDto1 -> {
-            profileDto2.getMeasurementDtos().stream().filter(md -> md.getResultExtensionName().equals(measurementDto1.getResultExtensionName())).findFirst().ifPresent(measurementDto2 -> measurementCompare(measurementDto1, measurementDto2));
-        });
+        Optional.ofNullable(profileDto1.getMeasurementDtos()).orElseGet(ArrayList::new)
+            .forEach(measurementDto1 ->
+                Optional.ofNullable(profileDto2.getMeasurementDtos()).orElseGet(ArrayList::new)
+                    .stream().filter(md -> md.getResultExtensionName().equals(measurementDto1.getResultExtensionName()))
+                    .findFirst()
+                    .ifPresent(measurementDto2 -> measurementCompare(measurementDto1, measurementDto2)));
 
         return Objects.equals(profileDto1.getProfileGroupName(), profileDto2.getProfileGroupName()) && Objects.equals(profileDto1.getKeyFieldNames(), profileDto2.getKeyFieldNames())
             && Utils.timeCompare(profileDto1.getPeriodDuration(), profileDto1.getPeriodDurationUnit(), profileDto2.getPeriodDuration(), profileDto2.getPeriodDurationUnit())
-            && Utils.timeCompare(profileDto1.getStatsSlide(), profileDto1.getStatsSlideUnit(), profileDto2.getStatsSlide(), profileDto2.getStatsSlideUnit());
+            && Utils.timeCompare(profileDto1.getStatsSlide(), profileDto1.getStatsSlideUnit(),
+            profileDto2.getStatsSlide(), profileDto2.getStatsSlideUnit());
     }
 
 

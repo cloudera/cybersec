@@ -5,7 +5,9 @@ import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.generator.FreemarkerImmediateGenerator;
 import com.cloudera.cyber.profiler.dto.MeasurementDto;
+import com.cloudera.cyber.profiler.dto.MeasurementDto.MeasurementDtoBuilder;
 import com.cloudera.cyber.profiler.dto.ProfileDto;
+import com.cloudera.cyber.profiler.dto.ProfileDto.ProfileDtoBuilder;
 import com.cloudera.cyber.profiler.phoenix.PhoenixThinClient;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import com.cloudera.cyber.scoring.ScoredMessageWatermarkedStream;
@@ -51,9 +53,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import scala.tools.nsc.transform.patmat.Logic.PropositionalLogic;
 
 @Slf4j
 public abstract class ProfileJob {
+
     protected PhoenixThinClient client;
     protected static final String PARAM_PROFILE_CONFIG = "profile.config.file";
     protected static final String PARAM_LATENESS_TOLERANCE_MILLIS = "profile.lateness";
@@ -69,75 +73,84 @@ public abstract class ProfileJob {
     protected static final String PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_START_WITH = "phoenix.db.query.param.profile_sequence_start_with";
     protected static final String PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE = "phoenix.db.query.param.profile_sequence_cache";
     protected static final String PARAMS_PHOENIX_DB_QUERY_KEY_COUNT = "phoenix.db.query.param.field_key_count";
-    protected static final String DRIVER_NAME = "org.apache.phoenix.jdbc.PhoenixDriver";
     protected static final ObjectMapper jsonObjectMapper =
-            new ObjectMapper()
-                    .activateDefaultTyping(BasicPolymorphicTypeValidator.builder().
-                            allowIfSubType(Map.class).
-                            allowIfSubType(List.class).
-                            allowIfSubType(java.util.concurrent.TimeUnit.class).
-                            build())
-                    .enable(SerializationFeature.INDENT_OUTPUT);
+        new ObjectMapper()
+            .activateDefaultTyping(BasicPolymorphicTypeValidator.builder().
+                allowIfSubType(Map.class).
+                allowIfSubType(List.class).
+                allowIfSubType(java.util.concurrent.TimeUnit.class).
+                build())
+            .enable(SerializationFeature.INDENT_OUTPUT);
+
     private static final Function<ResultSet, Integer> ID_MAPPER = rs -> {
         try {
             return rs.getInt("ID");
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            log.error("Error while mapping an id", e);
+            return null;
         }
-        return null;
     };
     private static final Function<ResultSet, Integer> FIRST_VALUE_MAPPER = rs -> {
         try {
             return rs.getInt(1);
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+        } catch (SQLException e) {
+            log.error("Error while mapping a first value", e);
+            return null;
         }
-        return null;
     };
     private static final Function<ResultSet, ProfileDto> PROFILE_META_MAPPER = rs -> {
         try {
-            return ProfileDto.builder().id(rs.getInt("ID"))
-                    .profileGroupName(rs.getString("PROFILE_GROUP_NAME"))
-                    .keyFieldNames(rs.getString("KEY_FIELD_NAMES"))
-                    .periodDuration(rs.getLong("PERIOD_DURATION"))
-                    .periodDurationUnit(rs.getString("PERIOD_DURATION_UNIT"))
-                    .statsSlide(rs.getLong("STATS_SLIDE"))
-                    .statsSlideUnit(rs.getString("STATS_SLIDE_UNIT"))
-                    .build();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            ProfileDtoBuilder profileDtoBuilder = ProfileDto.builder().id(rs.getInt("ID"))
+                .profileGroupName(rs.getString("PROFILE_GROUP_NAME"))
+                .keyFieldNames(rs.getString("KEY_FIELD_NAMES"));
+            long periodDuration = rs.getLong("PERIOD_DURATION");
+            if (!rs.wasNull()) {
+                profileDtoBuilder.periodDuration(periodDuration)
+                    .periodDurationUnit(rs.getString("PERIOD_DURATION_UNIT"));
+            }
+            long statsSlide = rs.getLong("STATS_SLIDE");
+            if (!rs.wasNull()) {
+                profileDtoBuilder.statsSlide(statsSlide)
+                    .statsSlideUnit(rs.getString("STATS_SLIDE_UNIT"));
+            }
+            return profileDtoBuilder.build();
+        } catch (SQLException e) {
+            log.error("Error while mapping a profile", e);
+            return ProfileDto.builder().build();
         }
-        return null;
     };
 
     private static final Function<ResultSet, MeasurementDto> MEASUREMENT_META_MAPPER = rs -> {
         try {
-            return MeasurementDto.builder()
+            MeasurementDtoBuilder format = MeasurementDto.builder()
                 .id(rs.getInt("ID"))
-                .resultExtensionName("RESULT_EXTENSION_NAME")
+                .resultExtensionName(rs.getString("RESULT_EXTENSION_NAME"))
                 .calculateStats(rs.getBoolean("CALCULATE_STATS"))
                 .aggregationMethod(rs.getString("AGGREGATION_METHOD"))
                 .fieldName(rs.getString("FIELD_NAME"))
-                .format(rs.getString("FORMAT"))
-                .firstSeenExpirationDuration(rs.getLong("FIRST_SEEN_EXPIRATION_DURATION"))
-                .firstSeenExpirationDurationUnit(rs.getString("FIRST_SEEN_EXPIRATION_DURATION_UNIT"))
-                .profileId(rs.getInt("PROFILE_ID"))
-                .build();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+                .format(rs.getString("FORMAT"));
+            long firstSeenExpirationDuration = rs.getLong("FIRST_SEEN_EXPIRATION_DURATION");
+            if (!rs.wasNull()) {
+                format.firstSeenExpirationDuration(firstSeenExpirationDuration)
+                    .firstSeenExpirationDurationUnit(rs.getString("FIRST_SEEN_EXPIRATION_DURATION_UNIT"));
+            }
+            format.profileId(rs.getInt("PROFILE_ID"));
+            return format.build();
+        } catch (SQLException e) {
+            log.error("Error while mapping a measurement", e);
+            return MeasurementDto.builder().build();
         }
-        return null;
     };
     protected final FreemarkerImmediateGenerator freemarkerGenerator = new FreemarkerImmediateGenerator();
     private static final String SELECT_PROFILE_BY_NAME = "SELECT * FROM ${profile_metadata_table_name} WHERE PROFILE_GROUP_NAME = ?";
     private static final String SELECT_MEASUREMENT_BY_NAME = "SELECT * FROM ${measurement_metadata_table_name} WHERE RESULT_EXTENSION_NAME = ? AND PROFILE_ID = ?";
-    private static final String UPSERT_PROFILE_META = "UPSERT INTO ${profile_metadata_table_name} (ID,PROFILE_GROUP_NAME,KEY_FIELD_NAMES,PERIOD_DURATION,PERIOD_DURATION_UNIT,STATS_SLIDE,STATS_SLIDE_UNIT) VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY IGNORE";
-    private static final String UPSERT_MEASUREMENT_META = "UPSERT INTO ${measurement_metadata_table_name} (ID,FIELD_NAME,RESULT_EXTENSION_NAME,AGGREGATION_METHOD,CALCULATE_STATS,FORMAT,FIRST_SEEN_EXPIRATION_DURATION, FIRST_SEEN_EXPIRATION_DURATION_UNIT, PROFILE_ID) VALUES (?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY IGNORE";
+    private static final String UPSERT_PROFILE_META = "UPSERT INTO ${profile_metadata_table_name} (ID,PROFILE_GROUP_NAME,KEY_FIELD_NAMES,PERIOD_DURATION,PERIOD_DURATION_UNIT,STATS_SLIDE,STATS_SLIDE_UNIT) VALUES (?,?,?,?,?,?,?)";
+    private static final String UPSERT_MEASUREMENT_META = "UPSERT INTO ${measurement_metadata_table_name} (ID,FIELD_NAME,RESULT_EXTENSION_NAME,AGGREGATION_METHOD,CALCULATE_STATS,FORMAT,FIRST_SEEN_EXPIRATION_DURATION, FIRST_SEEN_EXPIRATION_DURATION_UNIT, PROFILE_ID) VALUES (?,?,?,?,?,?,?,?,?)";
     private static final String SELECT_PROFILE_ID = "SELECT NEXT VALUE FOR ${profile_sequence_name}";
     private static final String SELECT_MEASUREMENT_ID = "SELECT NEXT VALUE FOR ${measurement_sequence_name}";
     private static final String SELECT_METADATA_FROM_MEASUREMENT_DATA_TABLE = "SELECT * FROM ${measurement_data_table_name} LIMIT 1";
 
-    private static final Function<String,Consumer<PreparedStatement>> PROFILE_PS_CONSUMER_FUNCTION = profileGroupName -> ps -> {
+    private static final Function<String, Consumer<PreparedStatement>> PROFILE_PS_CONSUMER_FUNCTION = profileGroupName -> ps -> {
         try {
             ps.setString(1, profileGroupName);
         } catch (SQLException throwables) {
@@ -145,10 +158,10 @@ public abstract class ProfileJob {
         }
     };
 
-    private static final BiFunction<String,Integer,Consumer<PreparedStatement>> MEASUREMENT_PS_CONSUMER_FUNCTION = (resultExtensionName, profileId) -> ps -> {
+    private static final BiFunction<String, Integer, Consumer<PreparedStatement>> MEASUREMENT_PS_CONSUMER_FUNCTION = (resultExtensionName, profileId) -> ps -> {
         try {
             ps.setString(1, resultExtensionName);
-            ps.setInt(1, profileId);
+            ps.setInt(2, profileId);
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
@@ -156,9 +169,9 @@ public abstract class ProfileJob {
 
     protected List<ProfileGroupConfig> parseConfigFile(String configJson) throws JsonProcessingException {
         List<ProfileGroupConfig> profileGroupConfigs = jsonObjectMapper.readValue(
-                configJson,
-                new TypeReference<ArrayList<ProfileGroupConfig>>() {
-                });
+            configJson,
+            new TypeReference<ArrayList<ProfileGroupConfig>>() {
+            });
         profileGroupConfigs.forEach(ProfileGroupConfig::verify);
         return profileGroupConfigs;
     }
@@ -224,55 +237,64 @@ public abstract class ProfileJob {
 
     protected List<ProfileDto> persistProfileMeasurementConfigMeta(List<ProfileGroupConfig> profileGroups, PhoenixThinClient client, Properties properties) throws SQLException, IOException, TemplateException {
         ImmutableMap<String, String> propertiesMap = Maps.fromProperties(properties);
-        List<ProfileDto> profiles = profileGroups.stream().map(ProfileDto::of).collect(Collectors.toList());
-        for (ProfileDto profile : profiles) {
-            processProfile(client, propertiesMap, profile);
+        List<ProfileDto> resultProfiles = new ArrayList<>();
+        for (ProfileDto profile : profileGroups.stream().map(ProfileDto::of).collect(Collectors.toList())) {
+            resultProfiles.add(processProfile(client, propertiesMap, profile));
         }
-        return profiles;
+        return resultProfiles;
     }
 
-    private MeasurementDto processMeasurement(PhoenixThinClient client, ImmutableMap<String, String> propertiesMap, ProfileDto profile, MeasurementDto measurement) throws SQLException, IOException, TemplateException {
-        MeasurementDto measurementEntity = client.selectResult(freemarkerGenerator.replceByTemplate(SELECT_MEASUREMENT_BY_NAME, propertiesMap), MEASUREMENT_META_MAPPER, MEASUREMENT_PS_CONSUMER_FUNCTION.apply(measurement.getResultExtensionName(),profile.getId()));
+    private MeasurementDto processMeasurement(PhoenixThinClient client, ImmutableMap<String, String> propertiesMap, Integer profileId, MeasurementDto measurement) throws SQLException, IOException, TemplateException {
+        MeasurementDto measurementEntity = client.selectResult(freemarkerGenerator.replceByTemplate(SELECT_MEASUREMENT_BY_NAME, propertiesMap), MEASUREMENT_META_MAPPER,
+            MEASUREMENT_PS_CONSUMER_FUNCTION.apply(measurement.getResultExtensionName(), profileId));
         if (measurementEntity == null) {
-            return createMeasurement(client, propertiesMap, measurement);
+            return createMeasurement(client, propertiesMap, profileId, measurement);
+        } else if (measurementEntity.getId() == null) {
+            throw new RuntimeException(String.format("Error when trying to map measurement from phoenix database with name %s and profile id %d", measurement.getResultExtensionName(), measurement.getProfileId()));
         } else {
-            return updateMeasurement(client, propertiesMap, measurement, measurementEntity);
+            return updateMeasurement(client, propertiesMap, profileId, measurementEntity, measurement);
         }
     }
 
-    private MeasurementDto createMeasurement(PhoenixThinClient client, Map<String, String> params, MeasurementDto measurement) throws SQLException, IOException, TemplateException {
+    private MeasurementDto createMeasurement(PhoenixThinClient client, Map<String, String> params, Integer profileId, MeasurementDto measurement) throws SQLException, IOException, TemplateException {
         Integer measurementId = client.selectResult(freemarkerGenerator.replceByTemplate(SELECT_MEASUREMENT_ID, params), FIRST_VALUE_MAPPER);
-        client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_MEASUREMENT_META, params), getUpdateMeasurementMetaConsumer(measurement, measurementId));
-        return measurement.toBuilder().id(measurementId).build();
+        client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_MEASUREMENT_META, params), getUpdateMeasurementMetaConsumer(measurement, measurementId, profileId));
+        return measurement.toBuilder().id(measurementId).profileId(profileId).build();
     }
 
-    private MeasurementDto updateMeasurement(PhoenixThinClient client, Map<String, String> params, MeasurementDto measurement, MeasurementDto measurementDtoDb) throws SQLException, IOException, TemplateException {
-        if (!measurementDtoDb.equals(measurement)) {
-            throw new IllegalStateException("Key fields cannot be changed for the measurement.");
+    private MeasurementDto updateMeasurement(PhoenixThinClient client, Map<String, String> params, Integer profileId, MeasurementDto measurementDtoDb, MeasurementDto measurement) throws SQLException, IOException, TemplateException {
+        if (!ProfileUtils.measurementCompare(measurementDtoDb, measurement)) {
+            log.error("Measurement from configuration {} measurement from database {}", measurement, measurementDtoDb);
+            throw new IllegalStateException("Key fields cannot be changed for the measurement='" + measurement + "' measurementDtoDb='" + measurementDtoDb + "'");
         }
         Integer measurementId = measurementDtoDb.getId();
-        client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_PROFILE_META, params), getUpdateMeasurementMetaConsumer(measurement, measurementId));
-        return measurement.toBuilder().id(measurementId).build();
+        client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_MEASUREMENT_META, params), getUpdateMeasurementMetaConsumer(measurement, measurementId, profileId));
+        return measurement.toBuilder().id(measurementId).profileId(profileId).build();
     }
 
     private ProfileDto processProfile(PhoenixThinClient client, ImmutableMap<String, String> propertiesMap, ProfileDto profile) throws SQLException, IOException, TemplateException {
-        ProfileDto profileDtoDb = client.selectResult(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_BY_NAME, propertiesMap), PROFILE_META_MAPPER, PROFILE_PS_CONSUMER_FUNCTION.apply(profile.getProfileGroupName()));
+        String profileGroupName = profile.getProfileGroupName();
+        ProfileDto profileDtoDb = client.selectResult(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_BY_NAME, propertiesMap), PROFILE_META_MAPPER, PROFILE_PS_CONSUMER_FUNCTION.apply(profileGroupName));
         if (profileDtoDb == null) {
             return createProfile(client, propertiesMap, profile);
-        } else {
+        } else if (profileDtoDb.getId() == null) {
+            throw new SQLException(String.format("Error when trying to map profile from phoenix database with name %s", profileGroupName));
+
+        }else {
             return updateProfile(client, propertiesMap, profile, profileDtoDb);
         }
     }
 
     private ProfileDto updateProfile(PhoenixThinClient client, ImmutableMap<String, String> propertiesMap, ProfileDto profile, ProfileDto profileDtoDb) throws SQLException, IOException, TemplateException {
-        if (!profileDtoDb.equals(profile)) {
-            throw new IllegalStateException("Key fields cannot be changed for the profile.");
+        if (!ProfileUtils.compareProfileDto(profileDtoDb, profile)) {
+            log.error("Profile from configuration {} profile from database {}", profile, profileDtoDb);
+            throw new IllegalStateException("Key fields cannot be changed for the profile='" + profile + "' profileDtoDb='" + profileDtoDb + "'");
         }
         Integer profileId = profileDtoDb.getId();
         client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_PROFILE_META, propertiesMap), getUpdateProfileConsumer(profile, profileId));
         ArrayList<MeasurementDto> measurementDtos = new ArrayList<>();
         for (MeasurementDto measurementDto : profile.getMeasurementDtos()) {
-            measurementDtos.add(processMeasurement(client,propertiesMap,profile,measurementDto));
+            measurementDtos.add(processMeasurement(client, propertiesMap, profileId, measurementDto));
         }
         return profile.toBuilder().id(profileId).measurementDtos(measurementDtos).build();
     }
@@ -282,12 +304,12 @@ public abstract class ProfileJob {
         client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_PROFILE_META, propertiesMap), getUpdateProfileConsumer(profile, profileId));
         ArrayList<MeasurementDto> measurementDtos = new ArrayList<>();
         for (MeasurementDto measurementDto : profile.getMeasurementDtos()) {
-            measurementDtos.add(createMeasurement(client,propertiesMap, measurementDto));
+            measurementDtos.add(createMeasurement(client, propertiesMap, profileId, measurementDto));
         }
         return profile.toBuilder().id(profileId).measurementDtos(measurementDtos).build();
     }
 
-    private Consumer<PreparedStatement> getUpdateMeasurementMetaConsumer(MeasurementDto measurement, Integer measurementId) {
+    private Consumer<PreparedStatement> getUpdateMeasurementMetaConsumer(MeasurementDto measurement, Integer measurementId, Integer profileId) {
         return ps -> {
             try {
                 ps.setInt(1, measurementId);
@@ -306,7 +328,7 @@ public abstract class ProfileJob {
                     ps.setLong(7, measurement.getFirstSeenExpirationDuration());
                 }
                 ps.setString(8, measurement.getFirstSeenExpirationDurationUnit());
-                ps.setInt(9, measurement.getProfileId());
+                ps.setInt(9, profileId);
             } catch (SQLException throwables) {
                 throwables.printStackTrace();
             }
@@ -348,9 +370,9 @@ public abstract class ProfileJob {
 
         Time profilePeriodDuration = Time.of(profileGroupConfig.getPeriodDuration(), TimeUnit.valueOf(profileGroupConfig.getPeriodDurationUnit()));
         DataStream<ProfileMessage> profileMessages = messages.filter(new ProfileMessageFilter(profileGroupConfig)).
-                map(new ScoredMessageToProfileMessageMap(profileGroupConfig)).
-                keyBy(new MessageKeySelector(profileGroupConfig.getKeyFieldNames())).window(TumblingEventTimeWindows.of(profilePeriodDuration)).
-                aggregate(new FieldValueProfileAggregateFunction(profileGroupConfig));
+            map(new ScoredMessageToProfileMessageMap(profileGroupConfig)).
+            keyBy(new MessageKeySelector(profileGroupConfig.getKeyFieldNames())).window(TumblingEventTimeWindows.of(profilePeriodDuration)).
+            aggregate(new FieldValueProfileAggregateFunction(profileGroupConfig));
         if (profileGroupConfig.hasFirstSeen()) {
             profileMessages = updateFirstSeen(params, profileMessages, profileGroupConfig);
         }
@@ -360,9 +382,9 @@ public abstract class ProfileJob {
             Time statsSlide = Time.of(profileGroupConfig.getStatsSlide(), TimeUnit.valueOf(profileGroupConfig.getStatsSlideUnit()));
 
             DataStream<ProfileMessage> statsStream = ProfileMessage.watermarkedStreamOf(profileMessages, allowedLatenessMillis).
-                    keyBy(profileKeySelector).
-                    window(SlidingEventTimeWindows.of(profilePeriodDuration, statsSlide)).
-                    aggregate(new StatsProfileAggregateFunction(profileGroupConfig));
+                keyBy(profileKeySelector).
+                window(SlidingEventTimeWindows.of(profilePeriodDuration, statsSlide)).
+                aggregate(new StatsProfileAggregateFunction(profileGroupConfig));
             StatsProfileKeySelector statsKeySelector = new StatsProfileKeySelector();
             profileMessages = profileMessages.join(statsStream).where(profileKeySelector).equalTo(statsKeySelector).window(TumblingEventTimeWindows.of(profilePeriodDuration)).apply(new ProfileStatsJoin());
             profileMessageStreams = unionProfileMessages(profileMessageStreams, statsStream);
