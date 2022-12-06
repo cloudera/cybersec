@@ -53,7 +53,7 @@ public class FreemarkerImmediateGenerator {
         return out.toString();
     }
 
-    public <K,V> String replceByTemplate(String templateString, Map<K,V> params) throws IOException, TemplateException {
+    public <K,V> String replaceByTemplate(String templateString, Map<K,V> params) throws IOException, TemplateException {
         Template template = new Template("templateName", templateString, cfg);
         Writer out = new StringWriter();
         template.process(params, out);
