@@ -1,3 +1,15 @@
+/*
+ * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+ *
+ * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. Refer to the License for the specific permissions and
+ * limitations governing your use of the file.
+ */
+
 package com.cloudera.cyber.profiler.phoenix;
 
 import com.cloudera.cyber.flink.Utils;
@@ -38,22 +50,21 @@ public class PhoenixThinClient {
         this.userName = params.get(PHOENIX_THIN_PROPERTY_AVATICA_USER);
         this.password = params.get(PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD);
         dbUrl = "jdbc:phoenix:thin:url=" +
-                params.get(PHOENIX_THIN_PROPERTY_URL) + ";" +
-                Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_SERIALIZATION)).map(str -> String.format("serialization=%s;", str)).orElse("serialization=PROTOBUF;") +
-                Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_AUTHENTICATION)).map(str -> String.format("authentication=%s;", str)).orElse("authentication=BASIC;") +
-                Optional.ofNullable(userName).map(str -> String.format("avatica_user=%s;", str)).orElse("") +
-                Optional.ofNullable(password).map(str -> String.format("avatica_password=%s;", str)).orElse("") +
-                Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_PRINCIPAL)).map(str -> String.format("principal=%s;", str)).orElse("") +
-                Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_KEYTAB)).map(str -> String.format("keytab=%s;", str)).orElse("") +
-                Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE)).map(str -> String.format("truststore=%s;", str)).orElse("") +
-                Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE_PASSWORD)).map(str -> String.format("truststore_password=%s;", str)).orElse("");
+            params.get(PHOENIX_THIN_PROPERTY_URL) + ";" +
+            Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_SERIALIZATION)).map(str -> String.format("serialization=%s;", str)).orElse("serialization=PROTOBUF;") +
+            Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_AUTHENTICATION)).map(str -> String.format("authentication=%s;", str)).orElse("authentication=BASIC;") +
+            Optional.ofNullable(userName).map(str -> String.format("avatica_user=%s;", str)).orElse("") +
+            Optional.ofNullable(password).map(str -> String.format("avatica_password=%s;", str)).orElse("") +
+            Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_PRINCIPAL)).map(str -> String.format("principal=%s;", str)).orElse("") +
+            Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_KEYTAB)).map(str -> String.format("keytab=%s;", str)).orElse("") +
+            Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE)).map(str -> String.format("truststore=%s;", str)).orElse("") +
+            Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE_PASSWORD)).map(str -> String.format("truststore_password=%s;", str)).orElse("");
     }
 
     private Object connectionResultMetaData(Function<Connection, Object> function) {
         try {
             Class.forName(DRIVER);
             try (Connection conn = DriverManager.getConnection(dbUrl)) {
-                conn.setAutoCommit(true);
                 return function.apply(conn);
             } catch (SQLException e) {
                 log.error("Connection exception SQL State: {}\n{}", e.getSQLState(), e.getMessage());
@@ -79,7 +90,6 @@ public class PhoenixThinClient {
 
     public void executeSql(String sql) throws SQLException {
         try (Connection conn = DriverManager.getConnection(dbUrl)) {
-            conn.setAutoCommit(true);
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.execute();
             }
@@ -92,7 +102,6 @@ public class PhoenixThinClient {
 
     public void insertIntoTable(String sql, Consumer<PreparedStatement> consumer) throws SQLException {
         try (Connection conn = DriverManager.getConnection(dbUrl)) {
-            conn.setAutoCommit(true);
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 consumer.accept(ps);
                 ps.executeUpdate();
@@ -113,7 +122,6 @@ public class PhoenixThinClient {
         List<T> results = new ArrayList<>();
         Optional<Consumer<PreparedStatement>> optionalConsumer = Optional.ofNullable(consumer);
         try (Connection conn = DriverManager.getConnection(dbUrl)) {
-            conn.setAutoCommit(true);
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 optionalConsumer.ifPresent(con -> con.accept(ps));
                 try (ResultSet resultSet = ps.executeQuery()) {
@@ -129,13 +137,13 @@ public class PhoenixThinClient {
         }
     }
 
-    public <T> T selectResult (String sql, Function<ResultSet, T> mapper) throws SQLException {
+    public <T> T selectResult(String sql, Function<ResultSet, T> mapper) throws SQLException {
         return selectResult(sql, mapper, null);
     }
-        public <T> T selectResult (String sql, Function<ResultSet, T> mapper, Consumer<PreparedStatement> consumer) throws SQLException {
-            Optional<Consumer<PreparedStatement>> optionalConsumer = Optional.ofNullable(consumer);
-            try (Connection conn = DriverManager.getConnection(dbUrl)) {
-            conn.setAutoCommit(true);
+
+    public <T> T selectResult(String sql, Function<ResultSet, T> mapper, Consumer<PreparedStatement> consumer) throws SQLException {
+        Optional<Consumer<PreparedStatement>> optionalConsumer = Optional.ofNullable(consumer);
+        try (Connection conn = DriverManager.getConnection(dbUrl)) {
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 optionalConsumer.ifPresent(con -> con.accept(ps));
                 try (ResultSet resultSet = ps.executeQuery()) {
