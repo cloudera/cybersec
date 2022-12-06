@@ -95,7 +95,7 @@
         <global.jar.version>3.0.2</global.jar.version>
         <global.httpclient.version>4.5.13</global.httpclient.version>
         <cybersec.full.version>${project.parent.version}-${flink.version}-cdh${cdh.version}-${timestamp}</cybersec.full.version>
-        <simple-syslog.version>1.0.0</simple-syslog.version>
+        <simple-syslog.version>0.0.6</simple-syslog.version>
         <testng.version>7.5</testng.version>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
