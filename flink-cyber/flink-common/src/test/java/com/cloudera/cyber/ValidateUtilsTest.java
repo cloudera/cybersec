@@ -13,7 +13,9 @@
 package com.cloudera.cyber;
 
 import com.cloudera.cyber.flink.Utils;
+import java.util.concurrent.TimeUnit;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.streaming.api.windowing.time.Time;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.*;
@@ -31,6 +33,25 @@ public class ValidateUtilsTest {
         assertThatCode(() -> ValidateUtils.validatePhoenixName("_name1", testParam)).doesNotThrowAnyException();
         assertThatCode(() -> ValidateUtils.validatePhoenixName("name1", testParam)).doesNotThrowAnyException();
         assertThatCode(() -> ValidateUtils.validatePhoenixName("n1_a_me1", testParam)).doesNotThrowAnyException();
+    }
+
+    @Test
+    public void validTimeCompare() {
+        Time sixtySeconds = Time.of(60L, TimeUnit.SECONDS);
+        Time oneMinute = Time.of(1L, TimeUnit.MINUTES);
+        Time sixtyMinute = Time.of(60L, TimeUnit.MINUTES);
+        Time oneHour = Time.of(1L, TimeUnit.HOURS);
+
+        assertThat(Utils.timeCompare(60L, "SECONDS", 1L, "MINUTES")).isTrue();
+        assertThat(Utils.timeCompare(60L, "MINUTES", 1L, "HOURS")).isTrue();
+        assertThat(Utils.timeCompare(24L, "HOURS", 1L, "DAYS")).isTrue();
+        assertThat(Utils.timeCompare(24L, "SECONDS", 1L, "MINUTES")).isFalse();
+        assertThat(Utils.timeCompare(24L, "MINUTES", 1L, "DAYS")).isFalse();
+
+        assertThat(Utils.timeCompare(sixtySeconds,oneMinute,Time::getSize, obj -> obj.getUnit().name())).isTrue();
+        assertThat(Utils.timeCompare(sixtyMinute,oneHour,Time::getSize, obj -> obj.getUnit().name())).isTrue();
+        assertThat(Utils.timeCompare(sixtyMinute,sixtySeconds,Time::getSize, obj -> obj.getUnit().name())).isTrue();
+        assertThat(Utils.timeCompare(oneHour,oneMinute,Time::getSize, obj -> obj.getUnit().name())).isTrue();
     }
 
     @Test

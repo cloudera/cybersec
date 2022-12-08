@@ -234,7 +234,7 @@ public class Utils {
     }
 
     public static <T> boolean timeCompare(T object1, T object2, Function<T,Long> timeUnitSelector, Function<T, String> timeUnitTypeSelector) {
-        return timeCompare(timeUnitSelector.apply(object1),timeUnitTypeSelector.apply(object1),timeUnitSelector.apply(object1), timeUnitTypeSelector.apply(object2));
+        return timeCompare(timeUnitSelector.apply(object1),timeUnitTypeSelector.apply(object1),timeUnitSelector.apply(object2), timeUnitTypeSelector.apply(object2));
     }
 
     private static class ConfigHolder {

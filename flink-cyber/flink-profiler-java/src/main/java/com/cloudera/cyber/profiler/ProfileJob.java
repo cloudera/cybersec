@@ -65,7 +65,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import scala.tools.nsc.transform.patmat.Logic.PropositionalLogic;
 
 @Slf4j
 public abstract class ProfileJob {
@@ -275,7 +274,7 @@ public abstract class ProfileJob {
     }
 
     private MeasurementDto updateMeasurement(PhoenixThinClient client, Map<String, String> params, Integer profileId, MeasurementDto measurementDtoDb, MeasurementDto measurement) throws SQLException, IOException, TemplateException {
-        if (!ProfileUtils.measurementCompare(measurementDtoDb, measurement)) {
+        if (!ProfileUtils.compareMeasurementDto(measurementDtoDb, measurement)) {
             log.error("Measurement from configuration {} measurement from database {}", measurement, measurementDtoDb);
             throw new IllegalStateException("Key fields cannot be changed for the measurement='" + measurement + "' measurementDtoDb='" + measurementDtoDb + "'");
         }
