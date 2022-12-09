@@ -39,7 +39,6 @@ public class ThreatIntelligence extends SpecificRecordBase implements SpecificRe
     private long ts;
     private String observable;
     private String observableType;
-    private String stixReference;
     private Map<String, String> fields;
 
     public static final Schema SCHEMA$ = SchemaBuilder.record(ThreatIntelligence.class.getName()).namespace(ThreatIntelligence.class.getPackage().getName())
@@ -48,7 +47,6 @@ public class ThreatIntelligence extends SpecificRecordBase implements SpecificRe
             .requiredLong("ts")
             .requiredString("observable")
             .requiredString("observableType")
-            .optionalString("stixReference")
             .name("fields").type(Schema.createMap(SchemaBuilder.builder().stringType())).noDefault()
             .endRecord();
 
@@ -64,8 +62,7 @@ public class ThreatIntelligence extends SpecificRecordBase implements SpecificRe
             case 1: return ts;
             case 2: return observable;
             case 3: return observableType;
-            case 4: return stixReference;
-            case 5: return fields;
+            case 4: return fields;
             default: throw new AvroRuntimeException("Bad index");
         }
     }
@@ -79,8 +76,7 @@ public class ThreatIntelligence extends SpecificRecordBase implements SpecificRe
             case 1: ts = (Long)value$; break;
             case 2: observable = value$.toString(); break;
             case 3: observableType = value$.toString(); break;
-            case 4: stixReference = value$.toString(); break;
-            case 5: fields = utf8toStringMap(value$); break;
+            case 4: fields = utf8toStringMap(value$); break;
             default: throw new AvroRuntimeException("Bad index");
         }
     }

@@ -1,1 +1,1 @@
-{"id":"7f784485-5ef0-42c0-adf4-77681e1b629c","ts":1596547282911,"observable":"testObservable","observableType":"testType","stixReference":"stix","fields":{"test":"value"}}
+{"id":"7f784485-5ef0-42c0-adf4-77681e1b629c","ts":1596547282911,"observable":"testObservable","observableType":"testType","fields":{"test":"value"}}
