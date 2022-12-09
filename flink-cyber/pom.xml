@@ -65,8 +65,7 @@
         <scala.binary.version>2.12</scala.binary.version>
         <kafka.version>2.5.0.${cdh.version}</kafka.version>
         <nifi.version>1.11.4</nifi.version>
-        <jackson.version>2.11.2</jackson.version>
-        <jackson.datatype.version>2.10.1</jackson.datatype.version>
+        <jackson.version>2.14.1</jackson.version>
         <smm.intercepter.version>2.1.0.${cdh.version}</smm.intercepter.version>
         <flink.format.parquet.version>1.11.1</flink.format.parquet.version>
         <slf4j.version>1.7.36</slf4j.version>
@@ -365,6 +364,27 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <scope>compile</scope>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <scope>compile</scope>
+                <version>${jackson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-json-provider</artifactId>
+                <scope>compile</scope>
+                <version>${jackson.version}</version>
             </dependency>
 
             <dependency>
