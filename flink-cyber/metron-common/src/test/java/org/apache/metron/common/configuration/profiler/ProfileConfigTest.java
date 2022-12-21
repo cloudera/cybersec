@@ -19,7 +19,7 @@
  */
 package org.apache.metron.common.configuration.profiler;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.cyber.jackson.databind.JsonMappingException;
 import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.Test;
 

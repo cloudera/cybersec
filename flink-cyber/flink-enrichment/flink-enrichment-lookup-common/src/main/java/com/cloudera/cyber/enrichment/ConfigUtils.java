@@ -15,8 +15,8 @@ package com.cloudera.cyber.enrichment;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentField;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.cyber.jackson.core.type.TypeReference;
+import com.cyber.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.Collection;

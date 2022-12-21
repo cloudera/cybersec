@@ -17,17 +17,17 @@
  */
 package org.apache.metron.common.configuration;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.nio.charset.StandardCharsets;
+import com.cyber.jackson.core.JsonProcessingException;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.metron.common.message.metadata.RawMessageStrategy;
 import org.apache.metron.common.message.metadata.RawMessageStrategies;
+import org.apache.metron.common.message.metadata.RawMessageStrategy;
 import org.apache.metron.common.utils.JSONUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

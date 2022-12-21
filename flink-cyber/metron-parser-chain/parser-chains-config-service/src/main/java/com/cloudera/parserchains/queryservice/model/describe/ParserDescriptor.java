@@ -20,8 +20,8 @@ package com.cloudera.parserchains.queryservice.model.describe;
 
 import com.cloudera.parserchains.core.model.define.ParserID;
 import com.cloudera.parserchains.core.model.define.ParserName;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.cyber.jackson.annotation.JsonProperty;
+import com.cyber.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 

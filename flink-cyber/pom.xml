@@ -49,6 +49,7 @@
         <module>cyber-jobs</module>
         <module>cyber-csd</module>
         <module>cyber-parcel</module>
+        <module>cyber-jackson</module>
     </modules>
 
     <properties>
@@ -65,7 +66,7 @@
         <scala.binary.version>2.12</scala.binary.version>
         <kafka.version>2.5.0.${cdh.version}</kafka.version>
         <nifi.version>1.11.4</nifi.version>
-        <jackson.version>2.13.4</jackson.version>
+        <jackson.version>2.14.1</jackson.version>
         <flink.jackson.version>2.13.4-16.1</flink.jackson.version>
         <smm.intercepter.version>2.1.0.${cdh.version}</smm.intercepter.version>
         <flink.format.parquet.version>1.11.1</flink.format.parquet.version>
@@ -205,6 +206,53 @@
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-hbase_${scala.binary.version}</artifactId>
                 <version>${flink.version}</version>
+            </dependency>
+
+            <!--            Jackson replacements for transient dependencies-->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <scope>compile</scope>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <scope>compile</scope>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <scope>compile</scope>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <scope>compile</scope>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.jaxrs</groupId>
+                <artifactId>jackson-jaxrs-json-provider</artifactId>
+                <scope>compile</scope>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-csv</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jdk8</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
 
             <dependency>
@@ -368,42 +416,27 @@
             </dependency>
 
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <scope>compile</scope>
-                <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-shaded-jackson</artifactId>
                 <scope>compile</scope>
                 <version>${flink.jackson.version}</version>
             </dependency>
 
+<!--            Own jackson for internal use-->
             <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-yaml</artifactId>
+                <groupId>com.cyber.jackson</groupId>
+                <artifactId>jackson-core</artifactId>
                 <scope>compile</scope>
                 <version>${jackson.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>com.fasterxml.jackson.jaxrs</groupId>
-                <artifactId>jackson-jaxrs-json-provider</artifactId>
-                <scope>compile</scope>
-                <version>${jackson.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
+                <groupId>com.cyber.jackson</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <scope>compile</scope>
                 <version>${jackson.version}</version>
             </dependency>
-
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
+                <groupId>com.cyber.jackson</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <scope>compile</scope>
                 <version>${jackson.version}</version>

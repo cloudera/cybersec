@@ -63,7 +63,7 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>com.cyber.jackson</groupId>
             <artifactId>jackson-annotations</artifactId>
             <scope>compile</scope>
         </dependency>

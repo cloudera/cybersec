@@ -14,7 +14,7 @@ package com.cloudera.parserchains.queryservice.model;
 
 import com.cloudera.parserchains.core.model.define.ParserName;
 import com.cloudera.parserchains.core.utils.JSONUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.cyber.jackson.core.JsonProcessingException;
 import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.Test;
 

@@ -72,13 +72,6 @@
             </exclusions>
         </dependency>
 
-        <!--replacing in other dependencies-->
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-jaxb-annotations</artifactId>
-            <scope>compile</scope>
-            <version>${jackson.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-testing-util</artifactId>

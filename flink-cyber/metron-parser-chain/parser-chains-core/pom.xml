@@ -40,7 +40,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>com.cyber.jackson</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
@@ -117,6 +117,5 @@
             <groupId>org.apache.avro</groupId>
             <artifactId>avro</artifactId>
         </dependency>
-
     </dependencies>
 </project>

@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class MetronCompatibilityParserTest {
@@ -51,7 +53,7 @@ public class MetronCompatibilityParserTest {
 
     @Test
     public void testBadJsonConfig() {
-        assertThrows(com.fasterxml.jackson.core.JsonParseException.class,
+        assertThrows(com.cyber.jackson.core.JsonParseException.class,
                 () -> MetronCompatibilityParser.of("badsyntax", configStream(BAD_SYNTAX_CONFIG_FILE)));
     }
 

@@ -24,7 +24,7 @@ import com.cloudera.parserchains.parsers.DelimitedTextParser;
 import com.cloudera.parserchains.parsers.TimestampParser;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummary;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummaryMapper;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.cyber.jackson.core.JsonProcessingException;
 import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.Test;
 

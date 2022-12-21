@@ -13,7 +13,7 @@
 package com.cloudera.cyber.enrichment.threatq;
 
 import com.cloudera.cyber.EnrichmentEntry;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.cyber.jackson.annotation.JsonFormat;
 import com.hortonworks.registries.schemaregistry.serdes.avro.exceptions.AvroException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

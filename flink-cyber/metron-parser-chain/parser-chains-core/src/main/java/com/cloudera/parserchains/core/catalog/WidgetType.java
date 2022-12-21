@@ -12,8 +12,8 @@
 
 package com.cloudera.parserchains.core.catalog;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.cyber.jackson.annotation.JsonCreator;
+import com.cyber.jackson.annotation.JsonValue;
 
 /**
  * Defines the valid types of widgets for the {@link Configurable#widgetType()}

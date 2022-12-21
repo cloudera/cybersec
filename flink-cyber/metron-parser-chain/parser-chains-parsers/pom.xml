@@ -86,7 +86,7 @@
 
         <!--CSV parser dependencies-->
         <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <groupId>com.cyber.jackson</groupId>
             <artifactId>jackson-dataformat-csv</artifactId>
         </dependency>
 
@@ -197,12 +197,6 @@
                                     </excludes>
                                 </filter>
                             </filters>
-                            <relocations>
-                                <relocation>
-                                    <pattern>com.fasterxml.jackson</pattern>
-                                    <shadedPattern>com.cloudera.parserchains.parsers.jackson</shadedPattern>
-                                </relocation>
-                            </relocations>
                         </configuration>
                     </execution>
                 </executions>

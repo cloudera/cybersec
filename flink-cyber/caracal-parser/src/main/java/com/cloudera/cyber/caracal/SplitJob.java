@@ -15,7 +15,7 @@ package com.cloudera.cyber.caracal;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.parserchains.core.utils.JSONUtils;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.cyber.jackson.core.type.TypeReference;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.state.MapStateDescriptor;
