@@ -16,7 +16,7 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.parserchains.core.utils.JSONUtils;
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.cyber.jackson.core.type.TypeReference;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;

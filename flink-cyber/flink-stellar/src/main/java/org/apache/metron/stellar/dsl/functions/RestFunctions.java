@@ -17,7 +17,7 @@
  */
 package org.apache.metron.stellar.dsl.functions;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.cyber.jackson.core.JsonProcessingException;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -29,7 +29,11 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
@@ -64,7 +68,11 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 import static org.apache.metron.stellar.dsl.Context.Capabilities.GLOBAL_CONFIG;
-import static org.apache.metron.stellar.dsl.functions.RestConfig.*;
+import static org.apache.metron.stellar.dsl.functions.RestConfig.POOLING_DEFAULT_MAX_PER_RUOTE;
+import static org.apache.metron.stellar.dsl.functions.RestConfig.POOLING_MAX_TOTAL;
+import static org.apache.metron.stellar.dsl.functions.RestConfig.STELLAR_REST_GET_SETTINGS;
+import static org.apache.metron.stellar.dsl.functions.RestConfig.STELLAR_REST_POST_SETTINGS;
+import static org.apache.metron.stellar.dsl.functions.RestConfig.STELLAR_REST_SETTINGS;
 
 /**
  * Defines functions that enable REST requests with proper result and error handling.  Depends on an

@@ -17,9 +17,8 @@
  */
 package org.apache.metron.common.configuration.profiler;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.nio.charset.StandardCharsets;
+import com.cyber.jackson.annotation.JsonProperty;
+import com.cyber.jackson.core.JsonProcessingException;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
@@ -27,6 +26,7 @@ import org.apache.metron.common.utils.JSONUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

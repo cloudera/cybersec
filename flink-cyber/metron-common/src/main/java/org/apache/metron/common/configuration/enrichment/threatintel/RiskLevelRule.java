@@ -17,7 +17,8 @@
  */
 package org.apache.metron.common.configuration.enrichment.threatintel;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.cyber.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
 /**

@@ -15,6 +15,7 @@ package com.cloudera.cyber.caracal;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.SignedSourceKey;
 import com.cloudera.parserchains.core.utils.JSONUtils;
+import com.cyber.jackson.core.type.TypeReference;
 import lombok.NonNull;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -84,7 +85,7 @@ public class ParserChainMapFunctionTest {
             put(PARAM_PRIVATE_KEY, Base64.getEncoder().encodeToString(pair.getPrivate().getEncoded()));
         }});
 
-        @NonNull List<SplitConfig> splitConfig = JSONUtils.INSTANCE.getMapper().readValue(splitConfigString, new com.fasterxml.jackson.core.type.TypeReference<List<SplitConfig>>() {});
+        @NonNull List<SplitConfig> splitConfig = JSONUtils.INSTANCE.getMapper().readValue(splitConfigString, new TypeReference<List<SplitConfig>>() {});
         Map<String, SplitConfig> configMap = splitConfig.stream().collect(Collectors.toMap(k -> k.getTopic(), v->v));
 
         ParserChainMapFunction parserChainMapFunction = new ParserChainMapFunction(configMap);

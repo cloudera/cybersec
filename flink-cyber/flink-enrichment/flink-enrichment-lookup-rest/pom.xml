@@ -24,13 +24,6 @@
     <artifactId>flink-enrichment-lookup-rest</artifactId>
 
     <dependencies>
-<!--        replacing in other dependencies-->
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-            <scope>compile</scope>
-            <version>${jackson.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
@@ -112,7 +105,7 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>com.cyber.jackson</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>

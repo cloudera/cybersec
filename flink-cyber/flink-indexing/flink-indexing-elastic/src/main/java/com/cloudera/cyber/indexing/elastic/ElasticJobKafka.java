@@ -16,7 +16,7 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.indexing.CollectionField;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.cyber.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;

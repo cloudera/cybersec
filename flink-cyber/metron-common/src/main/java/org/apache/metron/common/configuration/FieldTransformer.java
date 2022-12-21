@@ -18,18 +18,19 @@
 
 package org.apache.metron.common.configuration;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.cyber.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ImmutableList;
+import org.apache.metron.common.field.transformation.FieldTransformation;
+import org.apache.metron.common.field.transformation.FieldTransformations;
+import org.apache.metron.stellar.dsl.Context;
+import org.json.simple.JSONObject;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.metron.common.field.transformation.FieldTransformation;
-import org.apache.metron.common.field.transformation.FieldTransformations;
-import org.apache.metron.stellar.dsl.Context;
-import org.json.simple.JSONObject;
 
 /**
  * Performs an {@link FieldTransformation} on Json.

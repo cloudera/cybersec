@@ -18,7 +18,7 @@
 
 package org.apache.metron.common.configuration.enrichment;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.cyber.jackson.annotation.JsonIgnore;
 import org.apache.metron.common.configuration.enrichment.handler.ConfigHandler;
 
 import java.util.HashMap;

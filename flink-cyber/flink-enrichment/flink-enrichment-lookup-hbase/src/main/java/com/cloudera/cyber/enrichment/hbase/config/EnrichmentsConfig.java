@@ -12,14 +12,16 @@
 
 package com.cloudera.cyber.enrichment.hbase.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.cyber.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**

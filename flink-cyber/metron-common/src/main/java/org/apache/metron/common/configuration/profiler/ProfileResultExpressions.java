@@ -17,8 +17,8 @@
  */
 package org.apache.metron.common.configuration.profiler;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.cyber.jackson.annotation.JsonCreator;
+import com.cyber.jackson.annotation.JsonValue;
 
 import java.io.Serializable;
 

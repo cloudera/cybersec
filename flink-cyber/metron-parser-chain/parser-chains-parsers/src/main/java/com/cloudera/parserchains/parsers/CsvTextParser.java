@@ -21,11 +21,11 @@ import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.cyber.jackson.core.JsonProcessingException;
+import com.cyber.jackson.core.type.TypeReference;
+import com.cyber.jackson.databind.ObjectReader;
+import com.cyber.jackson.dataformat.csv.CsvMapper;
+import com.cyber.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;

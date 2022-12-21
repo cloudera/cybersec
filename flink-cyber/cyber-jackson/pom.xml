@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.cloudera.cyber</groupId>
+        <artifactId>flink-cyber</artifactId>
+        <version>2.3.0</version>
+    </parent>
+
+    <groupId>com.cyber.jackson</groupId>
+    <artifactId>cyber-jackson</artifactId>
+    <version>2.3.0</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>jackson-datatype-jsr310</module>
+        <module>jackson-dataformat-csv</module>
+        <module>json-schema-validator</module>
+        <module>jackson-annotations</module>
+        <module>jackson-databind</module>
+        <module>jackson-core</module>
+        <module>zjsonpatch</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <!-- We use the maven-shade plugin to create a fat jar that contains relocated jackson. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven-shade-plugin.version}</version>
+                <executions>
+                    <!-- Run shade goal on package phase -->
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.fasterxml.jackson</pattern>
+                                    <shadedPattern>com.cyber.jackson</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

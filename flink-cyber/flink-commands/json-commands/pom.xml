@@ -39,6 +39,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.cyber.jackson</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>${assertj.version}</version>

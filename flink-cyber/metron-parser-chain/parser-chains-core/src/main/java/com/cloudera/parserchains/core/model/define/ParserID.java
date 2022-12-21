@@ -12,7 +12,7 @@
 
 package com.cloudera.parserchains.core.model.define;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.cyber.jackson.annotation.JsonValue;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 

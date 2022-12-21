@@ -18,13 +18,18 @@ import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.utils.JSONUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
+import com.cyber.jackson.core.JsonProcessingException;
+import com.cyber.jackson.databind.ObjectMapper;
+import com.cyber.jackson.databind.ObjectReader;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;

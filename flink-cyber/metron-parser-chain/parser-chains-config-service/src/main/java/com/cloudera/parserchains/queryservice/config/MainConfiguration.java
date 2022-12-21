@@ -18,7 +18,12 @@
 
 package com.cloudera.parserchains.queryservice.config;
 
-import com.cloudera.parserchains.core.*;
+import com.cloudera.parserchains.core.ChainBuilder;
+import com.cloudera.parserchains.core.ChainRunner;
+import com.cloudera.parserchains.core.DefaultChainBuilder;
+import com.cloudera.parserchains.core.DefaultChainRunner;
+import com.cloudera.parserchains.core.ParserBuilder;
+import com.cloudera.parserchains.core.ReflectiveParserBuilder;
 import com.cloudera.parserchains.core.catalog.ClassIndexParserCatalog;
 import com.cloudera.parserchains.core.catalog.ParserCatalog;
 import com.cloudera.parserchains.core.catalog.ParserInfo;
@@ -31,13 +36,11 @@ import com.cloudera.parserchains.queryservice.model.summary.ParserSummaryMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.nio.file.Paths;
-
 @Configuration
 public class MainConfiguration {
 
   @Bean
-  public com.fasterxml.jackson.databind.ObjectMapper objectMapper() {
+  public com.cyber.jackson.databind.ObjectMapper objectMapper() {
     return JSONUtils.INSTANCE.getMapper();
   }
 

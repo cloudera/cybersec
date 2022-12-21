@@ -87,21 +87,6 @@
 
         <!-- Hive dependencies -->
 
-        <!--replacing in other dependencies-->
-        <dependency>
-            <groupId>com.fasterxml.jackson.jaxrs</groupId>
-            <artifactId>jackson-jaxrs-base</artifactId>
-            <scope>compile</scope>
-            <version>${jackson.version}</version>
-        </dependency>
-        <!--replacing in other dependencies-->
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-jaxb-annotations</artifactId>
-            <scope>compile</scope>
-            <version>${jackson.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.hive</groupId>
             <artifactId>hive-exec</artifactId>

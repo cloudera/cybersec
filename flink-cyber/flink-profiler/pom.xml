@@ -35,7 +35,7 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>com.cyber.jackson</groupId>
             <artifactId>jackson-databind</artifactId>
             <scope>compile</scope>
         </dependency>

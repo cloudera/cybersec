@@ -17,10 +17,10 @@
  */
 package org.apache.metron.common.configuration.profiler;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.cyber.jackson.annotation.JsonAnyGetter;
+import com.cyber.jackson.annotation.JsonAnySetter;
+import com.cyber.jackson.annotation.JsonCreator;
+import com.cyber.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
 import java.util.HashMap;
