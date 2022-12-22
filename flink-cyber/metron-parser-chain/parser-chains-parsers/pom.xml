@@ -86,7 +86,7 @@
 
         <!--CSV parser dependencies-->
         <dependency>
-            <groupId>com.cyber.jackson</groupId>
+            <groupId>com.cyber.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-csv</artifactId>
         </dependency>
 

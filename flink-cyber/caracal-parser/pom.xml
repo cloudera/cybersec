@@ -90,15 +90,15 @@
             <artifactId>guava</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.cyber.jackson</groupId>
+            <groupId>com.cyber.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.cyber.jackson</groupId>
+            <groupId>com.cyber.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.cyber.jackson</groupId>
+            <groupId>com.cyber.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
         </dependency>
 

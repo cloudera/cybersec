@@ -10,6 +10,7 @@
         <version>2.3.0</version>
     </parent>
 
+    <groupId>com.cyber.jackson.core</groupId>
     <artifactId>jackson-core</artifactId>
     <version>${jackson.version}</version>
 

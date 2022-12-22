@@ -93,7 +93,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.cyber.jackson</groupId>
+            <groupId>com.cyber.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
             <scope>test</scope>
             <version>${jackson.version}</version>
