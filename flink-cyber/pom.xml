@@ -424,19 +424,19 @@
 
 <!--            Own jackson for internal use-->
             <dependency>
-                <groupId>com.cyber.jackson</groupId>
+                <groupId>com.cyber.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
                 <scope>compile</scope>
                 <version>${jackson.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.cyber.jackson</groupId>
+                <groupId>com.cyber.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
                 <scope>compile</scope>
                 <version>${jackson.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.cyber.jackson</groupId>
+                <groupId>com.cyber.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <scope>compile</scope>
                 <version>${jackson.version}</version>

@@ -10,6 +10,7 @@
         <version>2.3.0</version>
     </parent>
 
+    <groupId>com.cyber.jackson.datatype</groupId>
     <artifactId>jackson-datatype-jsr310</artifactId>
     <version>${jackson.version}</version>
 

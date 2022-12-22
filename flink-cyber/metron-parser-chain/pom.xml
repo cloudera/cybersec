@@ -140,7 +140,7 @@
                 <version>${springdoc-openapi.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.cyber.jackson</groupId>
+                <groupId>com.cyber.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
@@ -150,7 +150,7 @@
                 <version>${json.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.cyber.jackson</groupId>
+                <groupId>com.cyber.jackson.dataformat</groupId>
                 <artifactId>jackson-dataformat-csv</artifactId>
                 <version>${jackson.version}</version>
             </dependency>

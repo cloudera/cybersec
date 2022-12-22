@@ -192,7 +192,7 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.cyber.jackson</groupId>
+            <groupId>com.cyber.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
             <version>${jackson.version}</version>
         </dependency>
@@ -205,11 +205,6 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.cyber.jackson</groupId>
-            <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
 
         <!-- All test deps currently inherited from parent -->
