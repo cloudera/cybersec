@@ -20,8 +20,9 @@ package org.apache.metron.parsers;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import oi.thekraken.grok.api.Grok;
-import oi.thekraken.grok.api.Match;
+import io.krakens.grok.api.Grok;
+import io.krakens.grok.api.GrokCompiler;
+import io.krakens.grok.api.Match;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
@@ -56,6 +57,7 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
 
   protected static final LazyLogger LOG = LazyLoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
+  protected GrokCompiler grokCompiler;
   protected transient Grok grok;
   protected String grokPath;
   protected boolean multiLine = false;
@@ -109,7 +111,8 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
 
   @Override
   public void init() {
-    grok = new Grok();
+    grokCompiler = GrokCompiler.newInstance();
+    grokCompiler.registerDefaultPatterns();
     try {
       InputStream commonInputStream = openInputStream(patternsCommonDir);
       LOG.info("Grok parser loading common patterns from: {}", patternsCommonDir);
@@ -119,7 +122,7 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
                 "Unable to initialize grok parser: Unable to load " + patternsCommonDir + " from either classpath or HDFS");
       }
 
-      grok.addPatternFromReader(new InputStreamReader(commonInputStream, getReadCharset()));
+      grokCompiler.register(new InputStreamReader(commonInputStream, getReadCharset()));
       LOG.info("Loading parser-specific patterns from: {}", grokPath);
 
       InputStream patterInputStream = openInputStream(grokPath);
@@ -127,20 +130,20 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
         throw new RuntimeException("Grok parser unable to initialize grok parser: Unable to load " + grokPath
                 + " from either classpath or HDFS");
       }
-      grok.addPatternFromReader(new InputStreamReader(patterInputStream, getReadCharset()));
+      grokCompiler.register(new InputStreamReader(patterInputStream, getReadCharset()));
 
-      if (!grok.getPatterns().containsKey(patternLabel)){
+      if (!grokCompiler.getPatternDefinitions().containsKey(patternLabel)){
         throw new RuntimeException(
                 String.format("Grok parser init error: not able to find pattern [%s] in the [%s]",
                         patternLabel, grokPath));
       }
 
       LOG.info("Grok parser set the following grok expression for '{}': {}", () ->patternLabel,
-              () -> grok.getPatterns().get(patternLabel));
+              () -> grokCompiler.getPatternDefinitions().get(patternLabel));
 
       String grokPattern = "%{" + patternLabel + "}";
 
-      grok.compile(grokPattern);
+      grok = grokCompiler.compile(grokPattern);
       LOG.info("Compiled grok pattern {}", grokPattern);
 
     } catch (Throwable e) {
@@ -172,9 +175,8 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
         LOG.debug("Grok parser parsing message: {}", originalMessage);
         try {
           Match gm = grok.match(originalMessage);
-          gm.captures();
           JSONObject message = new JSONObject();
-          message.putAll(gm.toMap());
+          message.putAll(gm.capture());
 
           if (message.size() == 0) {
             Throwable rte = new RuntimeException("Grok statement produced a null message. Original message was: "
@@ -222,9 +224,8 @@ public class GrokParser implements MessageParser<JSONObject>, Serializable {
       originalMessage = new String(rawMessage, StandardCharsets.UTF_8);
       LOG.debug("Grok parser parsing message: {}",originalMessage);
       Match gm = grok.match(originalMessage);
-      gm.captures();
       JSONObject message = new JSONObject();
-      message.putAll(gm.toMap());
+      message.putAll(gm.capture());
 
       if (message.size() == 0) {
         Throwable rte = new RuntimeException("Grok statement produced a null message. Original message was: "

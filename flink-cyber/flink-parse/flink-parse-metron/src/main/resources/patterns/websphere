@@ -17,7 +17,7 @@ WORD \w+
 PRIORITY \d+
 
 # Log start - the first part of the log line
-LOGSTART <%{PRIORITY:priority}>?%{TIMESTAMP:timestamp_string} %{WORD:hostname}
+LOGSTART <%{PRIORITY:priority:int}>?%{TIMESTAMP:timestamp_string} %{WORD:hostname}
 
 # Security domain
 SECURITY_DOMAIN [%{WORD:security_domain}]

@@ -26,7 +26,6 @@
     <properties>
         <!-- main dependency versions -->
         <antlr4.version>${antlr.version}</antlr4.version>
-        <java-grok.version>0.1.9</java-grok.version>
         <global_shade_version>3.2.0</global_shade_version>
     </properties>
 

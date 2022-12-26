@@ -30,7 +30,7 @@ IP (?:%{IPV6:UNWANTED}|%{IPV4:UNWANTED})
 HOSTNAME \b(?:[0-9A-Za-z][0-9A-Za-z-]{0,62})(?:\.(?:[0-9A-Za-z][0-9A-Za-z-]{0,62}))*(\.?|\b)
 HOST %{HOSTNAME:UNWANTED}
 IPORHOST (?:%{HOSTNAME:UNWANTED}|%{IP:UNWANTED})
-HOSTPORT (?:%{IPORHOST}:%{POSINT:PORT})
+HOSTPORT (?:%{IPORHOST}:%{POSINT:PORT:int})
 
 # paths
 PATH (?:%{UNIXPATH}|%{WINPATH})
@@ -39,7 +39,7 @@ UNIXPATH (?>/(?>[\w_%!$@:.,~-]+|\\.)*)+
 TTY (?:/dev/(pts|tty([pq])?)(\w+)?/?(?:[0-9]+))
 WINPATH (?>[A-Za-z]+:|\\)(?:\\[^\\?*]*)+
 URIPROTO [A-Za-z]+(\+[A-Za-z+]+)?
-URIHOST %{IPORHOST}(?::%{POSINT:port})?
+URIHOST %{IPORHOST}(?::%{POSINT:port:int})?
 # uripath comes loosely from RFC1738, but mostly from what Firefox
 # doesn't turn into %XX
 URIPATH (?:/[A-Za-z0-9$.+!*'(){},~:;=@#%_\-]*)+
@@ -87,9 +87,9 @@ GREEDYDATA .*
 # Syslog Dates: Month Day HH:MM:SS
 SYSLOGTIMESTAMP %{MONTH} +%{MONTHDAY} %{TIME}
 PROG (?:[\w._/%-]+)
-SYSLOGPROG %{PROG:program}(?:\[%{POSINT:pid}\])?
+SYSLOGPROG %{PROG:program}(?:\[%{POSINT:pid:int}\])?
 SYSLOGHOST %{IPORHOST}
-SYSLOGFACILITY <%{NONNEGINT:facility}.%{NONNEGINT:priority}>
+SYSLOGFACILITY <%{NONNEGINT:facility:int}.%{NONNEGINT:priority:int}>
 HTTPDATE %{MONTHDAY}/%{MONTH}/%{YEAR}:%{TIME} %{INT}
 
 # Shortcuts
