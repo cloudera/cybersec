@@ -12,8 +12,8 @@
 
 package com.cloudera.parserchains.core.model.define;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.cyber.jackson.annotation.JsonAnyGetter;
+import com.cyber.jackson.annotation.JsonAnySetter;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 

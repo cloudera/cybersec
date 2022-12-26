@@ -17,12 +17,12 @@
  */
 package org.apache.metron.common.configuration.enrichment;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import java.nio.charset.StandardCharsets;
+import com.cyber.jackson.core.JsonProcessingException;
 import org.apache.metron.common.configuration.enrichment.threatintel.ThreatIntelConfig;
 import org.apache.metron.common.utils.JSONUtils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 

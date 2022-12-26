@@ -12,8 +12,8 @@
 
 package com.cloudera.cyber.enrichment.threatq;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.cyber.jackson.core.JsonProcessingException;
+import com.cyber.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;

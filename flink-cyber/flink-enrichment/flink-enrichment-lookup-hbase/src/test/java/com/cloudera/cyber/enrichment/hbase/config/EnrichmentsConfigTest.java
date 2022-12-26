@@ -94,7 +94,7 @@ public class EnrichmentsConfigTest {
         String fullTestFilePath = getJsonAbsPath("invalid_syntax_enrichments_config.json");
         assertThatThrownBy(() -> testLoadJson(fullTestFilePath)).isInstanceOf(RuntimeException.class)
                 .hasMessage(EnrichmentsConfig.ENRICHMENT_CONFIG_FILE_DESERIALIZATION_ERROR, fullTestFilePath)
-                .hasCauseInstanceOf(com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException.class);
+                .hasCauseInstanceOf(com.cyber.jackson.databind.exc.UnrecognizedPropertyException.class);
     }
 
     @Test

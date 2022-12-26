@@ -13,9 +13,9 @@
 package com.cloudera.cyber.test;
 
 import com.cloudera.cyber.generator.FreemarkerImmediateGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.MapType;
-import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.cyber.jackson.databind.ObjectMapper;
+import com.cyber.jackson.databind.type.MapType;
+import com.cyber.jackson.databind.type.TypeFactory;
 import freemarker.template.TemplateException;
 import org.junit.Assert;
 import org.junit.Test;

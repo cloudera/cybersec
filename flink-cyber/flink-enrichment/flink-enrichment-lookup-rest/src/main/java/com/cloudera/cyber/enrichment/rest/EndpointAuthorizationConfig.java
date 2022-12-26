@@ -12,10 +12,10 @@
 
 package com.cloudera.cyber.enrichment.rest;
 
-import lombok.*;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.cyber.jackson.annotation.JsonSubTypes;
+import com.cyber.jackson.annotation.JsonTypeInfo;
+import lombok.Data;
 import org.apache.commons.text.StringSubstitutor;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
 
 import java.io.Serializable;
 

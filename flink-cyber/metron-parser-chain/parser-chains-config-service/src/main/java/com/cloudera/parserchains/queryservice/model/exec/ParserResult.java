@@ -18,9 +18,13 @@
 
 package com.cloudera.parserchains.queryservice.model.exec;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.cyber.jackson.annotation.JsonInclude;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * The result of parsing a message with a parser chain or parser.

@@ -18,12 +18,12 @@
 
 package org.apache.metron.common.utils;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.cyber.jackson.annotation.JsonInclude;
+import com.cyber.jackson.core.JsonParser;
+import com.cyber.jackson.core.JsonProcessingException;
+import com.cyber.jackson.core.type.TypeReference;
+import com.cyber.jackson.databind.JsonNode;
+import com.cyber.jackson.databind.ObjectMapper;
 import com.flipkart.zjsonpatch.JsonPatch;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

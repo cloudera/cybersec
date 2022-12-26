@@ -19,7 +19,7 @@
 package com.cloudera.parserchains.queryservice.model.exec;
 
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.cyber.jackson.annotation.JsonProperty;
 
 /**
  * Defines the data model for a request to test a parser chain.

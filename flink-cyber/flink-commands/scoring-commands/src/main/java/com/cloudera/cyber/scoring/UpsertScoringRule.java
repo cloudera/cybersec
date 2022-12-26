@@ -14,9 +14,9 @@ package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.rules.DynamicRuleCommandType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.cyber.jackson.databind.ObjectMapper;
+import com.cyber.jackson.databind.ObjectReader;
+import com.cyber.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.Preconditions;
 import com.hortonworks.registries.schemaregistry.serdes.avro.kafka.KafkaAvroDeserializer;
 import com.hortonworks.registries.schemaregistry.serdes.avro.kafka.KafkaAvroSerializer;
