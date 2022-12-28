@@ -14,11 +14,11 @@
  */
 package org.apache.metron.parsers.leef;
 
+import com.cyber.fge.jackson.JsonLoader;
+import com.cyber.fge.jsonschema.core.report.ProcessingReport;
+import com.cyber.fge.jsonschema.main.JsonSchemaFactory;
+import com.cyber.fge.jsonschema.main.JsonValidator;
 import com.cyber.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import com.github.fge.jsonschema.main.JsonSchemaFactory;
-import com.github.fge.jsonschema.main.JsonValidator;
 import com.google.common.io.Resources;
 import org.apache.metron.common.Constants.Fields;
 import org.apache.metron.parsers.interfaces.MessageParser;

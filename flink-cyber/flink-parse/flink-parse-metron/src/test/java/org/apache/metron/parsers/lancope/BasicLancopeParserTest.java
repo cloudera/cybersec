@@ -17,7 +17,7 @@
  */
 package org.apache.metron.parsers.lancope;
 
-import com.github.fge.jsonschema.core.exceptions.ProcessingException;
+import com.cyber.fge.jsonschema.core.exceptions.ProcessingException;
 import org.apache.metron.parsers.AbstractParserConfigTest;
 import org.apache.metron.parsers.interfaces.MessageParser;
 import org.json.simple.JSONObject;

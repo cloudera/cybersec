@@ -66,6 +66,14 @@
                                     <pattern>com.fasterxml.jackson</pattern>
                                     <shadedPattern>com.cyber.jackson</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>com.flipkart.zjsonpatch</pattern>
+                                    <shadedPattern>com.cyber.zjsonpatch</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.github.fge</pattern>
+                                    <shadedPattern>com.cyber.fge</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>

@@ -17,12 +17,12 @@
  */
 package org.apache.metron.parsers;
 
+import com.cyber.fge.jackson.JsonLoader;
+import com.cyber.fge.jsonschema.core.exceptions.ProcessingException;
+import com.cyber.fge.jsonschema.core.report.ProcessingReport;
+import com.cyber.fge.jsonschema.main.JsonSchemaFactory;
+import com.cyber.fge.jsonschema.main.JsonValidator;
 import com.cyber.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
-import com.github.fge.jsonschema.core.exceptions.ProcessingException;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import com.github.fge.jsonschema.main.JsonSchemaFactory;
-import com.github.fge.jsonschema.main.JsonValidator;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
