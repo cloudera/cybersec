@@ -24,7 +24,7 @@ import com.cyber.jackson.core.JsonProcessingException;
 import com.cyber.jackson.core.type.TypeReference;
 import com.cyber.jackson.databind.JsonNode;
 import com.cyber.jackson.databind.ObjectMapper;
-import com.flipkart.zjsonpatch.JsonPatch;
+import com.cyber.zjsonpatch.JsonPatch;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
