@@ -60,6 +60,11 @@ public class ConfigParamDescriptor {
   private boolean required;
 
   /**
+   * Defines whether the user is able to enter multiple values per parameter.
+   */
+  private boolean multipleValues;
+
+  /**
    * Defines a path that allows the UI to organize the parameters.
    *
    * <p>In cases where multiple, associated values are accepted, like a field rename with a
@@ -129,6 +134,15 @@ public class ConfigParamDescriptor {
 
   public ConfigParamDescriptor setRequired(boolean required) {
     this.required = required;
+    return this;
+  }
+
+  public boolean isMultipleValues() {
+    return multipleValues;
+  }
+
+  public ConfigParamDescriptor setMultipleValues(boolean multipleValues) {
+    this.multipleValues = multipleValues;
     return this;
   }
 

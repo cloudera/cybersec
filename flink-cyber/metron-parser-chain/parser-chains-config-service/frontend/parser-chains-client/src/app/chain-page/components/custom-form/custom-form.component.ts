@@ -24,6 +24,7 @@ export interface CustomFormConfig {
   options?: { id: string, name: string }[];
   onChange?: (config: any) => {};
   required?: boolean;
+  multipleValues?: boolean;
   description?: string;
   placeholder?: string;
   defaultValue?: string;

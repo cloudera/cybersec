@@ -11,55 +11,55 @@
   -->
 
 <div class="multi-input">
-  <nz-form-control
-    *ngFor="let item of controls; let i = index;"
-    [nzSm]="24"
-    [nzXs]="20"
-  >
-    <div class="input-group-container">
-      <nz-input-group [nzSuffix]="suffixIconSearch">
-        <input
-          *ngIf="config.type === 'text'"
-          nz-input
-          [formControl]="controls[i]"
-          (keyup)="onChange(config)"
-        />
-        <textarea
-          *ngIf="config.type === 'textarea'"
-          nz-input
-          rows="4"
-          [formControl]="controls[i]"
-          nzSize="small"
-          (keyup)="onChange(config)"
-        ></textarea>
-      </nz-input-group>
-      <button
-        class="add-field-button"
-        nz-button
-        nzSize="small"
-        nzType="primary"
-        nzShape="circle"
-        (click)="onAddClick()"
-        *ngIf="i === 0"
-        title="Add field"
-      ><i nz-icon nzType="plus-circle" nzTheme="fill"></i></button>
-      <button
-        class="remove-field-button"
-        nz-button
-        nzType="primary"
-        nzDanger="true"
-        nzShape="circle"
-        nzSize="small"
-        *ngIf="i > 0"
-        (click)="onRemoveFieldClick(controls[i], config)"
-        title="Remove field"
-      >
-        <i nz-icon nzType="minus-circle" nzTheme="fill"></i>
-      </button>
-    </div>
-    <ng-template #suffixIconSearch>
-      <i *ngIf="i === 0" nz-icon nzType="info-circle" nzTheme="outline" nzTooltipTitle="{{ config.description }}"
-    nzTooltipPlacement="right" nz-tooltip></i>
-    </ng-template>
-  </nz-form-control>
+    <nz-form-control
+            *ngFor="let item of controls; let i = index;"
+            [nzSm]="24"
+            [nzXs]="20"
+    >
+        <div class="input-group-container">
+            <nz-input-group [nzSuffix]="suffixIconSearch">
+                <input
+                        *ngIf="config.type === 'text'"
+                        nz-input
+                        [formControl]="controls[i]"
+                        (keyup)="onChange(config)"
+                />
+                <textarea
+                        *ngIf="config.type === 'textarea'"
+                        nz-input
+                        rows="4"
+                        [formControl]="controls[i]"
+                        nzSize="small"
+                        (keyup)="onChange(config)"
+                ></textarea>
+            </nz-input-group>
+            <button
+                    class="add-field-button"
+                    nz-button
+                    nzSize="small"
+                    nzType="primary"
+                    nzShape="circle"
+                    (click)="onAddClick()"
+                    *ngIf="i === 0 && config.multipleValues"
+                    title="Add field"
+            ><i nz-icon nzType="plus-circle" nzTheme="fill"></i></button>
+            <button
+                    class="remove-field-button"
+                    nz-button
+                    nzType="primary"
+                    nzDanger="true"
+                    nzShape="circle"
+                    nzSize="small"
+                    *ngIf="controls.length > 1"
+                    (click)="onRemoveFieldClick(controls[i], config)"
+                    title="Remove field"
+            >
+                <i nz-icon nzType="minus-circle" nzTheme="fill"></i>
+            </button>
+        </div>
+        <ng-template #suffixIconSearch>
+            <i *ngIf="i === 0" nz-icon nzType="info-circle" nzTheme="outline" nzTooltipTitle="{{ config.description }}"
+               nzTooltipPlacement="right" nz-tooltip></i>
+        </ng-template>
+    </nz-form-control>
 </div>

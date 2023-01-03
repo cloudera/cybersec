@@ -12,7 +12,10 @@
 
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.*;
+import com.cloudera.parserchains.core.FieldName;
+import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.Parser;
+import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
@@ -24,7 +27,11 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.*;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
@@ -65,7 +72,8 @@ public class XPathParser implements Parser {
         return this;
     }
 
-    @Configurable(key="xpath")
+    @Configurable(key="xpath",
+            multipleValues = true)
     public XPathParser expression(
             @Parameter(key="field", label="Field Name", description="The field to create or modify.") String fieldName,
             @Parameter(key="expr", label="XPath", description="The XPath expression.") String expression) {

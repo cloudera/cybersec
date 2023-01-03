@@ -24,7 +24,12 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
@@ -65,7 +70,8 @@ public class JSONParser implements Parser {
                     "'DISALLOW_NESTED' Stop parsing and throw an error if nested JSON exists.  " +
                     "'DROP_NESTED' Drop and ignore any nested JSON values.  " +
                     "'UNFOLD_NESTED' Unfold the nested JSON by creating a nested, dot-separated field name.  ",
-            defaultValue=DEFAULT_NORMALIZER)
+            defaultValue=DEFAULT_NORMALIZER,
+            multipleValues = true)
     public JSONParser normalizer(String normalizer) {
         if(StringUtils.isNotBlank(normalizer)) {
             addNormalizer(Normalizers.valueOf(normalizer));
