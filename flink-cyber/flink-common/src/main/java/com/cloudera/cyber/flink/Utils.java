@@ -233,7 +233,7 @@ public class Utils {
         } else if (unit1 == null || unitType1 == null || unit2 == null || unitType2 == null) {
             return false;
         }
-        return Time.of(unit1, TimeUnit.valueOf(unitType1)).toMilliseconds() == Time.of(unit2, TimeUnit.valueOf(unitType2)).toMilliseconds();
+        return TimeUnit.valueOf(unitType1).toMillis(unit1) == TimeUnit.valueOf(unitType2).toMillis(unit2);
     }
 
     public static <T> boolean isTimeEqual(T object1, T object2, ToLongFunction<T> timeUnitSelector, Function<T, String> timeUnitTypeSelector) {
