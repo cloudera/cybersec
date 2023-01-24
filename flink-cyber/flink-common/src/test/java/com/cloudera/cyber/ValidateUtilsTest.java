@@ -13,7 +13,9 @@
 package com.cloudera.cyber;
 
 import com.cloudera.cyber.flink.Utils;
+
 import java.util.concurrent.TimeUnit;
+
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.junit.Test;
@@ -42,16 +44,16 @@ public class ValidateUtilsTest {
         Time sixtyMinute = Time.of(60L, TimeUnit.MINUTES);
         Time oneHour = Time.of(1L, TimeUnit.HOURS);
 
-        assertThat(Utils.timeCompare(60L, "SECONDS", 1L, "MINUTES")).isTrue();
-        assertThat(Utils.timeCompare(60L, "MINUTES", 1L, "HOURS")).isTrue();
-        assertThat(Utils.timeCompare(24L, "HOURS", 1L, "DAYS")).isTrue();
-        assertThat(Utils.timeCompare(24L, "SECONDS", 1L, "MINUTES")).isFalse();
-        assertThat(Utils.timeCompare(24L, "MINUTES", 1L, "DAYS")).isFalse();
+        assertThat(Utils.isTimeEqual(60L, "SECONDS", 1L, "MINUTES")).isTrue();
+        assertThat(Utils.isTimeEqual(60L, "MINUTES", 1L, "HOURS")).isTrue();
+        assertThat(Utils.isTimeEqual(24L, "HOURS", 1L, "DAYS")).isTrue();
+        assertThat(Utils.isTimeEqual(24L, "SECONDS", 1L, "MINUTES")).isFalse();
+        assertThat(Utils.isTimeEqual(24L, "MINUTES", 1L, "DAYS")).isFalse();
 
-        assertThat(Utils.timeCompare(sixtySeconds,oneMinute,Time::getSize, obj -> obj.getUnit().name())).isTrue();
-        assertThat(Utils.timeCompare(sixtyMinute,oneHour,Time::getSize, obj -> obj.getUnit().name())).isTrue();
-        assertThat(Utils.timeCompare(sixtyMinute,sixtySeconds,Time::getSize, obj -> obj.getUnit().name())).isTrue();
-        assertThat(Utils.timeCompare(oneHour,oneMinute,Time::getSize, obj -> obj.getUnit().name())).isTrue();
+        assertThat(Utils.isTimeEqual(sixtySeconds, oneMinute, Time::getSize, obj -> obj.getUnit().name())).isTrue();
+        assertThat(Utils.isTimeEqual(sixtyMinute, oneHour, Time::getSize, obj -> obj.getUnit().name())).isTrue();
+        assertThat(Utils.isTimeEqual(sixtyMinute, sixtySeconds, Time::getSize, obj -> obj.getUnit().name())).isTrue();
+        assertThat(Utils.isTimeEqual(oneHour, oneMinute, Time::getSize, obj -> obj.getUnit().name())).isTrue();
     }
 
     @Test
@@ -76,6 +78,6 @@ public class ValidateUtilsTest {
                 entry("test1.property1", "test1-property1-rewrited"),
                 entry("test2.property", "test2-property"),
                 entry("test2.property1", "test2-property1")
-                );
+        );
     }
 }
