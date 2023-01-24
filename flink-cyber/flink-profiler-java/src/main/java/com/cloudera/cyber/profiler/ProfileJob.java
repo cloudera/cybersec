@@ -256,7 +256,7 @@ public abstract class ProfileJob {
     }
 
     private MeasurementDto processMeasurement(PhoenixThinClient client, ImmutableMap<String, String> propertiesMap, Integer profileId, MeasurementDto measurement) throws SQLException, IOException, TemplateException {
-        MeasurementDto measurementEntity = client.selectResult(freemarkerGenerator.replceByTemplate(SELECT_MEASUREMENT_BY_NAME, propertiesMap), MEASUREMENT_META_MAPPER,
+        MeasurementDto measurementEntity = client.selectResult(freemarkerGenerator.replaceByTemplate(SELECT_MEASUREMENT_BY_NAME, propertiesMap), MEASUREMENT_META_MAPPER,
             MEASUREMENT_PS_CONSUMER_FUNCTION.apply(measurement.getResultExtensionName(), profileId));
         if (measurementEntity == null) {
             return createMeasurement(client, propertiesMap, profileId, measurement);
@@ -268,8 +268,8 @@ public abstract class ProfileJob {
     }
 
     private MeasurementDto createMeasurement(PhoenixThinClient client, Map<String, String> params, Integer profileId, MeasurementDto measurement) throws SQLException, IOException, TemplateException {
-        Integer measurementId = client.selectResult(freemarkerGenerator.replceByTemplate(SELECT_MEASUREMENT_ID, params), FIRST_VALUE_MAPPER);
-        client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_MEASUREMENT_META, params), getUpdateMeasurementMetaConsumer(measurement, measurementId, profileId));
+        Integer measurementId = client.selectResult(freemarkerGenerator.replaceByTemplate(SELECT_MEASUREMENT_ID, params), FIRST_VALUE_MAPPER);
+        client.insertIntoTable(freemarkerGenerator.replaceByTemplate(UPSERT_MEASUREMENT_META, params), getUpdateMeasurementMetaConsumer(measurement, measurementId, profileId));
         return measurement.toBuilder().id(measurementId).profileId(profileId).build();
     }
 
@@ -279,13 +279,13 @@ public abstract class ProfileJob {
             throw new IllegalStateException("Key fields cannot be changed for the measurement='" + measurement + "' measurementDtoDb='" + measurementDtoDb + "'");
         }
         Integer measurementId = measurementDtoDb.getId();
-        client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_MEASUREMENT_META, params), getUpdateMeasurementMetaConsumer(measurement, measurementId, profileId));
+        client.insertIntoTable(freemarkerGenerator.replaceByTemplate(UPSERT_MEASUREMENT_META, params), getUpdateMeasurementMetaConsumer(measurement, measurementId, profileId));
         return measurement.toBuilder().id(measurementId).profileId(profileId).build();
     }
 
     private ProfileDto processProfile(PhoenixThinClient client, ImmutableMap<String, String> propertiesMap, ProfileDto profile) throws SQLException, IOException, TemplateException {
         String profileGroupName = profile.getProfileGroupName();
-        ProfileDto profileDtoDb = client.selectResult(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_BY_NAME, propertiesMap), PROFILE_META_MAPPER, PROFILE_PS_CONSUMER_FUNCTION.apply(profileGroupName));
+        ProfileDto profileDtoDb = client.selectResult(freemarkerGenerator.replaceByTemplate(SELECT_PROFILE_BY_NAME, propertiesMap), PROFILE_META_MAPPER, PROFILE_PS_CONSUMER_FUNCTION.apply(profileGroupName));
         if (profileDtoDb == null) {
             return createProfile(client, propertiesMap, profile);
         } else if (profileDtoDb.getId() == null) {
@@ -302,7 +302,7 @@ public abstract class ProfileJob {
             throw new IllegalStateException("Key fields cannot be changed for the profile='" + profile + "' profileDtoDb='" + profileDtoDb + "'");
         }
         Integer profileId = profileDtoDb.getId();
-        client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_PROFILE_META, propertiesMap), getUpdateProfileConsumer(profile, profileId));
+        client.insertIntoTable(freemarkerGenerator.replaceByTemplate(UPSERT_PROFILE_META, propertiesMap), getUpdateProfileConsumer(profile, profileId));
         ArrayList<MeasurementDto> measurementDtos = new ArrayList<>();
         for (MeasurementDto measurementDto : profile.getMeasurementDtos()) {
             measurementDtos.add(processMeasurement(client, propertiesMap, profileId, measurementDto));
@@ -311,8 +311,8 @@ public abstract class ProfileJob {
     }
 
     private ProfileDto createProfile(PhoenixThinClient client, ImmutableMap<String, String> propertiesMap, ProfileDto profile) throws SQLException, IOException, TemplateException {
-        Integer profileId = client.selectResult(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_ID, propertiesMap), FIRST_VALUE_MAPPER);
-        client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_PROFILE_META, propertiesMap), getUpdateProfileConsumer(profile, profileId));
+        Integer profileId = client.selectResult(freemarkerGenerator.replaceByTemplate(SELECT_PROFILE_ID, propertiesMap), FIRST_VALUE_MAPPER);
+        client.insertIntoTable(freemarkerGenerator.replaceByTemplate(UPSERT_PROFILE_META, propertiesMap), getUpdateProfileConsumer(profile, profileId));
         ArrayList<MeasurementDto> measurementDtos = new ArrayList<>();
         for (MeasurementDto measurementDto : profile.getMeasurementDtos()) {
             measurementDtos.add(createMeasurement(client, propertiesMap, profileId, measurementDto));

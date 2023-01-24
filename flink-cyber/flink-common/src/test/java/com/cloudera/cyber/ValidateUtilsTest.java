@@ -52,8 +52,8 @@ public class ValidateUtilsTest {
 
         assertThat(Utils.isTimeEqual(sixtySeconds, oneMinute, Time::getSize, obj -> obj.getUnit().name())).isTrue();
         assertThat(Utils.isTimeEqual(sixtyMinute, oneHour, Time::getSize, obj -> obj.getUnit().name())).isTrue();
-        assertThat(Utils.isTimeEqual(sixtyMinute, sixtySeconds, Time::getSize, obj -> obj.getUnit().name())).isTrue();
-        assertThat(Utils.isTimeEqual(oneHour, oneMinute, Time::getSize, obj -> obj.getUnit().name())).isTrue();
+        assertThat(Utils.isTimeEqual(sixtyMinute, sixtySeconds, Time::getSize, obj -> obj.getUnit().name())).isFalse();
+        assertThat(Utils.isTimeEqual(oneHour, oneMinute, Time::getSize, obj -> obj.getUnit().name())).isFalse();
     }
 
     @Test
