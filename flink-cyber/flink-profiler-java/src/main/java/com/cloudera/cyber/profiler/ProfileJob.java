@@ -222,7 +222,7 @@ public abstract class ProfileJob {
             client.executeSql(freemarkerGenerator.replaceByFile("sql/profile_metadata_table.sql", mapsParams));
             client.executeSql(freemarkerGenerator.replaceByFile("sql/measurement_metadata_table.sql", mapsParams));
             client.executeSql(freemarkerGenerator.replaceByFile("sql/measurement_table.sql", mapsParams));
-            ResultSetMetaData tableMetadata = client.getTableMetadata(freemarkerGenerator.replceByTemplate(SELECT_METADATA_FROM_MEASUREMENT_DATA_TABLE, mapsParams));
+            ResultSetMetaData tableMetadata = client.getTableMetadata(freemarkerGenerator.replaceByTemplate(SELECT_METADATA_FROM_MEASUREMENT_DATA_TABLE, mapsParams));
             validate(params, tableMetadata);
             return persistProfileMeasurementConfigMeta(profileGroups, client, properties);
         }

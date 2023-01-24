@@ -111,7 +111,7 @@ public class ProfileJobKafka extends ProfileJob {
                 .withUrl(client.getDbUrl())
                 .build();
         SinkFunction<MeasurementDataDto> jdbcSink = JdbcSink.sink(
-                freemarkerGenerator.replceByTemplate(UPSERT_SQL, Maps.fromProperties(properties)),
+                freemarkerGenerator.replaceByTemplate(UPSERT_SQL, Maps.fromProperties(properties)),
                 objectJdbcStatementBuilder,
                 executionOptions,
                 connectionOptions);
