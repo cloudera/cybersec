@@ -179,12 +179,12 @@
     "group": "cybersec",
     "permissions": "0755"
   },
-  "etc/conf/kafka.properties.template.kerberos": {
+  "etc/conf/templates/kafka.properties.template.kerberos": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
   },
-  "etc/conf/kafka.properties.template.open": {
+  "etc/conf/templates/kafka.properties.template.open": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
