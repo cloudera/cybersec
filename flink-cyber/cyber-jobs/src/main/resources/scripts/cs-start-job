@@ -155,7 +155,7 @@ if [ -f "${kerberos_properties}" ]; then
   security_options+=("-yt" "generated/${flink_internal_keystore}")
 fi
 
-job_properties=arr("/etc/cybersec/conf/kafka.properties" "${job_properties[@]}")
+job_properties=("/etc/cybersec/conf/kafka.properties" "${job_properties[@]}")
 
 flink run \
   "${savepoint_options[@]}" \
