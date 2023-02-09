@@ -400,7 +400,7 @@ public abstract class ProfileJob {
 
     private DataStream<ScoredMessage> score(DataStream<Message> in, StreamExecutionEnvironment env, ParameterTool params) {
         DataStream<ScoringRuleCommand> rulesSource = createRulesSource(env, params);
-        SingleOutputStreamOperator<ScoredMessage> results = ScoringJob.enrich(in, rulesSource);
+        SingleOutputStreamOperator<ScoredMessage> results = ScoringJob.enrich(in, rulesSource, params);
         writeScoredRuleCommandResult(params, results.getSideOutput(ScoringJob.COMMAND_RESULT_OUTPUT_TAG));
         return results;
     }
