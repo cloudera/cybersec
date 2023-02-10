@@ -12,6 +12,22 @@
 # limitations governing your use of the file.
 #
 
+# Determine the location of the script to locate parcel
+# Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$(dirname "$SOURCE")"
+while [ -h "$SOURCE" ]
+do
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Populate necessary environment variables
+source $BIN_DIR/env.sh
+
+
 if [ "$#" -ne 2 ]; then
   echo "Usage: $0 branch pipeline" >&2
   exit 1
@@ -39,7 +55,7 @@ sed -e s/BRANCH/$branch/g "$pipeline/triage/$enrichment_storage_template" > $gen
 
 generated_enrichment_rest_file="enrichments-rest.json"
 enrichment_rest_template="${generated_enrichment_rest_file}.template"
-cs-run-java json-commands com.cloudera.cyber.json.ReplaceJsonProperties "$pipeline/triage/$enrichment_rest_template" rest.properties "$generated_dir/$generated_enrichment_rest_file"
+run_java_class json-commands com.cloudera.cyber.json.ReplaceJsonProperties "$pipeline/triage/$enrichment_rest_template" rest.properties "$generated_dir/$generated_enrichment_rest_file"
 
 job_name=${branch}.${pipeline}.triage
 
@@ -49,7 +65,6 @@ if [ ! -z "$savepoint" ]; then
    savepoint_options+=("-s" "$savepoint")
 fi
 
-source cs-override-hbase
-override_hbase
+override_hbase ship_configs
 
 cs-start-job -j flink-enrichment-combined -y "$pipeline/triage/stellar" "${ship_configs[@]}" -p /etc/cybersec/conf/triage.properties  -p kafka.properties -p "$generated_triage_props" "${savepoint_options[@]}"

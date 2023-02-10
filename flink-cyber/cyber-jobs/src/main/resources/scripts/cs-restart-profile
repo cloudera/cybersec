@@ -12,6 +12,22 @@
 # limitations governing your use of the file.
 #
 
+# Determine the location of the script to locate parcel
+# Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$(dirname "$SOURCE")"
+while [ -h "$SOURCE" ]
+do
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Populate necessary environment variables
+source $BIN_DIR/env.sh
+
+
 if [ "$#" -ne 3 ]; then
   echo "Usage: $0 branch pipeline profile_name" >&2
   exit 1
@@ -47,8 +63,7 @@ if [ ! -z "$savepoint" ]; then
    savepoint_options+=("-s" "$savepoint")
 fi
 
-source cs-override-hbase
-override_hbase
+override_hbase ship_configs
 
 phoenix_client_jar=$(ls /opt/cloudera/parcels/CDH/lib/phoenix_queryserver/phoenix-queryserver-client-*.jar -1)
 

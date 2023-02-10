@@ -18,7 +18,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 pipeline=$1
-cs-add-parser $pipeline main
-cs-add-triage $pipeline
-cs-add-index $pipeline
-cs-add-profile $pipeline main
+cs-add-parser "$pipeline" main
+cs-add-triage "$pipeline"
+cs-add-index "$pipeline"
+cs-add-profile "$pipeline" main

@@ -75,7 +75,7 @@ fi
 
 ship_enrichment_file=()
 configure_enrich_file=$enrichment_file
-if [ "$enrichment_file" != hdfs* ]; then
+if [ "$enrichment_file" == hdfs* ]; then
   if [ -f "$enrichment_file" ]; then
       ship_enrichment_file+=("-y" "$enrichment_file")
       configure_enrich_file=$(basename "$enrichment_file")
