@@ -103,22 +103,6 @@ under the License.
                             <attach>false</attach>
                         </configuration>
                     </execution>
-					<execution>
-						<id>Build meta.tar.gz</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-						<configuration>
-							<appendAssemblyId>false</appendAssemblyId>
-							<tarLongFileMode>gnu</tarLongFileMode>
-							<descriptors>
-								<descriptor>src/main/assemblies/meta-assembly.xml</descriptor>
-							</descriptors>
-							<finalName>${parcel.filename}.meta</finalName>
-							<attach>false</attach>
-						</configuration>
-					</execution>
                 </executions>
             </plugin>
             <plugin>
