@@ -12,6 +12,21 @@
 # limitations governing your use of the file.
 #
 
+# Determine the location of the script to locate parcel
+# Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$(dirname "$SOURCE")"
+while [ -h "$SOURCE" ]
+do
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Populate necessary environment variables
+source $BIN_DIR/env.sh
+
 usage="$(basename "$0") -- loads enrichment name value pairs into hbase or flink state
 
 where:
@@ -103,7 +118,4 @@ enrichment_storage_template="${generated_enrichment_storage_file}.template"
 generated_enrichment_storage="$generated_load_dir/$generated_enrichment_storage_file"
 sed -e s/BRANCH/$branch/g "$pipeline/triage/$enrichment_storage_template" > $generated_enrichment_storage
 
-source cs-override-hbase
-override_hbase
-
-cs-start-job -j flink-enrichment-loading "${ship_enrichment_file[@]}" "${ship_configs[@]}" -p kafka.properties -p /etc/cybersec/conf/load-enrichment.properties -p "$generated_load_props"
+cs-start-job -o -j flink-enrichment-loading "${ship_enrichment_file[@]}" -p kafka.properties -p /etc/cybersec/conf/load-enrichment.properties -p "$generated_load_props"

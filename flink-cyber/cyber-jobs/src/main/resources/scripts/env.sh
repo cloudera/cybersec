@@ -105,11 +105,11 @@ function read_properties_into_variables() {
     value=${line#*=}
     key=${line%"=$value"}
     key=$(echo $key | tr '.' '_')
-    eval ${key}=\${value}
+    eval ${key}=${value}
   done <$1
 }
 
-# get_property_value <file name> <property_name>
+#  <file name> <property_name>
 # get the value of a property from a file
 function get_property_value() {
   cat "$1" | grep -v "^.*#" | grep "$2" | cut -d '=' -f 2-
@@ -133,8 +133,7 @@ function init_key_store() {
 }
 
 function get_kerberos_config() {
-  local -n _result=$1
-  local security_options
+  local security_options=()
   kerberos_properties="kerberos.properties"
   internal_ssl_properties="generated/internal_ssl.properties"
 
@@ -151,26 +150,26 @@ function get_kerberos_config() {
     security_options+=("-yD" "security.ssl.internal.truststore-password=${flink_internal_password}")
     security_options+=("-yt" "generated/${flink_internal_keystore}")
   fi
-  _result=("${security_options[@]}")
+  eval "$1"=\('${security_options[@]}'\)
 }
 
 
 ship_config() {
-  local -n arr=$2
-  if [ -f "$1" ]; then
-    echo "INFO: HBase Configuration: adding file $1"
-    arr+=("-y" "$1")
+  local temp_arr
+  if [ -f "$2" ]; then
+    echo "INFO: HBase Configuration: adding file $2"
+    temp_arr+=("$1 $2")
   fi
+  eval "$3"=\('${arr_temp[@]}'\)
 }
 
 override_hbase() {
-  local -n _result=$1
-  local arr=()
-  ship_config "core-site.xml" arr
-  ship_config "hdfs-site.xml" arr
-  ship_config "hbase-site.xml" arr
+  local arr_temp=()
+  ship_config "-yt" "core-site.xml" arr_temp
+  ship_config "-yt" "hdfs-site.xml" arr_temp
+  ship_config "-yt" "hbase-site.xml" arr_temp
 
-  if [ "${#arr[@]}" -eq 0 ]; then
+  if [ "${#arr_temp[@]}" -eq 0 ]; then
       if [ -f "hbase-conf/hbase-site.xml" ]; then
           hbase_conf_dir="$(pwd)/hbase-conf"
           echo "INFO: HBase Configuration: using directory $hbase_conf_dir"
@@ -179,7 +178,8 @@ override_hbase() {
           echo "INFO: HBase Configuration: using default"
       fi
   fi
-  _result=("${arr[@]}")
+
+  eval "$1"=\('${arr_temp[@]}'\)
 }
 
 # Set environment variables

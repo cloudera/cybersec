@@ -1,14 +1,4 @@
 {
-  "bin": {
-    "user": "cybersec",
-    "group": "cybersec",
-    "permissions": "0755"
-  },
-  "bin/cs-add-enrich": {
-    "user": "cybersec",
-    "group": "cybersec",
-    "permissions": "0755"
-  },
   "bin/cs-add-index": {
     "user": "cybersec",
     "group": "cybersec",
@@ -35,16 +25,6 @@
     "permissions": "0755"
   },
   "bin/cs-create-pipeline": {
-    "user": "cybersec",
-    "group": "cybersec",
-    "permissions": "0755"
-  },
-  "bin/cs-get-template-dir": {
-    "user": "cybersec",
-    "group": "cybersec",
-    "permissions": "0755"
-  },
-  "bin/cs-init-keystore": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
@@ -89,16 +69,6 @@
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/cs-run-java": {
-    "user": "cybersec",
-    "group": "cybersec",
-    "permissions": "0755"
-  },
-  "bin/cs-override-hbase": {
-    "user": "cybersec",
-    "group": "cybersec",
-    "permissions": "0755"
-  },
   "bin/cs-start-job": {
     "user": "cybersec",
     "group": "cybersec",
@@ -119,7 +89,7 @@
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/start-parser-ui": {
+  "bin/cs-start-parser-ui": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"

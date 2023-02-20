@@ -54,16 +54,6 @@ include_job_properties() {
   echo  "INFO: $1: Flink Job Name = $FLINK_JOB_NAME" >&2
 }
 
-# ship_path <file or directory path>
-# If the path is either a file or directory, include a -yt option on the job command line
-ship_path() {
-  if [ -e "$1" ]; then
-      ship_options+=("-yt" "$1")
-  else
-      echo "WARN: Could not ship $1 because it does not exist." >&2
-  fi
-}
-
 usage="$(basename "$0")  -- starts cybersec job
 
 where:
@@ -74,15 +64,16 @@ where:
     -n Yarn job name
     -p property file name
     -s save point
+    -o override hbase config files
     "
 
-while getopts "j:y:c:n:p:s:h" option; do
+while getopts "j:y:c:n:p:s:h:o" option; do
   case $option in
   j)
     JOB_JAR=$(cs-lookup-jar "$OPTARG")
     ;;
   y)
-    ship_path "$OPTARG"
+    ship_config "-yt" "$OPTARG" ship_options
     ;;
   c)
     classpath_options+=("--classpath" 'file://'"$OPTARG")
@@ -96,6 +87,9 @@ while getopts "j:y:c:n:p:s:h" option; do
   s)
     savepoint_options=("--allowNonRestoredState" "-s" "$OPTARG")
     ;;
+  o)
+      override_hbase ship_options
+      ;;
   h)
     echo "$usage"
     exit 0
@@ -131,6 +125,7 @@ if [ -z "$YARN_NAME" ]; then
 fi
 
 init_key_store
+security_options=()
 get_kerberos_config security_options
 
 job_properties=("$CYBERSEC_CONF_DIR/kafka.properties" "${job_properties[@]}")

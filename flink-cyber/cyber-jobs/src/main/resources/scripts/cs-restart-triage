@@ -65,6 +65,4 @@ if [ ! -z "$savepoint" ]; then
    savepoint_options+=("-s" "$savepoint")
 fi
 
-override_hbase ship_configs
-
-cs-start-job -j flink-enrichment-combined -y "$pipeline/triage/stellar" "${ship_configs[@]}" -p /etc/cybersec/conf/triage.properties  -p kafka.properties -p "$generated_triage_props" "${savepoint_options[@]}"
+cs-start-job -o -j flink-enrichment-combined -y "$pipeline/triage/stellar" -p /etc/cybersec/conf/triage.properties  -p kafka.properties -p "$generated_triage_props" "${savepoint_options[@]}"
