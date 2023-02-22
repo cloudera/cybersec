@@ -180,7 +180,7 @@ public abstract class ProfileJob {
             client.executeSql(freemarkerGenerator.replaceByFile("sql/profile_metadata_table.sql", mapsParams));
             client.executeSql(freemarkerGenerator.replaceByFile("sql/measurement_metadata_table.sql", mapsParams));
             client.executeSql(freemarkerGenerator.replaceByFile("sql/measurement_table.sql", mapsParams));
-            ResultSetMetaData tableMetadata = client.getTableMetadata(freemarkerGenerator.replceByTemplate(SELECT_METADATA_FROM_MEASUREMENT_DATA_TABLE, mapsParams));
+            ResultSetMetaData tableMetadata = client.getTableMetadata(freemarkerGenerator.replaceByTemplate(SELECT_METADATA_FROM_MEASUREMENT_DATA_TABLE, mapsParams));
             validate(params, tableMetadata);
             return persistProfileMeasurementConfigMeta(profileGroups, client, properties);
         }
@@ -212,7 +212,7 @@ public abstract class ProfileJob {
         ImmutableMap<String, String> propertiesMap = Maps.fromProperties(properties);
         List<ProfileDto> profileDtos = profileGroups.stream().map(ProfileDto::of).collect(Collectors.toList());
         for (ProfileDto profileDto : profileDtos) {
-            ProfileDto profileDtoDb = client.selectResultWithParams(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_BY_ID, propertiesMap), PROFILE_MAPPER, ps -> {
+            ProfileDto profileDtoDb = client.selectResultWithParams(freemarkerGenerator.replaceByTemplate(SELECT_PROFILE_BY_ID, propertiesMap), PROFILE_MAPPER, ps -> {
                 try {
                     ps.setString(1, profileDto.getProfileGroupName());
                 } catch (SQLException throwables) {
@@ -220,25 +220,25 @@ public abstract class ProfileJob {
                 }
             });
             if (profileDtoDb == null) {
-                Integer profileId = client.selectResultWithParams(freemarkerGenerator.replceByTemplate(SELECT_PROFILE_ID, propertiesMap), FIRST_VALUE_MAPPER, preparedStatement -> {
+                Integer profileId = client.selectResultWithParams(freemarkerGenerator.replaceByTemplate(SELECT_PROFILE_ID, propertiesMap), FIRST_VALUE_MAPPER, preparedStatement -> {
                 });
-                client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPDATE_PROFILE, propertiesMap), getUpdateProfileConsumer(profileDto, profileId));
+                client.insertIntoTable(freemarkerGenerator.replaceByTemplate(UPDATE_PROFILE, propertiesMap), getUpdateProfileConsumer(profileDto, profileId));
                 profileDto.setId(profileId);
             } else {
                 if (!StringUtils.equals(profileDto.getKeyFieldNames(), profileDtoDb.getKeyFieldNames())) {
                     throw new IllegalStateException("Key fields cannot be changed for the profile.");
                 }
                 profileDto.setId(profileDtoDb.getId());
-                client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPDATE_PROFILE, propertiesMap), getUpdateProfileConsumer(profileDto, profileDtoDb.getId()));
+                client.insertIntoTable(freemarkerGenerator.replaceByTemplate(UPDATE_PROFILE, propertiesMap), getUpdateProfileConsumer(profileDto, profileDtoDb.getId()));
             }
             for (MeasurementDto measurement : profileDto.getMeasurementDtos()) {
                 measurement.setProfileId(profileDto.getId());
                 Map<String, String> params = getFreemarkerParams(measurement);
                 params.putAll(propertiesMap);
-                Integer id = client.selectResultWithParams(freemarkerGenerator.replceByTemplate(SELECT_MEASUREMENT_CONFIG_ID, params), ID_MAPPER, getSelectMeasurementConfigConsumer(measurement));
+                Integer id = client.selectResultWithParams(freemarkerGenerator.replaceByTemplate(SELECT_MEASUREMENT_CONFIG_ID, params), ID_MAPPER, getSelectMeasurementConfigConsumer(measurement));
                 if (id == null) {
-                    client.insertIntoTable(freemarkerGenerator.replceByTemplate(UPSERT_INTO_MEASUREMENT_METADATA_TABLE, params), getInsertMeasurementConfigConsumer(measurement, profileDto.getId()));
-                    id = client.selectResultWithParams(freemarkerGenerator.replceByTemplate(SELECT_MEASUREMENT_CONFIG_ID, params), ID_MAPPER, getSelectMeasurementConfigConsumer(measurement));
+                    client.insertIntoTable(freemarkerGenerator.replaceByTemplate(UPSERT_INTO_MEASUREMENT_METADATA_TABLE, params), getInsertMeasurementConfigConsumer(measurement, profileDto.getId()));
+                    id = client.selectResultWithParams(freemarkerGenerator.replaceByTemplate(SELECT_MEASUREMENT_CONFIG_ID, params), ID_MAPPER, getSelectMeasurementConfigConsumer(measurement));
                 }
                 measurement.setId(id);
             }
@@ -400,7 +400,7 @@ public abstract class ProfileJob {
 
     private DataStream<ScoredMessage> score(DataStream<Message> in, StreamExecutionEnvironment env, ParameterTool params) {
         DataStream<ScoringRuleCommand> rulesSource = createRulesSource(env, params);
-        SingleOutputStreamOperator<ScoredMessage> results = ScoringJob.enrich(in, rulesSource);
+        SingleOutputStreamOperator<ScoredMessage> results = ScoringJob.enrich(in, rulesSource, params);
         writeScoredRuleCommandResult(params, results.getSideOutput(ScoringJob.COMMAND_RESULT_OUTPUT_TAG));
         return results;
     }
