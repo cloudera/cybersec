@@ -41,4 +41,4 @@ fi
 
 cs-cancel-job ${job_name}
 
-cs-start-job -j flink-indexing-hive -p /etc/cybersec/conf/triage.properties -p kafka.properties -p "$generated_index_props" "${ship_configs[@]}"
+cs-start-job -j flink-indexing-hive -y $pipeline/index/conf -p /etc/cybersec/conf/triage.properties -p kafka.properties -p "$generated_index_props" "${ship_configs[@]}"

@@ -1,0 +1,25 @@
+[
+  {
+    "name": "id",
+    "path": "."
+  },
+  {
+    "name": "ts",
+    "transformation": "TO_TIMESTAMP_LTZ(%s, 3)",
+    "path": "."
+  },
+  {
+    "name": "source",
+    "path": "."
+  },
+  {
+    "name": "cyberscore",
+    "kafka_name": "cyberScore",
+    "path": ".."
+  },
+  {
+    "name": "cyberscore_details",
+    "kafka_name": "cyberScoresDetails",
+    "path": ".."
+  }
+]

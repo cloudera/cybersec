@@ -22,6 +22,10 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.types.Row;
 
 @Data
 @Builder(toBuilder = true)
@@ -44,6 +48,21 @@ public class DataQualityMessage extends SpecificRecordBase implements SpecificRe
             .requiredString("field")
             .requiredString("message")
             .endRecord();
+
+    public static final DataTypes.Field[] FLINK_FIELDS$ = {
+            DataTypes.FIELD("level", DataTypes.STRING()),
+            DataTypes.FIELD("feature", DataTypes.STRING()),
+            DataTypes.FIELD("field", DataTypes.STRING()),
+            DataTypes.FIELD("message", DataTypes.STRING())
+    };
+
+    public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
+            new String[]{"level", "feature", "field", "message"},
+            Types.STRING, Types.STRING, Types.STRING, Types.STRING);
+
+    public Row toRow() {
+        return Row.of(level, feature, field, message);
+    }
 
     @Override
     public Schema getSchema() {
@@ -71,5 +90,4 @@ public class DataQualityMessage extends SpecificRecordBase implements SpecificRe
             default: throw new AvroRuntimeException("Bad index");
         }
     }
-
 }
