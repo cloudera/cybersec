@@ -22,6 +22,10 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.types.Row;
 
 import java.util.Map;
 import java.util.UUID;
@@ -52,6 +56,23 @@ public class ThreatIntelligence extends SpecificRecordBase implements SpecificRe
             .name("fields").type(Schema.createMap(SchemaBuilder.builder().stringType())).noDefault()
             .endRecord();
 
+    public static final DataTypes.Field[] FLINK_FIELDS$ = {
+            DataTypes.FIELD("id", DataTypes.STRING()),
+            DataTypes.FIELD("ts", DataTypes.BIGINT()),
+            DataTypes.FIELD("observable", DataTypes.STRING()),
+            DataTypes.FIELD("observableType", DataTypes.STRING()),
+            DataTypes.FIELD("stixReference", DataTypes.STRING()),
+            DataTypes.FIELD("fields", DataTypes.MAP(DataTypes.STRING(), DataTypes.STRING()))
+    };
+
+    public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
+            new String[]{"id", "ts", "observable", "observableType", "stixReference", "fields"},
+            Types.STRING, Types.LONG, Types.STRING, Types.STRING, Types.STRING, Types.MAP(Types.STRING, Types.STRING));
+
+    public Row toRow() {
+        return Row.of(id, ts, observable, observableType, stixReference, fields);
+    }
+
     @Override
     public Schema getSchema() {
         return SCHEMA$;
@@ -60,28 +81,48 @@ public class ThreatIntelligence extends SpecificRecordBase implements SpecificRe
     @Override
     public Object get(int field$) {
         switch (field$) {
-            case 0: return id;
-            case 1: return ts;
-            case 2: return observable;
-            case 3: return observableType;
-            case 4: return stixReference;
-            case 5: return fields;
-            default: throw new AvroRuntimeException("Bad index");
+            case 0:
+                return id;
+            case 1:
+                return ts;
+            case 2:
+                return observable;
+            case 3:
+                return observableType;
+            case 4:
+                return stixReference;
+            case 5:
+                return fields;
+            default:
+                throw new AvroRuntimeException("Bad index");
         }
     }
 
     // Used by DatumReader.  Applications should not call.
-    @SuppressWarnings(value="unchecked")
+    @SuppressWarnings(value = "unchecked")
     @Override
     public void put(int field$, Object value$) {
         switch (field$) {
-            case 0: id = value$.toString(); break;
-            case 1: ts = (Long)value$; break;
-            case 2: observable = value$.toString(); break;
-            case 3: observableType = value$.toString(); break;
-            case 4: stixReference = value$.toString(); break;
-            case 5: fields = utf8toStringMap(value$); break;
-            default: throw new AvroRuntimeException("Bad index");
+            case 0:
+                id = value$.toString();
+                break;
+            case 1:
+                ts = (Long) value$;
+                break;
+            case 2:
+                observable = value$.toString();
+                break;
+            case 3:
+                observableType = value$.toString();
+                break;
+            case 4:
+                stixReference = value$.toString();
+                break;
+            case 5:
+                fields = utf8toStringMap(value$);
+                break;
+            default:
+                throw new AvroRuntimeException("Bad index");
         }
     }
 }

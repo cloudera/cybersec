@@ -21,6 +21,10 @@ import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.types.Row;
 
 import java.nio.ByteBuffer;
 
@@ -34,6 +38,7 @@ public class SignedSourceKey extends SpecificRecordBase implements SpecificRecor
     private int partition;
     private long offset;
     private byte[] signature;
+
     public static final Schema SCHEMA$ = SchemaBuilder
             .record(SignedSourceKey.class.getName())
             .namespace(SignedSourceKey.class.getPackage().getName())
@@ -43,6 +48,22 @@ public class SignedSourceKey extends SpecificRecordBase implements SpecificRecor
             .requiredLong("offset")
             .name("signature").type().bytesBuilder().endBytes().noDefault()
             .endRecord();
+
+    public static final DataTypes.Field[] FLINK_FIELDS$ = {
+            DataTypes.FIELD("topic", DataTypes.STRING()),
+            DataTypes.FIELD("partition", DataTypes.INT()),
+            DataTypes.FIELD("offset", DataTypes.BIGINT()),
+            DataTypes.FIELD("signature", DataTypes.BYTES())
+    };
+
+    public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
+            new String[]{"topic", "partition", "offset", "signature"},
+            Types.STRING, Types.INT, Types.LONG, Types.PRIMITIVE_ARRAY(Types.BYTE));
+
+
+    public Row toRow() {
+        return Row.of(topic, partition, offset, signature);
+    }
 
 //    static public class SignedSourceKeyBuilder {
 //        public SignedSourceKeyBuilder signature(byte[] bytes) {

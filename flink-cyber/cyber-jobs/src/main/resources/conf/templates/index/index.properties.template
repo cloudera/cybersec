@@ -2,6 +2,10 @@ hive.catalog=hive
 hive.schema=cyber
 hive.table=events
 
+#hive.tables-init-file=/home/systest/stas/cyb-105-test/main/cyb-105/index/conf/hive-table-config.json
+#hive.mapping-file=/home/systest/stas/cyb-105-test/main/cyb-105/index/conf/table-config.json
+#hive.writer=tableapi
+
 #hive.confdir=/etc/hive/conf/
 
 #hive.transaction.messages=500
