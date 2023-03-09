@@ -24,7 +24,6 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.types.Row;
 
 @Data
@@ -43,12 +42,6 @@ public class Scores extends SpecificRecordBase implements SpecificRecord {
             .requiredDouble("score")
             .requiredString("reason")
             .endRecord();
-
-    public static final DataTypes.Field[] FLINK_FIELDS$ = {
-            DataTypes.FIELD("ruleId", DataTypes.STRING()),
-            DataTypes.FIELD("score", DataTypes.DOUBLE()),
-            DataTypes.FIELD("reason", DataTypes.STRING())
-    };
 
     public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
             new String[]{"ruleId", "score", "reason"},

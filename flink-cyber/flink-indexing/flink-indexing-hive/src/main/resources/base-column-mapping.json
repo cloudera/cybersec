@@ -9,6 +9,18 @@
     "path": "."
   },
   {
+    "name": "dt",
+    "kafka_name": "ts",
+    "transformation": "DATE_FORMAT(TO_TIMESTAMP_LTZ(%s, 3), 'yyyy-MM-dd')",
+    "path": "."
+  },
+  {
+    "name": "hr",
+    "kafka_name": "ts",
+    "transformation": "DATE_FORMAT(TO_TIMESTAMP_LTZ(%s, 3), 'HH')",
+    "path": "."
+  },
+  {
     "name": "source",
     "path": "."
   },
@@ -21,5 +33,11 @@
     "name": "cyberscore_details",
     "kafka_name": "cyberScoresDetails",
     "path": ".."
+  },
+  {
+    "name": "fields",
+    "kafka_name": "extensions",
+    "transformation": "filterMap(%s, %s)",
+    "path": "."
   }
 ]

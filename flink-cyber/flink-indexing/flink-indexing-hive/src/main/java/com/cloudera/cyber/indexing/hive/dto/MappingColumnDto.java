@@ -38,6 +38,10 @@ public class MappingColumnDto {
         }
     }
 
+    public String getRawKafkaName(){
+        return kafkaName;
+    }
+
     public String getPath() {
         return StringUtils.hasText(path)
                 ? (path.equals(".") ? "" : path)
