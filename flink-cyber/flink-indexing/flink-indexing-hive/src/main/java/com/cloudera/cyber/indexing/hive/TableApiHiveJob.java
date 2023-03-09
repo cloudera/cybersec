@@ -128,7 +128,9 @@ public class TableApiHiveJob {
     }
 
     private StreamTableEnvironment getTableEnvironment() {
-        return StreamTableEnvironment.create(env);
+        final StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
+        tableEnv.createTemporarySystemFunction("filterMap", FilterMapFunction.class);
+        return tableEnv;
     }
 
     private void createKafkaTable(StreamTableEnvironment tableEnv) {
@@ -195,8 +197,8 @@ public class TableApiHiveJob {
     }
 
     private String buildInsertSql(String topic, MappingDto mappingDto) {
-        return String.join("\n", "insert into " + mappingDto.getHiveTable() + "(" + getHiveInsertColumns(mappingDto) + ", `fields`, `dt`, `hr`)",
-                " SELECT " + getKafkaFromColumns(mappingDto) + ", CAST(null AS MAP<STRING,STRING>), DATE_FORMAT(TO_TIMESTAMP_LTZ((`message`.`ts`), 3), 'yyyy-MM-dd'), DATE_FORMAT(TO_TIMESTAMP_LTZ((`message`.`ts`), 3), 'HH')",
+        return String.join("\n", "insert into " + mappingDto.getHiveTable() + "(" + getHiveInsertColumns(mappingDto) + ")",
+                " SELECT " + getKafkaFromColumns(mappingDto),
                 " from " + KAFKA_TABLE,
                 String.format(" where `message`.`originalSource`.`topic`='%s'", topic));
     }
@@ -222,7 +224,8 @@ public class TableApiHiveJob {
 
                     final String transformation = mappingColumnDto.getTransformation();
                     return StringUtils.hasText(transformation)
-                            ? String.format(transformation, "(" + fullPath + ")")
+                            ? String.format(transformation, "(" + fullPath + ")", mappingDto.getIgnoreFields().stream()
+                                .collect(Collectors.joining("','", "'", "'")))
                             : fullPath;
                 })
                 .collect(Collectors.joining(", ", " ", " "));
@@ -242,14 +245,12 @@ public class TableApiHiveJob {
                 " `hr` string",
                 ") STORED AS parquet TBLPROPERTIES (",
                 "  'partition.time-extractor.timestamp-pattern'='$dt $hr:00:00',",
-                "  'sink.partition-commit.trigger'='partition-time',",
-                "  'sink.partition-commit.delay'='1 h',",
+                "  'sink.partition-commit.trigger'='process-time',",
                 "  'sink.partition-commit.policy.kind'='metastore,success-file'",
                 ")");
     }
 
-    //todo fields column, everything else from events table
-    //todo kafka fields to ignore
+    //TODO partitions optimization
 
     private String getColumnList(List<HiveColumnDto> columnList) {
         return columnList.stream()

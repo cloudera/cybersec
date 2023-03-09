@@ -23,7 +23,6 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.types.Row;
 
 import java.nio.ByteBuffer;
@@ -48,13 +47,6 @@ public class SignedSourceKey extends SpecificRecordBase implements SpecificRecor
             .requiredLong("offset")
             .name("signature").type().bytesBuilder().endBytes().noDefault()
             .endRecord();
-
-    public static final DataTypes.Field[] FLINK_FIELDS$ = {
-            DataTypes.FIELD("topic", DataTypes.STRING()),
-            DataTypes.FIELD("partition", DataTypes.INT()),
-            DataTypes.FIELD("offset", DataTypes.BIGINT()),
-            DataTypes.FIELD("signature", DataTypes.BYTES())
-    };
 
     public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
             new String[]{"topic", "partition", "offset", "signature"},

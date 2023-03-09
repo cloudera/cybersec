@@ -24,7 +24,6 @@ import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.types.Row;
 
 import java.util.Map;
@@ -55,15 +54,6 @@ public class ThreatIntelligence extends SpecificRecordBase implements SpecificRe
             .optionalString("stixReference")
             .name("fields").type(Schema.createMap(SchemaBuilder.builder().stringType())).noDefault()
             .endRecord();
-
-    public static final DataTypes.Field[] FLINK_FIELDS$ = {
-            DataTypes.FIELD("id", DataTypes.STRING()),
-            DataTypes.FIELD("ts", DataTypes.BIGINT()),
-            DataTypes.FIELD("observable", DataTypes.STRING()),
-            DataTypes.FIELD("observableType", DataTypes.STRING()),
-            DataTypes.FIELD("stixReference", DataTypes.STRING()),
-            DataTypes.FIELD("fields", DataTypes.MAP(DataTypes.STRING(), DataTypes.STRING()))
-    };
 
     public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
             new String[]{"id", "ts", "observable", "observableType", "stixReference", "fields"},

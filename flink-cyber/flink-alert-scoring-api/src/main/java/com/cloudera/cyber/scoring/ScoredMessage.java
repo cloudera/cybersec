@@ -27,7 +27,6 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
-import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.types.Row;
 
 import java.util.List;
@@ -63,24 +62,16 @@ public class ScoredMessage extends SpecificRecordBase implements IdentifiedMessa
             .optionalDouble("cyberScore")
             .endRecord();
 
-    public static final org.apache.flink.table.api.Schema FLINK_SCHEMA$ = org.apache.flink.table.api.Schema.newBuilder()
-            .column("message", DataTypes.STRUCTURED(Message.class, Message.FLINK_FIELDS$))
-            .column("cyberScoresDetails", DataTypes.ARRAY(DataTypes.ROW(Scores.FLINK_FIELDS$)).bridgedTo(List.class))
-            .column("cyberScore", DataTypes.DOUBLE())
-            .build();
-
     public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
             new String[]{"message", "cyberScoresDetails", "cyberScore"},
             Message.FLINK_TYPE_INFO, Types.OBJECT_ARRAY(Scores.FLINK_TYPE_INFO), Types.DOUBLE);
 
     public Row toRow() {
-        final Row row = Row.of(message == null ? null : message.toRow(),
+        return Row.of(message == null ? null : message.toRow(),
                 cyberScoresDetails == null ? null : cyberScoresDetails.stream()
                         .map(Scores::toRow)
                         .toArray(Row[]::new),
                 cyberScore);
-        System.out.println("UNIQUESTRING " + row);
-        return row;
     }
 
     @Override
