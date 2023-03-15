@@ -18,12 +18,14 @@ import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.indexing.CollectionField;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.base.DeliveryGuarantee;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
-import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
@@ -48,9 +50,9 @@ public class ElasticJobKafka extends ElasticJob {
 
     @Override
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        return env.addSource(
-                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, INDEXER_ELASTIC_GROUP_ID)
-        ).name("Kafka Source").uid("kafka-source");
+        return env.fromSource(
+                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, INDEXER_ELASTIC_GROUP_ID),
+                WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
     }
 
     @Override
@@ -70,19 +72,17 @@ public class ElasticJobKafka extends ElasticJob {
         String topic = params.get(PARAMS_TOPIC_CONFIG_LOG, DEFAULT_TOPIC_CONFIG_LOG);
         Properties kafkaProperties = readKafkaProperties(params, INDEXER_ELASTIC_GROUP_ID,false);
         log.info("Creating Kafka Sink for {}, using {}", topic, kafkaProperties);
-        FlinkKafkaProducer<CollectionField> kafkaSink = new FlinkKafkaProducer<>(topic,
-                (KafkaSerializationSchema<CollectionField>) (collectionField, aLong) -> {
+        KafkaSink<CollectionField> kafkaSink = KafkaSink.<CollectionField>builder().setRecordSerializer(
+                (KafkaRecordSerializationSchema<CollectionField>) (collectionField,  kafkaSinkContext, timestamp) -> {
                     ObjectMapper om = new ObjectMapper();
                     try {
                         return new ProducerRecord<>(topic, null, Instant.now().toEpochMilli(), collectionField.getKey().getBytes(), om.writeValueAsBytes(collectionField));
                     } catch (IOException e) {
                         return new ProducerRecord<>(topic, null, Instant.now().toEpochMilli(), collectionField.getKey().getBytes(), e.getMessage().getBytes());
                     }
-                },
-                kafkaProperties,
-                FlinkKafkaProducer.Semantic.AT_LEAST_ONCE);
+                }).setKafkaProducerConfig(kafkaProperties).setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE).build();
 
-        configSource.addSink(kafkaSink).name("Schema Log").uid("schema-log")
+        configSource.sinkTo(kafkaSink).name("Schema Log").uid("schema-log")
                 .setParallelism(1);
     }
 

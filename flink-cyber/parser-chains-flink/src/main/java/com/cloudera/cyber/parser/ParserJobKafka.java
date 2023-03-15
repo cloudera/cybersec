@@ -21,7 +21,10 @@ import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
+import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.formats.parquet.avro.ParquetAvroWriters;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -31,14 +34,15 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.filesystem.OutputFileConfig;
 import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Preconditions;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -49,12 +53,6 @@ public class ParserJobKafka extends ParserJob {
     private final AtomicInteger atomicInteger = new AtomicInteger(0);
 
     public static final String PARAMS_ORIGINAL_LOGS_PATH = "original.basepath";
-    public static final String PARAMS_ROLL_PART_SIZE = "original.roll.size";
-    public static final String PARAMS_ROLL_INACTIVITY = "original.roll.inactive";
-    public static final String PARAMS_ROLL_INTERVAL = "original.roll.interval";
-    public static final long DEFAULT_ROLL_INTERVAL = TimeUnit.MINUTES.toMicros(15);
-    public static final long DEFAULT_ROLL_PART_SIZE = 1024 * 1024 * 128;
-    public static final long DEFAULT_ROLL_INACTIVITY = TimeUnit.MINUTES.toMicros(5);
     public static final String PARAMS_ORIGINAL_ENABLED = "original.enabled";
     public static final String PARAMS_CONFIG_TOPIC = "config.topic";
 
@@ -68,10 +66,10 @@ public class ParserJobKafka extends ParserJob {
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
-        FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
+        KafkaSink<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
                 params.getRequired(ConfigConstants.PARAMS_TOPIC_OUTPUT), "cyber-parser",
                 params);
-        results.addSink(sink).name("Kafka Parser Results ")
+        results.sinkTo(sink).name("Kafka Parser Results ")
                 .uid("kafka.results." + results.getTransformation().getUid());
     }
 
@@ -113,10 +111,10 @@ public class ParserJobKafka extends ParserJob {
 
     @Override
     protected void writeErrors(ParameterTool params, DataStream<Message> errors) {
-        FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
+        KafkaSink<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
                 params.getRequired(ConfigConstants.PARAMS_TOPIC_ERROR), "cyber-parser",
                 params);
-        errors.addSink(sink).name("Kafka Error Results " + atomicInteger.get())
+        errors.sinkTo(sink).name("Kafka Error Results " + atomicInteger.get())
                 .uid("kafka.error.results." + atomicInteger.getAndIncrement());
     }
 
@@ -145,8 +143,9 @@ public class ParserJobKafka extends ParserJob {
                         .readProperties(params.getProperties(), kafkaPrefixConf + '.' + Utils.KAFKA_PREFIX);
                 kafkaProperties.putAll(brokerSpecificProperties);
             }
-            DataStreamSource<MessageToParse> streamSource = env.addSource(
-                    new FlinkKafkaConsumer<>(topicNamePattern, new MessageToParseDeserializer(), kafkaProperties));
+            KafkaSource<MessageToParse> rawMessages = KafkaSource.<MessageToParse>builder()
+                    .setTopicPattern(topicNamePattern).setBootstrapServers(kafkaProperties.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG)).setDeserializer(new MessageToParseDeserializer()).setProperties(kafkaProperties).build();
+            DataStreamSource<MessageToParse> streamSource = env.fromSource(rawMessages, WatermarkStrategy.noWatermarks(), "Kafka Raw Messages");
             SingleOutputStreamOperator<MessageToParse> newSource = streamSource
                     .name(String.format("Kafka Source topic='%s' kafka prefix configuration='%s'", topicNamePattern.toString(), kafkaPrefixConf))
                     .uid("kafka.input." + kafkaPrefixConf);

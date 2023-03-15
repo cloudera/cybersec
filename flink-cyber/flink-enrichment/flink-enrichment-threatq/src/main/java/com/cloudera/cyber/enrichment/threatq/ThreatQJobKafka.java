@@ -15,12 +15,12 @@ package com.cloudera.cyber.enrichment.threatq;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.common.serialization.AbstractDeserializationSchema;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.util.Preconditions;
 
 import java.io.ByteArrayInputStream;
@@ -43,15 +43,15 @@ public class ThreatQJobKafka extends ThreatQJob {
 
     @Override
     protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> reduction) {
-        reduction.addSink(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), THREATQ_ENRICHMENT_GROUP_ID,params))
+        reduction.sinkTo(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), THREATQ_ENRICHMENT_GROUP_ID,params))
                 .name("Kafka Sink").uid("kafka-sink");
     }
 
     @Override
     public DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        return env.addSource(
-                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, THREATQ_ENRICHMENT_GROUP_ID)
-        ).name("Kafka Source").uid("kafka-source");
+        return env.fromSource(
+                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, THREATQ_ENRICHMENT_GROUP_ID),
+                WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
     }
 
     @Override
@@ -60,15 +60,11 @@ public class ThreatQJobKafka extends ThreatQJob {
 
         Properties kafkaProperties = readKafkaProperties(params, THREATQ_PARSER_GROUP_ID, true);
 
-        FlinkKafkaConsumer<byte[]> source = new FlinkKafkaConsumer<>(topic, new AbstractDeserializationSchema<byte[]>() {
-            @Override
-            public byte[] deserialize(byte[] bytes) {
-                return bytes;
-            }
-        }, kafkaProperties);
-        return env.addSource(source).flatMap(
-                (FlatMapFunction<byte[], ThreatQEntry>) (s, collector) ->
-                        ThreatQParser.parse(new ByteArrayInputStream(s)).forEach(collector::collect))
-                .name("ThreatQ Input").uid("kafka-enrichment-source");
+        FlatMapFunction<String, ThreatQEntry> threatQParser = (FlatMapFunction<String, ThreatQEntry>) (s, collector) -> ThreatQParser.parse(new ByteArrayInputStream(s.getBytes())).forEach(tq -> collector.collect(tq));
+
+        KafkaSource<String> source = FlinkUtils.createKafkaStringSource(topic, kafkaProperties);
+        return env.fromSource(source, WatermarkStrategy.noWatermarks(), "ThreatQ Input").
+                uid("kafka-enrichment-source").
+                flatMap(threatQParser);
     }
 }

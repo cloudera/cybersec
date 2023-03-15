@@ -17,21 +17,22 @@ import com.cloudera.cyber.generator.FreemarkerTemplateSource;
 import com.cloudera.cyber.generator.GenerationSource;
 import com.cloudera.cyber.generator.ThreatGeneratorMap;
 import com.cloudera.cyber.libs.networking.IPLocal;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public abstract class CaracalGeneratorFlinkJob {
 
@@ -46,13 +47,11 @@ public abstract class CaracalGeneratorFlinkJob {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         FlinkUtils.setupEnv(env, params);
 
-        env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
-
         String avroGeneratorFlag = params.get(PARAMS_SCHEMA);
         SingleOutputStreamOperator<Tuple2<String, String>> generatedInput;
         if (BooleanUtils.toBoolean(avroGeneratorFlag)) {
             String schemaString = IOUtils.toString(
-                    Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(SCHEMA_PATH)));
+                    Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(SCHEMA_PATH)), Charset.defaultCharset());
             SingleOutputStreamOperator<Tuple2<String, byte[]>> binaryInput = convertDataToAvro(schemaString, createSourceFromTemplateSource(
                     params, env, Collections
                             .singletonMap(new GenerationSource("Netflow/netflow_avro_sample1.json", "generator.avro"),
@@ -63,7 +62,6 @@ public abstract class CaracalGeneratorFlinkJob {
             generateRandomThreatResults(params, generatedInput);
             writeMetrics(params, generateMetrics(generatedInput));
             writeResults(params, generatedInput);
-
         }
         return env;
     }
@@ -79,11 +77,11 @@ public abstract class CaracalGeneratorFlinkJob {
         return generatedInput
                 .map(new MapFunction<Tuple2<String, String>, Tuple2<String, Integer>>() {
                     @Override
-                    public Tuple2<String, Integer> map(Tuple2<String, String> stringStringTuple2) throws Exception {
-                        return Tuple2.of(stringStringTuple2.f0, Integer.valueOf(1));
+                    public Tuple2<String, Integer> map(Tuple2<String, String> stringStringTuple2) {
+                        return Tuple2.of(stringStringTuple2.f0, 1);
                     }
                 })
-                .keyBy(0)
+                .keyBy(value -> value.f0)
                 .window(TumblingProcessingTimeWindows.of(Time.seconds(30)))
                 .sum(1);
     }
