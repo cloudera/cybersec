@@ -2,15 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/flink-cyber/cyber-jackson/cyber-jackson.iml" filepath="$PROJECT_DIR$/flink-cyber/cyber-jackson/cyber-jackson.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/cybersec.iml" filepath="$PROJECT_DIR$/.idea/cybersec.iml" />
-      <module fileurl="file://$PROJECT_DIR$/flink-cyber/cyber-jackson/jackson-annotations/jackson-annotations.iml" filepath="$PROJECT_DIR$/flink-cyber/cyber-jackson/jackson-annotations/jackson-annotations.iml" />
-      <module fileurl="file://$PROJECT_DIR$/flink-cyber/cyber-jackson/jackson-core/jackson-core.iml" filepath="$PROJECT_DIR$/flink-cyber/cyber-jackson/jackson-core/jackson-core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/flink-cyber/cyber-jackson/jackson-databind/jackson-databind.iml" filepath="$PROJECT_DIR$/flink-cyber/cyber-jackson/jackson-databind/jackson-databind.iml" />
-      <module fileurl="file://$PROJECT_DIR$/flink-cyber/cyber-jackson/jackson-dataformat-csv/jackson-dataformat-csv.iml" filepath="$PROJECT_DIR$/flink-cyber/cyber-jackson/jackson-dataformat-csv/jackson-dataformat-csv.iml" />
-      <module fileurl="file://$PROJECT_DIR$/flink-cyber/cyber-jackson/jackson-datatype-jsr310/jackson-datatype-jsr310.iml" filepath="$PROJECT_DIR$/flink-cyber/cyber-jackson/jackson-datatype-jsr310/jackson-datatype-jsr310.iml" />
-      <module fileurl="file://$PROJECT_DIR$/flink-cyber/cyber-jackson/json-schema-validator/json-schema-validator.iml" filepath="$PROJECT_DIR$/flink-cyber/cyber-jackson/json-schema-validator/json-schema-validator.iml" />
-      <module fileurl="file://$PROJECT_DIR$/flink-cyber/cyber-jackson/zjsonpatch/zjsonpatch.iml" filepath="$PROJECT_DIR$/flink-cyber/cyber-jackson/zjsonpatch/zjsonpatch.iml" />
     </modules>
   </component>
 </project>
