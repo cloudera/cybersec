@@ -17,7 +17,15 @@ import com.cloudera.cyber.commands.CommandType;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.google.common.collect.ImmutableMap;
+import org.apache.flink.api.common.io.InputStreamFSInputWrapper;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.connector.file.src.reader.StreamFormat;
+import org.apache.flink.formats.csv.CsvReaderFormat;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.module.SimpleModule;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
@@ -25,7 +33,9 @@ import org.apache.flink.test.util.JobTester;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -33,6 +43,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class HbaseBatchEnrichmentCSVLoaderTest extends BatchEnrichmentLoaderCSV {
 
@@ -71,6 +82,36 @@ public class HbaseBatchEnrichmentCSVLoaderTest extends BatchEnrichmentLoaderCSV 
     private static final Map<String, Map<String, String>>  extensionsWithAllData =
             ImmutableMap.of("facebook.com", firstExtensions,
                     "wikipedia.org", lastExtensions);
+
+    @Test
+    public void testCSVFormat() throws IOException {
+
+        String[] columns = "GlobalRank,TldRank,Domain,TLD,RefSubNets,RefIPs,IDN_Domain,IDN_TLD,PrevGlobalRank,PrevTldRank,PrevRefSubNets,PrevRefIPs".split(",");
+        List<String> keyFields = new ArrayList<>();
+        keyFields.add("Domain");
+        List<String> valueFields = new ArrayList<>();
+        valueFields.add("TldRank");
+
+        CsvMapper mapper = new CsvMapper();
+        CsvSchema.Builder schemaBuilder = CsvSchema.builder();
+
+        Stream.of(columns).forEach(columnName -> schemaBuilder.addColumn(columnName, CsvSchema.ColumnType.STRING));
+        CsvSchema schema = schemaBuilder.build().withSkipFirstDataRow(false).withLineSeparator("\n");
+
+        SimpleModule module = new SimpleModule();
+        module.addDeserializer(EnrichmentCommand.class, new CsvToEnrichmentCommandDeserializer("TestEnrichemnt", CommandType.ADD, keyFields, ":", valueFields));
+        mapper.registerModule(module);
+
+        CsvReaderFormat<EnrichmentCommand> csvFormat =
+                CsvReaderFormat.forSchema(mapper, schema, TypeInformation.of(EnrichmentCommand.class));
+
+        StreamFormat.Reader<EnrichmentCommand> reader1 = csvFormat.createReader(new Configuration(), new InputStreamFSInputWrapper(new ByteArrayInputStream("1,1,facebook.com,com,494155,2890130,facebook.com,com,1,1,493314,2868293\n".getBytes())));
+
+        EnrichmentCommand r1 = reader1.read();
+
+        int i = 5;
+
+    }
 
     @Test
     public void testCSVLoad() throws Exception {
@@ -113,6 +154,8 @@ public class HbaseBatchEnrichmentCSVLoaderTest extends BatchEnrichmentLoaderCSV 
 
     private void testLoad(ParameterTool params, Map<String, Map<String, String>> enrichmentsToVerify) throws Exception {
         JobTester.startTest(runPipeline(params));
+        StreamExecutionEnvironment env = runPipeline(params);
+        env.executeAsync();
 
         List<EnrichmentCommand> enrichmentCommands = new ArrayList<>();
 

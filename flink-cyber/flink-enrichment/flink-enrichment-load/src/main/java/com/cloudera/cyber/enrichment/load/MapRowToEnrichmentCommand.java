@@ -19,30 +19,29 @@ import com.cloudera.cyber.commands.EnrichmentCommand;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.types.Row;
+import org.apache.flink.api.java.tuple.Tuple2;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @AllArgsConstructor
 @Slf4j
-public class MapRowToEnrichmentCommand implements MapFunction<Row, EnrichmentCommand> {
+public class MapRowToEnrichmentCommand implements MapFunction<List<String>, EnrichmentCommand> {
     private static final String NULL_STRING_VALUE = "null";
     private final String enrichmentType;
     private final CommandType commandType;
-    private final List<String> fieldNames;
+    private final List<Tuple2<Integer, String>> fieldNames;
+    private final List<Integer> keyFieldIndices;
     private final String keyDelimiter;
-    private final int numKeyFields;
 
     @Override
-    public EnrichmentCommand map(Row row) {
+    public EnrichmentCommand map(List<String> fields) {
 
-        String enrichmentKey = IntStream.range(0, numKeyFields).mapToObj(index -> Objects.toString(row.getField(index), NULL_STRING_VALUE)).collect(Collectors.joining(keyDelimiter));
+        String enrichmentKey = keyFieldIndices.stream().map(keyFieldIndex -> Objects.toString(fields.get(keyFieldIndex), NULL_STRING_VALUE)).collect(Collectors.joining(keyDelimiter));
 
         Map<String, String> enrichmentValues = new HashMap<>();
-        IntStream.range(numKeyFields, row.getArity()).
-                forEach(index -> enrichmentValues.put(fieldNames.get( index - numKeyFields), Objects.toString(row.getField(index), "null")));
+        fieldNames.stream().
+                forEach(fieldName -> enrichmentValues.put(fieldName.f1, fields.get(fieldName.f0)));
 
         EnrichmentEntry enrichmentEntry = EnrichmentEntry.builder().ts(MessageUtils.getCurrentTimestamp()).
                 type(enrichmentType).
