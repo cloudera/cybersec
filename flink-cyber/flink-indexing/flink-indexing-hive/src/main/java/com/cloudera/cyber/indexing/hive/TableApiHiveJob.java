@@ -128,9 +128,7 @@ public class TableApiHiveJob {
     }
 
     private StreamTableEnvironment getTableEnvironment() {
-        final StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env);
-        tableEnv.createTemporarySystemFunction("filterMap", FilterMapFunction.class);
-        return tableEnv;
+        return StreamTableEnvironment.create(env);
     }
 
     private void createKafkaTable(StreamTableEnvironment tableEnv) {
@@ -194,6 +192,7 @@ public class TableApiHiveJob {
         final HashMap<String, String> conf = new HashMap<>();
         conf.put("pipeline.name", params.get("flink.job.name", "Indexing - Hive TableApi"));
         tableEnv.getConfig().addConfiguration(Configuration.fromMap(conf));
+        tableEnv.createTemporarySystemFunction("filterMap", FilterMapFunction.class);
     }
 
     private String buildInsertSql(String topic, MappingDto mappingDto) {
@@ -246,11 +245,10 @@ public class TableApiHiveJob {
                 ") STORED AS parquet TBLPROPERTIES (",
                 "  'partition.time-extractor.timestamp-pattern'='$dt $hr:00:00',",
                 "  'sink.partition-commit.trigger'='process-time',",
+                "  'sink.partition-commit.delay'='1 h',",
                 "  'sink.partition-commit.policy.kind'='metastore,success-file'",
                 ")");
     }
-
-    //TODO partitions optimization
 
     private String getColumnList(List<HiveColumnDto> columnList) {
         return columnList.stream()
