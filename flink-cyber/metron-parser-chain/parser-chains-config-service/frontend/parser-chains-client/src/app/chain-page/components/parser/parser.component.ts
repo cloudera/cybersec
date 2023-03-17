@@ -10,15 +10,14 @@
  * limitations governing your use of the file.
  */
 
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import produce from 'immer';
-import { get } from 'lodash';
-import { set } from 'lodash';
+import {get, set} from 'lodash';
 
-import { ParserModel } from '../../chain-page.models';
-import { CustomFormConfig } from '../custom-form/custom-form.component';
+import {ParserModel} from '../../chain-page.models';
+import {CustomFormConfig} from '../custom-form/custom-form.component';
 
-import { ConfigChangedEvent } from './advanced-editor/advanced-editor.component';
+import {ConfigChangedEvent} from './advanced-editor/advanced-editor.component';
 
 @Component({
   selector: 'app-parser',
@@ -34,6 +33,7 @@ export class ParserComponent implements OnInit, OnChanges {
   @Input() isolatedParserView = false;
   @Input() parserType: string;
   @Input() failedParser: string;
+  @Input() indexingFieldMap: Map<string,boolean>;
   @Output() removeParser = new EventEmitter<string>();
   @Output() parserChange = new EventEmitter<any>();
 

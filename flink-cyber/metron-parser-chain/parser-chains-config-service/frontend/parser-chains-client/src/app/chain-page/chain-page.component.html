@@ -13,27 +13,35 @@
 <nz-card class="parser-chain" *ngIf="chain" [nzTitle]="breadcrumbsCardTitle">
   <div nz-row nzGutter="16">
     <div nz-col nzSpan="10">
-      <app-chain-view
-        [parsers]="parsers"
-        [chainId]="(breadcrumbs.length > 0 && breadcrumbs[breadcrumbs.length - 1].id) || (chain && chain.id)"
-        [dirtyParsers]="dirtyParsers"
-        [failedParser]="failedParser$"
-        (removeParserEmitter)="removeParser($event)"
-        (chainLevelChange)="onChainLevelChange($event)"
-      ></app-chain-view>
-      <div class="add-parser">
-        <button
-          nz-button
-          nzType="primary"
-          class="add-new-parser-button"
-          (click)="onAddParserClick($event)"
-          nz-tooltip
-          nzTooltipTitle="Add new Parser"
-          nzTooltipPlacement="right"
-        >
-          <i nz-icon nzType="plus" nzTheme="outline"></i>
-        </button>
-      </div>
+      <nz-tabset class="left-side-tabs">
+        <nz-tab class="parsers-tab" nzTitle="Parser config">
+          <app-chain-view
+            [parsers]="parsers"
+            [chainId]="(breadcrumbs.length > 0 && breadcrumbs[breadcrumbs.length - 1].id) || (chain && chain.id)"
+            [dirtyParsers]="dirtyParsers"
+            [failedParser]="failedParser$"
+            [indexingFieldMap]="indexingFieldMap"
+            (removeParserEmitter)="removeParser($event)"
+            (chainLevelChange)="onChainLevelChange($event)"
+          ></app-chain-view>
+          <div class="add-parser">
+            <button
+              nz-button
+              nzType="primary"
+              class="add-new-parser-button"
+              (click)="onAddParserClick($event)"
+              nz-tooltip
+              nzTooltipTitle="Add new Parser"
+              nzTooltipPlacement="right"
+            >
+              <i nz-icon nzType="plus" nzTheme="outline"></i>
+            </button>
+          </div>
+        </nz-tab>
+        <nz-tab class="indexing-tab" nzTitle="Index mapping">
+          <app-indexing-form (fieldSetUpdated)="updateAllFields($event)"></app-indexing-form>
+        </nz-tab>
+      </nz-tabset>
     </div>
     <div nz-col nzSpan="14">
       <app-live-view [chainConfig$]="chainConfig$" ></app-live-view>

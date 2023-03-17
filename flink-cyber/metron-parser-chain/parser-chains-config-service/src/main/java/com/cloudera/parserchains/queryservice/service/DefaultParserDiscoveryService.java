@@ -35,7 +35,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedMethods;
@@ -140,6 +146,7 @@ public class DefaultParserDiscoveryService implements ParserDiscoveryService {
               .setLabel(p.label())
               .setDescription(p.description())
               .setRequired(p.required())
+              .setOutputName(p.isOutputName())
               .setType(p.widgetType());
       if (StringUtils.isNotBlank(p.defaultValue())) {
         paramDescriptor.addDefaultValue(p.key(), p.defaultValue());
@@ -151,6 +158,7 @@ public class DefaultParserDiscoveryService implements ParserDiscoveryService {
               .setLabel(configurable.label())
               .setDescription(configurable.description())
               .setRequired(configurable.required())
+              .setOutputName(configurable.isOutputName())
               .setType(configurable.widgetType());
       if (StringUtils.isNotBlank(configurable.defaultValue())) {
         paramDescriptor.addDefaultValue(configurable.key(), configurable.defaultValue());

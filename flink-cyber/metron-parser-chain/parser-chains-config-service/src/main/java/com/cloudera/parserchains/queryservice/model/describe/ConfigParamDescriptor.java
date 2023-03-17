@@ -58,6 +58,12 @@ public class ConfigParamDescriptor {
    * Defines whether the user is required to define a value for this configuration parameter.
    */
   private boolean required;
+  /**
+   * Specifies if the parameter specifies the output field name.
+   * If true, the selection will be provided with possible field names.
+   * <p>This value is optional.
+   */
+  private boolean isOutputName;
 
   /**
    * Defines a path that allows the UI to organize the parameters.
@@ -129,6 +135,15 @@ public class ConfigParamDescriptor {
 
   public ConfigParamDescriptor setRequired(boolean required) {
     this.required = required;
+    return this;
+  }
+
+  public boolean isOutputName() {
+    return isOutputName;
+  }
+
+  public ConfigParamDescriptor setOutputName(boolean outputName) {
+    isOutputName = outputName;
     return this;
   }
 

@@ -26,6 +26,7 @@
           <app-custom-form
             *ngIf="areFormsReadyToRender && configForm !== null"
             [config]="configForm"
+            [indexingFieldMap]="indexingFieldMap"
             (valueChange)="onCustomFormChange(parser, $event)"
           ></app-custom-form>
         </nz-tab>
