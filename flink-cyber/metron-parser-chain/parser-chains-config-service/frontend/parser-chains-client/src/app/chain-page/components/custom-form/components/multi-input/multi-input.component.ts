@@ -47,9 +47,7 @@ export class MultiInputComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log('changes')
     if (changes.indexingFieldMap) {
-      console.log('map changes')
       this.updateDropdownLists();
     }
   }
