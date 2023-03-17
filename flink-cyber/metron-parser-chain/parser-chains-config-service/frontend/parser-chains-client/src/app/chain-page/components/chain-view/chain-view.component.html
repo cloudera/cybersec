@@ -30,6 +30,7 @@
         [chainId]="chainId"
         [dirty]="(dirtyParsers || []).includes(parserId)"
         [failedParser]="failedParser | async"
+        [indexingFieldMap]="indexingFieldMap"
         (subchainSelect)="onChainSelected($event)"
         (parserRemove)="onParserRemove($event)"
         (parserChange)="onParserChange($event)"

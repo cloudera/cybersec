@@ -66,7 +66,7 @@ public class JSONPathParser implements Parser {
      */
     @Configurable(key = "expr")
     public JSONPathParser expression(
-            @Parameter(key = "field", label = "Field Name", description = "The field to create or modify.") String fieldName,
+            @Parameter(key = "field", label = "Field Name", description = "The field to create or modify.", isOutputName = true) String fieldName,
             @Parameter(key = "expr", label = "Path Expression", description = "The path expression.") String expr) {
         if (StringUtils.isNoneBlank(fieldName, expr)) {
             expressions.put(FieldName.of(fieldName), JsonPath.compile(expr));

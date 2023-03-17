@@ -164,7 +164,7 @@ public class CsvTextParser implements Parser {
 
     @Configurable(key = "outputField", label = "Output Field")
     public void withOutputField(
-            @Parameter(key = "fieldName", label = "Field Name", description = "The name of the output field.") String fieldName,
+            @Parameter(key = "fieldName", label = "Field Name", description = "The name of the output field.", isOutputName = true) String fieldName,
             @Parameter(key = "fieldIndex", label = "Column Index", description = "The index of the column containing the data.") String index) {
         if (StringUtils.isNoneBlank(fieldName, index)) {
             withOutputField(FieldName.of(fieldName), Integer.parseInt(index));
