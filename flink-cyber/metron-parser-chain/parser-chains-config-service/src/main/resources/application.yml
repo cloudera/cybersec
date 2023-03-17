@@ -6,7 +6,6 @@ server:
   tomcat:
     accesslog:
       enabled: true
-  port: 3000
 
 # Enable/disable and expose/hide web enpoints for Actuator admin services
 management.endpoints.web:
