@@ -1,4 +1,4 @@
-package com.cloudera.cyber.indexing.hive.dto;
+package com.cloudera.cyber.indexing;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

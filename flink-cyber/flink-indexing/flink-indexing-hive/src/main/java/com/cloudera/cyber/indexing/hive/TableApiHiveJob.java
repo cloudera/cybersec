@@ -1,9 +1,9 @@
 package com.cloudera.cyber.indexing.hive;
 
 import com.cloudera.cyber.flink.Utils;
-import com.cloudera.cyber.indexing.hive.dto.HiveColumnDto;
-import com.cloudera.cyber.indexing.hive.dto.MappingColumnDto;
-import com.cloudera.cyber.indexing.hive.dto.MappingDto;
+import com.cloudera.cyber.indexing.HiveColumnDto;
+import com.cloudera.cyber.indexing.MappingColumnDto;
+import com.cloudera.cyber.indexing.MappingDto;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Streams;
