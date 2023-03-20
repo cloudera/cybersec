@@ -33,7 +33,7 @@ public class MetronLookupKey extends LookupKey {
             LookupKV<EnrichmentKey, EnrichmentValue> keyValue = converter.fromResult(result, getCf());
             return keyValue.getValue().getMetadata();
         }  catch(Exception e) {
-            log.error("Unable to convert result Map", e);
+            log.error(String.format("Unable to convert result Map: '%s'", result), e);
             return Collections.emptyMap();
         }
     }

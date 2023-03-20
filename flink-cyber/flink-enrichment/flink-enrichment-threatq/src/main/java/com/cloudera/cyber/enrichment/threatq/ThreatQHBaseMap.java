@@ -39,7 +39,7 @@ public class ThreatQHBaseMap extends AbstractHbaseMapFunction<Message, Message> 
     public ThreatQHBaseMap(List<ThreatQConfig> configs, EnrichmentsConfig enrichmentStorageConfig) {
         super();
         this.configs = configs;
-        log.info("Configuration: {}", configs);
+        log.info("ThreatQ Configuration: {}", configs);
         this.threatqStorage = enrichmentStorageConfig.getStorageConfigs().
                 getOrDefault(THREAT_Q_ENRICHMENT_NAME,
                         new EnrichmentStorageConfig(EnrichmentStorageFormat.HBASE_SIMPLE, DEFAULT_THREATQ_TABLE, DEFAULT_THREATQ_COLUMN_FAMILY));
