@@ -24,7 +24,8 @@ export class MultiInputComponent implements OnInit, OnChanges {
 
   @Input() config: CustomFormConfig;
   @Input() value: string | any[] = "";
-  @Input() indexingFieldMap: Map<string,boolean>;
+  @Input() selectedSource: string;
+  @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() changeValue = new EventEmitter<{ [key: string]: string }[]>();
 
   count = 0;
@@ -47,7 +48,7 @@ export class MultiInputComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes.indexingFieldMap) {
+    if (changes.indexingFieldMap || changes.selectedSource) {
       this.updateDropdownLists();
     }
   }
@@ -58,13 +59,15 @@ export class MultiInputComponent implements OnInit, OnChanges {
     this.mappingColumns = [];
 
     // split the items into two lists based on the boolean value
-    this.indexingFieldMap.forEach((value, key) => {
-      if (value) {
-        this.ignoreColumns.push(key);
-      } else {
-        this.mappingColumns.push(key);
-      }
-    });
+    if (this.indexingFieldMap && this.selectedSource) {
+      this.indexingFieldMap.get(this.selectedSource).forEach((value, key) => {
+        if (value) {
+          this.ignoreColumns.push(key);
+        } else {
+          this.mappingColumns.push(key);
+        }
+      });
+    }
     this.ignoreColumns.sort()
     this.mappingColumns.sort()
   }

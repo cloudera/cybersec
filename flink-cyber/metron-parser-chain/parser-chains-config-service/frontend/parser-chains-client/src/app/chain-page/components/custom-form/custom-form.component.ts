@@ -38,7 +38,8 @@ export interface CustomFormConfig {
 export class CustomFormComponent implements OnInit, OnChanges {
 
   @Input() config: CustomFormConfig[] = [];
-  @Input() indexingFieldMap: Map<string,boolean>;
+  @Input() selectedSource: string;
+  @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() valueChange = new EventEmitter<any>();
 
   formGroup: FormGroup;

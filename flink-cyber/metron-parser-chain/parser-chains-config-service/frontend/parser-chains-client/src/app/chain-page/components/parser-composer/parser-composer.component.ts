@@ -32,7 +32,8 @@ export class ParserComposerComponent implements OnInit {
   @Input() parserId: string;
   @Input() chainId: string;
   @Input() failedParser: string;
-  @Input() indexingFieldMap: Map<string,boolean>;
+  @Input() selectedSource: string;
+  @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() subchainSelect = new EventEmitter<string>();
   @Output() parserRemove = new EventEmitter<string>();
   @Output() parserChange = new EventEmitter<PartialParserModel>();

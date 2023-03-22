@@ -10,10 +10,31 @@
   ~ limitations governing your use of the file.
   -->
 
-<div class="indexing-form">
-    <app-advanced-editor
-            [config]=""
-            (configChanged)="onAdvancedEditorChanged($event)"
-    ></app-advanced-editor>
+<div>
+    <form nz-form [formGroup]="form" [nzLayout]="'inline'" (ngSubmit)="submitForm()">
+        <nz-form-item>
+            <nz-form-label>Mapping path</nz-form-label>
+            <nz-form-control>
+                <nz-input-group nzPrefixIcon="file">
+                    <input formControlName="filePath"
+                           nz-input
+                           placeholder="/path/to/file.json" />
+                </nz-input-group>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-control>
+                <button nz-button nzType="primary">Load mappings</button>
+            </nz-form-control>
+        </nz-form-item>
+    </form>
+    <div class="indexing-form">
+        <app-advanced-editor
+                class="indexing-form-editor"
+                [isReadOnly]="true"
+                [config]="mappingJson"
+                (configChanged)="onAdvancedEditorChanged($event)"
+        ></app-advanced-editor>
+    </div>
 </div>
 

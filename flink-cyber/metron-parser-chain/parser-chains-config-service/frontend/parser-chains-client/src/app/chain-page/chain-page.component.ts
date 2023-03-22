@@ -55,7 +55,8 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   @ViewChild('chainNameInput', { static: false }) chainNameInput: ElementRef;
   editChainNameForm: FormGroup;
   failedParser$: Observable<string>;
-  indexingFieldMap: Map<string,boolean>;
+  indexingFieldMap: Map<string,Map<string, boolean>>;
+  sourceList: Set<string>;
 
   constructor(
     private store: Store<ChainPageState>,
@@ -254,7 +255,11 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
     }
   }
 
-  updateAllFields($event: Map<string,boolean>) {
+  updateAllFields($event: Map<string,Map<string, boolean>>) {
     this.indexingFieldMap = $event
+  }
+
+  updateSourceList($event: Set<string>) {
+    this.sourceList = $event
   }
 }

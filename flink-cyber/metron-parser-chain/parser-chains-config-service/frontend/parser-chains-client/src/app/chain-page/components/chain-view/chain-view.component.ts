@@ -28,12 +28,14 @@ export class ChainViewComponent implements OnInit {
   @Input() dirtyParsers: string[];
   @Input() chainId: string;
   @Input() failedParser: Observable<string>;
-  @Input() indexingFieldMap: Map<string,boolean>;
+  @Input() sourceList: Set<string>;
+  @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() removeParserEmitter = new EventEmitter<string>();
   @Output() chainLevelChange = new EventEmitter<string>();
   @Output() parserChange = new EventEmitter<PartialParserModel>();
   collapseAll: boolean;
   parserCollapseStateArray: boolean[];
+  selectedSource: string;
   constructor(public chainPageService: ChainPageService) {
   }
   ngOnInit() {
@@ -66,5 +68,4 @@ export class ChainViewComponent implements OnInit {
   collapseExpandAllParsers() {
     this.chainPageService.collapseExpandAllParsers();
   }
-
 }
