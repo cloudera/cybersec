@@ -26,9 +26,9 @@
             nzAllowClear
             nzPlaceHolder="Select a source"
             class="parser-source-select"
-            [nzDisabled]="sourceList && sourceList.size < 1"
+            [nzDisabled]="indexingFieldMap && indexingFieldMap.size < 1"
             [(ngModel)]="selectedSource">
-      <nz-option *ngFor="let item of sourceList; let i = index;" nzLabel="{{item}}" nzValue="{{item}}"></nz-option>
+      <nz-option *ngFor="let item of indexingFieldMap | keyvalue" nzLabel="{{item.key}}" nzValue="{{item.key}}"></nz-option>
     </nz-select>
   </div>
   <div *ngFor="let parserId of parsers; trackBy: trackByFn; index as i" class="parser-chain-item">

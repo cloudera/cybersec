@@ -15,7 +15,6 @@ export class IndexingFormComponent implements OnInit {
 
     form!: FormGroup;
     @Output() fieldSetUpdated = new EventEmitter<Map<string, Map<string, boolean>>>()
-    @Output() sourceListUpdated = new EventEmitter<Set<string>>()
     mappingJson: any;
 
     constructor(public chainPageService: ChainPageService,
@@ -30,11 +29,9 @@ export class IndexingFormComponent implements OnInit {
 
     onAdvancedEditorChanged(e: ConfigChangedEvent) {
         let result = new Map<string, Map<string, boolean>>()
-        let sources = new Set<string>()
 
         this.mappingJson = e['value']
         for (let s in this.mappingJson) {
-            sources.add(s)
             let sourceMap = new Map<string, boolean>();
             result.set(s, sourceMap)
             this.findValues(this.mappingJson[s], 'ignore_fields').forEach(ignore_list =>
@@ -43,8 +40,6 @@ export class IndexingFormComponent implements OnInit {
             this.findValues(this.mappingJson[s], 'column_mapping').forEach(mapping =>
                 this.findValues(mapping, 'name').forEach(value => sourceMap.set(value, false)))
         }
-
-        this.sourceListUpdated.emit(sources)
         this.fieldSetUpdated.emit(result)
     }
 
