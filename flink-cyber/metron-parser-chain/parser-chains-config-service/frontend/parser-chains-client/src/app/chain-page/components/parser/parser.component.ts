@@ -33,7 +33,8 @@ export class ParserComponent implements OnInit, OnChanges {
   @Input() isolatedParserView = false;
   @Input() parserType: string;
   @Input() failedParser: string;
-  @Input() indexingFieldMap: Map<string,boolean>;
+  @Input() selectedSource: string;
+  @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() removeParser = new EventEmitter<string>();
   @Output() parserChange = new EventEmitter<any>();
 

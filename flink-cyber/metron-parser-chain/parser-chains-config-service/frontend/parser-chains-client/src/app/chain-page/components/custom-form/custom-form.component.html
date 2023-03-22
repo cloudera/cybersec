@@ -36,6 +36,7 @@
         <app-multi-input
           [config]="formConfig"
           [value]="formConfig.value"
+          [selectedSource]="selectedSource"
           [indexingFieldMap]="indexingFieldMap"
           (changeValue)="onChange($event, formConfig)"
         >

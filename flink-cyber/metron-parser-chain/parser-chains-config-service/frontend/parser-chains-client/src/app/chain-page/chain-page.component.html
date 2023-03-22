@@ -21,6 +21,7 @@
             [dirtyParsers]="dirtyParsers"
             [failedParser]="failedParser$"
             [indexingFieldMap]="indexingFieldMap"
+            [sourceList]="sourceList"
             (removeParserEmitter)="removeParser($event)"
             (chainLevelChange)="onChainLevelChange($event)"
           ></app-chain-view>
@@ -39,7 +40,9 @@
           </div>
         </nz-tab>
         <nz-tab class="indexing-tab" nzTitle="Index mapping">
-          <app-indexing-form (fieldSetUpdated)="updateAllFields($event)"></app-indexing-form>
+          <app-indexing-form
+                  (sourceListUpdated)="updateSourceList($event)"
+                  (fieldSetUpdated)="updateAllFields($event)"></app-indexing-form>
         </nz-tab>
       </nz-tabset>
     </div>
