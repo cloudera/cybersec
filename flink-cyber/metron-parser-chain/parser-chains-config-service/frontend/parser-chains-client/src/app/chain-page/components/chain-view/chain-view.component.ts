@@ -28,7 +28,6 @@ export class ChainViewComponent implements OnInit {
   @Input() dirtyParsers: string[];
   @Input() chainId: string;
   @Input() failedParser: Observable<string>;
-  @Input() sourceList: Set<string>;
   @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() removeParserEmitter = new EventEmitter<string>();
   @Output() chainLevelChange = new EventEmitter<string>();
