@@ -11,6 +11,7 @@
 # either express or implied. Refer to the License for the specific permissions and
 # limitations governing your use of the file.
 #
+set -x
 
 if [ "$#" -lt 2 ]; then
     echo "Usage: $0 jar_prefix class_name {options}" >&2
@@ -46,7 +47,7 @@ fi
 jar_path=$(cs-lookup-jar "$jar_prefix")
 flink_dist=$(cs-lookup-jar "flink_dist")
 log4j_config=$(cs-lookup-jar "log4j.properties")
-lib_jars=$(ls -d -1 /opt/cloudera/parcels/CYBERSEC/lib/*.jar | tr '\n' ':' | sed 's/:$/\n/')
+lib_jars=$(ls -d -1 $CYBERSEC_HOME/lib/*.jar | tr '\n' ':' | sed 's/:$/\n/')
 flink_dist=$(find /opt/cloudera/parcels/FLINK/ -name "flink-dist*.jar")
 
 "$JAVA_RUN" -Dlog4j.configuration="$log4j_config" -Dlog4j.configurationFile="$log4j_config" -cp "$jar_path:$lib_jars:$flink_dist" $class_name "${options[@]}"
