@@ -165,7 +165,7 @@ public abstract class ProfileJob {
 
         Preconditions.checkNotNull(profiledStreams, "At least one profile must be specified");
         DataStream<ScoredMessage> scoredMessages = score(profiledStreams.map(new ProfileMessageToMessageMap()), env, params);
-        writeProfileMeasurementsResults(params, profileDtos, profiledStreams);
+            writeProfileMeasurementsResults(params, profileDtos, profiledStreams);
         writeResults(params, scoredMessages);
         return env;
     }
