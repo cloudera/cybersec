@@ -30,7 +30,7 @@ public abstract class HiveJob {
         FlinkUtils.setupEnv(env, params);
 
         DataStream<ScoredMessage> source = createSource(env, params);
-        if (params.get("hive.writer", "").equalsIgnoreCase("TableAPI")) {
+        if (params.get("flink.writer", "").equalsIgnoreCase("TableAPI")) {
             try {
                 final TableApiHiveJob tableApiHiveJob = new TableApiHiveJob(params, env, source);
                 tableApiHiveJob.startJob();
