@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class HiveColumnDto {
+public class TableColumnDto {
 
     @JsonProperty("name")
     private String name;

@@ -5,6 +5,8 @@ hive.table=events
 #hive.tables-init-file=/home/systest/stas/cyb-105-test/main/cyb-105/index/conf/hive-table-config.json
 #hive.mapping-file=/home/systest/stas/cyb-105-test/main/cyb-105/index/conf/table-config.json
 #hive.writer=tableapi
+#flink.output-connector=hive
+flink.output-connector=iceberg
 
 #hive.confdir=/etc/hive/conf/
 
