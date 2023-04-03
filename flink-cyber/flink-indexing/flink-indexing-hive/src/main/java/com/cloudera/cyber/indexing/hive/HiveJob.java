@@ -13,6 +13,8 @@
 package com.cloudera.cyber.indexing.hive;
 
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.indexing.hive.tableapi.TableApiAbstractJob;
+import com.cloudera.cyber.indexing.hive.tableapi.TableApiJobFactory;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -32,8 +34,9 @@ public abstract class HiveJob {
         DataStream<ScoredMessage> source = createSource(env, params);
         if (params.get("hive.writer", "").equalsIgnoreCase("TableAPI")) {
             try {
-                final TableApiHiveJob tableApiHiveJob = new TableApiHiveJob(params, env, source);
-                tableApiHiveJob.startJob();
+                final String connectorName = params.getRequired("flink.output-connector");
+                final TableApiAbstractJob job = TableApiJobFactory.getJobByConnectorName(connectorName, params, env, source);
+                job.startJob();
                 return null;
             } catch (Exception e) {
                 throw new RuntimeException(e);
