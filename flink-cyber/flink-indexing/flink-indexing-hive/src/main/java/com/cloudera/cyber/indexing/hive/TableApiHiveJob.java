@@ -41,7 +41,7 @@ public class TableApiHiveJob {
     private static final String HIVE_MAPPING_FILE_PARAM = "hive.mapping-file";
 
     private static final String BASE_COLUMN_MAPPING_JSON = "base-column-mapping.json";
-    private static final String BASE_HIVE_TABLE_JSON = "base-hive-table.json";
+    private static final String BASE_HIVE_TABLE_JSON = "base-table.json";
     private static final String KAFKA_TABLE = "KafkaTempView";
 
 
