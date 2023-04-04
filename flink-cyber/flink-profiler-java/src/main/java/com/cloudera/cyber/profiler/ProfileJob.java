@@ -93,14 +93,6 @@ public abstract class ProfileJob {
                 build())
             .enable(SerializationFeature.INDENT_OUTPUT);
 
-    private static final Function<ResultSet, Integer> ID_MAPPER = rs -> {
-        try {
-            return rs.getInt("ID");
-        } catch (SQLException e) {
-            log.error("Error while mapping an id", e);
-            return null;
-        }
-    };
     private static final Function<ResultSet, Integer> FIRST_VALUE_MAPPER = rs -> {
         try {
             return rs.getInt(1);
@@ -183,7 +175,7 @@ public abstract class ProfileJob {
             configJson,
             new TypeReference<ArrayList<ProfileGroupConfig>>() {
             });
-        profileGroupConfigs.forEach(ProfileGroupConfig::verify);
+        ProfileGroupConfig.verify(profileGroupConfigs);
         return profileGroupConfigs;
     }
 
