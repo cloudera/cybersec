@@ -10,14 +10,16 @@
  * limitations governing your use of the file.
  */
 
-import { createSelector } from '@ngrx/store';
+import {createSelector} from '@ngrx/store';
 
 import * as chainListPageActions from './chain-list-page.actions';
-import { ChainModel } from './chain.model';
+import {ChainModel} from './chain.model';
 
 export interface ChainListPageState {
   loading: boolean;
   createModalVisible: boolean;
+  deleteModalVisible: boolean;
+  deleteItem: ChainModel;
   error: string;
   items: ChainModel[];
 }
@@ -25,6 +27,8 @@ export interface ChainListPageState {
 export const initialState: ChainListPageState = {
   loading: false,
   createModalVisible: false,
+  deleteModalVisible: false,
+  deleteItem: null,
   items: [],
   error: ''
 };
@@ -74,6 +78,19 @@ export function reducer(
         createModalVisible: false,
       }
     }
+    case chainListPageActions.SHOW_DELETE_MODAL: {
+      return {
+        ...state,
+        deleteModalVisible: true,
+      }
+    }
+    case chainListPageActions.HIDE_DELETE_MODAL: {
+      return {
+        ...state,
+        deleteModalVisible: false,
+        items: state.items.map(chainItem => ({...chainItem, selected: false}))
+      }
+    }
     case chainListPageActions.CREATE_CHAIN_SUCCESS: {
       return {
         ...state,
@@ -88,6 +105,12 @@ export function reducer(
         loading: false,
       };
     }
+    case chainListPageActions.DELETE_CHAIN_SELECT: {
+      return {
+        ...state,
+        deleteItem: state.items.find(chainItem => chainItem.id === action.chainId)
+      };
+    }
     case chainListPageActions.DELETE_CHAIN: {
       return {
         ...state,
@@ -98,7 +121,8 @@ export function reducer(
       return {
         ...state,
         loading: false,
-        items: state.items.filter(chainItem => chainItem.id !== action.chainId)
+        items: state.items.filter(chainItem => chainItem.id !== action.chainId),
+        deleteItem: null,
       };
     }
     case chainListPageActions.DELETE_CHAIN_FAIL: {
@@ -106,6 +130,7 @@ export function reducer(
         ...state,
         error: action.error.message,
         loading: false,
+        deleteItem: null,
       };
     }
     default: {
@@ -124,11 +149,21 @@ export const getChains = createSelector(
 );
 
 export const getLoading = createSelector(
-    getChainListPageState,
-    (state: ChainListPageState) => state.loading
+  getChainListPageState,
+  (state: ChainListPageState) => state.loading
 );
 
 export const getCreateModalVisible = createSelector(
-    getChainListPageState,
-    (state: ChainListPageState) => state.createModalVisible
+  getChainListPageState,
+  (state: ChainListPageState) => state.createModalVisible
+);
+
+export const getDeleteModalVisible = createSelector(
+  getChainListPageState,
+  (state: ChainListPageState) => state.deleteModalVisible
+);
+
+export const getDeleteChain = createSelector(
+  getChainListPageState,
+  (state: ChainListPageState) => state.deleteItem
 );
