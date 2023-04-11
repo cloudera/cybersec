@@ -50,6 +50,10 @@ buildNumber.properties
 auto-import.
 .idea
 **/.angular
+dist
+node
+node_modules
+jars
 *.iml
 *.ipr
 
