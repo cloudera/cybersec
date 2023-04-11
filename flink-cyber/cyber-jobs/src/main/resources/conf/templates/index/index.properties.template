@@ -2,11 +2,13 @@ hive.catalog=hive
 hive.schema=cyber
 hive.table=events
 
-#hive.tables-init-file=/home/systest/stas/cyb-105-test/main/cyb-105/index/conf/hive-table-config.json
-#hive.mapping-file=/home/systest/stas/cyb-105-test/main/cyb-105/index/conf/table-config.json
+#hive.metastore.uri=thrift://localhost:9083
+
 #flink.writer=tableapi
 #flink.output-connector=hive
 #flink.output-connector=iceberg
+#flink.tables-init-file=/home/systest/cyb-105-test/main/cyb-105/index/conf/table-config.json
+#flink.mapping-file=/home/systest/cyb-105-test/main/cyb-105/index/conf/mapping-config.json
 
 #hive.confdir=/etc/hive/conf/
 

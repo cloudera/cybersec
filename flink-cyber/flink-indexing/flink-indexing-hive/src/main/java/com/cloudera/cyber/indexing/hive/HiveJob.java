@@ -34,7 +34,7 @@ public abstract class HiveJob {
         DataStream<ScoredMessage> source = createSource(env, params);
         if (params.get("flink.writer", "").equalsIgnoreCase("TableAPI")) {
             try {
-                final String connectorName = params.getRequired("flink.output-connector");
+                final String connectorName = params.get("flink.output-connector", "hive");
                 final TableApiAbstractJob job = TableApiJobFactory.getJobByConnectorName(connectorName, params, env, source);
                 job.startJob();
                 return null;
