@@ -21,10 +21,12 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
+import org.apache.flink.util.Preconditions;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.cloudera.cyber.scoring.ScoringRule.RESULT_REASON;
@@ -33,17 +35,24 @@ import static com.cloudera.cyber.scoring.ScoringRule.RESULT_SCORE;
 @Slf4j
 public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRule, ScoringRuleCommand, ScoringRuleCommandResult, ScoredMessage> {
 
-    private final ParameterTool params;
+    private final String scoringSummarizationModeName;
+    private transient ScoringSummarizationMode scoringSummarizationMode;
+    public static final String ILLEGAL_SUMMARIZATION_METHOD_ERROR_MESSAGE = "Summarization method '%s' is not a legal value '%s'";
 
     public ScoringProcessFunction(OutputTag<ScoringRuleCommandResult> rulesResultSink, MapStateDescriptor<RulesForm, List<ScoringRule>> rulesDescriptor, ParameterTool params) {
         super(rulesResultSink, rulesDescriptor);
-        this.params = params;
+        this.scoringSummarizationModeName = params.get(ScoringJobKafka.SCORING_SUMMATION_NAME(), ScoringSummarizationMode.DEFAULT().name());
+
+        Preconditions.checkArgument(ScoringSummarizationMode.isLegalSummarizationMode(this.scoringSummarizationModeName),
+                String.format(ILLEGAL_SUMMARIZATION_METHOD_ERROR_MESSAGE, this.scoringSummarizationModeName, ScoringSummarizationMode.legalSummarizationModes()));
+
     }
 
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
         setResultBuilderSupplier(ScoringRuleCommandResult::builder);
+        scoringSummarizationMode = ScoringSummarizationMode.valueOf(scoringSummarizationModeName);
     }
 
     protected void processMessages(Message message, Collector<ScoredMessage> collector, List<ScoringRule> rules) {
@@ -63,7 +72,7 @@ public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRu
                             return null;
                         }
                     })
-                    .filter(f -> f != null)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             //TODO remove if not needed. Was unused, which resulted to additional calculations for each message
@@ -72,16 +81,17 @@ public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRu
         if (log.isDebugEnabled()) {
             log.debug("Scored Message: {}, {}", message, rules);
         }
-        final List<Double> scoreValues = scores.stream().map(Scores::getScore).collect(Collectors.toList());
-        collector.collect(ScoredMessage.builder()
-                .message(message)
-                .cyberScoresDetails(scores)
-                .cyberScore(getScoringSummarizationMode(params).calculateScore(scoreValues))
-                .build());
+
+        collector.collect(scoreMessage(message, scores, scoringSummarizationMode));
     }
 
-    protected static ScoringSummarizationMode getScoringSummarizationMode(ParameterTool params) {
-        return ScoringSummarizationMode.valueOf(
-                params.get(ScoringJobKafka.SCORING_SUMMATION_NAME(), ScoringSummarizationMode.DEFAULT().name()));
+    public static ScoredMessage scoreMessage(Message message, List<Scores> scores, ScoringSummarizationMode summarizationMode) {
+        final List<Double> scoreValues = scores.stream().map(Scores::getScore).collect(Collectors.toList());
+        return ScoredMessage.builder()
+                .message(message)
+                .cyberScoresDetails(scores)
+                .cyberScore(summarizationMode.calculateScore(scoreValues))
+                .build();
     }
+
 }
