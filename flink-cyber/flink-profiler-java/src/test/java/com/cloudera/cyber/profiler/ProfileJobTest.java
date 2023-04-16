@@ -16,11 +16,7 @@ import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.profiler.dto.ProfileDto;
 import com.cloudera.cyber.rules.DynamicRuleCommandResult;
-import com.cloudera.cyber.scoring.ScoredMessage;
-import com.cloudera.cyber.scoring.Scores;
-import com.cloudera.cyber.scoring.ScoringRule;
-import com.cloudera.cyber.scoring.ScoringRuleCommand;
-import com.cloudera.cyber.scoring.ScoringRuleCommandResult;
+import com.cloudera.cyber.scoring.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -37,25 +33,17 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.IntStream;
 
 import static com.cloudera.cyber.flink.FlinkUtils.PARAMS_PARALLELISM;
 import static com.cloudera.cyber.profiler.ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION;
 import static com.cloudera.cyber.profiler.StatsProfileAggregateFunction.STATS_PROFILE_GROUP_SUFFIX;
-import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.END_PERIOD_EXTENSION;
-import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.START_PERIOD_EXTENSION;
-import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.STATS_EXTENSION_SUFFIXES;
+import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.*;
 import static com.cloudera.cyber.rules.DynamicRuleCommandType.UPSERT;
 import static com.cloudera.cyber.rules.RuleType.JS;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.withPrecision;
+import static org.assertj.core.api.Assertions.*;
 import static org.hamcrest.Matchers.equalTo;
 
 public class ProfileJobTest extends ProfileJob {
@@ -198,7 +186,7 @@ public class ProfileJobTest extends ProfileJob {
                 KEY_FIELD_NAME, keyFieldValue,
                 MAX_FIELD_NAME, Long.toString(maxFieldValue)
         );
-        ScoredMessage message = ScoredMessage.builder().cyberScoresDetails(Collections.emptyList()).message(TestUtils.createMessage(timestamp, "test", extensions)).build();
+        ScoredMessage message = ScoringProcessFunction.scoreMessage(TestUtils.createMessage(timestamp, "test", extensions), Collections.emptyList(), ScoringSummarizationMode.SUM);
         source.sendRecord(message);
     }
 
@@ -214,8 +202,7 @@ public class ProfileJobTest extends ProfileJob {
                 IP_SRC_3, 31.0);
 
         List<Scores> scores = Collections.singletonList(Scores.builder().ruleId(RULE_UUID).reason("my reason").score(ipToScore.get(secondKeyField)).build());
-        ScoredMessage message = ScoredMessage.builder().cyberScoresDetails(scores).
-                message(TestUtils.createMessage(timestamp, "netflow", extensions)).build();
+        ScoredMessage message = ScoringProcessFunction.scoreMessage(TestUtils.createMessage(timestamp, "netflow", extensions), scores, ScoringSummarizationMode.DEFAULT());
         source.sendRecord(message, timestamp);
     }
 
