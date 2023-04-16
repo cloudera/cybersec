@@ -14,15 +14,12 @@ package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
-import com.cloudera.cyber.flink.MessageBoundedOutOfOrder;
 import com.cloudera.cyber.rules.DynamicRuleCommandResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
-import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
@@ -30,20 +27,11 @@ import org.junit.Test;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeoutException;
 
 import static com.cloudera.cyber.flink.FlinkUtils.PARAMS_PARALLELISM;
-import static com.cloudera.cyber.rules.DynamicRuleCommandType.DELETE;
-import static com.cloudera.cyber.rules.DynamicRuleCommandType.LIST;
-import static com.cloudera.cyber.rules.DynamicRuleCommandType.UPSERT;
+import static com.cloudera.cyber.rules.DynamicRuleCommandType.*;
 import static com.cloudera.cyber.rules.RuleType.JS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -58,7 +46,6 @@ public class TestScoringJob extends ScoringJob {
     private final CollectingSink<ScoringRuleCommandResult> queryResponse = new CollectingSink<>();
 
     private final List<Message> recordLog = new ArrayList<>();
-
 
     @Test
     public void testPipeline() throws Exception {
@@ -259,6 +246,7 @@ public class TestScoringJob extends ScoringJob {
                 .map(ScoredMessage::getCyberScoresDetails)
                 .orElse(Collections.emptyList());
         assertThat("message scores match", expectedScores, equalTo(actualScores));
+        assertThat(scoredMessage.isPresent(), equalTo(true));
         assertThat("message scores match", scoredMessage.get().getCyberScore(), equalTo(expectedCyberScore));
     }
 
@@ -307,23 +295,15 @@ public class TestScoringJob extends ScoringJob {
     @Override
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         source = JobTester.createManualSource(env, TypeInformation.of(Message.class));
-        return source.getDataStream()
-                .assignTimestampsAndWatermarks(new MessageBoundedOutOfOrder(Time.milliseconds(1000)))
-                .setParallelism(1);
+
+        return source.getDataStream();
     }
 
     @Override
     protected DataStream<ScoringRuleCommand> createRulesSource(StreamExecutionEnvironment env, ParameterTool params) {
         querySource = JobTester.createManualSource(env, TypeInformation.of(ScoringRuleCommand.class));
 
-        return querySource.getDataStream()
-                .assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor<ScoringRuleCommand>(Time.milliseconds(1000)) {
-                    @Override
-                    public long extractTimestamp(ScoringRuleCommand scoringRuleCommand) {
-                        return scoringRuleCommand.getTs();
-                    }
-                })
-                .setParallelism(1);
+        return querySource.getDataStream();
     }
 
     @Override
