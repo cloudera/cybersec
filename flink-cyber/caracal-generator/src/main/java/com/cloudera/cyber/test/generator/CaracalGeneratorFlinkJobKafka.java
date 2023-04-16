@@ -22,8 +22,11 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
 
 public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
+
+    private static final String PRODUCER_ID_PREFIX = "event_generator";
 
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
@@ -49,49 +52,29 @@ public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
                         );
                     }
                 },
-                Utils.readKafkaProperties(params, false),
+                readKafkaProperties(params, PRODUCER_ID_PREFIX.concat("generator.metrics"), false),
                 FlinkKafkaProducer.Semantic.NONE);
         metrics.addSink(metricsSink).name("Metrics Sink");
     }
 
     @Override
     protected void writeResults(ParameterTool params,
-            SingleOutputStreamOperator<Tuple2<String, String>> generatedInput) {
-        FlinkKafkaProducer<Tuple2<String, String>> kafkaSink = new FlinkKafkaProducer<Tuple2<String, String>>(
-                "generator.output",
-                new KafkaSerializationSchema<Tuple2<String, String>>() {
-                    @Override
-                    public ProducerRecord<byte[], byte[]> serialize(Tuple2<String, String> stringStringTuple2,
-                            @Nullable Long aLong) {
-                        return new ProducerRecord<byte[], byte[]>(
-                                stringStringTuple2.f0,
-                                stringStringTuple2.f1.getBytes(StandardCharsets.UTF_8)
-                        );
-                    }
-                },
-                Utils.readKafkaProperties(params, false),
-                FlinkKafkaProducer.Semantic.AT_LEAST_ONCE);
-        generatedInput.addSink(kafkaSink).name("Text Generator Sink");
-    }
-
-    @Override
-    protected void writeBinaryResults(ParameterTool params,
-                                SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput) {
+            SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput) {
         FlinkKafkaProducer<Tuple2<String, byte[]>> kafkaSink = new FlinkKafkaProducer<Tuple2<String, byte[]>>(
-                "generator.binary.output",
+                "generator.output",
                 new KafkaSerializationSchema<Tuple2<String, byte[]>>() {
                     @Override
-                    public ProducerRecord<byte[], byte[]> serialize(Tuple2<String, byte[]> stringStringTuple2,
-                                                                    @Nullable Long aLong) {
-                        return new ProducerRecord<byte[], byte[]>(
-                                stringStringTuple2.f0,
-                                stringStringTuple2.f1
+                    public ProducerRecord<byte[], byte[]> serialize(Tuple2<String, byte[]> topicData, Long aLong) {
+                        return new ProducerRecord<>(
+                                topicData.f0,
+                                topicData.f1
                         );
                     }
+
                 },
-                Utils.readKafkaProperties(params, false),
+                readKafkaProperties(params, PRODUCER_ID_PREFIX.concat("generator.output"), false),
                 FlinkKafkaProducer.Semantic.AT_LEAST_ONCE);
-        generatedInput.addSink(kafkaSink).name("Binary Generator Sink");
+        generatedInput.addSink(kafkaSink).name("Text Generator Sink");
     }
 
 }

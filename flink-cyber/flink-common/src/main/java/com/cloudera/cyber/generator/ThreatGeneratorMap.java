@@ -12,13 +12,19 @@
 
 package com.cloudera.cyber.generator;
 
-import com.cloudera.cyber.generator.ThreatGenerator;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 
-public class ThreatGeneratorMap extends RichMapFunction<String, Tuple2<String, String>> {
+import java.nio.charset.Charset;
+
+public class ThreatGeneratorMap extends RichMapFunction<String, Tuple2<String, byte[]>> {
     private transient ThreatGenerator threatGenerator;
+    private final String topicName;
+
+    public ThreatGeneratorMap(String topicName) {
+        this.topicName = topicName;
+    }
 
     @Override
     public void open(Configuration parameters) throws Exception {
@@ -27,7 +33,7 @@ public class ThreatGeneratorMap extends RichMapFunction<String, Tuple2<String, S
     }
 
     @Override
-    public Tuple2<String, String> map(String ip) throws Exception {
-        return Tuple2.of("threats", threatGenerator.generateThreat(ip));
+    public Tuple2<String, byte[]> map(String ip) throws Exception {
+        return Tuple2.of(topicName, threatGenerator.generateThreat(ip).getBytes(Charset.defaultCharset()));
     }
 }

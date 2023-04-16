@@ -1,0 +1,1 @@
+${((ts)/1000)?c}  ${utils.randomInt(1024,65535)?c} ${utils.randomIP()} TCP_TUNNEL/200 414 CONNECT www.google.com:443 - HIER_DIRECT/${utils.randomIP()} -
