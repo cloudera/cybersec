@@ -37,7 +37,6 @@ public class QuickTest {
 
         StreamTableEnvironment tableEnv = StreamTableEnvironment.create(env, EnvironmentSettings
                 .newInstance()
-                .useBlinkPlanner()
                 .inStreamingMode()
                 .build());
 

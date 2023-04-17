@@ -17,13 +17,13 @@ import com.cloudera.cyber.ThreatIntelligence;
 import com.cloudera.cyber.enrichment.stix.parsing.ThreatIntelligenceDetails;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
+import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Preconditions;
 
 import java.util.Properties;
@@ -55,20 +55,20 @@ public class StixJobKafka extends StixJob {
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
-        FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
+        KafkaSink<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
                 params.getRequired(PARAM_MARKED_OUTPUT_TOPIC),
                 "cyber-stix-enrichment",
                 params);
-        results.addSink(sink).name("Kafka Results").uid("kafka.results");
+        results.sinkTo(sink).name("Kafka Results").uid("kafka.results");
     }
 
     @Override
     protected void writeStixResults(ParameterTool params, DataStream<ThreatIntelligence> results) {
-        FlinkKafkaProducer<ThreatIntelligence> sink = new FlinkUtils<>(ThreatIntelligence.class).createKafkaSink(
+        KafkaSink<ThreatIntelligence> sink = new FlinkUtils<>(ThreatIntelligence.class).createKafkaSink(
                 params.getRequired(PARAM_STIX_OUTPUT_TOPIC),
                 "cyber-stix-command",
                 params);
-        results.addSink(sink).name("Kafka Stix Results").uid("kafka.results.stix");
+        results.sinkTo(sink).name("Kafka Stix Results").uid("kafka.results.stix");
 
         ThreatIntelligenceHBaseSinkFunction hbaseSink = new ThreatIntelligenceHBaseSinkFunction("threatIntelligence", params);
         results.addSink(hbaseSink);
@@ -89,19 +89,18 @@ public class StixJobKafka extends StixJob {
         Properties kafkaProperties = Utils.readKafkaProperties(params, GROUP_ID, true);
 
         String topic = params.get(PARAM_INPUT_TOPIC, DEFAULT_INPUT_TOPIC);
-        FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(topic, new SimpleStringSchema(),  kafkaProperties);
+        KafkaSource<String> source = FlinkUtils.createKafkaStringSource(topic, kafkaProperties);
 
-        return env.addSource(consumer).name("Stix Kafka Source").uid("stix-kafka-source");
+        return env.fromSource(source, WatermarkStrategy.noWatermarks(), "Stix Kafka Source").uid("stix-kafka-source");
     }
 
     @Override
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         Pattern inputTopic = Pattern.compile(params.getRequired("topic.input"));
         String groupId = "cyber-stix";
-        return env.addSource(createKafkaSource(inputTopic,
+        return env.fromSource(createKafkaSource(inputTopic,
                 params,
-                groupId))
-                .name("Kafka Source")
+                groupId), WatermarkStrategy.noWatermarks(), "Kafka Source")
                 .uid("kafka.input");
     }
 }
