@@ -8,6 +8,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.SqlDialect;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.table.catalog.hive.HiveCatalog;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,34 +30,32 @@ public class TableApiIcebergJob extends TableApiAbstractJob {
     protected String buildTableDLL(String tableName, List<TableColumnDto> columnList) {
         return String.join("\n", "CREATE TABLE " + tableName + " ( ",
                 getColumnList(columnList),
-                ", `dt` string, ",
-                " `hr` string",
                 ") PARTITIONED BY (",
-                " `dt`, ",
-                " `hr`",
+                " `dt` string, ",
+                " `hr` string",
+                ") TBLPROPERTIES (",
+                "  'connector' = 'iceberg',",
+                "  'catalog-database' = 'cyber',",
+                "  'catalog-type' = 'hive',",
+                "  'catalog-name' = 'iceberg_catalog',",
+                "  'engine.hive.enabled' = 'true',",
+
+                "  'partition.time-extractor.timestamp-pattern'='$dt $hr:00:00',",
+                "  'sink.partition-commit.trigger'='process-time',",
+                "  'sink.partition-commit.delay'='1 h',",
+                "  'sink.partition-commit.policy.kind'='metastore,success-file'",
                 ")");
     }
 
     @Override
     protected void registerCatalog(StreamTableEnvironment tableEnv) {
+        String name = "iceberg_catalog";
         String defaultDatabase = params.get("hive.dbname", "cyber");
         String hiveConfDir = params.get("hive.confdir", "/etc/hive/conf");
-        String hiveMetastoreUri = params.get("hive.metastore.uri", "thrift://localhost:9083");
 
-        final String catalogSql = String.join("\n", "CREATE CATALOG iceberg_catalog WITH (",
-                "  'type'='iceberg',",
-                "  'catalog-type'='hive',",
-                "  'uri'='" + hiveMetastoreUri + "',",
-                "  'hive-conf-dir'='" + hiveConfDir + "',",
-                "  'clients'='5',",
-                "  'property-version'='1'",
-                ")");
-        System.out.println("Creating Flink catalog for iceberg: " + catalogSql);
-        tableEnv.executeSql(catalogSql);
-
-        createAndUseDatabase(tableEnv, defaultDatabase);
-
-        tableEnv.useCatalog("iceberg_catalog");
+        HiveCatalog hive = new HiveCatalog(name, defaultDatabase, hiveConfDir);
+        tableEnv.registerCatalog(name, hive);
+        tableEnv.useCatalog(name);
     }
 
     private static void createAndUseDatabase(StreamTableEnvironment tableEnv, String defaultDatabase) {
