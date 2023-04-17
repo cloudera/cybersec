@@ -15,6 +15,7 @@ package com.cloudera.cyber.enrichemnt.stellar;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -34,15 +35,15 @@ public class StellarEnrichmentJobKafka extends StellarEnrichmentJob {
 
     @Override
     protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> reduction) {
-        reduction.addSink(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), STELLAR_ENRICHMENT_GROUP_ID, params))
+        reduction.sinkTo(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), STELLAR_ENRICHMENT_GROUP_ID, params))
                 .name("Kafka Sink").uid("kafka-sink");
     }
 
     @Override
     public DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        return env.addSource(
-                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, STELLAR_ENRICHMENT_GROUP_ID)
-        ).name("Kafka Source").uid("kafka-source");
+        return env.fromSource(
+                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, STELLAR_ENRICHMENT_GROUP_ID),
+                WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
     }
 
 }

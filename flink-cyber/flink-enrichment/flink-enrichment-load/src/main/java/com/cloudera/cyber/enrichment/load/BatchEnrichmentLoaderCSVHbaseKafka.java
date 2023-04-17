@@ -40,7 +40,7 @@ public class BatchEnrichmentLoaderCSVHbaseKafka extends BatchEnrichmentLoaderCSV
     protected void writeResults(ParameterTool params, EnrichmentsConfig enrichmentsConfig, String enrichmentType, DataStream<EnrichmentCommand> enrichmentSource, StreamExecutionEnvironment env) {
         String topic = params.get(PARAMS_TOPIC_ENRICHMENT_INPUT);
         if (topic != null) {
-            enrichmentSource.addSink(new FlinkUtils<>(EnrichmentCommand.class).createKafkaSink(topic, "enrichment_loader", params)).name("Kafka Enrichment Command Sink");
+            enrichmentSource.sinkTo(new FlinkUtils<>(EnrichmentCommand.class).createKafkaSink(topic, "enrichment_loader", params)).name("Kafka Enrichment Command Sink");
         } else {
             String hbaseTable = enrichmentsConfig.getStorageForEnrichmentType(enrichmentType).getHbaseTableName();
             HBaseSinkFunction<EnrichmentCommand> hbaseSink = new HbaseEnrichmentCommandSink(hbaseTable, enrichmentsConfig, params);
