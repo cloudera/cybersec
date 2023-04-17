@@ -98,28 +98,38 @@ Profile checks the syntax of the profile json to verify that it is correct.
 ####Profile Group
 * name specified and contains at least one character
 at least one source
+* name is unique among all profile groups
 * period duration and period duration units specified
 * period duration> 0
 * period duration unit is a legal TimeUnit value
-at least one measurement
+* has at least one measurement
 * if at least one measurement calculates stats, statsSlide and statsSlideUnit defined
 statsSlide > 0
 * statsSlide unit is a legal TimeUnit value
 * if no measurements calculate stats, statsSlide and statsSlideUnit should not be defined
 #### Profile Measurement
 * fieldName contains at least one character if aggregationMethod is not count or first seen
-* resultExtension contains at least one character 
+* resultExtensionName contains at least one character 
+* resultExtensionName is unique among all resultExtensionNames in the profile group
 * aggregationMethod specified
 * if aggregationMethod is first seen
 * verify firstSeenExpirationDuration is > 0 and firstSeenExpirationUnit is legal time unit
 * if other aggregationMethod 
 * verify neither firstSeenExpirationDuration nor firstSeenExpirationUnit is specified
 ### Profile Backward Compatibility
-Profile checks the profile.json against the metadata in Phoenix.  The profile job will not start if the metadata stored in Phoenix is not backward compatible with the profile.json file.
+Profile assesses the backward compatibility of the profile groups defined in profile.json to the metadata in Phoenix.  Profile will not start if the profile.json is not backward compatible with the profile defined in the metadata.  If the validation check fails, profile reports an error and will not start.
 
-For example, a profile period can’t change.  Changing the time period of the measurements stored in the profile would allow different measurements in the same profile to have different time units. 
+The backward compatibility check assesses the following areas:
+* profile group has equivalent period duration
+* profile group has equivalent stats slide duration
+* profile measurement result extension has same aggregation method and same field name
 
-If you need to make a change to a profile that is rejected by the profile job, create a new profile with a new name.   
+Equivalent time periods are two different ways of expressing the same duration using different units.  For example, 1 hour is equivalent to 60 minutes.
+
+If profile rejects a modified profile group, rename the profile group or add a new profile group with a different name.  If the measurement result extensions
+ are not compatible, rename the result extension or add a new result extension.  
+ 
+Profile will only collect the profiles defined in profile.json.  If a profile group or result extension is not in the profile.json, profile will no longer collect measurements.  The existing measurements and metadata remain in Phoenix but profile no longer calculates or writes the measurement on new data.
  
 ## Properties Configuration
 
