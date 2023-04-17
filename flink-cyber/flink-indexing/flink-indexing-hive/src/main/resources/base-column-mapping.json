@@ -30,6 +30,11 @@
     "path": ".."
   },
   {
+    "name": "cyberscore_details",
+    "kafka_name": "cyberScoresDetails",
+    "path": ".."
+  },
+  {
     "name": "fields",
     "kafka_name": "extensions",
     "transformation": "filterMap(%s, %s)",
