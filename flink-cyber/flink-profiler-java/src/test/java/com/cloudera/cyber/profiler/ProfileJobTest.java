@@ -72,6 +72,18 @@ public class ProfileJobTest extends ProfileJob {
     private final CollectingSink<ScoringRuleCommandResult> scoringRuleCommandResponse = new CollectingSink<>();
     private final CollectingSink<ProfileMessage> jdbcSink = new CollectingSink<>();
 
+    @Test
+    public void testDuplicateProfile() {
+        String profileConfigFilePath = ClassLoader.getSystemResource("duplicate_profile.json").getPath();
+        ImmutableMap<String, String> props = ImmutableMap.<String, String>builder()
+                .put(PARAMS_PARALLELISM, "1")
+                .put(PARAM_PROFILE_CONFIG, profileConfigFilePath)
+                .put(PARAM_LATENESS_TOLERANCE_MILLIS, "5")
+                .put(PARAMS_PHOENIX_DB_INIT, "false")
+                .build();
+
+        assertThatThrownBy(() -> createPipeline(ParameterTool.fromMap(props))).isInstanceOf(IllegalStateException.class).hasMessageContaining("Duplicate profile group names");
+    }
 
     @Test
     public void testPipeline() throws Exception {
