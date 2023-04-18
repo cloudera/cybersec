@@ -18,8 +18,6 @@ import com.cloudera.cyber.generator.GenerationSource;
 import com.cloudera.cyber.generator.GeneratorConfig;
 import com.cloudera.cyber.generator.ThreatGeneratorMap;
 import com.cloudera.cyber.libs.networking.IPLocal;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.BooleanUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -30,13 +28,6 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -108,9 +99,9 @@ public abstract class CaracalGeneratorFlinkJob {
     private SingleOutputStreamOperator<Tuple2<String, Integer>> generateMetrics(
             SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput) {
         return generatedInput
-                .map(new MapFunction<Tuple2<String, byte[]>, Tuple2<String, Integer>>() {
+                .map(new MapFunction<Tuple2<String, byte[]>, Tuple2<String,Integer>>() {
                     @Override
-                    public Tuple2<String, Integer> map(Tuple2<String, String> stringStringTuple2) {
+                    public Tuple2<String, Integer> map(Tuple2<String, byte[]> stringStringTuple2) {
                         return Tuple2.of(stringStringTuple2.f0, 1);
                     }
                 })
