@@ -46,7 +46,7 @@ public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
                         stringIntegerTuple2.f0.getBytes(StandardCharsets.UTF_8),
                         stringIntegerTuple2.f1.toString().getBytes(StandardCharsets.UTF_8)
                 )).setKafkaProducerConfig(
-                readKafkaProperties(params, false)).setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE).build();
+                readKafkaProperties(params, PRODUCER_ID_PREFIX.concat("generator.metrics"), false)).setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE).build();
         metrics.sinkTo(metricsSink).name("Metrics Sink");
     }
 
@@ -58,7 +58,7 @@ public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
                         stringStringTuple2.f0,
                         stringStringTuple2.f1
                 )).
-                setKafkaProducerConfig(readKafkaProperties(params, false)).
+                setKafkaProducerConfig(readKafkaProperties(params, PRODUCER_ID_PREFIX.concat("generator.output"), false)).
                 setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE).
                 build();
 
