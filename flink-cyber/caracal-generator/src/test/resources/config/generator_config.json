@@ -1,5 +1,5 @@
 {
-  "templateBaseDirectory": "src/test/resources/config",
+  "baseDirectory": "src/test/resources/config",
   "generationSources" :
     [
       {

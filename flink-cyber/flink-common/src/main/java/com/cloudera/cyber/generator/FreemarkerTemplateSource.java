@@ -92,7 +92,7 @@ public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<S
         this.eps = eps;
 
         this.generationSources.addAll(files);
-        this.templateBaseDir = generatorConfig.getTemplateBaseDirectory();
+        this.templateBaseDir = generatorConfig.getBaseDirectory();
 
     }
 
@@ -118,7 +118,7 @@ public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<S
             } else {
                 topicOutputConverter.put(generationSource.getTopic(), new TextToBytes());
             }
-            generationSource.readScenarioFile();
+            generationSource.readScenarioFile(templateBaseDir);
         }
 
         int ms = 0;
