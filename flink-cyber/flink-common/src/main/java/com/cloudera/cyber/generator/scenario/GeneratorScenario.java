@@ -1,9 +1,9 @@
 package com.cloudera.cyber.generator.scenario;
 
 import com.cloudera.cyber.generator.RandomGenerators;
+import com.cloudera.cyber.generator.Utils;
 import com.google.common.base.Preconditions;
 import org.apache.commons.io.IOUtils;
-import org.apache.flink.core.fs.Path;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.MappingIterator;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectReader;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -22,11 +22,10 @@ public class GeneratorScenario {
     private final List<String> lines;
     private final ObjectReader csvReader;
 
-    public static GeneratorScenario load(String csvFile) throws IOException {
+    public static GeneratorScenario load(String baseDir, String csvFile) throws IOException {
 
         GeneratorScenario scenario;
-        Path csvPath = new Path(csvFile);
-        try (InputStream csvStream = csvPath.getFileSystem().open(csvPath)) {
+        try (InputStream csvStream = Utils.openFileStream(baseDir, csvFile)) {
             List<String> lines = IOUtils.readLines(csvStream, Charset.defaultCharset());
             Preconditions.checkState(lines.size() >= 2, NOT_ENOUGH_LINES_ERROR);
             scenario = new GeneratorScenario(lines);
