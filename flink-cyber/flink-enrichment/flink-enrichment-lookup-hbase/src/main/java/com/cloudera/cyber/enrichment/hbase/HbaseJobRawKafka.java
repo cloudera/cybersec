@@ -21,6 +21,7 @@ import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.enrichment.hbase.writer.HbaseEnrichmentCommandSink;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.hbase.sink.HBaseSinkFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -65,21 +66,21 @@ public class HbaseJobRawKafka extends HbaseJob {
 
     @Override
     protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> reduction) {
-        reduction.addSink(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), DEFAULT_GROUP_ID,params));
+        reduction.sinkTo(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), DEFAULT_GROUP_ID,params));
     }
 
     @Override
     public DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        return env.addSource(
-                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, DEFAULT_GROUP_ID)
-        ).returns(new MessageTypeFactory().createTypeInfo(null, null));
+        return env.fromSource(
+                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, DEFAULT_GROUP_ID),
+                WatermarkStrategy.noWatermarks(), "Kafka Messages");
     }
 
     @Override
     protected DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
-        return env.addSource(
-                new FlinkUtils<>(EnrichmentCommand.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, DEFAULT_GROUP_ID)
-        );
+        return env.fromSource(
+                new FlinkUtils<>(EnrichmentCommand.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, DEFAULT_GROUP_ID),
+                WatermarkStrategy.noWatermarks(), "Kafka Enrichment Commands");
     }
 
     @Override
@@ -91,7 +92,7 @@ public class HbaseJobRawKafka extends HbaseJob {
     }
 
     protected void writeQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> enrichmentResults) {
-        enrichmentResults.addSink(new FlinkUtils<>(EnrichmentCommandResponse.class).createKafkaSink(params.getRequired(PARAMS_QUERY_OUTPUT), "enrichment-combined-command", params))
+        enrichmentResults.sinkTo(new FlinkUtils<>(EnrichmentCommandResponse.class).createKafkaSink(params.getRequired(PARAMS_QUERY_OUTPUT), "enrichment-combined-command", params))
                 .name("HBase Enrichment Response Sink").uid("kafka-enrichment-query-sink");
     }
 

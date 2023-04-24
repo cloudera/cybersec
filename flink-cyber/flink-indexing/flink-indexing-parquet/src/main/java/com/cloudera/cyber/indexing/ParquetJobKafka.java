@@ -15,6 +15,7 @@ package com.cloudera.cyber.indexing;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.formats.parquet.avro.ParquetAvroWriters;
@@ -36,9 +37,9 @@ public class ParquetJobKafka extends ParquetJob {
 
     @Override
     public DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        return env.addSource(
-                new FlinkUtils(Message.class).createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, "indexer-parquet")
-        ).name("Kafka Source").uid("kafka-source");
+        return env.fromSource(
+                new FlinkUtils(Message.class).createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, "indexer-parquet"),
+                WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
     }
 
     @Override
