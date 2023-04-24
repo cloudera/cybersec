@@ -17,22 +17,24 @@ import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.parser.MessageToParse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.base.DeliveryGuarantee;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
+import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.formats.parquet.avro.ParquetAvroWriters;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.filesystem.OutputFileConfig;
 import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink;
-import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
-import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.flink.util.Preconditions;
-import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.springframework.util.DigestUtils;
 
 import java.nio.charset.StandardCharsets;
@@ -79,11 +81,10 @@ public class SplitJobKafka extends SplitJob {
         String groupId = createGroupId(params.get(PARAMS_TOPIC_INPUT, "") + params.get(PARAMS_TOPIC_PATTERN, ""), "cyber-split-parser-config-");
         Properties kafkaProperties = readKafkaProperties(params, groupId, true);
 
-        FlinkKafkaConsumer<String> source =
-                new FlinkKafkaConsumer<>(params.getRequired(PARAMS_CONFIG_TOPIC),  new SimpleStringSchema(), kafkaProperties);
+        KafkaSource<String> source =
+                KafkaSource.<String>builder().setTopics(params.getRequired(PARAMS_CONFIG_TOPIC)).setValueOnlyDeserializer(new SimpleStringSchema()).setProperties(kafkaProperties).build();
 
-        return env.addSource(source)
-                .name("Config Kafka Feed").uid("config.source.kafka").setParallelism(1).setMaxParallelism(1)
+        return env.fromSource(source, WatermarkStrategy.noWatermarks(), "Config Kafka Feed").uid("config.source.kafka").setParallelism(1).setMaxParallelism(1)
                 .map(new SplitConfigJsonParserMap())
                 .name("Config Source").uid("config.source").setMaxParallelism(1).setParallelism(1);
 
@@ -91,11 +92,11 @@ public class SplitJobKafka extends SplitJob {
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
-        FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
+        KafkaSink<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
                 params.getRequired(PARAMS_TOPIC_OUTPUT),
                 "splits-parser",
                 params);
-        results.addSink(sink).name("Kafka Results").uid("kafka.results");
+        results.sinkTo(sink).name("Kafka Results").uid("kafka.results");
     }
 
     @Override
@@ -104,12 +105,6 @@ public class SplitJobKafka extends SplitJob {
 
         // write the original sources to HDFS files
         Path path = new Path(params.getRequired(PARAMS_ORIGINAL_LOGS_PATH));
-
-        DefaultRollingPolicy<MessageToParse, String> defaultRollingPolicy = DefaultRollingPolicy.builder()
-                .withInactivityInterval(params.getLong(PARAMS_ROLL_INACTIVITY, DEFAULT_ROLL_INACTIVITY))
-                .withMaxPartSize(params.getLong(PARAMS_ROLL_PART_SIZE, DEFAULT_ROLL_PART_SIZE))
-                .withRolloverInterval(params.getLong(PARAMS_ROLL_INTERVAL, DEFAULT_ROLL_INTERVAL))
-                .build();
 
         // TODO - add the message id
         // TODO - add filtering (might not care about all raws)
@@ -132,12 +127,42 @@ public class SplitJobKafka extends SplitJob {
         Properties kafkaProperties = readKafkaProperties(params, "splits-parser", false);
         String topic = params.get(PARAM_COUNT_TOPIC, DEFAULT_COUNT_TOPIC);
 
-        sums.addSink(new FlinkKafkaProducer<>(topic,
-                (KafkaSerializationSchema<Tuple2<String, Long>>) (e, time) ->
-                        new ProducerRecord<>(topic, null, time, e.f0.getBytes(), e.f1.toString().getBytes()),
-                kafkaProperties,
-                FlinkKafkaProducer.Semantic.AT_LEAST_ONCE)
-        ).name("Count Results").uid("count.results");
+        SerializationSchema<Tuple2<String, Long>> keySerializationSchema = new SerializationSchema<Tuple2<String, Long>>() {
+
+            @Override
+            public void open(InitializationContext context) {
+
+            }
+
+            @Override
+            public byte[] serialize(Tuple2<String, Long> metric) {
+                return metric.f0.getBytes();
+            }
+        };
+        SerializationSchema<Tuple2<String, Long>> valueSerial = new SerializationSchema<Tuple2<String, Long>>() {
+
+            @Override
+            public void open(InitializationContext context) {
+
+            }
+
+            @Override
+            public byte[] serialize(Tuple2<String, Long> metric) {
+                return metric.f1.toString().getBytes();
+            }
+        };
+        KafkaSink<Tuple2<String, Long>> sink = KafkaSink.<Tuple2<String, Long>>builder()
+                .setBootstrapServers(kafkaProperties.getProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG))
+                .setRecordSerializer(KafkaRecordSerializationSchema.builder()
+                        .setTopic(topic)
+                        .setKeySerializationSchema(keySerializationSchema)
+                        .setValueSerializationSchema(valueSerial)
+                        .build())
+                .setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                .setKafkaProducerConfig(kafkaProperties)
+                .build();
+
+        sums.sinkTo(sink).name("Count Results").uid("count.results");
     }
 
     @Override
