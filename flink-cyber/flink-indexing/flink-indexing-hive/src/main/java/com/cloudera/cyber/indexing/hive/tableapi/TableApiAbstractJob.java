@@ -125,6 +125,7 @@ public abstract class TableApiAbstractJob {
             System.out.printf("Creating %s table %s...%n", connectorName, tableName);
             final String ddl = buildTableDLL(tableName, columnList);
             try {
+                System.out.printf("Creating %s table %s: %s%n", connectorName, tableName, ddl);
                 tableEnv.executeSql(ddl);
             } catch (Exception e) {
                 System.err.printf("Error executing the %s DDL: %s%n", connectorName, ddl);

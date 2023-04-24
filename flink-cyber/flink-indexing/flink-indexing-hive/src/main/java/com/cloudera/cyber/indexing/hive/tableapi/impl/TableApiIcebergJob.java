@@ -44,6 +44,7 @@ public class TableApiIcebergJob extends TableApiAbstractJob {
                 "  'sink.partition-commit.trigger'='process-time',",
                 "  'sink.partition-commit.delay'='1 h',",
                 "  'sink.partition-commit.policy.kind'='metastore,success-file'",
+                "  'hive.vectorized.execution.enabled'='false'",
                 ")");
     }
 
