@@ -54,9 +54,9 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.verion>1.8</java.verion>
-        <flink.version>1.15.1-csa1.9.0.0</flink.version>
+        <flink.version>1.15.1-csadh1.9.0.1</flink.version>
         <flink.hbase.version>2.4</flink.hbase.version>
-        <iceberg-flink.version>0.14.1.1.18.7215.0-52</iceberg-flink.version>
+        <iceberg-flink.version>0.14.1.7.2.16.0-287</iceberg-flink.version>
         <cdh.version>7.2.16.0-287</cdh.version>
         <lombok.version>1.18.22</lombok.version>
         <lombok.plugin.version>1.18.16.0</lombok.plugin.version>
@@ -105,6 +105,7 @@
         <commons-validator.version>1.7</commons-validator.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-text.version>1.10.0</commons-text.version>
+        <everit-json-schema.version>1.14.2</everit-json-schema.version>
     </properties>
 
     <repositories>
@@ -227,6 +228,12 @@
             </dependency>
 
             <dependency>
+                <groupId>com.github.erosb</groupId>
+                <artifactId>everit-json-schema</artifactId>
+                <version>${everit-json-schema.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-cloudera-registry</artifactId>
                 <version>${flink.version}</version>
@@ -234,6 +241,10 @@
                     <exclusion>
                         <groupId>org.apache.avro</groupId>
                         <artifactId>avro</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.everit.json</groupId>
+                        <artifactId>org.everit.json.schema</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
