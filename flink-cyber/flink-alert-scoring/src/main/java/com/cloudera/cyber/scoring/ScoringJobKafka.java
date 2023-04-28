@@ -31,6 +31,7 @@ public class ScoringJobKafka extends ScoringJob {
 
     private static final String SCORING_GROUP_ID = "scoring";
     private static final String SCORING_RULES_GROUP_ID = "scoring-rules";
+    private static final String SCORING_SUMMARIZATION = "scoring.summarization";
 
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
@@ -73,5 +74,9 @@ public class ScoringJobKafka extends ScoringJob {
         String topic = params.getRequired("query.output.topic");
         KafkaSink<ScoringRuleCommandResult> sink = new FlinkUtils<>(ScoringRuleCommandResult.class).createKafkaSink(topic, SCORING_RULES_GROUP_ID, params);
         results.sinkTo(sink).name("Kafka Rule Command Results").uid("kafka.output.rule.command.results");
+    }
+
+    public static String SCORING_SUMMATION_NAME(){
+        return SCORING_SUMMARIZATION;
     }
 }

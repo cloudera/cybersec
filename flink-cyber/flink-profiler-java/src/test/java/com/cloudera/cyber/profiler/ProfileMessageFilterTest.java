@@ -15,6 +15,8 @@ package com.cloudera.cyber.profiler;
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.scoring.ScoredMessage;
+import com.cloudera.cyber.scoring.ScoringProcessFunction;
+import com.cloudera.cyber.scoring.ScoringSummarizationMode;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.junit.Assert;
@@ -76,8 +78,7 @@ public class ProfileMessageFilterTest {
     }
 
     private void verifyFilter(ProfileMessageFilter filter, String source, Map<String, String> fieldValues, boolean matches) {
-        ScoredMessage scoredMessage = ScoredMessage.builder().cyberScoresDetails(Collections.emptyList()).
-                message(TestUtils.createMessage(MessageUtils.getCurrentTimestamp(), source, fieldValues)).build();
+        ScoredMessage scoredMessage = ScoringProcessFunction.scoreMessage(TestUtils.createMessage(MessageUtils.getCurrentTimestamp(), source, fieldValues), Collections.emptyList(), ScoringSummarizationMode.DEFAULT());
         Assert.assertEquals(matches, filter.filter(scoredMessage));
     }
 
