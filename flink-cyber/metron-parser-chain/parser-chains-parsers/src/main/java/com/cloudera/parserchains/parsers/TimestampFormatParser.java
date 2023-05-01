@@ -81,7 +81,8 @@ public class TimestampFormatParser implements Parser {
 
     @Configurable(key = "fields",
             label = "Time Fields",
-            description = "The field that will contain the timestamp.")
+            description = "The field that will contain the timestamp.",
+            multipleValues = true)
     public TimestampFormatParser withOutputField(
             @Parameter(key = "field", label = "Input Field", description = "Field to be parsed", required = true) String fieldName,
             @Parameter(key = "format", label = "Time format", description = "A compatible time format", required = true) String format,
