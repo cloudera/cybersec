@@ -18,8 +18,8 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class MappingDto {
 
-    @JsonProperty("hive_table")
-    private String hiveTable;
+    @JsonProperty("table_name")
+    private String tableName;
 
     @JsonProperty("ignore_fields")
     private List<String> ignoreFields;
