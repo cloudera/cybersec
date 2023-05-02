@@ -13,10 +13,17 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.FormatDescriptor;
+import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.api.SqlDialect;
+import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.bridge.java.StreamStatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.table.catalog.Column;
+import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
+import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 import org.springframework.util.StringUtils;
 
@@ -27,6 +34,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -99,7 +107,7 @@ public class TableApiHiveJob {
             final String insertSql = buildInsertSql(topic, mappingDto);
             try {
                 insertStatementSet.addInsertSql(insertSql);
-                System.out.printf("Insert SQL added to the queue for the table: %s%nSQL: %s%n", mappingDto.getHiveTable(), insertSql);
+                System.out.printf("Insert SQL added to the queue for the table: %s%nSQL: %s%n", mappingDto.getTableName(), insertSql);
             } catch (Exception e) {
                 System.err.printf("Error adding insert to the statement set: %s%n", insertSql);
                 throw e;
@@ -116,15 +124,177 @@ public class TableApiHiveJob {
             System.out.printf("Hive table [%s] already exists. Skipping its creation.%n", hiveTableName);
         } else {
             System.out.printf("Creating Hive table %s...%n", hiveTableName);
-            final String ddl = buildHiveTableDLL(hiveTableName, columnList);
+            final String tableConnector = getTableConnector();
+            final Schema schema = buildHiveTableSchema(columnList);
             try {
-                tableEnv.executeSql(ddl);
+                final TableDescriptor tableDescriptor = buildTableDescriptor(tableConnector, schema);
+                System.out.println("TableDescriptor: " + tableDescriptor.toString());
+                tableEnv.createTable(hiveTableName, tableDescriptor);
             } catch (Exception e) {
-                System.err.printf("Error executing the Hive DDL: %s%n", ddl);
+                System.err.printf("Error creating table with connector: [%s] and schema: %s%n", tableConnector, schema);
                 throw e;
             }
             System.out.printf("Hive table created: %s%n", hiveTableName);
         }
+    }
+
+    private static TableDescriptor buildTableDescriptor(String tableConnector, Schema schema) {
+        return TableDescriptor
+                .forConnector(tableConnector)
+                .schema(schema)
+                .partitionedBy("dt", "hr")
+                .format(FormatDescriptor.forFormat("parquet").build())
+                .option("partition.time-extractor.timestamp-pattern", "$dt $hr:00:00")
+                .option("sink.partition-commit.trigger", "process-time")
+//                .option("sink.partition-commit.delay", "1 h")
+                .option("sink.partition-commit.policy.kind", "metastore,success-file")
+                .build();
+    }
+
+    private Schema buildHiveTableSchema(List<HiveColumnDto> columnList) {
+        final List<Column> flinkColumnList = columnList.stream()
+                .map(col -> Column.physical(col.getName(), getFlinkType(col.getType(), col.getNullable())))
+                .collect(Collectors.toList());
+        System.out.println("flinkColumnList: " + flinkColumnList.stream().map(Column::toString).collect(Collectors.joining(", ")));
+        return Schema.newBuilder()
+                .fromResolvedSchema(ResolvedSchema.of(flinkColumnList))
+                .build();
+    }
+
+    private static DataType getFlinkType(String colType) {
+        return getFlinkType(colType, true);
+    }
+
+    /**
+     * Creates Flink Data Type from the config column type.
+     *
+     * @param colType  config column type.
+     *                 Possible config column type values are:
+     *                 string, timestamp, date, int, bigint, float, double, boolean, bytes, null,
+     *                 array<type>, map<key,value>, struct<field:type, field2:type2>
+     * @param nullable whether column is nullable or not
+     * @return Flink DataType that describes provided column type
+     */
+    private static DataType getFlinkType(String colType, Boolean nullable) {
+        if (colType == null) {
+            throw new IllegalArgumentException("Column type cannot be null");
+        }
+        final String type = colType.toLowerCase().trim();
+        DataType result;
+        if (type.equals("string")) {
+            result = DataTypes.STRING();
+        } else if (type.equals("timestamp")) {
+            result = DataTypes.TIMESTAMP(9);
+        } else if (type.equals("date")) {
+            result = DataTypes.DATE();
+        } else if (type.equals("int")) {
+            result = DataTypes.INT();
+        } else if (type.equals("bigint")) {
+            result = DataTypes.BIGINT();
+        } else if (type.equals("float")) {
+            result = DataTypes.FLOAT();
+        } else if (type.equals("double")) {
+            result = DataTypes.DOUBLE();
+        } else if (type.equals("boolean")) {
+            result = DataTypes.BOOLEAN();
+        } else if (type.equals("bytes")) {
+            result = DataTypes.BYTES();
+        } else if (type.equals("null")) {
+            result = DataTypes.NULL();
+        } else if (type.startsWith("array")) {
+            result = parseArrayType(type);
+        } else if (type.startsWith("map")) {
+            result = parseMapType(type);
+        } else if (type.startsWith("struct")) {
+            result = parseStructType(type);
+        } else {
+            throw new IllegalArgumentException("Unknown column type: " + type);
+        }
+        return Optional.ofNullable(nullable).orElse(true) ? result.nullable() : result.notNull();
+    }
+
+    /**
+     * Parses Array type from the config column type.
+     *
+     * @param type config column type. Supported format is: array<type>
+     * @return Flink DataType that describes provided array type
+     */
+    private static DataType parseArrayType(String type) {
+        final String body = getInnerBody(type, "Array");
+        return DataTypes.ARRAY(getFlinkType(body));
+    }
+
+    /**
+     * Parses Map type from the config column type.
+     *
+     * @param type config column type. Supported format is: map<key,value>
+     * @return Flink DataType that describes provided map type
+     */
+    private static DataType parseMapType(String type) {
+        final String body = getInnerBody(type, "Map");
+        if (!body.contains(",")) {
+            throw new IllegalArgumentException("Unknown column type for Map: " + type);
+        }
+        final List<String> split = splitTypes(body, ',');
+        return DataTypes.MAP(getFlinkType(split.get(0)), getFlinkType(split.get(1)));
+    }
+
+    /**
+     * Parses Struct type from the config column type.
+     *
+     * @param type config column type. Supported format is: struct<name:type, name2:type2>. The name can contain only alphanumeric characters and underscores.
+     * @return Flink DataType that describes provided struct type
+     */
+    private static DataType parseStructType(String type) {
+        final String body = getInnerBody(type, "Struct");
+        if (!body.contains(":")) {
+            throw new IllegalArgumentException("Unknown column type for Struct: " + type);
+        }
+        final List<String> fields = splitTypes(body, ',');
+        final List<DataTypes.Field> fieldList = new ArrayList<>();
+        for (String field : fields) {
+            final List<String> fieldSplit = splitTypes(field, ':');
+            if (fieldSplit.size() < 2) {
+                throw new IllegalArgumentException("Unknown column type for Struct: " + type);
+            }
+            final String name = fieldSplit.get(0).replaceAll("[^a-zA-Z0-9_]", "");
+            final DataType value = getFlinkType(fieldSplit.get(1));
+            fieldList.add(DataTypes.FIELD(name, value));
+        }
+        return DataTypes.ROW(fieldList.toArray(new DataTypes.Field[0]));
+    }
+
+    private static String getInnerBody(String type, String typeName) {
+        final int start = type.indexOf("<");
+        final int stop = type.lastIndexOf(">");
+        if (start < 0 || stop < 0) {
+            throw new IllegalArgumentException("Unknown column type for " + typeName + " : " + type);
+        }
+        return type.substring(start + 1, stop);
+    }
+
+    private static List<String> splitTypes(String body, char delimiter) {
+        List<String> types = new ArrayList<>();
+        int start = 0;
+        int end = 0;
+        int count = 0;
+        while (end < body.length()) {
+            if (body.charAt(end) == '<') {
+                count++;
+            } else if (body.charAt(end) == '>') {
+                count--;
+            } else if (body.charAt(end) == delimiter && count == 0) {
+                types.add(body.substring(start, end));
+                start = end + 1;
+            }
+            end++;
+        }
+        types.add(body.substring(start, end));
+        return types;
+    }
+
+    private String getTableConnector() {
+        return "hive";
     }
 
     private StreamTableEnvironment getTableEnvironment() {
@@ -177,13 +347,23 @@ public class TableApiHiveJob {
             return Collections.emptyMap();
         }
         final HashMap<String, List<HiveColumnDto>> columnMap = Utils.readFile(filePath, typeRef);
+        final List<HiveColumnDto> partitionColumns = Arrays.asList(HiveColumnDto.builder()
+                .name("dt")
+                .type("string")
+                .build(), HiveColumnDto.builder()
+                .name("hr")
+                .type("string")
+                .build());
         //adding the default columns to each table
         columnMap.forEach((tableName, columnList) -> {
             final List<HiveColumnDto> customColumns = Optional.ofNullable(columnList)
                     .orElse(Collections.emptyList());
-            final Collection<HiveColumnDto> combinedColumns = Streams.concat(customColumns.stream(), defaultColumnList.stream())
-                    .collect(Collectors.toMap(HiveColumnDto::getName, Function.identity(), (f, s) -> f)).values();
-            columnMap.put(tableName, new ArrayList<>(combinedColumns));
+            final Map<String, HiveColumnDto> combinedColumnMap = Streams.concat(customColumns.stream(), defaultColumnList.stream(), partitionColumns.stream())
+                    .collect(Collectors.toMap(HiveColumnDto::getName, Function.identity(), (f, s) -> f, LinkedHashMap::new));
+            //partition columns should be placed last
+            partitionColumns.forEach(col -> combinedColumnMap.put(col.getName(), col));
+
+            columnMap.put(tableName, new ArrayList<>(combinedColumnMap.values()));
         });
         return columnMap;
     }
@@ -196,7 +376,7 @@ public class TableApiHiveJob {
     }
 
     private String buildInsertSql(String topic, MappingDto mappingDto) {
-        return String.join("\n", "insert into " + mappingDto.getHiveTable() + "(" + getHiveInsertColumns(mappingDto) + ")",
+        return String.join("\n", "insert into " + mappingDto.getTableName() + "(" + getHiveInsertColumns(mappingDto) + ")",
                 " SELECT " + getKafkaFromColumns(mappingDto),
                 " from " + KAFKA_TABLE,
                 String.format(" where `message`.`originalSource`.`topic`='%s'", topic));
@@ -216,7 +396,7 @@ public class TableApiHiveJob {
                     }
                     if (StringUtils.hasText(fullPath)) {
                         fullPath = Arrays.stream(fullPath.split("\\."))
-                                .collect(Collectors.joining("`.`", "`", "`"));
+                                .collect(Collectors.joining(".", "", ""));
                     }
 
                     fullPath = fullPath + kafkaName;
@@ -224,7 +404,7 @@ public class TableApiHiveJob {
                     final String transformation = mappingColumnDto.getTransformation();
                     return StringUtils.hasText(transformation)
                             ? String.format(transformation, "(" + fullPath + ")", mappingDto.getIgnoreFields().stream()
-                                .collect(Collectors.joining("','", "'", "'")))
+                            .collect(Collectors.joining("','", "'", "'")))
                             : fullPath;
                 })
                 .collect(Collectors.joining(", ", " ", " "));
@@ -233,30 +413,7 @@ public class TableApiHiveJob {
     private String getHiveInsertColumns(MappingDto mappingDto) {
         return mappingDto.getColumnMapping().stream()
                 .map(MappingColumnDto::getName)
-                .collect(Collectors.joining("`, `", " `", "` "));
+                .collect(Collectors.joining(", ", " ", " "));
     }
-
-    private String buildHiveTableDLL(String tableName, List<HiveColumnDto> columnList) {
-        return String.join("\n", "CREATE TABLE IF NOT EXISTS " + tableName + " ( ",
-                getColumnList(columnList),
-                ") PARTITIONED BY (",
-                " `dt` string, ",
-                " `hr` string",
-                ") STORED AS parquet TBLPROPERTIES (",
-                "  'partition.time-extractor.timestamp-pattern'='$dt $hr:00:00',",
-                "  'sink.partition-commit.trigger'='process-time',",
-                "  'sink.partition-commit.delay'='1 h',",
-                "  'sink.partition-commit.policy.kind'='metastore,success-file'",
-                ")");
-    }
-
-    private String getColumnList(List<HiveColumnDto> columnList) {
-        return columnList.stream()
-                .map(col -> String.format("`%s` %s %s",
-                        col.getName(), col.getType(),
-                        Optional.ofNullable(col.getNullable()).orElse(true) ? "" : "NOT NULL"))
-                .collect(Collectors.joining(", \n", " ", " \n"));
-    }
-
 
 }

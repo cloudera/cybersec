@@ -32,9 +32,9 @@ public class MappingColumnDto {
             return String.format("['%s']", properName);
         } else {
             if (getPath().equals("..")) {
-                return String.format("`%s`", properName);
+                return String.format("%s", properName);
             }
-            return String.format(".`%s`", properName);
+            return String.format(".%s", properName);
         }
     }
 
