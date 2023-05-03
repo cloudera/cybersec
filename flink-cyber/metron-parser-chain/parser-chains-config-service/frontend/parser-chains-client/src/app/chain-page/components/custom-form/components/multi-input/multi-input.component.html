@@ -23,6 +23,7 @@
                         nz-input
                         [formControl]="controls[i]"
                         (keyup)="onChange(config)"
+                        (keyup.enter)="onAddClick()"
                 />
                 <textarea
                         *ngIf="config.type === 'textarea'"
@@ -39,6 +40,7 @@
                     nzSize="small"
                     nzType="primary"
                     nzShape="circle"
+                    type="button"
                     (click)="onAddClick()"
                     *ngIf="i === 0 && config.multipleValues"
                     title="Add field"
@@ -50,6 +52,7 @@
                     nzDanger="true"
                     nzShape="circle"
                     nzSize="small"
+                    type="button"
                     *ngIf="controls.length > 1"
                     (click)="onRemoveFieldClick(controls[i], config)"
                     title="Remove field"

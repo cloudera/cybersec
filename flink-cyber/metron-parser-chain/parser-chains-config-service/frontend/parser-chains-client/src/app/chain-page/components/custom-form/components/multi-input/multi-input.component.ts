@@ -44,9 +44,11 @@ export class MultiInputComponent implements OnInit {
   }
 
   onAddClick() {
-    this.controls.push(
-      new FormControl('')
-    );
+    if (this.config.multipleValues==true) {
+      this.controls.push(
+          new FormControl('')
+      );
+    }
   }
 
   onChange(config: CustomFormConfig) {
