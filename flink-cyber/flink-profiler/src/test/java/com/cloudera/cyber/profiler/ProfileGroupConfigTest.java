@@ -16,9 +16,10 @@ import org.apache.commons.compress.utils.Lists;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -69,6 +70,70 @@ public class ProfileGroupConfigTest {
         goodFirstSeen.verify();
         Assert.assertFalse(goodFirstSeen.hasStats());
         Assert.assertTrue(goodFirstSeen.hasFirstSeen());
+    }
+
+    @Test
+    public void testDuplicateProfileGroupNames() {
+        String dup1Name = "dup_1";
+        String dup2Name = "dup_2";
+
+        ProfileGroupConfig duplicateProfile1 = ProfileGroupConfig.builder().
+                profileGroupName(dup1Name).sources(TEST_SOURCES).
+                keyFieldNames(TEST_KEY_FIELDS).measurements(MEASUREMENTS).
+                periodDuration(20L).periodDurationUnit(TimeUnit.HOURS.name()).
+                build();
+
+        ProfileGroupConfig duplicateProfile2 = ProfileGroupConfig.builder().
+                profileGroupName(dup2Name).sources(TEST_SOURCES).
+                keyFieldNames(TEST_KEY_FIELDS).measurements(MEASUREMENTS).
+                periodDuration(20L).periodDurationUnit(TimeUnit.HOURS.name()).
+                build();
+
+        ProfileGroupConfig uniqueProfile = ProfileGroupConfig.builder().
+                profileGroupName("unique").sources(TEST_SOURCES).
+                keyFieldNames(TEST_KEY_FIELDS).measurements(MEASUREMENTS).
+                periodDuration(20L).periodDurationUnit(TimeUnit.HOURS.name()).
+                build();
+
+        // test with one duplicate
+        assertThatThrownBy(() -> ProfileGroupConfig.verify(Arrays.asList(duplicateProfile1, uniqueProfile, duplicateProfile1)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage(String.format(ProfileGroupConfig.DUPLICATE_PROFILE_GROUP_NAMES_ERROR, dup1Name));
+
+        // test with multiple duplicates
+        assertThatThrownBy(() -> ProfileGroupConfig.verify(Arrays.asList(duplicateProfile1, duplicateProfile2, uniqueProfile, duplicateProfile1, duplicateProfile2, duplicateProfile2)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage(String.format(ProfileGroupConfig.DUPLICATE_PROFILE_GROUP_NAMES_ERROR, String.join(", ", dup1Name, dup2Name)));
+
+        // no duplicates passes with no errors
+        ProfileGroupConfig.verify(Arrays.asList(duplicateProfile1, uniqueProfile, duplicateProfile2));
+    }
+
+    @Test
+    public void testDuplicateMeasurementResultNames() {
+        // test with one duplicate
+        testDuplicateMeasurementResultNames(
+                Stream.of(MEASUREMENTS, MEASUREMENTS, MEASUREMENTS_WITH_FIRST).flatMap(Collection::stream).collect(Collectors.toCollection(ArrayList::new)),
+                Collections.singletonList(GOOD_MEASUREMENT.getResultExtensionName()));
+
+        // test with multiple duplicates
+        testDuplicateMeasurementResultNames(
+                Stream.of(MEASUREMENTS, MEASUREMENTS, MEASUREMENTS_WITH_FIRST, MEASUREMENTS_WITH_FIRST, MEASUREMENTS_WITH_FIRST).flatMap(Collection::stream).collect(Collectors.toCollection(ArrayList::new)),
+                Arrays.asList(GOOD_FIRST_SEEN_MEASUREMENT.getResultExtensionName(), GOOD_MEASUREMENT.getResultExtensionName()));
+    }
+
+    private void testDuplicateMeasurementResultNames(ArrayList<ProfileMeasurementConfig> dupMeasurements, List<String> expectedDuplicates) {
+        String profileGroupName = "dup_measurements";
+
+        ProfileGroupConfig duplicateMeasurementResults = ProfileGroupConfig.builder().
+                profileGroupName(profileGroupName).sources(TEST_SOURCES).
+                keyFieldNames(TEST_KEY_FIELDS).measurements(dupMeasurements).
+                periodDuration(20L).periodDurationUnit(TimeUnit.HOURS.name()).
+                build();
+
+        assertThatThrownBy(duplicateMeasurementResults::verify)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage(String.format(ProfileGroupConfig.DUPLICATE_RESULT_EXTENSIONS_NAMES, profileGroupName, String.join(", ", expectedDuplicates)));
     }
 
     @Test

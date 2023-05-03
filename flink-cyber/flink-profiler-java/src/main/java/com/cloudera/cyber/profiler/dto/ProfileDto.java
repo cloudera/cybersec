@@ -13,22 +13,21 @@
 package com.cloudera.cyber.profiler.dto;
 
 import com.cloudera.cyber.profiler.ProfileGroupConfig;
-import com.google.common.collect.Ordering;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.stream.Collectors;
+import lombok.ToString;
 
 @Data
 @NoArgsConstructor(force = true, access = AccessLevel.PUBLIC)
 @AllArgsConstructor
-@Builder
+@ToString
+@Builder(toBuilder = true)
 public class ProfileDto implements Serializable {
     private Integer id;
     private String profileGroupName;
