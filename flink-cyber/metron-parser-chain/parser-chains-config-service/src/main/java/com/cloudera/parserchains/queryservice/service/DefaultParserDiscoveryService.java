@@ -35,7 +35,13 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedMethods;
@@ -132,7 +138,8 @@ public class DefaultParserDiscoveryService implements ParserDiscoveryService {
      */
     ConfigParamDescriptor paramDescriptor = new ConfigParamDescriptor()
             .setPath(DEFAULT_PATH_ROOT + PATH_DELIMITER + configurable.key())
-            .setMultiple(true);
+            .setMultiple(true)
+            .setMultipleValues(configurable.multipleValues());
     if (parameter.isPresent()) {
       // use the parameter-level annotation
       Parameter p = parameter.get();
