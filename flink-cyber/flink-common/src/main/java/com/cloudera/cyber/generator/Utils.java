@@ -17,9 +17,13 @@ import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.*;
+import org.apache.flink.core.fs.Path;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+
 
 public class Utils {
 
@@ -44,4 +48,24 @@ public class Utils {
          return null;
       }
    }
+
+    public static InputStream openFileStream(String baseDir, String filePath) throws IOException {
+        Path possiblePath = new Path(filePath);
+        Path resolvedPath = null;
+        if (possiblePath.getFileSystem().exists(possiblePath)) {
+            resolvedPath = possiblePath;
+        } else {
+            if (baseDir != null && !baseDir.isEmpty() && !possiblePath.isAbsolute()) {
+                possiblePath = new Path(baseDir, filePath);
+                if (possiblePath.getFileSystem().exists(possiblePath)) {
+                    resolvedPath = possiblePath;
+                }
+            }
+        }
+        if (resolvedPath != null) {
+            return resolvedPath.getFileSystem().open(resolvedPath);
+        } else {
+            throw new FileNotFoundException(String.format("Basedir: '%s' File: '%s'", baseDir, filePath));
+        }
+    }
 }
