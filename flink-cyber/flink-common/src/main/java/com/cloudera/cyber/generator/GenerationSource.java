@@ -17,7 +17,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
-import org.apache.flink.core.fs.Path;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,19 +46,29 @@ public class GenerationSource implements Serializable {
         this.weight = weight;
     }
 
-    public void readAvroSchema() throws IOException {
+    public void readAvroSchema(String baseDir) throws IOException {
         if (outputAvroSchemaFile != null) {
-            final Path schemaPath = new Path(outputAvroSchemaFile);
-            try (InputStream schemaStream = schemaPath.getFileSystem().open(schemaPath)) {
-                outputAvroSchema = IOUtils.toString(
-                        Objects.requireNonNull(schemaStream), Charset.defaultCharset());
+            // try loading from a jar resource
+            try (InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(outputAvroSchemaFile)) {
+                if (resourceStream != null) {
+                    outputAvroSchema = IOUtils.toString(
+                            Objects.requireNonNull(resourceStream), Charset.defaultCharset());
+                }
+            }
+
+            // if not in jar, load the file
+            if (outputAvroSchema == null) {
+                try (InputStream schemaStream = Utils.openFileStream(baseDir, outputAvroSchemaFile)) {
+                    outputAvroSchema = IOUtils.toString(
+                            Objects.requireNonNull(schemaStream), Charset.defaultCharset());
+                }
             }
         }
     }
 
-    public void readScenarioFile() throws IOException {
+    public void readScenarioFile(String baseDir) throws IOException {
         if (scenarioFile != null) {
-            scenario = GeneratorScenario.load(scenarioFile);
+            scenario = GeneratorScenario.load(baseDir, scenarioFile);
         }
     }
 
@@ -70,4 +79,5 @@ public class GenerationSource implements Serializable {
             return Collections.emptyMap();
         }
     }
+
 }

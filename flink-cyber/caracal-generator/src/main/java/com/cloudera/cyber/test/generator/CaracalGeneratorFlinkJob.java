@@ -28,6 +28,7 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
+import org.apache.flink.util.Preconditions;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,6 +54,7 @@ public abstract class CaracalGeneratorFlinkJob {
     protected static final String DPI_SMTP_TOPIC = "dpi_smtp";
     protected static final String GENERATOR_AVRO_TOPIC = "generator.avro";
     protected static final String THREAT_TOPIC_NAME = "threats";
+    protected static final String AVRO_WITH_CUSTOM_CONFIG_ERROR = String.format("'%s' should not be specified when '%s' is true.  Select either a custom generation config file or generate the default avro.", PARAMS_GENERATOR_CONFIG, PARAMS_SCHEMA);
 
     public StreamExecutionEnvironment createPipeline(ParameterTool params) throws IOException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -74,13 +76,14 @@ public abstract class CaracalGeneratorFlinkJob {
         String generatorConfigFile = params.get(PARAMS_GENERATOR_CONFIG);
         GeneratorConfig generatorConfig = new GeneratorConfig();
 
-        if (avroGeneratorFlag) {
+        if (avroGeneratorFlag && generatorConfigFile == null) {
            generatorConfig.setGenerationSources(Collections
                     .singletonList(
-                            new GenerationSource("Netflow/netflow_avro_sample1.json", GENERATOR_AVRO_TOPIC, Objects.requireNonNull(getClass().getClassLoader().getResource(SCHEMA_PATH)).toExternalForm(), 1.0)));
+                            new GenerationSource("Netflow/netflow_avro_sample1.json", GENERATOR_AVRO_TOPIC, SCHEMA_PATH, 1.0)));
         } else if (generatorConfigFile == null) {
             generatorConfig.setGenerationSources(getNetflowSampleMap());
         } else {
+            Preconditions.checkState(!avroGeneratorFlag, AVRO_WITH_CUSTOM_CONFIG_ERROR);
             Path configPath = new Path(generatorConfigFile);
             try (InputStream configStream = configPath.getFileSystem().open(configPath)) {
                 generatorConfig = new ObjectMapper().readValue(
@@ -89,9 +92,7 @@ public abstract class CaracalGeneratorFlinkJob {
                         });
             }
         }
-        for(GenerationSource source : generatorConfig.getGenerationSources()) {
-            source.readAvroSchema();
-        }
+        generatorConfig.open();
 
         return generatorConfig;
     }
@@ -112,17 +113,20 @@ public abstract class CaracalGeneratorFlinkJob {
 
     private void generateRandomThreatResults(ParameterTool params,
             SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput, GeneratorConfig generatorConfig) {
-        // add random threat intelligence for a sample of the generated IPs
-        IPLocal localIp = new IPLocal();
 
-        List<String> characterTopics = generatorConfig.getGenerationSources().stream().filter(gs -> Objects.isNull(gs.getOutputAvroSchema())).
-                map(GenerationSource::getTopic).collect(Collectors.toList());
-        SingleOutputStreamOperator<Tuple2<String, byte[]>> threats = generatedInput.filter(t -> characterTopics.contains(t.f0))
-                .map(new GetIpMap())
-                .filter(f -> f != null && !localIp.eval(f))
-                .filter(new RandomSampler<>(THREAT_PROBABILITY))
-                .map(new ThreatGeneratorMap(THREAT_TOPIC_NAME));
-        writeResults(params, threats);
+        if (params.get(PARAMS_GENERATOR_CONFIG) == null) {
+            // add random threat intelligence for a sample of the generated IPs
+            IPLocal localIp = new IPLocal();
+
+            List<String> characterTopics = generatorConfig.getGenerationSources().stream().filter(gs -> Objects.isNull(gs.getOutputAvroSchema())).
+                    map(GenerationSource::getTopic).collect(Collectors.toList());
+            SingleOutputStreamOperator<Tuple2<String, byte[]>> threats = generatedInput.filter(t -> characterTopics.contains(t.f0))
+                    .map(new GetIpMap())
+                    .filter(f -> f != null && !localIp.eval(f))
+                    .filter(new RandomSampler<>(THREAT_PROBABILITY))
+                    .map(new ThreatGeneratorMap(THREAT_TOPIC_NAME));
+            writeResults(params, threats);
+        }
     }
 
     private List<GenerationSource> getNetflowSampleMap() {

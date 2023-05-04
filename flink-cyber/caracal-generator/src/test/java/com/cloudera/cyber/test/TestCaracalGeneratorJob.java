@@ -26,6 +26,7 @@ import org.junit.Test;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -69,8 +70,31 @@ public class TestCaracalGeneratorJob extends CaracalGeneratorFlinkJob {
 
         JobTester.stopTest();
 
+        checkGeneratedResults(count, Lists.newArrayList("squid", "squid_scenario"));
+    }
+
+    @Test
+    public void testRelativeCustomGenerator() throws Exception {
+        int count = 100;
+        JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
+                PARAMS_RECORDS_LIMIT, String.valueOf(count),
+                PARAMS_GENERATOR_CONFIG, Objects.requireNonNull(getClass().getClassLoader().getResource("config/relative_generator_config.json")).toExternalForm()
+        ))));
+
+        JobTester.stopTest();
+
         checkGeneratedResults(count, Lists.newArrayList(THREAT_TOPIC_NAME, "squid", "squid_scenario"));
     }
+
+    @Test
+    public void testAvroWithCustomError() {
+        assertThatThrownBy( () ->
+            JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
+                    PARAMS_RECORDS_LIMIT, String.valueOf(100),
+                    PARAMS_GENERATOR_CONFIG, Objects.requireNonNull(getClass().getClassLoader().getResource("config/relative_generator_config.json")).toExternalForm(),
+                    PARAMS_SCHEMA, Boolean.toString(true)
+            ))))).isInstanceOf(IllegalStateException.class).hasMessage(AVRO_WITH_CUSTOM_CONFIG_ERROR);
+   }
 
     private void checkGeneratedResults(int expectedCount, List<String> expectedTopics) throws TimeoutException {
         List<Tuple2<String, byte[]>> results = new ArrayList<>();

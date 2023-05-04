@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -18,7 +17,7 @@ public class GeneratorScenarioTest {
 
     @Test
     public void testCsvScenario() throws IOException {
-        GeneratorScenario scenario = GeneratorScenario.load("src/test/resources/scenario.csv");
+        GeneratorScenario scenario = GeneratorScenario.load("src/test/resources", "scenario.csv");
 
         Map<String,String> expectedValue1 = ImmutableMap.of(IP_DEST_ADDR, "1.1.1.1", DOMAIN_NAME, "www.google.com", ACTION, "CONNECT");
         Map<String,String> expectedValue2 = ImmutableMap.of(IP_DEST_ADDR, "2.2.2.2", DOMAIN_NAME, "www.amazon.com", ACTION, "MISS");
@@ -41,8 +40,8 @@ public class GeneratorScenarioTest {
     @Test
     public void testCsvFileNotFound() {
         String notFoundFileName = "doesnt_exist.csv";
-        assertThatThrownBy(() ->GeneratorScenario.load(notFoundFileName)).isInstanceOf(IOException.class).
-                hasMessage(String.format("%s (No such file or directory)", notFoundFileName));
+        assertThatThrownBy(() ->GeneratorScenario.load("", notFoundFileName)).isInstanceOf(IOException.class).
+                hasMessage(String.format("Basedir: '' File: '%s'", notFoundFileName));
     }
 
     @Test
@@ -56,7 +55,7 @@ public class GeneratorScenarioTest {
     }
 
     private void testNotEnoughLines(String scenarioFile) {
-        assertThatThrownBy(() ->GeneratorScenario.load(scenarioFile)).
+        assertThatThrownBy(() ->GeneratorScenario.load("", scenarioFile)).
                 isInstanceOf(IllegalStateException.class).
                 hasMessage(GeneratorScenario.NOT_ENOUGH_LINES_ERROR);
 
