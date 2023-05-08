@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class HiveColumnDto {
+public class TableColumnDto {
 
     @JsonProperty("name")
     private String name;
