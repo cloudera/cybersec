@@ -32,6 +32,11 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
     }
 
     @Override
+    protected void createTableIfNotExists(StreamTableEnvironment tableEnv, Set<String> tableList, String tableName, List<TableColumnDto> columnList) {
+
+    }
+
+    @Override
     protected void executeInsert(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping, Map<String, List<TableColumnDto>> tablesConfig) {
         topicMapping.forEach((topic, mappingDto) -> {
             final String insertSql = buildInsertSql(topic, mappingDto);
@@ -88,7 +93,11 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
 
     @Override
     protected String getInsertSqlPrefix() {
-        return "CREATE TEMPORARY VIEW";
+        return "CREATE TEMPORARY VIEW ";
     }
 
+    @Override
+    protected String getInsertSqlSuffix() {
+        return " AS ";
+    }
 }
