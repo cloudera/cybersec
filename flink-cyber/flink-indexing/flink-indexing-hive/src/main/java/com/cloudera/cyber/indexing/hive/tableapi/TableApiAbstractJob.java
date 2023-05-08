@@ -194,7 +194,7 @@ public abstract class TableApiAbstractJob {
     }
 
     protected final String buildInsertSql(String topic, MappingDto mappingDto) {
-        return String.join("\n", getInsertSqlPrefix() + mappingDto.getTableName() + "(" + getInsertColumns(mappingDto) + ")",
+        return String.join("\n", getInsertSqlPrefix() + " " + mappingDto.getTableName() + "(" + getInsertColumns(mappingDto) + ") " + getInsertSqlSuffix(),
                 " SELECT " + getFromColumns(mappingDto),
                 " from " + KAFKA_TABLE,
                 String.format(" where `message`.`originalSource`.`topic`='%s'", topic));
@@ -202,6 +202,10 @@ public abstract class TableApiAbstractJob {
 
     protected String getInsertSqlPrefix() {
         return "INSERT INTO ";
+    }
+
+    protected String getInsertSqlSuffix() {
+        return "";
     }
 
     protected String getInsertColumns(MappingDto mappingDto) {
