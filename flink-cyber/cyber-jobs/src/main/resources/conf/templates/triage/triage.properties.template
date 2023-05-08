@@ -8,6 +8,10 @@ asn.ip_fields=ip_src_addr,ip_dst_addr,not_defined,ip_dst,ip_src
 # default location is set with cloudera manager
 #asn.database_path=hdfs:/path/to/cyb_92/GeoLite2-ASN.mmdb
 
+cidr.enabled=false
+cidr.ip_fields=ip_src_addr,ip_dst_addr,not_defined,ip_dst,ip_src
+cidr.config_file_path=PIPELINE/triage/enrichments-cidr.json
+
 lookups.config.file=PIPELINE/triage/enrichments-lookups.json
 
 hbase.enabled=false
