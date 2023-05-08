@@ -18,6 +18,7 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +33,6 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
 
     @Override
     protected void executeInsert(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping, Map<String, List<TableColumnDto>> tablesConfig) {
-        System.out.println("Executing Kafka insert...");
         topicMapping.forEach((topic, mappingDto) -> {
             final String insertSql = buildInsertSql(topic, mappingDto);
             try {
@@ -63,6 +63,12 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
                 throw e;
             }
         });
+    }
+
+    @Override
+    protected HashSet<String> getExistingTableList(StreamTableEnvironment tableEnv) {
+        //Kafka tables are temporary, so no tables are present on the job creation
+        return new HashSet<>();
     }
 
     @Override

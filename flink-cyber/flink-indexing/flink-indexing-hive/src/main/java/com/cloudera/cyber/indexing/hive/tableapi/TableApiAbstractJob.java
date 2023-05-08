@@ -82,7 +82,7 @@ public abstract class TableApiAbstractJob {
         final Map<String, List<TableColumnDto>> tablesConfig = getTablesConfig();
 
         System.out.println("Creating tables...");
-        final Set<String> tableList = new HashSet<>(Arrays.asList(tableEnv.listTables()));
+        final Set<String> tableList = getExistingTableList(tableEnv);
         setConnectorDialect(tableEnv);
 
         tablesConfig.forEach(
@@ -95,10 +95,15 @@ public abstract class TableApiAbstractJob {
         System.out.println("Creating Kafka table...");
         createKafkaTable(tableEnv);
 
+        System.out.printf("Executing %s insert...%n", connectorName);
         executeInsert(tableEnv, topicMapping, tablesConfig);
 
         System.out.println("TableApiJob is done!");
         return jobReturnValue();
+    }
+
+    protected HashSet<String> getExistingTableList(StreamTableEnvironment tableEnv) {
+        return new HashSet<>(Arrays.asList(tableEnv.listTables()));
     }
 
     protected StreamExecutionEnvironment jobReturnValue() {
