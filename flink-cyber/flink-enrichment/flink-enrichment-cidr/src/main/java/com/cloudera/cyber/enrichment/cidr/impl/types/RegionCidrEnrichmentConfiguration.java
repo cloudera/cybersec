@@ -1,4 +1,4 @@
-package com.cloudera.cyber.enrichment.geocode.impl.types;
+package com.cloudera.cyber.enrichment.cidr.impl.types;
 
 import java.util.HashMap;
 import java.util.List;

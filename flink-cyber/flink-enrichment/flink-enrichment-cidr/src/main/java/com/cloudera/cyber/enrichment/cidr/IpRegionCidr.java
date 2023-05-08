@@ -10,12 +10,12 @@
  * limitations governing your use of the file.
  */
 
-package com.cloudera.cyber.enrichment.geocode;
+package com.cloudera.cyber.enrichment.cidr;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.ValidateUtils;
 import com.cloudera.cyber.ValidateUtils.ValidationException;
-import com.cloudera.cyber.enrichment.geocode.impl.types.RegionCidrEnrichmentConfiguration;
+import com.cloudera.cyber.enrichment.cidr.impl.types.RegionCidrEnrichmentConfiguration;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import inet.ipaddr.AddressStringException;
 import inet.ipaddr.IPAddress;

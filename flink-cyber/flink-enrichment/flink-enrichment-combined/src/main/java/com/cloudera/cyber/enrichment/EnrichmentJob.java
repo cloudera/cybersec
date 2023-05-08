@@ -18,8 +18,7 @@ import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.cloudera.cyber.enrichemnt.stellar.StellarEnrichmentJob;
 import com.cloudera.cyber.enrichment.geocode.IpGeo;
-import com.cloudera.cyber.enrichment.geocode.IpRegionCidr;
-import com.cloudera.cyber.enrichment.geocode.IpRegionCidrJob;
+import com.cloudera.cyber.enrichment.cidr.IpRegionCidr;
 import com.cloudera.cyber.enrichment.hbase.HbaseJob;
 import com.cloudera.cyber.enrichment.hbase.HbaseJobRawKafka;
 import com.cloudera.cyber.enrichment.lookup.LookupJob;
@@ -55,8 +54,8 @@ import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_ASN_DATABASE_
 import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_ASN_FIELDS;
 import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_GEO_DATABASE_PATH;
 import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_GEO_FIELDS;
-import static com.cloudera.cyber.enrichment.geocode.IpRegionCidrJob.PARAM_CIDR_CONFIG_PATH;
-import static com.cloudera.cyber.enrichment.geocode.IpRegionCidrJob.PARAM_CIDR_IP_FIELDS;
+import static com.cloudera.cyber.enrichment.cidr.IpRegionCidrJob.PARAM_CIDR_CONFIG_PATH;
+import static com.cloudera.cyber.enrichment.cidr.IpRegionCidrJob.PARAM_CIDR_IP_FIELDS;
 
 @Slf4j
 public abstract class EnrichmentJob {

@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-package com.cloudera.cyber.enrichment.geocode;
+package com.cloudera.cyber.enrichment.cidr;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;

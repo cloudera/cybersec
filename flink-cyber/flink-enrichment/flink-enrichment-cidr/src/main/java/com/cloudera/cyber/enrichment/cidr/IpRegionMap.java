@@ -1,11 +1,10 @@
-package com.cloudera.cyber.enrichment.geocode;
+package com.cloudera.cyber.enrichment.cidr;
 
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.enrichment.geocode.impl.IpRegionCidrEnrichment;
-import com.cloudera.cyber.enrichment.geocode.impl.types.RegionCidrEnrichmentConfiguration;
-import inet.ipaddr.IPAddress;
+import com.cloudera.cyber.enrichment.cidr.impl.types.RegionCidrEnrichmentConfiguration;
+import com.cloudera.cyber.enrichment.cidr.impl.IpRegionCidrEnrichment;
 import inet.ipaddr.IPAddressString;
 import java.util.ArrayList;
 import java.util.HashMap;

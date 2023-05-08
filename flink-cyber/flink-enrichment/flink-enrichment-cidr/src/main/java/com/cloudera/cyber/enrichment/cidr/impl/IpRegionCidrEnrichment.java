@@ -1,4 +1,4 @@
-package com.cloudera.cyber.enrichment.geocode.impl;
+package com.cloudera.cyber.enrichment.cidr.impl;
 
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;

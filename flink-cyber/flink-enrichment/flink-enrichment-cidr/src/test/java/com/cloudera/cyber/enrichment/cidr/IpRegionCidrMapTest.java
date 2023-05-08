@@ -16,9 +16,8 @@ import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.enrichment.Enrichment;
-import com.cloudera.cyber.enrichment.geocode.IpRegionMap;
-import com.cloudera.cyber.enrichment.geocode.impl.IpRegionCidrEnrichment;
-import com.cloudera.cyber.enrichment.geocode.impl.types.RegionCidrEnrichmentConfiguration;
+import com.cloudera.cyber.enrichment.cidr.impl.IpRegionCidrEnrichment;
+import com.cloudera.cyber.enrichment.cidr.impl.types.RegionCidrEnrichmentConfiguration;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.Before;
@@ -39,7 +38,7 @@ import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 
-public class IpRegionCidrTestMap {
+public class IpRegionCidrMapTest {
 
     private static final String SINGLE_IP_FIELD_NAME = "ip_dst_addr";
     private static final String LIST_IPS_FIELD_NAME = "dns.answers";
@@ -50,7 +49,7 @@ public class IpRegionCidrTestMap {
     private IpRegionCidrEnrichment regionCidrEnrichment;
 
     @Before
-    public void createGeoMap() throws Exception {
+    public void createIpRegionMap() throws Exception {
         regionMap = new IpRegionMap(new RegionCidrEnrichmentConfiguration(), ENRICH_FIELD_NAMES);
         FieldUtils.writeField(regionMap, "regionCidrEnrichment", regionCidrEnrichment, true);
     }

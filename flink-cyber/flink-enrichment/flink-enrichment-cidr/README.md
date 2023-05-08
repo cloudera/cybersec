@@ -29,12 +29,40 @@ The cidr enrichment mapping reports the following messages.
 #### configuration file to map ip to region example
 ```json
 {
-  "zone1": {
-    "test1" : ["10.1.0.0/16", "12.3.4.0/24"]
+  // zone to match the name with the cidr array
+  "<zone-name-1>": {
+    // region name and corresponding array of subnet ips in the format of v4 or v6
+    "us-east" : ["10.1.0.0/16", "12.3.4.0/24"]
   },
-  "zone2": {
-    "test2": ["::ffff:f01:0/112"]
+  // zone to match the name with the cidr array
+  "<zone-name-2>": {
+    // region name and corresponding array of subnet ips in the format of v4 or v6
+    "eu-west": ["::ffff:f01:0/112"]
   }
+}
+```
+
+#### Example message process
+Incoming message
+```json
+{
+  .....
+  "ip.src": "10.1.0.1",
+  "ip.dst": "15.1.0.2",
+  .....
+}
+```
+
+Processed message
+```json
+{
+  .....
+  "ip.src": "10.1.0.1",
+  "ip.src.region" : "us-east",
+  "ip.dst": "15.1.0.2",
+  "ip.dst.region" : "us-west",
+  .....
+
 }
 ```
 
@@ -54,8 +82,8 @@ The cidr enrichment mapping reports the following messages.
 
 ### Example properties file
 ```
-geo.ip_fields=dst_ip
-geo.database_path=hdfs:/user/centos/flink-cyber/cidr/cidr.json
+cidr.ip_fields=dst_ip
+cidr.config_file_path=hdfs:/user/centos/flink-cyber/cidr/cidr.json
 topic.input=enrichment.input
 topic.output=enrichment.geo
 

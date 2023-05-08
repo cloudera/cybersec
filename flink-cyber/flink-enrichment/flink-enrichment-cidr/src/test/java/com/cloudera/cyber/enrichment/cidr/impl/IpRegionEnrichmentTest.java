@@ -12,7 +12,7 @@
 
 package com.cloudera.cyber.enrichment.cidr.impl;
 
-import static com.cloudera.cyber.enrichment.geocode.impl.IpRegionCidrEnrichment.FEATURE_NAME;
+import static com.cloudera.cyber.enrichment.cidr.impl.IpRegionCidrEnrichment.FEATURE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,7 +21,6 @@ import static org.mockito.Mockito.mock;
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.enrichment.Enrichment;
 import com.cloudera.cyber.enrichment.cidr.IpRegionCidrTestData;
-import com.cloudera.cyber.enrichment.geocode.impl.IpRegionCidrEnrichment;
 import com.google.common.collect.ImmutableMap;
 import inet.ipaddr.IPAddressString;
 
@@ -41,7 +40,7 @@ public class IpRegionEnrichmentTest {
     private IpRegionCidrEnrichment ipRegionCidrEnrichment;
 
     @Before
-    public void createAsnEnrichment() {
+    public void createCidrEnrichment() {
         Map<IPAddressString, String> map = ImmutableMap.of(
                 new IPAddressString(IpRegionCidrTestData.IPV4_MASK_REGION_1), IpRegionCidrTestData.IPV4_MASK_REGION_1_NAME,
                 new IPAddressString(IpRegionCidrTestData.IPV4_SHORT_MASK_REGION), IpRegionCidrTestData.IPV4_SHORT_MASK_REGION_NAME,
