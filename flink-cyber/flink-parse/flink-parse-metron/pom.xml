@@ -87,6 +87,12 @@
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
         </dependency>
+        <!--        Overwriting vulnerable altlr4-runtime in the simple-syslog-->
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>${antlr.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.github.palindromicity</groupId>
             <artifactId>simple-syslog</artifactId>
@@ -140,19 +146,9 @@
             <version>${global_kryo_serializers_version}</version>
         </dependency>
         <dependency>
-            <groupId>io.thekraken</groupId>
-            <artifactId>grok</artifactId>
-            <version>0.1.0</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>commons-lang3</artifactId>
-                    <groupId>org.apache.commons</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>io.krakens</groupId>
+            <artifactId>java-grok</artifactId>
+            <version>${java-grok.version}</version>
         </dependency>
     </dependencies>
 

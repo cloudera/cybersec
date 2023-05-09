@@ -17,8 +17,8 @@
  */
 package org.apache.metron.parsers.utils;
 import java.io.Serializable;
+import java.util.regex.Pattern;
 
-import com.google.code.regexp.Pattern;
 
 public class GrokUtils implements Serializable {
 

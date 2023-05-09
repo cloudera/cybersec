@@ -162,7 +162,7 @@ public class CsvTextParser implements Parser {
         return this;
     }
 
-    @Configurable(key = "outputField", label = "Output Field")
+    @Configurable(key = "outputField", label = "Output Field", multipleValues = true)
     public void withOutputField(
             @Parameter(key = "fieldName", label = "Field Name", description = "The name of the output field.") String fieldName,
             @Parameter(key = "fieldIndex", label = "Column Index", description = "The index of the column containing the data.") String index) {
