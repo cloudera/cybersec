@@ -17,6 +17,10 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient;
+
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -25,6 +29,7 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.core.fs.FSDataInputStream;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
+import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.encrypttool.EncryptTool;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -44,6 +49,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.ToLongFunction;
 
 import static com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient.Configuration.SASL_JAAS_CONFIG;
 import static org.apache.flink.configuration.GlobalConfiguration.loadConfiguration;
@@ -229,6 +235,19 @@ public class Utils {
 
     public static Configuration getConfiguration() {
         return ConfigHolder.INSTANCE;
+    }
+
+    public static boolean isTimeEqual(Long unit1, String unitType1, Long unit2, String unitType2) {
+        if (unit1 == null && unitType1 == null && unit2 == null && unitType2 == null) {
+            return true;
+        } else if (unit1 == null || unitType1 == null || unit2 == null || unitType2 == null) {
+            return false;
+        }
+        return TimeUnit.valueOf(unitType1).toMillis(unit1) == TimeUnit.valueOf(unitType2).toMillis(unit2);
+    }
+
+    public static <T> boolean isTimeEqual(T object1, T object2, ToLongFunction<T> timeUnitSelector, Function<T, String> timeUnitTypeSelector) {
+        return isTimeEqual(timeUnitSelector.applyAsLong(object1), timeUnitTypeSelector.apply(object1), timeUnitSelector.applyAsLong(object2), timeUnitTypeSelector.apply(object2));
     }
 
     private static class ConfigHolder {

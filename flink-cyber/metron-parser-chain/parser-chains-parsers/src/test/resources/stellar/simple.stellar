@@ -1,0 +1,2 @@
+unique_hash := HASH(original_string,'SHA-256')
+upper_col2 := TO_UPPER(column2)

@@ -56,6 +56,7 @@ public class RemoveFieldParser implements Parser {
             key="fieldToRemove",
             label="Field to Remove",
             description="The name of a field to remove.",
+            multipleValues=true,
             required=true)
     public void removeField(String fieldName) {
         if(StringUtils.isNotBlank(fieldName)) {

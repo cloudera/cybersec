@@ -5,6 +5,8 @@ import org.apache.commons.collections.CollectionUtils;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public enum ScoringSummarizationMode {
     SUM(ScoringSummarizationMode::sum),
@@ -20,6 +22,18 @@ public enum ScoringSummarizationMode {
 
     public static ScoringSummarizationMode DEFAULT() {
         return POSITIVE_MEAN;
+    }
+
+    public static boolean isLegalSummarizationMode(String summarizationModeName) {
+        return legalSummarizationModesStream().anyMatch(name -> name.equals(summarizationModeName));
+    }
+
+    public static List<String> legalSummarizationModes() {
+        return legalSummarizationModesStream().collect(Collectors.toList());
+    }
+
+    private static Stream<String> legalSummarizationModesStream() {
+        return Stream.of(ScoringSummarizationMode.values()).map(ScoringSummarizationMode::name);
     }
 
     public Double calculateScore(List<Double> scoreList) {

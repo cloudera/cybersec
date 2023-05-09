@@ -87,7 +87,7 @@
         <phoenix.version>5.1.0.${cdh.version}</phoenix.version>
         <phoenix.queryserver>6.0.0.${cdh.version}</phoenix.queryserver>
         <classindex.version>3.4</classindex.version>
-        <antlr.version>4.7.2</antlr.version>
+        <antlr.version>4.9.3</antlr.version>
         <metrics.version>3.0.2</metrics.version>
         <pcap.version>1.7.1</pcap.version>
         <global.kryo.version>3.0.3</global.kryo.version>
@@ -104,6 +104,7 @@
         <commons-validator.version>1.7</commons-validator.version>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-text.version>1.10.0</commons-text.version>
+        <java-grok.version>0.1.9</java-grok.version>
     </properties>
 
     <repositories>
