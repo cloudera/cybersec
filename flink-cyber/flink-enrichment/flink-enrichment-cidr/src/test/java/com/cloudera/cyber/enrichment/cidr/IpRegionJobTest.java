@@ -27,8 +27,10 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
+import org.junit.After;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
 
 @Log
@@ -48,8 +51,9 @@ public class IpRegionJobTest extends IpRegionCidrJob {
     private ManualSource<Message> source;
     private final CollectingSink<Message> sink = new CollectingSink<>();
     private final List<Message> recordLog = new ArrayList<>();
-
     public static final String CIDR_CONFIG_PATH = "./src/test/resources/cidr.json";
+    public static final String UN_EXIST_CIDR_CONFIG_PATH = "./src/test/resources/unExist.json";
+    public static final String EMPTY_CIDR_CONFIG_PATH = "./src/test/resources/empty-cidr.json";
 
 
     @Test
@@ -57,8 +61,8 @@ public class IpRegionJobTest extends IpRegionCidrJob {
         long ts = 0;
 
         JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
-            PARAM_CIDR_IP_FIELDS, String.join(",", STRING_IP_FIELD_NAME, LIST_IP_FIELD_NAME),
-            PARAM_CIDR_CONFIG_PATH, CIDR_CONFIG_PATH
+                PARAM_CIDR_IP_FIELDS, String.join(",", STRING_IP_FIELD_NAME, LIST_IP_FIELD_NAME),
+                PARAM_CIDR_CONFIG_PATH, CIDR_CONFIG_PATH
         ))).setParallelism(1));
 
         createMessages(ts);
@@ -77,17 +81,67 @@ public class IpRegionJobTest extends IpRegionCidrJob {
         }
         checkResults(output);
     }
+    @Test
+    public void testIpGeoPipelineWithEmptyIpFields() throws Exception {
+        long ts = 0;
+
+        JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
+                PARAM_CIDR_IP_FIELDS, "",
+                PARAM_CIDR_CONFIG_PATH, CIDR_CONFIG_PATH
+        ))).setParallelism(1));
+
+        createMessages(ts);
+
+        JobTester.stopTest();
+
+        List<Message> output = new ArrayList<>();
+
+        int recordCount = recordLog.size();
+        for (int i = 0; i < recordCount; i++) {
+            try {
+                output.add(sink.poll(Duration.ofMillis(100)));
+            } catch (TimeoutException e) {
+                log.info("Caught timeout exception.");
+            }
+        }
+        assertThat(output.stream().flatMap(m -> m.getExtensions().entrySet().stream()).collect(Collectors.toList()))
+                .contains(
+                        entry(STRING_IP_FIELD_NAME, IpRegionCidrTestData.IPV4_10_ADDRESS),
+                        entry(LIST_IP_FIELD_NAME, IpRegionCidrTestData.IPV6_15_ADDRESS));
+
+    }
+
+    @Test
+    public void testIpGeoPipelineWithNotExistConfigFile() throws Exception {
+        assertThatThrownBy(() -> JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
+                PARAM_CIDR_IP_FIELDS, "",
+                PARAM_CIDR_CONFIG_PATH, UN_EXIST_CIDR_CONFIG_PATH
+        ))).setParallelism(1))).isInstanceOf(IOException.class)
+                .hasMessageContaining("No such file or directory")
+                .hasMessageNotContaining("File is empty");
+    }
+
+    @Test
+    public void testIpGeoPipelineWithEmptyConfigFile() throws Exception {
+        assertThatThrownBy(() -> JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
+                PARAM_CIDR_IP_FIELDS, "",
+                PARAM_CIDR_CONFIG_PATH, EMPTY_CIDR_CONFIG_PATH
+        ))).setParallelism(1))).isInstanceOf(IOException.class)
+                .hasMessageContaining("File is empty")
+                .hasMessageContaining("src/test/resources/empty-cidr.json")
+                .hasMessageNotContaining("No such file or directory");
+    }
 
     private void createMessages(long ts) {
         long offset = 100;
         List<SimpleEntry<String, String>> entries = Arrays.asList(
-            new SimpleEntry<>(STRING_IP_FIELD_NAME, IpRegionCidrTestData.IPV4_10_ADDRESS),
-            new SimpleEntry<>(LIST_IP_FIELD_NAME, IpRegionCidrTestData.IPV6_15_ADDRESS)
+                new SimpleEntry<>(STRING_IP_FIELD_NAME, IpRegionCidrTestData.IPV4_10_ADDRESS),
+                new SimpleEntry<>(LIST_IP_FIELD_NAME, IpRegionCidrTestData.IPV6_15_ADDRESS)
         );
         for (SimpleEntry<String, String> entry : entries) {
             MessageBuilder builder = TestUtils.createMessage().toBuilder()
-                .extensions(ImmutableMap.of(entry.getKey(), entry.getValue()))
-                .ts(ts + offset);
+                    .extensions(ImmutableMap.of(entry.getKey(), entry.getValue()))
+                    .ts(ts + offset);
             sendRecord(builder);
             offset += 100;
         }
@@ -122,7 +176,12 @@ public class IpRegionJobTest extends IpRegionCidrJob {
     @Override
     protected SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> ipFields) {
         source = JobTester.createManualSource(env, TypeInformation.of(Message.class));
-        return source.getDataStream().map(s->s);
+        return source.getDataStream().map(s -> s);
+    }
+
+    @After
+    public void clean() throws Exception{
+        JobTester.stopTest();
     }
 }
 

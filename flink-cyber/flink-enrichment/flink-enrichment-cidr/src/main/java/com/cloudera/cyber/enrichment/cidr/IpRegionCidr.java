@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.core.fs.FSDataInputStream;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
@@ -51,7 +52,11 @@ public class IpRegionCidr {
         Path path = new Path(stringPath);
         try (FSDataInputStream fsDataInputStream = path.getFileSystem().open(path)) {
             log.info("Successfully loaded file {}", path);
-            return IOUtils.toString(fsDataInputStream, StandardCharsets.UTF_8);
+            String fileContent = IOUtils.toString(fsDataInputStream, StandardCharsets.UTF_8);
+            if (StringUtils.isEmpty(fileContent)) {
+                throw new IOException("Exception while loading file " + path + ". File is empty.");
+            }
+            return fileContent;
         } catch (IOException ioe) {
             log.error("Exception while loading file " + path, ioe);
             throw ioe;

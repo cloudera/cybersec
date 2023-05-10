@@ -93,7 +93,7 @@ public abstract class EnrichmentJob {
                         Arrays.asList(params.getRequired(PARAM_ASN_FIELDS).split(",")),
                         params.getRequired(PARAM_ASN_DATABASE_PATH)) : geoEnriched;
 
-        SingleOutputStreamOperator<Message> cidrEnriched = params.getBoolean(PARAMS_ENABLE_CIDR, true) ?
+        SingleOutputStreamOperator<Message> cidrEnriched = params.getBoolean(PARAMS_ENABLE_CIDR, false) ?
             IpRegionCidr.cidr(asnEnriched,
                 Arrays.asList(params.getRequired(PARAM_CIDR_IP_FIELDS).split(",")),
                 params.getRequired(PARAM_CIDR_CONFIG_PATH)) : asnEnriched;
