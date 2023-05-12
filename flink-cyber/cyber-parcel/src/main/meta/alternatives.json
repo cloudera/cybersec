@@ -23,6 +23,12 @@
     "priority": 10,
     "isDirectory": false
   },
+  "cs-add-enrich": {
+    "destination": "/usr/bin/cs-add-enrich",
+    "source": "bin/cs-add-enrich",
+    "priority": 10,
+    "isDirectory": false
+  },
   "cs-cancel-job": {
     "destination": "/usr/bin/cs-cancel-job",
     "source": "bin/cs-cancel-job",
@@ -95,6 +101,7 @@
     "priority": 10,
     "isDirectory": false
   },
+
   "cs-stop-job": {
     "destination": "/usr/bin/cs-stop-job",
     "source": "bin/cs-stop-job",

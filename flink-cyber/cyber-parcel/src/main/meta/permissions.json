@@ -94,6 +94,11 @@
     "group": "cybersec",
     "permissions": "0755"
   },
+  "bin/cs-add-enrich": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
   "etc/conf/triage.properties": {
     "user": "cybersec",
     "group": "cybersec",
