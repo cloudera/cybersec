@@ -28,11 +28,13 @@
             "preserveSymlinks": true,
             "allowedCommonJsDependencies": [
               "lodash",
-              "uuid"
+              "uuid",
+              "msw"
             ],
             "assets": [
               "src/favicon.ico",
               "src/assets",
+              "src/mockServiceWorker.js",
               {
                 "glob": "**/*",
                 "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
