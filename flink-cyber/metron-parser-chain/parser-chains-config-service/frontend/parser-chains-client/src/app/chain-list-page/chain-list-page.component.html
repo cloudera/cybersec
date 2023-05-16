@@ -44,13 +44,19 @@
 </nz-modal>
 <nz-modal
   *ngIf="deleteChainItem$ | async as deleteChainItem"
-  nzModalType="confirm"
   [nzVisible]="isChainDeleteModalVisible$ | async"
-  nzTitle="Delete Chain Name"
-  (nzOnCancel)="handleCancelDeleteModal()"
-  (nzOnOk)="deleteChain(deleteChainItem.id, deleteChainItem.name)"
-  [nzOkLoading]="isOkLoading$ | async">
-  <p *nzModalContent>Are you sure you want to delete the chain {{deleteChainItem.name}}?</p>
+  [nzTitle]="modalTitle"
+  [nzContent]="modalContent"
+  [nzFooter]="modalFooter"
+  (nzOnCancel)="handleCancelDeleteModal()">
+  <ng-template #modalTitle>Delete Chain Name</ng-template>
+  <ng-template #modalContent>
+    <p>Are you sure you want to delete the chain <b>{{deleteChainItem.name}}</b>?</p>
+  </ng-template>
+  <ng-template #modalFooter>
+    <button nz-button nzType="default" (click)="handleCancelDeleteModal()">Cancel</button>
+    <button nz-button nzType="primary" (click)="deleteChain(deleteChainItem.id, deleteChainItem.name)" [nzLoading]="isOkLoading$ | async">Delete</button>
+  </ng-template>
 </nz-modal>
 
 <nz-card nzTitle="Parser Chains" [nzExtra]="AddButton">
