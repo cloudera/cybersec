@@ -1,0 +1,24 @@
+.green-icon {
+  background: linear-gradient(10deg, #1a3b0a, #08c237);
+  cursor: pointer;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.red-icon {
+  background: linear-gradient(10deg, #800024, #cd030a);
+  cursor: pointer;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.yellow-icon {
+  background: linear-gradient(10deg, #442f00, #c79000);
+  cursor: pointer;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mat-icon {
+  vertical-align: -5px;
+}

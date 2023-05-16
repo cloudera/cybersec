@@ -9,6 +9,9 @@
  * either express or implied. Refer to the License for the specific permissions and
  * limitations governing your use of the file.
  */
+import {worker} from '../mocks/browser';
+
+worker.start();
 
 export const environment = {
   production: false
