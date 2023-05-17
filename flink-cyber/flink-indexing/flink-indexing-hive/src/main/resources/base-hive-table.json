@@ -1,0 +1,26 @@
+[
+  {
+    "name": "id",
+    "type": "string"
+  },
+  {
+    "name": "ts",
+    "type": "timestamp"
+  },
+  {
+    "name": "fields",
+    "type": "map<string,string>"
+  },
+  {
+    "name": "source",
+    "type": "string"
+  },
+  {
+    "name": "cyberscore",
+    "type": "double"
+  },
+  {
+    "name": "cyberscore_details",
+    "type": "array<struct<`ruleid`:string, `score`:double, `reason`:string>>"
+  }
+]

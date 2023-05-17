@@ -21,7 +21,7 @@ pipeline=$1
 index_dir=$pipeline/index
 template_dir=$(cs-get-template-dir)
 
-mkdir -p $index_dir
+mkdir -p $index_dir/conf
 for FILE in $template_dir/index/*; do
     sed -e s/PIPELINE/$pipeline/g $FILE > $index_dir/${FILE##*/}
 done
