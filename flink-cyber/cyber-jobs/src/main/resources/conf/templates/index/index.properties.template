@@ -2,6 +2,12 @@ hive.catalog=hive
 hive.schema=cyber
 hive.table=events
 
+#flink.writer=tableapi
+#flink.output-connector=hive
+#flink.output-connector=kafka
+#flink.tables-init-file=/home/systest/cyb-105-test/main/cyb-105/index/conf/table-config.json
+#flink.mapping-file=/home/systest/cyb-105-test/main/cyb-105/index/conf/mapping-config.json
+
 #hive.confdir=/etc/hive/conf/
 
 #hive.transaction.messages=500
