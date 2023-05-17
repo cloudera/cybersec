@@ -10,11 +10,11 @@
  * limitations governing your use of the file.
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
-import { ParserModel, PartialParserModel } from '../../chain-page.models';
+import {ParserModel, PartialParserModel} from '../../chain-page.models';
 
-import { ChainPageService } from '../../../services/chain-page.service';
+import {ChainPageService} from '../../../services/chain-page.service';
 import {Observable} from "rxjs";
 
 @Component({
@@ -28,11 +28,13 @@ export class ChainViewComponent implements OnInit {
   @Input() dirtyParsers: string[];
   @Input() chainId: string;
   @Input() failedParser: Observable<string>;
+  @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() removeParserEmitter = new EventEmitter<string>();
   @Output() chainLevelChange = new EventEmitter<string>();
   @Output() parserChange = new EventEmitter<PartialParserModel>();
   collapseAll: boolean;
   parserCollapseStateArray: boolean[];
+  selectedSource: string;
   constructor(public chainPageService: ChainPageService) {
   }
   ngOnInit() {
@@ -65,5 +67,4 @@ export class ChainViewComponent implements OnInit {
   collapseExpandAllParsers() {
     this.chainPageService.collapseExpandAllParsers();
   }
-
 }

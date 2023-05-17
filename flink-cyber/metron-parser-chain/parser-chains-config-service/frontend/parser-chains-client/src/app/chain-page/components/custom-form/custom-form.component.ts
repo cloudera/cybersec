@@ -25,6 +25,7 @@ export interface CustomFormConfig {
   onChange?: (config: any) => {};
   required?: boolean;
   multipleValues?: boolean;
+  outputName?: boolean;
   description?: string;
   placeholder?: string;
   defaultValue?: string;
@@ -38,6 +39,8 @@ export interface CustomFormConfig {
 export class CustomFormComponent implements OnInit, OnChanges {
 
   @Input() config: CustomFormConfig[] = [];
+  @Input() selectedSource: string;
+  @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() valueChange = new EventEmitter<any>();
 
   formGroup: FormGroup;

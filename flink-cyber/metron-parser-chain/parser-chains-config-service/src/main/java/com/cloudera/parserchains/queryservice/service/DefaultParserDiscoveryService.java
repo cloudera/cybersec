@@ -147,6 +147,7 @@ public class DefaultParserDiscoveryService implements ParserDiscoveryService {
               .setLabel(p.label())
               .setDescription(p.description())
               .setRequired(p.required())
+              .setOutputName(p.isOutputName())
               .setType(p.widgetType());
       if (StringUtils.isNotBlank(p.defaultValue())) {
         paramDescriptor.addDefaultValue(p.key(), p.defaultValue());
@@ -158,6 +159,7 @@ public class DefaultParserDiscoveryService implements ParserDiscoveryService {
               .setLabel(configurable.label())
               .setDescription(configurable.description())
               .setRequired(configurable.required())
+              .setOutputName(configurable.isOutputName())
               .setType(configurable.widgetType());
       if (StringUtils.isNotBlank(configurable.defaultValue())) {
         paramDescriptor.addDefaultValue(configurable.key(), configurable.defaultValue());
