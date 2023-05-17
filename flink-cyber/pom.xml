@@ -105,6 +105,7 @@
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-text.version>1.10.0</commons-text.version>
         <java-grok.version>0.1.9</java-grok.version>
+        <everit-json-schema.version>1.14.2</everit-json-schema.version>
     </properties>
 
     <repositories>
@@ -223,6 +224,11 @@
             </dependency>
 
             <dependency>
+                <groupId>com.github.erosb</groupId>
+                <artifactId>everit-json-schema</artifactId>
+                <version>${everit-json-schema.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-cloudera-registry</artifactId>
                 <version>${flink.version}</version>
@@ -230,6 +236,10 @@
                     <exclusion>
                         <groupId>org.apache.avro</groupId>
                         <artifactId>avro</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.everit.json</groupId>
+                        <artifactId>org.everit.json.schema</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>

@@ -34,7 +34,7 @@ public class IndexingService {
             //Converting to map so that we ignore all the overwritten getters
             return JSONUtils.INSTANCE.getMapper().readValue(chainString, Map.class);
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Wasn't able to read the index mapping file [%s]!", path));
+            throw new RuntimeException(String.format("Wasn't able to read the index mapping file [%s]!", path), e);
         }
     }
 
