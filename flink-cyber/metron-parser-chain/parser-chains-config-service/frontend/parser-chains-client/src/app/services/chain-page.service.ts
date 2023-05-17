@@ -10,11 +10,11 @@
  * limitations governing your use of the file.
  */
 
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import {HttpClient} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject} from 'rxjs';
 
-import { ChainDetailsModel } from '../chain-page/chain-page.models';
+import {ChainDetailsModel} from '../chain-page/chain-page.models';
 
 @Injectable({
     providedIn: 'root'
@@ -47,6 +47,11 @@ export class ChainPageService {
 
     public getFormConfigs() {
       return this.http.get(this.BASE_URL + `parser-form-configuration`);
+    }
+
+    public getIndexMappings(payload?: { filePath: string} ) {
+      let finalPayload = payload ? payload : {}
+      return this.http.post(this.BASE_URL + `indexing`, finalPayload);
     }
 
     public createChainCollapseArray(size: number) {

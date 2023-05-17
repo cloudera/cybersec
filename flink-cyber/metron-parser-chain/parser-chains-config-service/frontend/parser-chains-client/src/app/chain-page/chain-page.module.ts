@@ -10,43 +10,46 @@
  * limitations governing your use of the file.
  */
 
-import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
-import { EffectsModule } from '@ngrx/effects';
-import { StoreModule } from '@ngrx/store';
-import {  NzMessageService } from 'ng-zorro-antd/message';
-import { NzModalModule } from 'ng-zorro-antd/modal';
-import { MonacoEditorModule } from '@materia-ui/ngx-monaco-editor';
+import {CommonModule} from '@angular/common';
+import {NgModule} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {RouterModule} from '@angular/router';
+import {EffectsModule} from '@ngrx/effects';
+import {StoreModule} from '@ngrx/store';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {NzModalModule} from 'ng-zorro-antd/modal';
+import {MonacoEditorModule} from '@materia-ui/ngx-monaco-editor';
 
-import { AutofocusDirective } from '../misc/autofocus.directive';
+import {AutofocusDirective} from '../misc/autofocus.directive';
 
-import { ChainPageComponent } from './chain-page.component';
-import { ChainPageEffects } from './chain-page.effects';
-import { reducer } from './chain-page.reducers';
-import { ChainViewComponent } from './components/chain-view/chain-view.component';
-import { MultiInputComponent } from './components/custom-form/components/multi-input/multi-input.component';
-import { CustomFormComponent } from './components/custom-form/custom-form.component';
-import { LiveViewModule } from './components/live-view/live-view.module';
-import { ParserComposerComponent } from './components/parser-composer/parser-composer.component';
-import { AdvancedEditorComponent } from './components/parser/advanced-editor/advanced-editor.component';
-import { ParserComponent } from './components/parser/parser.component';
-import { RouteComponent } from './components/route/route.component';
-import { RouterComponent } from './components/router/router.component';
-import { NzTabsModule } from 'ng-zorro-antd/tabs';
-import { NzCollapseModule } from 'ng-zorro-antd/collapse';
-import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzPopoverModule } from 'ng-zorro-antd/popover';
-import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
-import { NzSelectModule } from 'ng-zorro-antd/select';
+import {ChainPageComponent} from './chain-page.component';
+import {ChainPageEffects} from './chain-page.effects';
+import {reducer} from './chain-page.reducers';
+import {ChainViewComponent} from './components/chain-view/chain-view.component';
+import {MultiInputComponent} from './components/custom-form/components/multi-input/multi-input.component';
+import {CustomFormComponent} from './components/custom-form/custom-form.component';
+import {LiveViewModule} from './components/live-view/live-view.module';
+import {ParserComposerComponent} from './components/parser-composer/parser-composer.component';
+import {AdvancedEditorComponent} from './components/parser/advanced-editor/advanced-editor.component';
+import {ParserComponent} from './components/parser/parser.component';
+import {RouteComponent} from './components/route/route.component';
+import {RouterComponent} from './components/router/router.component';
+import {NzTabsModule} from 'ng-zorro-antd/tabs';
+import {NzCollapseModule} from 'ng-zorro-antd/collapse';
+import {NzGridModule} from 'ng-zorro-antd/grid';
+import {NzToolTipModule} from 'ng-zorro-antd/tooltip';
+import {NzButtonModule} from 'ng-zorro-antd/button';
+import {NzInputModule} from 'ng-zorro-antd/input';
+import {NzPopoverModule} from 'ng-zorro-antd/popover';
+import {NzCardModule} from 'ng-zorro-antd/card';
+import {NzBreadCrumbModule} from 'ng-zorro-antd/breadcrumb';
+import {NzFormModule} from 'ng-zorro-antd/form';
+import {NzIconModule} from 'ng-zorro-antd/icon';
+import {NzPopconfirmModule} from 'ng-zorro-antd/popconfirm';
+import {NzSelectModule} from 'ng-zorro-antd/select';
+import {NzDropDownModule} from "ng-zorro-antd/dropdown";
+import {IndexingFormComponent} from './components/indexing-form/indexing-form.component';
+import {NzLayoutModule} from "ng-zorro-antd/layout";
 
 @NgModule({
   declarations: [
@@ -60,6 +63,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
     AdvancedEditorComponent,
     AutofocusDirective,
     MultiInputComponent,
+    IndexingFormComponent,
   ],
   entryComponents: [ ChainViewComponent ],
     imports: [
@@ -85,6 +89,8 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
         NzIconModule,
         NzPopconfirmModule,
         NzSelectModule,
+        NzDropDownModule,
+        NzLayoutModule,
     ],
   providers: [
     NzMessageService,

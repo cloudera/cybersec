@@ -10,24 +10,28 @@
  * limitations governing your use of the file.
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {FormControl} from '@angular/forms';
 
-import { CustomFormConfig } from '../../custom-form.component';
+import {CustomFormConfig} from '../../custom-form.component';
 
 @Component({
   selector: 'app-multi-input',
   templateUrl: './multi-input.component.html',
   styleUrls: ['./multi-input.component.scss']
 })
-export class MultiInputComponent implements OnInit {
+export class MultiInputComponent implements OnInit, OnChanges {
 
   @Input() config: CustomFormConfig;
   @Input() value: string | any[] = "";
+  @Input() selectedSource: string;
+  @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() changeValue = new EventEmitter<{ [key: string]: string }[]>();
 
   count = 0;
   controls = [];
+  ignoreColumns: string[] = [];
+  mappingColumns: string[] = [];
 
   constructor() { }
 
@@ -41,6 +45,31 @@ export class MultiInputComponent implements OnInit {
         new FormControl('')
       );
     }
+  }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.indexingFieldMap || changes.selectedSource) {
+      this.updateDropdownLists();
+    }
+  }
+
+  private updateDropdownLists() {
+    // clear the existing lists
+    this.ignoreColumns = [];
+    this.mappingColumns = [];
+
+    // split the items into two lists based on the boolean value
+    if (this.indexingFieldMap && this.selectedSource) {
+      this.indexingFieldMap.get(this.selectedSource).forEach((value, key) => {
+        if (value) {
+          this.ignoreColumns.push(key);
+        } else {
+          this.mappingColumns.push(key);
+        }
+      });
+    }
+    this.ignoreColumns.sort()
+    this.mappingColumns.sort()
   }
 
   onAddClick() {
@@ -58,6 +87,11 @@ export class MultiInputComponent implements OnInit {
       };
     });
     this.changeValue.emit(value);
+  }
+
+  updateValue(selectedValue: String, control: FormControl, config: CustomFormConfig) {
+    control.setValue(selectedValue)
+    this.onChange(config)
   }
 
   onRemoveFieldClick(control, config) {
