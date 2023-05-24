@@ -1,4 +1,5 @@
 import {Component, Input, OnInit} from "@angular/core";
+import {b} from "msw/lib/glossary-de6278a9";
 
 @Component({
   selector: 'app-status-icon',
@@ -11,17 +12,23 @@ export class StatusIconComponent implements OnInit {
   ngOnInit(): void {
   }
 
+  isSpinner(): boolean {
+    return this.iconName === "running";
+  }
+
   getIconType(): string {
     switch (this.iconName.toLowerCase()) {
-      case 'stop': case 'stopped':
+      case 'stop':
+      case 'stopped':
         return 'stop_circle_outline';
-      case 'start' : case 'running':
-        return 'play_circle_outline';
-      case 'pause':
+      case 'paused':
         return 'pause_circle_outline';
       case 'failed':
         return 'error';
+      case 'start' :
+        return 'play_circle_outline';
       case 'online':
+      case 'started' :
         return 'check_circle_outline';
       case 'offline':
         return 'offline_bolt';
@@ -34,18 +41,16 @@ export class StatusIconComponent implements OnInit {
 
   getIconClass(): string {
     switch (this.iconName.toLowerCase()) {
-      case 'stop': case 'stopped':
-        return 'red-icon';
-      case 'start' : case 'running':
-        return 'green-icon';
-      case 'pause':
-        return 'yellow-icon';
+      case 'stop':
       case 'failed':
         return 'red-icon';
-      case 'online':
-        return 'green-icon';
+      case 'stopped':
+      case 'paused':
       case 'offline':
-        return 'red-icon';
+        return 'gray-icon';
+      case 'started' :
+      case 'start' :
+      case 'online':
       case 'restart' :
         return 'green-icon';
       default:

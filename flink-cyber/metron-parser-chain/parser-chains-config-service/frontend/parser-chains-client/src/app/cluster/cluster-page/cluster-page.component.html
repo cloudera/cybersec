@@ -15,15 +15,15 @@
   <mat-icon>more_vert</mat-icon>
 </button>
 <mat-menu #menu="matMenu">
-  <button mat-menu-item (click)="this.changeJobStatus('start')">
+  <button mat-menu-item (click)="this.changeJobStatus('running')">
     <app-status-icon iconName="start"></app-status-icon>
     <span>Start</span>
   </button>
-  <button mat-menu-item disabled (click)="this.changeJobStatus('restart')">
+  <button mat-menu-item (click)="this.changeJobStatus('started')">
     <app-status-icon iconName="restart"></app-status-icon>
     <span>Restart</span>
   </button>
-  <button mat-menu-item (click)="this.changeJobStatus('stop')">
+  <button mat-menu-item (click)="this.changeJobStatus('stopped')">
     <app-status-icon iconName="stop"></app-status-icon>
     <span>Stop</span>
   </button>

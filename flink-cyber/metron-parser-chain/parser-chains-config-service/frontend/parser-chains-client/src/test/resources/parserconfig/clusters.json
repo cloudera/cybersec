@@ -10,7 +10,7 @@
         "branch": "main",
         "pipeline": "netflow",
         "type": "parser",
-        "status": "running",
+        "status": "started",
         "created": "1681213301000"
       },
       {
@@ -50,7 +50,7 @@
         "branch": "main",
         "pipeline": "squid",
         "type": "triage",
-        "status": "running",
+        "status": "started",
         "created": "1681213501110"
       },
       {
@@ -58,7 +58,7 @@
         "branch": "develop",
         "pipeline": "squid",
         "type": "parser",
-        "status": "running",
+        "status": "paused",
         "created": "1681213301000"
       },
       {
@@ -74,7 +74,7 @@
         "branch": "develop",
         "pipeline": "squid",
         "type": "triage",
-        "status": "stopped",
+        "status": "paused",
         "created": "1681213501110"
       }
     ]

@@ -12,12 +12,13 @@
 
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {forkJoin, Observable, throwError} from 'rxjs';
+import {forkJoin, Observable, of, throwError} from 'rxjs';
 import {catchError, switchMap} from "rxjs/operators";
 import {ClusterModel, Job} from "../cluster-list-page/cluster-list-page.model";
 import {ClusterService} from "../../services/cluster.service";
 import {SelectionModel} from '@angular/cdk/collections';
 import {HttpErrorResponse, HttpResponse} from "@angular/common/http";
+import {SnackbarService, SnackBarStatus} from "../../services/snack-bar.service";
 
 
 @Component({
@@ -35,7 +36,8 @@ export class ClusterPageComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private clusterService: ClusterService
+    private clusterService: ClusterService,
+    private snackBarService: SnackbarService
   ) {
     this.cluster$ = this.route.paramMap.pipe(
       switchMap(params => {
@@ -63,26 +65,46 @@ export class ClusterPageComponent implements OnInit {
     }
   }
 
-  changeJobStatus(newStatus: 'start' | 'stop' | 'restart') {
+  changeJobStatus(newStatus: 'running' | 'started' | 'stopped') {
     forkJoin(
       this.selection.selected.reduce((acc, job) =>
-        ({...acc,
-          [job.name]:
-            this.clusterService.sendJobCommand(this.clusterId, job.name, {status: newStatus})}),
+          ({
+            ...acc,
+            [job.name]:
+              this.clusterService.sendJobCommand(this.clusterId, job.name, {status: newStatus}).pipe(catchError(err => {
+                this.snackBarService.showMessage(err.message, SnackBarStatus.Fail);
+                return of(null);
+              }))
+          }),
         {})
-    ).subscribe((value: {[jobName: string] : HttpResponse<any>}) => {
+    ).subscribe((value: { [jobName: string]: HttpResponse<any> }) => {
         Object.entries(value).forEach(([jobName, res]) => {
-          this.jobs = this.jobs.map(job => job.name === jobName ? res.status === 204 ? {...job, status: newStatus} : job : job);
+          this.jobs = this.jobs.map(this.updateJobStatus(jobName, res, newStatus));
         });
       },
       (error) => {
         //handle your error here
-        console.log("error");
-        console.log(error);
+        this.snackBarService.showMessage(`Unexpected error ${error.message}`, SnackBarStatus.Fail);
       }, () => {
         //observable completes
         this.selection.clear();
       });
+  }
+
+  private updateJobStatus(jobName: string, res: HttpResponse<any>, newStatus: 'running' | 'started' | 'stopped') {
+    return job => {
+      if (job.name === jobName && res !== null) {
+        if (res.status === 204) {
+          this.snackBarService.showMessage(`Successfully updated '${jobName}' with new status '${newStatus}' `, SnackBarStatus.Success);
+          return {...job, status: newStatus};
+        } else {
+          this.snackBarService.showMessage(`Get '${res.status}' response when updating job '${jobName} status to '${newStatus}'.`, SnackBarStatus.Warning);
+          return job;
+        }
+      } else {
+        return job;
+      }
+    };
   }
 
   private handleError(error: HttpErrorResponse) {
