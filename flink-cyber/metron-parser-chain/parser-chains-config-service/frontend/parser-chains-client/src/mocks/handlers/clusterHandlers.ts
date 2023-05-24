@@ -41,6 +41,11 @@ export const clusterHandlers = [
     const storedClusters: ClusterModel[] = JSON.parse(localStorage.getItem('cluster'));
     const clusterModel = storedClusters.find(chain => chain.id === clusterId);
     const job: Job = clusterModel?.jobs.find(job => job.name === jobName);
+    if (jobName.toLowerCase().includes('triage')) {
+      return res(
+        ctx.status(400)
+      );
+    }
     if (!job) {
       return res(
         ctx.status(404)

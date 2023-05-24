@@ -19,6 +19,13 @@
   -webkit-text-fill-color: transparent;
 }
 
+.gray-icon {
+  background: grey;
+  cursor: pointer;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .mat-icon {
   vertical-align: -5px;
 }

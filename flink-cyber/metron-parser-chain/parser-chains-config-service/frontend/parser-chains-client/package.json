@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "node -r dotenv/config scripts/config-app-server.js",
     "start:dev": "ng serve --configuration dev",
+    "start:dev-mock": "ng serve --configuration dev-mock",
     "start:production": "node scripts/config-app-server.js",
     "build": "ng build --baseHref=/ui/",
     "test": "ng test",
