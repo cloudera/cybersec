@@ -88,7 +88,8 @@ public class GrokParser implements Parser {
 
     @Configurable(key = "grokExpression",
             label = "Grok Expression(s)",
-            description = "The grok expression to execute.")
+            description = "The grok expression to execute.",
+            multipleValues = true)
     public GrokParser expression(String grokExpression) {
         if (StringUtils.isNotBlank(grokExpression)) {
             Grok grok = grokCompiler.compile(grokExpression, zoneOffset, false);

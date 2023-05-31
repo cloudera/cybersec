@@ -130,6 +130,8 @@ get_kerberos_config security_options
 
 job_properties=("$CYBERSEC_CONF_DIR/kafka.properties" "${job_properties[@]}")
 
+job_properties=("/etc/cybersec/conf/kafka.properties" "${job_properties[@]}")
+
 flink run \
   "${savepoint_options[@]}" \
   "${classpath_options[@]}" \

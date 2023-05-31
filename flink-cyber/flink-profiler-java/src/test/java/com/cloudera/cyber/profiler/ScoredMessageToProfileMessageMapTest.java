@@ -16,6 +16,8 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import com.cloudera.cyber.scoring.Scores;
+import com.cloudera.cyber.scoring.ScoringProcessFunction;
+import com.cloudera.cyber.scoring.ScoringSummarizationMode;
 import com.google.common.collect.Lists;
 import org.junit.Assert;
 import org.junit.Test;
@@ -42,10 +44,10 @@ public class ScoredMessageToProfileMessageMapTest {
         inputExtensions.put(notRequiredFieldName, "should be removed");
 
         Message inputMessage = TestUtils.createMessage(inputExtensions);
-        ScoredMessage inputScoredMessage = ScoredMessage.builder().
-                cyberScoresDetails(Collections.singletonList(Scores.builder().reason("because").score(expectedScore).build())).
-                message(inputMessage).
-                build();
+
+        List<Scores> scoreDetails = Collections.singletonList(Scores.builder().reason("because").score(expectedScore).build());
+        ScoredMessage inputScoredMessage = ScoringProcessFunction.scoreMessage(inputMessage, scoreDetails, ScoringSummarizationMode.DEFAULT());
+
         ScoredMessageToProfileMessageMap map = new ScoredMessageToProfileMessageMap(profileGroupConfig);
         ProfileMessage outputProfileMessage = map.map(inputScoredMessage);
 

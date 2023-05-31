@@ -16,9 +16,7 @@ import lombok.*;
 import org.apache.flink.util.Preconditions;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,6 +38,9 @@ public class ProfileGroupConfig implements Serializable {
     public static final String UNNECESSARY_STATS_SLIDE_ERROR = "Profile group '%s' does not have calculateStats enabled but specifies statsSlide";
     public static final String MISSING_STATS_SLIDE_UNIT = "Profile group '%s' has calculateStates enabled but does not specify statsSlideUnit";
     public static final String ILLEGAL_TIME_UNIT_ERROR = "Profile group '%s' %s has an undefined time unit.";
+    public static final String DUPLICATE_PROFILE_GROUP_NAMES_ERROR = "Duplicate profile group names '%s'.";
+    public static final String DUPLICATE_RESULT_EXTENSIONS_NAMES = "Profile group '%s' has duplicate result extension names '%s'.";
+
     private String profileGroupName;
     private ArrayList<String> sources;
     private ArrayList<String> keyFieldNames;
@@ -80,9 +81,26 @@ public class ProfileGroupConfig implements Serializable {
         }
 
         int offset = 1;
+        Set<String> uniqueMeasurementResults = new HashSet<>();
+
+        Set<String> duplicateMeasurementResults = new HashSet<>();
         for(ProfileMeasurementConfig measurement : measurements) {
             measurement.verify(this, offset++);
+            String resultExtensionName = measurement.getResultExtensionName();
+            if (!uniqueMeasurementResults.add(resultExtensionName)) {
+                duplicateMeasurementResults.add(resultExtensionName);
+            }
         }
+        Preconditions.checkState(duplicateMeasurementResults.isEmpty(), String.format(DUPLICATE_RESULT_EXTENSIONS_NAMES, getProfileGroupName(), String.join(", ", duplicateMeasurementResults)));
+    }
+
+    public static void verify(List<ProfileGroupConfig> profileGroupConfigs) {
+        profileGroupConfigs.forEach(ProfileGroupConfig::verify);
+        Set<String> uniqueProfileGroupNames = new HashSet<>();
+        Set<String> duplicateProfileGroupNames = profileGroupConfigs.stream().map(ProfileGroupConfig::getProfileGroupName)
+                .filter(n -> !uniqueProfileGroupNames.add(n))
+                .collect(Collectors.toSet());
+        Preconditions.checkState(duplicateProfileGroupNames.isEmpty(), String.format(DUPLICATE_PROFILE_GROUP_NAMES_ERROR, String.join(", ", duplicateProfileGroupNames)));
     }
 
     private void verifyList(List<?> listToVerify, String messageFormat) {

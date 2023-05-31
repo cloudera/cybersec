@@ -16,9 +16,12 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.rules.DynamicRuleCommandType;
 import com.cloudera.cyber.rules.RuleType;
+import com.google.common.collect.ImmutableMap;
+import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.streaming.util.BroadcastOperatorTestHarness;
 import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.Duration;
@@ -26,7 +29,9 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static com.cloudera.cyber.flink.FlinkUtils.PARAMS_PARALLELISM;
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TestScoringRulesProcessFunction {
     private static final String FIRST_RULE_EXTENSION_KEY = "test.key.1";
@@ -58,8 +63,10 @@ public class TestScoringRulesProcessFunction {
         List<ScoredMessage> expectedScoredMessages = new ArrayList<>();
         sendMessage(expectedScoredMessages, new HashMap<String,String>() {{ put(FIRST_RULE_EXTENSION_KEY, "key value");}},
                 Collections.singletonList(Scores.builder().ruleId(ruleV0.getId()).score(expectedScore).reason(MATCH_REASON).build()), harness);
+        expectedScoredMessages.get(0).setCyberScore(expectedScore);
         sendMessage(expectedScoredMessages, Collections.emptyMap(),
                 Collections.singletonList(Scores.builder().ruleId(ruleV0.getId()).score(0.0).reason(NO_MATCH_REASON).build()), harness);
+        expectedScoredMessages.get(1).setCyberScore(0.0);
 
         // update the rule script
         expectedScore = 70.0;
@@ -69,6 +76,7 @@ public class TestScoringRulesProcessFunction {
         // trigger the rule again and make sure the results match the new version
         sendMessage(expectedScoredMessages, new HashMap<String,String>() {{ put(FIRST_RULE_EXTENSION_KEY, "key value");}},
                 Collections.singletonList(Scores.builder().ruleId(ruleV0.getId()).score(expectedScore).reason(MATCH_REASON).build()), harness);
+        expectedScoredMessages.get(2).setCyberScore(expectedScore);
 
         assertEquals(expectedScoredMessages, harness.extractOutputValues());
         harness.snapshot(1L, 1L);
@@ -81,7 +89,7 @@ public class TestScoringRulesProcessFunction {
         // insert a new rule
         double expectedScore = 90.0;
         ScoringRule ruleV0 = buildScoringRule(true, 1, "first ruleV0", String.format(RULE_SCRIPT_FORMAT_BROKEN, FIRST_RULE_EXTENSION_KEY, expectedScore));
-        ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> scoringRuleCommandResults = verifyUpsert(ruleV0, false, harness, null, false);
+        verifyUpsert(ruleV0, false, harness, null, false);
 
     }
 
@@ -119,9 +127,41 @@ public class TestScoringRulesProcessFunction {
         // triggering the rule again - scores should be returned
         sendMessage(expectedScoredMessages, extensionsToTriggerRule, allScores, harness);
 
+        expectedScoredMessages.get(0).setCyberScore(firstExpectedScore);
+        expectedScoredMessages.get(1).setCyberScore(0.0);
+        expectedScoredMessages.get(2).setCyberScore(firstExpectedScore);
         assertEquals(expectedScoredMessages, harness.extractOutputValues());
     }
 
+    @Test
+    public void testIllegalScoreSummarization() {
+            String badScoringMethod = "BAD_SCORING";
+            Map<String, String> props = ImmutableMap.of(PARAMS_PARALLELISM, "1",
+                    ScoringJobKafka.SCORING_SUMMATION_NAME(), badScoringMethod);
+
+            assertThrows(IllegalArgumentException.class, () -> new ScoringProcessFunction(ScoringJob.Descriptors.rulesResultSink, ScoringJob.Descriptors.rulesState, ParameterTool.fromMap(props)),
+                    String.format(ScoringProcessFunction.ILLEGAL_SUMMARIZATION_METHOD_ERROR_MESSAGE, badScoringMethod, ScoringSummarizationMode.legalSummarizationModes()));
+   }
+
+    @Test
+    public void testScoreMessages() {
+        testScoreMessage(TestUtils.createMessage(), Collections.emptyList(), 0.0, ScoringSummarizationMode.DEFAULT());
+
+        List<Scores> scores = Arrays.asList(Scores.builder().ruleId("1").reason("reason 1").score(50.0).build(),
+                Scores.builder().ruleId("2").reason("reason 2").score(50.0).build());
+
+        testScoreMessage(TestUtils.createMessage(), scores, 100.00, ScoringSummarizationMode.SUM);
+        testScoreMessage(TestUtils.createMessage(), scores, 50.00, ScoringSummarizationMode.MEAN);
+
+        testScoreMessage(TestUtils.createMessage(), Collections.singletonList(Scores.builder().ruleId("1").reason("reason 1").score(50.0).build()), 50.0, ScoringSummarizationMode.MAX);
+    }
+
+    private void testScoreMessage(Message baseMessage, List<Scores> scoreDetails, double expectedScore, ScoringSummarizationMode mode) {
+        ScoredMessage scoredMessage =  ScoringProcessFunction.scoreMessage(baseMessage, scoreDetails, mode);
+        Assert.assertEquals(baseMessage, scoredMessage.getMessage());
+        Assert.assertEquals(scoreDetails, scoredMessage.getCyberScoresDetails());
+        Assert.assertEquals(expectedScore, scoredMessage.getCyberScore(), 0.01);
+    }
 
     @Test
     public void testDeleteRule() throws Exception {
@@ -151,6 +191,9 @@ public class TestScoringRulesProcessFunction {
         sendMessage(expectedScoredMessages, extensionsToTriggerRule,
                 Collections.emptyList(), harness);
 
+        expectedScoredMessages.get(0).setCyberScore(expectedScore);
+        expectedScoredMessages.get(1).setCyberScore(0.0);
+        expectedScoredMessages.get(2).setCyberScore(0.0);
         assertEquals(expectedScoredMessages, harness.extractOutputValues());
     }
 
@@ -182,21 +225,19 @@ public class TestScoringRulesProcessFunction {
         sendMessage(expectedScoredMessages, extensionsToTriggerRule,
                 Collections.singletonList(Scores.builder().ruleId(rule.getId()).score(expectedScore).reason(MATCH_REASON).build()), harness);
 
+        expectedScoredMessages.forEach(sm -> sm.setCyberScore(expectedScore));
         assertEquals(expectedScoredMessages, harness.extractOutputValues());
     }
 
     private void sendMessage(List<ScoredMessage> expectedScoredMessages, Map<String, String> extensions, List<Scores> expectedScores, BroadcastOperatorTestHarness<Message, ScoringRuleCommand, ScoredMessage> harness) throws Exception {
         Message sentMessage = TestUtils.createMessage(extensions);
         harness.processElement(new StreamRecord<>(sentMessage));
-        expectedScoredMessages.add(ScoredMessage.builder()
-                .message(sentMessage)
-                .cyberScoresDetails(expectedScores)
-                .build());
+        expectedScoredMessages.add(ScoringProcessFunction.scoreMessage(sentMessage, expectedScores, ScoringSummarizationMode.DEFAULT()));
     }
 
     private BroadcastOperatorTestHarness<Message, ScoringRuleCommand, ScoredMessage> createTestHarness() throws Exception {
         BroadcastOperatorTestHarness<Message, ScoringRuleCommand, ScoredMessage> harness = ProcessFunctionTestHarnesses
-                .forBroadcastProcessFunction(new ScoringProcessFunction(ScoringJob.Descriptors.rulesResultSink, ScoringJob.Descriptors.rulesState ), ScoringJob.Descriptors.rulesState);
+                .forBroadcastProcessFunction(new ScoringProcessFunction(ScoringJob.Descriptors.rulesResultSink, ScoringJob.Descriptors.rulesState, ParameterTool.fromMap(new HashMap<>())), ScoringJob.Descriptors.rulesState);
         harness.open();
 
         return harness;
@@ -249,11 +290,6 @@ public class TestScoringRulesProcessFunction {
 
     private ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> verifyList(ScoringRule rule, BroadcastOperatorTestHarness<Message, ScoringRuleCommand, ScoredMessage> harness, ConcurrentLinkedQueue<StreamRecord<ScoringRuleCommandResult>> scoringRuleCommandResults) throws Exception {
         ScoringRuleCommand listCommand =  buildScoringRuleCommand(DynamicRuleCommandType.LIST, null, null);
-        List<ScoringRuleCommandResult> expectedReplies = new ArrayList<>();
-        if (rule != null) {
-            expectedReplies.add(ScoringRuleCommandResult.builder().cmdId(listCommand.getId()).success(true).rule(rule).build());
-        }
-        expectedReplies.add(ScoringRuleCommandResult.builder().cmdId(listCommand.getId()).success(true).rule(null).build());
         return verifyBroadcast(listCommand, harness, scoringRuleCommandResults, ScoringRuleCommandResult.builder().cmdId(listCommand.getId()).success(true).rule(rule).build());
     }
 

@@ -36,6 +36,7 @@ public class ParserDescriptorTest {
      *     "label" : "Output Field",
      *     "description" : "The name of the output field.",
      *     "required" : true,
+     *     "multipleValues" : false,
      *     "path" : "config",
      *     "multiple" : false
      *   }, {
@@ -44,6 +45,7 @@ public class ParserDescriptorTest {
      *     "label" : "Input Field",
      *     "description" : "The name of the input field.",
      *     "required" : true,
+     *     "multipleValues" : false,
      *     "path" : "config",
      *     "multiple" : false,
      *     "defaultValue" : [ {
@@ -51,7 +53,7 @@ public class ParserDescriptorTest {
      *     } ]
      *   } ]
      * }
-     */
+      */
     @Multiline
     private String expectedJSON;
 

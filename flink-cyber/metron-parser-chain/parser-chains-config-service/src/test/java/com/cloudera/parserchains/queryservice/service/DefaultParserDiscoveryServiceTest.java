@@ -93,6 +93,7 @@ public class DefaultParserDiscoveryServiceTest {
    *     "label" : "Delimiter",
    *     "description" : "A regex used to split the text. Defaults to comma.",
    *     "required" : false,
+   *     "multipleValues" : false,
    *     "path" : "config.delimiter",
    *     "multiple" : true,
    *     "defaultValue" : [ {
@@ -104,6 +105,7 @@ public class DefaultParserDiscoveryServiceTest {
    *     "label" : "Column Index",
    *     "description" : "The index of the column containing the data.",
    *     "required" : false,
+   *     "multipleValues" : true,
    *     "path" : "config.outputField",
    *     "multiple" : true
    *   }, {
@@ -112,6 +114,7 @@ public class DefaultParserDiscoveryServiceTest {
    *     "label" : "Field Name",
    *     "description" : "The name of the output field.",
    *     "required" : false,
+   *     "multipleValues" : true,
    *     "path" : "config.outputField",
    *     "multiple" : true
    *   }, {
@@ -120,6 +123,7 @@ public class DefaultParserDiscoveryServiceTest {
    *     "label" : "Input Field",
    *     "description" : "The name of the input field to parse.",
    *     "required" : false,
+   *     "multipleValues" : false,
    *     "path" : "config.inputField",
    *     "multiple" : true,
    *     "defaultValue" : [ {
@@ -131,6 +135,7 @@ public class DefaultParserDiscoveryServiceTest {
    *     "label" : "Trim Whitespace",
    *     "description" : "Trim whitespace from each value. Defaults to true.",
    *     "required" : false,
+   *     "multipleValues" : false,
    *     "path" : "config.trim",
    *     "multiple" : true,
    *     "defaultValue" : [ {
@@ -161,6 +166,7 @@ public class DefaultParserDiscoveryServiceTest {
    *       "label" : "Field to Remove",
    *       "description" : "The name of a field to remove.",
    *       "required" : true,
+   *       "multipleValues" : true,
    *       "path" : "config.fieldToRemove",
    *       "multiple" : true
    *     } ]
@@ -174,6 +180,7 @@ public class DefaultParserDiscoveryServiceTest {
    *       "label" : "Delimiter",
    *       "description" : "A regex used to split the text. Defaults to comma.",
    *       "required" : false,
+   *       "multipleValues" : false,
    *       "path" : "config.delimiter",
    *       "multiple" : true,
    *       "defaultValue" : [ {
@@ -185,6 +192,7 @@ public class DefaultParserDiscoveryServiceTest {
    *       "label" : "Column Index",
    *       "description" : "The index of the column containing the data.",
    *       "required" : false,
+   *       "multipleValues" : true,
    *       "path" : "config.outputField",
    *       "multiple" : true
    *     }, {
@@ -193,6 +201,7 @@ public class DefaultParserDiscoveryServiceTest {
    *       "label" : "Field Name",
    *       "description" : "The name of the output field.",
    *       "required" : false,
+   *       "multipleValues" : true,
    *       "path" : "config.outputField",
    *       "multiple" : true
    *     }, {
@@ -201,6 +210,7 @@ public class DefaultParserDiscoveryServiceTest {
    *       "label" : "Input Field",
    *       "description" : "The name of the input field to parse.",
    *       "required" : false,
+   *       "multipleValues" : false,
    *       "path" : "config.inputField",
    *       "multiple" : true,
    *       "defaultValue" : [ {
@@ -212,6 +222,7 @@ public class DefaultParserDiscoveryServiceTest {
    *       "label" : "Trim Whitespace",
    *       "description" : "Trim whitespace from each value. Defaults to true.",
    *       "required" : false,
+   *       "multipleValues" : false,
    *       "path" : "config.trim",
    *       "multiple" : true,
    *       "defaultValue" : [ {
