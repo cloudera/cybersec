@@ -17,6 +17,7 @@ export CYBERSEC_BIN=${CYBERSEC_BIN:-$CDH_CYBERSEC_BIN}
 export SCRIPTS_DIR=${SCRIPTS_DIR:-${CONF_DIR}/scripts}
 export CYBERSEC_CONF_DIR=${CONF_DIR}/cybersec-conf
 
+. $COMMON_SCRIPT
 
 case $CMD in
   (start-parser-ui)
