@@ -1,0 +1,141 @@
+<!--
+  ~ Copyright 2020 - 2023 Cloudera. All Rights Reserved.
+  ~
+  ~ This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+  ~ except in compliance with the License. You may obtain a copy of the License at
+  ~ http://www.apache.org/licenses/LICENSE-2.0.
+  ~
+  ~ This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+  ~ either express or implied. Refer to the License for the specific permissions and
+  ~ limitations governing your use of the file.
+  -->
+
+<form nz-form [formGroup]="folderForm" (ngSubmit)="fetchSamples()">
+    <nz-form-item>
+        <nz-form-label>Sample folder path</nz-form-label>
+        <nz-form-control>
+            <nz-input-group nzPrefixIcon="folder">
+                <input formControlName="folderPath"
+                       nz-input
+                       placeholder="/path/to/sample_folder"/>
+                <button
+                        nz-button
+                        nzType="primary"
+                        class="fetch-samples-button"
+                        nz-tooltip
+                        nzTooltipTitle="Fetch samples from the specified folder path">
+                    Fetch Samples
+                </button>
+            </nz-input-group>
+        </nz-form-control>
+    </nz-form-item>
+</form>
+<nz-table #nzTable [nzData]="sampleData$ | async" nzSize="small" [nzShowPagination]="false" nzTableLayout="fixed">
+    <thead>
+    <tr>
+        <th nzWidth="30px"></th>
+        <th nzWidth="60px">Status</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <ng-container *ngFor="let data of nzTable.data; let i = index">
+        <tr>
+            <td [nzExpand]="expandSet.has(data.id)" (nzExpandChange)="onExpandChange(data.id, $event)"></td>
+            <td>
+                <span nz-icon *ngIf="(runResults$ | async).get(data.id)?.status === SampleTestStatus.SUCCESS"
+                      class="sample-status-icon"
+                      [nzType]="'check-circle'"
+                      [nzTheme]="'twotone'"
+                      [nzTwotoneColor]="'#52c41a'">
+                </span>
+                <span nz-icon *ngIf="(runResults$ | async).get(data.id)?.status === SampleTestStatus.FAIL"
+                      class="sample-status-icon"
+                      [nzType]="'close-circle'"
+                      [nzTheme]="'twotone'"
+                      [nzTwotoneColor]="'#d41f1f'">
+                </span>
+                <span nz-icon
+                      *ngIf="(runResults$ | async).get(data.id) === undefined || (runResults$ | async).get(data.id)?.status === SampleTestStatus.UNKNOWN"
+                      class="sample-status-icon"
+                      [nzType]="'clock-circle'"
+                      [nzTheme]="'twotone'"
+                      [nzTwotoneColor]="'#bbbbbb'">
+                </span>
+            </td>
+            <td>{{ data.name }}</td>
+            <td>{{ data.description }}</td>
+            <td>
+                <button
+                        nz-button
+                        nzType="default"
+                        class="sample-action-button"
+                        (click)="applySample($event, data)"
+                        nz-tooltip
+                        nzTooltipTitle="Apply sample to see the detailed results in the Result tab">
+                    Apply
+                </button>
+                <button
+                        nz-button
+                        nzType="default"
+                        class="sample-action-button"
+                        (click)="editSample($event, data, i)"
+                        nz-tooltip
+                        nzTooltipTitle="Edit sample and store changes to the selected folder">
+                    Edit
+                </button>
+                <button
+                        nz-button
+                        nzType="default"
+                        class="sample-action-button"
+                        (click)="deleteSample($event, data, i)"
+                        nz-tooltip
+                        nzTooltipTitle="Delete sample and store changes to the selected folder">
+                    Delete
+                </button>
+            </td>
+        </tr>
+        <tr [nzExpand]="expandSet.has(data.id)">
+            <nz-collapse>
+                <nz-collapse-panel nzHeader="Source">
+                    <p>{{data.source}}</p>
+                </nz-collapse-panel>
+                <nz-collapse-panel nzHeader="Expected result">
+                    <p>Failure: {{data.expectedFailure}}</p>
+                    <p>{{data.expectedResult}}</p>
+                </nz-collapse-panel>
+                <nz-collapse-panel nzHeader="Actual result" [nzDisabled]="(runResults$ | async).get(data.id) === undefined">
+                    <p>Failure: {{(runResults$ | async).get(data.id)?.failure}}</p>
+                    <p>{{(runResults$ | async).get(data.id)?.result}}</p>
+                </nz-collapse-panel>
+                <nz-collapse-panel nzHeader="Difference"
+                                   *ngIf="(runResults$ | async).get(data.id)?.status === SampleTestStatus.FAIL">
+                    <app-text-diff-view
+                            originalModel="Failure: {{data.expectedFailure}}, Data: {{(runResults$ | async).get(data.id)?.expected}}"
+                            modifiedModel="Failure: {{(runResults$ | async).get(data.id)?.failure}}, Data: {{(runResults$ | async).get(data.id)?.result}}"></app-text-diff-view>
+                </nz-collapse-panel>
+            </nz-collapse>
+        </tr>
+    </ng-container>
+    </tbody>
+</nz-table>
+<button
+        nz-button
+        nzType="primary"
+        class="sample-folder-main-button"
+        (click)="runSamples()">
+    Run all samples
+</button>
+<button
+        nz-button
+        nzType="primary"
+        class="sample-folder-main-button"
+        (click)="addSample()">
+    Add new sample
+</button>
+<app-sample-edit-popup
+        [modalVisible]="editSampleModalVisible$ | async" [sample]="selectedSample[1]"
+        (sampleDataChange)="updateSample($event)">
+</app-sample-edit-popup>

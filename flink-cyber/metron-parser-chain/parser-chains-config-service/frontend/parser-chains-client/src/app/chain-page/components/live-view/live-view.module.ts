@@ -12,7 +12,7 @@
 
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreModule } from '@ngrx/store';
 import { NzModalModule } from 'ng-zorro-antd/modal';
@@ -36,6 +36,18 @@ import { LiveViewService } from './services/live-view.service';
 import { StackTraceComponent } from './stack-trace/stack-trace.component';
 import { NzTimelineModule } from 'ng-zorro-antd/timeline';
 import { NzResultModule } from 'ng-zorro-antd/result';
+import { SampleDataTextInputComponent } from './sample-data-form/sample-data-text-input/sample-data-text-input.component';
+import { SampleDataTextFolderInputComponent } from './sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.component';
+import {NzIconModule} from "ng-zorro-antd/icon";
+import {NzToolTipModule} from "ng-zorro-antd/tooltip";
+import {NzStepsModule} from "ng-zorro-antd/steps";
+import {NzTableModule} from "ng-zorro-antd/table";
+import {
+    SampleDataTextFolderInputModule
+} from "./sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.module";
+import {NzCollapseModule} from "ng-zorro-antd/collapse";
+import { TextDiffViewComponent } from './text-diff-view/text-diff-view.component';
+import {MonacoEditorModule} from '@materia-ui/ngx-monaco-editor';
 
 @NgModule({
   declarations: [
@@ -44,25 +56,36 @@ import { NzResultModule } from 'ng-zorro-antd/result';
     LiveViewResultComponent,
     ParserByParserComponent,
     StackTraceComponent,
+    SampleDataTextInputComponent,
+    SampleDataTextFolderInputComponent,
+    TextDiffViewComponent,
   ],
-  imports: [
-    NzModalModule,
-    CommonModule,
-    FormsModule,
-    StoreModule.forFeature('live-view', reducer),
-    EffectsModule.forFeature([LiveViewEffects]),
-    NzTabsModule,
-    NzFormModule,
-    NzButtonModule,
-    NzRadioModule,
-    NzInputModule,
-    NzSpinModule,
-    NzSwitchModule,
-    NzCardModule,
-    NzPopoverModule,
-    NzTimelineModule,
-    NzResultModule,
-  ],
+    imports: [
+        NzModalModule,
+        CommonModule,
+        FormsModule,
+        StoreModule.forFeature('live-view', reducer),
+        EffectsModule.forFeature([LiveViewEffects]),
+        SampleDataTextFolderInputModule,
+        NzTabsModule,
+        NzFormModule,
+        NzButtonModule,
+        NzRadioModule,
+        NzInputModule,
+        NzSpinModule,
+        NzSwitchModule,
+        NzCardModule,
+        NzPopoverModule,
+        NzTimelineModule,
+        NzResultModule,
+        ReactiveFormsModule,
+        NzIconModule,
+        NzToolTipModule,
+        NzStepsModule,
+        NzTableModule,
+        NzCollapseModule,
+        MonacoEditorModule,
+    ],
   providers: [
     LiveViewService
   ],

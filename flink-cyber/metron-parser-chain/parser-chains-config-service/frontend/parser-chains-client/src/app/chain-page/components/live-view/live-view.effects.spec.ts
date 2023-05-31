@@ -151,7 +151,7 @@ describe('live-view.effects', () => {
   it('should persist sample data input to local storage', () => {
     spyOn(localStorage, 'setItem');
 
-    liveViewEffects.persistingSapmleData$.subscribe();
+    liveViewEffects.persistingSampleData$.subscribe();
 
     actions$.next(sampleDataInputChanged({ sampleData: { type: SampleDataType.MANUAL, source: 'testing persistance' } }));
 
