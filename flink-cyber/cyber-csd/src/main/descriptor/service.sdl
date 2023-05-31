@@ -25,6 +25,16 @@
       "cybersec-plugin"
     ]
   },
+  "serviceDependencies": [
+    {
+      "name": "FLINK",
+      "required": "true"
+    },
+    {
+      "name": "KAFKA",
+      "required": "false"
+    }
+  ],
   "dependencyExtensions": [
     {
       "type": "kafkaDependency",
@@ -105,13 +115,17 @@
         "url" : "http://${host}:${parser_ui_port}",
         "secureUrl": "https://${host}:${parser_ui_port}"
       },
-      "topology" : { "minInstances" : 0, "maxInstances" : 1 },
-      "logging" : {
+      "topology": {
+        "minInstances": 0,
+        "softMinInstances": 1,
+        "softMaxInstances": 1
+      },
+      "logging": {
         "dir": "/var/log/cybersec",
-        "configFilename" : "cybersec-conf/logback.xml",
+        "configFilename": "cybersec-conf/logback.xml",
         "filename": "parser-ui-${host}.log",
         "configName": "logging.config",
-        "modifiable" : true,
+        "modifiable": true,
         "loggingType": "logback",
         "additionalConfigs": [
           {
@@ -126,7 +140,6 @@
             "key": "logger3",
             "value": "<logger name=\"com.cloudera.parserchains\" level=\"${logging.com.cloudera.parserchains.level}\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
           },
-
           {
             "key": "logger4",
             "value": "<logger name=\"org.apache.metron\" level=\"${logging.org.apache.metron.level}\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
