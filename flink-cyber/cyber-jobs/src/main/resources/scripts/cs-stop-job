@@ -26,6 +26,6 @@ if [ ! -z "$job_id" ]; then
    if [ "$job_status" = "(RUNNING)" ]; then
        flink stop $job_id 2>&1 |  grep "Savepoint completed" | awk '{print $4 }'
    else 
-       flink cancel $job_id 2>&1 > /dev/null
+       flink cancel $job_id > /dev/null 2>&1
    fi
 fi
