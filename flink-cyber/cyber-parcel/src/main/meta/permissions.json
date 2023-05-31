@@ -1,5 +1,5 @@
 {
-  "bin": {
+  "bin/env.sh": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
