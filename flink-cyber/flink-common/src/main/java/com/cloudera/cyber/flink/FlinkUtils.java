@@ -16,36 +16,33 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.cyber.parser.MessageToParseDeserializer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.formats.avro.registry.cloudera.ClouderaRegistryKafkaDeserializationSchema;
-import org.apache.flink.formats.avro.registry.cloudera.ClouderaRegistryKafkaSerializationSchema;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
+import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
+import org.apache.flink.formats.registry.cloudera.avro.ClouderaRegistryAvroKafkaDeserializationSchema;
+import org.apache.flink.formats.registry.cloudera.avro.ClouderaRegistryAvroKafkaRecordSerializationSchema;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
-import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
 import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 
 import java.util.Properties;
 import java.util.regex.Pattern;
 
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_ALLOWED_LATENESS;
 import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
 import static com.cloudera.cyber.flink.Utils.readSchemaRegistryProperties;
-import static org.apache.flink.streaming.api.windowing.time.Time.milliseconds;
 
 @Slf4j
 public class FlinkUtils<T> {
-    public static final long DEFAULT_MAX_LATENESS = 1000;
 
-    private static final String PARAMS_TOPIC_INPUT = "topic.input";
-    private static final String PARAMS_TOPIC_OUTPUT = "topic.output";
     private static final String PARAMS_CHECKPOINT_INTERVAL = "checkpoint.interval.ms";
     private static final int DEFAULT_CHECKPOINT_INTERVAL = 60000;
     public static final String PARAMS_PARALLELISM = "parallelism";
@@ -67,69 +64,74 @@ public class FlinkUtils<T> {
         env.execute(params.get("flink.job.name",defaultJobName));
     }
 
-    public FlinkKafkaProducer<T> createKafkaSink(final String topic, String groupId, final ParameterTool params) {
+    public static KafkaSource<String> createKafkaStringSource(String topic, Properties kafkaProperties) {
+        return KafkaSource.<String>builder().setBootstrapServers(kafkaProperties.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG)).setTopics(topic).setValueOnlyDeserializer(new SimpleStringSchema()).setProperties(kafkaProperties).build();
+    }
+
+    public KafkaSink<T> createKafkaSink(final String topic, String groupId, final ParameterTool params) {
         Preconditions.checkNotNull(topic, "Must specific output topic");
 
         Properties kafkaProperties = readKafkaProperties(params, groupId, false);
         log.info("Creating Kafka Sink for {}, using {}", topic, kafkaProperties);
-        KafkaSerializationSchema<T> schema = ClouderaRegistryKafkaSerializationSchema
+
+        KafkaRecordSerializationSchema<T> schema = ClouderaRegistryAvroKafkaRecordSerializationSchema
                 .<T>builder(topic)
                 .setConfig(readSchemaRegistryProperties(params))
                 .build();
-        return new FlinkKafkaProducer<T>(topic,
-                schema,
-                kafkaProperties,
-                FlinkKafkaProducer.Semantic.AT_LEAST_ONCE);
+
+        return KafkaSink.<T>builder()
+                .setBootstrapServers(kafkaProperties.getProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG))
+                .setRecordSerializer(schema)
+                .setKafkaProducerConfig(kafkaProperties)
+                .build();
     }
 
-    public FlinkKafkaConsumer<T> createKafkaGenericSource(String topic, ParameterTool params, String groupId) {
+    public KafkaSource<T> createKafkaGenericSource(String topic, ParameterTool params, String groupId) {
         Preconditions.checkNotNull(topic, "Must specific input topic");
         Preconditions.checkNotNull(groupId, "Must specific group id");
 
         Properties kafkaProperties = readKafkaProperties(params, groupId, true);
         log.info(String.format("Creating Kafka Source for %s, using %s", topic, kafkaProperties));
-        KafkaDeserializationSchema<T> schema = ClouderaRegistryKafkaDeserializationSchema
+        KafkaDeserializationSchema<T> schema = ClouderaRegistryAvroKafkaDeserializationSchema
                 .builder(type)
                 .setConfig(readSchemaRegistryProperties(params))
                 .build();
 
-        return new FlinkKafkaConsumer<T>(topic, schema, kafkaProperties);
+        return KafkaSource.<T>builder().setTopics(topic).
+                setBootstrapServers(kafkaProperties.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG)).
+                setProperties(kafkaProperties).
+                setDeserializer(KafkaRecordDeserializationSchema.of(schema)).
+                build();
     }
 
-    public static FlinkKafkaConsumer<Message> createKafkaSource(String topic, ParameterTool params, String groupId) {
+    private KafkaSourceBuilder<T> createKafkaSourceBuilder(ParameterTool params, String groupId) {
+        Preconditions.checkNotNull(groupId, "Must specific group id");
+
+        Properties kafkaProperties = readKafkaProperties(params, groupId, true);
+        KafkaDeserializationSchema<T> schema = ClouderaRegistryAvroKafkaDeserializationSchema
+                .builder(type)
+                .setConfig(readSchemaRegistryProperties(params))
+                .build();
+
+        return KafkaSource.<T>builder().
+                setBootstrapServers(kafkaProperties.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG)).
+                setProperties(kafkaProperties).
+                setDeserializer(KafkaRecordDeserializationSchema.of(schema));
+
+    }
+    public static KafkaSource<Message> createKafkaSource(String topic, ParameterTool params, String groupId) {
         Preconditions.checkNotNull(topic, "Must specific input topic");
-        Preconditions.checkNotNull(groupId, "Must specific group id");
 
-        Properties kafkaProperties = readKafkaProperties(params, groupId, true);
-        log.info(String.format("Creating Kafka Source for %s, using %s", topic, kafkaProperties));
-        KafkaDeserializationSchema<Message> schema = ClouderaRegistryKafkaDeserializationSchema
-                .builder(Message.class)
-                .setConfig(readSchemaRegistryProperties(params))
-                .build();
-
-        FlinkKafkaConsumer<Message> source = new FlinkKafkaConsumer<>(topic, schema, kafkaProperties);
-
-        Time lateness = milliseconds(params.getLong(PARAMS_ALLOWED_LATENESS, DEFAULT_MAX_LATENESS));
-        source.assignTimestampsAndWatermarks(new MessageBoundedOutOfOrder(lateness));
-        return source;
+       return  new FlinkUtils<>(Message.class).createKafkaSourceBuilder(params, groupId).setTopics(topic).build();
     }
 
-    public static FlinkKafkaConsumer<Message> createKafkaSource(Pattern topic, ParameterTool params, String groupId) {
+    public static KafkaSource<Message> createKafkaSource(Pattern topic, ParameterTool params, String groupId) {
         Preconditions.checkNotNull(topic, "Must specific input topic pattern");
-        Preconditions.checkNotNull(groupId, "Must specific group id");
-        Properties kafkaProperties = readKafkaProperties(params, groupId, true);
-        KafkaDeserializationSchema<Message> schema = ClouderaRegistryKafkaDeserializationSchema
-                .builder(Message.class)
-                .setConfig(readSchemaRegistryProperties(params))
-                .build();
 
-        FlinkKafkaConsumer<Message> source = new FlinkKafkaConsumer<>(topic, schema, kafkaProperties);
-        Time lateness = milliseconds(params.getLong(PARAMS_ALLOWED_LATENESS, DEFAULT_MAX_LATENESS));
-        source.assignTimestampsAndWatermarks(new MessageBoundedOutOfOrder(lateness));
-        return source;
+        return  new FlinkUtils<>(Message.class).createKafkaSourceBuilder(params, groupId).setTopicPattern(topic).build();
     }
 
-    public static <T> DataStream<T> createRawKafkaSource(StreamExecutionEnvironment env, ParameterTool params, String groupId, KafkaDeserializationSchema<T> deserializationSchema) {
+    public static <T> DataStream<T> createRawKafkaSource(StreamExecutionEnvironment env, ParameterTool params, String groupId, KafkaRecordDeserializationSchema<T> deserializationSchema) {
         String inputTopic = params.get(ConfigConstants.PARAMS_TOPIC_INPUT,"");
         String pattern = params.get(ConfigConstants.PARAMS_TOPIC_PATTERN, "");
 
@@ -141,27 +143,18 @@ public class FlinkUtils<T> {
         Properties kafkaProperties = readKafkaProperties(params, groupId, true);
 
         kafkaProperties.putIfAbsent(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        KafkaSourceBuilder<T> kafkaSourceBuilder = KafkaSource.<T>builder().setDeserializer(deserializationSchema).setProperties(kafkaProperties);
 
-        DataStreamSource<T> source = (pattern != null) ?
-            env.addSource(new FlinkKafkaConsumer<>(Pattern.compile(pattern), deserializationSchema, kafkaProperties)) :
-            env.addSource(new FlinkKafkaConsumer<>(inputTopic, deserializationSchema, kafkaProperties));
+        if (pattern != null) {
+            kafkaSourceBuilder.setTopicPattern(Pattern.compile(pattern));
+        } else {
+            kafkaSourceBuilder.setTopics(inputTopic);
+        }
 
-        return source
-            .name("Kafka Source")
-            .uid("kafka.input");
+        return env.fromSource(kafkaSourceBuilder.build(), WatermarkStrategy.noWatermarks(), "Kafka Source");
     }
 
     public static DataStream<MessageToParse> createRawKafkaSource(StreamExecutionEnvironment env, ParameterTool params, String groupId) {
         return createRawKafkaSource(env, params,groupId, new MessageToParseDeserializer());
-    }
-
-    public static DataStream<Message> assignTimestamps(DataStream<Message> messages, long allowedLatenessMillis) {
-        BoundedOutOfOrdernessTimestampExtractor<Message> timestampAssigner = new BoundedOutOfOrdernessTimestampExtractor<Message>(Time.milliseconds(allowedLatenessMillis)) {
-            @Override
-            public long extractTimestamp(Message message) {
-                return message.getTs();
-            }
-        };
-        return messages.assignTimestampsAndWatermarks(timestampAssigner);
     }
 }

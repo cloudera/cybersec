@@ -16,15 +16,14 @@ import com.cloudera.cyber.DedupeMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor;
-import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Preconditions;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
@@ -33,7 +32,7 @@ import static com.cloudera.cyber.flink.FlinkUtils.createKafkaSource;
 public class DedupeJobKafka extends DedupeJob {
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
-        ParameterTool params = Utils.getParamToolsFromProperties(args);;
+        ParameterTool params = Utils.getParamToolsFromProperties(args);
         new DedupeJobKafka()
             .createPipeline(params)
             .execute("Flink Deduplicator");
@@ -56,29 +55,23 @@ public class DedupeJobKafka extends DedupeJob {
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<DedupeMessage> results) {
-        FlinkKafkaProducer<DedupeMessage> sink = new FlinkUtils<>(DedupeMessage.class).createKafkaSink(
+        KafkaSink<DedupeMessage> sink = new FlinkUtils<>(DedupeMessage.class).createKafkaSink(
                 params.getRequired("topic.enrichment"),
                 "dedup",
                 params);
-        results.addSink(sink).name("Kafka Results").uid("kafka.results");
+        results.sinkTo(sink).name("Kafka Results").uid("kafka.results");
     }
 
     @Override
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> sessionKey, Long sessionTimeout) {
         String inputTopic = params.getRequired("topic.input");
         String groupId = createGroupId(inputTopic, sessionKey, sessionTimeout);
-        Time allowedLateness = Time.milliseconds(params.getLong(PARAM_DEDUPE_LATENESS, 0L));
-        AssignerWithPeriodicWatermarks<Message> assigner = new BoundedOutOfOrdernessTimestampExtractor<Message>(allowedLateness) {
-            @Override
-            public long extractTimestamp(Message message) {
-                return message.getTs();
-            }
-        };
-        return env.addSource(createKafkaSource(inputTopic,
+
+        WatermarkStrategy<Message> watermarkStrategy = WatermarkStrategy.<Message>forBoundedOutOfOrderness(Duration.ofMillis(params.getLong(PARAM_DEDUPE_LATENESS, 0L))).
+                withTimestampAssigner((event, timestamp) -> event.getTs());
+        return env.fromSource(createKafkaSource(inputTopic,
                         params,
-                        groupId))
-                .assignTimestampsAndWatermarks(assigner)
-                        .name("Kafka Source")
+                        groupId), watermarkStrategy, "Kafka Source")
                         .uid("kafka.input");
     }
 }
