@@ -104,7 +104,6 @@ export class LiveViewComponent implements OnInit, AfterViewInit, OnDestroy {
       takeUntil(this.unsubscribe$),
       filter(sampleData => sampleData !== null),
     ).subscribe(sampleData => {
-      this.sampleDataForceChange$.next(null)
       this.store.dispatch(sampleDataInputChanged({ sampleData }));
     });
 
