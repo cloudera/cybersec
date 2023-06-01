@@ -13,32 +13,29 @@
 package com.cloudera.cyber.parser;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
+import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
+import org.apache.flink.util.Collector;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import java.nio.charset.StandardCharsets;
+import java.io.IOException;
 
-public class MessageToParseDeserializer implements KafkaDeserializationSchema<MessageToParse> {
-
-    @Override
-    public boolean isEndOfStream(MessageToParse messageToParse) {
-        return false;
-    }
+public class MessageToParseDeserializer implements KafkaRecordDeserializationSchema<MessageToParse> {
 
     @Override
-    public MessageToParse deserialize(ConsumerRecord<byte[], byte[]> consumerRecord) {
-        return MessageToParse.builder()
+    public void deserialize(ConsumerRecord<byte[], byte[]> consumerRecord, Collector<MessageToParse> collector) throws IOException {
+        collector.collect(MessageToParse.builder()
                 .originalBytes(consumerRecord.value())
                 .topic(consumerRecord.topic())
                 .offset(consumerRecord.offset())
                 .partition(consumerRecord.partition())
                 .key(consumerRecord.key())
-                .build();
+                .build());
     }
 
     @Override
     public TypeInformation<MessageToParse> getProducedType() {
         return TypeInformation.of(MessageToParse.class);
     }
+
 }
 
