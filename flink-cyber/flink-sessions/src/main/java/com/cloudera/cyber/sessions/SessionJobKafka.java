@@ -16,11 +16,12 @@ import com.cloudera.cyber.GroupedMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Preconditions;
 
 import java.util.Arrays;
@@ -42,7 +43,7 @@ public class SessionJobKafka extends SessionJob {
      *
      * @param inputTopic topic to read from
      * @param sessionKey the keys being used to sessionise
-     * @param sessionTimeout
+     * @param sessionTimeout duration of time window for session
      * @return Generated group id for Kakfa
      */
     private String createGroupId(String inputTopic, List<String> sessionKey, Long sessionTimeout) {
@@ -55,10 +56,10 @@ public class SessionJobKafka extends SessionJob {
 
     @Override
     protected void writeResults(ParameterTool params, SingleOutputStreamOperator<GroupedMessage> results) {
-        FlinkKafkaProducer<GroupedMessage> sink = new FlinkUtils<>(GroupedMessage.class).createKafkaSink(
+        KafkaSink<GroupedMessage> sink = new FlinkUtils<>(GroupedMessage.class).createKafkaSink(
                 params.getRequired("topic.enrichment"), "sessionizer",
                 params);
-        results.addSink(sink).name("Kafka Results").uid("kafka.results");
+        results.sinkTo(sink).name("Kafka Results").uid("kafka.results");
     }
 
     @Override
@@ -66,10 +67,9 @@ public class SessionJobKafka extends SessionJob {
         String inputTopic = params.getRequired("topic.input");
         String groupId = createGroupId(inputTopic, sessionKey, sessionTimeout);
         return
-                env.addSource(createKafkaSource(inputTopic,
+                env.fromSource(createKafkaSource(inputTopic,
                         params,
-                        groupId))
-                        .name("Kafka Source")
+                        groupId), WatermarkStrategy.noWatermarks(), "Kafka Source")
                         .uid("kafka.input");
     }
 }

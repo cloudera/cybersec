@@ -27,13 +27,13 @@ import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import com.cloudera.cyber.scoring.ScoringRuleCommand;
 import com.cloudera.cyber.scoring.ScoringRuleCommandResult;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
+import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Preconditions;
 
 import java.util.Properties;
@@ -66,27 +66,27 @@ public class EnrichmentJobKafka extends EnrichmentJob {
 
     @Override
     protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<ScoredMessage> reduction) {
-        reduction.addSink(new FlinkUtils<>(ScoredMessage.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), "enrichments-combined", params))
+        reduction.sinkTo(new FlinkUtils<>(ScoredMessage.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), "enrichments-combined", params))
                 .name("Kafka Triaging Scored Sink").uid("kafka-sink");
     }
 
     @Override
     public SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        return env.addSource(
-                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
-        ).name("Kafka Source").uid("kafka-source");
+        return env.fromSource(
+                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT),
+                        params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID)),
+                WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
     }
 
     @Override
     protected DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
-        return env.addSource(
-                new FlinkUtils<>(EnrichmentCommand.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID))
-        ).name("Kafka Enrichments").uid("kafka-enrichment-source");
+        KafkaSource<EnrichmentCommand> source = new FlinkUtils<>(EnrichmentCommand.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID));
+        return env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Enrichments").uid("kafka-enrichment-source");
     }
 
     @Override
     protected void writeEnrichmentQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> sideOutput) {
-        sideOutput.addSink(new FlinkUtils<>(EnrichmentCommandResponse.class).createKafkaSink(params.getRequired(PARAMS_QUERY_OUTPUT), "enrichment-combined-command", params))
+        sideOutput.sinkTo(new FlinkUtils<>(EnrichmentCommandResponse.class).createKafkaSink(params.getRequired(PARAMS_QUERY_OUTPUT), "enrichment-combined-command", params))
                 .name("Triaging Query Sink").uid("kafka-enrichment-query-sink");
     }
 
@@ -97,18 +97,17 @@ public class EnrichmentJobKafka extends EnrichmentJob {
 
         Properties kafkaProperties = readKafkaProperties(params, groupId, true);
 
-        FlinkKafkaConsumer<String> source = new FlinkKafkaConsumer<>(topic, new SimpleStringSchema(), kafkaProperties);
-        return env.addSource(source).name("ThreatQ Source").uid("threatq-kafka")
+        return env.fromSource(FlinkUtils.createKafkaStringSource(topic, kafkaProperties), WatermarkStrategy.noWatermarks(),"ThreatQ Source").uid("threatq-kafka")
                 .flatMap(new ThreatQParserFlatMap()).name("ThreatQ Parser").uid("threatq-parser");
     }
 
 
     @Override
     protected void writeStixThreats(ParameterTool params, DataStream<ThreatIntelligence> results) {
-        FlinkKafkaProducer<ThreatIntelligence> sink = new FlinkUtils<>(ThreatIntelligence.class).createKafkaSink(
+        KafkaSink<ThreatIntelligence> sink = new FlinkUtils<>(ThreatIntelligence.class).createKafkaSink(
                 params.get(PARAM_STIX_OUTPUT_TOPIC, DEFAULT_STIX_OUTPUT_TOPIC), "stix-threat-intel",
                 params);
-        results.addSink(sink).name("Kafka Stix Results").uid("kafka.results.stix");
+        results.sinkTo(sink).name("Kafka Stix Results").uid("kafka.results.stix");
 
         ThreatIntelligenceHBaseSinkFunction hbaseSink = new ThreatIntelligenceHBaseSinkFunction("threatIntelligence", params);
 
@@ -128,17 +127,15 @@ public class EnrichmentJobKafka extends EnrichmentJob {
     @Override
     protected DataStream<ScoringRuleCommand> createRulesSource(StreamExecutionEnvironment env, ParameterTool params) {
         String topic = params.getRequired("query.input.topic");
-        FlinkKafkaConsumer<ScoringRuleCommand> source = new FlinkUtils<>(ScoringRuleCommand.class).createKafkaGenericSource(topic, params, SCORING_RULES_GROUP_ID);
-        return env.addSource(source)
-                .name("Kafka Score Rule Source")
-                .uid("kafka.input.rule.command");
+        KafkaSource<ScoringRuleCommand> source = new FlinkUtils<>(ScoringRuleCommand.class).createKafkaGenericSource(topic, params, SCORING_RULES_GROUP_ID);
+        return env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Score Rule Source").uid("kafka.input.rule.command");
     }
 
     @Override
     protected void writeScoredRuleCommandResult(ParameterTool params, DataStream<ScoringRuleCommandResult> results) {
         String topic = params.getRequired("query.output.topic");
-        FlinkKafkaProducer<ScoringRuleCommandResult> sink = new FlinkUtils<>(ScoringRuleCommandResult.class).createKafkaSink(topic, SCORING_RULES_GROUP_ID, params);
-        results.addSink(sink).name("Kafka Score Rule Command Results").uid("kafka.output.rule.command.results");
+        KafkaSink<ScoringRuleCommandResult> sink = new FlinkUtils<>(ScoringRuleCommandResult.class).createKafkaSink(topic, SCORING_RULES_GROUP_ID, params);
+        results.sinkTo(sink).name("Kafka Score Rule Command Results").uid("kafka.output.rule.command.results");
     }
 
     @Override
@@ -146,9 +143,8 @@ public class EnrichmentJobKafka extends EnrichmentJob {
         Properties kafkaProperties = Utils.readKafkaProperties(params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID), true);
 
         String topic = params.get(PARAM_STIX_INPUT_TOPIC, DEFAULT_STIX_INPUT_TOPIC);
-        FlinkKafkaConsumer<String> consumer = new FlinkKafkaConsumer<>(topic, new SimpleStringSchema(), kafkaProperties);
-        return env.addSource(consumer).name("Stix Kafka Source").uid("stix-kafka-source");
+        KafkaSource<String> stix =  FlinkUtils.createKafkaStringSource(topic, kafkaProperties);
+        return env.fromSource(stix, WatermarkStrategy.noWatermarks(),"Stix Kafka Source").uid("stix-kafka-source");
     }
-
 
 }

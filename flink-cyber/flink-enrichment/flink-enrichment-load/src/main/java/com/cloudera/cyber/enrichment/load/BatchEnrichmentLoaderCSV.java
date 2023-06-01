@@ -12,29 +12,25 @@
 
 package com.cloudera.cyber.enrichment.load;
 
-import com.cloudera.cyber.commands.CommandType;
+import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentFieldsConfig;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageConfig;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.file.src.FileSource;
+import org.apache.flink.core.fs.Path;
+import org.apache.flink.formats.csv.CsvReaderFormat;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.DataTypes;
-import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.flink.table.sources.CsvTableSource;
-import org.apache.flink.types.Row;
 import org.apache.flink.util.Preconditions;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_SIMPLE;
 import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig.DEFAULT_ENRICHMENT_STORAGE_NAME;
@@ -58,34 +54,16 @@ public abstract class BatchEnrichmentLoaderCSV extends BatchEnrichmentLoader {
         String enrichmentType = params.getRequired(ENRICHMENT_TYPE);
         EnrichmentsConfig enrichmentsConfig = getEnrichmentsConfig(params, enrichmentType, columnNames);
         EnrichmentConfig enrichmentConfig = enrichmentsConfig.getEnrichmentConfigs().get(enrichmentType);
-        List<String> keyFields = enrichmentConfig.getFieldMapping().getKeyFields();
-        List<String> configuredValueFields = enrichmentConfig.getFieldMapping().getValueFields();
+        CsvReaderFormat<EnrichmentCommand> csvFormat =
+               CsvToEnrichmentCommandDeserializer.createCsvReaderFormat(enrichmentConfig, columnNames, ignoreFirstLine, enrichmentType);
 
-        List<String> valueFieldNames = columnNames.stream().filter(f -> !f.isEmpty() && !keyFields.contains(f) && (configuredValueFields == null || configuredValueFields.contains(f))).collect(Collectors.toList());
+        Path csvPath = new Path(path);
 
-        // create a CSV table source from the specified file
-        CsvTableSource.Builder builder = CsvTableSource.builder().path(path);
-        if (ignoreFirstLine) {
-            builder.ignoreFirstLine();
-        }
+        FileSource<EnrichmentCommand> source = FileSource.forRecordStreamFormat(csvFormat, csvPath).build();
 
-        // add a field for each column, any ignored column is named ignore_<number>
-        IntStream.range(0, columnNames.size()).
-                mapToObj(index -> !columnNames.get(index).isEmpty() ? columnNames.get(index) : String.format("ignore_%d", index)).
-                forEach(f -> builder.field(f, DataTypes.STRING()));
+        DataStream<EnrichmentCommand> csvEnrichment = env.fromSource(source, WatermarkStrategy.noWatermarks(), "Enrichment CSV");
 
-        CsvTableSource tableSource = builder.build();
-
-        EnvironmentSettings settings = EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build();
-        StreamTableEnvironment streamTableEnv = StreamTableEnvironment.create(env, settings);
-
-
-        String fieldSelection = Stream.concat(enrichmentConfig.getFieldMapping().getKeyFields().stream(), valueFieldNames.stream()).collect(Collectors.joining(","));
-        Table enrichmentTable = streamTableEnv.fromTableSource(tableSource).select(fieldSelection);
-
-        DataStream<Row> enrichmentStream = streamTableEnv.toAppendStream(enrichmentTable, Row.class);
-        MapRowToEnrichmentCommand csvToEnrichmentCommand = new MapRowToEnrichmentCommand(enrichmentType, CommandType.ADD, valueFieldNames, enrichmentConfig.getFieldMapping().getKeyDelimiter(), enrichmentConfig.getFieldMapping().getKeyFields().size() );
-        writeResults(params, enrichmentsConfig, enrichmentType, enrichmentStream.map(csvToEnrichmentCommand), env);
+        writeResults(params, enrichmentsConfig, enrichmentType, csvEnrichment, env);
     }
 
     private EnrichmentsConfig getEnrichmentsConfig(ParameterTool params, String enrichmentType, List<String> columnNames) {
