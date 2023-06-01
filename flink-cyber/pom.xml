@@ -54,16 +54,16 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.verion>1.8</java.verion>
-        <flink.version>1.15.1-csadh1.9.0.1</flink.version>
+        <flink.version>1.15.1-csa1.9.0.1</flink.version>
         <flink.hbase.version>2.4</flink.hbase.version>
-        <cdh.version>7.2.16.0-287</cdh.version>
+        <cdh.version>7.1.7.0-551</cdh.version>
         <lombok.version>1.18.22</lombok.version>
         <lombok.plugin.version>1.18.16.0</lombok.plugin.version>
         <guava.version>21.0</guava.version>
         <avro.version>1.10.0</avro.version>
         <log4j.kafka.version>2.5.0.${cdh.version}</log4j.kafka.version>
         <scala.binary.version>2.12</scala.binary.version>
-        <kafka.version>3.1.2.${cdh.version}</kafka.version>
+        <kafka.version>2.5.0.${cdh.version}</kafka.version>
         <nifi.version>1.11.4</nifi.version>
         <jackson.version>2.11.2</jackson.version>
         <jackson.datatype.version>2.10.1</jackson.datatype.version>
@@ -78,7 +78,7 @@
         <solr.version>8.4.1.${cdh.version}</solr.version>
         <maxmind.version>2.13.1</maxmind.version>
         <hadoop.version>3.1.1.${cdh.version}</hadoop.version>
-        <hbase.version>2.4.6.${cdh.version}</hbase.version>
+        <hbase.version>2.2.3.${cdh.version}</hbase.version>
         <mockito.version>3.6.0</mockito.version>
         <datasketches.version>1.3.0-incubating</datasketches.version>
         <assertj.version>3.13.2</assertj.version>
