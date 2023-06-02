@@ -73,7 +73,7 @@ while getopts "j:y:c:n:p:s:h:o" option; do
     JOB_JAR=$(cs-lookup-jar "$OPTARG")
     ;;
   y)
-    ship_config "-yt" "$OPTARG" ship_options
+    ship_config "-yt" "$OPTARG"
     ;;
   c)
     classpath_options+=("--classpath" 'file://'"$OPTARG")
@@ -88,7 +88,7 @@ while getopts "j:y:c:n:p:s:h:o" option; do
     savepoint_options=("--allowNonRestoredState" "-s" "$OPTARG")
     ;;
   o)
-      override_hbase ship_options
+      override_hbase
       ;;
   h)
     echo "$usage"
@@ -125,8 +125,7 @@ if [ -z "$YARN_NAME" ]; then
 fi
 
 init_key_store
-security_options=()
-get_kerberos_config security_options
+get_kerberos_config
 
 job_properties=("$CYBERSEC_CONF_DIR/kafka.properties" "${job_properties[@]}")
 
