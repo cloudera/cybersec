@@ -31,11 +31,27 @@
 
     <pluginRepositories>
         <pluginRepository>
-            <id>cloudera-staging</id>
-            <url>https://repository.cloudera.com/artifactory/libs-staging-local</url>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
+            <id>nexus-private-plugins</id>
+            <name>nexus-private-plugins</name>
+            <url>http://nexus-private.hortonworks.com/nexus/content/groups/public</url>
+        </pluginRepository>
+        <pluginRepository>
+            <id>in-qa</id>
+            <name>cloudera-mirrors-artifactory</name>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <url>https://nexus-private.hortonworks.com/nexus/repository/IN-QA</url>
+            <layout>default</layout>
         </pluginRepository>
     </pluginRepositories>
 
