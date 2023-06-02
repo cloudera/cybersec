@@ -4,6 +4,11 @@
     "group": "cybersec",
     "permissions": "0755"
   },
+  "bin/cs-add-generator": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
   "bin/cs-add-index": {
     "user": "cybersec",
     "group": "cybersec",
@@ -50,6 +55,11 @@
     "permissions": "0755"
   },
   "bin/cs-publish-samples": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-restart-generator": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
@@ -139,6 +149,16 @@
     "group": "cybersec",
     "permissions": "0755"
   },
+  "etc/conf/templates/generate": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/generate/templates": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
   "etc/conf/templates/index": {
     "user": "cybersec",
     "group": "cybersec",
@@ -165,6 +185,26 @@
     "permissions": "0755"
   },
   "etc/conf/templates/kafka.properties.template.open": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/generate/generator.properties.template": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/generate/config.json": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/generate/templates/squid.csv": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "etc/conf/templates/generate/templates/squid.txt": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"

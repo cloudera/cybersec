@@ -29,6 +29,12 @@
     "priority": 10,
     "isDirectory": false
   },
+  "cs-add-generator": {
+    "destination": "/usr/bin/cs-add-generator",
+    "source": "bin/cs-add-generator",
+    "priority": 10,
+    "isDirectory": false
+  },
   "cs-cancel-job": {
     "destination": "/usr/bin/cs-cancel-job",
     "source": "bin/cs-cancel-job",
@@ -62,6 +68,12 @@
   "cs-publish-samples": {
     "destination": "/usr/bin/cs-publish-samples",
     "source": "bin/cs-publish-samples",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-restart-generator": {
+    "destination": "/usr/bin/cs-restart-generator",
+    "source": "bin/cs-restart-generator",
     "priority": 10,
     "isDirectory": false
   },
