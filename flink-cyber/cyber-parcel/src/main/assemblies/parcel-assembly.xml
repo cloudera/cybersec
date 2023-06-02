@@ -81,6 +81,26 @@
         </fileSet>
 
         <fileSet>
+            <directory>${basedir}/target/cyber-jobs-${project.parent.version}/conf/templates/generate</directory>
+            <outputDirectory>/etc/conf/templates/generate</outputDirectory>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>${basedir}/target/cyber-jobs-${project.parent.version}/conf/templates/generate/templates</directory>
+            <outputDirectory>/etc/conf/templates/generate/templates</outputDirectory>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+            <includes>
+                <include>*</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
             <directory>${basedir}/target/cyber-jobs-${project.parent.version}/conf/templates/index</directory>
             <outputDirectory>/etc/conf/templates/index</outputDirectory>
             <fileMode>0755</fileMode>
