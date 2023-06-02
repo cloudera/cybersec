@@ -15,11 +15,12 @@ package com.cloudera.cyber.enrichment.geocode;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Preconditions;
 
 import java.util.Arrays;
@@ -36,11 +37,11 @@ public class IpGeoJobKafka extends IpGeoJob {
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
-        FlinkKafkaProducer<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
+        KafkaSink<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
                 params.getRequired("topic.output"),
                 "enrichment-geocode",
                 params);
-        results.addSink(sink).name("Kafka Results").uid("kafka.results");
+        results.sinkTo(sink).name("Kafka Results").uid("kafka.results");
     }
 
     /**
@@ -60,9 +61,8 @@ public class IpGeoJobKafka extends IpGeoJob {
     @Override
     protected SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> ipFields) {
         String inputTopic = params.getRequired("topic.input");
-      return env.addSource(FlinkUtils.createKafkaSource(inputTopic,
-                params,createGroupId(inputTopic, ipFields)))
-                .name("Kafka Source")
+      return env.fromSource(FlinkUtils.createKafkaSource(inputTopic,
+                params,createGroupId(inputTopic, ipFields)), WatermarkStrategy.noWatermarks(), "Kafka Source")
                 .uid("kafka.input");
     }
 

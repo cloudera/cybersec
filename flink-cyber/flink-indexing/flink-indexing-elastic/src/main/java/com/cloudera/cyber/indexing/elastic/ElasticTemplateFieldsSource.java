@@ -27,9 +27,8 @@ import org.elasticsearch.client.indices.GetIndexTemplatesRequest;
 import org.elasticsearch.client.indices.GetIndexTemplatesResponse;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
-
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,7 +37,7 @@ public class ElasticTemplateFieldsSource extends RichParallelSourceFunction<Coll
     @NonNull
     private RestHighLevelClient client;
     @NonNull
-    private long delay;
+    private final long delay;
     private volatile boolean isRunning = true;
 
     @Override
@@ -59,7 +58,7 @@ public class ElasticTemplateFieldsSource extends RichParallelSourceFunction<Coll
                         .map(
                                 template -> CollectionField.builder()
                                         .key(template.name())
-                                        .values(template.mappings().getSourceAsMap().entrySet().stream().map(e -> e.getKey()).collect(toList()))
+                                        .values(new ArrayList<>(template.mappings().getSourceAsMap().keySet()))
                                         .build())
                         .forEach(c -> {
                             long now = Instant.now().toEpochMilli();

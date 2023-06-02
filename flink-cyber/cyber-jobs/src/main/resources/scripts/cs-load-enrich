@@ -90,18 +90,19 @@ fi
 
 ship_enrichment_file=()
 configure_enrich_file=$enrichment_file
-if [ "$enrichment_file" == hdfs* ]; then
+hdfs_regex='hdfs.*'
+if ! [[ "$enrichment_file" =~ $hdfs_regex ]]; then
   if [ -f "$enrichment_file" ]; then
       ship_enrichment_file+=("-y" "$enrichment_file")
       configure_enrich_file=$(basename "$enrichment_file")
   else
-      echo "ERROR: $0 Enrichment file $enrichment_file does not exist" >&2
+      echo "ERROR: $0 Enrichment file '$enrichment_file' does not exist" >&2
       exit 1
   fi
 else
   hdfs dfs -test -f "$enrichment_file"
   if [ "$?" -ne 0 ]; then
-     echo "ERROR: $0 Enrichment file $enrichment_file does not exist" >&2
+     echo "ERROR: $0 Enrichment file '$enrichment_file' does not exist" >&2
     exit 1
   fi
 fi
