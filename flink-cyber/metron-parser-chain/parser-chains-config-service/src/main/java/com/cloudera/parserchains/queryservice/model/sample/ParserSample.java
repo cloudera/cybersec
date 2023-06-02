@@ -21,8 +21,8 @@ package com.cloudera.parserchains.queryservice.model.sample;
 import java.util.Objects;
 
 /**
- * Describes a type of parser available to the user for
- * constructing a parser chain.
+ * Describes a parser source sample that's used to store and retrieve
+ * samples for Live View from the storage
  */
 public class ParserSample {
 
