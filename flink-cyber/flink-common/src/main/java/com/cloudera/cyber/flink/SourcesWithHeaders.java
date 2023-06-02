@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * TODO - all the request and response stuff should be in wrapper objects instead of using the HasHeader interface.
- * 
+ *
  * @param <T>
  */
 @Slf4j
@@ -88,7 +88,7 @@ public class SourcesWithHeaders<T extends HasHeaders> {
                 setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE).
                 build();
     }
-    
+
     private class HeaderDeserializer implements KafkaRecordDeserializationSchema<T> {
         private final KafkaDeserializationSchema<T> delegate;
 

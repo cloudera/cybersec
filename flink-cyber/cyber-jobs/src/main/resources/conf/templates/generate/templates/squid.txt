@@ -1,0 +1,1 @@
+${((ts)/1000)?c}  ${utils.randomInt(1024,65535)?c} ${params.ip_src_addr} ${params.action}/${params.code} 414 CONNECT ${params.url} - HIER_DIRECT/${params.ip_dst_addr} -
