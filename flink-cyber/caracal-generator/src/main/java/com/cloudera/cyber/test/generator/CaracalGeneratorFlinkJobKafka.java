@@ -25,6 +25,8 @@ import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
 
 import java.nio.charset.StandardCharsets;
 
+import java.nio.charset.StandardCharsets;
+
 public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
 
     private static final String PRODUCER_ID_PREFIX = "event_generator";

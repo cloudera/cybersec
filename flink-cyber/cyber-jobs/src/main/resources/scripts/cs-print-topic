@@ -12,10 +12,25 @@
 # limitations governing your use of the file.
 #
 
+# Determine the location of the script to locate parcel
+# Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$(dirname "$SOURCE")"
+while [ -h "$SOURCE" ]
+do
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Populate necessary environment variables
+source $BIN_DIR/env.sh
+
 if [ "$#" -ne 1 ]; then
   echo "Usage: $0 topic " >&2
   exit 1
 fi
 
 topic=$1
-cs-run-java kafka-commands com.cloudera.cyber.kafka.TopicAvroToJson kafka.properties $topic
+run_java_class kafka-commands com.cloudera.cyber.kafka.TopicAvroToJson kafka.properties $topic

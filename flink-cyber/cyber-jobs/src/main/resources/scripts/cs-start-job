@@ -11,7 +11,21 @@
 # limitations governing your use of the file.
 #
 
-SHIP_DIRS=""
+# Determine the location of the script to locate parcel
+# Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$(dirname "$SOURCE")"
+while [ -h "$SOURCE" ]
+do
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Populate necessary environment variables
+source $BIN_DIR/env.sh
+
 YARN_JOB_MANAGER_MEMORY="2048"
 YARN_TASK_MANAGER_MEMORY="2048"
 
@@ -20,11 +34,6 @@ classpath_options=()
 job_properties=()
 ship_options=()
 
-# get_property_value <file name> <property_name>
-# get the value of a property from a file
-get_property_value() {
-  echo $(cat "$1" | grep -v "^.*#" | grep "$2" | cut -d '=' -f 2-)
-}
 
 # include_job_properties <file name>
 # Include the specified file in the list of property files sent to the job.
@@ -45,16 +54,6 @@ include_job_properties() {
   echo  "INFO: $1: Flink Job Name = $FLINK_JOB_NAME" >&2
 }
 
-# ship_path <file or directory path>
-# If the path is either a file or directory, include a -yt option on the job command line
-ship_path() {
-  if [ -e "$1" ]; then
-      ship_options+=("-yt" "$1")
-  else
-      echo "WARN: Could not ship $1 because it does not exist." >&2
-  fi
-}
-
 usage="$(basename "$0")  -- starts cybersec job
 
 where:
@@ -65,15 +64,16 @@ where:
     -n Yarn job name
     -p property file name
     -s save point
+    -o override hbase config files
     "
 
-while getopts "j:y:c:n:p:s:h" option; do
+while getopts "j:y:c:n:p:s:h:o" option; do
   case $option in
   j)
     JOB_JAR=$(cs-lookup-jar "$OPTARG")
     ;;
   y)
-    ship_path "$OPTARG"
+    ship_config "-yt" "$OPTARG" ship_options
     ;;
   c)
     classpath_options+=("--classpath" 'file://'"$OPTARG")
@@ -87,6 +87,9 @@ while getopts "j:y:c:n:p:s:h" option; do
   s)
     savepoint_options=("--allowNonRestoredState" "-s" "$OPTARG")
     ;;
+  o)
+      override_hbase ship_options
+      ;;
   h)
     echo "$usage"
     exit 0
@@ -121,39 +124,13 @@ if [ -z "$YARN_NAME" ]; then
   exit 1
 fi
 
-# read_properties_into_variables <property_file_name>
-# Read the name value pairs
-#   split at first equals to key and value
-#   convert property name to legal shell variable name
-#   set shell variable to property variable
-read_properties_into_variables() {
-  while read -r line; do
-    [[ "$line" =~ ^([[:space:]]*|[[:space:]]*#.*)$ ]] && continue
-    value=${line#*=}
-    key=${line%"=$value"}
-    key=$(echo $key | tr '.' '_')
-    eval ${key}=\${value}
-  done <$1
-}
-
-cs-init-keystore
-kerberos_properties="kerberos.properties"
-internal_ssl_properties="generated/internal_ssl.properties"
-
+init_key_store
 security_options=()
-if [ -f "${kerberos_properties}" ]; then
-  read_properties_into_variables "${kerberos_properties}"
-  read_properties_into_variables "${internal_ssl_properties}"
-  security_options+=("-yD" "security.kerberos.login.keytab=${kerberos_keytab}")
-  security_options+=("-yD" "security.kerberos.login.principal=${kerberos_principal}")
-  security_options+=("-yD" "security.ssl.internal.enabled=true")
-  security_options+=("-yD" "security.ssl.internal.keystore=${flink_internal_keystore}")
-  security_options+=("-yD" "security.ssl.internal.key-password=${flink_internal_password}")
-  security_options+=("-yD" "security.ssl.internal.keystore-password=${flink_internal_password}")
-  security_options+=("-yD" "security.ssl.internal.truststore=${flink_internal_keystore}")
-  security_options+=("-yD" "security.ssl.internal.truststore-password=${flink_internal_password}")
-  security_options+=("-yt" "generated/${flink_internal_keystore}")
-fi
+get_kerberos_config security_options
+
+job_properties=("$CYBERSEC_CONF_DIR/kafka.properties" "${job_properties[@]}")
+
+job_properties=("/etc/cybersec/conf/kafka.properties" "${job_properties[@]}")
 
 flink run \
   "${savepoint_options[@]}" \

@@ -17,11 +17,12 @@ export CYBERSEC_BIN=${CYBERSEC_BIN:-$CDH_CYBERSEC_BIN}
 export SCRIPTS_DIR=${SCRIPTS_DIR:-${CONF_DIR}/scripts}
 export CYBERSEC_CONF_DIR=${CONF_DIR}/cybersec-conf
 
+. $COMMON_SCRIPT
 
 case $CMD in
   (start-parser-ui)
-  get_generic_java_opts
-    echo "ParserUI echo $CYBERSEC_BIN/start-parser-ui  ${CYBERSEC_BIN}/start-parser-ui"
+    echo "ParserUI echo $CYBERSEC_BIN/start-parser-ui"
+    get_generic_java_opts
     exec ${CYBERSEC_BIN}/start-parser-ui start
     ;;
   (*)
