@@ -80,16 +80,16 @@ function run_java_class() {
   local log4j_config
   local flink_dist
 
-  for arg in "$@:3"
+  for arg in "${@:3}"
   do
     options+=("$arg")
   done
 
   jar_path=$(cs-lookup-jar "$jar_prefix")
-  flink_dist=$(cs-lookup-jar "flink_dist")
+  flink_dist=$(cs-lookup-jar "flink_dist_")
   log4j_config=$(cs-lookup-jar "log4j.properties")
   lib_jars=$(find "$CYBERSEC_OPT_DIR/lib/" -name "*.jar" | tr '\n' ':' | sed 's/:$/\n/')
-  flink_dist=$(find "$OPT_DIR/FLINK/" -name "flink-dist*.jar")
+  flink_dist=$(find "$OPT_DIR/FLINK/" -name "flink-dist_*.jar")
 
   "$JAVA_RUN" -Dlog4j.configuration="$log4j_config" -Dlog4j.configurationFile="$log4j_config" -cp "$jar_path:$lib_jars:$flink_dist" "$class_name" "${options[@]}"
 }
@@ -133,7 +133,7 @@ function init_key_store() {
 }
 
 function get_kerberos_config() {
-  local security_options=()
+  security_options=()
   kerberos_properties="kerberos.properties"
   internal_ssl_properties="generated/internal_ssl.properties"
 
@@ -150,26 +150,22 @@ function get_kerberos_config() {
     security_options+=("-yD" "security.ssl.internal.truststore-password=${flink_internal_password}")
     security_options+=("-yt" "generated/${flink_internal_keystore}")
   fi
-  eval "$1"=\('${security_options[@]}'\)
 }
 
 
 ship_config() {
-  local temp_arr
-  if [ -f "$2" ]; then
-    echo "INFO: HBase Configuration: adding file $2"
-    temp_arr+=("$1 $2")
+  if [ -e "$2" ]; then
+    echo "INFO: Shipping config $2"
+    ship_options+=("$1" "$2")
   fi
-  eval "$3"=\('${arr_temp[@]}'\)
 }
 
 override_hbase() {
-  local arr_temp=()
-  ship_config "-yt" "core-site.xml" arr_temp
-  ship_config "-yt" "hdfs-site.xml" arr_temp
-  ship_config "-yt" "hbase-site.xml" arr_temp
+  ship_config "-yt" "core-site.xml"
+  ship_config "-yt" "hdfs-site.xml"
+  ship_config "-yt" "hbase-site.xml"
 
-  if [ "${#arr_temp[@]}" -eq 0 ]; then
+  if [ "${#ship_options[@]}" -eq 0 ]; then
       if [ -f "hbase-conf/hbase-site.xml" ]; then
           hbase_conf_dir="$(pwd)/hbase-conf"
           echo "INFO: HBase Configuration: using directory $hbase_conf_dir"
@@ -179,7 +175,6 @@ override_hbase() {
       fi
   fi
 
-  eval "$1"=\('${arr_temp[@]}'\)
 }
 
 # Set environment variables
