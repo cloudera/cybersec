@@ -12,6 +12,18 @@
 # limitations governing your use of the file.
 #
 
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$(dirname "$SOURCE")"
+while [ -h "$SOURCE" ]
+do
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+source $BIN_DIR/env.sh
+
+
 if [ "$#" -ne 2 ]; then
   echo "Usage: $0 pipeline_name enrichment_type" >&2
   exit 1
@@ -20,7 +32,6 @@ fi
 pipeline=$1
 enrichment_type=$2
 
-template_dir=$(cs-get-template-dir)
 triage_dir=$pipeline/triage
 
 if [ ! -d "$triage_dir" ]; then
@@ -28,4 +39,4 @@ if [ ! -d "$triage_dir" ]; then
   exit 1
 fi
 
-sed -e s/ENRICHMENT_TYPE/$enrichment_type/g -e s/PIPELINE/$pipeline/g $template_dir/triage/load.properties.template > $pipeline/triage/load_${enrichment_type}.properties.template
+sed -e s/ENRICHMENT_TYPE/$enrichment_type/g -e s/PIPELINE/$pipeline/g $TEMPLATES_DIR/triage/load.properties.template > $pipeline/triage/load_${enrichment_type}.properties.template

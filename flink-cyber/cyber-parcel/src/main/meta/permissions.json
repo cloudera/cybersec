@@ -1,10 +1,5 @@
 {
-  "bin": {
-    "user": "cybersec",
-    "group": "cybersec",
-    "permissions": "0755"
-  },
-  "bin/cs-add-enrich": {
+  "bin/env.sh": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
@@ -35,16 +30,6 @@
     "permissions": "0755"
   },
   "bin/cs-create-pipeline": {
-    "user": "cybersec",
-    "group": "cybersec",
-    "permissions": "0755"
-  },
-  "bin/cs-get-template-dir": {
-    "user": "cybersec",
-    "group": "cybersec",
-    "permissions": "0755"
-  },
-  "bin/cs-init-keystore": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
@@ -89,16 +74,6 @@
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/cs-run-java": {
-    "user": "cybersec",
-    "group": "cybersec",
-    "permissions": "0755"
-  },
-  "bin/cs-override-hbase": {
-    "user": "cybersec",
-    "group": "cybersec",
-    "permissions": "0755"
-  },
   "bin/cs-start-job": {
     "user": "cybersec",
     "group": "cybersec",
@@ -119,7 +94,12 @@
     "group": "cybersec",
     "permissions": "0755"
   },
-  "bin/start-parser-ui": {
+  "bin/cs-start-parser-ui": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
+  "bin/cs-add-enrich": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
@@ -179,12 +159,12 @@
     "group": "cybersec",
     "permissions": "0755"
   },
-  "etc/conf/kafka.properties.template.kerberos": {
+  "etc/conf/templates/kafka.properties.template.kerberos": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"
   },
-  "etc/conf/kafka.properties.template.open": {
+  "etc/conf/templates/kafka.properties.template.open": {
     "user": "cybersec",
     "group": "cybersec",
     "permissions": "0755"

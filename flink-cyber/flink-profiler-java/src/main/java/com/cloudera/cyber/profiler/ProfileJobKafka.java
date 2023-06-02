@@ -98,25 +98,27 @@ public class ProfileJobKafka extends ProfileJob {
     }
 
     protected void writeProfileMeasurementsResults(ParameterTool params, List<ProfileDto> profileDtos, DataStream<ProfileMessage> results) throws IOException, TemplateException {
-        DataStream<MeasurementDataDto> measurementDtoDataStream = results.flatMap(new ProfileMessageToMeasurementDataDtoMapping(new ArrayList<>(profileDtos)));
-        Properties properties = Utils.readProperties(params.getProperties(), PARAMS_PHOENIX_DB_QUERY_PARAM);
-        JdbcStatementBuilder<MeasurementDataDto> objectJdbcStatementBuilder = new PhoenixJdbcStatementBuilder(params.getInt(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT, 0));
-        JdbcExecutionOptions.Builder jdbcExecutionOptionsBuilder = JdbcExecutionOptions.builder();
-        validateNumericParamAndApply(PARAMS_PHOENIX_DB_BATCH_SIZE, params.get(PARAMS_PHOENIX_DB_BATCH_SIZE), jdbcExecutionOptionsBuilder::withBatchSize);
-        validateNumericParamAndApply(PARAMS_PHOENIX_DB_INTERVAL_MILLIS, params.get(PARAMS_PHOENIX_DB_INTERVAL_MILLIS), jdbcExecutionOptionsBuilder::withBatchIntervalMs);
-        validateNumericParamAndApply(PARAMS_PHOENIX_DB_MAX_RETRY_TIMES, params.get(PARAMS_PHOENIX_DB_MAX_RETRY_TIMES), jdbcExecutionOptionsBuilder::withMaxRetries);
+        if (params.getBoolean(PARAMS_PHOENIX_DB_INIT)) {
+            DataStream<MeasurementDataDto> measurementDtoDataStream = results.flatMap(new ProfileMessageToMeasurementDataDtoMapping(new ArrayList<>(profileDtos)));
+            Properties properties = Utils.readProperties(params.getProperties(), PARAMS_PHOENIX_DB_QUERY_PARAM);
+            JdbcStatementBuilder<MeasurementDataDto> objectJdbcStatementBuilder = new PhoenixJdbcStatementBuilder(params.getInt(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT, 0));
+            JdbcExecutionOptions.Builder jdbcExecutionOptionsBuilder = JdbcExecutionOptions.builder();
+            validateNumericParamAndApply(PARAMS_PHOENIX_DB_BATCH_SIZE, params.get(PARAMS_PHOENIX_DB_BATCH_SIZE), jdbcExecutionOptionsBuilder::withBatchSize);
+            validateNumericParamAndApply(PARAMS_PHOENIX_DB_INTERVAL_MILLIS, params.get(PARAMS_PHOENIX_DB_INTERVAL_MILLIS), jdbcExecutionOptionsBuilder::withBatchIntervalMs);
+            validateNumericParamAndApply(PARAMS_PHOENIX_DB_MAX_RETRY_TIMES, params.get(PARAMS_PHOENIX_DB_MAX_RETRY_TIMES), jdbcExecutionOptionsBuilder::withMaxRetries);
 
-        JdbcExecutionOptions executionOptions = jdbcExecutionOptionsBuilder.build();
-        JdbcConnectionOptions connectionOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                .withDriverName(PhoenixThinClient.getDRIVER())
-                .withUrl(client.getDbUrl())
-                .build();
-        SinkFunction<MeasurementDataDto> jdbcSink = JdbcSink.sink(
-                freemarkerGenerator.replaceByTemplate(UPSERT_SQL, Maps.fromProperties(properties)),
-                objectJdbcStatementBuilder,
-                executionOptions,
-                connectionOptions);
-        measurementDtoDataStream.addSink(jdbcSink).name("JDBC Sink").uid("jdbc.profile.group");
+            JdbcExecutionOptions executionOptions = jdbcExecutionOptionsBuilder.build();
+            JdbcConnectionOptions connectionOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+                    .withDriverName(PhoenixThinClient.getDRIVER())
+                    .withUrl(client.getDbUrl())
+                    .build();
+            SinkFunction<MeasurementDataDto> jdbcSink = JdbcSink.sink(
+                    freemarkerGenerator.replaceByTemplate(UPSERT_SQL, Maps.fromProperties(properties)),
+                    objectJdbcStatementBuilder,
+                    executionOptions,
+                    connectionOptions);
+            measurementDtoDataStream.addSink(jdbcSink).name("JDBC Sink").uid("jdbc.profile.group");
+        }
     }
 
     @Override
@@ -200,7 +202,7 @@ public class ProfileJobKafka extends ProfileJob {
             Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE)), INCORRECT_NUMERIC_MESSAGE_TEMPLATE, PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE, params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE));
             Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT)), INCORRECT_NUMERIC_MESSAGE_TEMPLATE, PARAMS_PHOENIX_DB_QUERY_KEY_COUNT, params.get(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT));
         } else {
-            Preconditions.checkArgument(!StringUtils.equals(phoenixFlag, "false"), "Invalid properties '%s' value %s (expected 'true' or 'false').", PARAMS_PHOENIX_DB_INIT, phoenixFlag);
+            Preconditions.checkArgument(StringUtils.equals(phoenixFlag, "false"), "Invalid properties '%s' value %s (expected 'true' or 'false').", PARAMS_PHOENIX_DB_INIT, phoenixFlag);
         }
     }
 

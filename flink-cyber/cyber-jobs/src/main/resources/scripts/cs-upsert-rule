@@ -11,6 +11,20 @@
 # limitations governing your use of the file.
 #
 
+# Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$(dirname "$SOURCE")"
+while [ -h "$SOURCE" ]
+do
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Populate necessary environment variables
+source $BIN_DIR/env.sh
+
 stage="triage"
 
 usage="$(basename "$0") -- upserts triage or profile scoring rule
@@ -90,7 +104,12 @@ fi
 
 mkdir -p "$generated_dir"
 upsert_props=$generated_dir/upsert.properties
-cat kafka.properties > "$upsert_props"
+
+if [ -f "kafka.properties" ]; then
+  cat kafka.properties > "$upsert_props"
+else
+  cat $CYBERSEC_CONF_DIR/kafka.properties > "$upsert_props"
+fi
 cat "$property_file" | grep query. |  sed -e s/BRANCH/main/g >> "$upsert_props"
 
-cs-run-java 'scoring-commands*.jar' com.cloudera.cyber.scoring.UpsertScoringRule "$upsert_props" "$rule"
+run_java_class 'scoring-commands*.jar' com.cloudera.cyber.scoring.UpsertScoringRule "$upsert_props" "$rule"
