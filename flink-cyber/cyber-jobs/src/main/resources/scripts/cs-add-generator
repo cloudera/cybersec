@@ -12,6 +12,17 @@
 # limitations governing your use of the file.
 #
 
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$(dirname "$SOURCE")"
+while [ -h "$SOURCE" ]
+do
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+source $BIN_DIR/env.sh
+
 if [ "$#" -ne 2 ]; then
   echo "Usage: $0 pipeline_name generator_name" >&2
   exit 1
@@ -25,10 +36,9 @@ if [ ! -d "$pipeline" ]; then
   exit 1
 fi
 
-template_dir=$(cs-get-template-dir)
 generate_dir=$pipeline/generate
 
 mkdir -p $generate_dir/$generator
-sed -e s/GENERATOR_NAME/$generator/g -e s/PIPELINE/$pipeline/g $template_dir/generate/generator.properties.template > $pipeline/generate/$generator/generator.properties.template
-sed -e s/GENERATOR_NAME/$generator/g -e s/PIPELINE/$pipeline/g $template_dir/generate/config.json > $pipeline/generate/$generator/config.json
-cp -r $template_dir/generate/templates $generate_dir/$generator
+sed -e s/GENERATOR_NAME/$generator/g -e s/PIPELINE/$pipeline/g $TEMPLATES_DIR/generate/generator.properties.template > $pipeline/generate/$generator/generator.properties.template
+sed -e s/GENERATOR_NAME/$generator/g -e s/PIPELINE/$pipeline/g $TEMPLATES_DIR/generate/config.json > $pipeline/generate/$generator/config.json
+cp -r $TEMPLATES_DIR/generate/templates $generate_dir/$generator
