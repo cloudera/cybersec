@@ -140,6 +140,11 @@
 			<fileMode>0644</fileMode>
 		</fileSet>
 		<fileSet>
+			<directory>src/main/resources/conf/templates/generate</directory>
+			<outputDirectory>conf/templates/generate</outputDirectory>
+			<fileMode>0644</fileMode>
+		</fileSet>
+		<fileSet>
 			<directory>src/main/resources/conf/templates/index</directory>
 			<outputDirectory>conf/templates/index</outputDirectory>
 			<fileMode>0644</fileMode>
