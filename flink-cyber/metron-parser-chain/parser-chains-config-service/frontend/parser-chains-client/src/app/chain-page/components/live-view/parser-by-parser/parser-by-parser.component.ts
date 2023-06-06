@@ -10,9 +10,9 @@
  * limitations governing your use of the file.
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
-import { ParserResultsModel } from '../models/live-view.model';
+import {ParserFieldStatus, ParserResultsModel} from '../models/live-view.model';
 
 @Component({
   selector: 'app-parser-by-parser',
@@ -20,20 +20,92 @@ import { ParserResultsModel } from '../models/live-view.model';
   styleUrls: ['./parser-by-parser.component.scss']
 })
 export class ParserByParserComponent implements OnInit {
-  @Input() parserResults: ParserResultsModel[];
   @Input() logMessage: string;
   @Output() investigateParser = new EventEmitter<string>();
 
   compileErrorDescription =
     'There was an error that prevented your parser chain from being constructed. Please review your configuration settings.';
+  private _diffOnly: boolean = false;
+  private _parserResults: ParserResultsModel[];
+  private _calculatedParserResults: ParserResultsModel[];
+
+  get diffOnly(): boolean {
+    return this._diffOnly;
+  }
+
+  set diffOnly(value: boolean) {
+    this._diffOnly = value;
+    this.updateParserResults();
+  }
+
+  get parserResults(): ParserResultsModel[] {
+    return this._calculatedParserResults;
+  }
+
+  @Input()
+  set parserResults(value: ParserResultsModel[]) {
+    this._parserResults = value;
+    this.updateParserResults();
+  }
+
+  private updateParserResults() {
+    if (this.diffOnly){
+      this._calculatedParserResults = this.calculateParsersDiff();
+    } else {
+      this._calculatedParserResults = this._parserResults
+    }
+  }
 
   constructor() { }
 
   ngOnInit() {
+    this.updateParserResults()
   }
 
   enableInvestigateParser(parserId) {
     this.investigateParser.emit(parserId);
   }
 
+  private calculateParsersDiff() {
+    let parserDiffs: ParserResultsModel[] = []
+
+    let previous: ParserResultsModel = null
+
+    for (const res of this._parserResults) {
+      let diff = {}
+      let prevOutput = previous ? previous['output'] : {};
+      let currOutput = res['output'];
+
+      for (const outputKey in currOutput) {
+        let status: ParserFieldStatus
+        let prevValue = prevOutput[outputKey];
+        let currValue = currOutput[outputKey];
+        if (prevValue){
+          status = ParserFieldStatus.DIFF
+        } else {
+          status = ParserFieldStatus.NEW
+        }
+        if (prevValue != currValue){
+          diff[outputKey] = [currValue, status]
+        }
+      }
+      if (prevOutput){
+        for (const outputKey in prevOutput) {
+          if (!currOutput[outputKey]) {
+            diff[outputKey] = [prevOutput[outputKey], ParserFieldStatus.REMOVED]
+          }
+        }
+      }
+      parserDiffs.push(
+          {
+            ...res,
+            output: diff
+          })
+      previous = res
+    }
+    console.log(parserDiffs)
+    return parserDiffs
+  }
+
+  protected readonly ParserFieldStatus = ParserFieldStatus;
 }

@@ -36,6 +36,10 @@ import { LiveViewService } from './services/live-view.service';
 import { StackTraceComponent } from './stack-trace/stack-trace.component';
 import { NzTimelineModule } from 'ng-zorro-antd/timeline';
 import { NzResultModule } from 'ng-zorro-antd/result';
+import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
+import {NzIconModule} from "ng-zorro-antd/icon";
+import {AppModule} from "../../../app.module";
+import { DiffPopupComponent } from './parser-by-parser/diff-popup/diff-popup.component';
 
 @NgModule({
   declarations: [
@@ -44,25 +48,28 @@ import { NzResultModule } from 'ng-zorro-antd/result';
     LiveViewResultComponent,
     ParserByParserComponent,
     StackTraceComponent,
+    DiffPopupComponent,
   ],
-  imports: [
-    NzModalModule,
-    CommonModule,
-    FormsModule,
-    StoreModule.forFeature('live-view', reducer),
-    EffectsModule.forFeature([LiveViewEffects]),
-    NzTabsModule,
-    NzFormModule,
-    NzButtonModule,
-    NzRadioModule,
-    NzInputModule,
-    NzSpinModule,
-    NzSwitchModule,
-    NzCardModule,
-    NzPopoverModule,
-    NzTimelineModule,
-    NzResultModule,
-  ],
+    imports: [
+        NzModalModule,
+        CommonModule,
+        FormsModule,
+        StoreModule.forFeature('live-view', reducer),
+        EffectsModule.forFeature([LiveViewEffects]),
+        NzTabsModule,
+        NzFormModule,
+        NzButtonModule,
+        NzRadioModule,
+        NzInputModule,
+        NzSpinModule,
+        NzSwitchModule,
+        NzCardModule,
+        NzPopoverModule,
+        NzTimelineModule,
+        NzResultModule,
+        NzCheckboxModule,
+        NzIconModule,
+    ],
   providers: [
     LiveViewService
   ],

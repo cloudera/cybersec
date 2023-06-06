@@ -9,8 +9,8 @@
   ~ either express or implied. Refer to the License for the specific permissions and
   ~ limitations governing your use of the file.
   -->
-
 <div class="pbp-container">
+  <label nz-checkbox class="diff-only-checkbox" [(ngModel)]="diffOnly">Differences only</label>
   <nz-timeline class="nz-timeline">
     <nz-timeline-item
       *ngFor="let parser of parserResults; last as isLast"
@@ -31,9 +31,18 @@
         <div nz-row class="output">
           <div nz-col nzSpan="2" class="label">Output</div>
           <div nz-col nzSpan="22">
-            <div nz-row *ngFor="let item of parser.output | keyvalue">
-              <div nz-col nzSpan="6" class="fieldName">{{ item.key }}:</div>
-              <div nz-col nzSpan="18">{{ item.value }}</div>
+            <div nz-row
+                 *ngFor="let item of parser.output | keyvalue"
+                 [ngClass]="{
+                   'fieldNew': diffOnly && item.value[1] === ParserFieldStatus.NEW,
+                   'fieldDiff': diffOnly && item.value[1] === ParserFieldStatus.DIFF,
+                   'fieldRemoved': diffOnly && item.value[1] === ParserFieldStatus.REMOVED
+                 }">
+              <div nz-col nzSpan="6" nzFlex="2" class="fieldName">{{ item.key }}:</div>
+              <div nz-col nzFlex="6">{{ diffOnly ? item.value[0] : item.value }}</div>
+              <button nz-button nz-col nzFlex="1"
+                      class="diff-param-button"
+                      *ngIf="diffOnly && item.value[1] === ParserFieldStatus.DIFF">Show diff</button>
             </div>
           </div>
         </div>
