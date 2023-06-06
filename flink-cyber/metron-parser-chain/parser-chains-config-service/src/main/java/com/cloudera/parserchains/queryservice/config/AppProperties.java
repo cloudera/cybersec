@@ -27,7 +27,8 @@ import org.springframework.core.env.Environment;
 public class AppProperties {
 
   private enum Options implements ConfigOption<String, Environment> {
-    CONFIG_PATH(".");
+    CONFIG_PATH("."),
+    SAMPLE_FOLDER_PATH("../samples/");
 
     @Override
     public String get(Environment source) {
@@ -60,5 +61,9 @@ public class AppProperties {
 
   public String getConfigPath() {
     return Options.CONFIG_PATH.get(environment);
+  }
+
+  public String getSampleFolderPath() {
+    return Options.SAMPLE_FOLDER_PATH.get(environment);
   }
 }

@@ -32,7 +32,9 @@
     nzTitle="Sample Data">
     <app-sample-data-form
       [sampleData]="sampleData$ | async"
+      [chainConfig]="chainConfig$ | async"
       (sampleDataChange)="sampleDataChange$.next($event)"
+      (sampleDataForceChange)="sampleDataForceChange$.next($event)"
       ></app-sample-data-form>
   </nz-tab>
   <nz-tab
