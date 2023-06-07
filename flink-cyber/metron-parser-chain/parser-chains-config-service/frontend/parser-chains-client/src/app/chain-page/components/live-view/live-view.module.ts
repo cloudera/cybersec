@@ -38,8 +38,6 @@ import { NzTimelineModule } from 'ng-zorro-antd/timeline';
 import { NzResultModule } from 'ng-zorro-antd/result';
 import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
 import {NzIconModule} from "ng-zorro-antd/icon";
-import {AppModule} from "../../../app.module";
-import { DiffPopupComponent } from './parser-by-parser/diff-popup/diff-popup.component';
 import { SampleDataTextInputComponent } from './sample-data-form/sample-data-text-input/sample-data-text-input.component';
 import { SampleDataTextFolderInputComponent } from './sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.component';
 import {NzToolTipModule} from "ng-zorro-antd/tooltip";
@@ -51,6 +49,8 @@ import {
 import {NzCollapseModule} from "ng-zorro-antd/collapse";
 import { TextDiffViewComponent } from './text-diff-view/text-diff-view.component';
 import {MonacoEditorModule} from '@materia-ui/ngx-monaco-editor';
+import {DiffPopupComponent} from "./diff-popup/diff-popup.component";
+import {DiffPopupModule} from "./diff-popup/diff-popup.module";
 
 @NgModule({
   declarations: [
@@ -71,6 +71,7 @@ import {MonacoEditorModule} from '@materia-ui/ngx-monaco-editor';
         StoreModule.forFeature('live-view', reducer),
         EffectsModule.forFeature([LiveViewEffects]),
         SampleDataTextFolderInputModule,
+        DiffPopupModule,
         NzTabsModule,
         NzFormModule,
         NzButtonModule,

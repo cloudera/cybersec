@@ -13,6 +13,9 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 
 import {ParserFieldStatus, ParserResultsModel} from '../models/live-view.model';
+import {Store} from "@ngrx/store";
+import {DiffPopupState} from "../diff-popup/diff-popup.reducers";
+import {ShowDiffModalAction} from "../diff-popup/diff-popup.actions";
 
 @Component({
   selector: 'app-parser-by-parser',
@@ -23,11 +26,23 @@ export class ParserByParserComponent implements OnInit {
   @Input() logMessage: string;
   @Output() investigateParser = new EventEmitter<string>();
 
+
+
   compileErrorDescription =
     'There was an error that prevented your parser chain from being constructed. Please review your configuration settings.';
   private _diffOnly: boolean = false;
   private _parserResults: ParserResultsModel[];
   private _calculatedParserResults: ParserResultsModel[];
+
+  @Input()
+  set parserResults(value: ParserResultsModel[]) {
+    this._parserResults = value;
+    this.updateParserResults();
+  }
+
+  get parserResults(): ParserResultsModel[] {
+    return this._calculatedParserResults;
+  }
 
   get diffOnly(): boolean {
     return this._diffOnly;
@@ -38,14 +53,12 @@ export class ParserByParserComponent implements OnInit {
     this.updateParserResults();
   }
 
-  get parserResults(): ParserResultsModel[] {
-    return this._calculatedParserResults;
+
+  constructor(private store: Store<DiffPopupState>) {
   }
 
-  @Input()
-  set parserResults(value: ParserResultsModel[]) {
-    this._parserResults = value;
-    this.updateParserResults();
+  ngOnInit() {
+    this.updateParserResults()
   }
 
   private updateParserResults() {
@@ -56,10 +69,8 @@ export class ParserByParserComponent implements OnInit {
     }
   }
 
-  constructor() { }
-
-  ngOnInit() {
-    this.updateParserResults()
+  showDiff(oldValue: string, newValue: string) {
+    this.store.dispatch(ShowDiffModalAction({previousDiffValue: oldValue, newDiffValue: newValue}));
   }
 
   enableInvestigateParser(parserId) {
@@ -86,13 +97,13 @@ export class ParserByParserComponent implements OnInit {
           status = ParserFieldStatus.NEW
         }
         if (prevValue != currValue){
-          diff[outputKey] = [currValue, status]
+          diff[outputKey] = {currentValue: currValue, previousValue: prevValue, status: status}
         }
       }
       if (prevOutput){
         for (const outputKey in prevOutput) {
           if (!currOutput[outputKey]) {
-            diff[outputKey] = [prevOutput[outputKey], ParserFieldStatus.REMOVED]
+            diff[outputKey] = {currentValue: prevOutput[outputKey], status: ParserFieldStatus.REMOVED}
           }
         }
       }
@@ -103,9 +114,9 @@ export class ParserByParserComponent implements OnInit {
           })
       previous = res
     }
-    console.log(parserDiffs)
     return parserDiffs
   }
 
   protected readonly ParserFieldStatus = ParserFieldStatus;
+
 }

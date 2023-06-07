@@ -1,0 +1,16 @@
+<nz-modal
+        nzWidth="80%"
+        [nzVisible]="diffModalVisible$ | async"
+        nzTitle="Difference"
+        nzCentered="true"
+        (nzOnCancel)="handleCancelModal()"
+        (nzOnOk)="handleOkModal()"
+        [nzOkDisabled]="false"
+>
+    <ng-container *nzModalContent>
+        <app-text-diff-view
+                [originalModel]="previousDiffValue$ | async"
+                [modifiedModel]="newDiffValue$ | async">
+        </app-text-diff-view>
+    </ng-container>
+</nz-modal>

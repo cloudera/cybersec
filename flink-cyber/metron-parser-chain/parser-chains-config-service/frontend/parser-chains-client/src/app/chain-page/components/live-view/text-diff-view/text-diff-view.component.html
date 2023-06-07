@@ -1,5 +1,5 @@
 <div class="container-fluid container-diff">
-    <div class="row col-md-12">
+    <div class="row">
         <form class="form-inline" role="form">
            <div class="form-check mb-2 mr-sm-2">
                 <label class="form-check-label">
@@ -8,7 +8,7 @@
             </div>
         </form>
     </div>
-    <div class="row col-md-12 editor">
-        <ngx-monaco-diff-editor id="diffeditor" [options]="diffOptions" [original]="originalModel" [modified]="modifiedModel"></ngx-monaco-diff-editor>
+    <div class="row editor">
+        <ngx-monaco-diff-editor id="diff-editor" [options]="diffOptions" [original]="originalModel" [modified]="modifiedModel"></ngx-monaco-diff-editor>
     </div>
 </div>
