@@ -11,7 +11,7 @@ export class TextDiffViewComponent implements OnInit {
     @Input() originalModel: string;
     @Input() modifiedModel: string;
 
-    diffOptions: MonacoDiffEditorConstructionOptions = {theme: "vs", readOnly: true, renderSideBySide: true};
+    diffOptions: MonacoDiffEditorConstructionOptions = {theme: "vs", automaticLayout: true, readOnly: true, renderSideBySide: true};
 
 
     public ngOnInit() {

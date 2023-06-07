@@ -19,9 +19,7 @@
 }
 
 .editor{
-  max-height: 500px;
-}
-#diff-editor {
-  display: block;
+  resize: vertical;
+  overflow: auto;
   height: 500px;
 }
