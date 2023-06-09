@@ -188,7 +188,6 @@
         <dependency>
             <groupId>org.adrianwalker</groupId>
             <artifactId>multiline-string</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

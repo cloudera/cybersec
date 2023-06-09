@@ -12,15 +12,16 @@
 
 package com.cloudera.cyber.enrichemnt.stellar;
 
-import org.junit.jupiter.api.Test;
+
+import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-class StellarEnrichmentJobTest {
+public class StellarEnrichmentJobTest {
 
     @Test
-    void loadFilesFail() {
+    public void loadFilesFail() {
         final String path = "Not-existing-path";
         try {
             StellarEnrichmentJob.loadFiles(path);

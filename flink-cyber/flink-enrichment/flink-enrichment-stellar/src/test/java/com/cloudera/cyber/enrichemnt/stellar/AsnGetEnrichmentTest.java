@@ -16,28 +16,19 @@ import com.cloudera.cyber.enrichemnt.stellar.functions.GeoEnrichmentFunctions;
 import com.cloudera.cyber.enrichment.Enrichment;
 import com.cloudera.cyber.enrichment.MetronGeoEnrichment;
 import com.cloudera.cyber.enrichment.geocode.impl.IpAsnEnrichment;
-import com.cloudera.cyber.enrichment.geocode.impl.IpGeoEnrichment;
 import com.cloudera.cyber.enrichment.geocode.impl.types.MetronGeoEnrichmentFields;
 import com.google.common.collect.ImmutableList;
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -133,7 +124,7 @@ public class AsnGetEnrichmentTest {
 
         verify(ipAsnEnrichment).lookup(enrichCreationCapture.capture(), isNull(), eq(IP), anyMap(), isNull());
         verifyNoMoreInteractions(ipAsnEnrichment);
-        assertThat(result).isNotNull().asInstanceOf(InstanceOfAssertFactories.MAP).contains(entry(TEST_RESULT_KEY, TEST_RESULT_VALUE));
+                                                   assertThat(result).isNotNull().asInstanceOf(InstanceOfAssertFactories.MAP).contains(entry(TEST_RESULT_KEY, TEST_RESULT_VALUE));
         Enrichment enrichment = enrichCreationCapture.getValue().apply(TEST_ENRICHMENT_FIELD_NAME, TEST_ENRICHMENT_FEATURE);
         assertThat(enrichment).isInstanceOf(MetronGeoEnrichment.class);
     }

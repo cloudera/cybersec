@@ -45,6 +45,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -155,7 +156,10 @@ public abstract class ParserJob {
             if (ArrayUtils.isEmpty(fileStatusList)){
                 throw new RuntimeException(String.format("Provided config directory doesn't exist or empty [%s]!", path));
             }
-            for (FileStatus fileStatus : fileStatusList) {
+            final FileStatus[] sortedFileList = Arrays.stream(fileStatusList)
+                    .sorted(Comparator.comparing(fs -> fs.getPath().getName()))
+                    .toArray(FileStatus[]::new);
+            for (FileStatus fileStatus : sortedFileList) {
                 final Path filePath = fileStatus.getPath();
                 if (filePath.getName().endsWith(".json")) {
                     final ParserChainSchema chainSchema;
