@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 
-package org.apache.metron.enrichment.stellar;
+package com.cloudera.cyber.enrichemnt.stellar;
 
-import com.cloudera.cyber.TestUtils;
+import com.cloudera.cyber.enrichemnt.stellar.functions.GeoEnrichmentFunctions;
+import com.cloudera.cyber.enrichment.geocode.IpGeoJob;
 import com.google.common.collect.ImmutableMap;
 import org.apache.metron.enrichment.adapters.maxmind.asn.GeoLiteAsnDatabase;
 import org.apache.metron.stellar.common.StellarProcessor;
@@ -26,9 +27,9 @@ import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.DefaultVariableResolver;
 import org.apache.metron.stellar.dsl.StellarFunctions;
 import org.json.simple.JSONObject;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.Collections;
@@ -42,35 +43,38 @@ public class AsnEnrichmentFunctionsTest {
   private static Context context;
   private static File asnHdfsFile;
 
-  private static JSONObject expectedMessage = new JSONObject();
-  private static JSONObject expectedSubsetMessage = new JSONObject();
+  private static final JSONObject expectedMessage = new JSONObject();
+  private static final JSONObject expectedSubsetMessage = new JSONObject();
 
-  @BeforeAll
-  @SuppressWarnings("unchecked")
+  private static final String TEST_IP = "1.128.0.0";
+  private static final String TEST_ORG = "Telstra Pty Ltd";
+  private static final String TEST_NUMBER = "1221";
+  private static final String TEST_NETWORK = "1.128.0.0/11";
+
+  @BeforeClass
   public static void setupOnce() {
-    // Construct this explicitly here, otherwise it'll be a Long instead of Integer.
-    expectedMessage.put("autonomous_system_organization", "Google LLC");
-    expectedMessage.put("autonomous_system_number", 15169);
-    expectedMessage.put("network", "8.8.4.0");
+    expectedMessage.put("autonomous_system_organization", TEST_ORG);
+    expectedMessage.put("autonomous_system_number", TEST_NUMBER);
+    expectedMessage.put("network", TEST_NETWORK);
 
-    expectedSubsetMessage.put("autonomous_system_organization", "Google LLC");
-    expectedSubsetMessage.put("autonomous_system_number", 15169);
+    expectedSubsetMessage.put("autonomous_system_organization", TEST_ORG);
+    expectedSubsetMessage.put("autonomous_system_number", TEST_NUMBER);
 
-    String baseDir = TestUtils.findDir("GeoLite");
-    asnHdfsFile = new File(new File(baseDir), "GeoLite2-ASN.tar.gz");
+    String file = GeoEnrichmentFunctions.class.getResource("/GeoLite/GeoLite2-ASN-Test.mmdb").getFile();
+    asnHdfsFile = new File(file);
   }
 
-  @BeforeEach
-  public void setup() throws Exception {
+  @Before
+  public void setup() {
     context = new Context.Builder().with(Context.Capabilities.GLOBAL_CONFIG,
-        () -> ImmutableMap.of(GeoLiteAsnDatabase.ASN_HDFS_FILE, asnHdfsFile.getAbsolutePath())
+        () -> ImmutableMap.of(IpGeoJob.PARAM_ASN_DATABASE_PATH, asnHdfsFile.getAbsolutePath())
     ).build();
   }
 
   public Object run(String rule, Map<String, Object> variables) {
     StellarProcessor processor = new StellarProcessor();
     assertTrue(processor.validate(rule, context), rule + " not valid.");
-    return processor.parse(rule,
+      return processor.parse(rule,
         new DefaultVariableResolver(variables::get, variables::containsKey),
         StellarFunctions.FUNCTION_RESOLVER(), context);
   }
@@ -140,28 +144,28 @@ public class AsnEnrichmentFunctionsTest {
 
   @Test
   public void testGetRemote() {
-    String stellar = "ASN_GET('8.8.4.0')";
+    String stellar = "ASN_GET('1.128.0.0')";
     Object result = run(stellar, ImmutableMap.of());
     assertEquals(expectedMessage, result, "Remote IP should return result based on DB");
   }
 
   @Test
   public void testGetRemoteSingleField() {
-    String stellar = "ASN_GET('8.8.4.0', ['autonomous_system_organization'])";
+    String stellar = String.format("ASN_GET('%s', ['autonomous_system_organization'])", TEST_IP);
     Object result = run(stellar, ImmutableMap.of());
-    assertEquals("Google LLC", result, "Remote IP should return country result based on DB");
+    assertEquals(TEST_ORG, result, "Remote IP should return country result based on DB");
   }
 
   @Test
   public void testGetRemoteSingleFieldInteger() {
-    String stellar = "ASN_GET('8.8.4.0', ['autonomous_system_number'])";
+    String stellar = String.format("ASN_GET('%s', ['autonomous_system_number'])", TEST_IP);
     Object result = run(stellar, ImmutableMap.of());
-    assertEquals(15169, result, "Remote IP should return country result based on DB");
+    assertEquals(TEST_NUMBER, result, "Remote IP should return country result based on DB");
   }
 
   @Test
   public void testGetRemoteMultipleFields() {
-    String stellar = "ASN_GET('8.8.4.0', ['autonomous_system_organization', 'autonomous_system_number'])";
+    String stellar = String.format("ASN_GET('%s', ['autonomous_system_organization', 'autonomous_system_number'])", TEST_IP);
     Object result = run(stellar, ImmutableMap.of());
     assertEquals(expectedSubsetMessage, result,
             "Remote IP should return country result based on DB");
@@ -169,7 +173,7 @@ public class AsnEnrichmentFunctionsTest {
 
   @Test
   public void testGetTooManyParams() {
-    String stellar = "ASN_GET('8.8.4.0', ['autonomous_system_organization', 'autonomous_system_number', 'network'], 'garbage')";
+    String stellar = String.format("ASN_GET('%s', ['autonomous_system_organization', 'autonomous_system_number', 'network'], 'garbage')", TEST_IP);
     assertThrows(org.apache.metron.stellar.dsl.ParseException.class, () -> run(stellar, ImmutableMap.of()));
   }
 }

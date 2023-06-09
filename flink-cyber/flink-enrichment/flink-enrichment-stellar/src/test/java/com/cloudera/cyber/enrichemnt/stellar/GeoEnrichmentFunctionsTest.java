@@ -16,9 +16,10 @@
  * limitations under the License.
  */
 
-package org.apache.metron.enrichment.stellar;
+package com.cloudera.cyber.enrichemnt.stellar;
 
 import com.cloudera.cyber.TestUtils;
+import com.cloudera.cyber.enrichment.geocode.IpGeoJob;
 import com.google.common.collect.ImmutableMap;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.enrichment.adapters.maxmind.geo.GeoLiteCityDatabase;
@@ -29,9 +30,9 @@ import org.apache.metron.stellar.dsl.StellarFunctions;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.BeforeClass;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.Collections;
@@ -74,7 +75,7 @@ public class GeoEnrichmentFunctionsTest {
 
   private static JSONObject expectedSubsetMessage;
 
-  @BeforeAll
+  @BeforeClass
   public static void setupOnce() throws ParseException {
     JSONParser jsonParser = new JSONParser();
     expectedMessage = (JSONObject) jsonParser.parse(expectedMessageString);
@@ -82,13 +83,13 @@ public class GeoEnrichmentFunctionsTest {
     expectedSubsetMessage = (JSONObject) jsonParser.parse(expectedSubsetString);
 
     String baseDir = TestUtils.findDir("GeoLite");
-    geoHdfsFile = new File(new File(baseDir), "GeoLite2-City.mmdb.gz");
+    geoHdfsFile = new File(new File(baseDir), "GeoIP2-City-Test.mmdb");
   }
 
-  @BeforeEach
-  public void setup() throws Exception {
+  @Before
+  public void setup() {
     context = new Context.Builder().with(Context.Capabilities.GLOBAL_CONFIG
-            , () -> ImmutableMap.of(GeoLiteCityDatabase.GEO_HDFS_FILE, geoHdfsFile.getAbsolutePath())
+            , () -> ImmutableMap.of(IpGeoJob.PARAM_GEO_DATABASE_PATH, geoHdfsFile.getAbsolutePath())
     )
             .build();
   }
