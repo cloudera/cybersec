@@ -62,8 +62,11 @@ fi
 # on the CDH parcel.
 CDH_PARCEL_HOME=$BIN_DIR/../../CDH
 if ! [ -d $CDH_PARCEL_HOME ]; then
-  echo '[ERROR] The CDH parcel directory was not found. Verify your Cloudera Distribution for Hadoop installation.' >&2
-  exit 1
+  CDH_PARCEL_HOME=$OPT_DIR/CDH
+  if ! [ -d $CDH_PARCEL_HOME ]; then
+    echo '[ERROR] The CDH parcel directory was not found. Verify your Cloudera Distribution for Hadoop installation.' >&2
+    exit 1
+  fi
 fi
 
 function run_java_class() {
