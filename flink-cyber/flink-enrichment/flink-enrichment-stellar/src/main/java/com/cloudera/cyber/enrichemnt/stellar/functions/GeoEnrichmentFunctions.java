@@ -23,13 +23,11 @@ import com.cloudera.cyber.enrichment.geocode.impl.IpAsnEnrichment;
 import com.cloudera.cyber.enrichment.geocode.impl.IpGeoEnrichment;
 import com.cloudera.cyber.enrichment.geocode.impl.types.GeoFields;
 import com.cloudera.cyber.enrichment.geocode.impl.types.MetronGeoEnrichmentFields;
+import com.google.common.collect.ImmutableMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
-import org.apache.metron.enrichment.adapters.maxmind.asn.GeoLiteAsnDatabase;
-import org.apache.metron.enrichment.adapters.maxmind.geo.GeoLiteCityDatabase;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.ParseException;
 import org.apache.metron.stellar.dsl.Stellar;
@@ -39,13 +37,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GeoEnrichmentFunctions {
 
+    private static final Map<String,String> ASN_RESULT_TO_METRON_KEYS = ImmutableMap.of("org", "autonomous_system_organization",
+            "number", "autonomous_system_number",
+            "mask","network");
     @Stellar(name = "GET"
             , namespace = "GEO"
             , description = "Look up an IPV4 address and returns geographic information about it"
@@ -83,6 +83,13 @@ public class GeoEnrichmentFunctions {
                 @SuppressWarnings("unchecked")
                 GeoFields[] geoFieldSet = ((List<String>) args.get(1)).stream().map(MetronGeoEnrichmentFields::fromSingularName).toArray(GeoFields[]::new);
                 ipGeoEnrichment.lookup(MetronGeoEnrichment::new, null, ip, geoFieldSet, result, Collections.emptyList());
+                if (geoFieldSet.length == 1) {
+                    if (MapUtils.isNotEmpty(result)) {
+                        return result.values().iterator().next();
+                    } else {
+                        return null;
+                    }
+                }
                 return result;
             }
             return null;
@@ -143,14 +150,14 @@ public class GeoEnrichmentFunctions {
                 }
                 ipAsnEnrichment.lookup(MetronGeoEnrichment::new, null, ip, result, null);
 
-                return result;
+                return convertToMetronKeys(result);
             } else if (args.size() == 2 && args.get(1) instanceof List) {
                 // If fields are provided, return just those fields.
                 String ip = (String) args.get(0);
                 @SuppressWarnings("unchecked")
                 List<String> fields = (List) args.get(1);
                 ipAsnEnrichment.lookup(MetronGeoEnrichment::new, null, ip, result, null);
-
+                result = convertToMetronKeys(result);
                 // If only one field is requested, just return it directly
                 if (fields.size() == 1 && MapUtils.isNotEmpty(result)) {
                     if (!result.containsKey(fields.get(0))) {
@@ -164,6 +171,10 @@ public class GeoEnrichmentFunctions {
             }
 
             return null;
+        }
+
+        private static HashMap<String, String> convertToMetronKeys(Map<String, String> result) {
+            return result.entrySet().stream().collect(Collectors.toMap(e -> ASN_RESULT_TO_METRON_KEYS.getOrDefault(e.getKey(), e.getKey()), Map.Entry::getValue, (prev, next) -> next, HashMap::new));
         }
 
         @Override

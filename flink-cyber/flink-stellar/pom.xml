@@ -41,12 +41,9 @@
         <global_json_simple_version>1.1.1</global_json_simple_version>
         <global_antlr_version>${antlr.version}</global_antlr_version>
         <global_classindex_version>${classindex.version}</global_classindex_version>
-        <global_junit_jupiter_version>5.5.2</global_junit_jupiter_version>
         <global_hamcrest_version>2.2</global_hamcrest_version>
         <global_shade_version>3.2.0</global_shade_version>
         <global_mockito_version>3.1.0</global_mockito_version>
-        <maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
-        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     </properties>
     <dependencies>
         <dependency>
@@ -79,7 +76,6 @@
         <dependency>
             <groupId>org.adrianwalker</groupId>
             <artifactId>multiline-string</artifactId>
-            <scope>test</scope>
         </dependency>
       <dependency>
             <groupId>com.trendmicro</groupId>
@@ -259,19 +255,19 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${global_junit_jupiter_version}</version>
+            <version>${jupiter.junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${global_junit_jupiter_version}</version>
+            <version>${jupiter.junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-migrationsupport</artifactId>
-            <version>${global_junit_jupiter_version}</version>
+            <version>${jupiter.junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
