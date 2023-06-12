@@ -10,8 +10,8 @@
  * limitations governing your use of the file.
  */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { isEqual } from 'lodash';
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {isEqual} from 'lodash';
 
 export interface ConfigChangedEvent {
   value: {};
@@ -22,9 +22,10 @@ export interface ConfigChangedEvent {
   templateUrl: './advanced-editor.component.html',
   styleUrls: ['./advanced-editor.component.scss']
 })
-export class AdvancedEditorComponent {
+export class AdvancedEditorComponent implements OnChanges {
 
   @Input() config = {};
+  @Input() isReadOnly: boolean = false;
   @Output() configChanged = new EventEmitter<ConfigChangedEvent>();
 
   monacoOptions = {
@@ -33,12 +34,19 @@ export class AdvancedEditorComponent {
     folding: false,
     lineDecorationsWidth: 10,
     lineNumbersMinChars: 0,
+    readOnly: this.isReadOnly,
     minimap: {
       enabled: false
     },
     automaticLayout: true,
     formatOnPaste: true,
   };
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.isReadOnly !== undefined){
+      this.monacoOptions["readOnly"]= this.isReadOnly;
+    }
+  }
 
   onChange(value: string) {
     let json = {};
