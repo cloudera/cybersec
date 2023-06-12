@@ -1,0 +1,13 @@
+{
+  "baseDirectory": "templates",
+  "generationSources" :
+    [
+      {
+        "file": "squid.txt",
+        "topic": "squid",
+        "outputAvroSchemaFile": null,
+        "weight": 1.0,
+        "scenarioFile": "squid.csv"
+      }
+  ]
+}

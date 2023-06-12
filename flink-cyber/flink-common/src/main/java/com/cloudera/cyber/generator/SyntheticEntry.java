@@ -12,13 +12,15 @@
 
 package com.cloudera.cyber.generator;
 
-import com.cloudera.cyber.generator.RandomGenerators;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.Map;
 
 @Data
 @Builder
 public class SyntheticEntry {
     private long ts;
     private RandomGenerators utils;
+    private Map<String,String> params;
 }

@@ -27,6 +27,7 @@ public class TestNsLookup {
         List<NsLookupRecord> results = new NsLookup().eval("www.google.com", "AAAA");
         assertThat(results, hasSize(greaterThan(0)));
     }
+
     @Test
     public void testDnsMx() {
         List<NsLookupRecord> results = new NsLookup().eval("google.com", "MX");

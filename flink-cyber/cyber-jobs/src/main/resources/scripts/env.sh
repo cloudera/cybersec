@@ -25,6 +25,9 @@ done
 BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 ETC_DIR=$BIN_DIR/../etc
+TEMPLATES_DIR="$ETC_DIR"/conf/templates
+OPT_DIR="/opt/cloudera/parcels"
+CYBERSEC_OPT_DIR=${CYBERSEC_OPT_DIR:-"$OPT_DIR/CYBERSEC"}
 
 # Autodetect JAVA_HOME if not defined
 if [ -e /usr/bin/bigtop-detect-javahome ] ; then
@@ -34,8 +37,10 @@ fi
 
 if [[ -d "$JAVA_HOME" ]]; then
     JAVA_RUN="$JAVA_HOME"/bin/java
+    KEYTOOL_RUN="$JAVA_HOME"/bin/keytool
 else
     JAVA_RUN=java
+    KEYTOOL_RUN=keytool
 fi
 
 # Detect if /etc/cybersec/conf has been introduced, otherwise fall back to the parcel local option.
@@ -61,13 +66,132 @@ if ! [ -d $CDH_PARCEL_HOME ]; then
   exit 1
 fi
 
+function run_java_class() {
+  if [ "$#" -lt 2 ]; then
+      echo "Usage: $0 jar_prefix class_name {options}" >&2
+      exit 1
+  fi
+
+  local jar_prefix=$1
+  local class_name=$2
+  local options=()
+  local jar_path
+  local flink_dist
+  local log4j_config
+  local flink_dist
+
+  for arg in "${@:3}"
+  do
+    options+=("$arg")
+  done
+
+  jar_path=$(cs-lookup-jar "$jar_prefix")
+  flink_dist=$(cs-lookup-jar "flink_dist_")
+  log4j_config=$(cs-lookup-jar "log4j.properties")
+  lib_jars=$(find "$CYBERSEC_OPT_DIR/lib/" -name "*.jar" | tr '\n' ':' | sed 's/:$/\n/')
+  flink_dist=$(find "$OPT_DIR/FLINK/" -name "flink-dist_*.jar")
+
+  "$JAVA_RUN" -Dlog4j.configuration="$log4j_config" -Dlog4j.configurationFile="$log4j_config" -cp "$jar_path:$lib_jars:$flink_dist" "$class_name" "${options[@]}"
+}
+
+# read_properties_into_variables <property_file_name>
+# Read the name value pairs
+#   split at first equals to key and value
+#   convert property name to legal shell variable name
+#   set shell variable to property variable
+function read_properties_into_variables() {
+  while read -r line; do
+    [[ "$line" =~ ^([[:space:]]*|[[:space:]]*#.*)$ ]] && continue
+    value=${line#*=}
+    key=${line%"=$value"}
+    key=$(echo $key | tr '.' '_')
+    eval ${key}=${value}
+  done <$1
+}
+
+#  <file name> <property_name>
+# get the value of a property from a file
+function get_property_value() {
+  cat "$1" | grep -v "^.*#" | grep "$2" | cut -d '=' -f 2-
+}
+
+function init_key_store() {
+  if [ -f "kerberos.properties" ]; then
+      generated_dir=generated
+      mkdir -p "$generated_dir"
+      keystore_file=flink_internal.jks
+      keystore_name=$generated_dir/$keystore_file
+      if [ ! -f "$keystore_name" ]; then
+         ssl_properties=$generated_dir/internal_ssl.properties
+         keystore_pass=$(openssl rand -base64 18)
+         ${KEYTOOL_RUN} -genkeypair -alias flink.internal -keystore "${keystore_name}" -dname "CN=flink.internal" -storepass "${keystore_pass}" -keyalg RSA -keysize 4096 -storetype PKCS12
+         printf 'flink.internal.keystore=%s\nflink.internal.password=%s\n' "${keystore_file}" "${keystore_pass}" > ${ssl_properties}
+         chmod 600 ${ssl_properties}
+         chmod 600 ${keystore_name}
+      fi
+  fi
+}
+
+function get_kerberos_config() {
+  security_options=()
+  kerberos_properties="kerberos.properties"
+  internal_ssl_properties="generated/internal_ssl.properties"
+
+  if [ -f "${kerberos_properties}" ]; then
+    read_properties_into_variables "${kerberos_properties}"
+    read_properties_into_variables "${internal_ssl_properties}"
+    security_options+=("-yD" "security.kerberos.login.keytab=${kerberos_keytab}")
+    security_options+=("-yD" "security.kerberos.login.principal=${kerberos_principal}")
+    security_options+=("-yD" "security.ssl.internal.enabled=true")
+    security_options+=("-yD" "security.ssl.internal.keystore=${flink_internal_keystore}")
+    security_options+=("-yD" "security.ssl.internal.key-password=${flink_internal_password}")
+    security_options+=("-yD" "security.ssl.internal.keystore-password=${flink_internal_password}")
+    security_options+=("-yD" "security.ssl.internal.truststore=${flink_internal_keystore}")
+    security_options+=("-yD" "security.ssl.internal.truststore-password=${flink_internal_password}")
+    security_options+=("-yt" "generated/${flink_internal_keystore}")
+  fi
+}
+
+
+ship_config() {
+  if [ -e "$2" ]; then
+    echo "INFO: Shipping config $2"
+    ship_options+=("$1" "$2")
+  fi
+}
+
+override_hbase() {
+  ship_config "-yt" "core-site.xml"
+  ship_config "-yt" "hdfs-site.xml"
+  ship_config "-yt" "hbase-site.xml"
+
+  if [ "${#ship_options[@]}" -eq 0 ]; then
+      if [ -f "hbase-conf/hbase-site.xml" ]; then
+          hbase_conf_dir="$(pwd)/hbase-conf"
+          echo "INFO: HBase Configuration: using directory $hbase_conf_dir"
+          export "HBASE_CONF_DIR=$hbase_conf_dir"
+      else
+          echo "INFO: HBase Configuration: using default"
+      fi
+  fi
+
+}
+
 # Set environment variables
 export HADOOP_HOME=${HADOOP_HOME:-/usr/lib/hadoop}
 export HADOOP_CONF_DIR=${HADOOP_CONF_DIR:-/etc/hadoop/conf}
-export CYBERSEC_OPT_DIR=${CYBERSEC_OPT_DIR:-/opt/cloudera/parcels/CYBERSEC}
+export CYBERSEC_OPT_DIR
 export CYBERSEC_HOME=${CYBERSEC_HOME:-/var/lib/cybersec}
 export CYBERSEC_LOG_DIR=${CYBERSEC_LOG_DIR:-$CYBERSEC_HOME/log}
 export CYBERSEC_CONF_DIR=${CYBERSEC_CONF_DIR:-$DEFAULT_CYBERSEC_CONF_DIR}
 export HADOOP_CLASSPATH=${HADOOP_CLASSPATH:-$(hadoop classpath)}
 export HBASE_CONF_DIR=${HBASE_CONF_DIR:-/etc/hbase/conf}
 export JAVA_RUN
+export KEYTOOL_RUN
+export TEMPLATES_DIR
+
+CYBERSEC_DIRNAME=${PARCEL_DIRNAME:-"CYBERSEC"}
+CDH_CYBERSEC_HOME="$PARCELS_ROOT"/"$CYBERSEC_DIRNAME"
+CDH_CYBERSEC_BIN="$PARCELS_ROOT"/"$CYBERSEC_DIRNAME"/bin
+export CDH_CYBERSEC_HOME
+export CDH_CYBERSEC_BIN

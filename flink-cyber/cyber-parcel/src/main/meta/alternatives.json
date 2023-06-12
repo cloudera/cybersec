@@ -1,52 +1,4 @@
 {
-  "start-generator": {
-    "destination": "/usr/bin/start-generator",
-    "source": "bin/start-generator",
-    "priority": 10,
-    "isDirectory": false
-  },
-  "start-enrichment": {
-    "destination": "/usr/bin/start-triage",
-    "source": "bin/start-enrichment",
-    "priority": 10,
-    "isDirectory": false
-  },
-  "start-parser": {
-    "destination": "/usr/bin/start-parser",
-    "source": "bin/start-parser",
-    "priority": 10,
-    "isDirectory": false
-  },
-  "start-profile": {
-    "destination": "/usr/bin/start-profile",
-    "source": "bin/start-profile",
-    "priority": 10,
-    "isDirectory": false
-  },
-  "start-hive-indexing": {
-    "destination": "/usr/bin/start-hive-indexing",
-    "source": "bin/start-hive-indexing",
-    "priority": 10,
-    "isDirectory": false
-  },
-  "send-scoring-command": {
-    "destination": "/usr/bin/send-scoring-command",
-    "source": "bin/send-scoring-command",
-    "priority": 10,
-    "isDirectory": false
-  },
-  "start-parser-ui": {
-    "destination": "/usr/bin/start-parser-ui",
-    "source": "bin/start-parser-ui",
-    "priority": 10,
-    "isDirectory": false
-  },
-  "cs-add-enrich": {
-    "destination": "/usr/bin/cs-add-enrich",
-    "source": "bin/cs-add-enrich",
-    "priority": 10,
-    "isDirectory": false
-  },
   "cs-add-index": {
     "destination": "/usr/bin/cs-add-index",
     "source": "bin/cs-add-index",
@@ -71,6 +23,18 @@
     "priority": 10,
     "isDirectory": false
   },
+  "cs-add-enrich": {
+    "destination": "/usr/bin/cs-add-enrich",
+    "source": "bin/cs-add-enrich",
+    "priority": 10,
+    "isDirectory": false
+  },
+  "cs-add-generator": {
+    "destination": "/usr/bin/cs-add-generator",
+    "source": "bin/cs-add-generator",
+    "priority": 10,
+    "isDirectory": false
+  },
   "cs-cancel-job": {
     "destination": "/usr/bin/cs-cancel-job",
     "source": "bin/cs-cancel-job",
@@ -80,18 +44,6 @@
   "cs-create-pipeline": {
     "destination": "/usr/bin/cs-create-pipeline",
     "source": "bin/cs-create-pipeline",
-    "priority": 10,
-    "isDirectory": false
-  },
-  "cs-get-template-dir": {
-    "destination": "/usr/bin/cs-get-template-dir",
-    "source": "bin/cs-get-template-dir",
-    "priority": 10,
-    "isDirectory": false
-  },
-  "cs-init-keystore": {
-    "destination": "/usr/bin/cs-init-keystore",
-    "source": "bin/cs-init-keystore",
     "priority": 10,
     "isDirectory": false
   },
@@ -119,6 +71,12 @@
     "priority": 10,
     "isDirectory": false
   },
+  "cs-restart-generator": {
+    "destination": "/usr/bin/cs-restart-generator",
+    "source": "bin/cs-restart-generator",
+    "priority": 10,
+    "isDirectory": false
+  },
   "cs-restart-index": {
     "destination": "/usr/bin/cs-restart-index",
     "source": "bin/cs-restart-index",
@@ -143,24 +101,19 @@
     "priority": 10,
     "isDirectory": false
   },
-  "cs-run-java": {
-    "destination": "/usr/bin/cs-run-java",
-    "source": "bin/cs-run-java",
-    "priority": 10,
-    "isDirectory": false
-  },
-  "cs-override-hbase": {
-    "destination": "/usr/bin/cs-override-hbase",
-    "source": "bin/cs-override-hbase",
-    "priority": 10,
-    "isDirectory": false
-  },
   "cs-start-job": {
     "destination": "/usr/bin/cs-start-job",
     "source": "bin/cs-start-job",
     "priority": 10,
     "isDirectory": false
   },
+  "cs-start-parser-ui": {
+    "destination": "/usr/bin/cs-start-parser-ui",
+    "source": "bin/cs-start-parser-ui",
+    "priority": 10,
+    "isDirectory": false
+  },
+
   "cs-stop-job": {
     "destination": "/usr/bin/cs-stop-job",
     "source": "bin/cs-stop-job",
