@@ -91,7 +91,7 @@ function run_java_class() {
   log4j_config=$(cs-lookup-jar "log4j.properties")
 
   if [ -f "$log4j_config" ]; then
-     log4j_config_options+=("-Dlog4j.configuration=log4j.properties" -Dlog4j.configurationFile=log4j.properties)
+      log4j_config_options+=("-Dlog4j.configuration=${log4j_config}" "-Dlog4j.configurationFile=${log4j_config}")
   fi
 
   lib_jars=$(find "$BIN_DIR/../lib/" -name "*.jar" | tr '\n' ':' | sed 's/:$/\n/')
