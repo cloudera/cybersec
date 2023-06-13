@@ -12,20 +12,58 @@
 
 package com.cloudera.cyber;
 
+import org.springframework.util.CollectionUtils;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public final class ValidateUtils {
 
     private static final Pattern PHOENIX_NAME_REGEXP = Pattern.compile("^[a-zA-Z_][a-zA-Z0-9_]+");
-    private static final Pattern UNDERSCORE_PATTERN =  Pattern.compile("_+");
+    private static final Pattern UNDERSCORE_PATTERN = Pattern.compile("_+");
 
     private ValidateUtils() {
     }
 
     public static void validatePhoenixName(String value, String parameter) {
-        if ( !PHOENIX_NAME_REGEXP.matcher(value).matches() || UNDERSCORE_PATTERN.matcher(value).matches()) {
+        if (!PHOENIX_NAME_REGEXP.matcher(value).matches() || UNDERSCORE_PATTERN.matcher(value).matches()) {
             throw new IllegalArgumentException(String.format("Invalid value %s for parameter '%s'. It can only contain alphanumerics or underscore(a-z, A-Z, 0-9, _)", value, parameter));
         }
     }
 
+    public static <T, R> Collection<R> getDuplicates(Collection<T> list, Function<T, R> classifier) {
+        if (CollectionUtils.isEmpty(list)) {
+            return Collections.emptyList();
+        }
+        return list.stream()
+            .collect(Collectors.groupingBy(classifier, Collectors.counting()))
+            .entrySet()
+            .stream().filter(entry -> entry.getValue() > 1)
+            .map(Entry::getKey)
+            .collect(Collectors.toList());
+    }
+
+    public static <T> Collection<T> getDuplicates(Collection<T> collections) {
+        return getDuplicates(collections, Function.identity());
+    }
+
+
+    public static class ValidationException extends RuntimeException {
+
+        public ValidationException() {
+            super();
+        }
+
+        public ValidationException(String message) {
+            super(message);
+        }
+
+        public ValidationException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
 }
