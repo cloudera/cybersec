@@ -37,6 +37,7 @@
         <module>flink-enrichment-load</module>
         <module>metron-enrichment-common</module>
         <module>flink-enrichment-stellar</module>
+        <module>flink-enrichment-cidr</module>
     </modules>
 
 </project>
