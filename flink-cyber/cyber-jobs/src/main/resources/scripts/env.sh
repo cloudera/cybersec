@@ -78,6 +78,7 @@ function run_java_class() {
   local jar_path
   local flink_dist
   local log4j_config
+  local log4j_config_options=()
   local flink_dist
 
   for arg in "${@:3}"
@@ -88,10 +89,15 @@ function run_java_class() {
   jar_path=$(cs-lookup-jar "$jar_prefix")
   flink_dist=$(cs-lookup-jar "flink_dist_")
   log4j_config=$(cs-lookup-jar "log4j.properties")
-  lib_jars=$(find "$CYBERSEC_OPT_DIR/lib/" -name "*.jar" | tr '\n' ':' | sed 's/:$/\n/')
+
+  if [ -f "$log4j_config" ]; then
+      log4j_config_options+=("-Dlog4j.configuration=${log4j_config}" "-Dlog4j.configurationFile=${log4j_config}")
+  fi
+
+  lib_jars=$(find "$BIN_DIR/../lib/" -name "*.jar" | tr '\n' ':' | sed 's/:$/\n/')
   flink_dist=$(find "$OPT_DIR/FLINK/" -name "flink-dist_*.jar")
 
-  "$JAVA_RUN" -Dlog4j.configuration="$log4j_config" -Dlog4j.configurationFile="$log4j_config" -cp "$jar_path:$lib_jars:$flink_dist" "$class_name" "${options[@]}"
+  "$JAVA_RUN" "${log4j_config_options[@]}" -cp "$jar_path:$lib_jars:$flink_dist" "$class_name" "${options[@]}"
 }
 
 # read_properties_into_variables <property_file_name>
