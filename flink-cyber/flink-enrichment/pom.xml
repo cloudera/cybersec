@@ -28,7 +28,6 @@
         <module>flink-enrichment-lookup-raw</module>
         <module>flink-enrichment-lookup-hbase</module>
         <module>flink-enrichment-lookup-rest</module>
-        <module>flink-enrichment-stix</module>
         <module>flink-enrichment-rules</module>
         <module>flink-enrichment-lookup-common</module>
         <module>flink-enrichment-combined</module>
