@@ -10,9 +10,9 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.table.api.FormatDescriptor;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
@@ -43,7 +43,7 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
             try {
                 //create view
                 tableEnv.executeSql(insertSql);
-                final FlinkKafkaProducer<GenericRecord> kafkaSink = new FlinkUtils<>(GenericRecord.class).createKafkaSink(mappingDto.getTableName(), "indexing-job", params);
+                final KafkaSink<GenericRecord> kafkaSink = new FlinkUtils<>(GenericRecord.class).createKafkaSink(mappingDto.getTableName(), "indexing-job", params);
 
                 //read from view and write to kafka sink
                 final Table table = tableEnv.from(mappingDto.getTableName());
@@ -61,7 +61,7 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
 
                     return record;
                 });
-                stream.addSink(kafkaSink);
+                stream.sinkTo(kafkaSink);
                 System.out.printf("Insert SQL added to the queue for the table: %s%nSQL: %s%n", mappingDto.getTableName(), insertSql);
             } catch (Exception e) {
                 System.err.printf("Error adding insert to the statement set: %s%n", insertSql);
