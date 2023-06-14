@@ -24,10 +24,16 @@ import org.apache.flink.util.InstantiationUtil;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 public class SerializationTests {
@@ -39,7 +45,7 @@ public class SerializationTests {
             put("b", "b");
         }};
         ThreatIntelligence ti = ThreatIntelligence.builder().fields(map)
-                .observable("ob").observableType("ip").stixReference("stix").ts(0).build();
+                .observable("ob").observableType("ip").ts(0).build();
         ThreatIntelligence test = test(ti);
 
         assertThat(test.getFields(), equalTo(map));
@@ -67,7 +73,7 @@ public class SerializationTests {
             put("b", "b");
         }};
         ThreatIntelligence ti = ThreatIntelligence.builder().fields(map)
-                .observable("ob").observableType("ip").stixReference("stix").ts(0).build();
+                .observable("ob").observableType("ip").ts(0).build();
     }
 
 
@@ -146,7 +152,6 @@ public class SerializationTests {
                 .fields(tiFields)
                 .observable("ob")
                 .observableType("ip")
-                .stixReference("stix")
                 .ts(0)
                 .build());
     }

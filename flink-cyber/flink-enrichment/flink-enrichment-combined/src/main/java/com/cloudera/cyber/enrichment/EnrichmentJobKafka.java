@@ -13,13 +13,8 @@
 package com.cloudera.cyber.enrichment;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.ThreatIntelligence;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
-import com.cloudera.cyber.enrichment.stix.ThreatIndexHbaseSinkFunction;
-import com.cloudera.cyber.enrichment.stix.ThreatIntelligenceDetailsHBaseSinkFunction;
-import com.cloudera.cyber.enrichment.stix.ThreatIntelligenceHBaseSinkFunction;
-import com.cloudera.cyber.enrichment.stix.parsing.ThreatIntelligenceDetails;
 import com.cloudera.cyber.enrichment.threatq.ThreatQEntry;
 import com.cloudera.cyber.enrichment.threatq.ThreatQParserFlatMap;
 import com.cloudera.cyber.flink.FlinkUtils;
@@ -48,12 +43,7 @@ public class EnrichmentJobKafka extends EnrichmentJob {
     private static final String PARAMS_TOPIC_ENRICHMENT_INPUT = "enrichment.topic.input";
     private static final String PARAMS_GROUP_ID = "group.id";
     private static final String DEFAULT_GROUP_ID = "enrichment-combined";
-    public static final String PARAM_STIX_INPUT_TOPIC = "stix.input.topic";
     public static final String SCORING_RULES_GROUP_ID = "scoring-rules";
-    public static final String DEFAULT_STIX_INPUT_TOPIC = "stix";
-    public static final String PARAM_STIX_OUTPUT_TOPIC = "stix.output.topic";
-    public static final String DEFAULT_STIX_OUTPUT_TOPIC = "stix.output";
-    private static final String PARAM_TI_TABLE = "stix.hbase.table";
     private static final String DEFAULT_TI_TABLE = "threatIntelligence";
     private static final String PARAMS_TOPIC_THREATQ_INPUT = "threatq.topic.input";
 
@@ -101,29 +91,6 @@ public class EnrichmentJobKafka extends EnrichmentJob {
                 .flatMap(new ThreatQParserFlatMap()).name("ThreatQ Parser").uid("threatq-parser");
     }
 
-
-    @Override
-    protected void writeStixThreats(ParameterTool params, DataStream<ThreatIntelligence> results) {
-        KafkaSink<ThreatIntelligence> sink = new FlinkUtils<>(ThreatIntelligence.class).createKafkaSink(
-                params.get(PARAM_STIX_OUTPUT_TOPIC, DEFAULT_STIX_OUTPUT_TOPIC), "stix-threat-intel",
-                params);
-        results.sinkTo(sink).name("Kafka Stix Results").uid("kafka.results.stix");
-
-        ThreatIntelligenceHBaseSinkFunction hbaseSink = new ThreatIntelligenceHBaseSinkFunction("threatIntelligence", params);
-
-        results.addSink(hbaseSink);
-
-        ThreatIndexHbaseSinkFunction indexSink = new ThreatIndexHbaseSinkFunction("threatIndex", params);
-        results.addSink(indexSink).name("Stix sink").uid("stix-hbase-sink");
-    }
-
-    @Override
-    protected void writeStixDetails(ParameterTool params, DataStream<ThreatIntelligenceDetails> results) {
-        // write out to HBase
-        ThreatIntelligenceDetailsHBaseSinkFunction hbaseSink = new ThreatIntelligenceDetailsHBaseSinkFunction(params.get(PARAM_TI_TABLE, DEFAULT_TI_TABLE), params);
-        results.addSink(hbaseSink).name("Stix Detail sink").uid("stix-hbase-detail-sink");
-    }
-
     @Override
     protected DataStream<ScoringRuleCommand> createRulesSource(StreamExecutionEnvironment env, ParameterTool params) {
         String topic = params.getRequired("query.input.topic");
@@ -138,13 +105,5 @@ public class EnrichmentJobKafka extends EnrichmentJob {
         results.sinkTo(sink).name("Kafka Score Rule Command Results").uid("kafka.output.rule.command.results");
     }
 
-    @Override
-    protected DataStream<String> createStixSource(StreamExecutionEnvironment env, ParameterTool params) {
-        Properties kafkaProperties = Utils.readKafkaProperties(params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID), true);
-
-        String topic = params.get(PARAM_STIX_INPUT_TOPIC, DEFAULT_STIX_INPUT_TOPIC);
-        KafkaSource<String> stix =  FlinkUtils.createKafkaStringSource(topic, kafkaProperties);
-        return env.fromSource(stix, WatermarkStrategy.noWatermarks(),"Stix Kafka Source").uid("stix-kafka-source");
-    }
 
 }
