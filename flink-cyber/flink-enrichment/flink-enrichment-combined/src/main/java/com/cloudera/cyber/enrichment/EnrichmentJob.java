@@ -132,7 +132,7 @@ public abstract class EnrichmentJob {
             List<ThreatQConfig> threatQconfigs = ThreatQJob.parseConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_THREATQ_CONFIG_FILE))));
             log.info("ThreatQ Configs {}", threatQconfigs);
             tqed = ThreatQJob.enrich(rested, threatQconfigs, enrichmentsStorageConfig);
-            ThreatQJob.ingest(createThreatQSource(env, params), threatQconfigs);
+            ThreatQJob.ingest(createThreatQSource(env, params));
         } else {
             tqed = rested;
         }
