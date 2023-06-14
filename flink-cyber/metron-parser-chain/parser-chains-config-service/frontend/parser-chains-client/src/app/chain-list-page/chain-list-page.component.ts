@@ -10,22 +10,23 @@
  * limitations governing your use of the file.
  */
 
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { select, Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
-import { switchMap, take } from 'rxjs/operators';
+import {Component, OnInit} from '@angular/core';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router';
+import {select, Store} from '@ngrx/store';
+import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
+import {switchMap, take} from 'rxjs/operators';
 
-import { LoadChainsAction } from './chain-list-page.actions';
 import * as fromActions from './chain-list-page.actions';
+import {LoadChainsAction} from './chain-list-page.actions';
 import {
   ChainListPageState,
   getChains,
-  getCreateModalVisible,
+  getCreateModalVisible, getDeleteChain,
+  getDeleteModalVisible,
   getLoading,
 } from './chain-list-page.reducers';
-import { ChainModel, ChainOperationalModel } from './chain.model';
+import {ChainModel, ChainOperationalModel} from './chain.model';
 import {NzMessageService} from "ng-zorro-antd/message";
 
 @Component({
@@ -35,12 +36,13 @@ import {NzMessageService} from "ng-zorro-antd/message";
 })
 export class ChainListPageComponent implements OnInit {
   isChainCreateModalVisible$: Observable<boolean>;
-  isVisibleDeleteModal: boolean = false;
   isOkLoading$: Observable<boolean>;
   chains$: Observable<ChainModel[]>;
+  isChainDeleteModalVisible$: Observable<boolean>;
+  deleteChainItem$: Observable<ChainModel>;
   totalRecords = 200;
   chainDataSorted$: Observable<ChainModel[]>;
-  sortDescription$: BehaviorSubject<{key: string, value: string}> = new BehaviorSubject({ key: 'name', value: '' });
+  sortDescription$: BehaviorSubject<{ key: string, value: string }> = new BehaviorSubject({key: 'name', value: ''});
   newChainForm: FormGroup;
 
   constructor(
@@ -49,18 +51,18 @@ export class ChainListPageComponent implements OnInit {
     private route: ActivatedRoute,
     private messageService: NzMessageService,
   ) {
-    this.route.queryParams.subscribe(() => {
-      store.dispatch(new LoadChainsAction());
-      this.chains$ = store.pipe(select(getChains));
-      this.isOkLoading$ = store.pipe(select(getLoading));
-      this.isChainCreateModalVisible$ = store.pipe(select(getCreateModalVisible));
-    });
+    store.dispatch(new LoadChainsAction());
+    this.chains$ = store.pipe(select(getChains));
+    this.isOkLoading$ = store.pipe(select(getLoading));
+    this.isChainCreateModalVisible$ = store.pipe(select(getCreateModalVisible));
+    this.isChainDeleteModalVisible$ = store.pipe(select(getDeleteModalVisible));
+    this.deleteChainItem$ = this.store.pipe(select(getDeleteChain));
 
     this.chainDataSorted$ = combineLatest([
       this.chains$,
       this.sortDescription$
     ]).pipe(
-      switchMap(([ chains, sortDescription ]) => this.sortTable(chains, sortDescription))
+      switchMap(([chains, sortDescription]) => this.sortTable(chains, sortDescription))
     );
   }
 
@@ -72,8 +74,8 @@ export class ChainListPageComponent implements OnInit {
     this.store.dispatch(new fromActions.ShowCreateModalAction());
   }
 
-  showDeleteModal(): void {
-    this.isVisibleDeleteModal = true;
+  showDeleteModal(id): void {
+    this.store.dispatch(new fromActions.SelectDeleteChainAction(id));
   }
 
   pushChain(): void {
@@ -101,7 +103,7 @@ export class ChainListPageComponent implements OnInit {
   }
 
   handleCancelDeleteModal(): void {
-    this.isVisibleDeleteModal = false;
+    this.store.dispatch(new fromActions.HideDeleteModalAction());
   }
 
   sortTable(data: ChainModel[], sortDescription: any): Observable<ChainModel[]> {
