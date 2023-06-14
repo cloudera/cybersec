@@ -36,6 +36,21 @@
             <artifactId>parser-chains-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>metron-enrichment-common</artifactId>
+            <version>${project.parent.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-reload4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.cloudera.cyber</groupId>
+                    <artifactId>flink-hbase-common</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
 
         <dependency>
@@ -58,14 +73,20 @@
 
         <!-- syslog parser dependencies -->
         <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+            <version>${antlr.version}</version>
+        </dependency>
+<!--        Overwriting vulnerable altlr4-runtime in the simple-syslog-->
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>${antlr.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.github.palindromicity</groupId>
             <artifactId>simple-syslog</artifactId>
             <version>${simple-syslog.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4</artifactId>
-            <version>${antlr4.version}</version>
         </dependency>
 
         <!-- json path parser dependencies -->
@@ -115,6 +136,13 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version> ${commons-beanutils.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
 
         <!-- test dependencies -->
         <dependency>
@@ -157,7 +185,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-java_${scala.binary.version}</artifactId>
+            <artifactId>flink-streaming-java</artifactId>
         </dependency>
     </dependencies>
 

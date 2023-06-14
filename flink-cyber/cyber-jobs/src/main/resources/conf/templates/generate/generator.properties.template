@@ -1,0 +1,7 @@
+generator.eps=20
+generator.metrics=generator.count
+
+generator.config=PIPELINE/generate/GENERATOR_NAME/config.json
+
+parallelism=1
+flink.job.name=BRANCH.PIPELINE.generate.GENERATOR_NAME

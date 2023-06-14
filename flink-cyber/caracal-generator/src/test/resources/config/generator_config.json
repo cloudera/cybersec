@@ -1,0 +1,20 @@
+{
+  "baseDirectory": "src/test/resources/config",
+  "generationSources" :
+    [
+      {
+        "file": "squid.txt",
+        "topic": "squid",
+        "outputAvroSchemaFile": null,
+        "weight": 1.0
+      },
+      {
+        "file": "squid_scenario.txt",
+        "topic": "squid_scenario",
+        "outputAvroSchemaFile": null,
+        "weight": 1.0,
+        "scenarioFile": "src/test/resources/config/good_squid.csv"
+      }
+  ]
+}
+

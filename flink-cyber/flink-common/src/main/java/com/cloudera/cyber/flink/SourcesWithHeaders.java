@@ -15,12 +15,15 @@ package com.cloudera.cyber.flink;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.formats.avro.registry.cloudera.ClouderaRegistryKafkaDeserializationSchema;
-import org.apache.flink.formats.avro.registry.cloudera.ClouderaRegistryKafkaSerializationSchema;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
+import org.apache.flink.connector.base.DeliveryGuarantee;
+import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
+import org.apache.flink.formats.registry.cloudera.avro.ClouderaRegistryAvroKafkaDeserializationSchema;
+import org.apache.flink.formats.registry.cloudera.avro.ClouderaRegistryAvroKafkaRecordSerializationSchema;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
-import org.apache.flink.streaming.connectors.kafka.KafkaSerializationSchema;
+import org.apache.flink.util.Collector;
 import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -32,12 +35,13 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static com.cloudera.cyber.flink.Utils.*;
+import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
+import static com.cloudera.cyber.flink.Utils.readSchemaRegistryProperties;
 import static java.util.stream.Collectors.toList;
 
 /**
  * TODO - all the request and response stuff should be in wrapper objects instead of using the HasHeader interface.
- * 
+ *
  * @param <T>
  */
 @Slf4j
@@ -48,75 +52,80 @@ public class SourcesWithHeaders<T extends HasHeaders> {
         this.type = type;
     }
 
-    public FlinkKafkaConsumer<T> createSourceWithHeaders(String topic, ParameterTool params, String groupId) {
+    public KafkaSource<T> createSourceWithHeaders(String topic, ParameterTool params, String groupId) {
         Preconditions.checkNotNull(topic, "Must specific input topic");
         Preconditions.checkNotNull(groupId, "Must specific group id");
 
+        Preconditions.checkNotNull(groupId, "Must specific group id");
+
         Properties kafkaProperties = readKafkaProperties(params, groupId, true);
-        log.info(String.format("Creating Kafka Source for %s, using %s", topic, kafkaProperties));
-        ClouderaRegistryKafkaDeserializationSchema<Void, T, T> delegate = ClouderaRegistryKafkaDeserializationSchema
+        KafkaDeserializationSchema<T> delegate = ClouderaRegistryAvroKafkaDeserializationSchema
                 .builder(type)
                 .setConfig(readSchemaRegistryProperties(params))
                 .build();
 
-        KafkaDeserializationSchema<T> schema = new HeaderDeserializer(delegate);
+        KafkaRecordDeserializationSchema<T> schema = new HeaderDeserializer(delegate);
 
-        return new FlinkKafkaConsumer<T>(topic, schema, kafkaProperties);
+        return KafkaSource.<T>builder().setTopics(topic).setDeserializer(schema).
+                setProperties(kafkaProperties).build();
     }
 
-    public FlinkKafkaProducer<T> createKafkaSink(final String topic, String groupId, final ParameterTool params) {
+    public KafkaSink<T> createKafkaSink(final String topic, String groupId, final ParameterTool params) {
         Preconditions.checkNotNull(topic, "Must specific output topic");
 
         Properties kafkaProperties = readKafkaProperties(params, groupId, false);
         log.info("Creating Kafka Sink for {}, using {}", topic, kafkaProperties);
-        ClouderaRegistryKafkaSerializationSchema<Void, T, T> delegate = ClouderaRegistryKafkaSerializationSchema
+
+        KafkaRecordSerializationSchema<T> delegate = ClouderaRegistryAvroKafkaRecordSerializationSchema
                 .<T>builder(topic)
-                .setRegistryAddress(params.getRequired(K_SCHEMA_REG_URL))
+                .setConfig(readSchemaRegistryProperties(params))
                 .build();
+
         HeaderSerializer schema = new HeaderSerializer(delegate);
-        return new FlinkKafkaProducer<T>(topic,
-                schema,
-                kafkaProperties,
-                FlinkKafkaProducer.Semantic.AT_LEAST_ONCE);
+        return KafkaSink.<T>builder().
+                setKafkaProducerConfig(kafkaProperties).
+                setRecordSerializer(schema).
+                setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE).
+                build();
     }
-    
-    private class HeaderDeserializer implements KafkaDeserializationSchema<T> {
-        private ClouderaRegistryKafkaDeserializationSchema<Void, T, T> delegate;
 
-        public HeaderDeserializer(ClouderaRegistryKafkaDeserializationSchema<Void, T, T> delegate) {
+    private class HeaderDeserializer implements KafkaRecordDeserializationSchema<T> {
+        private final KafkaDeserializationSchema<T> delegate;
+
+        public HeaderDeserializer(KafkaDeserializationSchema<T> delegate) {
             this.delegate = delegate;
-        }
-
-        @Override
-        public boolean isEndOfStream(T t) {
-            return false;
-        }
-
-        @Override
-        public T deserialize(ConsumerRecord<byte[], byte[]> consumerRecord) throws Exception {
-            T deserialize = delegate.deserialize(consumerRecord);
-            deserialize.setHeaders(StreamSupport.stream(consumerRecord.headers().spliterator(), false).collect(Collectors.toMap(k -> k.key(), v->new String(v.value()))));
-            return deserialize;
         }
 
         @Override
         public TypeInformation<T> getProducedType() {
-            return null;
+            return TypeInformation.of(type);
+        }
+
+        @Override
+        public void deserialize(ConsumerRecord<byte[], byte[]> consumerRecord, Collector<T> collector) {
+            try {
+                T deserialize = delegate.deserialize(consumerRecord);
+                deserialize.setHeaders(StreamSupport.stream(consumerRecord.headers().spliterator(), false).collect(Collectors.toMap(Header::key, v -> new String(v.value()))));
+                collector.collect(deserialize);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private class HeaderSerializer implements KafkaSerializationSchema<T> {
-        private final ClouderaRegistryKafkaSerializationSchema<Void, T, T> delegate;
+    private class HeaderSerializer implements KafkaRecordSerializationSchema<T> {
+        private final KafkaRecordSerializationSchema<T> delegate;
 
-        public HeaderSerializer(ClouderaRegistryKafkaSerializationSchema<Void, T, T> delegate) {
+        public HeaderSerializer(KafkaRecordSerializationSchema<T> delegate) {
             this.delegate = delegate;
         }
 
         @Override
-        public ProducerRecord<byte[], byte[]> serialize(T t, Long ts) {
-            ProducerRecord<byte[], byte[]> serialize = delegate.serialize(t, ts);
+        public ProducerRecord<byte[], byte[]> serialize(T t, KafkaSinkContext kafkaSinkContext, Long ts) {
+            ProducerRecord<byte[], byte[]> serialize = delegate.serialize(t, kafkaSinkContext, ts);
             List<Header> headers = t.getHeaders().entrySet().stream().map(h -> new RecordHeader(h.getKey(), h.getValue().getBytes())).collect(toList());
             return new ProducerRecord<>(serialize.topic(), serialize.partition(), serialize.key(), serialize.value(), headers);
+
         }
     }
 }

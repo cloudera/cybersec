@@ -29,15 +29,32 @@
         <schema.validator.version>7.3.0</schema.validator.version>
     </properties>
 
+    <!-- uncomment when updating csd files - repository is internal
     <pluginRepositories>
         <pluginRepository>
-            <id>cloudera-staging</id>
-            <url>https://repository.cloudera.com/artifactory/libs-staging-local</url>
+            <releases>
+                <updatePolicy>never</updatePolicy>
+            </releases>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
+            <id>nexus-private-plugins</id>
+            <name>nexus-private-plugins</name>
+            <url>http://nexus-private.hortonworks.com/nexus/content/groups/public</url>
         </pluginRepository>
-    </pluginRepositories>
+        <pluginRepository>
+            <id>in-qa</id>
+            <name>cloudera-mirrors-artifactory</name>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <url>https://nexus-private.hortonworks.com/nexus/repository/IN-QA</url>
+            <layout>default</layout>
+        </pluginRepository>
+    </pluginRepositories> -->
 
     <build>
         <plugins>
@@ -61,6 +78,7 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- uncomment when updating CSD files - requires internal repository
             <plugin>
                 <groupId>com.cloudera.enterprise</groupId>
                 <artifactId>schema-validator-maven-plugin</artifactId>
@@ -91,7 +109,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin> -->
 
         </plugins>
     </build>

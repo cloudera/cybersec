@@ -12,6 +12,21 @@
 # limitations governing your use of the file.
 #
 
+# Determine the location of the script to locate parcel
+# Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$(dirname "$SOURCE")"
+while [ -h "$SOURCE" ]
+do
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Populate necessary environment variables
+source $BIN_DIR/env.sh
+
 if [ "$#" -ne 1 ]; then
   echo "Usage: $0 pipeline_name " >&2
   exit 1
@@ -20,11 +35,10 @@ fi
 pipeline=$1
 
 triage_dir=$pipeline/triage
-template_dir=$(cs-get-template-dir)
 
 mkdir -p $triage_dir/stellar
 mkdir -p $triage_dir/samples
 mkdir -p $triage_dir/rules
-for FILE in $template_dir/triage/*; do 
+for FILE in $TEMPLATES_DIR/triage/*; do 
     sed -e s/PIPELINE/$pipeline/g $FILE > $pipeline/triage/${FILE##*/}
 done

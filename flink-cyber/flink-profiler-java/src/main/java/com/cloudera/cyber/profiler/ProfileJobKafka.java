@@ -33,13 +33,14 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import freemarker.template.TemplateException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.hbase.sink.HBaseSinkFunction;
+import org.apache.flink.connector.kafka.sink.KafkaSink;
+import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer;
 import org.apache.flink.util.Preconditions;
 
 import java.io.IOException;
@@ -72,7 +73,7 @@ public class ProfileJobKafka extends ProfileJob {
 
     private static final String INCORRECT_NUMERIC_MESSAGE_TEMPLATE = "Property '%s' has incorrect value '%s'. It should be numeric";
 
-    private FlinkKafkaProducer<ScoredMessage> sink;
+    private KafkaSink<ScoredMessage> sink;
 
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
@@ -84,9 +85,9 @@ public class ProfileJobKafka extends ProfileJob {
 
     @Override
     protected DataStream<ScoredMessage> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        return env.addSource(
-                new FlinkUtils<>(ScoredMessage.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_INPUT), params, params.get(PARAMS_GROUP_ID, PROFILE_GROUP_ID))
-        ).name("Kafka Source").uid("kafka-source");
+        return env.fromSource(
+                new FlinkUtils<>(ScoredMessage.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_INPUT), params, params.get(PARAMS_GROUP_ID, PROFILE_GROUP_ID)),
+                WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
     }
 
     @Override
@@ -96,29 +97,31 @@ public class ProfileJobKafka extends ProfileJob {
                     params.getRequired(ConfigConstants.PARAMS_TOPIC_OUTPUT), PROFILE_GROUP_ID,
                     params);
         }
-        results.addSink(sink).name("Kafka Results").uid("kafka.results.");
+        results.sinkTo(sink).name("Kafka Results").uid("kafka.results.");
     }
 
     protected void writeProfileMeasurementsResults(ParameterTool params, List<ProfileDto> profileDtos, DataStream<ProfileMessage> results) throws IOException, TemplateException {
-        DataStream<MeasurementDataDto> measurementDtoDataStream = results.flatMap(new ProfileMessageToMeasurementDataDtoMapping(new ArrayList<>(profileDtos)));
-        Properties properties = Utils.readProperties(params.getProperties(), PARAMS_PHOENIX_DB_QUERY_PARAM);
-        JdbcStatementBuilder<MeasurementDataDto> objectJdbcStatementBuilder = new PhoenixJdbcStatementBuilder(params.getInt(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT, 0));
-        JdbcExecutionOptions.Builder jdbcExecutionOptionsBuilder = JdbcExecutionOptions.builder();
-        validateNumericParamAndApply(PARAMS_PHOENIX_DB_BATCH_SIZE, params.get(PARAMS_PHOENIX_DB_BATCH_SIZE), jdbcExecutionOptionsBuilder::withBatchSize);
-        validateNumericParamAndApply(PARAMS_PHOENIX_DB_INTERVAL_MILLIS, params.get(PARAMS_PHOENIX_DB_INTERVAL_MILLIS), jdbcExecutionOptionsBuilder::withBatchIntervalMs);
-        validateNumericParamAndApply(PARAMS_PHOENIX_DB_MAX_RETRY_TIMES, params.get(PARAMS_PHOENIX_DB_MAX_RETRY_TIMES), jdbcExecutionOptionsBuilder::withMaxRetries);
+        if (params.getBoolean(PARAMS_PHOENIX_DB_INIT)) {
+            DataStream<MeasurementDataDto> measurementDtoDataStream = results.flatMap(new ProfileMessageToMeasurementDataDtoMapping(new ArrayList<>(profileDtos)));
+            Properties properties = Utils.readProperties(params.getProperties(), PARAMS_PHOENIX_DB_QUERY_PARAM);
+            JdbcStatementBuilder<MeasurementDataDto> objectJdbcStatementBuilder = new PhoenixJdbcStatementBuilder(params.getInt(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT, 0));
+            JdbcExecutionOptions.Builder jdbcExecutionOptionsBuilder = JdbcExecutionOptions.builder();
+            validateNumericParamAndApply(PARAMS_PHOENIX_DB_BATCH_SIZE, params.get(PARAMS_PHOENIX_DB_BATCH_SIZE), jdbcExecutionOptionsBuilder::withBatchSize);
+            validateNumericParamAndApply(PARAMS_PHOENIX_DB_INTERVAL_MILLIS, params.get(PARAMS_PHOENIX_DB_INTERVAL_MILLIS), jdbcExecutionOptionsBuilder::withBatchIntervalMs);
+            validateNumericParamAndApply(PARAMS_PHOENIX_DB_MAX_RETRY_TIMES, params.get(PARAMS_PHOENIX_DB_MAX_RETRY_TIMES), jdbcExecutionOptionsBuilder::withMaxRetries);
 
-        JdbcExecutionOptions executionOptions = jdbcExecutionOptionsBuilder.build();
-        JdbcConnectionOptions connectionOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-                .withDriverName(PhoenixThinClient.getDRIVER())
-                .withUrl(client.getDbUrl())
-                .build();
-        SinkFunction<MeasurementDataDto> jdbcSink = JdbcSink.sink(
-                freemarkerGenerator.replaceByTemplate(UPSERT_SQL, Maps.fromProperties(properties)),
-                objectJdbcStatementBuilder,
-                executionOptions,
-                connectionOptions);
-        measurementDtoDataStream.addSink(jdbcSink).name("JDBC Sink").uid("jdbc.profile.group");
+            JdbcExecutionOptions executionOptions = jdbcExecutionOptionsBuilder.build();
+            JdbcConnectionOptions connectionOptions = new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+                    .withDriverName(PhoenixThinClient.getDRIVER())
+                    .withUrl(client.getDbUrl())
+                    .build();
+            SinkFunction<MeasurementDataDto> jdbcSink = JdbcSink.sink(
+                    freemarkerGenerator.replaceByTemplate(UPSERT_SQL, Maps.fromProperties(properties)),
+                    objectJdbcStatementBuilder,
+                    executionOptions,
+                    connectionOptions);
+            measurementDtoDataStream.addSink(jdbcSink).name("JDBC Sink").uid("jdbc.profile.group");
+        }
     }
 
     @Override
@@ -143,17 +146,16 @@ public class ProfileJobKafka extends ProfileJob {
     @Override
     protected DataStream<ScoringRuleCommand> createRulesSource(StreamExecutionEnvironment env, ParameterTool params) {
         String topic = params.getRequired("query.input.topic");
-        FlinkKafkaConsumer<ScoringRuleCommand> source = new FlinkUtils<>(ScoringRuleCommand.class).createKafkaGenericSource(topic, params, params.get(PARAMS_GROUP_ID, PROFILE_GROUP_ID));
-        return env.addSource(source)
-                .name("Kafka Score Rule Source")
+        KafkaSource<ScoringRuleCommand> source = new FlinkUtils<>(ScoringRuleCommand.class).createKafkaGenericSource(topic, params, params.get(PARAMS_GROUP_ID, PROFILE_GROUP_ID));
+        return env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Score Rule Source")
                 .uid("kafka.input.rule.command");
     }
 
     @Override
     protected void writeScoredRuleCommandResult(ParameterTool params, DataStream<ScoringRuleCommandResult> results) {
         String topic = params.getRequired("query.output.topic");
-        FlinkKafkaProducer<ScoringRuleCommandResult> scoredSink = new FlinkUtils<>(ScoringRuleCommandResult.class).createKafkaSink(topic, params.get(PARAMS_GROUP_ID, PROFILE_GROUP_ID), params);
-        results.addSink(scoredSink).name("Kafka Score Rule Command Results").uid("kafka.output.rule.command.results");
+        KafkaSink<ScoringRuleCommandResult> scoredSink = new FlinkUtils<>(ScoringRuleCommandResult.class).createKafkaSink(topic, params.get(PARAMS_GROUP_ID, PROFILE_GROUP_ID), params);
+        results.sinkTo(scoredSink).name("Kafka Score Rule Command Results").uid("kafka.output.rule.command.results");
 
     }
 
@@ -206,7 +208,7 @@ public class ProfileJobKafka extends ProfileJob {
             Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE)), INCORRECT_NUMERIC_MESSAGE_TEMPLATE, PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE, params.get(PARAMS_PHOENIX_DB_QUERY_PROFILE_SEQUENCE_CACHE));
             Preconditions.checkArgument(StringUtils.isNumeric(params.get(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT)), INCORRECT_NUMERIC_MESSAGE_TEMPLATE, PARAMS_PHOENIX_DB_QUERY_KEY_COUNT, params.get(PARAMS_PHOENIX_DB_QUERY_KEY_COUNT));
         } else {
-            Preconditions.checkArgument(!StringUtils.equals(phoenixFlag, "false"), "Invalid properties '%s' value %s (expected 'true' or 'false').", PARAMS_PHOENIX_DB_INIT, phoenixFlag);
+            Preconditions.checkArgument(StringUtils.equals(phoenixFlag, "false"), "Invalid properties '%s' value %s (expected 'true' or 'false').", PARAMS_PHOENIX_DB_INIT, phoenixFlag);
         }
     }
 

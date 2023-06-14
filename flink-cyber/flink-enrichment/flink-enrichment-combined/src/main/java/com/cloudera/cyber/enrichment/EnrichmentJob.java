@@ -17,6 +17,7 @@ import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.cloudera.cyber.enrichemnt.stellar.StellarEnrichmentJob;
 import com.cloudera.cyber.enrichment.geocode.IpGeo;
+import com.cloudera.cyber.enrichment.cidr.IpRegionCidr;
 import com.cloudera.cyber.enrichment.hbase.HbaseJob;
 import com.cloudera.cyber.enrichment.hbase.HbaseJobRawKafka;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
@@ -51,6 +52,8 @@ import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_ASN_FIELDS;
 import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_GEO_DATABASE_PATH;
 import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_GEO_FIELDS;
 import static com.cloudera.cyber.enrichment.hbase.HbaseJob.PARAMS_ENRICHMENT_CONFIG;
+import static com.cloudera.cyber.enrichment.cidr.IpRegionCidrJob.PARAM_CIDR_CONFIG_PATH;
+import static com.cloudera.cyber.enrichment.cidr.IpRegionCidrJob.PARAM_CIDR_IP_FIELDS;
 
 @Slf4j
 public abstract class EnrichmentJob {
@@ -60,6 +63,7 @@ public abstract class EnrichmentJob {
 
     private static final String PARAMS_ENABLE_GEO = "geo.enabled";
     private static final String PARAMS_ENABLE_ASN = "asn.enabled";
+    private static final String PARAMS_ENABLE_CIDR = "cidr.enabled";
     private static final String PARAMS_ENABLE_HBASE = "hbase.enabled";
     private static final String PARAMS_ENABLE_REST = "rest.enabled";
     private static final String PARAMS_ENABLE_THREATQ = "threatq.enabled";
@@ -86,7 +90,12 @@ public abstract class EnrichmentJob {
                         Arrays.asList(params.getRequired(PARAM_ASN_FIELDS).split(",")),
                         params.getRequired(PARAM_ASN_DATABASE_PATH)) : geoEnriched;
 
-        Tuple2<SingleOutputStreamOperator<Message>, DataStream<EnrichmentCommandResponse>> enriched = LookupJob.enrich(localEnrichments, asnEnriched, enrichmentConfigs);
+        SingleOutputStreamOperator<Message> cidrEnriched = params.getBoolean(PARAMS_ENABLE_CIDR, false) ?
+            IpRegionCidr.cidr(asnEnriched,
+                Arrays.asList(params.getRequired(PARAM_CIDR_IP_FIELDS).split(",")),
+                params.getRequired(PARAM_CIDR_CONFIG_PATH)) : asnEnriched;
+
+        Tuple2<SingleOutputStreamOperator<Message>, DataStream<EnrichmentCommandResponse>> enriched = LookupJob.enrich(localEnrichments, cidrEnriched, enrichmentConfigs);
 
         DataStream<EnrichmentCommandResponse> enrichmentCommandResponses = enriched.f1;
 
@@ -123,7 +132,7 @@ public abstract class EnrichmentJob {
             List<ThreatQConfig> threatQconfigs = ThreatQJob.parseConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_THREATQ_CONFIG_FILE))));
             log.info("ThreatQ Configs {}", threatQconfigs);
             tqed = ThreatQJob.enrich(rested, threatQconfigs, enrichmentsStorageConfig);
-            ThreatQJob.ingest(createThreatQSource(env, params));
+            ThreatQJob.ingest(createThreatQSource(env, params), threatQconfigs);
         } else {
             tqed = rested;
         }
