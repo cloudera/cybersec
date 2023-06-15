@@ -15,7 +15,7 @@
 # Determine the location of the script to locate parcel
 # Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 SOURCE="${BASH_SOURCE[0]}"
-BIN_DIR="$(dirname "$SOURCE")"
+BIN_DIR="$( dirname "$SOURCE" )"
 while [ -h "$SOURCE" ]
 do
   SOURCE="$(readlink "$SOURCE")"
@@ -24,23 +24,5 @@ do
 done
 BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-# Populate necessary environment variables
-source $BIN_DIR/env_template.sh
-
-if [ "$#" -ne 2 ]; then
-  echo "Usage: $0 pipeline_name parser_name" >&2
-  exit 1
-fi
-
-pipeline=$1
-parser=$2
-
-parse_dir=$pipeline/parse
-
-mkdir -p $parse_dir/chains
-mkdir -p $parse_dir/stellar
-mkdir -p $parse_dir/patterns
-mkdir -p $parse_dir/samples
-mkdir -p $parse_dir/$parser
-sed -e s/PARSER_NAME/$parser/g -e s/PIPELINE/$pipeline/g $TEMPLATES_DIR/parse/parser.properties.template > $pipeline/parse/$parser/parser.properties.template
-cp $TEMPLATES_DIR/parse/chain-topic-map.json $parse_dir/$parser
+ETC_DIR=$BIN_DIR/../etc
+TEMPLATES_DIR="$ETC_DIR"/conf/templates
