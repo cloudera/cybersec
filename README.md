@@ -38,7 +38,7 @@ mvn clean install
 
 ### Build without running tests
 ```
-cd cybersec/flink-cybercvf .
+cd cybersec/flink-cyber
 mvn clean install -DskipTests
 ```
 
