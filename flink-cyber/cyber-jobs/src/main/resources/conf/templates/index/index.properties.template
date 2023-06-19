@@ -3,8 +3,12 @@ hive.schema=cyber
 hive.table=events
 
 #flink.writer=tableapi
+
+#Uncomment one of the following lines in case flink.writer=tableapi is specified
 #flink.output-connector=hive
 #flink.output-connector=kafka
+
+#Uncomment following two lines in case flink.writer=tableapi is specified
 #flink.tables-init-file=/home/systest/cyb-105-test/main/cyb-105/index/conf/table-config.json
 #flink.mapping-file=/home/systest/cyb-105-test/main/cyb-105/index/conf/mapping-config.json
 
