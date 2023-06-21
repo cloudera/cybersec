@@ -18,11 +18,14 @@ export const LOAD_CHAINS = '[Chain List] load all start';
 export const LOAD_CHAINS_SUCCESS = '[Chain List] load all success';
 export const LOAD_CHAINS_FAIL = '[Chain List] load all fail';
 export const DELETE_CHAIN = '[Chain List] delete item';
+export const DELETE_CHAIN_SELECT = '[Chain List] prepare delete item';
 export const DELETE_CHAIN_SUCCESS = '[Chain List] delete item success';
 export const DELETE_CHAIN_FAIL = '[Chain List] delete item fail';
 export const CREATE_CHAIN = '[Chain List] create item';
 export const SHOW_CREATE_MODAL = '[Chain List] show create modal';
 export const HIDE_CREATE_MODAL = '[Chain List] hide create modal';
+export const SHOW_DELETE_MODAL = '[Chain List] show delete modal';
+export const HIDE_DELETE_MODAL = '[Chain List] hide delete modal';
 export const CREATE_CHAIN_SUCCESS = '[Chain List] create item success';
 export const CREATE_CHAIN_FAIL = '[Chain List] create item fail';
 
@@ -48,6 +51,10 @@ export class LoadChainsFailAction implements Action {
 export class DeleteChainAction implements Action {
   readonly type = DELETE_CHAIN;
   constructor(public chainId: string, public chainName: string) {}
+}
+export class SelectDeleteChainAction implements Action {
+  readonly type = DELETE_CHAIN_SELECT;
+  constructor(public chainId: string) {}
 }
 
 export class DeleteChainSuccessAction implements Action {
@@ -75,6 +82,16 @@ export class HideCreateModalAction implements Action {
     constructor() {}
 }
 
+export class ShowDeleteModalAction implements Action {
+  readonly type = SHOW_DELETE_MODAL;
+  constructor() {}
+}
+
+export class HideDeleteModalAction implements Action {
+  readonly type = HIDE_DELETE_MODAL;
+  constructor() {}
+}
+
 export class CreateChainSuccessAction implements Action {
     readonly type = CREATE_CHAIN_SUCCESS;
     constructor(public chain: ChainModel) {}
@@ -88,6 +105,9 @@ export class CreateChainFailAction implements Action {
 export type ChainListAction = LoadChainsAction
   | LoadChainsSuccessAction
   | LoadChainsFailAction
+  | ShowDeleteModalAction
+  | HideDeleteModalAction
+  | SelectDeleteChainAction
   | DeleteChainAction
   | DeleteChainSuccessAction
   | DeleteChainFailAction

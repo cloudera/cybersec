@@ -74,7 +74,9 @@
         <multiline-string.version>0.1.2</multiline-string.version>
         <testcontainers.version>1.15.0</testcontainers.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
-        <maven-surefire-plugin.version>2.12.4</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <solr.version>8.4.1.${cdh.version}</solr.version>
         <maxmind.version>2.13.1</maxmind.version>
         <hadoop.version>3.1.1.${cdh.version}</hadoop.version>
@@ -83,7 +85,7 @@
         <datasketches.version>1.3.0-incubating</datasketches.version>
         <assertj.version>3.13.2</assertj.version>
         <json.simple.version>1.1.1</json.simple.version>
-        <jupiter.junit.version>5.5.2</jupiter.junit.version>
+        <jupiter.junit.version>5.9.3</jupiter.junit.version>
         <phoenix.version>5.1.0.${cdh.version}</phoenix.version>
         <phoenix.queryserver>6.0.0.${cdh.version}</phoenix.queryserver>
         <classindex.version>3.4</classindex.version>
@@ -105,6 +107,7 @@
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-text.version>1.10.0</commons-text.version>
         <java-grok.version>0.1.9</java-grok.version>
+        <everit-json-schema.version>1.14.2</everit-json-schema.version>
     </properties>
 
     <repositories>
@@ -208,6 +211,13 @@
                 <version>${flink.version}</version>
             </dependency>
 
+<!--            replacing inside flink-cloudera-registry-->
+            <dependency>
+                <groupId>com.github.erosb</groupId>
+                <artifactId>everit-json-schema</artifactId>
+                <version>${everit-json-schema.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-cloudera-registry</artifactId>
@@ -216,6 +226,10 @@
                     <exclusion>
                         <groupId>org.apache.avro</groupId>
                         <artifactId>avro</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.everit.json</groupId>
+                        <artifactId>org.everit.json.schema</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -456,7 +470,7 @@
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
-                <version>3.13.2</version>
+                <version>${assertj.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>

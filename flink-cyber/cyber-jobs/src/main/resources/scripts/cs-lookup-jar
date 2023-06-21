@@ -18,14 +18,32 @@ if [ "$#" -ne 1 ]; then
 fi
 jar_prefix=$1
 
-## Build the jar path
+# Determine the location of the script to locate parcel
+# Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$(dirname "$SOURCE")"
+while [ -h "$SOURCE" ]
+do
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
 #  current directory
 jar_paths=(".")
-# CYBERSEC_HOME/jobs if defined
-if [[ ! -z "${CYBERSEC_HOME}" ]]; then
-    jar_paths+=("${CYBERSEC_HOME}/jobs")
-    jar_paths+=("${CYBERSEC_HOME}/tools")
+# first look relative to the bin directory, then look in /opt - allows overriding for testing
+JOBS_DIR=${BIN_DIR}/../jobs
+TOOLS_DIR=${BIN_DIR}/../tools
+
+if [[ ! -z "${JOBS_DIR}" ]]; then
+    jar_paths+=("${JOBS_DIR}")
 fi
+
+if [[ ! -z "${TOOLS_DIR}" ]]; then
+    jar_paths+=("${TOOLS_DIR}")
+fi
+
 # parcel directory
 jar_paths+=("/opt/cloudera/parcels/CYBERSEC/jobs")
 jar_paths+=("/opt/cloudera/parcels/CYBERSEC/tools")
