@@ -118,20 +118,6 @@
         <dependency>
             <groupId>org.adrianwalker</groupId>
             <artifactId>multiline-string</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-            </exclusions>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>com.cloudera.cyber</groupId>
-            <artifactId>flink-common</artifactId>
-            <scope>compile</scope>
-            <version>${project.parent.version}</version>
         </dependency>
 
         <!-- Logging -->
@@ -211,6 +197,20 @@
             </testResource>
         </testResources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.cloudera.cyber</groupId>
+                        <artifactId>flink-common</artifactId>
+                        <version>${project.parent.version}</version>
+                        <type>test-jar</type>
+                        <scope>compile</scope>
+                    </dependency>
+                </dependencies>
+            </plugin>
             <!-- We use the maven-shade plugin to create a fat jar that contains all necessary dependencies. -->
             <!-- Change the value of <mainClass>...</mainClass> if your program entry point changes. -->
             <plugin>

@@ -1,12 +1,16 @@
 geo.enabled=true
-geo.ip_fields=ip_src_addr,ip_dst_addr,ip_dst,ip_src,not_defined
+geo.ip_fields=ip_src_addr,ip_dst_addr
 # default location is set with cloudera manager
-#geo.database_path=hdfs:/path/to/cyb_92/GeoLite2-City.mmdb
+#geo.database_path=hdfs:/path/to/GeoLite2-City.mmdb
 
 asn.enabled=true
-asn.ip_fields=ip_src_addr,ip_dst_addr,not_defined,ip_dst,ip_src
+asn.ip_fields=ip_src_addr,ip_dst_addr
 # default location is set with cloudera manager
-#asn.database_path=hdfs:/path/to/cyb_92/GeoLite2-ASN.mmdb
+#asn.database_path=hdfs:/path/to/GeoLite2-ASN.mmdb
+
+cidr.enabled=false
+cidr.ip_fields=ip_src_addr,ip_dst_addr
+cidr.config_file_path=PIPELINE/triage/enrichments-cidr.json
 
 lookups.config.file=PIPELINE/triage/enrichments-lookups.json
 
@@ -22,7 +26,6 @@ threatq.config.file=PIPELINE/triage/enrichments-threatq.json
 stellar.enabled=false
 stellar.config.dir=PIPELINE/triage/stellar
 
-stix.enabled=false
 rules.enabled=false
 
 kafka.group.id=BRANCH.PIPELINE.triage

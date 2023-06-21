@@ -71,9 +71,8 @@
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
-            <artifactId>flink-enrichment-stix</artifactId>
+            <artifactId>flink-enrichment-cidr</artifactId>
             <version>${project.parent.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>

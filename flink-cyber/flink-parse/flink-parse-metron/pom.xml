@@ -24,8 +24,6 @@
     <artifactId>flink-parse-metron</artifactId>
 
     <properties>
-        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
         <global_kryo_version>3.0.3</global_kryo_version>
         <global_kryo_serializers_version>0.38</global_kryo_serializers_version>
     </properties>
@@ -119,8 +117,6 @@
         <dependency>
             <groupId>org.adrianwalker</groupId>
             <artifactId>multiline-string</artifactId>
-            <version>0.1.2</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
