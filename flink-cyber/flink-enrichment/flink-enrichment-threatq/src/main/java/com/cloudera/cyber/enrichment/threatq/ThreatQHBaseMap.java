@@ -14,8 +14,8 @@ package com.cloudera.cyber.enrichment.threatq;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentFieldsConfig;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageConfig;
-import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.hbase.AbstractHbaseMapFunction;
 import com.cloudera.cyber.hbase.LookupKey;
@@ -29,9 +29,6 @@ import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 public class ThreatQHBaseMap extends AbstractHbaseMapFunction<Message, Message> {
-    private static final String THREAT_Q_ENRICHMENT_NAME = "threatq";
-    private static final String DEFAULT_THREATQ_TABLE = "threatq";
-    private static final String DEFAULT_THREATQ_COLUMN_FAMILY = "t";
 
     private final List<ThreatQConfig> configs;
     private final EnrichmentStorageConfig threatqStorage;
@@ -40,9 +37,7 @@ public class ThreatQHBaseMap extends AbstractHbaseMapFunction<Message, Message> 
         super();
         this.configs = configs;
         log.info("ThreatQ Configuration: {}", configs);
-        this.threatqStorage = enrichmentStorageConfig.getStorageConfigs().
-                getOrDefault(THREAT_Q_ENRICHMENT_NAME,
-                        new EnrichmentStorageConfig(EnrichmentStorageFormat.HBASE_SIMPLE, DEFAULT_THREATQ_TABLE, DEFAULT_THREATQ_COLUMN_FAMILY));
+        this.threatqStorage = enrichmentStorageConfig.getStorageForEnrichmentType(EnrichmentFieldsConfig.THREATQ_ENRICHMENT_NAME);
     }
 
     @Override
@@ -55,8 +50,8 @@ public class ThreatQHBaseMap extends AbstractHbaseMapFunction<Message, Message> 
                     if (!message.getExtensions().containsKey(f)) {
                         return Collections.<String,String>emptyMap();
                     }
-                    String k = config.getIndicatorType() + ":" + message.getExtensions().get(f);
-                    LookupKey lookup = threatqStorage.getFormat().getLookupBuilder().build(threatqStorage, THREAT_Q_ENRICHMENT_NAME, k);
+                    String k = ThreatQEntry.createKey(config.getIndicatorType(), message.getExtensions().get(f));
+                    LookupKey lookup = threatqStorage.getFormat().getLookupBuilder().build(threatqStorage, EnrichmentFieldsConfig.THREATQ_ENRICHMENT_NAME, k);
                     return hbaseLookup(message.getTs(), lookup, f + ".threatq");
                 })
                 .flatMap(m -> m.entrySet().stream())
