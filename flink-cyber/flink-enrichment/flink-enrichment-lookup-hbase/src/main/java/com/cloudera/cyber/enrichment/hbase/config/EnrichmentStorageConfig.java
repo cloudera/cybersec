@@ -33,8 +33,9 @@ public class EnrichmentStorageConfig implements Serializable {
     private String columnFamily;
 
     public void validate(String storageType) {
-        Preconditions.checkState(StringUtils.isNotEmpty(hbaseTableName), String.format(STORAGE_CONFIG_TABLE_NOT_SET_ERROR, storageType));
+        Preconditions.checkState(StringUtils.isNotEmpty(hbaseTableName), STORAGE_CONFIG_TABLE_NOT_SET_ERROR, storageType);
         Preconditions.checkState(format.equals(EnrichmentStorageFormat.HBASE_SIMPLE) || StringUtils.isNotEmpty(columnFamily), String.format(STORAGE_CONFIG_COLUMN_FAMILY_NOT_SET_ERROR, storageType));
-        Preconditions.checkState(format.equals(EnrichmentStorageFormat.HBASE_METRON) || StringUtils.isEmpty(columnFamily), String.format(STORAGE_CONFIG_COLUMN_FAMILY_SET_ERROR, storageType));
+        Preconditions.checkState(format.equals(EnrichmentStorageFormat.HBASE_METRON) || StringUtils.isEmpty(columnFamily), String.format
+            (STORAGE_CONFIG_COLUMN_FAMILY_SET_ERROR, storageType));
     }
 }

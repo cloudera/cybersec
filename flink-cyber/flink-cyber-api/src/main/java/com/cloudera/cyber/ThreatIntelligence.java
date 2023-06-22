@@ -42,7 +42,6 @@ public class ThreatIntelligence extends SpecificRecordBase implements SpecificRe
     private long ts;
     private String observable;
     private String observableType;
-    private String stixReference;
     private Map<String, String> fields;
 
     public static final Schema SCHEMA$ = SchemaBuilder.record(ThreatIntelligence.class.getName()).namespace(ThreatIntelligence.class.getPackage().getName())
@@ -51,16 +50,15 @@ public class ThreatIntelligence extends SpecificRecordBase implements SpecificRe
             .requiredLong("ts")
             .requiredString("observable")
             .requiredString("observableType")
-            .optionalString("stixReference")
             .name("fields").type(Schema.createMap(SchemaBuilder.builder().stringType())).noDefault()
             .endRecord();
 
     public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
-            new String[]{"id", "ts", "observable", "observableType", "stixReference", "fields"},
-            Types.STRING, Types.LONG, Types.STRING, Types.STRING, Types.STRING, Types.MAP(Types.STRING, Types.STRING));
+            new String[]{"id", "ts", "observable", "observableType", "fields"},
+            Types.STRING, Types.LONG, Types.STRING, Types.STRING, Types.MAP(Types.STRING, Types.STRING));
 
     public Row toRow() {
-        return Row.of(id, ts, observable, observableType, stixReference, fields);
+        return Row.of(id, ts, observable, observableType, fields);
     }
 
     @Override
@@ -71,48 +69,26 @@ public class ThreatIntelligence extends SpecificRecordBase implements SpecificRe
     @Override
     public Object get(int field$) {
         switch (field$) {
-            case 0:
-                return id;
-            case 1:
-                return ts;
-            case 2:
-                return observable;
-            case 3:
-                return observableType;
-            case 4:
-                return stixReference;
-            case 5:
-                return fields;
-            default:
-                throw new AvroRuntimeException("Bad index");
+            case 0: return id;
+            case 1: return ts;
+            case 2: return observable;
+            case 3: return observableType;
+            case 4: return fields;
+            default: throw new AvroRuntimeException("Bad index");
         }
     }
 
     // Used by DatumReader.  Applications should not call.
-    @SuppressWarnings(value = "unchecked")
+    @SuppressWarnings(value="unchecked")
     @Override
     public void put(int field$, Object value$) {
         switch (field$) {
-            case 0:
-                id = value$.toString();
-                break;
-            case 1:
-                ts = (Long) value$;
-                break;
-            case 2:
-                observable = value$.toString();
-                break;
-            case 3:
-                observableType = value$.toString();
-                break;
-            case 4:
-                stixReference = value$.toString();
-                break;
-            case 5:
-                fields = utf8toStringMap(value$);
-                break;
-            default:
-                throw new AvroRuntimeException("Bad index");
+            case 0: id = value$.toString(); break;
+            case 1: ts = (Long)value$; break;
+            case 2: observable = value$.toString(); break;
+            case 3: observableType = value$.toString(); break;
+            case 4: fields = utf8toStringMap(value$); break;
+            default: throw new AvroRuntimeException("Bad index");
         }
     }
 }
