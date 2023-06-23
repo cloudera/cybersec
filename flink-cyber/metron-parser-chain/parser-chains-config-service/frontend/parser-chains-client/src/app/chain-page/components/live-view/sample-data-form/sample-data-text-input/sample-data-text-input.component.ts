@@ -28,7 +28,6 @@ export class SampleDataTextInputComponent {
     reader.onload = () => {
       const fileTypeError = this.checkFileType(file);
       if (fileTypeError) {
-        this.messageService.create('error', fileTypeError.message);
         return;
       }
       this.sampleDataInput.nativeElement.value = reader.result;
@@ -39,18 +38,17 @@ export class SampleDataTextInputComponent {
 
   private checkFileType(file: File) {
     if (!file) {
-      return null;
+      return false;
     }
     const [, extension] = file.name.split('.');
     const fileExt = ['txt', 'csv'];
     const fileTypes = ['text/plain', 'text/csv'];
 
     if (!fileExt.find(ext => ext === extension.toLowerCase()) || !fileTypes.find(type => file.type === type)) {
-      return {
-        message: `The file must be a .txt or .csv`
-      };
+        this.messageService.create('error', 'The file must be a .txt or .csv');
+        return true;
     }
-    return null;
+    return false;
   }
 
 }

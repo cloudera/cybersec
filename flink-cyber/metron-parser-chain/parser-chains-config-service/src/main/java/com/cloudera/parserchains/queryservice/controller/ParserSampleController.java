@@ -51,10 +51,10 @@ import static com.cloudera.parserchains.queryservice.common.ApplicationConstants
 public class ParserSampleController {
 
     @Autowired
-    ParserSampleService parserSampleService;
+    private ParserSampleService parserSampleService;
 
     @Autowired
-    AppProperties appProperties;
+    private AppProperties appProperties;
 
     @ApiOperation(value = "Retrieves all parser samples for the specified chain.")
     @ApiResponses(value = {
@@ -66,6 +66,9 @@ public class ParserSampleController {
                                                    @RequestBody SampleFolderDescriptor body) throws IOException {
         String sampleFolderPath = getSampleFolderPath(body);
         List<ParserSample> types = parserSampleService.findAllById(sampleFolderPath, id);
+        if (types == null){
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(types);
     }
 

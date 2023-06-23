@@ -22,6 +22,7 @@ import {
 } from "./sample-data-text-folder-input.actions";
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {liveViewInitialized} from "../../live-view.actions";
+import {map} from "rxjs/operators";
 
 @Component({
     selector: 'app-sample-data-text-folder-input',
@@ -44,7 +45,6 @@ export class SampleDataTextFolderInputComponent implements OnInit {
     }>>;
     sampleData$: Observable<SampleDataInternalModel[]>;
     sampleFolderPath$: Observable<string>;
-    editSampleModalVisible$: Observable<boolean>;
 
     expandSet = new Set<number>();
 
@@ -59,7 +59,6 @@ export class SampleDataTextFolderInputComponent implements OnInit {
         this.runResults$ = this.store.pipe(select(getRunResults));
         this.sampleData$ = this.store.pipe(select(getSampleData));
         this.sampleFolderPath$ = this.store.pipe(select(getSampleFolderPath));
-        this.editSampleModalVisible$ = store.pipe(select(getEditModalVisible));
 
         this.sampleData$.subscribe(value => this.currentSampleData = value)
     }
@@ -157,5 +156,40 @@ export class SampleDataTextFolderInputComponent implements OnInit {
             expectedResult: ""
         }]
         this.store.dispatch(ShowEditModalAction())
+    }
+
+    getIconType(id: number) {
+        return this.getStatus(id).pipe(map(dataStatus => {
+            switch (dataStatus) {
+                case SampleTestStatus.SUCCESS:
+                    return "check-circle"
+                case SampleTestStatus.FAIL:
+                    return "close-circle"
+                case SampleTestStatus.UNKNOWN:
+                    return "clock-circle"
+            }
+        }))
+    }
+
+    getIconColor(id: number) {
+        return this.getStatus(id).pipe(map(dataStatus => {
+            switch (dataStatus) {
+                case SampleTestStatus.SUCCESS:
+                    return "#52c41a"
+                case SampleTestStatus.FAIL:
+                    return "#d41f1f"
+                case SampleTestStatus.UNKNOWN:
+                    return "#bbbbbb"
+            }
+        }))
+    }
+
+    getStatus(id: number){
+        return this.runResults$.pipe(map(value => {
+            let dataById = value.get(id);
+            return dataById === undefined
+                ? SampleTestStatus.UNKNOWN
+                : dataById.status;
+        }));
     }
 }

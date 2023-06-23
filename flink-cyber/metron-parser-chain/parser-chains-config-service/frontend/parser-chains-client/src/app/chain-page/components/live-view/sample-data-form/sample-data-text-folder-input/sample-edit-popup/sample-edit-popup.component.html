@@ -1,5 +1,5 @@
 <nz-modal
-        [nzVisible]="modalVisible"
+        [nzVisible]="editSampleModalVisible$ | async"
         nzTitle="Edit Sample"
         (nzOnCancel)="handleCancelChainModal()"
         (nzOnOk)="pushChain()"
