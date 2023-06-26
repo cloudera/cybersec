@@ -158,13 +158,19 @@ $theme: mat.define-light-theme((
 }
 
 .success-snackbar {
-  background: rgb(65, 252, 134);
+  background: rgb(0, 110, 37);
   color: white;
+  font-weight: bold;
+  margin-bottom: 5px;
+  letter-spacing: .05em
 }
 
 .fail-snackbar {
-  background: #F44336;
+  background: #850900;
   color: white;
+  font-weight: bold;
+  margin-bottom: 5px;
+  letter-spacing: .05em
 }
 
 .warning-snackbar {

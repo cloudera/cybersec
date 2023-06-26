@@ -1,5 +1,5 @@
 import {Component, Input, OnInit} from "@angular/core";
-import {b} from "msw/lib/glossary-de6278a9";
+
 
 @Component({
   selector: 'app-status-icon',
@@ -13,7 +13,7 @@ export class StatusIconComponent implements OnInit {
   }
 
   isSpinner(): boolean {
-    return this.iconName === "running";
+    return this.iconName === "starting";
   }
 
   getIconType(): string {
@@ -21,14 +21,12 @@ export class StatusIconComponent implements OnInit {
       case 'stop':
       case 'stopped':
         return 'stop_circle_outline';
-      case 'paused':
-        return 'pause_circle_outline';
       case 'failed':
         return 'error';
       case 'start' :
         return 'play_circle_outline';
       case 'online':
-      case 'started' :
+      case 'running' :
         return 'check_circle_outline';
       case 'offline':
         return 'offline_bolt';
@@ -48,7 +46,7 @@ export class StatusIconComponent implements OnInit {
       case 'paused':
       case 'offline':
         return 'gray-icon';
-      case 'started' :
+      case 'running' :
       case 'start' :
       case 'online':
       case 'restart' :
@@ -57,5 +55,4 @@ export class StatusIconComponent implements OnInit {
         return 'red-icon';
     }
   }
-
 }
