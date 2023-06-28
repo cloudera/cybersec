@@ -29,6 +29,8 @@ public class ApplicationConstants {
 
   // parser-config endpoint constants
   public static final String PARSER_CONFIG_BASE_URL = API_BASE_URL + "/parserconfig";
+  // pipeline controller constants
+  public static final String PIPELINE_BASE_URL = API_BASE_URL + "/pipeline";
   // Endpoint names
   public static final String API_CHAINS = "/chains";
   public static final String API_PARSER_FORM_CONFIG = "/parser-form-configuration";
