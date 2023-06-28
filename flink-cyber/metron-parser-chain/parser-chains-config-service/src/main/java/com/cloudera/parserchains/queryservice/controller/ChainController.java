@@ -24,29 +24,43 @@ import com.cloudera.parserchains.queryservice.model.summary.ParserChainSummary;
 import com.cloudera.parserchains.queryservice.service.ChainBuilderService;
 import com.cloudera.parserchains.queryservice.service.ChainExecutorService;
 import com.cloudera.parserchains.queryservice.service.ChainPersistenceService;
+import com.cloudera.parserchains.queryservice.service.PipelineService;
 import com.cloudera.parserchains.queryservice.service.ResultLogBuilder;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.*;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_READ_URL;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_PARSER_TEST;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PARSER_CONFIG_BASE_URL;
 
 /**
  * The controller responsible for operations on parser chains.
  */
+@Slf4j
 @RestController
 @RequestMapping(value = PARSER_CONFIG_BASE_URL)
-@Slf4j
+@RequiredArgsConstructor
 public class ChainController {
 
     /**
@@ -54,25 +68,28 @@ public class ChainController {
      */
     static final int MAX_SAMPLES_PER_TEST = 200;
 
-    @Autowired
-    ChainPersistenceService chainPersistenceService;
+    private final ChainPersistenceService chainPersistenceService;
 
-    @Autowired
-    ChainBuilderService chainBuilderService;
+    private final ChainBuilderService chainBuilderService;
 
-    @Autowired
-    ChainExecutorService chainExecutorService;
+    private final ChainExecutorService chainExecutorService;
 
-    @Autowired
-    AppProperties appProperties;
+    private final PipelineService pipelineService;
+
+    private final AppProperties appProperties;
 
     @ApiOperation(value = "Finds and returns all available parser chains.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "A list of all parser chains.")
     })
     @GetMapping(value = API_CHAINS)
-    ResponseEntity<List<ParserChainSummary>> findAll() throws IOException {
-        String configPath = appProperties.getConfigPath();
+    ResponseEntity<List<ParserChainSummary>> findAll(
+            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName
+    ) throws IOException {
+        String configPath = StringUtils.hasText(pipelineName)
+                ? pipelineService.findAll().get(pipelineName).getPath()
+                : appProperties.getConfigPath();
         List<ParserChainSummary> configs = chainPersistenceService.findAll(Paths.get(configPath));
         return ResponseEntity.ok(configs);
     }
@@ -84,9 +101,13 @@ public class ChainController {
     })
     @PostMapping(value = API_CHAINS)
     ResponseEntity<ParserChainSchema> create(
+            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName,
             @ApiParam(name = "parserChain", value = "The parser chain to create.", required = true)
             @RequestBody ParserChainSchema chain) throws IOException {
-        String configPath = appProperties.getConfigPath();
+        String configPath = StringUtils.hasText(pipelineName)
+                ? pipelineService.findAll().get(pipelineName).toString()
+                : appProperties.getConfigPath();
         ParserChainSchema createdChain = chainPersistenceService.create(chain, Paths.get(configPath));
         if (null == createdChain) {
             return ResponseEntity.notFound().build();
@@ -104,9 +125,13 @@ public class ChainController {
     })
     @GetMapping(value = API_CHAINS + "/{id}")
     ResponseEntity<ParserChainSchema> read(
+            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName,
             @ApiParam(name = "id", value = "The ID of the parser chain to retrieve.", required = true)
             @PathVariable String id) throws IOException {
-        String configPath = appProperties.getConfigPath();
+        String configPath = StringUtils.hasText(pipelineName)
+                ? pipelineService.findAll().get(pipelineName).toString()
+                : appProperties.getConfigPath();
         ParserChainSchema chain = chainPersistenceService.read(id, Paths.get(configPath));
         if (null == chain) {
             return ResponseEntity.notFound().build();
@@ -122,11 +147,15 @@ public class ChainController {
     })
     @PutMapping(value = API_CHAINS + "/{id}")
     ResponseEntity<ParserChainSchema> update(
+            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName,
             @ApiParam(name = "parserChain", value = "The new parser chain definition.", required = true)
             @RequestBody ParserChainSchema chain,
             @ApiParam(name = "id", value = "The ID of the parser chain to update.")
-            @PathVariable String id) {
-        String configPath = appProperties.getConfigPath();
+            @PathVariable String id) throws IOException {
+        String configPath = StringUtils.hasText(pipelineName)
+                ? pipelineService.findAll().get(pipelineName).toString()
+                : appProperties.getConfigPath();
         try {
             ParserChainSchema updatedChain = chainPersistenceService.update(id, chain, Paths.get(configPath));
             if (null == updatedChain) {
@@ -146,9 +175,13 @@ public class ChainController {
     })
     @DeleteMapping(value = API_CHAINS + "/{id}")
     ResponseEntity<Void> delete(
+            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName,
             @ApiParam(name = "id", value = "The ID of the parser chain to delete.", required = true)
             @PathVariable String id) throws IOException {
-        String configPath = appProperties.getConfigPath();
+        String configPath = StringUtils.hasText(pipelineName)
+                ? pipelineService.findAll().get(pipelineName).toString()
+                : appProperties.getConfigPath();
         if (chainPersistenceService.delete(id, Paths.get(configPath))) {
             return ResponseEntity.noContent().build();
         } else {
@@ -176,7 +209,8 @@ public class ChainController {
 
     /**
      * Parse sample text using a parser chain.
-     * @param schema Defines the parser chain that needs to be constructed.
+     *
+     * @param schema      Defines the parser chain that needs to be constructed.
      * @param textToParse The text to parse.
      * @return
      */
@@ -186,7 +220,7 @@ public class ChainController {
             ChainLink chain = chainBuilderService.build(schema);
             result = chainExecutorService.execute(chain, textToParse);
 
-        } catch(InvalidParserException e) {
+        } catch (InvalidParserException e) {
             log.info("The parser chain is invalid as constructed.", e);
             ResultLog log = ResultLogBuilder.error()
                     .parserId(e.getBadParser().getLabel())
