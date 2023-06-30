@@ -20,6 +20,7 @@ import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.hbase.AbstractHbaseMapFunction;
 import com.cloudera.cyber.hbase.LookupKey;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.util.Collector;
 
 import java.util.Collections;
 import java.util.List;
@@ -41,23 +42,25 @@ public class ThreatQHBaseMap extends AbstractHbaseMapFunction<Message, Message> 
     }
 
     @Override
-    public Message map(Message message) {
-        if (this.configs == null) return message;
+    public void processElement(Message message, Context context, Collector<Message> collector) {
+        if (this.configs == null) {
+            collector.collect(message);
+        } else {
+            Map<String, String> results = configs.stream()
+                    .map(config -> {
+                        String f = config.getField();
+                        if (!message.getExtensions().containsKey(f)) {
+                            return Collections.<String, String>emptyMap();
+                        }
+                        String k = ThreatQEntry.createKey(config.getIndicatorType(), message.getExtensions().get(f));
+                        LookupKey lookup = threatqStorage.getFormat().getLookupBuilder().build(threatqStorage, EnrichmentFieldsConfig.THREATQ_ENRICHMENT_NAME, k);
+                        return hbaseLookup(message.getTs(), lookup, f + ".threatq");
+                    })
+                    .flatMap(m -> m.entrySet().stream())
+                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        Map<String, String> results = configs.stream()
-                .map(config -> {
-                    String f = config.getField();
-                    if (!message.getExtensions().containsKey(f)) {
-                        return Collections.<String,String>emptyMap();
-                    }
-                    String k = ThreatQEntry.createKey(config.getIndicatorType(), message.getExtensions().get(f));
-                    LookupKey lookup = threatqStorage.getFormat().getLookupBuilder().build(threatqStorage, EnrichmentFieldsConfig.THREATQ_ENRICHMENT_NAME, k);
-                    return hbaseLookup(message.getTs(), lookup, f + ".threatq");
-                })
-                .flatMap(m -> m.entrySet().stream())
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        return MessageUtils.addFields(message, results);
+            collector.collect(MessageUtils.addFields(message, results));
+        }
     }
 
 }

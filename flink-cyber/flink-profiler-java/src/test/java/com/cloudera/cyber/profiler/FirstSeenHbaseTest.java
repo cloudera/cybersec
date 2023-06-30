@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_SIMPLE;
-import static com.cloudera.cyber.profiler.FirstSeenHbaseMutationConverter.FIRST_SEEN_ENRICHMENT_TYPE;
+import static com.cloudera.cyber.profiler.FirstSeenHbaseLookup.FIRST_SEEN_ENRICHMENT_TYPE;
 import static com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.createMeasurement;
 
 public class FirstSeenHbaseTest {

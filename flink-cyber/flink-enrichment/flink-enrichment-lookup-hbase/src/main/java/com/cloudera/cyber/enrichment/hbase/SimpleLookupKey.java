@@ -13,6 +13,7 @@ import java.util.Map;
 @Getter
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper=true)
 public class SimpleLookupKey extends LookupKey {
 
     @Override

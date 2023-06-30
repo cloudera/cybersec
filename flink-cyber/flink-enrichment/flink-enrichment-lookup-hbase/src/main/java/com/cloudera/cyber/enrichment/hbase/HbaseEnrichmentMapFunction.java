@@ -25,11 +25,10 @@ import com.google.common.base.Joiner;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.flink.util.Collector;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -59,11 +58,12 @@ public class HbaseEnrichmentMapFunction extends AbstractHbaseMapFunction<Message
     }
 
     @Override
-    public Message map(Message message) {
+    public void processElement(Message message, Context context, Collector<Message> collector) {
         List<EnrichmentField> enrichmentFields = fieldToLookup.get(message.getSource());
         if (CollectionUtils.isNotEmpty(enrichmentFields)) {
             messageCounter.inc(1);
-            return MessageUtils.addFields(message, enrichmentFields.stream().flatMap(
+            collector.collect(
+                    MessageUtils.addFields(message, enrichmentFields.stream().flatMap(
                             field -> {
                                 String enrichmentType = field.getEnrichmentType();
                                 String key = message.getExtensions().get(field.getName());
@@ -74,9 +74,10 @@ public class HbaseEnrichmentMapFunction extends AbstractHbaseMapFunction<Message
                                         Joiner.on(".").join(field.getName(), field.getEnrichmentType())
                                 ).entrySet().stream();
                             })
-                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b)));
+                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b))));
+        } else {
+            collector.collect(message);
         }
-        return message;
     }
 }
 

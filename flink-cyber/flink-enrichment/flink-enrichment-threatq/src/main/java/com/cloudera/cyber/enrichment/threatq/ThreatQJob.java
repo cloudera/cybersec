@@ -39,7 +39,7 @@ public abstract class ThreatQJob {
                                              List<ThreatQConfig> configs,
                                              EnrichmentsConfig enrichmentStorageConfig
     ) {
-        return source.map(new ThreatQHBaseMap(configs, enrichmentStorageConfig)).name("Apply ThreatQ").uid("threatq-enrich");
+        return source.process(new ThreatQHBaseMap(configs, enrichmentStorageConfig)).name("Apply ThreatQ").uid("threatq-enrich");
     }
 
     public static List<ThreatQConfig> parseConfigs(byte[] configJson) throws IOException {

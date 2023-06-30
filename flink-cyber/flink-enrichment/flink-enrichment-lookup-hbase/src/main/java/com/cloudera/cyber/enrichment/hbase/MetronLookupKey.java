@@ -18,6 +18,7 @@ import java.util.Map;
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @Slf4j
+@ToString(callSuper = true)
 public class MetronLookupKey extends LookupKey {
     private final EnrichmentConverter converter  = new EnrichmentConverter();
     private final String enrichmentType;

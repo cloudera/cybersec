@@ -13,8 +13,9 @@
 package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.ValidateUtils;
-import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageConfig;
-import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat;
+import com.cloudera.cyber.commands.EnrichmentCommand;
+import com.cloudera.cyber.enrichment.hbase.config.*;
+import com.cloudera.cyber.enrichment.hbase.writer.HbaseEnrichmentCommandSink;
 import com.cloudera.cyber.flink.ConfigConstants;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
@@ -39,20 +40,21 @@ import org.apache.flink.connector.hbase.sink.HBaseSinkFunction;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.SinkFunction;
+import org.apache.flink.util.OutputTag;
 import org.apache.flink.util.Preconditions;
 
 import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 import java.util.function.Consumer;
 
+import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_METRON;
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
+import static com.cloudera.cyber.profiler.FirstSeenHbaseLookup.FIRST_SEEN_ENRICHMENT_TYPE;
 import static com.cloudera.cyber.profiler.phoenix.PhoenixThinClient.*;
 
 public class ProfileJobKafka extends ProfileJob {
@@ -128,18 +130,29 @@ public class ProfileJobKafka extends ProfileJob {
     protected DataStream<ProfileMessage> updateFirstSeen(ParameterTool params, DataStream<ProfileMessage> results,
                                                          ProfileGroupConfig profileGroupConfig) {
         String tableName = params.getRequired(PARAMS_FIRST_SEEN_HBASE_TABLE);
-        String columnFamilyName = params.getRequired(PARAMS_FIRST_SEEN_HBASE_COLUMN_FAMILY);
-        String storageFormatString = params.get(PARAMS_FIRST_SEEN_HBASE_FORMAT, EnrichmentStorageFormat.HBASE_METRON.name());
+        String columnFamilyName = null;
+        String storageFormatString = params.get(PARAMS_FIRST_SEEN_HBASE_FORMAT, HBASE_METRON.name());
         EnrichmentStorageFormat storageFormat = EnrichmentStorageFormat.valueOf(storageFormatString);
+        if (HBASE_METRON.equals(storageFormat)) {
+            columnFamilyName = params.getRequired(PARAMS_FIRST_SEEN_HBASE_COLUMN_FAMILY);
+        }
         EnrichmentStorageConfig enrichmentStorageConfig = new EnrichmentStorageConfig(storageFormat, tableName, columnFamilyName);
-        // look up the previous first seen timestamp and update the profile message
-        DataStream<ProfileMessage> updatedProfileMessages = results
-                .map(new FirstSeenHbaseLookup(enrichmentStorageConfig, profileGroupConfig));
 
-        // write the new first and last seen timestamps in hbase
-        HBaseSinkFunction<ProfileMessage> hbaseSink = new FirstSeenHbaseSink(enrichmentStorageConfig, profileGroupConfig,
-                params);
-        updatedProfileMessages.addSink(hbaseSink).name("HBase First Seen Profile Sink");
+        // look up the previous first seen timestamp and update the profile message
+        SingleOutputStreamOperator<ProfileMessage> updatedProfileMessages = results
+                .process(new FirstSeenHbaseLookup(enrichmentStorageConfig, profileGroupConfig));
+        final OutputTag<EnrichmentCommand> firstSeenEnrichmentUpdatesTag = new OutputTag<EnrichmentCommand>(FIRST_SEEN_ENRICHMENT_UPDATE) {
+        };
+        DataStream<EnrichmentCommand> firstSeenEnrichmentUpdates = updatedProfileMessages.getSideOutput(firstSeenEnrichmentUpdatesTag);
+
+        EnrichmentsConfig enrichmentsConfig = new EnrichmentsConfig();
+        enrichmentsConfig.getStorageConfigs().put(EnrichmentsConfig.DEFAULT_ENRICHMENT_STORAGE_NAME, enrichmentStorageConfig);
+        enrichmentsConfig.getEnrichmentConfigs().put(FIRST_SEEN_ENRICHMENT_TYPE, new EnrichmentConfig(EnrichmentsConfig.DEFAULT_ENRICHMENT_STORAGE_NAME, new EnrichmentFieldsConfig(null, null, null, null)));
+        enrichmentsConfig.validate();
+
+        HBaseSinkFunction<EnrichmentCommand> hbaseSink = new HbaseEnrichmentCommandSink(tableName, enrichmentsConfig, params);
+        firstSeenEnrichmentUpdates.addSink(hbaseSink);
+
         return updatedProfileMessages;
     }
 

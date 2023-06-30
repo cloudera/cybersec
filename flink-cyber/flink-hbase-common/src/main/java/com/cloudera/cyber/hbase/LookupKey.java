@@ -22,6 +22,7 @@ import java.util.Map;
 @Getter
 @SuperBuilder
 @EqualsAndHashCode
+@ToString
 public abstract class LookupKey {
     private String cf;
     private String tableName;

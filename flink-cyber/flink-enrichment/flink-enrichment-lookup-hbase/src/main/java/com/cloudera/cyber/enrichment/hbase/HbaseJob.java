@@ -35,7 +35,7 @@ public abstract class HbaseJob {
     public static final String PARAMS_ENRICHMENT_CONFIG = "enrichments.config";
 
     public static DataStream<Message> enrich(DataStream<Message> source, List<EnrichmentConfig> configs, EnrichmentsConfig enrichmentsConfig) {
-        return source.map(new HbaseEnrichmentMapFunction(configs, enrichmentsConfig))
+        return source.process(new HbaseEnrichmentMapFunction(configs, enrichmentsConfig))
                 .name("HBase Enrichment Mapper").uid("hbase-map");
     }
 

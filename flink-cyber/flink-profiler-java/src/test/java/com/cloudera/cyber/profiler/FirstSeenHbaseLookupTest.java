@@ -12,7 +12,10 @@
 
 package com.cloudera.cyber.profiler;
 
+import com.cloudera.cyber.EnrichmentEntry;
 import com.cloudera.cyber.MessageUtils;
+import com.cloudera.cyber.commands.CommandType;
+import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.hbase.SimpleLookupKey;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageConfig;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat;
@@ -22,13 +25,13 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.flink.metrics.SimpleCounter;
+import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
+import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
+import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class FirstSeenHbaseLookupTest extends FirstSeenHbaseLookup {
 
@@ -75,7 +78,6 @@ public class FirstSeenHbaseLookupTest extends FirstSeenHbaseLookup {
 
     @Test
     public void testPreviousObservation() {
-
         verifyFirstSeen(KEY_1_PREVIOUS_OBS, KEY_2_PREVIOUS_OBS, CURRENT_TIMESTAMP - 5, 0, Long.toString(EXPECTED_PREVIOUS_OBSERVATION));
     }
 
@@ -100,13 +102,32 @@ public class FirstSeenHbaseLookupTest extends FirstSeenHbaseLookup {
     }
 
     private void verifyFirstSeen(String key1, String key2, String firstSeen, String expectedFirstSeen, String expectedFirstTimestamp) {
+        String currentTsString = String.valueOf(CURRENT_TIMESTAMP);
         ProfileMessage profileMessage = new ProfileMessage(CURRENT_TIMESTAMP, ImmutableMap.of(KEY_1, key1,
                 KEY_2, key2,
-                ProfileGroupAcc.START_PERIOD_EXTENSION, firstSeen));
-        FirstSeenHbaseLookup lookup = new FirstSeenHbaseLookupTest();
-        ProfileMessage result = lookup.map(profileMessage);
-        Assert.assertEquals(expectedFirstSeen, result.getExtensions().get(FIRST_SEEN_RESULT_NAME));
-        Assert.assertEquals(expectedFirstTimestamp, result.getExtensions().get(FIRST_SEEN_RESULT_NAME.concat(FIRST_SEEN_TIME_SUFFIX)));
+                ProfileGroupAcc.START_PERIOD_EXTENSION, firstSeen,
+                ProfileGroupAcc.END_PERIOD_EXTENSION, currentTsString));
+
+        try {
+            OneInputStreamOperatorTestHarness<ProfileMessage, ProfileMessage> testHarness = createTestHarness();
+            testHarness.processElement(new StreamRecord<>(profileMessage));
+            List<ProfileMessage> results = testHarness.extractOutputValues();
+            Assert.assertEquals(1, results.size());
+            ProfileMessage result = results.get(0);
+            Assert.assertEquals(expectedFirstSeen, result.getExtensions().get(FIRST_SEEN_RESULT_NAME));
+            Assert.assertEquals(expectedFirstTimestamp, result.getExtensions().get(FIRST_SEEN_RESULT_NAME.concat(FIRST_SEEN_TIME_SUFFIX)));
+
+            EnrichmentCommand profileEnrichmentUpdate = Objects.requireNonNull(testHarness.getSideOutput(firstSeenUpdateOutput).poll()).getValue();
+            Assert.assertEquals(CommandType.ADD, profileEnrichmentUpdate.getType());
+            ImmutableMap<String, String> expectedEntries = ImmutableMap.of(
+                    FirstSeenHbaseLookup.FIRST_SEEN_PROPERTY_NAME, expectedFirstTimestamp != null ? expectedFirstTimestamp : firstSeen,
+                    FirstSeenHbaseLookup.LAST_SEEN_PROPERTY_NAME, currentTsString);
+            EnrichmentEntry enrichmentEntry = profileEnrichmentUpdate.getPayload();
+            Assert.assertEquals(FIRST_SEEN_ENRICHMENT_TYPE, enrichmentEntry.getType());
+            Assert.assertEquals(expectedEntries, enrichmentEntry.getEntries());
+        } catch (Exception e) {
+            Assert.fail();
+        }
     }
 
     private void verifyFirstSeen(String key1, String key2, long startPeriodTimestamp, int expectedFirstSeen, String expectedFirstTimestamp) {
@@ -121,10 +142,19 @@ public class FirstSeenHbaseLookupTest extends FirstSeenHbaseLookup {
                 periodDurationUnit("SECONDS").sources(Lists.newArrayList("ANY")).measurements(measurements).build();
     }
 
+    protected void connectHbase() {
+        // stub out hbase for testing
+    }
+
     protected Map<String, Object> fetch(LookupKey key) {
         Assert.assertTrue(key instanceof SimpleLookupKey);
         Assert.assertEquals(EXPECTED_HBASE_TABLE_NAME, key.getTableName());
         Assert.assertEquals(EXPECTED_COLUMN_FAMILY, key.getCf());
         return mockHbaseResults.getOrDefault(key.getKey(), Collections.emptyMap());
     }
+
+    private OneInputStreamOperatorTestHarness<ProfileMessage, ProfileMessage> createTestHarness() throws Exception {
+        return ProcessFunctionTestHarnesses.forProcessFunction(new FirstSeenHbaseLookupTest());
+    }
+
 }
