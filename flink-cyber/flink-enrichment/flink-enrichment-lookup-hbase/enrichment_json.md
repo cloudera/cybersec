@@ -127,6 +127,39 @@ The majestic_million enrichment is ingested in batch only.
 }
 ```
 
+### Reserved Enrichment Types
+There are two reserved enrichment names: threatq and first_seen.   Reserved enrichments define a mapping to the hbase table, column family and storage format.
+The keys and values are defined by the enrichment and profile jobs.  
+
+* The first_seen enrichment mapping is ignored.  Specify the hbase table and format using the profile properties file settings.  
+
+* If there is no specific mapping for threatq enrichment, the default table and format is used.
+
+* To store threatq enrichments in a different table and format, override the threatq enrichment.  In the example below the threatq enrichment is store in the threatq table 
+and cf column family with the HBASE_METRON format.
+```
+{
+  "storageConfigs": {
+    "default": {
+      "format": "HBASE_METRON",
+      "hbaseTableName": "enrich_default",
+      "columnFamily": "cf"
+    },
+    "threatq": {
+      "format": "HBASE_METRON",
+      "hbaseTableName": "threatq",
+      "columnFamily": "cf"
+    }
+  },
+  "enrichmentConfigs": {
+    "threatq" : {
+       "storage": "threatq",
+       "fieldMapping": {
+       }
+    }
+}
+```
+
 ## EnrichmentsConfig Json
 
 | Json Field       | Type                              | Description                | Required/Default | 

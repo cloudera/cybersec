@@ -45,7 +45,7 @@ public abstract class LookupJob implements CyberJob {
 
     public static final OutputTag<EnrichmentCommandResponse> QUERY_RESULT = new OutputTag<>("query-result", TypeInformation.of(EnrichmentCommandResponse.class));
 
-    public static Tuple2<SingleOutputStreamOperator<Message>, DataStream<EnrichmentCommandResponse>> enrich(DataStream<EnrichmentCommand> baseEnrichmentSource,
+    public static Tuple2<DataStream<Message>, DataStream<EnrichmentCommandResponse>> enrich(DataStream<EnrichmentCommand> baseEnrichmentSource,
                                                              SingleOutputStreamOperator<Message> source,
                                                              List<EnrichmentConfig> configs
     ) {
@@ -104,7 +104,7 @@ public abstract class LookupJob implements CyberJob {
 
         byte[] configJson = Files.readAllBytes(Paths.get(params.getRequired(PARAMS_CONFIG_FILE)));
 
-        Tuple2<SingleOutputStreamOperator<Message>, DataStream<EnrichmentCommandResponse>> pipeline = enrich(enrichmentSource, source, allConfigs(configJson));
+        Tuple2<DataStream<Message>, DataStream<EnrichmentCommandResponse>> pipeline = enrich(enrichmentSource, source, allConfigs(configJson));
         writeResults(env, params, pipeline.f0);
         writeQueryResults(env, params, pipeline.f1);
         return env;

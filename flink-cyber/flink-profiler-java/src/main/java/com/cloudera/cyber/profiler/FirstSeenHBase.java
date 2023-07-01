@@ -12,6 +12,7 @@
 
 package com.cloudera.cyber.profiler;
 
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageConfig;
 import com.cloudera.cyber.hbase.LookupKey;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import lombok.Data;
@@ -27,15 +28,13 @@ import java.util.stream.Stream;
 public class FirstSeenHBase implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String tableName;
-    private byte[] columnFamilyName;
+    private EnrichmentStorageConfig enrichmentStorageConfig;
     private String profileName;
     private List<String> keyFieldNames;
     private String firstSeenResultName;
 
-    public FirstSeenHBase(String tableName, String columnFamilyName, ProfileGroupConfig profileGroupConfig) {
-        this.tableName = tableName;
-        this.columnFamilyName = Bytes.toBytes(columnFamilyName);
+    public FirstSeenHBase(EnrichmentStorageConfig enrichmentStorageConfig, ProfileGroupConfig profileGroupConfig) {
+        this.enrichmentStorageConfig = enrichmentStorageConfig;
         this.profileName = profileGroupConfig.getProfileGroupName();
         this.keyFieldNames = profileGroupConfig.getKeyFieldNames();
         ProfileMeasurementConfig measurementConfig = profileGroupConfig.getMeasurements().stream().filter(m -> m.getAggregationMethod().equals(ProfileAggregationMethod.FIRST_SEEN)).
@@ -47,10 +46,7 @@ public class FirstSeenHBase implements Serializable {
         Map<String, String> extensions = message.getExtensions();
         String key = Stream.concat(Stream.of(profileName),
                 keyFieldNames.stream().map(extensions::get)).collect(Collectors.joining(":"));
-        return LookupKey.builder()
-                .key(Bytes.toBytes(key))
-                .cf(columnFamilyName)
-                .build();
+        return enrichmentStorageConfig.getFormat().getLookupBuilder().build(enrichmentStorageConfig, "first_seen", key);
     }
 
     public String getFirstSeen(ProfileMessage message) {
