@@ -122,7 +122,14 @@ public abstract class EnrichmentJob {
             tqed = rested;
         }
 
-        writeHbaseThreatQEnrichmentsToHbaseAndRespond(params, env, hbaseEnrichments, threatqEnrichments, enrichmentCommandResponses, enrichmentsStorageConfig);
+        DataStream<EnrichmentCommandResponse> hbaseTqEnrichResults = null;
+        if (hbaseEnabled || threatqEnabled) {
+            hbaseTqEnrichResults = writeHbaseThreatQEnrichmentsToHbaseAndRespond(params, env, hbaseEnrichments, threatqEnrichments, enrichmentsStorageConfig);
+        }
+
+
+        // write the local, hbase, and threatq responses to the output topic
+        writeEnrichmentQueryResults(env, params, unionStreams(enrichmentCommandResponses, hbaseTqEnrichResults));
 
         DataStream<Message> stellarStream;
         if (params.getBoolean(PARAMS_ENABLE_STELLAR, true)) {
@@ -144,16 +151,12 @@ public abstract class EnrichmentJob {
         return env;
     }
 
-    private void writeHbaseThreatQEnrichmentsToHbaseAndRespond(ParameterTool params, StreamExecutionEnvironment env,
-                                                        DataStream<EnrichmentCommand> hbaseEnrichments, DataStream<EnrichmentCommand> threatqEnrichments,
-                                                        DataStream<EnrichmentCommandResponse> enrichmentCommandResponses,
-                                                        EnrichmentsConfig enrichmentsStorageConfig) {
+    private DataStream<EnrichmentCommandResponse> writeHbaseThreatQEnrichmentsToHbaseAndRespond(ParameterTool params, StreamExecutionEnvironment env,
+                                                                                                DataStream<EnrichmentCommand> hbaseEnrichments, DataStream<EnrichmentCommand> threatqEnrichments,
+                                                                                                EnrichmentsConfig enrichmentsStorageConfig) {
 
         // write the threatq and hbase enrichments to hbase
-        DataStream<EnrichmentCommandResponse> hbaseEnrichmentResponses = new HbaseJobRawKafka().writeEnrichments(env, params, unionStreams(hbaseEnrichments, threatqEnrichments), enrichmentsStorageConfig);
-
-        // write the local, hbase, and threatq responses to the output topic
-        writeEnrichmentQueryResults(env, params, unionStreams(enrichmentCommandResponses, hbaseEnrichmentResponses));
+        return new HbaseJobRawKafka().writeEnrichments(env, params, unionStreams(hbaseEnrichments, threatqEnrichments), enrichmentsStorageConfig);
     }
 
     private static<T> DataStream<T> unionStreams(DataStream<T> stream1, DataStream<T> stream2) {

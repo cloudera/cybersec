@@ -63,7 +63,6 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction<ProfileMessag
         boolean first = previousFirstLastSeen.isEmpty();
         Map<String, String> firstSeenExtensions = new HashMap<>();
         String firstSeen = firstSeenHBaseInfo.getFirstSeen(message);
-        log.warn("Previous of {} = {}", lookupKey, previousFirstLastSeen);
         if (!first) {
             String previousFirstTimestamp = mergeFirstLastSeen((String)previousFirstLastSeen.get(FIRST_SEEN_PROPERTY_NAME),
                     (String)previousFirstLastSeen.get(LAST_SEEN_PROPERTY_NAME), firstSeenHBaseInfo.getFirstSeen(message));
@@ -73,7 +72,6 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction<ProfileMessag
                 firstSeen = previousFirstTimestamp;
             } else {
                 // previous observation was too old, treat this like a new observation
-                log.warn("Observation of {} was too old.  Adding new obs", lookupKey);
                 first = true;
             }
         }
@@ -83,7 +81,6 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction<ProfileMessag
 
         collector.collect(new ProfileMessage(message.getTs(), firstSeenExtensions));
         EnrichmentCommand enrichmentCommand = createFirstSeenUpdate(message.getTs(), lookupKey, firstSeen, firstSeenHBaseInfo.getLastSeen(message));
-        log.warn("New FirstSeen of {} = {}", lookupKey, enrichmentCommand);
         context.output(firstSeenUpdateOutput, enrichmentCommand);
     }
 
@@ -102,15 +99,12 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction<ProfileMessag
     }
 
     protected String mergeFirstLastSeen(String previousFirstString, String previousLastString, String newFirstString) {
-        log.warn("Merging previousfirst={} previousLast={} with newFirst={}", previousFirstString, previousLastString, newFirstString);
         if (previousFirstString != null && previousLastString != null) {
             Instant previousFirst = parseEpochMilliTimestamp(previousFirstString);
             Instant previousLast = parseEpochMilliTimestamp(previousLastString);
             Instant newFirst = parseEpochMilliTimestamp(newFirstString);
-            log.warn("Converted to instant previousfirst={} previousLast={} with newFirst={}", previousFirst, previousLast, newFirst);
             if (previousFirst != null && previousLast != null && newFirst != null) {
                Duration durationSinceLastObs = Duration.between(previousLast, newFirst);
-               log.warn("DurationSinceLast = {} vs expiration = {}", humanReadableFormat(durationSinceLastObs), humanReadableFormat(firstSeenExpireDuration));
                if (durationSinceLastObs.compareTo(firstSeenExpireDuration) < 0) {
                    // previous first seen is not too old so return the minimum
                    return previousFirstString;
@@ -133,10 +127,4 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction<ProfileMessag
         return null;
     }
 
-    public static String humanReadableFormat(Duration duration) {
-        return duration.toString()
-                .substring(2)
-                .replaceAll("(\\d[HMS])(?!$)", "$1 ")
-                .toLowerCase();
-    }
 }
