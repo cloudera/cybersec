@@ -15,7 +15,6 @@ package com.cloudera.cyber.enrichment;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
-import com.cloudera.cyber.enrichment.threatq.ThreatQEntry;
 import com.cloudera.cyber.enrichment.threatq.ThreatQParserFlatMap;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
@@ -44,7 +43,6 @@ public class EnrichmentJobKafka extends EnrichmentJob {
     private static final String PARAMS_GROUP_ID = "group.id";
     private static final String DEFAULT_GROUP_ID = "enrichment-combined";
     public static final String SCORING_RULES_GROUP_ID = "scoring-rules";
-    private static final String DEFAULT_TI_TABLE = "threatIntelligence";
     private static final String PARAMS_TOPIC_THREATQ_INPUT = "threatq.topic.input";
 
 
@@ -81,7 +79,7 @@ public class EnrichmentJobKafka extends EnrichmentJob {
     }
 
     @Override
-    protected DataStream<ThreatQEntry> createThreatQSource(StreamExecutionEnvironment env, ParameterTool params) {
+    protected DataStream<EnrichmentCommand> createThreatQSource(StreamExecutionEnvironment env, ParameterTool params) {
         String topic = params.getRequired(PARAMS_TOPIC_THREATQ_INPUT);
         String groupId = "threatq-parser";
 

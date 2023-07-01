@@ -137,7 +137,8 @@ Profile will only collect the profiles defined in profile.json.  If a profile gr
 |---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
 | profile.config.file    | File path  | Json defining the profile groups and measurements.  See [profile configuration](#profile-configuration) above | Required | profile.json |
 |profile.first.seen.table| legal HBase table name | Name of Hbase table to write first seen profiles values to | required | enrichments |
-|profile.first.seen.column.family| legal HBase column family name | Name of Hbase column familty to write first seen profiles values to | required | first_seen |
+|profile.first.seen.column.family| legal HBase column family name | Name of Hbase column familty to write first seen profiles values to | required for metron format | first_seen |
+|profile.first.seen.format | enum HBASE_METRON or HBASE_SIMPLE | Format used to store first and last seen time for first seen profiles | HBASE_METRON | HBASE_SIMPLE |
 | phoenix.db.init | boolean | Enables or disables writing profile measurements and profile metadata to Phoenix. | required | true |
 | phoenix.db.query.param.measurement_data_table_name | legal phoenix table name | Write measurement data to this phoenix table | required | prf_measure|
 | phoenix.db.query.param.measurement_metadata_table_name | legal phoenix table name | Write profile measurement configuration metadata to this phoenix table | required | prf_measure_meta|

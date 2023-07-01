@@ -16,6 +16,7 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.google.common.collect.ImmutableMap;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -43,7 +44,9 @@ public class HbaseJobTest extends HbaseJob {
     }
 
     @Override
-    public DataStream<EnrichmentCommandResponse> writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource) {
+    public DataStream<EnrichmentCommandResponse> writeEnrichments(StreamExecutionEnvironment env, ParameterTool params,
+                                                                  DataStream<EnrichmentCommand> enrichmentSource,
+                                                                  EnrichmentsConfig enrichmentsConfig) {
         // usually this would send to hbase
         return null;
     }
