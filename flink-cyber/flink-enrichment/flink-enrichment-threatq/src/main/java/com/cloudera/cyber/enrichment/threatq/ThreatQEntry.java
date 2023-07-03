@@ -14,11 +14,9 @@ package com.cloudera.cyber.enrichment.threatq;
 
 import com.cloudera.cyber.EnrichmentEntry;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.google.common.base.Joiner;
 import com.hortonworks.registries.schemaregistry.serdes.avro.exceptions.AvroException;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecordBase;
@@ -32,6 +30,7 @@ import java.util.Map;
 import static com.cloudera.cyber.AvroTypes.toListOf;
 import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @AllArgsConstructor
@@ -41,16 +40,16 @@ public class ThreatQEntry extends SpecificRecordBase {
     private String indicator;
     private List<String> tq_sources;
     @JsonFormat
-            (shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+            (shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Date tq_created_at;
     private Float tq_score;
     private String tq_type;
     private String tq_saved_search;
     @JsonFormat
-            (shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+            (shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Date tq_updated_at;
     @JsonFormat
-            (shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
+            (shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Date tq_touched_at;
 
     private Long tq_id;
@@ -59,25 +58,33 @@ public class ThreatQEntry extends SpecificRecordBase {
     private String tq_url;
     private List<String> tq_tags;
 
+    public static String createKey(String indicatorType, String indicator) {
+        return Joiner.on(":").join(indicatorType, indicator);
+    }
+
     public static EnrichmentEntry toEnrichmentEntry(ThreatQEntry threatQEntry) {
         return EnrichmentEntry.builder()
                 .ts(threatQEntry.tq_updated_at.getTime())
-                .key(threatQEntry.getIndicator())
+                .key(createKey(threatQEntry.getTq_type(), threatQEntry.getIndicator()))
                 .type("threatq")
                 .entries(new HashMap<String, String>() {{
                     putAll(threatQEntry.getTq_attributes());
-                    put("tq_id", threatQEntry.getTq_id().toString());
-                    put("tq_status", threatQEntry.getTq_status());
-                    put("tq_url", threatQEntry.getTq_url());
+                    put("id", threatQEntry.getTq_id().toString());
+                    put("createdAt",Long.toString(threatQEntry.getTq_created_at().getTime()));
+                    put("updatedAt", Long.toString(threatQEntry.getTq_updated_at().getTime()));
+                    put("touchedAt", Long.toString(threatQEntry.getTq_touched_at().getTime()));
+
+                    put("status", threatQEntry.getTq_status());
+                    put("url", threatQEntry.getTq_url());
                     if (threatQEntry.getTq_tags() != null && threatQEntry.getTq_tags().size() > 0) {
-                        put("tq_tags", threatQEntry.getTq_tags().toString());
+                        put("tags", Joiner.on(",").join(threatQEntry.getTq_tags()));
                     }
-                    put("tq_type", threatQEntry.getTq_type());
-                    put("tq_saved_search", threatQEntry.getTq_saved_search());
+                    put("type", threatQEntry.getTq_type());
+                    put("savedSearch", threatQEntry.getTq_saved_search());
                     if (threatQEntry.getTq_sources() != null && threatQEntry.getTq_sources().size() > 0) {
-                        put("tq_sources", threatQEntry.getTq_sources().toString());
+                        put("sources", threatQEntry.getTq_sources().toString());
                     }
-                    put("tq_score", threatQEntry.getTq_score().toString());
+                    put("score", threatQEntry.getTq_score().toString());
                 }})
                 .build();
     }
