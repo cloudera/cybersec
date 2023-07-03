@@ -10,6 +10,9 @@
  * limitations governing your use of the file.
  */
 
+export interface PipelineModel {
+  name: string;
+}
 export interface ChainModel {
   id: string;
   name: string;

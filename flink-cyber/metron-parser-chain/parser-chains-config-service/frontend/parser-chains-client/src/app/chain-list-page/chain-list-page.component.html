@@ -59,6 +59,20 @@
   </ng-template>
 </nz-modal>
 
+<div>
+  <span>Select pipeline:</span>
+  <nz-select
+          nzShowSearch
+          nzAllowClear
+          nzPlaceHolder="Select a pipeline"
+          class="pipeline-select"
+          [nzDisabled]="(pipelineList$ | async) && (pipelineList$ | async).length < 1"
+          [(ngModel)]="selectedPipeline"
+          (ngModelChange)="pipelineChanged($event)">
+    <nz-option *ngFor="let item of (pipelineList$ | async)" [nzLabel]="item.name" [nzValue]="item"></nz-option>
+  </nz-select>
+</div>
+
 <nz-card nzTitle="Parser Chains" [nzExtra]="AddButton">
   <nz-table #basicTable [nzData]="$any(chainDataSorted$ | async)" [nzShowPagination]="false">
     <thead>

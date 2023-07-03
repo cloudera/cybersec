@@ -13,7 +13,7 @@
 import {createSelector} from '@ngrx/store';
 
 import * as chainListPageActions from './chain-list-page.actions';
-import {ChainModel} from './chain.model';
+import {ChainModel, PipelineModel} from './chain.model';
 
 export interface ChainListPageState {
   loading: boolean;
@@ -22,6 +22,8 @@ export interface ChainListPageState {
   deleteItem: ChainModel;
   error: string;
   items: ChainModel[];
+  currentPipeline: PipelineModel;
+  pipelines: PipelineModel[];
 }
 
 export const initialState: ChainListPageState = {
@@ -30,6 +32,8 @@ export const initialState: ChainListPageState = {
   deleteModalVisible: false,
   deleteItem: null,
   items: [],
+  currentPipeline: null,
+  pipelines: [],
   error: ''
 };
 
@@ -133,6 +137,32 @@ export function reducer(
         deleteItem: null,
       };
     }
+    case chainListPageActions.LOAD_PIPELINES: {
+      return {
+        ...state,
+        loading: true,
+      };
+    }
+    case chainListPageActions.LOAD_PIPELINES_SUCCESS: {
+      return {
+        ...state,
+        loading: false,
+        pipelines: action.pipelines
+      };
+    }
+    case chainListPageActions.LOAD_PIPELINES_FAIL: {
+      return {
+        ...state,
+        error: action.error.message,
+        loading: false,
+      };
+    }
+    case chainListPageActions.PIPELINE_CHANGED: {
+      return {
+        ...state,
+        currentPipeline: action.newPipeline,
+      };
+    }
     default: {
       return state;
     }
@@ -167,3 +197,14 @@ export const getDeleteChain = createSelector(
   getChainListPageState,
   (state: ChainListPageState) => state.deleteItem
 );
+
+export const getPipelines = createSelector(
+  getChainListPageState,
+  (state: ChainListPageState) => state.pipelines
+);
+
+export const getCurrentPipeline = createSelector(
+  getChainListPageState,
+  (state: ChainListPageState) => state.currentPipeline
+);
+
