@@ -87,9 +87,7 @@ public class ChainController {
             @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName
     ) throws IOException {
-        String configPath = StringUtils.hasText(pipelineName)
-                ? pipelineService.findAll().get(pipelineName).getPath()
-                : appProperties.getConfigPath();
+        String configPath = getConfigPath(pipelineName);
         List<ParserChainSummary> configs = chainPersistenceService.findAll(Paths.get(configPath));
         return ResponseEntity.ok(configs);
     }
@@ -105,9 +103,7 @@ public class ChainController {
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
             @ApiParam(name = "parserChain", value = "The parser chain to create.", required = true)
             @RequestBody ParserChainSchema chain) throws IOException {
-        String configPath = StringUtils.hasText(pipelineName)
-                ? pipelineService.findAll().get(pipelineName).toString()
-                : appProperties.getConfigPath();
+        String configPath = getConfigPath(pipelineName);
         ParserChainSchema createdChain = chainPersistenceService.create(chain, Paths.get(configPath));
         if (null == createdChain) {
             return ResponseEntity.notFound().build();
@@ -129,9 +125,7 @@ public class ChainController {
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
             @ApiParam(name = "id", value = "The ID of the parser chain to retrieve.", required = true)
             @PathVariable String id) throws IOException {
-        String configPath = StringUtils.hasText(pipelineName)
-                ? pipelineService.findAll().get(pipelineName).toString()
-                : appProperties.getConfigPath();
+        String configPath = getConfigPath(pipelineName);
         ParserChainSchema chain = chainPersistenceService.read(id, Paths.get(configPath));
         if (null == chain) {
             return ResponseEntity.notFound().build();
@@ -153,9 +147,7 @@ public class ChainController {
             @RequestBody ParserChainSchema chain,
             @ApiParam(name = "id", value = "The ID of the parser chain to update.")
             @PathVariable String id) throws IOException {
-        String configPath = StringUtils.hasText(pipelineName)
-                ? pipelineService.findAll().get(pipelineName).toString()
-                : appProperties.getConfigPath();
+        String configPath = getConfigPath(pipelineName);
         try {
             ParserChainSchema updatedChain = chainPersistenceService.update(id, chain, Paths.get(configPath));
             if (null == updatedChain) {
@@ -179,9 +171,7 @@ public class ChainController {
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
             @ApiParam(name = "id", value = "The ID of the parser chain to delete.", required = true)
             @PathVariable String id) throws IOException {
-        String configPath = StringUtils.hasText(pipelineName)
-                ? pipelineService.findAll().get(pipelineName).toString()
-                : appProperties.getConfigPath();
+        String configPath = getConfigPath(pipelineName);
         if (chainPersistenceService.delete(id, Paths.get(configPath))) {
             return ResponseEntity.noContent().build();
         } else {
@@ -230,5 +220,11 @@ public class ChainController {
                     .setLog(log);
         }
         return result;
+    }
+
+    private String getConfigPath(String pipelineName) throws IOException {
+        return StringUtils.hasText(pipelineName)
+                ? pipelineService.findAll().get(pipelineName).getPath()
+                : appProperties.getConfigPath();
     }
 }

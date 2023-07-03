@@ -10,11 +10,12 @@
  * limitations governing your use of the file.
  */
 
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { map } from 'rxjs/operators';
 
 import { ParserModel } from '../chain-page/chain-page.models';
+import {PipelineModel} from "../chain-list-page/chain.model";
 
 @Injectable({
   providedIn: 'root'
@@ -27,16 +28,24 @@ export class AddParserPageService {
     private http: HttpClient
   ) {}
 
-  public add(chainId: string, parser: ParserModel) {
-    return this.http.post(this.BASE_URL + `chains/${chainId}/parsers`, parser);
+  public add(chainId: string, parser: ParserModel, pipeline: PipelineModel = null) {
+    let httpParams: HttpParams = new HttpParams();
+    if (pipeline) {
+      httpParams = httpParams.set('pipelineName', pipeline.name)
+    }
+    return this.http.post(this.BASE_URL + `chains/${chainId}/parsers`, parser, {params: httpParams});
   }
 
   public getParserTypes() {
     return this.http.get<{ id: string, name: string }[]>(this.BASE_URL + `parser-types`);
   }
 
-  public getParsers(chainId: string){
-    return this.http.get<ParserModel[]>(this.BASE_URL + `chains/${chainId}/parsers`)
+  public getParsers(chainId: string, pipeline: PipelineModel = null) {
+    let httpParams: HttpParams = new HttpParams();
+    if (pipeline) {
+      httpParams = httpParams.set('pipelineName', pipeline.name)
+    }
+    return this.http.get<ParserModel[]>(this.BASE_URL + `chains/${chainId}/parsers`, {params: httpParams})
       .pipe(
         map((parsers: ParserModel[]) => {
           return parsers;

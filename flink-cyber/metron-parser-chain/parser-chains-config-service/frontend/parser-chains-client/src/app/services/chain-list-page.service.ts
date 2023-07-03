@@ -10,10 +10,11 @@
  * limitations governing your use of the file.
  */
 
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import {ChainModel, ChainOperationalModel} from '../chain-list-page/chain.model';
+import {ChainModel, ChainOperationalModel, PipelineModel} from '../chain-list-page/chain.model';
+import * as http from "http";
 
 @Injectable({
     providedIn: 'root'
@@ -26,16 +27,34 @@ export class ChainListPageService {
       private http: HttpClient
     ) {}
 
-    public createChain(chain: ChainOperationalModel) {
-        return this.http.post<ChainModel>('/api/v1/parserconfig/chains', chain);
+    public createChain(chain: ChainOperationalModel, pipeline: PipelineModel = null) {
+        let httpParams: HttpParams = new HttpParams();
+        if (pipeline) {
+            httpParams = httpParams.set('pipelineName', pipeline.name)
+        }
+        return this.http.post<ChainModel>('/api/v1/parserconfig/chains', chain,{params: httpParams});
     }
 
-    public getChains(params = null) {
-        return this.http.get<ChainModel[]>(this.BASE_URL + 'chains');
+    public getChains(pipeline: PipelineModel = null, params = null) {
+        let httpParams: HttpParams = new HttpParams();
+        console.log('get chains')
+        if (pipeline) {
+            httpParams = httpParams.set('pipelineName', pipeline.name)
+            console.log('pipeline', pipeline, httpParams)
+        }
+        return this.http.get<ChainModel[]>(this.BASE_URL + 'chains',{params: httpParams});
     }
 
-    public deleteChain(chainId: string) {
-        return this.http.delete(this.BASE_URL + 'chains/' + chainId);
+    public deleteChain(chainId: string, pipeline: PipelineModel = null) {
+        let httpParams: HttpParams = new HttpParams();
+        if (pipeline) {
+            httpParams = httpParams.set('pipelineName', pipeline.name)
+        }
+        return this.http.delete(this.BASE_URL + 'chains/' + chainId,{params: httpParams});
+    }
+
+    public getPipelines() {
+        return this.http.delete(this.BASE_URL + 'pipeline');
     }
 
 }
