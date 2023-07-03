@@ -13,17 +13,19 @@
 package com.cloudera.cyber.enrichment.threatq;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.commands.EnrichmentCommand;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentFieldsConfig;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
+import com.cloudera.cyber.enrichment.hbase.writer.HbaseEnrichmentCommandSink;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
 
-import java.io.ByteArrayInputStream;
 import java.util.Properties;
 
 import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
@@ -55,16 +57,24 @@ public class ThreatQJobKafka extends ThreatQJob {
     }
 
     @Override
-    protected DataStream<ThreatQEntry> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
+    protected DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
         String topic = params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT);
 
         Properties kafkaProperties = readKafkaProperties(params, THREATQ_PARSER_GROUP_ID, true);
 
-        FlatMapFunction<String, ThreatQEntry> threatQParser = (FlatMapFunction<String, ThreatQEntry>) (s, collector) -> ThreatQParser.parse(new ByteArrayInputStream(s.getBytes())).forEach(tq -> collector.collect(tq));
-
         KafkaSource<String> source = FlinkUtils.createKafkaStringSource(topic, kafkaProperties);
         return env.fromSource(source, WatermarkStrategy.noWatermarks(), "ThreatQ Input").
                 uid("kafka-enrichment-source").
-                flatMap(threatQParser);
+                flatMap(new ThreatQParserFlatMap());
+    }
+
+    public void writeEnrichments(DataStream<EnrichmentCommand> enrichmentSource,
+                                                              EnrichmentsConfig enrichmentsConfig,
+                                                              ParameterTool params) {
+        String tableName = enrichmentsConfig.getStorageForEnrichmentType(EnrichmentFieldsConfig.THREATQ_ENRICHMENT_NAME).getHbaseTableName();
+
+        enrichmentSource.addSink(new HbaseEnrichmentCommandSink(tableName, enrichmentsConfig, params)).
+                name("ThreatQ HBase Writer").uid("threatq-hbase");
+
     }
 }

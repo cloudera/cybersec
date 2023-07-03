@@ -69,6 +69,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class ProfileJob {
 
+    public static final String FIRST_SEEN_ENRICHMENT_UPDATE = "first_seen_update";
     protected PhoenixThinClient client;
     protected static final String PARAM_PROFILE_CONFIG = "profile.config.file";
     protected static final String PARAM_LATENESS_TOLERANCE_MILLIS = "profile.lateness";

@@ -12,16 +12,22 @@
 
 package com.cloudera.cyber.hbase;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Result;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class LookupKey {
-    private byte[] cf;
-    private byte[] key;
+import java.util.Map;
+
+@Getter
+@SuperBuilder
+@EqualsAndHashCode
+@ToString
+public abstract class LookupKey {
+    private String cf;
+    private String tableName;
+    private String key;
+
+    public abstract Get toGet();
+    public abstract Map<String, Object> resultToMap(Result hbaseResult);
 }
