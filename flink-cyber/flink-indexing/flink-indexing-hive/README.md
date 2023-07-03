@@ -87,7 +87,7 @@ Note that the fixed fields include the UUID for the message, the timestamp and m
 
 ## TableAPI Writer
 
-TableAPI writer is an optimized version that aims to provide both better performance and and ability to have multiple outputs.
+TableAPI writer is an optimized version that aims to provide both better performance and ability to have multiple outputs.
 
 At this moment TableAPI writer supports writing to the Hive tables (in the similar way to the default writer) and to other Kafka topics.
 
