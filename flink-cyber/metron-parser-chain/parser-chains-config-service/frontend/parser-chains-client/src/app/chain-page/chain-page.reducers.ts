@@ -19,6 +19,7 @@ import * as chainPageActions from './chain-page.actions';
 import { ParserChainModel, ParserModel, RouteModel } from './chain-page.models';
 import { denormalizeParserConfig } from './chain-page.utils';
 import { CustomFormConfig } from './components/custom-form/custom-form.component';
+import * as chainListPageActions from "../chain-list-page/chain-list-page.actions";
 
 export interface ChainPageState {
   chains: { [key: string]: ParserChainModel };
@@ -52,9 +53,13 @@ export const uniqueAdd = (haystack: string[], needle: string): string[] => {
 
 export function reducer(
   state: ChainPageState = initialState,
-  action: chainPageActions.ChainDetailsAction | addParserActions.ParserAction
+  action: chainPageActions.ChainDetailsAction | addParserActions.ParserAction | chainListPageActions.ChainListAction
 ): ChainPageState {
   switch (action.type) {
+    case chainListPageActions.PIPELINE_CHANGED: {
+      console.log('chainPage reducer PIPELINE_CHANGED')
+      return initialState
+    }
     case chainPageActions.LOAD_CHAIN_DETAILS_SUCCESS: {
       return {
         ...state,
