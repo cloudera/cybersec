@@ -1,1 +1,21 @@
-m
+{
+  "squid": {
+    "table_name": "hive_table",
+    "ignore_fields": [
+      "code"
+    ],
+    "column_mapping": [
+      {
+        "name": "full_hostname"
+      },
+      {
+        "name": "action"
+      }
+    ]
+  },
+  "test": {
+    "table_name": "another_hive_table",
+    "column_mapping": [
+    ]
+  }
+}
