@@ -32,6 +32,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.core.fs.Path;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,6 +49,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS;
 import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_READ_URL;
@@ -223,8 +225,13 @@ public class ChainController {
     }
 
     private String getConfigPath(String pipelineName) throws IOException {
-        return StringUtils.hasText(pipelineName)
-                ? pipelineService.findAll().get(pipelineName).getPath()
-                : appProperties.getConfigPath();
+        if (!StringUtils.hasText(pipelineName)){
+            return appProperties.getConfigPath();
+        }
+
+        return Optional.ofNullable(pipelineService.findAll())
+                .map(pipelineMap -> pipelineMap.get(pipelineName))
+                .map(Path::getPath)
+                .orElseGet(appProperties::getConfigPath);
     }
 }
