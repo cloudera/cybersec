@@ -10,20 +10,18 @@
  * limitations governing your use of the file.
  */
 
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 
 import {ClusterModel, PipelineModel} from '../chain-list-page/chain.model';
-import {map, take} from "rxjs/operators";
 import {Observable} from "rxjs";
 import {select, Store} from "@ngrx/store";
 import {ChainListPageState, getCurrentPipeline} from "../chain-list-page/chain-list-page.reducers";
-import {getFinalBaseUrl, getHttpParams} from "../chain-list-page/chain-list-page.utils";
 
 @Injectable({
     providedIn: 'root'
 })
-export class PipelineService {
+export class ClusterService {
 
     private readonly BASE_URL = '/api/v1/pipeline';
 
@@ -36,22 +34,8 @@ export class PipelineService {
         this.currentPipeline$ = store.pipe(select(getCurrentPipeline))
     }
 
-    public getPipelines(cluster: ClusterModel) {
-        let url = getFinalBaseUrl(this.BASE_URL, cluster);
-
-        let httpParams: HttpParams = getHttpParams(cluster);
-
-        return this.http.get<string[]>(url, {params: httpParams})
-            .pipe(map(strArr => strArr.map(str => {
-                return {name: str} as PipelineModel
-            })));
-    }
-
-    public getCurrentPipeline() {
-        let currentPipeline: PipelineModel;
-        this.currentPipeline$.pipe(take(1))
-            .subscribe(value => currentPipeline = value);
-        return currentPipeline;
+    public getCurrentCluster(): ClusterModel {
+        return null;
     }
 
 }
