@@ -30,6 +30,7 @@ import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.errors.TimeoutException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 
@@ -125,16 +126,25 @@ public class UpsertScoringRule {
         consumerProperties.put("specific.avro.reader", true);
         consumerProperties.putAll(Utils.readSchemaRegistryProperties(applicationProperties));
 
+        final int maxRetries = applicationProperties.getInt("kafka.retry.amount", 10);
+        final int retryDuration = applicationProperties.getInt("kafka.retry.duration", 5);
+
+        int retries = 0;
+
         try (KafkaConsumer<String, ScoringRuleCommandResult> consumer = new KafkaConsumer<>(consumerProperties)) {
             boolean gotResponse = false;
-            while (!gotResponse) {
+            while (!gotResponse && retries <= maxRetries) {
                 consumer.subscribe(Collections.singletonList(topic));
-                ConsumerRecords<String, ScoringRuleCommandResult> records = consumer.poll(Duration.ofSeconds(5));
+                ConsumerRecords<String, ScoringRuleCommandResult> records = consumer.poll(Duration.ofSeconds(retryDuration));
                 for (ConsumerRecord<String, ScoringRuleCommandResult> rec : records) {
                     boolean responseMatches = commandId.equals(rec.value().getCmdId());
                     gotResponse = gotResponse || responseMatches;
-                    log.info("Match=" + responseMatches + ", Response; " + rec.value());
+                    log.debug("Match=" + responseMatches + ", Response; " + rec.value());
                 }
+                retries++;
+            }
+            if (!gotResponse){
+                fail(String.format("Kafka read timed out after %s attempts", retries), new TimeoutException());
             }
         } catch (Exception e) {
             fail("Kafka consumer is available", e);

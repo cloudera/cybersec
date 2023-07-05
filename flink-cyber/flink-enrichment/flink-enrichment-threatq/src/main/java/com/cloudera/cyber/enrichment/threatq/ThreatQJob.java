@@ -13,13 +13,12 @@
 package com.cloudera.cyber.enrichment.threatq;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.commands.EnrichmentCommand;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.flink.FlinkUtils;
-import com.cloudera.cyber.hbase.AbstractHbaseSinkFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
@@ -31,23 +30,16 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
+import static com.cloudera.cyber.enrichment.hbase.HbaseJob.PARAMS_ENRICHMENT_CONFIG;
 
 @Slf4j
 public abstract class ThreatQJob {
-    private static final String tableName = "threatq";
 
     public static DataStream<Message> enrich(DataStream<Message> source,
-                                             List<ThreatQConfig> configs
+                                             List<ThreatQConfig> configs,
+                                             EnrichmentsConfig enrichmentStorageConfig
     ) {
-        return source.map(new ThreatQHBaseMap(configs)).name("Apply ThreatQ").uid("threatq-enrich");
-    }
-
-    public static DataStreamSink<ThreatQEntry> ingest(DataStream<ThreatQEntry> enrichmentSource, List<ThreatQConfig> configs) {
-        ParameterTool params = ParameterTool.fromMap(Collections.emptyMap());
-
-        return enrichmentSource.addSink(new ThreatQEntryHbaseSink(tableName, params)).
-                name("ThreatQ HBase Writer").uid("threatq-hbase");
-
+        return source.process(new ThreatQHBaseMap(configs, enrichmentStorageConfig)).name("Apply ThreatQ").uid("threatq-enrich");
     }
 
     public static List<ThreatQConfig> parseConfigs(byte[] configJson) throws IOException {
@@ -62,15 +54,23 @@ public abstract class ThreatQJob {
         FlinkUtils.setupEnv(env, params);
 
         DataStream<Message> source = createSource(env, params);
-        DataStream<ThreatQEntry> enrichmentSource = createEnrichmentSource(env, params);
+        DataStream<EnrichmentCommand> enrichmentSource = createEnrichmentSource(env, params);
 
         byte[] configJson = Files.readAllBytes(Paths.get(params.getRequired(PARAMS_CONFIG_FILE)));
         List<ThreatQConfig> configs = parseConfigs(configJson);
         log.info("ThreatQ Configs {}", configs);
 
-        ingest(enrichmentSource, configs);
+        EnrichmentsConfig enrichmentsStorageConfig = EnrichmentsConfig.load(params.getRequired(PARAMS_ENRICHMENT_CONFIG));
 
-        DataStream<Message> pipeline = enrich(source,configs);
+        writeEnrichments(enrichmentSource, enrichmentsStorageConfig, params);
+
+        String enrichmentsStorageConfigFileName = params.get(PARAMS_ENRICHMENT_CONFIG);
+        EnrichmentsConfig enrichmentStorageConfig = new EnrichmentsConfig(Collections.emptyMap(), Collections.emptyMap());
+        if (enrichmentsStorageConfigFileName != null) {
+            enrichmentStorageConfig = EnrichmentsConfig.load(enrichmentsStorageConfigFileName);
+        }
+
+        DataStream<Message> pipeline = enrich(source,configs, enrichmentStorageConfig);
         writeResults(env, params, pipeline);
         return env;
     }
@@ -79,7 +79,10 @@ public abstract class ThreatQJob {
 
     public abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
 
-    protected abstract DataStream<ThreatQEntry> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
+    protected abstract DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
 
+    public abstract void writeEnrichments(DataStream<EnrichmentCommand> enrichmentSource,
+                                                              EnrichmentsConfig enrichmentsConfig,
+                                                              ParameterTool params);
 
 }
