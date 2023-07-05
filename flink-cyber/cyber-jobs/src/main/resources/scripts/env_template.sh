@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+#
+# Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+#
+# This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+# except in compliance with the License. You may obtain a copy of the License at
+# http://www.apache.org/licenses/LICENSE-2.0.
+#
+# This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. Refer to the License for the specific permissions and
+# limitations governing your use of the file.
+#
+
+# Determine the location of the script to locate parcel
+# Reference: http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
+SOURCE="${BASH_SOURCE[0]}"
+BIN_DIR="$( dirname "$SOURCE" )"
+while [ -h "$SOURCE" ]
+do
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+ETC_DIR=$BIN_DIR/../etc
+TEMPLATES_DIR="$ETC_DIR"/conf/templates

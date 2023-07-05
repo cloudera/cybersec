@@ -15,6 +15,7 @@ package com.cloudera.cyber.enrichment.hbase;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.flink.FlinkUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -31,8 +32,10 @@ import static com.cloudera.cyber.enrichment.ConfigUtils.allConfigs;
 
 public abstract class HbaseJob {
 
-    public static DataStream<Message> enrich(DataStream<Message> source, List<EnrichmentConfig> configs) {
-        return source.map(new HbaseEnrichmentMapFunction(configs, "enrichments"))
+    public static final String PARAMS_ENRICHMENT_CONFIG = "enrichments.config";
+
+    public static DataStream<Message> enrich(DataStream<Message> source, List<EnrichmentConfig> configs, EnrichmentsConfig enrichmentsConfig) {
+        return source.process(new HbaseEnrichmentMapFunction(configs, enrichmentsConfig))
                 .name("HBase Enrichment Mapper").uid("hbase-map");
     }
 
@@ -45,16 +48,19 @@ public abstract class HbaseJob {
         DataStream<EnrichmentCommand> enrichmentSource = createEnrichmentSource(env, params);
 
         byte[] configJson = Files.readAllBytes(Paths.get(params.getRequired(PARAMS_CONFIG_FILE)));
+        EnrichmentsConfig enrichmentsConfig = EnrichmentsConfig.load(params.getRequired(PARAMS_ENRICHMENT_CONFIG));
 
-        DataStream<Message> result = enrich(source, allConfigs(configJson));
+        DataStream<Message> result = enrich(source, allConfigs(configJson), enrichmentsConfig);
         writeResults(env, params, result);
-        DataStream<EnrichmentCommandResponse> enrichmentCommandResponses = writeEnrichments(env, params, enrichmentSource);
+        DataStream<EnrichmentCommandResponse> enrichmentCommandResponses = writeEnrichments(env, params, enrichmentSource, enrichmentsConfig);
         writeQueryResults(env, params, enrichmentCommandResponses);
 
         return env;
     }
 
-    public abstract DataStream<EnrichmentCommandResponse> writeEnrichments(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommand> enrichmentSource);
+    public abstract DataStream<EnrichmentCommandResponse> writeEnrichments(StreamExecutionEnvironment env, ParameterTool params,
+                                                                           DataStream<EnrichmentCommand> enrichmentSource,
+                                                                           EnrichmentsConfig enrichmentsConfig);
 
     protected abstract void writeQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> sideOutput);
 

@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public abstract class Enrichment {
+
     public static final String DELIMITER = ".";
 
     protected final String fieldName;
@@ -40,13 +41,13 @@ public abstract class Enrichment {
 
     public List<DataQualityMessage> addQualityMessage(List<DataQualityMessage> messages, DataQualityMessageLevel level, String message) {
         Optional<DataQualityMessage> duplicate = messages.stream().
-                filter(m -> m.getLevel().equals(level.name()) && m.getField().equals(fieldName) && m.getFeature().equals(feature) && m.getMessage().equals(message)).findFirst();
+            filter(m -> m.getLevel().equals(level.name()) && m.getField().equals(fieldName) && m.getFeature().equals(feature) && m.getMessage().equals(message)).findFirst();
         if (!duplicate.isPresent()) {
             messages.add(DataQualityMessage.builder()
-                    .level(level.name())
-                    .feature(feature)
-                    .field(fieldName)
-                    .message(message).build());
+                .level(level.name())
+                .feature(feature)
+                .field(fieldName)
+                .message(message).build());
         }
         return messages;
     }

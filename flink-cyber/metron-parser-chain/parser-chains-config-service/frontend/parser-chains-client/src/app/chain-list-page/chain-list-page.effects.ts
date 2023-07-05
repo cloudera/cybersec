@@ -10,16 +10,16 @@
  * limitations governing your use of the file.
  */
 
-import { Injectable } from '@angular/core';
-import { Actions, createEffect, Effect, ofType } from '@ngrx/effects';
-import { Action } from '@ngrx/store';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
+import {Action} from '@ngrx/store';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {Observable, of} from 'rxjs';
+import {catchError, map, switchMap} from 'rxjs/operators';
 
-import { ChainListPageService } from '../services/chain-list-page.service';
+import {ChainListPageService} from '../services/chain-list-page.service';
 import * as fromActions from './chain-list-page.actions';
-import { ChainModel } from './chain.model';
+import {ChainModel} from './chain.model';
 
 @Injectable()
 export class ChainListEffects {
@@ -27,7 +27,8 @@ export class ChainListEffects {
     private actions$: Actions,
     private messageService: NzMessageService,
     private chainListService: ChainListPageService
-  ) { }
+  ) {
+  }
 
   loadChains$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.LOAD_CHAINS),
@@ -63,14 +64,27 @@ export class ChainListEffects {
   ));
 
   hideCreateModal$: Observable<Action> = createEffect(() => this.actions$.pipe(
-      ofType(
-          fromActions.CREATE_CHAIN_SUCCESS,
-          fromActions.CREATE_CHAIN_FAIL
-      ),
-      map(() => new fromActions.HideCreateModalAction())
+    ofType(
+      fromActions.CREATE_CHAIN_SUCCESS,
+      fromActions.CREATE_CHAIN_FAIL
+    ),
+    map(() => new fromActions.HideCreateModalAction())
+  ))
+  hideDeleteModal$: Observable<Action> = createEffect(() => this.actions$.pipe(
+    ofType(
+      fromActions.DELETE_CHAIN_SUCCESS,
+      fromActions.DELETE_CHAIN_FAIL
+    ),
+    map(() => new fromActions.HideDeleteModalAction())
   ))
 
-  deleteChain$: Observable<Action> = createEffect(()=> this.actions$.pipe(
+  showDeleteModal$: Observable<Action> = createEffect(() => this.actions$.pipe(
+      ofType(fromActions.DELETE_CHAIN_SELECT),
+      map(() => new fromActions.ShowDeleteModalAction())
+    ),
+  )
+
+  deleteChain$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.DELETE_CHAIN),
     switchMap((action: fromActions.DeleteChainAction) => {
       return this.chainListService.deleteChain(action.chainId)

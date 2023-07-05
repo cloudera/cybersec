@@ -4,12 +4,12 @@
 Applies selected enrichments to a message in the following order:
 1. Maxmind IP Geolocation.
 2. Maxmind IP ASN.
-3. Local Flink state lookup.
-4. HBase key lookup.
-5. Rest service results.
-6. Experimental Feature: [Stix 1.x](https://oasis-open.github.io/cti-documentation/stix/compare) threat intelligence indicators.
-7. Threatq threat intelligence indicators.
-8. Stellar.
+3. IP Cidr
+4. Local Flink state lookup.
+5. HBase key lookup.
+6. Rest service results.
+8. Threatq threat intelligence indicators.
+9. Stellar.
 
 After applying all enrichments, the triaging job runs all scoring rules and attaches the scores to the event.
 The triaging job publishes the scored event to the output topic.
@@ -72,6 +72,14 @@ flink run -yt hbase-site.xml -yt hdfs-site.xml -yt core-site.xml flink-enrichmen
 |asn.ip_fields | string | Comma separated list of field names to perform ASN lookup.  If the field is set to an IP address, look up the ip in the Maxmind ASN database.  Add the ASN information to the event.   | required | ip_src_addr,ip_dst_addr|
 |asn.database.path | string | Path to the Maxmind ASN .mmdb file.  If running in yarn, use an HDFS location so the flink job can access the file.  The flink job user must have read access to the file. | required | hdfs://cyber/geo/GeoLite2-ASN.mmdb |
 
+## IP Cidr 
+
+| Property Name | Type                                    | Description                                  | Required/Default |Example             |
+|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
+|cidr.enabled    | boolean | If true, enrich the specified message fields with matching Cidrs defined in the cidr.config_file_path.   Otherwise, skip cidr enrichment. | true | false |
+|cidr.ip_fields | string | Comma separated list of field names to perform Cidr lookup.  If the field is set to an IP address, add the names of any matching Cidr ranges. | required | ip_src_addr, ip_dst_addr |
+|cidr.config_file_path| string | Path to the [configuration file](../flink-enrichment-cidr/README.md) defining the Cidr ranges.  | required |hdfs:/user/flink/data/enrichments-cidr.json |
+
 ## Local Flink State Lookup
 
 | Property Name | Type                                    | Description                                  | Required/Default |Example             |
@@ -90,22 +98,11 @@ flink run -yt hbase-site.xml -yt hdfs-site.xml -yt core-site.xml flink-enrichmen
 |enrichment.topic.query.output | string | Publish enrichment command results to this topic.  | required | my_pipeline.enrichments.output |
 
 ## Rest Service Results
+
 | Property Name | Type                                    | Description                                  | Required/Default |Example             |
 |---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
 |rest.enabled | boolean | If true, enrich messages with key-value mappings stored in HBase | true | false |
 |rest.config.file | string |Path to the [rest configuration file](../flink-enrichment-lookup-rest/README.md) specifying the res enrichments to apply to each source.  | required | rest-enrichments.json|
-
-## Stix 1.x Threat Intelligence Indicators
-
-NOTE: This feature is experimental and for development environments only.  Do not use in production.
-
-| Property Name | Type                                    | Description                                  | Required/Default |Example             |
-|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
-|stix.enabled| boolean | If true, enrich message with Stix threat intelligence | true | false|
-|stix.input.topic| string | Topic to consume new Stix 1.x threat intelligence indicators. | stix|my_pipeline.stix.input|
-|stix.output.topic|string | Topic to publish results of Stix threat indicators | stix.output | my_pipeline.stix.output|
-|stix.hbase.table| string | Store Stix threat intelligence in this hbase table | threatIntelligence | stix_ti |
-
 
 ## Threatq Threat Intelligence Indicators
     
@@ -158,6 +155,11 @@ asn.enabled=true
 asn.ip_fields=ip_src_addr,ip_dst_addr,not_defined,ip_dst,ip_src
 asn.database_path=hdfs:/user/flink/data/GeoLite2-ASN.mmdb
 
+# cidr
+cidr.enabled=false
+cidr.ip_fields=ip_src_addr,ip_dst_addr
+cidr.config_file_path=hdfs:/user/flink/data/enrichments-cidr.json
+
 # lookups
 lookups.config.file=enrichments.json
 hbase.enabled=true
@@ -172,7 +174,6 @@ stellar.enabled=true
 stellar.config.dir=enrichments
 
 # disabled enrichments
-stix.enabled=false
 rules.enabled=false
 threatq.enabled=false
 ```

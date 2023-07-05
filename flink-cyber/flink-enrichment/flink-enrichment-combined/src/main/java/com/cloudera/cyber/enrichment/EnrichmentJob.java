@@ -13,22 +13,19 @@
 package com.cloudera.cyber.enrichment;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.ThreatIntelligence;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.cloudera.cyber.enrichemnt.stellar.StellarEnrichmentJob;
+import com.cloudera.cyber.enrichment.cidr.IpRegionCidr;
 import com.cloudera.cyber.enrichment.geocode.IpGeo;
 import com.cloudera.cyber.enrichment.hbase.HbaseJob;
 import com.cloudera.cyber.enrichment.hbase.HbaseJobRawKafka;
+import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.enrichment.lookup.LookupJob;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
 import com.cloudera.cyber.enrichment.rest.RestLookupJob;
-import com.cloudera.cyber.enrichment.stix.StixJob;
-import com.cloudera.cyber.enrichment.stix.StixResults;
-import com.cloudera.cyber.enrichment.stix.parsing.ThreatIntelligenceDetails;
 import com.cloudera.cyber.enrichment.threatq.ThreatQConfig;
-import com.cloudera.cyber.enrichment.threatq.ThreatQEntry;
 import com.cloudera.cyber.enrichment.threatq.ThreatQJob;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.scoring.ScoredMessage;
@@ -36,7 +33,6 @@ import com.cloudera.cyber.scoring.ScoringJob;
 import com.cloudera.cyber.scoring.ScoringRuleCommand;
 import com.cloudera.cyber.scoring.ScoringRuleCommandResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -49,10 +45,10 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_ASN_DATABASE_PATH;
-import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_ASN_FIELDS;
-import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_GEO_DATABASE_PATH;
-import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.PARAM_GEO_FIELDS;
+import static com.cloudera.cyber.enrichment.cidr.IpRegionCidrJob.PARAM_CIDR_CONFIG_PATH;
+import static com.cloudera.cyber.enrichment.cidr.IpRegionCidrJob.PARAM_CIDR_IP_FIELDS;
+import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.*;
+import static com.cloudera.cyber.enrichment.hbase.HbaseJob.PARAMS_ENRICHMENT_CONFIG;
 
 @Slf4j
 public abstract class EnrichmentJob {
@@ -62,9 +58,9 @@ public abstract class EnrichmentJob {
 
     private static final String PARAMS_ENABLE_GEO = "geo.enabled";
     private static final String PARAMS_ENABLE_ASN = "asn.enabled";
+    private static final String PARAMS_ENABLE_CIDR = "cidr.enabled";
     private static final String PARAMS_ENABLE_HBASE = "hbase.enabled";
     private static final String PARAMS_ENABLE_REST = "rest.enabled";
-    private static final String PARAMS_ENABLE_STIX = "stix.enabled";
     private static final String PARAMS_ENABLE_THREATQ = "threatq.enabled";
     private static final String PARAMS_ENABLE_RULES = "rules.enabled";
     private static final String PARAMS_ENABLE_STELLAR = "stellar.enabled";
@@ -89,45 +85,51 @@ public abstract class EnrichmentJob {
                         Arrays.asList(params.getRequired(PARAM_ASN_FIELDS).split(",")),
                         params.getRequired(PARAM_ASN_DATABASE_PATH)) : geoEnriched;
 
-        Tuple2<SingleOutputStreamOperator<Message>, DataStream<EnrichmentCommandResponse>> enriched = LookupJob.enrich(localEnrichments, asnEnriched, enrichmentConfigs);
+        SingleOutputStreamOperator<Message> cidrEnriched = params.getBoolean(PARAMS_ENABLE_CIDR, false) ?
+            IpRegionCidr.cidr(asnEnriched,
+                Arrays.asList(params.getRequired(PARAM_CIDR_IP_FIELDS).split(",")),
+                params.getRequired(PARAM_CIDR_CONFIG_PATH)) : asnEnriched;
+
+        Tuple2<DataStream<Message>, DataStream<EnrichmentCommandResponse>> enriched = LookupJob.enrich(localEnrichments, cidrEnriched, enrichmentConfigs);
 
         DataStream<EnrichmentCommandResponse> enrichmentCommandResponses = enriched.f1;
 
-        // write the hbase enrichments to hbase
-        if (params.getBoolean(PARAMS_ENABLE_HBASE, true)) {
-            DataStream<EnrichmentCommandResponse> hbaseEnrichmentResponses = new HbaseJobRawKafka().writeEnrichments(env, params, hbaseEnrichments);
-            if (enrichmentCommandResponses != null) {
-                enrichmentCommandResponses = enriched.f1.union(hbaseEnrichmentResponses);
-            } else {
-                enrichmentCommandResponses = hbaseEnrichmentResponses;
-            }
+        boolean hbaseEnabled = params.getBoolean(PARAMS_ENABLE_HBASE, true);
+        boolean threatqEnabled = params.getBoolean(PARAMS_ENABLE_THREATQ, true);
+
+        EnrichmentsConfig enrichmentsStorageConfig = null;
+        if (hbaseEnabled || threatqEnabled) {
+            enrichmentsStorageConfig = EnrichmentsConfig.load(params.getRequired(PARAMS_ENRICHMENT_CONFIG));
         }
 
-        writeEnrichmentQueryResults(env, params, enrichmentCommandResponses);
 
-        DataStream<Message> hbased = params.getBoolean(PARAMS_ENABLE_HBASE, true) ?
-                HbaseJob.enrich(enriched.f0, enrichmentConfigs) : enriched.f0;
+        DataStream<Message> hbased = hbaseEnabled ?
+                HbaseJob.enrich(enriched.f0, enrichmentConfigs, enrichmentsStorageConfig) : enriched.f0;
 
         // rest based enrichments
         DataStream<Message> rested = params.getBoolean(PARAMS_ENABLE_REST, true) ?
                 RestLookupJob.enrich(hbased, params.getRequired(PARAMS_REST_CONFIG_FILE)) : hbased;
 
-
-        // stix process parses incoming stix sources and stores locally, can use long term backup
-        // also outputs multiple streams which need sending somewhere
-        DataStream<Message> tied = params.getBoolean(PARAMS_ENABLE_STIX, true) ?
-                doStix(rested, env, params) : rested;
-
         // Run threatQ integrations
         DataStream<Message> tqed;
-        if (params.getBoolean(PARAMS_ENABLE_THREATQ, true)) {
+        DataStream<EnrichmentCommand> threatqEnrichments = null;
+        if (threatqEnabled) {
             List<ThreatQConfig> threatQconfigs = ThreatQJob.parseConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_THREATQ_CONFIG_FILE))));
             log.info("ThreatQ Configs {}", threatQconfigs);
-            tqed = ThreatQJob.enrich(tied, threatQconfigs);
-            ThreatQJob.ingest(createThreatQSource(env, params), threatQconfigs);
+            tqed = ThreatQJob.enrich(rested, threatQconfigs, enrichmentsStorageConfig);
+            threatqEnrichments = createThreatQSource(env, params);
         } else {
-            tqed = tied;
+            tqed = rested;
         }
+
+        DataStream<EnrichmentCommandResponse> hbaseTqEnrichResults = null;
+        if (hbaseEnabled || threatqEnabled) {
+            hbaseTqEnrichResults = writeHbaseThreatQEnrichmentsToHbaseAndRespond(params, env, hbaseEnrichments, threatqEnrichments, enrichmentsStorageConfig);
+        }
+
+
+        // write the local, hbase, and threatq responses to the output topic
+        writeEnrichmentQueryResults(env, params, unionStreams(enrichmentCommandResponses, hbaseTqEnrichResults));
 
         DataStream<Message> stellarStream;
         if (params.getBoolean(PARAMS_ENABLE_STELLAR, true)) {
@@ -141,7 +143,7 @@ public abstract class EnrichmentJob {
 
         // disabled by default - NOT IMPLEMENTED
         DataStream<Message> ruled = params.getBoolean(PARAMS_ENABLE_RULES, false) ?
-                doRules(stellarStream, params) : stellarStream;
+                doRules(stellarStream) : stellarStream;
 
         DataStream<ScoredMessage> scoring = doScoring(ruled, env, params);
 
@@ -149,22 +151,30 @@ public abstract class EnrichmentJob {
         return env;
     }
 
+    private DataStream<EnrichmentCommandResponse> writeHbaseThreatQEnrichmentsToHbaseAndRespond(ParameterTool params, StreamExecutionEnvironment env,
+                                                                                                DataStream<EnrichmentCommand> hbaseEnrichments, DataStream<EnrichmentCommand> threatqEnrichments,
+                                                                                                EnrichmentsConfig enrichmentsStorageConfig) {
+
+        // write the threatq and hbase enrichments to hbase
+        return new HbaseJobRawKafka().writeEnrichments(env, params, unionStreams(hbaseEnrichments, threatqEnrichments), enrichmentsStorageConfig);
+    }
+
+    private static<T> DataStream<T> unionStreams(DataStream<T> stream1, DataStream<T> stream2) {
+        if (stream1 != null && stream2 != null) {
+            return stream1.union(stream2);
+        } else if (stream1 != null) {
+            return stream1;
+        } else {
+            return stream2;
+        }
+    }
 
     /**
      * @param in     Messages incoming for rules processing
-     * @param params Global Job Parameters
      * @return incoming stream for now.  Not implemented.
      */
-    private DataStream<Message> doRules(DataStream<Message> in, ParameterTool params) {
+    private DataStream<Message> doRules(DataStream<Message> in) {
         return in;
-    }
-
-    private DataStream<Message> doStix(DataStream<Message> in, StreamExecutionEnvironment env, ParameterTool params) {
-        DataStream<String> stixSource = createStixSource(env, params);
-        StixResults stix = StixJob.enrich(in, stixSource, getLongTermLookupFunction(), params);
-        writeStixThreats(params, stix.getThreats());
-        writeStixDetails(params, stix.getDetails());
-        return stix.getResults();
     }
 
     private DataStream<ScoredMessage> doScoring(DataStream<Message> in, StreamExecutionEnvironment env, ParameterTool params) {
@@ -182,18 +192,7 @@ public abstract class EnrichmentJob {
 
     protected abstract void writeEnrichmentQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> sideOutput);
 
-    protected abstract DataStream<ThreatQEntry> createThreatQSource(StreamExecutionEnvironment env, ParameterTool params);
-
-    /* STIX related parts */
-    protected abstract DataStream<String> createStixSource(StreamExecutionEnvironment env, ParameterTool params);
-
-    protected abstract void writeStixThreats(ParameterTool params, DataStream<ThreatIntelligence> results);
-
-    protected abstract void writeStixDetails(ParameterTool params, DataStream<ThreatIntelligenceDetails> results);
-
-    protected MapFunction<Message, Message> getLongTermLookupFunction() {
-        return null;
-    }
+    protected abstract DataStream<EnrichmentCommand> createThreatQSource(StreamExecutionEnvironment env, ParameterTool params);
 
     protected abstract DataStream<ScoringRuleCommand> createRulesSource(StreamExecutionEnvironment env, ParameterTool params);
 
