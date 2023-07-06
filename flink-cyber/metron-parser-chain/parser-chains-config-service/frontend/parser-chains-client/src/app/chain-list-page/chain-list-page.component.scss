@@ -55,5 +55,10 @@
 
 .pipeline-select {
     margin: 1rem;
-    width: 12rem;
+    width: 20rem;
+    display-model: inline-block;
+}
+
+.pipeline-select-dropdown {
+    margin-left: 0.25rem;
 }
