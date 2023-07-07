@@ -12,23 +12,35 @@
 
 package com.cloudera.parserchains.queryservice.controller;
 
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PIPELINE_BASE_URL;
+import com.cloudera.parserchains.queryservice.config.KafkaConsumerConfig;
+import com.cloudera.parserchains.queryservice.model.enums.KafkaMessageType;
+import com.cloudera.parserchains.queryservice.service.KafkaService;
 import com.cloudera.parserchains.queryservice.service.PipelineService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.core.fs.Path;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
-
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PIPELINE_BASE_URL;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.core.fs.Path;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.KafkaException;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.requestreply.KafkaReplyTimeoutException;
+import org.springframework.kafka.requestreply.ReplyingKafkaTemplate;
+import org.springframework.kafka.requestreply.RequestReplyFuture;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * The controller responsible for operations on parser chains.
@@ -39,19 +51,30 @@ import static com.cloudera.parserchains.queryservice.common.ApplicationConstants
 @RequiredArgsConstructor
 public class PipelineController {
 
-    private final PipelineService pipelineService;
+  private final PipelineService pipelineService;
+  private final KafkaService kafkaService;
 
-    @ApiOperation(value = "Finds and returns all available pipelines.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A list of all pipelines."),
-            @ApiResponse(code = 404, message = "No valid pipelines found.")
-    })
-    @GetMapping
-    ResponseEntity<Set<String>> findAll() throws IOException {
-        Map<String, Path> pipelineMap = pipelineService.findAll();
-        if (pipelineMap == null || pipelineMap.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(pipelineMap.keySet());
+  @ApiOperation(value = "Finds and returns all available pipelines.")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "A list of all pipelines."),
+      @ApiResponse(code = 404, message = "No valid pipelines found.")
+  })
+  @GetMapping
+  ResponseEntity<Set<String>> findAll() throws IOException {
+    Map<String, Path> pipelineMap = pipelineService.findAll();
+    if (pipelineMap == null || pipelineMap.isEmpty()) {
+      return ResponseEntity.notFound().build();
     }
+    return ResponseEntity.ok(pipelineMap.keySet());
+  }
+
+  @GetMapping("/test/parser")
+  public String testParser() {
+    return kafkaService.sendWithReply("clusterId", KafkaMessageType.PARSER, "test-parser-value");
+  }
+
+  @GetMapping("/test/cluster")
+  public String testCluster() {
+    return kafkaService.sendWithReply("clusterId", KafkaMessageType.CLUSTER, "test-cluster-value");
+  }
 }
