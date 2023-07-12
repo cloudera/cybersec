@@ -63,6 +63,13 @@ public @interface Parameter {
     String defaultValue() default "";
 
     /**
+     * Specifies if the parameter specifies the output field name.
+     * If true, the selection will be provided with possible field names.
+     * <p>This value is optional.
+     */
+    boolean isOutputName() default false;
+
+    /**
      * Defines the type of widget presented to the user when
      * configuring the parameter.
      * <p>This value is optional and defaults to a simple text box.

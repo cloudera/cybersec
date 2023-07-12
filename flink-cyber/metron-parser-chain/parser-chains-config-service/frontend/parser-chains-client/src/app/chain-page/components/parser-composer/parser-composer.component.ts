@@ -10,15 +10,15 @@
  * limitations governing your use of the file.
  */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { select, Store } from '@ngrx/store';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {select, Store} from '@ngrx/store';
 
-import { v1 as uuidv1 } from 'uuid';
+import {v1 as uuidv1} from 'uuid';
 
 import * as fromActions from '../../chain-page.actions';
-import { ParserModel, PartialParserModel } from '../../chain-page.models';
-import { ChainPageState, getFormConfigByType, getParser, getParserToBeInvestigated } from '../../chain-page.reducers';
-import { CustomFormConfig } from '../custom-form/custom-form.component';
+import {ParserModel, PartialParserModel} from '../../chain-page.models';
+import {ChainPageState, getFormConfigByType, getParser, getParserToBeInvestigated} from '../../chain-page.reducers';
+import {CustomFormConfig} from '../custom-form/custom-form.component';
 
 @Component({
   selector: 'app-parser-composer',
@@ -32,6 +32,8 @@ export class ParserComposerComponent implements OnInit {
   @Input() parserId: string;
   @Input() chainId: string;
   @Input() failedParser: string;
+  @Input() selectedSource: string;
+  @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() subchainSelect = new EventEmitter<string>();
   @Output() parserRemove = new EventEmitter<string>();
   @Output() parserChange = new EventEmitter<PartialParserModel>();
