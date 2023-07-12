@@ -64,7 +64,7 @@ public class RenameFieldParser implements Parser {
             multipleValues=true)
     public void renameField(
             @Parameter(key="from", label="Rename From", description="The original name of the field.") String from,
-            @Parameter(key="to", label="Rename To", description="The new name of the field.") String to) {
+            @Parameter(key="to", label="Rename To", description="The new name of the field.", isOutputName = true) String to) {
         if(StringUtils.isNoneBlank(from, to)) {
             renameField(FieldName.of(from), FieldName.of(to));
         }

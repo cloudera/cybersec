@@ -22,6 +22,9 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.flink.api.common.typeinfo.TypeInfo;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.types.Row;
 
 import java.util.Map;
 import java.util.UUID;
@@ -49,6 +52,14 @@ public class ThreatIntelligence extends SpecificRecordBase implements SpecificRe
             .requiredString("observableType")
             .name("fields").type(Schema.createMap(SchemaBuilder.builder().stringType())).noDefault()
             .endRecord();
+
+    public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
+            new String[]{"id", "ts", "observable", "observableType", "fields"},
+            Types.STRING, Types.LONG, Types.STRING, Types.STRING, Types.MAP(Types.STRING, Types.STRING));
+
+    public Row toRow() {
+        return Row.of(id, ts, observable, observableType, fields);
+    }
 
     @Override
     public Schema getSchema() {
