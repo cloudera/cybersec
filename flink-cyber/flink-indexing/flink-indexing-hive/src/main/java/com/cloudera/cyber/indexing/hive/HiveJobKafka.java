@@ -33,7 +33,10 @@ public class HiveJobKafka extends HiveJob {
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         ParameterTool params = Utils.getParamToolsFromProperties(args);
-        FlinkUtils.executeEnv(new HiveJobKafka().createPipeline(params),"Indexing - Hive", params);
+        final StreamExecutionEnvironment pipeline = new HiveJobKafka().createPipeline(params);
+        if (pipeline != null) {
+            FlinkUtils.executeEnv(pipeline, "Indexing - Hive", params);
+        }
     }
 
     @Override

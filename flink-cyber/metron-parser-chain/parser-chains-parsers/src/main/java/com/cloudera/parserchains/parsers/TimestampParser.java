@@ -12,7 +12,11 @@
 
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.*;
+import com.cloudera.parserchains.core.FieldName;
+import com.cloudera.parserchains.core.FieldValue;
+import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.Parser;
+import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import org.apache.commons.lang3.StringUtils;
@@ -38,7 +42,7 @@ public class TimestampParser implements Parser {
 
     @Override
     public Message parse(Message input) {
-        Long now = clock.currentTimeMillis();
+        long now = clock.currentTimeMillis();
         FieldValue timestamp = StringFieldValue.of(Long.toString(now));
         return Message.builder()
                 .withFields(input)
@@ -49,6 +53,7 @@ public class TimestampParser implements Parser {
     @Configurable(key="outputField",
             label="Output Field",
             description="The field that will contain the timestamp.",
+            isOutputName=true,
             defaultValue=DEFAULT_OUTPUT_FIELD)
     public TimestampParser withOutputField(String fieldName) {
         if(StringUtils.isNotBlank(fieldName)) {
