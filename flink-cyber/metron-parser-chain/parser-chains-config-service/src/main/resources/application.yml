@@ -30,17 +30,16 @@ springdoc:
 
 
 # Kafka
-
 spring:
   kafka:
     bootstrap-servers: localhost:9092
+    reply-topic: reply-topic
+    request-topic: request-topic
     consumer:
       group-id: my-consumer-group
       auto-offset-reset: latest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      reply-topic: reply-topic
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
-      request-topic: request-topic
