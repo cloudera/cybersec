@@ -28,7 +28,6 @@ export class SampleDataTextInputComponent {
     reader.onload = () => {
       const fileTypeError = this.checkFileType(file);
       if (fileTypeError) {
-        this.messageService.create('error', fileTypeError.message);
         return;
       }
       this.sampleDataInput.nativeElement.value = reader.result;

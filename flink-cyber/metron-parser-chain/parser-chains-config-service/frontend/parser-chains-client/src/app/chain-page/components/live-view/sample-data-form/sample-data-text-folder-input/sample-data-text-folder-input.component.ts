@@ -21,7 +21,6 @@ import {
     ShowEditModalAction
 } from "./sample-data-text-folder-input.actions";
 import {FormBuilder, FormGroup} from "@angular/forms";
-import {liveViewInitialized} from "../../live-view.actions";
 import {map} from "rxjs/operators";
 
 @Component({
