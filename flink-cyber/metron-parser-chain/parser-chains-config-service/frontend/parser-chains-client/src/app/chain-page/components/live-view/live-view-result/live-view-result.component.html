@@ -12,7 +12,7 @@
 
 <div *ngIf='results'>
   <button nz-button (click)="downloadEntries()" class="download-btn"><i nz-icon nzType="download" nzTheme="outline"></i>Download Output</button>
-  <button nz-button (click)="copyOutput()" class="download-btn"><i nz-icon nzType="copy" nzTheme="outline"></i>Copy Output as JSON</button>
+  <button nz-button (click)="copyOutput()" class="download-btn"><i nz-icon nzType="copy" nzTheme="outline"></i>Copy to Clipboard</button>
   <div *ngFor="let entry of results; index as i">
     <button nz-button
             class="parser-by-parser-button"

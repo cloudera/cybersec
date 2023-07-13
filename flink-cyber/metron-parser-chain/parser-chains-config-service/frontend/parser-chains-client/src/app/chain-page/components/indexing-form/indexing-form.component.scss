@@ -1,4 +1,4 @@
-/*
+/*!
  * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
  *
  * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
@@ -10,16 +10,10 @@
  * limitations governing your use of the file.
  */
 
-package com.cloudera.cyber.profiler;
+.indexing-form {
+  height: 500px;
+}
 
-import com.cloudera.cyber.hbase.AbstractHbaseSinkFunction;
-import org.apache.flink.api.java.utils.ParameterTool;
-
-
-public class FirstSeenHbaseSink extends AbstractHbaseSinkFunction<ProfileMessage> {
-
-    public FirstSeenHbaseSink(String hTableName, String columnFamily, ProfileGroupConfig profileGroupConfig, ParameterTool params) {
-        super(hTableName, new FirstSeenHbaseMutationConverter(hTableName, columnFamily, profileGroupConfig), params, "numFirstSeen");
-    }
-
+.indexing-form-editor {
+  height: 100%;
 }

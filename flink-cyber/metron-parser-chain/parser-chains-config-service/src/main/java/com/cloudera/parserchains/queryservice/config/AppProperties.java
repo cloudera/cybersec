@@ -28,7 +28,8 @@ public class AppProperties {
 
   private enum Options implements ConfigOption<String, Environment> {
     CONFIG_PATH("."),
-    SAMPLE_FOLDER_PATH("../samples/");
+    SAMPLE_FOLDER_PATH("../samples/"),
+    INDEX_PATH("../../index/conf/table-config.json");
 
     @Override
     public String get(Environment source) {
@@ -61,6 +62,10 @@ public class AppProperties {
 
   public String getConfigPath() {
     return Options.CONFIG_PATH.get(environment);
+  }
+
+  public String getIndexPath() {
+    return Options.INDEX_PATH.get(environment);
   }
 
   public String getSampleFolderPath() {

@@ -38,7 +38,8 @@ public class ParserDescriptorTest {
      *     "required" : true,
      *     "multipleValues" : false,
      *     "path" : "config",
-     *     "multiple" : false
+     *     "multiple" : false,
+     *     "outputName" : false
      *   }, {
      *     "name" : "inputField",
      *     "type" : "text",
@@ -50,7 +51,8 @@ public class ParserDescriptorTest {
      *     "multiple" : false,
      *     "defaultValue" : [ {
      *       "outputField" : "original_string"
-     *     } ]
+     *     } ],
+     *     "outputName" : false
      *   } ]
      * }
       */

@@ -21,7 +21,7 @@ do
   BIN_DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
 done
 BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
-source $BIN_DIR/env.sh
+source $BIN_DIR/env_template.sh
 
 
 if [ "$#" -ne 2 ]; then

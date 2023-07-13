@@ -19,6 +19,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 
+import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentFieldsConfig.FIRST_SEEN_ENRICHMENT_NAME;
+import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentFieldsConfig.THREATQ_ENRICHMENT_NAME;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class EnrichmentFieldsConfigTest {
@@ -36,6 +38,17 @@ public class EnrichmentFieldsConfigTest {
     }
 
     @Test
+    public void testValidReservedConfigs() {
+        testReservedConfig(THREATQ_ENRICHMENT_NAME);
+        testReservedConfig(FIRST_SEEN_ENRICHMENT_NAME);
+    }
+
+    private void testReservedConfig(String reservedName) {
+        testFieldsConfig(reservedName, null, null, null);
+        testFieldsConfig(reservedName, EMPTY_LIST, null, EMPTY_LIST);
+    }
+
+    @Test
     public void testInvalidKeyField() {
         testInvalidFieldsConfig(EnrichmentFieldsConfig.FIELD_CONFIG_INVALID_KEY_FIELD, null, null);
         testInvalidFieldsConfig(EnrichmentFieldsConfig.FIELD_CONFIG_INVALID_KEY_FIELD, EMPTY_LIST, null);
@@ -45,21 +58,37 @@ public class EnrichmentFieldsConfigTest {
     }
 
     @Test
+    public void testInvalidReservedConfigs() {
+        testInvalidReservedConfig(THREATQ_ENRICHMENT_NAME);
+        testInvalidReservedConfig(FIRST_SEEN_ENRICHMENT_NAME);
+    }
+
+    private void testInvalidReservedConfig(String reservedName) {
+        testInvalidFieldsConfig(reservedName, EnrichmentFieldsConfig.RESERVED_ENRICH_DEFINES_KEY_FIELD, KEY_FIELDS,  null, null);
+        testInvalidFieldsConfig(reservedName, EnrichmentFieldsConfig.RESERVED_ENRICH_DEFINES_VALUE_FIELD, null, null, VALUE_FIELDS);
+        testInvalidFieldsConfig(reservedName, EnrichmentFieldsConfig.RESERVED_ENRICH_DEFINES_DELIMITER, null, ".", null);
+    }
+
+    @Test
     public void testInvalidValueField() {
         testInvalidFieldsConfig(EnrichmentFieldsConfig.FIELD_CONFIG_INVALID_VALUE_FIELD, KEY_FIELDS, EMPTY_LIST);
         testInvalidFieldsConfig(EnrichmentFieldsConfig.FIELD_CONFIG_DUPLICATE_VALUE_FIELD, KEY_FIELDS, DUPLICATE_FIELDS);
     }
 
     private void testValidConfigs(String keyDelimiter) {
-        testFieldsConfig(KEY_FIELDS, keyDelimiter, null);
-        testFieldsConfig(KEY_FIELDS, ":", null);
-        testFieldsConfig(KEY_FIELDS, keyDelimiter, VALUE_FIELDS);
-        testFieldsConfig(KEY_FIELDS, keyDelimiter, VALUE_FIELDS);
+        testFieldsConfig(keyDelimiter, null);
+        testFieldsConfig(":", null);
+        testFieldsConfig(keyDelimiter, VALUE_FIELDS);
+        testFieldsConfig(keyDelimiter, VALUE_FIELDS);
     }
 
-    private void testFieldsConfig(ArrayList<String> keyFields, String keyDelimiter, ArrayList<String> valueFields) {
+    private void testFieldsConfig(String keyDelimiter, ArrayList<String> valueFields) {
+        testFieldsConfig(TEST_ENRICHMENT_TYPE, EnrichmentFieldsConfigTest.KEY_FIELDS, keyDelimiter, valueFields);
+    }
+
+    private void testFieldsConfig(String enrichmentType, ArrayList<String> keyFields, String keyDelimiter, ArrayList<String> valueFields) {
         EnrichmentFieldsConfig fieldConfig = new EnrichmentFieldsConfig(keyFields, keyDelimiter, valueFields, null);
-        fieldConfig.validate(TEST_ENRICHMENT_TYPE);
+        fieldConfig.validate(enrichmentType);
         if (keyDelimiter == null) {
             Assert.assertEquals(EnrichmentFieldsConfig.DEFAULT_KEY_DELIMITER, fieldConfig.getKeyDelimiter());
         } else {
@@ -67,9 +96,13 @@ public class EnrichmentFieldsConfigTest {
         }
     }
 
+    private void testInvalidFieldsConfig(String enrichmentType, String expectedMessage, ArrayList<String> keyFields, String delimiter, ArrayList<String> valueFields) {
+        assertThatThrownBy(() -> testFieldsConfig(enrichmentType, keyFields, delimiter, valueFields)).isInstanceOf(IllegalStateException.class)
+                .hasMessage(expectedMessage, enrichmentType);
+    }
+
     private void testInvalidFieldsConfig(String expectedMessage, ArrayList<String> keyFields, ArrayList<String> valueFields) {
-        assertThatThrownBy(() -> testFieldsConfig(keyFields, null, valueFields)).isInstanceOf(IllegalStateException.class)
-                .hasMessage(expectedMessage, TEST_ENRICHMENT_TYPE);
+        testInvalidFieldsConfig(TEST_ENRICHMENT_TYPE, expectedMessage, keyFields, null, valueFields);
     }
 
 }

@@ -45,24 +45,11 @@
         <tr>
             <td [nzExpand]="expandSet.has(data.id)" (nzExpandChange)="onExpandChange(data.id, $event)"></td>
             <td>
-                <span nz-icon *ngIf="(runResults$ | async).get(data.id)?.status === SampleTestStatus.SUCCESS"
-                      class="sample-status-icon"
-                      [nzType]="'check-circle'"
-                      [nzTheme]="'twotone'"
-                      [nzTwotoneColor]="'#52c41a'">
-                </span>
-                <span nz-icon *ngIf="(runResults$ | async).get(data.id)?.status === SampleTestStatus.FAIL"
-                      class="sample-status-icon"
-                      [nzType]="'close-circle'"
-                      [nzTheme]="'twotone'"
-                      [nzTwotoneColor]="'#d41f1f'">
-                </span>
                 <span nz-icon
-                      *ngIf="(runResults$ | async).get(data.id) === undefined || (runResults$ | async).get(data.id)?.status === SampleTestStatus.UNKNOWN"
                       class="sample-status-icon"
-                      [nzType]="'clock-circle'"
+                      [nzType]="getIconType(data.id) | async"
                       [nzTheme]="'twotone'"
-                      [nzTwotoneColor]="'#bbbbbb'">
+                      [nzTwotoneColor]="getIconColor(data.id) | async">
                 </span>
             </td>
             <td>{{ data.name }}</td>
@@ -111,7 +98,7 @@
                     <p>{{(runResults$ | async).get(data.id)?.result}}</p>
                 </nz-collapse-panel>
                 <nz-collapse-panel nzHeader="Difference"
-                                   *ngIf="(runResults$ | async).get(data.id)?.status === SampleTestStatus.FAIL">
+                                   *ngIf="(getStatus(data.id) | async) === SampleTestStatus.FAIL">
                     <app-text-diff-view
                             originalModel="Failure: {{data.expectedFailure}}, Data: {{(runResults$ | async).get(data.id)?.expected}}"
                             modifiedModel="Failure: {{(runResults$ | async).get(data.id)?.failure}}, Data: {{(runResults$ | async).get(data.id)?.result}}"></app-text-diff-view>
@@ -136,6 +123,6 @@
     Add new sample
 </button>
 <app-sample-edit-popup
-        [modalVisible]="editSampleModalVisible$ | async" [sample]="selectedSample[1]"
+        [sample]="selectedSample[1]"
         (sampleDataChange)="updateSample($event)">
 </app-sample-edit-popup>
