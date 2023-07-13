@@ -71,19 +71,19 @@ public class ChainController {
     static final int MAX_SAMPLES_PER_TEST = 200;
 
     @Autowired
-    ChainPersistenceService chainPersistenceService;
+    private ChainPersistenceService chainPersistenceService;
 
     @Autowired
-    ChainBuilderService chainBuilderService;
+    private ChainBuilderService chainBuilderService;
 
     @Autowired
-    ChainExecutorService chainExecutorService;
+    private ChainExecutorService chainExecutorService;
 
     @Autowired
     IndexingService indexingService;
 
     @Autowired
-    AppProperties appProperties;
+    private AppProperties appProperties;
 
     @ApiOperation(value = "Finds and returns all available parser chains.")
     @ApiResponses(value = {

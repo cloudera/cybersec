@@ -56,7 +56,7 @@ export class LiveViewEffects {
   );
 
   @Effect({ dispatch: false})
-  persistingSapmleData$ = this.actions$.pipe(
+  persistingSampleData$ = this.actions$.pipe(
     ofType(
       sampleDataInputChanged.type,
     ),

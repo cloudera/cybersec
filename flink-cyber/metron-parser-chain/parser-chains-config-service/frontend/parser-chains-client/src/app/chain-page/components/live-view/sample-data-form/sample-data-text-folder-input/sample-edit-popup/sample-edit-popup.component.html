@@ -1,0 +1,57 @@
+<nz-modal
+        [nzVisible]="editSampleModalVisible$ | async"
+        nzTitle="Edit Sample"
+        (nzOnCancel)="handleCancelChainModal()"
+        (nzOnOk)="pushChain()"
+        [nzOkDisabled]="false"
+        [nzOkLoading]="isOkLoading"
+>
+    <form nz-form *nzModalContent [formGroup]="editSampleForm" (ngSubmit)='pushChain()' nzLayout="horizontal">
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24">ID</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24">{{sample.id}}</nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="source">Source</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24">
+                <textarea nz-input
+                          type="text"
+                          id="source"
+                          formControlName="source"></textarea>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="name">Name</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24">
+                <input nz-input
+                       type="text"
+                       id="name"
+                       formControlName="name">
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="description">Description</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24">
+                <input nz-input
+                       type="text"
+                       id="description"
+                       formControlName="description">
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="32" nzFor="expectedFailure">Expected Failure</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="32">
+                <label nz-checkbox formControlName="expectedFailure"></label>
+            </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+            <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="expectedResult">Expected Result</nz-form-label>
+            <nz-form-control [nzSm]="14" [nzXs]="24">
+                <textarea nz-input
+                          type="text"
+                          id="expectedResult"
+                          formControlName="expectedResult"></textarea>
+            </nz-form-control>
+        </nz-form-item>
+    </form>
+</nz-modal>
