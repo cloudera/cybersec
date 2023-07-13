@@ -1,11 +1,9 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
-import {select, Store} from "@ngrx/store";
+import {Store} from "@ngrx/store";
 import {SampleDataTextFolderInputState} from "../sample-data-text-folder-input.reducers";
 import {HideEditModalAction} from "../sample-data-text-folder-input.actions";
 import {SampleDataInternalModel} from "../../../models/sample-data.model";
-import {getEditModalVisible} from "../sample-data-text-folder-input.selectors";
-import {Observable} from "rxjs";
 
 @Component({
     selector: 'app-sample-edit-popup',
@@ -14,11 +12,10 @@ import {Observable} from "rxjs";
 })
 export class SampleEditPopupComponent implements OnChanges {
 
+    @Input() modalVisible: boolean;
     @Input() sample: SampleDataInternalModel;
 
     @Output() sampleDataChange = new EventEmitter<SampleDataInternalModel>();
-
-    editSampleModalVisible$: Observable<boolean>;
 
     editSampleForm: FormGroup;
     isOkLoading = false;
@@ -26,7 +23,7 @@ export class SampleEditPopupComponent implements OnChanges {
 
     constructor(private store: Store<SampleDataTextFolderInputState>,
                 private fb: FormBuilder) {
-        this.editSampleModalVisible$ = store.pipe(select(getEditModalVisible));
+
     }
 
     ngOnChanges(changes: SimpleChanges): void {
