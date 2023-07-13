@@ -21,7 +21,6 @@ import {
     ShowEditModalAction
 } from "./sample-data-text-folder-input.actions";
 import {FormBuilder, FormGroup} from "@angular/forms";
-import {liveViewInitialized} from "../../live-view.actions";
 import {map} from "rxjs/operators";
 
 @Component({
@@ -45,6 +44,7 @@ export class SampleDataTextFolderInputComponent implements OnInit {
     }>>;
     sampleData$: Observable<SampleDataInternalModel[]>;
     sampleFolderPath$: Observable<string>;
+    editSampleModalVisible$: Observable<boolean>;
 
     expandSet = new Set<number>();
 
@@ -59,6 +59,7 @@ export class SampleDataTextFolderInputComponent implements OnInit {
         this.runResults$ = this.store.pipe(select(getRunResults));
         this.sampleData$ = this.store.pipe(select(getSampleData));
         this.sampleFolderPath$ = this.store.pipe(select(getSampleFolderPath));
+        this.editSampleModalVisible$ = store.pipe(select(getEditModalVisible));
 
         this.sampleData$.subscribe(value => this.currentSampleData = value)
     }

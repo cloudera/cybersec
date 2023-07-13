@@ -9,11 +9,11 @@
   ~ either express or implied. Refer to the License for the specific permissions and
   ~ limitations governing your use of the file.
   -->
-
 <div class="pbp-container">
+  <label nz-checkbox class="diff-only-checkbox" [(ngModel)]="diffOnly">Differences only</label>
   <nz-timeline class="nz-timeline">
     <nz-timeline-item
-      *ngFor="let parser of parserResults; last as isLast"
+      *ngFor="let parser of parserResults"
       [nzDot]="dotTemplate"
     >
       <h4>
@@ -31,9 +31,19 @@
         <div nz-row class="output">
           <div nz-col nzSpan="2" class="label">Output</div>
           <div nz-col nzSpan="22">
-            <div nz-row *ngFor="let item of parser.output | keyvalue">
-              <div nz-col nzSpan="6" class="fieldName">{{ item.key }}:</div>
-              <div nz-col nzSpan="18">{{ item.value }}</div>
+            <div nz-row
+                 *ngFor="let item of parser.output | keyvalue"
+                 [ngClass]="{
+                   'fieldNew': diffOnly && item.value.status === ParserFieldStatus.NEW,
+                   'fieldDiff': diffOnly && item.value.status === ParserFieldStatus.DIFF,
+                   'fieldRemoved': diffOnly && item.value.status === ParserFieldStatus.REMOVED
+                 }">
+              <div nz-col nzSpan="6" nzFlex="2" class="fieldName">{{ item.key }}:</div>
+              <div nz-col nzFlex="6">{{ diffOnly ? item.value.currentValue : item.value }}</div>
+              <button nz-button nz-col nzFlex="1"
+                      class="diff-param-button"
+                      (click)="showDiff(item.value.previousValue, item.value.currentValue)"
+                      *ngIf="diffOnly && item.value.status === ParserFieldStatus.DIFF">Show diff</button>
             </div>
           </div>
         </div>
@@ -75,3 +85,5 @@
     </nz-result>
   </div>
 </div>
+
+<app-diff-popup></app-diff-popup>

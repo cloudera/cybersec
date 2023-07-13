@@ -123,6 +123,7 @@
     Add new sample
 </button>
 <app-sample-edit-popup
+        [modalVisible]="editSampleModalVisible$ | async"
         [sample]="selectedSample[1]"
         (sampleDataChange)="updateSample($event)">
 </app-sample-edit-popup>

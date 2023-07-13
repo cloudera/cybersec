@@ -36,9 +36,10 @@ import { LiveViewService } from './services/live-view.service';
 import { StackTraceComponent } from './stack-trace/stack-trace.component';
 import { NzTimelineModule } from 'ng-zorro-antd/timeline';
 import { NzResultModule } from 'ng-zorro-antd/result';
+import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
+import {NzIconModule} from "ng-zorro-antd/icon";
 import { SampleDataTextInputComponent } from './sample-data-form/sample-data-text-input/sample-data-text-input.component';
 import { SampleDataTextFolderInputComponent } from './sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.component';
-import {NzIconModule} from "ng-zorro-antd/icon";
 import {NzToolTipModule} from "ng-zorro-antd/tooltip";
 import {NzStepsModule} from "ng-zorro-antd/steps";
 import {NzTableModule} from "ng-zorro-antd/table";
@@ -48,6 +49,8 @@ import {
 import {NzCollapseModule} from "ng-zorro-antd/collapse";
 import { TextDiffViewComponent } from './text-diff-view/text-diff-view.component';
 import {MonacoEditorModule} from '@materia-ui/ngx-monaco-editor';
+import {DiffPopupComponent} from "./diff-popup/diff-popup.component";
+import {DiffPopupModule} from "./diff-popup/diff-popup.module";
 
 @NgModule({
   declarations: [
@@ -59,33 +62,36 @@ import {MonacoEditorModule} from '@materia-ui/ngx-monaco-editor';
     SampleDataTextInputComponent,
     SampleDataTextFolderInputComponent,
     TextDiffViewComponent,
+    DiffPopupComponent,
   ],
-    imports: [
-        NzModalModule,
-        CommonModule,
-        FormsModule,
-        StoreModule.forFeature('live-view', reducer),
-        EffectsModule.forFeature([LiveViewEffects]),
-        SampleDataTextFolderInputModule,
-        NzTabsModule,
-        NzFormModule,
-        NzButtonModule,
-        NzRadioModule,
-        NzInputModule,
-        NzSpinModule,
-        NzSwitchModule,
-        NzCardModule,
-        NzPopoverModule,
-        NzTimelineModule,
-        NzResultModule,
-        ReactiveFormsModule,
-        NzIconModule,
-        NzToolTipModule,
-        NzStepsModule,
-        NzTableModule,
-        NzCollapseModule,
-        MonacoEditorModule,
-    ],
+  imports: [
+    NzModalModule,
+    CommonModule,
+    FormsModule,
+    StoreModule.forFeature('live-view', reducer),
+    EffectsModule.forFeature([LiveViewEffects]),
+    SampleDataTextFolderInputModule,
+    DiffPopupModule,
+    NzTabsModule,
+    NzFormModule,
+    NzButtonModule,
+    NzRadioModule,
+    NzInputModule,
+    NzSpinModule,
+    NzSwitchModule,
+    NzCardModule,
+    NzPopoverModule,
+    NzTimelineModule,
+    NzResultModule,
+    NzCheckboxModule,
+    ReactiveFormsModule,
+    NzIconModule,
+    NzToolTipModule,
+    NzStepsModule,
+    NzTableModule,
+    NzCollapseModule,
+    MonacoEditorModule,
+  ],
   providers: [
     LiveViewService
   ],
