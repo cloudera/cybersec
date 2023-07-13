@@ -62,7 +62,7 @@ public class TestParser {
                 everyItem(
                         allOf(isA(EnrichmentEntry.class),
                                 hasProperty("ts", allOf(isA(long.class))),
-                                hasProperty("entries", hasKey("tq_id"))
+                                hasProperty("entries", hasKey("id"))
                         ))
                 )
         );

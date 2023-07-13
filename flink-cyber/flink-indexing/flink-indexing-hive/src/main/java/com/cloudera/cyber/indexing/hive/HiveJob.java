@@ -12,11 +12,11 @@
 
 package com.cloudera.cyber.indexing.hive;
 
-import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import com.cloudera.cyber.indexing.hive.tableapi.TableApiAbstractJob;
+import com.cloudera.cyber.indexing.hive.tableapi.TableApiJobFactory;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.common.restartstrategy.RestartStrategies;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -32,6 +32,15 @@ public abstract class HiveJob {
         FlinkUtils.setupEnv(env, params);
 
         DataStream<ScoredMessage> source = createSource(env, params);
+        if (params.get("flink.writer", "").equalsIgnoreCase("TableAPI")) {
+            try {
+                final String connectorName = params.get("flink.output-connector", "hive");
+                final TableApiAbstractJob job = TableApiJobFactory.getJobByConnectorName(connectorName, params, env, source);
+                return job.startJob();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
         source.addSink(new StreamingHiveSink(params)).name("Hive Streaming Indexer");
 
         return env;

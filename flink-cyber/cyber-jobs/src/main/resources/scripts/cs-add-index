@@ -25,7 +25,7 @@ done
 BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 # Populate necessary environment variables
-source $BIN_DIR/env.sh
+source $BIN_DIR/env_template.sh
 
 if [ "$#" -ne 1 ]; then
   echo "Usage: $0 pipeline_name " >&2
@@ -35,7 +35,7 @@ fi
 pipeline=$1
 index_dir=$pipeline/index
 
-mkdir -p $index_dir
+mkdir -p $index_dir/conf
 for FILE in $TEMPLATES_DIR/index/*; do
     sed -e s/PIPELINE/$pipeline/g $FILE > $index_dir/${FILE##*/}
 done

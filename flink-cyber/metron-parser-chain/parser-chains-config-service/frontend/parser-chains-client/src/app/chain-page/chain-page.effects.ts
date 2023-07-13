@@ -10,19 +10,19 @@
  * limitations governing your use of the file.
  */
 
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Action, Store } from '@ngrx/store';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap, withLatestFrom } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {Action, Store} from '@ngrx/store';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {Observable, of} from 'rxjs';
+import {catchError, map, switchMap, withLatestFrom} from 'rxjs/operators';
 
-import { ChainPageService } from '../services/chain-page.service';
+import {ChainPageService} from '../services/chain-page.service';
 import * as fromActions from './chain-page.actions';
-import { ChainDetailsModel } from './chain-page.models';
-import { getChainPageState } from './chain-page.reducers';
-import { denormalizeParserConfig, normalizeParserConfig } from './chain-page.utils';
-import { CustomFormConfig } from './components/custom-form/custom-form.component';
+import {ChainDetailsModel} from './chain-page.models';
+import {getChainPageState} from './chain-page.reducers';
+import {denormalizeParserConfig, normalizeParserConfig} from './chain-page.utils';
+import {CustomFormConfig} from './components/custom-form/custom-form.component';
 
 @Injectable()
 export class ChainPageEffects {
@@ -106,6 +106,24 @@ export class ChainPageEffects {
         catchError((error: { message: string }) => {
           this.messageService.create('error', error.message);
           return of(new fromActions.GetFormConfigsFailAction(error));
+        })
+      );
+    })
+  );
+
+  @Effect()
+  getIndexMappings$: Observable<Action> = this.actions$.pipe(
+    ofType(fromActions.GET_INDEX_MAPPINGS),
+    switchMap((action: fromActions.GetIndexMappingsAction) => {
+      return this.chainPageService.getIndexMappings(action.payload).pipe(
+        map((response:{path:string, result:Map<string, object>}) => {
+            return new fromActions.GetIndexMappingsSuccessAction({
+              path: response.path, result: response.result
+            });
+          }),
+        catchError((error: { message: string }) => {
+          this.messageService.create('error', error.message);
+          return of(new fromActions.GetIndexMappingsFailAction(error));
         })
       );
     })

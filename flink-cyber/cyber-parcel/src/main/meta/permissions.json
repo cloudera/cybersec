@@ -4,6 +4,11 @@
     "group": "cybersec",
     "permissions": "0755"
   },
+  "bin/env_template.sh": {
+    "user": "cybersec",
+    "group": "cybersec",
+    "permissions": "0755"
+  },
   "bin/cs-add-generator": {
     "user": "cybersec",
     "group": "cybersec",

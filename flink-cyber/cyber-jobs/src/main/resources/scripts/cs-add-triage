@@ -25,7 +25,7 @@ done
 BIN_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 # Populate necessary environment variables
-source $BIN_DIR/env.sh
+source $BIN_DIR/env_template.sh
 
 if [ "$#" -ne 1 ]; then
   echo "Usage: $0 pipeline_name " >&2

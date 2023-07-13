@@ -10,8 +10,8 @@
  * limitations governing your use of the file.
  */
 
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {FormControl, FormGroup} from '@angular/forms';
 
 export interface CustomFormConfig {
   name: string;
@@ -25,6 +25,7 @@ export interface CustomFormConfig {
   onChange?: (config: any) => {};
   required?: boolean;
   multipleValues?: boolean;
+  outputName?: boolean;
   description?: string;
   placeholder?: string;
   defaultValue?: string;
@@ -38,6 +39,8 @@ export interface CustomFormConfig {
 export class CustomFormComponent implements OnInit, OnChanges {
 
   @Input() config: CustomFormConfig[] = [];
+  @Input() selectedSource: string;
+  @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() valueChange = new EventEmitter<any>();
 
   formGroup: FormGroup;

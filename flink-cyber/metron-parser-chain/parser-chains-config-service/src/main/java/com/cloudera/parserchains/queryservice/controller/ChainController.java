@@ -16,6 +16,7 @@ import com.cloudera.parserchains.core.ChainLink;
 import com.cloudera.parserchains.core.InvalidParserException;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.queryservice.config.AppProperties;
+import com.cloudera.parserchains.queryservice.model.describe.IndexMappingDescriptor;
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestRequest;
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestResponse;
 import com.cloudera.parserchains.queryservice.model.exec.ParserResult;
@@ -24,6 +25,7 @@ import com.cloudera.parserchains.queryservice.model.summary.ParserChainSummary;
 import com.cloudera.parserchains.queryservice.service.ChainBuilderService;
 import com.cloudera.parserchains.queryservice.service.ChainExecutorService;
 import com.cloudera.parserchains.queryservice.service.ChainPersistenceService;
+import com.cloudera.parserchains.queryservice.service.IndexingService;
 import com.cloudera.parserchains.queryservice.service.ResultLogBuilder;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -32,14 +34,28 @@ import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.*;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_READ_URL;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_INDEXING;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_PARSER_TEST;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PARSER_CONFIG_BASE_URL;
 
 /**
  * The controller responsible for operations on parser chains.
@@ -62,6 +78,9 @@ public class ChainController {
 
     @Autowired
     private ChainExecutorService chainExecutorService;
+
+    @Autowired
+    IndexingService indexingService;
 
     @Autowired
     private AppProperties appProperties;
@@ -156,6 +175,30 @@ public class ChainController {
         }
     }
 
+    @ApiOperation(value = "Loads table mappings for the indexing job")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "The mapping file parsed successfully."),
+    })
+    @PostMapping(value = API_INDEXING)
+    ResponseEntity<Map<String, Object>> getMappingsFromPath(@RequestBody IndexMappingDescriptor body) {
+        final String indexPath = StringUtils.hasText(body.getFilePath())
+                ? body.getFilePath()
+                : appProperties.getIndexPath();
+        try {
+            final Object mappingDtoMap = indexingService.getMappingsFromPath(indexPath);
+            if (null == mappingDtoMap) {
+                return ResponseEntity.notFound().build();
+            } else {
+                Map<String, Object> result = new HashMap<>();
+                result.put("path", indexPath);
+                result.put("result", mappingDtoMap);
+                return ResponseEntity.ok(result);
+            }
+        } catch (IOException ioe) {
+            throw new RuntimeException("Unable to read mappings from the provided path");
+        }
+    }
+
     @ApiOperation(value = "Executes a parser chain to parse sample data.")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "The result of parsing the message."),
@@ -176,7 +219,8 @@ public class ChainController {
 
     /**
      * Parse sample text using a parser chain.
-     * @param schema Defines the parser chain that needs to be constructed.
+     *
+     * @param schema      Defines the parser chain that needs to be constructed.
      * @param textToParse The text to parse.
      * @return
      */
@@ -186,7 +230,7 @@ public class ChainController {
             ChainLink chain = chainBuilderService.build(schema);
             result = chainExecutorService.execute(chain, textToParse);
 
-        } catch(InvalidParserException e) {
+        } catch (InvalidParserException e) {
             log.info("The parser chain is invalid as constructed.", e);
             ResultLog log = ResultLogBuilder.error()
                     .parserId(e.getBadParser().getLabel())
