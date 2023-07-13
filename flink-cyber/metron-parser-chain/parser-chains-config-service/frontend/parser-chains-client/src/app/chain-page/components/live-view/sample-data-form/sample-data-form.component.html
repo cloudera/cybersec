@@ -10,49 +10,24 @@
   ~ limitations governing your use of the file.
   -->
 
-<form nz-form>
-  <nz-form-item>
-    <nz-form-label nzFor="sourceType">Type of sample data</nz-form-label>
-    <nz-form-control>
-      <nz-button-group>
-        <button nz-button nzType="default" nzType="primary">Text Input</button>
-        <button nz-button nzType="default" disabled>Kafka Stream</button>
-        <button nz-button nzType="default" disabled>HDFS File</button>
-      </nz-button-group>
-    </nz-form-control>
-  </nz-form-item>
-  <nz-form-item>
-    <label
-      class="upload-btn-label"
-      nz-button
-      nzType="default"
-      for="upload"
-      (input)="uploadToForm($event)"
-      ><i nz-icon nzType="upload" nzTheme="outline"></i>Upload From File
-    </label>
-    <input
-      class="upload-btn"
-      nz-input
-      id="upload"
-      name="upload"
-      type="file"
-      value="Upload from file"
-      (input)="uploadToForm($event)"
-    />
-  </nz-form-item>
-  <nz-form-item>
-    <nz-form-label nzFor="sourceType">Sample data</nz-form-label>
-    <nz-form-control>
-      <textarea
-        #sampleDataInput
-        data-qe-id="sample-input"
-        nz-input
-        placeholder="Add sample data here..."
-        [value]="sampleData.source"
-        [nzAutosize]="{ minRows: 10, maxRows: 44 }"
-        (input)="onApply(sampleDataInput.value)"
-        name="sampleDataInput"
-      ></textarea>
-    </nz-form-control>
-  </nz-form-item>
-</form>
+<nz-tabset>
+    <nz-tab nzTitle="Text Input">
+        <app-sample-data-text-input
+                [sampleData]="sampleData"
+                (sampleDataChange)="sampleDataChange.next($event)">
+        </app-sample-data-text-input>
+    </nz-tab>
+    <nz-tab nzTitle="Text Folder">
+        <app-sample-data-text-folder-input
+                [chainConfig]="chainConfig"
+                (sampleDataChange)="sampleDataChange.next($event)"
+                (sampleDataForceChange)="sampleDataForceChange.next($event)">
+        </app-sample-data-text-folder-input>
+    </nz-tab>
+    <nz-tab nzTitle="Kafka Stream" nzDisabled>
+        text
+    </nz-tab>
+    <nz-tab nzTitle="HDFS File" nzDisabled>
+        text
+    </nz-tab>
+</nz-tabset>
