@@ -10,33 +10,8 @@
  * limitations governing your use of the file.
  */
 
-export enum SampleDataType {
-    MANUAL = 'manual',
-    KAFKA = 'kafka',
-    HDFS = 'hdfs'
-}
+export class SampleFolderConsts {
 
-export enum SampleTestStatus {
-    UNKNOWN,
-    SUCCESS ,
-    FAIL
-}
+  static readonly SAMPLE_FOLDER_PATH_STORAGE_KEY = 'sampleFolder.path';
 
-export interface SampleDataInternalModel {
-    id: number
-    name: string;
-    description: string;
-    source: string;
-    expectedFailure: boolean;
-    expectedResult: string;
-}
-
-export interface SampleDataModel {
-    type: SampleDataType;
-    source: string;
-}
-
-export interface SampleDataRequestModel {
-    type: SampleDataType;
-    source: string[];
 }

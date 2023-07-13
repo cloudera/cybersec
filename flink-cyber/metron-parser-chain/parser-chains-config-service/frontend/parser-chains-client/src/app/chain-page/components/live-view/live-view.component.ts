@@ -32,7 +32,10 @@ import {
   getSampleData,
 } from './live-view.selectors';
 import { EntryParsingResultModel } from './models/live-view.model';
-import { SampleDataModel } from './models/sample-data.model';
+import {SampleDataInternalModel, SampleDataModel} from './models/sample-data.model';
+import {
+  ExecutionListTriggeredAction
+} from "./sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.actions";
 
 @Component({
   selector: 'app-live-view',
@@ -52,6 +55,7 @@ export class LiveViewComponent implements OnInit, AfterViewInit, OnDestroy {
   sampleData$: Observable<SampleDataModel>;
 
   sampleDataChange$ = new Subject<SampleDataModel>();
+  sampleDataForceChange$ = new Subject<SampleDataInternalModel[]>();
   featureToggleChange$ = new Subject<boolean>();
 
   selectedTabIndex = 0;
@@ -101,6 +105,15 @@ export class LiveViewComponent implements OnInit, AfterViewInit, OnDestroy {
       filter(sampleData => sampleData !== null),
     ).subscribe(sampleData => {
       this.store.dispatch(sampleDataInputChanged({ sampleData }));
+    });
+
+    combineLatest([
+        this.sampleDataForceChange$,
+      this.chainConfig$]).pipe(
+        takeUntil(this.unsubscribe$),
+        filter((sampleData, chainConfig) => sampleData !== null),
+    ).subscribe(([sampleData, chainConfig]) => {
+      this.store.dispatch(ExecutionListTriggeredAction({ sampleData, chainConfig }));
     });
   }
 
