@@ -10,32 +10,17 @@
  * limitations governing your use of the file.
  */
 
-import {HttpClient} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 
-import {ClusterModel, PipelineModel} from '../chain-list-page/chain.model';
-import {Observable} from "rxjs";
-import {select, Store} from "@ngrx/store";
-import {ChainListPageState, getCurrentPipeline} from "../chain-list-page/chain-list-page.reducers";
+import {ClusterModel} from '../chain-list-page/chain.model';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class ClusterService {
 
-    private readonly BASE_URL = '/api/v1/pipeline';
-
-    currentPipeline$: Observable<PipelineModel>;
-
-    constructor(
-        private http: HttpClient,
-        private store: Store<ChainListPageState>
-    ) {
-        this.currentPipeline$ = store.pipe(select(getCurrentPipeline))
-    }
-
-    public getCurrentCluster(): ClusterModel {
-        return {id: "clusterId1"};
-    }
+  public getCurrentCluster(): ClusterModel {
+    return null;
+  }
 
 }
