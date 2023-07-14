@@ -75,7 +75,7 @@ public class XPathParser implements Parser {
     @Configurable(key="xpath",
             multipleValues = true)
     public XPathParser expression(
-            @Parameter(key="field", label="Field Name", description="The field to create or modify.") String fieldName,
+            @Parameter(key="field", label="Field Name", description="The field to create or modify.", isOutputName = true) String fieldName,
             @Parameter(key="expr", label="XPath", description="The XPath expression.") String expression) {
         if(StringUtils.isNoneBlank(fieldName, expression)) {
             FieldName field = FieldName.of(fieldName);

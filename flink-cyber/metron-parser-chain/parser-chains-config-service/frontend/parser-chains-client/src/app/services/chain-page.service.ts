@@ -11,10 +11,10 @@
  */
 
 import {HttpClient, HttpParams} from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject} from 'rxjs';
 
-import { ChainDetailsModel } from '../chain-page/chain-page.models';
+import {ChainDetailsModel} from '../chain-page/chain-page.models';
 import {ClusterModel, PipelineModel} from "../chain-list-page/chain.model";
 import {
     getFinalBaseUrl,
@@ -73,6 +73,15 @@ export class ChainPageService {
       let httpParams: HttpParams = getHttpParams(null, cluster);
 
       return this.http.get(url + `parser-form-configuration`,{params: httpParams});
+    }
+
+    public getIndexMappings(payload?: { filePath: string}, cluster: ClusterModel) {
+      let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+
+      let httpParams: HttpParams = getHttpParams(null, cluster);
+
+      let finalPayload = payload ? payload : {}
+      return this.http.post(url + `indexing`, finalPayload,{params: httpParams});
     }
 
     public createChainCollapseArray(size: number) {

@@ -12,17 +12,25 @@
 
 package com.cloudera.cyber;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.avro.util.Utf8;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.common.typeinfo.Types;
+import org.apache.flink.types.Row;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.cloudera.cyber.AvroTypes.toListOf;
 import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
@@ -55,6 +63,31 @@ public class Message extends SpecificRecordBase implements SpecificRecord, Ident
             .requiredString("source")
             .name("dataQualityMessages").type().optional().type(Schema.createArray(DataQualityMessage.SCHEMA$))
             .endRecord();
+
+    public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
+            new String[]{"id", "ts", "originalSource", "message", "threats", "extensions", "source", "dataQualityMessages"},
+            Types.STRING, Types.LONG, SignedSourceKey.FLINK_TYPE_INFO,Types.STRING,
+            Types.MAP(Types.STRING, Types.OBJECT_ARRAY(ThreatIntelligence.FLINK_TYPE_INFO)),
+            Types.MAP(Types.STRING, Types.STRING), Types.STRING, Types.OBJECT_ARRAY(DataQualityMessage.FLINK_TYPE_INFO));
+
+    public Row toRow() {
+        return Row.of(id,
+                ts,
+                originalSource.toRow(),
+                message,
+                threats == null ? null : threats.entrySet().stream()
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                e -> e.getValue().stream()
+                                        .map(ThreatIntelligence::toRow)
+                                        .toArray(Row[]::new))),
+                extensions,
+                source,
+                dataQualityMessages == null ? null : dataQualityMessages.stream()
+                        .map(DataQualityMessage::toRow)
+                        .toArray(Row[]::new)
+        );
+    }
 
     public static Schema getClassSchema() {
         return SCHEMA$;

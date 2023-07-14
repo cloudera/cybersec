@@ -1,0 +1,25 @@
+.container-diff {
+  width: 100%;
+}
+
+.editor-container {
+  border: 1px solid #ddd;
+}
+.input-title {
+  text-align: center;
+  color: #585858;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 12px;
+  border: 1px solid #ccc;
+  background-color: #ecebeb;
+}
+.input-title label {
+  margin-top: 6px;
+}
+
+.editor{
+  resize: vertical;
+  overflow: auto;
+  height: 500px;
+}

@@ -10,15 +10,15 @@
  * limitations governing your use of the file.
  */
 
-import { createSelector } from '@ngrx/store';
+import {createSelector} from '@ngrx/store';
 
 import * as addParserActions from '../chain-add-parser-page/chain-add-parser-page.actions';
-import { ChainModel } from '../chain-list-page/chain.model';
+import {ChainModel} from '../chain-list-page/chain.model';
 
 import * as chainPageActions from './chain-page.actions';
-import { ParserChainModel, ParserModel, RouteModel } from './chain-page.models';
-import { denormalizeParserConfig } from './chain-page.utils';
-import { CustomFormConfig } from './components/custom-form/custom-form.component';
+import {ParserChainModel, ParserModel, RouteModel} from './chain-page.models';
+import {denormalizeParserConfig} from './chain-page.utils';
+import {CustomFormConfig} from './components/custom-form/custom-form.component';
 import * as chainListPageActions from "../chain-list-page/chain-list-page.actions";
 
 export interface ChainPageState {
@@ -32,6 +32,7 @@ export interface ChainPageState {
   dirtyParsers: string[];
   dirtyChains: string[];
   path: string[];
+  indexMappings: { path: string, result: object };
 }
 
 export const initialState: ChainPageState = {
@@ -45,6 +46,7 @@ export const initialState: ChainPageState = {
   dirtyParsers: [],
   dirtyChains: [],
   path: [],
+  indexMappings: { path: '', result: {} },
 };
 
 export const uniqueAdd = (haystack: string[], needle: string): string[] => {
@@ -53,7 +55,7 @@ export const uniqueAdd = (haystack: string[], needle: string): string[] => {
 
 export function reducer(
   state: ChainPageState = initialState,
-  action: chainPageActions.ChainDetailsAction | addParserActions.ParserAction | chainListPageActions.ChainListAction
+  action: chainPageActions.ChainDetailsAction | addParserActions.ParserAction | chainListPageActions.ChainListAction | chainPageActions.IndexMappingAction
 ): ChainPageState {
   switch (action.type) {
     case chainListPageActions.PIPELINE_CHANGED: {
@@ -166,6 +168,13 @@ export function reducer(
       return {
         ...state,
         formConfigs: action.payload.formConfigs
+      };
+    }
+    case chainPageActions.GET_INDEX_MAPPINGS_SUCCESS: {
+      const { path, result } = action.payload;
+      return {
+        ...state,
+        indexMappings: {path, result}
       };
     }
     case chainPageActions.SAVE_PARSER_CONFIG: {
@@ -283,6 +292,13 @@ export const getChains = createSelector(
   getChainPageState,
   (state: ChainPageState): { [key: string]: ParserChainModel } => {
     return state.chains;
+  }
+);
+
+export const getIndexMappings = createSelector(
+  getChainPageState,
+  (state: ChainPageState) => {
+    return state.indexMappings;
   }
 );
 
