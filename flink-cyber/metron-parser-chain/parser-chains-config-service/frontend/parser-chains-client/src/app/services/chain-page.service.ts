@@ -16,10 +16,7 @@ import {BehaviorSubject} from 'rxjs';
 
 import {ChainDetailsModel} from '../chain-page/chain-page.models';
 import {ClusterModel, PipelineModel} from "../chain-list-page/chain.model";
-import {
-    getFinalBaseUrl,
-    getHttpParams
-} from "../chain-list-page/chain-list-page.utils";
+import {getFinalBaseUrl, getHttpParams} from "../chain-list-page/chain-list-page.utils";
 
 @Injectable({
     providedIn: 'root'
@@ -75,7 +72,7 @@ export class ChainPageService {
       return this.http.get(url + `parser-form-configuration`,{params: httpParams});
     }
 
-    public getIndexMappings(payload?: { filePath: string}, cluster: ClusterModel) {
+    public getIndexMappings(cluster: ClusterModel, payload?: { filePath: string}) {
       let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
 
       let httpParams: HttpParams = getHttpParams(null, cluster);

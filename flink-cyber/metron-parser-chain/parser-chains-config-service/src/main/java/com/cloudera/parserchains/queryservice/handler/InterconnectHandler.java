@@ -26,6 +26,8 @@ public class InterconnectHandler {
         return chainHandler.update(value);
       case CHAIN_DELETE:
         return chainHandler.delete(value);
+      case CHAIN_INDEXING_GET:
+        return chainHandler.getMappingsFromPath(value);
       case CHAIN_TEST:
         return chainHandler.test(value);
 

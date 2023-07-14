@@ -121,7 +121,7 @@ export class ChainPageEffects {
   getIndexMappings$: Observable<Action> = this.actions$.pipe(
     ofType(fromActions.GET_INDEX_MAPPINGS),
     switchMap((action: fromActions.GetIndexMappingsAction) => {
-      return this.chainPageService.getIndexMappings(action.payload).pipe(
+      return this.chainPageService.getIndexMappings(this.clusterService.getCurrentCluster(), action.payload).pipe(
         map((response:{path:string, result:Map<string, object>}) => {
             return new fromActions.GetIndexMappingsSuccessAction({
               path: response.path, result: response.result

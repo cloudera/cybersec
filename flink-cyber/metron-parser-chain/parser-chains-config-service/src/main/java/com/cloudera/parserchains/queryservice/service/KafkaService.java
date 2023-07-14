@@ -11,14 +11,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -58,7 +54,7 @@ public class KafkaService {
         messageType.name(), jsonBody);
     RequestReplyFuture<String, String, String> replyFuture = kafkaTemplate.sendAndReceive(record);
     try {
-      ConsumerRecord<String, String> consumerRecord = replyFuture.get(30, TimeUnit.SECONDS);
+      ConsumerRecord<String, String> consumerRecord = replyFuture.get(15, TimeUnit.SECONDS);
       if (consumerRecord == null) {
         throw new KafkaException("Got no reply");
       }
@@ -83,20 +79,6 @@ public class KafkaService {
     final HttpStatus status = HttpStatus.valueOf(replyBody.get(STATUS_PARAM).asText());
 
     return new ResponseEntity<>(body, headers, status);
-  }
-
-  private static HttpHeaders toHttpHeaders(LinkedHashMap<String, String> linkedHashMap) {
-    Map<String, List<String>> multiValueMap = linkedHashMap.entrySet().stream()
-        .collect(Collectors.groupingBy(Entry::getKey,
-            Collectors.collectingAndThen(Collectors.toList(),
-                entryList -> entryList.stream()
-                    .map(Entry::getValue)
-                    .collect(Collectors.toList()))));
-
-    final HttpHeaders headers = new HttpHeaders();
-    headers.putAll(multiValueMap);
-
-    return headers;
   }
 
 }
