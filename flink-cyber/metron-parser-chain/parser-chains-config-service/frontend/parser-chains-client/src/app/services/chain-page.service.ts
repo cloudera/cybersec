@@ -27,7 +27,8 @@ import {
 export class ChainPageService {
     private parserChainCollapseState: BehaviorSubject<boolean[]>;
     private parserChainSize: number;
-    private readonly BASE_URL = '/api/v1/parserconfig/';
+    private readonly URL_PREFIX = '/api/v1';
+    private readonly BASE_URL = '/parserconfig/';
     public collapseAll = new BehaviorSubject(false);
 
     constructor(
@@ -35,7 +36,7 @@ export class ChainPageService {
     ) {}
 
     public getChain(id: string, pipeline: PipelineModel = null, cluster: ClusterModel) {
-      let url = getFinalBaseUrl(this.BASE_URL, cluster);
+      let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
 
       let httpParams: HttpParams = getHttpParams(pipeline, cluster);
 
@@ -43,7 +44,7 @@ export class ChainPageService {
     }
 
     public getParsers(id: string, pipeline: PipelineModel = null, cluster: ClusterModel) {
-      let url = getFinalBaseUrl(this.BASE_URL, cluster);
+      let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
 
       let httpParams: HttpParams = getHttpParams(pipeline, cluster);
 
@@ -51,7 +52,7 @@ export class ChainPageService {
     }
 
     public saveParserConfig(chainId: string, config: ChainDetailsModel, pipeline: PipelineModel = null, cluster: ClusterModel) {
-      let url = getFinalBaseUrl(this.BASE_URL, cluster);
+      let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
 
       let httpParams: HttpParams = getHttpParams(pipeline, cluster);
 
@@ -59,17 +60,17 @@ export class ChainPageService {
     }
 
     public getFormConfig(type: string, cluster: ClusterModel) {
-      let url = getFinalBaseUrl(this.BASE_URL, cluster);
+      let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
 
-      let httpParams: HttpParams = getHttpParams(cluster);
+      let httpParams: HttpParams = getHttpParams(null, cluster);
 
       return this.http.get(url + `parser-form-configuration/${type}`,{params: httpParams});
     }
 
     public getFormConfigs(cluster: ClusterModel) {
-      let url = getFinalBaseUrl(this.BASE_URL, cluster);
+      let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
 
-      let httpParams: HttpParams = getHttpParams(cluster);
+      let httpParams: HttpParams = getHttpParams(null, cluster);
 
       return this.http.get(url + `parser-form-configuration`,{params: httpParams});
     }

@@ -17,6 +17,8 @@ import com.cloudera.parserchains.core.catalog.ClassIndexParserCatalog;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.cloudera.parserchains.queryservice.model.exec.ParserResult;
+import com.cloudera.parserchains.queryservice.service.impl.DefaultChainBuilderService;
+import com.cloudera.parserchains.queryservice.service.impl.DefaultChainExecutorService;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;

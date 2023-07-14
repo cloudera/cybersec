@@ -14,7 +14,7 @@ export interface PipelineModel {
   name: string;
 }
 export interface ClusterModel {
-  name: string;
+  id: string;
 }
 export interface ChainModel {
   id: string;

@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-package com.cloudera.parserchains.queryservice.controller;
+package com.cloudera.parserchains.queryservice.controller.impl;
 
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.core.utils.JSONUtils;
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.*;
-import static com.cloudera.parserchains.queryservice.controller.ChainController.MAX_SAMPLES_PER_TEST;
+import static com.cloudera.parserchains.queryservice.controller.impl.DefaultChainController.MAX_SAMPLES_PER_TEST;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -51,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ChainControllerTest {
+public class DefaultChainControllerTest {
 
     @Autowired
     private MockMvc mvc;

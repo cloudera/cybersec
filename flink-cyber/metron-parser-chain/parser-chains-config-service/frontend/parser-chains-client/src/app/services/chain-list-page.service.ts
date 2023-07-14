@@ -24,14 +24,15 @@ import {
 })
 export class ChainListPageService {
 
-    private readonly BASE_URL = '/api/v1/parserconfig/';
+    private readonly URL_PREFIX = '/api/v1';
+    private readonly BASE_URL = '/parserconfig/';
 
     constructor(
       private http: HttpClient
     ) {}
 
     public createChain(chain: ChainOperationalModel, pipeline: PipelineModel = null, cluster: ClusterModel) {
-        let url = getFinalBaseUrl(this.BASE_URL, cluster);
+        let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
 
         let httpParams: HttpParams = getHttpParams(pipeline, cluster);
 
@@ -39,7 +40,7 @@ export class ChainListPageService {
     }
 
     public getChains(pipeline: PipelineModel = null, cluster: ClusterModel, params = null) {
-        let url = getFinalBaseUrl(this.BASE_URL, cluster);
+        let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
 
         let httpParams: HttpParams = getHttpParams(pipeline, cluster);
 
@@ -47,7 +48,7 @@ export class ChainListPageService {
     }
 
     public deleteChain(chainId: string, pipeline: PipelineModel = null, cluster: ClusterModel) {
-        let url = getFinalBaseUrl(this.BASE_URL, cluster);
+        let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
 
         let httpParams: HttpParams = getHttpParams(pipeline, cluster);
 
@@ -55,9 +56,9 @@ export class ChainListPageService {
     }
 
     public getPipelines(cluster: ClusterModel) {
-        let url = getFinalBaseUrl(this.BASE_URL, cluster);
+        let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
 
-        let httpParams: HttpParams = getHttpParams(cluster);
+        let httpParams: HttpParams = getHttpParams(null, cluster);
 
         return this.http.delete(url + 'pipeline', {params: httpParams});
     }

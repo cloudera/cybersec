@@ -25,7 +25,8 @@ import {getFinalBaseUrl, getHttpParams} from "../chain-list-page/chain-list-page
 })
 export class PipelineService {
 
-    private readonly BASE_URL = '/api/v1/pipeline';
+    private readonly URL_PREFIX = '/api/v1';
+    private readonly BASE_URL = '/pipeline';
 
     currentPipeline$: Observable<PipelineModel>;
 
@@ -37,9 +38,9 @@ export class PipelineService {
     }
 
     public getPipelines(cluster: ClusterModel) {
-        let url = getFinalBaseUrl(this.BASE_URL, cluster);
+        let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
 
-        let httpParams: HttpParams = getHttpParams(cluster);
+        let httpParams: HttpParams = getHttpParams(null, cluster);
 
         return this.http.get<string[]>(url, {params: httpParams})
             .pipe(map(strArr => strArr.map(str => {

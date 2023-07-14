@@ -10,31 +10,38 @@
  * limitations governing your use of the file.
  */
 
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { EntryParsingResultModel, LiveViewRequestModel } from '../models/live-view.model';
 import { SampleDataModel, SampleDataRequestModel } from '../models/sample-data.model';
+import {getFinalBaseUrl, getHttpParams} from "../../../../chain-list-page/chain-list-page.utils";
+import {ClusterModel} from "../../../../chain-list-page/chain.model";
 
 @Injectable({
   providedIn: 'root'
 })
 export class LiveViewService {
 
-  readonly SAMPLE_PARSER_URL = '/api/v1/parserconfig/tests';
+  private readonly URL_PREFIX = '/api/v1';
+  private readonly BASE_URL = '/parserconfig/tests';
 
   constructor(
     private http: HttpClient,
   ) { }
 
-  execute(sampleData: SampleDataModel, chainConfig: {}): Observable<{ results: EntryParsingResultModel[]}> {
+  execute(sampleData: SampleDataModel, chainConfig: {}, cluster: ClusterModel): Observable<{ results: EntryParsingResultModel[]}> {
+    let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+
+    let httpParams: HttpParams = getHttpParams(null, cluster);
+
     const sampleDataRequest: SampleDataRequestModel = {
       ...sampleData,
       source: sampleData.source.trimEnd().split('\n')
     };
     return this.http.post<{ results: EntryParsingResultModel[]}>(
-      this.SAMPLE_PARSER_URL,
-      { sampleData: sampleDataRequest, chainConfig } as LiveViewRequestModel);
+      url,
+      { sampleData: sampleDataRequest, chainConfig } as LiveViewRequestModel, {params: httpParams});
   }
 }

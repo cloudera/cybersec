@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.parserchains.queryservice.service;
+package com.cloudera.parserchains.queryservice.service.impl;
 
 import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
@@ -29,6 +29,7 @@ import com.cloudera.parserchains.queryservice.model.describe.ConfigParamDescript
 import com.cloudera.parserchains.queryservice.model.describe.ParserDescriptor;
 import com.cloudera.parserchains.queryservice.model.summary.ObjectMapper;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummary;
+import com.cloudera.parserchains.queryservice.service.ParserDiscoveryService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
