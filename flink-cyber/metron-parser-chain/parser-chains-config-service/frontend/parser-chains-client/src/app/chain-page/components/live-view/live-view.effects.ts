@@ -30,6 +30,7 @@ import {
 } from './live-view.actions';
 import { LiveViewConsts } from './live-view.consts';
 import { LiveViewService } from './services/live-view.service';
+import {ClusterService} from "../../../services/cluster.service";
 
 @Injectable()
 export class LiveViewEffects {
@@ -37,6 +38,7 @@ export class LiveViewEffects {
     private actions$: Actions<LiveViewActionsType>,
     private liveViewService: LiveViewService,
     private messageService: NzMessageService,
+    private clusterService: ClusterService
   ) {}
 
   @Effect()
@@ -45,7 +47,7 @@ export class LiveViewEffects {
       executionTriggered.type,
     ),
     switchMap(({ sampleData, chainConfig }) => {
-      return this.liveViewService.execute(sampleData, chainConfig).pipe(
+      return this.liveViewService.execute(sampleData, chainConfig, this.clusterService.getCurrentCluster()).pipe(
         map(liveViewResult => liveViewRefreshedSuccessfully({ liveViewResult })),
         catchError(( error: { message: string }) => {
           this.messageService.create('error', error.message);

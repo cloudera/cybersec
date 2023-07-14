@@ -69,6 +69,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   }
 
   get parsers() {
+    console.log("parsers")
     if (this.parserToBeInvestigated.length) {
       return this.parserToBeInvestigated;
     } else {

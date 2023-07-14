@@ -10,13 +10,15 @@
  * limitations governing your use of the file.
  */
 
-package com.cloudera.parserchains.queryservice.service;
+package com.cloudera.parserchains.queryservice.service.impl;
 
 import com.cloudera.parserchains.core.ChainLink;
 import com.cloudera.parserchains.core.ChainRunner;
 import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.queryservice.model.exec.ParserResult;
 import com.cloudera.parserchains.queryservice.model.exec.ResultLog;
+import com.cloudera.parserchains.queryservice.service.ChainExecutorService;
+import com.cloudera.parserchains.queryservice.service.ResultLogBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

@@ -57,7 +57,6 @@ export function reducer(
 ): ChainPageState {
   switch (action.type) {
     case chainListPageActions.PIPELINE_CHANGED: {
-      console.log('chainPage reducer PIPELINE_CHANGED')
       return initialState
     }
     case chainPageActions.LOAD_CHAIN_DETAILS_SUCCESS: {

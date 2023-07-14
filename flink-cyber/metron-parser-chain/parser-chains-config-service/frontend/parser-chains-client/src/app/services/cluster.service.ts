@@ -35,7 +35,7 @@ export class ClusterService {
     }
 
     public getCurrentCluster(): ClusterModel {
-        return null;
+        return {id: "clusterId1"};
     }
 
 }

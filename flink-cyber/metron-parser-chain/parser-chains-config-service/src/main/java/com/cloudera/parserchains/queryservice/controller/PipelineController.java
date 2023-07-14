@@ -12,35 +12,18 @@
 
 package com.cloudera.parserchains.queryservice.controller;
 
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PIPELINE_BASE_URL;
-import com.cloudera.parserchains.queryservice.model.enums.KafkaMessageType;
-import com.cloudera.parserchains.queryservice.service.KafkaService;
-import com.cloudera.parserchains.queryservice.service.PipelineService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Set;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.core.fs.Path;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The controller responsible for operations on parser chains.
+ * The controller responsible for operations on pipelines.
  */
-@Slf4j
-@RestController
-@RequestMapping(value = PIPELINE_BASE_URL)
-@RequiredArgsConstructor
-public class PipelineController {
-
-  private final PipelineService pipelineService;
-  private final KafkaService kafkaService;
+public interface PipelineController {
 
   @ApiOperation(value = "Finds and returns all available pipelines.")
   @ApiResponses(value = {
@@ -48,23 +31,6 @@ public class PipelineController {
       @ApiResponse(code = 404, message = "No valid pipelines found.")
   })
   @GetMapping
-  ResponseEntity<Set<String>> findAll() throws IOException {
-    Map<String, Path> pipelineMap = pipelineService.findAll();
-    if (pipelineMap == null || pipelineMap.isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
-    return ResponseEntity.ok(pipelineMap.keySet());
-  }
+  ResponseEntity<Set<String>> findAll(String clusterId) throws IOException;
 
-  //TODO remove once testing is done
-  @GetMapping("/test/parser")
-  public String testParser() {
-    return kafkaService.sendWithReply("clusterId1", KafkaMessageType.PARSER, "test-parser-value");
-  }
-
-  //TODO remove once testing is done
-  @GetMapping("/test/cluster")
-  public String testCluster() {
-    return kafkaService.sendWithReply("clusterId1", KafkaMessageType.CLUSTER, "test-cluster-value");
-  }
 }
