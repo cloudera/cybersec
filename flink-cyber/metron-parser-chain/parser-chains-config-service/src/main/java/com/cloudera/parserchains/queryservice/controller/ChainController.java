@@ -13,8 +13,10 @@
 package com.cloudera.parserchains.queryservice.controller;
 
 import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_INDEXING;
 import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_PARSER_TEST;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
+import com.cloudera.parserchains.queryservice.model.describe.IndexMappingDescriptor;
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestRequest;
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestResponse;
 import com.cloudera.parserchains.queryservice.model.summary.ParserChainSummary;
@@ -24,6 +26,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -107,6 +110,18 @@ public interface ChainController {
       @RequestParam(name = "clusterId", required = false) String clusterId,
       @ApiParam(name = "id", value = "The ID of the parser chain to delete.", required = true)
       @PathVariable String id) throws IOException;
+
+  @ApiOperation(value = "Loads table mappings for the indexing job")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "The mapping file parsed successfully."),
+  })
+  @PostMapping(value = API_INDEXING)
+  ResponseEntity<Map<String, Object>> getMappingsFromPath(
+      @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+      @RequestParam(name = "pipelineName", required = false) String pipelineName,
+      @ApiParam(name = "clusterId", value = "The ID of the cluster to execute request in.")
+      @RequestParam(name = "clusterId", required = false) String clusterId,
+      @RequestBody IndexMappingDescriptor body) throws IOException;
 
   @ApiOperation(value = "Executes a parser chain to parse sample data.")
   @ApiResponses(value = {

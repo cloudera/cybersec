@@ -19,6 +19,7 @@ import com.cloudera.parserchains.core.InvalidParserException;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.queryservice.config.AppProperties;
 import com.cloudera.parserchains.queryservice.controller.ChainController;
+import com.cloudera.parserchains.queryservice.model.describe.IndexMappingDescriptor;
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestRequest;
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestResponse;
 import com.cloudera.parserchains.queryservice.model.exec.ParserResult;
@@ -27,13 +28,17 @@ import com.cloudera.parserchains.queryservice.model.summary.ParserChainSummary;
 import com.cloudera.parserchains.queryservice.service.ChainBuilderService;
 import com.cloudera.parserchains.queryservice.service.ChainExecutorService;
 import com.cloudera.parserchains.queryservice.service.ChainPersistenceService;
+import com.cloudera.parserchains.queryservice.service.IndexingService;
 import com.cloudera.parserchains.queryservice.service.PipelineService;
 import com.cloudera.parserchains.queryservice.service.ResultLogBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.core.fs.Path;
@@ -60,6 +65,8 @@ public class DefaultChainController implements ChainController {
   private final ChainExecutorService chainExecutorService;
 
   private final PipelineService pipelineService;
+
+  private final IndexingService indexingService;
 
   private final AppProperties appProperties;
 
@@ -121,6 +128,25 @@ public class DefaultChainController implements ChainController {
     }
   }
 
+  public ResponseEntity<Map<String, Object>> getMappingsFromPath(String pipelineName, String clusterId, IndexMappingDescriptor body)
+      throws IOException {
+    final String indexPath = getIndexingPath(body.getFilePath(), pipelineName);
+
+    try {
+      final Object mappingDtoMap = indexingService.getMappingsFromPath(indexPath);
+      if (null == mappingDtoMap) {
+        return ResponseEntity.notFound().build();
+      } else {
+        Map<String, Object> result = new HashMap<>();
+        result.put("path", indexPath);
+        result.put("result", mappingDtoMap);
+        return ResponseEntity.ok(result);
+      }
+    } catch (IOException ioe) {
+      throw new RuntimeException("Unable to read mappings from the provided path");
+    }
+  }
+
   public ResponseEntity<ChainTestResponse> test(String clusterId, ChainTestRequest testRun) {
     ParserChainSchema chain = testRun.getParserChainSchema();
     ChainTestResponse results = new ChainTestResponse();
@@ -158,13 +184,24 @@ public class DefaultChainController implements ChainController {
   }
 
   private String getConfigPath(String pipelineName) throws IOException {
+    return getPipelinePath(pipelineName, appProperties::getConfigPath);
+  }
+
+  private String getIndexingPath(String filePath, String pipelineName) throws IOException {
+    if (StringUtils.hasText(filePath)){
+      return filePath;
+    }
+    return getPipelinePath(pipelineName, appProperties::getIndexPath);
+  }
+
+  private String getPipelinePath(String pipelineName, Supplier<String> defaultPathSupplier) throws IOException{
     if (!StringUtils.hasText(pipelineName)) {
-      return appProperties.getConfigPath();
+      return defaultPathSupplier.get();
     }
 
     return Optional.ofNullable(pipelineService.findAll())
         .map(pipelineMap -> pipelineMap.get(pipelineName))
         .map(Path::getPath)
-        .orElseGet(appProperties::getConfigPath);
+        .orElseGet(defaultPathSupplier);
   }
 }

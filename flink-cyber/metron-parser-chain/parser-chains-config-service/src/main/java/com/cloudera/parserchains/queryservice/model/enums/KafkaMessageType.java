@@ -9,6 +9,7 @@ public enum KafkaMessageType {
   CHAIN_READ,
   CHAIN_UPDATE,
   CHAIN_DELETE,
+  CHAIN_INDEXING_GET,
   CHAIN_TEST,
 
   //ParserController messages

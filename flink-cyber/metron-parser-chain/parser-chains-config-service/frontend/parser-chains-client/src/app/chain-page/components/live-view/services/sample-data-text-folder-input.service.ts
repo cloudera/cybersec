@@ -18,6 +18,7 @@ import {EntryParsingResultModel} from '../models/live-view.model';
 import {SampleDataInternalModel, SampleDataModel, SampleDataType} from '../models/sample-data.model';
 import {LiveViewService} from "./live-view.service";
 import {concatAll, map, reduce} from "rxjs/operators";
+import {ClusterService} from "../../../../services/cluster.service";
 
 @Injectable({
     providedIn: 'root'
@@ -29,6 +30,7 @@ export class SampleDataTextFolderInputService {
     constructor(
         private http: HttpClient,
         private liveViewService: LiveViewService,
+        private clusterService: ClusterService,
     ) {
     }
 
@@ -44,7 +46,8 @@ export class SampleDataTextFolderInputService {
                 source: value.source,
                 type: SampleDataType.MANUAL
             }
-            let postObservable = this.liveViewService.execute(sample, chainConfig)
+            let postObservable =
+                this.liveViewService.execute(sample, chainConfig, this.clusterService.getCurrentCluster())
                 .pipe(map(res => {
                     return {
                         id: value.id,
