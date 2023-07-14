@@ -10,19 +10,19 @@
  * limitations governing your use of the file.
  */
 
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { select, Store } from '@ngrx/store';
-import { NzModalService } from 'ng-zorro-antd/modal';
-import { Observable, Observer, Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
+import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {ActivatedRoute, NavigationStart, Router} from '@angular/router';
+import {select, Store} from '@ngrx/store';
+import {NzModalService} from 'ng-zorro-antd/modal';
+import {Observable, Observer, Subscription} from 'rxjs';
+import {take} from 'rxjs/operators';
 
-import { DeactivatePreventer } from '../misc/deactivate-preventer.interface';
+import {DeactivatePreventer} from '../misc/deactivate-preventer.interface';
 
 import * as fromActions from './chain-page.actions';
 
-import { ChainDetailsModel, ParserChainModel } from './chain-page.models';
+import {ChainDetailsModel, ParserChainModel} from './chain-page.models';
 import {
   ChainPageState,
   getChain,
@@ -31,7 +31,7 @@ import {
   getParserToBeInvestigated,
   getPathWithChains
 } from './chain-page.reducers';
-import { getFailedParser } from './components/live-view/live-view.reducers';
+import {getFailedParser} from './components/live-view/live-view.reducers';
 
 @Component({
   selector: 'app-chain-page',
@@ -55,6 +55,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   @ViewChild('chainNameInput', { static: false }) chainNameInput: ElementRef;
   editChainNameForm: FormGroup;
   failedParser$: Observable<string>;
+  indexingFieldMap: Map<string,Map<string, boolean>>;
 
   constructor(
     private store: Store<ChainPageState>,
@@ -252,5 +253,9 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
     if (this.getChainSubscription) {
       this.getChainSubscription.unsubscribe();
     }
+  }
+
+  updateAllFields($event: Map<string,Map<string, boolean>>) {
+    this.indexingFieldMap = $event
   }
 }

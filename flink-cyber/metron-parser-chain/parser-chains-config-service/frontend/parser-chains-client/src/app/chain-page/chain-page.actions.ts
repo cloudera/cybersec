@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-import { Action } from '@ngrx/store';
+import {Action} from '@ngrx/store';
 
 import {
   ParserChainModel,
@@ -20,7 +20,7 @@ import {
   PartialRouteModel,
   RouteModel
 } from './chain-page.models';
-import { CustomFormConfig } from './components/custom-form/custom-form.component';
+import {CustomFormConfig} from './components/custom-form/custom-form.component';
 
 export const LOAD_CHAIN_DETAILS = '[Chain Details] load start';
 export const LOAD_CHAIN_DETAILS_SUCCESS = '[Chain Details] load success';
@@ -39,6 +39,9 @@ export const GET_FORM_CONFIG_FAIL = '[Chain Details] get form config fail';
 export const GET_FORM_CONFIGS = '[Chain Details] get form configs start';
 export const GET_FORM_CONFIGS_SUCCESS = '[Chain Details] get form configs success';
 export const GET_FORM_CONFIGS_FAIL = '[Chain Details] get form configs fail';
+export const GET_INDEX_MAPPINGS = '[Index Mappings] get index mappings start';
+export const GET_INDEX_MAPPINGS_SUCCESS = '[Index Mappings] get index mappings success';
+export const GET_INDEX_MAPPINGS_FAIL = '[Index Mappings] get index mappings fail';
 export const ADD_ROUTE = '[Chain Details] add route';
 export const UPDATE_ROUTE = '[Chain Details] update route';
 export const REMOVE_ROUTE = '[Chain Details] remove route';
@@ -139,6 +142,21 @@ export class GetFormConfigsFailAction implements Action {
   constructor(public error: { message: string }) {}
 }
 
+export class GetIndexMappingsAction implements Action {
+  readonly type = GET_INDEX_MAPPINGS;
+  constructor(public payload?: { filePath: string }) {}
+}
+
+export class GetIndexMappingsSuccessAction implements Action {
+  readonly type = GET_INDEX_MAPPINGS_SUCCESS;
+  constructor(public payload: { path: string, result: Map<string, object> }) {}
+}
+
+export class GetIndexMappingsFailAction implements Action {
+  readonly type = GET_INDEX_MAPPINGS_FAIL;
+  constructor(public error: { message: string }) {}
+}
+
 export class AddRouteAction implements Action {
   readonly type = ADD_ROUTE;
   constructor(public payload: {
@@ -191,7 +209,7 @@ export type ChainDetailsAction = LoadChainDetailsAction
   | RemoveParserAction
   | UpdateParserAction
   | SaveParserConfigAction
-  | SaveParserConfigFailAction
+  | SaveParserConfigSuccessAction
   | SaveParserConfigFailAction
   | AddChainAction
   | InvestigateParserAction
@@ -208,3 +226,7 @@ export type ChainDetailsAction = LoadChainDetailsAction
   | SetRouteAsDefaultAction
   | AddToPathAction
   | RemoveFromPathAction;
+
+export type IndexMappingAction = GetIndexMappingsAction
+    | GetIndexMappingsSuccessAction
+    | GetIndexMappingsFailAction;

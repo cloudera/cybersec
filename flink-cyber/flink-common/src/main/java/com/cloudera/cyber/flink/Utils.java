@@ -12,6 +12,9 @@
 
 package com.cloudera.cyber.flink;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient;
 
@@ -34,8 +37,6 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -66,6 +67,8 @@ public class Utils {
     public static final String K_TRUSTSTORE_PASSWORD = "trustStorePassword";
     public static final String K_KEYSTORE_PASSWORD = "keyStorePassword";
     public static final String PASSWORD = "password";
+
+    public static final ObjectMapper MAPPER = new ObjectMapper();
 
     public static Properties readProperties(Properties properties, String prefix) {
         Properties targetProperties = new Properties();
@@ -162,6 +165,13 @@ public class Utils {
         return schemaRegistryConf;
     }
 
+    private static <T> T jsonToObject(String json, TypeReference<T> typeReference) throws JsonProcessingException {
+        return MAPPER.readValue(json, typeReference);
+    }
+
+    public static <T> T readResourceFile(String resourceLocation, Class<?> cls, TypeReference<T> typeReference) throws IOException {
+        return jsonToObject(readResourceFile(resourceLocation, cls), typeReference);
+    }
 
     public static String readResourceFile(String resourceLocation, Class<?> cls) {
         try {
@@ -271,8 +281,18 @@ public class Utils {
     }
 
 
+    public static <T> T readFile(String path, TypeReference<T> typeReference) throws IOException {
+        return jsonToObject(readFile(path), typeReference);
+    }
+
     public static String readFile(String path) throws IOException {
-        return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
+        final Path filePath = new Path(path);
+        final FileSystem fileSystem = filePath.getFileSystem();
+        try (FSDataInputStream fsDataInputStream = fileSystem.open(filePath)) {
+            return IOUtils.toString(fsDataInputStream, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Wasn't able to read file [%s]!", filePath), e);
+        }
     }
 
 

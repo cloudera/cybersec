@@ -12,6 +12,7 @@
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { saveAs } from 'file-saver';
+import {Clipboard} from '@angular/cdk/clipboard';
 
 import { EntryParsingResultModel } from '../models/live-view.model';
 
@@ -24,6 +25,10 @@ export class LiveViewResultComponent {
   @Input() results: EntryParsingResultModel[];
   @Output() investigateParserAction = new EventEmitter<string>();
   parserByParserViewId = null;
+
+
+  constructor(private clipboard: Clipboard) {
+  }
 
   onInvestigateParserClicked(failedParser) {
     this.investigateParserAction.emit(failedParser);
@@ -40,5 +45,10 @@ export class LiveViewResultComponent {
     });
     const outputBlob = new Blob([`[${outputArray}]`], {type: 'application/json;charset=utf-8'});
     saveAs(outputBlob, `results-${Date.now()}.json`);
+  }
+
+  copyOutput() {
+    let output = JSON.stringify(this.results[this.results.length-1].output);
+    this.clipboard.copy(output);
   }
 }
