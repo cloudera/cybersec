@@ -3,10 +3,8 @@ package com.cloudera.parserchains.queryservice.config.kafka;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.metron.stellar.dsl.functions.HashFunctions.Hash;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
@@ -42,7 +40,7 @@ public class KafkaConfig {
 
   /***
    * Provides a map with key=clusterId and value=ClouderaKafkaProperties
-   * @return Map<clusterId, kafkaProperties> which is a mapping between clusterId and connection details for that cluster
+   * @return Map with key of clusterId and value - kafkaProperties. This map is a mapping between clusterId and connection details for that cluster
    */
   @Bean(name = "kafka-external-cluster-map")
   @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -56,7 +54,7 @@ public class KafkaConfig {
    * get responses.
    *
    * @param replyKafkaPropertiesMap - replyKafkaPropertiesMap bean with properties for each cluster, injected by Spring
-   * @return Map<clusterId, kafkaTemplate> that allows to send requests over Kafka to different clusters and get
+   * @return Map with key of clusterId and value - kafkaTemplate that allows to send requests over Kafka to different clusters and get
    * responses.
    */
   @Bean(name = "kafkaTemplatePool")
