@@ -1,6 +1,7 @@
 package com.cloudera.parserchains.queryservice.handler;
 
 import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.BODY_PARAM;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.CHAIN_PARAM;
 import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PIPELINE_NAME_PARAM;
 import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.TEST_RUN_PARAM;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
@@ -38,7 +39,7 @@ public class ChainHandler {
   public ResponseEntity<?> create(String body) throws IOException {
     final JsonNode params = MAPPER.readTree(body);
     final String pipelineName = getPipelineName(params);
-    final ParserChainSchema chain = CHAIN_SCHEMA_READER.readValue(params.get(PIPELINE_NAME_PARAM));
+    final ParserChainSchema chain = CHAIN_SCHEMA_READER.readValue(params.get(CHAIN_PARAM));
 
     return chainController.create(pipelineName, null, chain);
   }
@@ -54,7 +55,7 @@ public class ChainHandler {
   public ResponseEntity<?> update(String body) throws IOException {
     final JsonNode params = MAPPER.readTree(body);
     final String pipelineName = getPipelineName(params);
-    final ParserChainSchema chain = CHAIN_SCHEMA_READER.readValue(params.get(PIPELINE_NAME_PARAM));
+    final ParserChainSchema chain = CHAIN_SCHEMA_READER.readValue(params.get(CHAIN_PARAM));
     final String id = params.get(ApplicationConstants.ID_PARAM).asText();
 
     return chainController.update(pipelineName, null, chain, id);
@@ -78,10 +79,9 @@ public class ChainHandler {
 
   public ResponseEntity<?> test(String body) throws IOException {
     final JsonNode params = MAPPER.readTree(body);
-    final String pipelineName = getPipelineName(params);
     final ChainTestRequest testRun = CHAIN_TEST_READER.readValue(params.get(TEST_RUN_PARAM));
 
-    return chainController.test(pipelineName, testRun);
+    return chainController.test(null, testRun);
   }
 
   private static String getPipelineName(JsonNode params){

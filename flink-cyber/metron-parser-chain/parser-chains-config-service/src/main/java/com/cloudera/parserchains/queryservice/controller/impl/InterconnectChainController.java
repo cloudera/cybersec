@@ -12,10 +12,14 @@
 
 package com.cloudera.parserchains.queryservice.controller.impl;
 
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.BODY_PARAM;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.CHAIN_PARAM;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.ID_PARAM;
 import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PARSER_CONFIG_PROXY_BASE_URL;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PIPELINE_NAME_PARAM;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.TEST_RUN_PARAM;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.core.utils.JSONUtils;
-import com.cloudera.parserchains.queryservice.common.ApplicationConstants;
 import com.cloudera.parserchains.queryservice.controller.ChainController;
 import com.cloudera.parserchains.queryservice.model.describe.IndexMappingDescriptor;
 import com.cloudera.parserchains.queryservice.model.enums.KafkaMessageType;
@@ -51,23 +55,23 @@ public class InterconnectChainController implements ChainController {
 
   public ResponseEntity<List<ParserChainSummary>> findAll(String pipelineName, String clusterId) throws IOException {
     final Map<String, Object> params = new HashMap<>();
-    params.put(ApplicationConstants.PIPELINE_NAME_PARAM, pipelineName);
+    params.put(PIPELINE_NAME_PARAM, pipelineName);
     return kafkaService.sendWithReply(KafkaMessageType.CHAIN_FIND_ALL, clusterId, params, CHAIN_SUMMARY_READER);
   }
 
   public ResponseEntity<ParserChainSchema> create(String pipelineName, String clusterId, ParserChainSchema chain)
       throws IOException {
     final Map<String, Object> params = new HashMap<>();
-    params.put(ApplicationConstants.PIPELINE_NAME_PARAM, pipelineName);
-    params.put(ApplicationConstants.CHAIN_PARAM, chain);
+    params.put(PIPELINE_NAME_PARAM, pipelineName);
+    params.put(CHAIN_PARAM, chain);
 
     return kafkaService.sendWithReply(KafkaMessageType.CHAIN_CREATE, clusterId, params, CHAIN_SCHEMA_READER);
   }
 
   public ResponseEntity<ParserChainSchema> read(String pipelineName, String clusterId, String id) throws IOException {
     final Map<String, Object> params = new HashMap<>();
-    params.put(ApplicationConstants.PIPELINE_NAME_PARAM, pipelineName);
-    params.put(ApplicationConstants.ID_PARAM, id);
+    params.put(PIPELINE_NAME_PARAM, pipelineName);
+    params.put(ID_PARAM, id);
 
     return kafkaService.sendWithReply(KafkaMessageType.CHAIN_READ, clusterId, params, CHAIN_SCHEMA_READER);
   }
@@ -75,17 +79,17 @@ public class InterconnectChainController implements ChainController {
   public ResponseEntity<ParserChainSchema> update(String pipelineName, String clusterId,
       ParserChainSchema chain, String id) throws IOException {
     final Map<String, Object> params = new HashMap<>();
-    params.put(ApplicationConstants.PIPELINE_NAME_PARAM, pipelineName);
-    params.put(ApplicationConstants.CHAIN_PARAM, chain);
-    params.put(ApplicationConstants.ID_PARAM, id);
+    params.put(PIPELINE_NAME_PARAM, pipelineName);
+    params.put(CHAIN_PARAM, chain);
+    params.put(ID_PARAM, id);
 
     return kafkaService.sendWithReply(KafkaMessageType.CHAIN_UPDATE, clusterId, params, CHAIN_SCHEMA_READER);
   }
 
   public ResponseEntity<Void> delete(String pipelineName, String clusterId, String id) throws IOException {
     final Map<String, Object> params = new HashMap<>();
-    params.put(ApplicationConstants.PIPELINE_NAME_PARAM, pipelineName);
-    params.put(ApplicationConstants.ID_PARAM, id);
+    params.put(PIPELINE_NAME_PARAM, pipelineName);
+    params.put(ID_PARAM, id);
 
     return kafkaService.sendWithReply(KafkaMessageType.CHAIN_DELETE, clusterId, params, null);
   }
@@ -93,15 +97,15 @@ public class InterconnectChainController implements ChainController {
   public ResponseEntity<Map<String, Object>> getMappingsFromPath(String pipelineName, String clusterId, IndexMappingDescriptor body)
       throws IOException {
     final Map<String, Object> params = new HashMap<>();
-    params.put(ApplicationConstants.PIPELINE_NAME_PARAM, pipelineName);
-    params.put(ApplicationConstants.BODY_PARAM, body);
+    params.put(PIPELINE_NAME_PARAM, pipelineName);
+    params.put(BODY_PARAM, body);
 
     return kafkaService.sendWithReply(KafkaMessageType.CHAIN_INDEXING_GET, clusterId, params, OBJECT_MAP_READER);
   }
 
   public ResponseEntity<ChainTestResponse> test(String clusterId, ChainTestRequest testRun) throws IOException {
     final Map<String, Object> params = new HashMap<>();
-    params.put(ApplicationConstants.TEST_RUN_PARAM, testRun);
+    params.put(TEST_RUN_PARAM, testRun);
 
     return kafkaService.sendWithReply(KafkaMessageType.CHAIN_TEST, clusterId, params, CHAIN_TEST_READER);
   }
