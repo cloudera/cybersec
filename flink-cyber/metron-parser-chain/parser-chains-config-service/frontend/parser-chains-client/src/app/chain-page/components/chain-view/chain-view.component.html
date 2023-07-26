@@ -27,7 +27,8 @@
             nzPlaceHolder="Select a source"
             class="parser-source-select"
             [nzDisabled]="indexingFieldMap && indexingFieldMap.size < 1"
-            [(ngModel)]="selectedSource">
+            [(ngModel)]="selectedSource"
+    (ngModelChange)="selectedSourceChanged($event)">
       <nz-option *ngFor="let item of indexingFieldMap | keyvalue" nzLabel="{{item.key}}" nzValue="{{item.key}}"></nz-option>
     </nz-select>
   </div>
