@@ -197,7 +197,7 @@ public abstract class TableApiAbstractJob {
         return String.join("\n", getInsertSqlPrefix() + " " + mappingDto.getTableName() + "(" + getInsertColumns(mappingDto) + ") " + getInsertSqlSuffix(),
                 " SELECT " + getFromColumns(mappingDto),
                 " from " + KAFKA_TABLE,
-                String.format(" where `message`.`originalSource`.`topic`='%s'", topic));
+                String.format(" where `source`='%s'", topic));
     }
 
     protected String getInsertSqlPrefix() {
