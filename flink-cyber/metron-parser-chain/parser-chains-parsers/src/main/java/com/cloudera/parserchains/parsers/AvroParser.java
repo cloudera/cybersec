@@ -12,12 +12,17 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
+import static java.lang.String.format;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
@@ -29,13 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.core.fs.FSDataInputStream;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Optional;
-
-import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
-import static java.lang.String.format;
 
 @MessageParser(
         name = "Simple Avro parser",
@@ -56,7 +54,7 @@ public class AvroParser implements Parser {
     @Configurable(
             key = "input",
             label = "Input Field",
-            description = "The input field to parse.",
+            description = "The input field to parse. Default value: '" + DEFAULT_INPUT_FIELD + "'",
             defaultValue = DEFAULT_INPUT_FIELD)
     public AvroParser inputField(String fieldName) {
         if (StringUtils.isNotBlank(fieldName)) {
@@ -68,8 +66,9 @@ public class AvroParser implements Parser {
     @Configurable(
             key = "schemaPath",
             label = "Schema Path",
-            description = "Path to schema of avro file",
-            defaultValue = DEFAULT_AVRO_SCHEMA)
+            description = "Path to schema of avro file. Default value: '" + DEFAULT_AVRO_SCHEMA + "'",
+            defaultValue = DEFAULT_AVRO_SCHEMA,
+            required = true)
     public AvroParser schemaPath(String pathToSchema) throws IOException {
         FileSystem fileSystem = new Path(pathToSchema).getFileSystem();
         loadSchema(pathToSchema, fileSystem);
