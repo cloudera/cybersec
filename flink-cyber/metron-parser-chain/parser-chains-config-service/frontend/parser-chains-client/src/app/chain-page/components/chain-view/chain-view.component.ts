@@ -74,6 +74,7 @@ export class ChainViewComponent implements OnInit {
   }
 
   selectedSourceChanged(newSelectedSource: string) {
+    this.selectedSource = newSelectedSource;
     localStorage.setItem(this._selectedSourceKey, newSelectedSource);
   }
 }
