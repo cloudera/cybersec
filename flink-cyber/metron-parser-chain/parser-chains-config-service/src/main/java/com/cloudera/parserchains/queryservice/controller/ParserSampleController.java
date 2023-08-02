@@ -30,7 +30,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -66,7 +65,7 @@ public class ParserSampleController {
         String sampleFolderPath = getSampleFolderPath(body);
         List<ParserSample> types = parserSampleService.findAllById(sampleFolderPath, id);
         if (types == null){
-            return ResponseEntity.ok(new ArrayList<>());
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(types);
     }

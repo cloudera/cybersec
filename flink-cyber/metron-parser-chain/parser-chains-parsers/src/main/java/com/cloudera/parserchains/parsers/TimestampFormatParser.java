@@ -12,6 +12,7 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static java.util.stream.Collectors.toList;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
@@ -20,8 +21,6 @@ import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.Serializable;
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -33,8 +32,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
-
-import static java.util.stream.Collectors.toList;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A parser to extract formatted timestamps and express them as epoch time, preserving the
@@ -44,7 +42,7 @@ import static java.util.stream.Collectors.toList;
         name = "TimestampFormat",
         description = "Parse a formatted timestamp into usable unix epoch time")
 public class TimestampFormatParser implements Parser {
-    private final List<String> DEFAULT_TIMEFORMAT = Arrays.asList("yyyyMMddThh:mm:ss.sssZ");
+    private final String DEFAULT_TIMEFORMAT = "yyyyMMdd'T'hh:mm:ss.SSS'Z'";
     private static final String DEFAULT_TIMEZONE = TimeZone.getDefault().getID();
     private List<Config> fields = new ArrayList<>();
 
@@ -92,7 +90,7 @@ public class TimestampFormatParser implements Parser {
         List<String> formats = Arrays.asList(format.split(","));
 
         if (formats == null)
-            formats = DEFAULT_TIMEFORMAT;
+            formats = Arrays.asList(DEFAULT_TIMEFORMAT);
 
         if (StringUtils.isNotBlank(fieldName)) {
             this.fields.add(new TimestampFormatParser.Config(fieldName,

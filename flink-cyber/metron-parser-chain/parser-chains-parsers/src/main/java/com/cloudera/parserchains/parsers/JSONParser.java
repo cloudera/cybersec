@@ -12,6 +12,8 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
+import static java.lang.String.format;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
@@ -21,8 +23,6 @@ import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,9 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
-import static java.lang.String.format;
+import org.apache.commons.lang3.StringUtils;
 
 @MessageParser(
         name="Simple JSON",
@@ -53,7 +51,7 @@ public class JSONParser implements Parser {
     @Configurable(
             key="input",
             label="Input Field",
-            description="The input field to parse.",
+            description= "The input field to parse. Default value: '" + DEFAULT_INPUT_FIELD + "'",
             defaultValue=DEFAULT_INPUT_FIELD)
     public JSONParser inputField(String fieldName) {
         if(StringUtils.isNotBlank(fieldName)) {
@@ -69,7 +67,8 @@ public class JSONParser implements Parser {
                     "'ALLOW_NESTED' Embed nested JSON string as the field value.  " +
                     "'DISALLOW_NESTED' Stop parsing and throw an error if nested JSON exists.  " +
                     "'DROP_NESTED' Drop and ignore any nested JSON values.  " +
-                    "'UNFOLD_NESTED' Unfold the nested JSON by creating a nested, dot-separated field name.  ",
+                    "'UNFOLD_NESTED' Unfold the nested JSON by creating a nested, dot-separated field name.  " +
+                    "Default value: '" + DEFAULT_NORMALIZER + "'",
             defaultValue=DEFAULT_NORMALIZER,
             multipleValues = true)
     public JSONParser normalizer(String normalizer) {
