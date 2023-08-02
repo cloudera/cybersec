@@ -28,7 +28,10 @@ public class AvroSchemaUtil {
 
     //method that converts from flink Schema to avro Schema
     public static Schema convertToAvro(ResolvedSchema schema) {
-        SchemaBuilder.FieldAssembler<Schema> fieldAssembler = SchemaBuilder.record("base").fields();
+        SchemaBuilder.FieldAssembler<Schema> fieldAssembler = SchemaBuilder.record("base")
+                .prop("ssb.rowtimeAttribute", "ts")
+                .prop("ssb.watermarkExpression", "`ts` - INTERVAL '30' SECOND")
+                .fields();
 
         for (Column col : schema.getColumns()) {
             fieldAssembler = fieldAssembler.name(col.getName()).type().optional().type(AvroSchemaUtil.convertTypeToAvro(col.getName(), col.getDataType().getLogicalType()));
@@ -43,7 +46,11 @@ public class AvroSchemaUtil {
         if (row == null) {
             value = null;
         } else {
-            value = convertToAvroObject(record.getSchema().getField(avroFieldName).schema(), row.getField(fieldName));
+            try {
+                value = convertToAvroObject(record.getSchema().getField(avroFieldName).schema(), row.getField(fieldName));
+            } catch (Exception e) {
+                throw new RuntimeException(String.format("Error converting avro field %s", avroFieldName), e);
+            }
         }
         record.put(avroFieldName, value);
         System.out.println("fieldName: " + fieldName + " value: " + value);
