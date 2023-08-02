@@ -52,13 +52,6 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-hbase-${flink.hbase.version}</artifactId>
-            <version>${flink.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.glassfish</groupId>
-                    <artifactId>javax.el</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -67,6 +60,10 @@
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.hortonworks.registries</groupId>
+            <artifactId>schema-registry-serdes</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-cyber-api</artifactId>

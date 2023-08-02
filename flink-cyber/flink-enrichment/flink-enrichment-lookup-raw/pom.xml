@@ -55,6 +55,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.hortonworks.registries</groupId>
+            <artifactId>schema-registry-serdes</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-cyber-api</artifactId>
             <version>${project.parent.version}</version>

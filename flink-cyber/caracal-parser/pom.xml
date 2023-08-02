@@ -127,7 +127,11 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-cloudera-registry</artifactId>
-            <version>${flink.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hortonworks.registries</groupId>
+            <artifactId>schema-registry-serdes</artifactId>
         </dependency>
 
         <dependency>
@@ -162,6 +166,11 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-orc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.orc</groupId>
+            <artifactId>orc-core</artifactId>
         </dependency>
 
         <dependency>
