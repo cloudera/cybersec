@@ -70,9 +70,8 @@ public class ReflectiveParserBuilder implements ParserBuilder {
 
             final List<ConfigValueSchema> valuesSchema = parserConfig.get(annotationKey);
 
-            validateParams(parserSchema, valuesSchema, method);
-
             if (valuesSchema != null) {
+                configureParams(parserSchema, valuesSchema, method);
                 // execute each method with values present in schema
                 for (ConfigValueSchema value : valuesSchema) {
                     invokeMethod(parser, parserSchema, annotationKey, method, value.getValues());
@@ -88,12 +87,8 @@ public class ReflectiveParserBuilder implements ParserBuilder {
         }
     }
 
-    private void validateParams(ParserSchema parserSchema, List<ConfigValueSchema> valuesSchema, Method method)
+    private void configureParams(ParserSchema parserSchema, List<ConfigValueSchema> valuesSchema, Method method)
         throws InvalidParserException {
-        if (valuesSchema == null){
-          return;
-        }
-
         final List<Parameter> paramsAnnotations = Arrays.stream(method.getParameterAnnotations())
             .flatMap(Arrays::stream)
             .filter(annotation -> annotation instanceof Parameter)
@@ -110,7 +105,7 @@ public class ReflectiveParserBuilder implements ParserBuilder {
                 }
                 if (paramAnnotation.required() && valueMap.get(annotationKey) == null){
                     throw new InvalidParserException(parserSchema,
-                        String.format("Required field isn't provided: %s", annotationKey));
+                        String.format("Required parameter isn't provided: %s", annotationKey));
                 }
             }
         }
