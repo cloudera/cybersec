@@ -110,6 +110,6 @@ if [ -f "kafka.properties" ]; then
 else
   cat $CYBERSEC_CONF_DIR/kafka.properties > "$upsert_props"
 fi
-cat "$property_file" | grep query. |  sed -e s/BRANCH/main/g >> "$upsert_props"
+cat "$property_file" | grep query. |  sed -e s/BRANCH/$branch/g >> "$upsert_props"
 
 run_java_class 'scoring-commands*.jar' com.cloudera.cyber.scoring.UpsertScoringRule "$upsert_props" "$rule"
