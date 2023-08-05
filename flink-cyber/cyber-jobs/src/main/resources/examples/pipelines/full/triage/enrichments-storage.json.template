@@ -1,0 +1,53 @@
+{
+  "storageConfigs": {
+    "default": {
+      "format": "HBASE_METRON",
+      "hbaseTableName": "example_enrichments",
+      "columnFamily": "cf"
+    }
+  },
+  "enrichmentConfigs": {
+    "threatq" : {
+       "storage": "metron",
+       "fieldMapping": {
+       } 
+    },
+    "malicious_domain": {
+      "storage": "default",
+      "fieldMapping": {
+        "keyFields": [
+          "domain"
+        ],
+        "valueFields": [
+          "source"
+        ]
+      }
+    },
+    "domain_category": {
+      "storage": "metron",
+      "fieldMapping": {
+        "keyFields": [
+          "domain"
+        ],
+        "valueFields": [
+          "category"
+        ],
+        "streamingSources": [
+          "domain_category"
+        ]
+      }
+    },
+    "majestic_million": {
+      "storage": "default",
+      "fieldMapping": {
+        "keyFields": [
+          "domain"
+        ],
+        "valueFields": [
+          "rank"
+        ]
+      }
+    }
+  }
+}
+~            

@@ -1,0 +1,25 @@
+[ {
+  "endpointTemplate" : "${protocol}://${server}/model",
+  "entityTemplate" : "{\"accessKey\":\"${access_key}\",\"request\":{\"domain\":\"${full_hostname}\"}}",
+  "method" : "POST",
+  "tls" : null,
+  "sources" : [ "ANY" ],
+  "authorization" : {
+    "type" : "token",
+    "bearerTokenTemplate" : "${bearer_token}"
+  },
+  "headers" : {
+    "Content-Type" : "application/json"
+  },
+  "properties" : {
+    "server" : "REST_HOST:1081",
+    "protocol" : "http",
+    "access_key" : "mup8kz1hsl3erczwepbt8jupamita6y6",
+    "bearer_token" : "mybearertokenaae6b840d045b574d96e35e271419720d0d7645534da6d5ba3d.74c9e8867ef7e0750b5772671acf7e413a744f6d77507eac83584014c71c5866"
+  },
+  "capacity" : "4",
+  "prefix" : "dga_model",
+  "successJsonPath" : "$['success']",
+  "resultsJsonPath" : "$['response']"
+}]
+

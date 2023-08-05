@@ -1,0 +1,10 @@
+{
+  "squid_metron":{
+     "chainKey":"squid",
+     "source":"squid"
+  },
+  "squid_simple":{
+     "chainKey":"squid",
+     "source":"squid"
+  }
+}

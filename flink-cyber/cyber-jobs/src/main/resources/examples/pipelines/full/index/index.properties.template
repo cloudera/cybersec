@@ -1,0 +1,25 @@
+hive.catalog=hive
+hive.schema=cyber
+hive.table=events
+
+#flink.writer=tableapi
+
+#Uncomment one of the following lines in case flink.writer=tableapi is specified
+#flink.output-connector=hive
+#flink.output-connector=kafka
+
+#Uncomment following two lines in case flink.writer=tableapi is specified
+#flink.tables-init-file=full/index/table-config.json
+#flink.mapping-file=full/index/mapping-config.json
+
+#hive.confdir=/etc/hive/conf/
+
+#hive.transaction.messages=500
+
+kafka.group.id=BRANCH.full.index
+
+topic.input=BRANCH.full.triage.output
+
+parallelism=1
+checkpoint.interval.ms=60000
+flink.job.name=BRANCH.full.index

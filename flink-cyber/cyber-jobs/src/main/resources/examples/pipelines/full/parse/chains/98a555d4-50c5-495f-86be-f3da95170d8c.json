@@ -1,0 +1,14 @@
+{
+  "id" : "98a555d4-50c5-495f-86be-f3da95170d8c",
+  "name" : "squid",
+  "parsers" : [ {
+    "id" : "aa007ab0-57a2-11ed-b623-a74de6a703e8",
+    "name" : "stellar",
+    "type" : "com.cloudera.parserchains.parsers.StellarParser",
+    "config" : {
+      "configurationPath" : [ {
+        "configurationPath" : "stellar/squid.json"
+      } ]
+    }
+  } ]
+}

@@ -1,0 +1,12 @@
+enrichment.type=malicious_domain
+enrichment.config.file=generated/basic/triage/enrichments-storage.json
+
+enrichment.source.skipfirstline=false
+enrichment.source.columns=domain,source
+
+parallelism=1
+
+# uncomment for local enrichment
+enrichment.topic.input=BRANCH.basic.enrichments.input
+
+flink.job.name=BRANCH.basic.load.malicious_domain

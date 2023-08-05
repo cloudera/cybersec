@@ -1,0 +1,34 @@
+{
+  "examples.basic.proxy_events": [
+    {
+      "name": "full_hostname",
+      "type": "string"
+    },
+    {
+      "name": "dst_country",
+      "type": "string"
+    },
+    {
+      "name": "ip_src_addr",
+      "type": "string"
+    },
+    {
+      "name": "ip_dst_addr",
+      "type": "string"
+    },
+    {
+      "name": "domain_no_subdomains",
+      "type": "string"
+    },
+    {
+      "name": "request_bytes",
+      "type": "int"
+    },
+    {
+      "name": "action",
+      "type": "string"
+    }
+  ]
+}
+
+
