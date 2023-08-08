@@ -5,7 +5,13 @@ import com.cloudera.cyber.indexing.MappingDto;
 import com.cloudera.cyber.indexing.TableColumnDto;
 import com.cloudera.cyber.indexing.hive.tableapi.TableApiAbstractJob;
 import com.cloudera.cyber.indexing.hive.util.AvroSchemaUtil;
+import com.cloudera.cyber.indexing.hive.util.FlinkSchemaUtil;
 import com.cloudera.cyber.scoring.ScoredMessage;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -16,12 +22,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.FormatDescriptor;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.apache.flink.table.catalog.ResolvedSchema;
 
 public class TableApiKafkaJob extends TableApiAbstractJob {
 
@@ -32,8 +33,8 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
     }
 
     @Override
-    protected void createTableIfNotExists(StreamTableEnvironment tableEnv, Set<String> tableList, String tableName, List<TableColumnDto> columnList) {
-
+    protected ResolvedSchema createTableIfNotExists(StreamTableEnvironment tableEnv, Set<String> tableList, String tableName, List<TableColumnDto> columnList) {
+        return FlinkSchemaUtil.getResolvedSchema(columnList);
     }
 
     @Override
