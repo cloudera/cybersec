@@ -4,14 +4,14 @@
     [
       {
         "file": "squid.txt",
-        "topic": "examples.basic.squid",
+        "topic": "examples.full.squid",
         "outputAvroSchemaFile": null,
         "weight": 90.0,
         "scenarioFile": "squid.csv"
       },
       {
         "file": "squid.txt",
-        "topic": "examples.basic.squid",
+        "topic": "examples.full.squid",
         "outputAvroSchemaFile": null,
         "weight": 5.0,
         "scenarioFile": "bad_squid.csv"

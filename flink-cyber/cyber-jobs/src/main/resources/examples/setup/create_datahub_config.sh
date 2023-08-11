@@ -5,22 +5,51 @@ fi
 
 set -x
 
+get_dh_name() {
+  cdp datahub list-clusters | jq -r '.clusters[] | select(.clusterName | contains ("'"$1"'")) | select(.workloadType | contains ("'$2'")) | .clusterName '
+}
+
 env_name=$1
 cluster_prefix=$2
 config_dir=../pipelines
 workload_user=$(cdp iam get-user | jq -r '.user.workloadUsername')
 
+# discover hive configs
+hive_dh=$(get_dh_name "${cluster_prefix}" "Hive")
+if [[ ! -z "$hive_dh" ]]; then
+    hive_zip=$config_dir/hive-conf.zip
+    hive_conf="$config_dir/hive-conf"
+    hive_cm_api=$(cdp datahub describe-cluster --cluster-name "$hive_dh" | jq -r '.cluster.endpoints.endpoints[] | select (.serviceName | contains("CM-API")) | .serviceUrl')
+    echo cleaning up hive configs
+    rm "$hive_zip"
+    rm -rf "$hive_conf"
+    curl -o "${hive_zip}" -u "${workload_user}" ${hive_cm_api}/v41/clusters/${hive_dh}/services/hive_on_tez/clientConfig
+    if [[ -f "$hive_zip" ]]; then
+       unzip "$hive_zip" -d "$config_dir"
+       rm "$hive_conf/core-site.xml"
+       rm "$hive_conf/yarn-site.xml" 
+       hive_jdbc_url=$(cdp datahub describe-cluster --cluster-name "$hive_dh" | jq -r '.cluster.endpoints.endpoints[] | select (.serviceName | contains("HIVESERVER2")) | .serviceUrl')
+       echo "hive_jdbc_url=$hive_jdbc_url" > "$config_dir/beeline.properties"
+    else
+        echo "ERROR: could not get hive configuration."
+        exit 2
+    fi
+fi
+
 # discover kafka connection config 
-kafka_cluster_name=$(cdp datahub list-clusters | jq -r '.clusters[] | select(.clusterName | contains ("'"${cluster_prefix}"'")) | select(.workloadType | contains ("Kafka")) | .clusterName ')
-schema_registry=$(cdp datahub describe-cluster --cluster-name ${kafka_cluster_name} | jq -r '.cluster.instanceGroups[] | select(.name | contains("master")) | .instances[].fqdn')
-kafka_broker=$(cdp datahub describe-cluster --cluster-name  ${kafka_cluster_name} | jq -r '.cluster.endpoints.endpoints[] | select (.serviceName | contains("KAFKA_BROKER")) | .serviceUrl' | sed 's/ //g')
+kafka_dh_name=$(get_dh_name "${cluster_prefix}" "Kafka")
+schema_registry=$(cdp datahub describe-cluster --cluster-name ${kafka_dh_name} | jq -r '.cluster.instanceGroups[] | select(.name | contains("master")) | .instances[].fqdn')
+kafka_broker=$(cdp datahub describe-cluster --cluster-name  ${kafka_dh_name} | jq -r '.cluster.endpoints.endpoints[] | select (.serviceName | contains("KAFKA_BROKER")) | .serviceUrl' | sed 's/ //g')
 
 # opdb (hbase and phoenix) connection config
 opdb_cluster_name=$(cdp opdb list-databases --environment-name ${env_name} | jq -r '.databases[] | select(.databaseName | contains ("'"${cluster_prefix}"'")) | .databaseName') 
 if [[ ! -z "$opdb_cluster_name" ]]; then
-    opdb_client_url=$(cdp opdb describe-client-connectivity --environment-name se-sandboxx-aws --database-name msm-cod-1 | jq -r '.connectors[] | select(.name=="hbase") | .configuration.clientConfigurationDetails[].url')
+    opdb_client_url=$(cdp opdb describe-client-connectivity --environment-name ${env_name} --database-name ${opdb_cluster_name} | jq -r '.connectors[] | select(.name=="hbase") | .configuration.clientConfigurationDetails[].url')
     hbase_zip="$config_dir/hbase-config.zip"
-    curl -f -o "$hbase_zip" -u "cduby" "$opdb_client_url"
+    hbase_conf="$config_dir/hbase-conf"
+    rm "$hbase_zip"
+    rm -rf "$hbase_conf"
+    curl -f -o "$hbase_zip" -u "${workload_user}" "${opdb_client_url}"
     if [[ -f "$hbase_zip" ]]; then 
        unzip "$hbase_zip" -d "$config_dir"
     else 
@@ -43,4 +72,4 @@ cybersec_user_princ=`ktutil --keytab=${config_dir}/krb5.keytab list | awk '(NR>3
 echo "PRINCIPAL="$cybersec_user_princ
 
 hostname=$(hostname -f)
-for TEMPLATE in templates/*; do filename=$(basename $TEMPLATE); cat $TEMPLATE | sed -e 's/ENV_TRUSTSTORE_PW/'"$env_truststore_pass"'/g' -e 's/KAFKA_BROKER/'"${kafka_broker}"'/g' -e 's/KERBEROS_PRINCIPAL/'"$cybersec_user_princ"'/g' -e 's/SCHEMA_REGISTRY/'"$schema_registry"'/g' > ${config_dir}/$filename ; done
+for TEMPLATE in templates/*; do filename=$(basename $TEMPLATE); cat $TEMPLATE | sed -e 's,ENV_TRUSTSTORE_PW,'"$env_truststore_pass"',g' -e 's/KAFKA_BROKER/'"${kafka_broker}"'/g' -e 's/KERBEROS_PRINCIPAL/'"$cybersec_user_princ"'/g' -e 's/SCHEMA_REGISTRY/'"$schema_registry"'/g' > ${config_dir}/$filename ; done

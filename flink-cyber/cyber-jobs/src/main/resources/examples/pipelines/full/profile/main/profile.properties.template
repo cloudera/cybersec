@@ -1,4 +1,4 @@
-profile.config.file=cyb-60/profile/main/profile.json
+profile.config.file=full/profile/main/profile.json
 
 
 phoenix.db.init=true
@@ -20,14 +20,14 @@ phoenix.db.max_retries_times=3
 parallelism=1
 checkpoint.interval.ms=60000
 
-kafka.group.id=BRANCH.cyb-60.profile.main
+kafka.group.id=BRANCH.full.profile.main
 
-topic.output=BRANCH.cyb-60.profile.main.output
-topic.input=BRANCH.cyb-60.triage.output
-query.input.topic=BRANCH.cyb-60.profile.main.scoring.input
-query.output.topic=BRANCH.cyb-60.profile.main.scoring.output
+topic.output=BRANCH.full.profile.main.output
+topic.input=BRANCH.full.triage.output
+query.input.topic=BRANCH.full.profile.main.scoring.input
+query.output.topic=BRANCH.full.profile.main.scoring.output
 
-flink.job.name=BRANCH.cyb-60.profile.main
+flink.job.name=BRANCH.full.profile.main
 profile.first.seen.table=cyb60_met_enrich
 profile.first.seen.column.family=cf
 profile.first.seen.format=HBASE_METRON

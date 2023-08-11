@@ -8,7 +8,7 @@
   },
   "enrichmentConfigs": {
     "threatq" : {
-       "storage": "metron",
+       "storage": "default",
        "fieldMapping": {
        } 
     },
@@ -24,7 +24,7 @@
       }
     },
     "domain_category": {
-      "storage": "metron",
+      "storage": "default",
       "fieldMapping": {
         "keyFields": [
           "domain"

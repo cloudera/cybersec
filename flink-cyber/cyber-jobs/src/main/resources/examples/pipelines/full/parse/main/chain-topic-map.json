@@ -1,9 +1,5 @@
 {
-  "squid_metron":{
-     "chainKey":"squid",
-     "source":"squid"
-  },
-  "squid_simple":{
+  "examples.full.squid":{
      "chainKey":"squid",
      "source":"squid"
   }
