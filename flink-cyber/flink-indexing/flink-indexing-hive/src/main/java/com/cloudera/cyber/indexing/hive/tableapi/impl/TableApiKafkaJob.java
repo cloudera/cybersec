@@ -26,79 +26,85 @@ import org.apache.flink.table.catalog.ResolvedSchema;
 
 public class TableApiKafkaJob extends TableApiAbstractJob {
 
-    private static final String BASE_TABLE_JSON = "base-hive-table.json";
+  private static final String BASE_TABLE_JSON = "base-hive-table.json";
 
-    public TableApiKafkaJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source) throws IOException {
-        super(params, env, source, "Kafka", BASE_TABLE_JSON);
-    }
+  public TableApiKafkaJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source)
+      throws IOException {
+    super(params, env, source, "Kafka", BASE_TABLE_JSON);
+  }
 
-    @Override
-    protected ResolvedSchema createTableIfNotExists(StreamTableEnvironment tableEnv, Set<String> tableList, String tableName, List<TableColumnDto> columnList) {
-        return FlinkSchemaUtil.getResolvedSchema(columnList);
-    }
+  @Override
+  protected ResolvedSchema createTable(StreamTableEnvironment tableEnv, String tableName,
+      List<TableColumnDto> columnList) {
+    return FlinkSchemaUtil.getResolvedSchema(columnList);
+  }
 
-    @Override
-    protected void executeInsert(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping, Map<String, List<TableColumnDto>> tablesConfig) {
-        topicMapping.forEach((topic, mappingDto) -> {
-            final String insertSql = buildInsertSql(topic, mappingDto);
-            try {
-                //create view
-                tableEnv.executeSql(insertSql);
-                final KafkaSink<GenericRecord> kafkaSink = new FlinkUtils<>(GenericRecord.class).createKafkaSink(mappingDto.getTableName(), "indexing-job", params);
+  @Override
+  protected void executeInsert(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping,
+      Map<String, List<TableColumnDto>> tablesConfig) {
+    topicMapping.forEach((topic, mappingDto) -> {
+      final String insertSql = buildInsertSql(topic, mappingDto);
+      try {
+        //create view
+        tableEnv.executeSql(insertSql);
+        final KafkaSink<GenericRecord> kafkaSink = new FlinkUtils<>(GenericRecord.class).createKafkaSink(
+            mappingDto.getTableName(), "indexing-job", params);
 
-                //read from view and write to kafka sink
-                final Table table = tableEnv.from(mappingDto.getTableName());
-                final String schemaString = AvroSchemaUtil.convertToAvro(tablesConfig.get(mappingDto.getTableName())).toString();
+        //read from view and write to kafka sink
+        final Table table = tableEnv.from(mappingDto.getTableName());
+        final String schemaString = AvroSchemaUtil.convertToAvro(tablesConfig.get(mappingDto.getTableName()))
+            .toString();
 
-                final DataStream<GenericRecord> stream = tableEnv.toDataStream(table).map(row -> {
-                    final Schema schema = new Schema.Parser().parse(schemaString);
-                    final GenericRecord record = new GenericData.Record(schema);
-                    final Set<String> fieldNames = row.getFieldNames(true);
-                    if (fieldNames != null) {
-                        for (String fieldName : fieldNames) {
-                            AvroSchemaUtil.putRowIntoAvro(row, record, fieldName);
-                        }
-                    }
-
-                    return record;
-                });
-                stream.sinkTo(kafkaSink);
-                System.out.printf("Insert SQL added to the queue for the table: %s%nSQL: %s%n", mappingDto.getTableName(), insertSql);
-            } catch (Exception e) {
-                System.err.printf("Error adding insert to the statement set: %s%n", insertSql);
-                throw e;
+        final DataStream<GenericRecord> stream = tableEnv.toDataStream(table).map(row -> {
+          final Schema schema = new Schema.Parser().parse(schemaString);
+          final GenericRecord record = new GenericData.Record(schema);
+          final Set<String> fieldNames = row.getFieldNames(true);
+          if (fieldNames != null) {
+            for (String fieldName : fieldNames) {
+              AvroSchemaUtil.putRowIntoAvro(row, record, fieldName);
             }
+          }
+
+          return record;
         });
-    }
+        stream.sinkTo(kafkaSink);
+        System.out.printf("Insert SQL added to the queue for the table: %s%nSQL: %s%n", mappingDto.getTableName(),
+            insertSql);
+      } catch (Exception e) {
+        System.err.printf("Error adding insert to the statement set: %s%n", insertSql);
+        throw e;
+      }
+    });
+  }
 
-    @Override
-    protected HashSet<String> getExistingTableList(StreamTableEnvironment tableEnv) {
-        //Kafka tables are temporary, so no tables are present on the job creation
-        return new HashSet<>();
-    }
+  @Override
+  protected HashSet<String> getExistingTableList(StreamTableEnvironment tableEnv) {
+    //Kafka tables are temporary, so no tables are present on the job creation
+    return new HashSet<>();
+  }
 
-    @Override
-    protected void registerCatalog(StreamTableEnvironment tableEnv) {
+  @Override
+  protected void registerCatalog(StreamTableEnvironment tableEnv) {
 
-    }
+  }
 
-    @Override
-    protected String getTableConnector() {
-        return "filesystem";
-    }
+  @Override
+  protected String getTableConnector() {
+    return "filesystem";
+  }
 
-    @Override
-    protected FormatDescriptor getFormatDescriptor() {
-        return null;
-    }
+  @Override
+  protected FormatDescriptor getFormatDescriptor() {
+    return null;
+  }
 
-    @Override
-    protected String getInsertSqlPrefix() {
-        return "CREATE TEMPORARY VIEW ";
-    }
+  @Override
+  protected String getInsertSqlPrefix() {
+    return "CREATE TEMPORARY VIEW ";
+  }
 
-    @Override
-    protected String getInsertSqlSuffix() {
-        return " AS ";
-    }
+  @Override
+  protected String getInsertSqlSuffix() {
+    return " AS ";
+  }
 }
