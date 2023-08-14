@@ -3,7 +3,7 @@ package com.cloudera.cyber.indexing.hive.tableapi;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.cloudera.cyber.indexing.MappingColumnDto;
 import com.cloudera.cyber.indexing.MappingDto;
-import com.cloudera.cyber.indexing.hive.tableapi.impl.TableApiHiveJob;
+import com.cloudera.cyber.indexing.hive.tableapi.impl.TableApiKafkaJob;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +22,7 @@ class TableApiAbstractJobTest {
 
   public static final String GIVEN_SOURCE = "source";
   public static final String GIVEN_TABLE_NAME = "tableName";
-  private final TableApiAbstractJob job = new TableApiHiveJob(null, null, null);
+  private final TableApiAbstractJob job = new TableApiKafkaJob(null, null, null);
 
   TableApiAbstractJobTest() throws IOException {
   }
@@ -62,7 +62,21 @@ class TableApiAbstractJobTest {
             RuntimeException.class,
             String.format(
                 "Found invalid column mappings for source [%s]. Those columns are either not present in the table config or have empty names: %s",
-                GIVEN_SOURCE, "[ , someName]")));
+                GIVEN_SOURCE, "[ , someName]")),
+
+        Arguments.of(Collections.singletonMap(GIVEN_TABLE_NAME, ResolvedSchema.of(
+                Column.physical("column1", DataTypes.INT()),
+                Column.physical("column2", DataTypes.INT()),
+                Column.physical("column3", DataTypes.STRING()))),
+            Collections.singletonMap(GIVEN_SOURCE,
+                new MappingDto(GIVEN_TABLE_NAME, new ArrayList<>(), Arrays.asList(
+                    new MappingColumnDto("column1", null, null, null, false),
+                    new MappingColumnDto("column2", null, null, "someTransformation", false),
+                    new MappingColumnDto("column3", null, null, null, false)))),
+            RuntimeException.class,
+            String.format(
+                "Found column mappings of non-string type without transformations for source [%s]: %s",
+                GIVEN_SOURCE, "[column1]")));
   }
 
   @ParameterizedTest
