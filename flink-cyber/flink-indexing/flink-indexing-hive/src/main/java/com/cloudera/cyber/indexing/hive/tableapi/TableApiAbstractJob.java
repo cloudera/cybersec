@@ -37,7 +37,9 @@ import org.apache.flink.table.api.bridge.java.StreamStatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Column;
 import org.apache.flink.table.catalog.ResolvedSchema;
+import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 
@@ -46,8 +48,6 @@ public abstract class TableApiAbstractJob {
   private static final String TABLES_INIT_FILE_PARAM = "flink.tables-init-file";
   private static final String MAPPING_FILE_PARAM = "flink.mapping-file";
   protected static final String KAFKA_TABLE = "KafkaTempView";
-  protected static final String TEMP_INPUT_TABLE = "TEMP_TABLE_API_INPUT_TABLE";
-  protected static final String TEMP_OUTPUT_TABLE = "TEMP_TABLE_API_OUTPUT_TABLE";
 
   protected static final String BASE_COLUMN_MAPPING_JSON = "base-column-mapping.json";
 
@@ -83,12 +83,13 @@ public abstract class TableApiAbstractJob {
     registerCatalog(tableEnv);
 
     System.out.println("Getting tables config...");
-    final Map<String, List<TableColumnDto>> tablesConfig = getTablesConfig();
+    final Map<String, List<TableColumnDto>> rawTablesConfig = getRawTablesConfig();
+    final Map<String, List<TableColumnDto>> tablesConfig = appendDefaultTablesConfig(rawTablesConfig);
 
     System.out.println("Creating tables...");
     setConnectorDialect(tableEnv);
 
-    final Map<String, ResolvedSchema> tableSchemaMap = createTables(tableEnv, tablesConfig);
+    final Map<String, ResolvedSchema> tableSchemaMap = createTables(tableEnv, rawTablesConfig, tablesConfig);
 
     System.out.println("Getting topic mapping...");
     final Map<String, MappingDto> topicMapping = getTopicMapping();
@@ -111,20 +112,21 @@ public abstract class TableApiAbstractJob {
   /**
    * Creates tables in the tableEnv based on the tablesConfig. If table already exists, its schema is fetched.
    *
-   * @param tableEnv     is the Flink environment in which the tables are going to be created.
-   * @param tablesConfig config map with the table name as a key and column map as a value.
+   * @param tableEnv        is the Flink environment in which the tables are going to be created.
+   * @param rawTablesConfig map that contains contents of tables config file without any modifications.
+   * @param tablesConfig    modified version of rawTablesConfig that contains default and partition columns.
    * @return Map with table name as a key and table schema as a value.
    */
   private Map<String, ResolvedSchema> createTables(StreamTableEnvironment tableEnv,
-      Map<String, List<TableColumnDto>> tablesConfig) {
+      Map<String, List<TableColumnDto>> rawTablesConfig, Map<String, List<TableColumnDto>> tablesConfig) {
     final Set<String> tableList = getExistingTableList(tableEnv);
 
     return tablesConfig.entrySet().stream()
         .collect(Collectors.toMap(Entry::getKey,
-            entry -> createTableIfNotExists(tableEnv, tableList, entry.getKey(), entry.getValue())));
+            entry -> createTableIfNotExists(tableEnv, tableList, entry.getKey(), rawTablesConfig.get(entry.getKey()), entry.getValue())));
   }
 
-  private void validateMappings(Map<String, ResolvedSchema> tableSchemaMap,
+  protected void validateMappings(Map<String, ResolvedSchema> tableSchemaMap,
       Map<String, MappingDto> topicMapping) {
     for (Entry<String, MappingDto> entry : topicMapping.entrySet()) {
       final String source = entry.getKey();
@@ -150,8 +152,9 @@ public abstract class TableApiAbstractJob {
           .collect(Collectors.toList());
       if (!invalidColumnList.isEmpty()) {
         throw new RuntimeException(
-            String.format("Found invalid column mappings for source [%s]. Those columns are either not present in the table config or have empty names: %s", source,
-                invalidColumnList));
+            String.format(
+                "Found invalid column mappings for source [%s]. Those columns are either not present in the table config or have empty names: %s",
+                source, invalidColumnList));
       }
     }
   }
@@ -191,14 +194,21 @@ public abstract class TableApiAbstractJob {
     //to be overwritten if needed
   }
 
-  protected ResolvedSchema createTableIfNotExists(StreamTableEnvironment tableEnv, Set<String> tableList,
-      String tableName,
-      List<TableColumnDto> columnList) {
+  private ResolvedSchema createTableIfNotExists(StreamTableEnvironment tableEnv, Set<String> tableList,
+      String tableName, List<TableColumnDto> rawColumnList, List<TableColumnDto> columnList) {
     if (tableList.contains(tableName)) {
-      System.out.printf("%s table [%s] already exists. Skipping its creation.%n", connectorName, tableName);
-      return tableEnv.from(tableName).getResolvedSchema();
+      return handleExistingTable(tableEnv, tableName, columnList);
     }
 
+    if (CollectionUtils.isEmpty(rawColumnList)) {
+      throw new RuntimeException(String.format("%s table [%s] config is empty. Aborting...", connectorName, tableName));
+    }
+
+    return createTable(tableEnv, tableName, columnList);
+  }
+
+  protected ResolvedSchema createTable(StreamTableEnvironment tableEnv, String tableName,
+      List<TableColumnDto> columnList) {
     System.out.printf("Creating %s table %s...%n", connectorName, tableName);
     final ResolvedSchema resolvedSchema = FlinkSchemaUtil.getResolvedSchema(columnList);
     final Schema schema = FlinkSchemaUtil.buildSchema(resolvedSchema);
@@ -212,6 +222,37 @@ public abstract class TableApiAbstractJob {
     }
     System.out.printf("%s table created: %s%n", connectorName, tableName);
     return resolvedSchema;
+  }
+
+  protected ResolvedSchema handleExistingTable(StreamTableEnvironment tableEnv, String tableName,
+      List<TableColumnDto> columnList) {
+    final ResolvedSchema existingTableSchema = tableEnv.from(tableName).getResolvedSchema();
+    if (CollectionUtils.isEmpty(columnList)) {
+      System.out.printf("%s table [%s] already exists and no table config provided. Skipping its creation.%n",
+          connectorName,
+          tableName);
+      return existingTableSchema;
+    }
+
+    final List<Column> existingColumns = existingTableSchema.getColumns();
+    final List<Column> configColumns = FlinkSchemaUtil.getResolvedSchema(columnList).getColumns();
+    for (Column configColumn : configColumns) {
+      final DataType dataType = configColumn.getDataType();
+      final String columnName = configColumn.getName();
+      final boolean matchingColumnExists = existingColumns.stream()
+          .anyMatch(c -> c.getName().equals(columnName) && c.getDataType().equals(dataType));
+      if (!matchingColumnExists) {
+        throw new RuntimeException(String.format(
+            "%s table [%s] already exists, but table config was provided for it as well. "
+            + "In this case all columns from table config should be present in the existing table, "
+            + "but we didn't find the [%s] column of type [%s].",
+            connectorName, tableName, columnName, dataType));
+      }
+    }
+    System.out.printf("%s table [%s] already exists and provided table config matches it. Skipping its creation.%n",
+        connectorName,
+        tableName);
+    return existingTableSchema;
   }
 
   private TableDescriptor buildTableDescriptor(Schema schema) {
@@ -326,12 +367,12 @@ public abstract class TableApiAbstractJob {
   }
 
   /**
-   * Method provides table schemas from the config file.
+   * Method provides contents of the tables config file.
    *
    * @return Map with table name as a key, and a list of columns as a value.
-   * @throws IOException in case it can't read the config file
+   * @throws IOException in case it can't read the tables config file.
    */
-  protected Map<String, List<TableColumnDto>> getTablesConfig() throws IOException {
+  protected Map<String, List<TableColumnDto>> getRawTablesConfig() throws IOException {
     TypeReference<HashMap<String, List<TableColumnDto>>> typeRef
         = new TypeReference<HashMap<String, List<TableColumnDto>>>() {
     };
@@ -339,7 +380,20 @@ public abstract class TableApiAbstractJob {
     if (filePath == null) {
       return Collections.emptyMap();
     }
-    final HashMap<String, List<TableColumnDto>> columnMap = Utils.readFile(filePath, typeRef);
+    return Utils.readFile(filePath, typeRef);
+  }
+
+  /**
+   * Method appends default and partition columns to the raw tables config.
+   *
+   * @return Map with table name as a key, and a list of columns as a value.
+   */
+  protected Map<String, List<TableColumnDto>> appendDefaultTablesConfig(
+      Map<String, List<TableColumnDto>> rawTablesConfig) {
+    if (rawTablesConfig == null || rawTablesConfig.isEmpty()) {
+      return Collections.emptyMap();
+    }
+    final Map<String, List<TableColumnDto>> columnMap = new HashMap<>(rawTablesConfig);
     final List<TableColumnDto> partitionColumns = Arrays.asList(TableColumnDto.builder()
         .name("dt")
         .type("string")
