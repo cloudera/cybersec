@@ -31,12 +31,17 @@ public class DefaultPipelineController implements PipelineController {
 
   private final PipelineService pipelineService;
 
-  public ResponseEntity<Set<String>> findAll(String clusterId) throws IOException {
+  public ResponseEntity<Set<String>> findAll() throws IOException {
     Map<String, Path> pipelineMap = pipelineService.findAll();
     if (pipelineMap == null || pipelineMap.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
     return ResponseEntity.ok(pipelineMap.keySet());
+  }
+
+  public ResponseEntity<Set<String>> createPipeline(String pipelineName) throws IOException {
+    Set<String> pipelineList = pipelineService.createPipeline(pipelineName);
+    return ResponseEntity.ok(pipelineList);
   }
 
 }

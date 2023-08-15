@@ -11,18 +11,16 @@
  */
 
 import {Injectable} from '@angular/core';
-import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
-import {Action, select, Store} from '@ngrx/store';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
+import {Action} from '@ngrx/store';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {Observable, of} from 'rxjs';
-import {catchError, map, switchMap, take} from 'rxjs/operators';
+import {catchError, map, switchMap} from 'rxjs/operators';
 
 import {ChainListPageService} from '../services/chain-list-page.service';
 import * as fromActions from './chain-list-page.actions';
 import {ChainModel, PipelineModel} from './chain.model';
 import {PipelineService} from "../services/pipeline.service";
-import {ChainListPageState, getChains, getCurrentPipeline} from "./chain-list-page.reducers";
-import {ClusterService} from "../services/cluster.service";
 
 @Injectable()
 export class ChainListEffects {
@@ -31,15 +29,14 @@ export class ChainListEffects {
     private actions$: Actions,
     private messageService: NzMessageService,
     private chainListService: ChainListPageService,
-    private pipelineService: PipelineService,
-    private clusterService: ClusterService
+    private pipelineService: PipelineService
   ) {
   }
 
   loadChains$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.LOAD_CHAINS),
     switchMap((action: fromActions.LoadChainsAction) => {
-        return this.chainListService.getChains(this.pipelineService.getCurrentPipeline(), this.clusterService.getCurrentCluster())
+        return this.chainListService.getChains(this.pipelineService.getCurrentPipeline())
         .pipe(
           map((chains: ChainModel[]) => {
             return new fromActions.LoadChainsSuccessAction(chains);
@@ -55,7 +52,7 @@ export class ChainListEffects {
     createChain$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.CREATE_CHAIN),
     switchMap((action: fromActions.CreateChainAction) => {
-      return this.chainListService.createChain(action.newChain, this.pipelineService.getCurrentPipeline(), this.clusterService.getCurrentCluster())
+      return this.chainListService.createChain(action.newChain, this.pipelineService.getCurrentPipeline())
         .pipe(
           map((chain: ChainModel) => {
             this.messageService.create('success', 'Chain ' + action.newChain.name + ' has been created');
@@ -93,7 +90,7 @@ export class ChainListEffects {
   deleteChain$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.DELETE_CHAIN),
     switchMap((action: fromActions.DeleteChainAction) => {
-      return this.chainListService.deleteChain(action.chainId, this.pipelineService.getCurrentPipeline(), this.clusterService.getCurrentCluster())
+      return this.chainListService.deleteChain(action.chainId, this.pipelineService.getCurrentPipeline())
         .pipe(
           map(() => {
             this.messageService.create('success', 'Chain ' + action.chainName + ' deleted Successfully');
@@ -110,7 +107,7 @@ export class ChainListEffects {
   loadPipelines$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.LOAD_PIPELINES),
     switchMap((action: fromActions.LoadPipelinesAction) => {
-      return this.pipelineService.getPipelines(this.clusterService.getCurrentCluster())
+      return this.pipelineService.getPipelines()
         .pipe(
           map((pipelines: PipelineModel[]) => {
             return new fromActions.LoadPipelinesSuccessAction(pipelines);

@@ -11,37 +11,33 @@
  */
 
 import {HttpClient, HttpParams} from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {Observable} from 'rxjs';
 
-import { EntryParsingResultModel, LiveViewRequestModel } from '../models/live-view.model';
-import { SampleDataModel, SampleDataRequestModel } from '../models/sample-data.model';
-import {getFinalBaseUrl, getHttpParams} from "../../../../chain-list-page/chain-list-page.utils";
-import {ClusterModel} from "../../../../chain-list-page/chain.model";
+import {EntryParsingResultModel, LiveViewRequestModel} from '../models/live-view.model';
+import {SampleDataModel, SampleDataRequestModel} from '../models/sample-data.model';
+import {getHttpParams} from "../../../../chain-list-page/chain-list-page.utils";
 
 @Injectable({
   providedIn: 'root'
 })
 export class LiveViewService {
 
-  private readonly URL_PREFIX = '/api/v1';
-  private readonly BASE_URL = '/parserconfig/tests';
+  private readonly BASE_URL = '/api/v1/parserconfig/tests';
 
   constructor(
     private http: HttpClient,
   ) { }
 
-  execute(sampleData: SampleDataModel, chainConfig: {}, cluster: ClusterModel): Observable<{ results: EntryParsingResultModel[]}> {
-    let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
-
-    let httpParams: HttpParams = getHttpParams(null, cluster);
+  execute(sampleData: SampleDataModel, chainConfig: {}): Observable<{ results: EntryParsingResultModel[]}> {
+    let httpParams: HttpParams = getHttpParams(null);
 
     const sampleDataRequest: SampleDataRequestModel = {
       ...sampleData,
       source: sampleData.source.trimEnd().split('\n')
     };
     return this.http.post<{ results: EntryParsingResultModel[]}>(
-      url,
+      this.BASE_URL,
       { sampleData: sampleDataRequest, chainConfig } as LiveViewRequestModel, {params: httpParams});
   }
 }

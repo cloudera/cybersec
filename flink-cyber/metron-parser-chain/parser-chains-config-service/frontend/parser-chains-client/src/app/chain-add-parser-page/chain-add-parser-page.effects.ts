@@ -10,32 +10,30 @@
  * limitations governing your use of the file.
  */
 
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Action } from '@ngrx/store';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {Action} from '@ngrx/store';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {Observable, of} from 'rxjs';
+import {catchError, map, switchMap} from 'rxjs/operators';
 
-import { AddParserPageService } from '../services/chain-add-parser-page.service';
+import {AddParserPageService} from '../services/chain-add-parser-page.service';
 
 import * as fromActions from './chain-add-parser-page.actions';
-import {ClusterService} from "../services/cluster.service";
 
 @Injectable()
 export class AddParserEffects {
   constructor(
     private actions$: Actions,
     private messageService: NzMessageService,
-    private addParserService: AddParserPageService,
-    private clusterService: ClusterService
+    private addParserService: AddParserPageService
   ) { }
 
   @Effect()
   getParserTypes$: Observable<Action> = this.actions$.pipe(
     ofType(fromActions.GET_PARSER_TYPES),
     switchMap(() => {
-      return this.addParserService.getParserTypes(this.clusterService.getCurrentCluster())
+      return this.addParserService.getParserTypes()
         .pipe(
           map((parserTypes: { id: string, name: string }[]) => {
             return new fromActions.GetParserTypesSuccessAction(parserTypes);

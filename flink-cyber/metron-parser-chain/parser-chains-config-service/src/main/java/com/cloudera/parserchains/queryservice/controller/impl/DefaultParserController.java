@@ -34,12 +34,12 @@ public class DefaultParserController implements ParserController {
 
   private final ParserDiscoveryService parserDiscoveryService;
 
-  public ResponseEntity<List<ParserSummary>> findAll(String clusterId) throws IOException {
+  public ResponseEntity<List<ParserSummary>> findAll() throws IOException {
     List<ParserSummary> types = parserDiscoveryService.findAll();
     return ResponseEntity.ok(types);
   }
 
-  public ResponseEntity<Map<ParserID, ParserDescriptor>> describeAll(String clusterId) throws IOException {
+  public ResponseEntity<Map<ParserID, ParserDescriptor>> describeAll() throws IOException {
     Map<ParserID, ParserDescriptor> configs = parserDiscoveryService.describeAll();
     if (configs != null || configs.size() >= 0) {
       return ResponseEntity.ok(configs);

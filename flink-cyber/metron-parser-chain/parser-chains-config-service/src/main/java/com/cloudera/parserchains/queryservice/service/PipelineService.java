@@ -13,16 +13,16 @@
 package com.cloudera.parserchains.queryservice.service;
 
 import com.cloudera.parserchains.queryservice.config.AppProperties;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.flink.core.fs.FileStatus;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -57,4 +57,8 @@ public class PipelineService {
         return pipelineMap;
     }
 
+
+    public Set<String> createPipeline(String pipelineName) {
+        return null;
+    }
 }

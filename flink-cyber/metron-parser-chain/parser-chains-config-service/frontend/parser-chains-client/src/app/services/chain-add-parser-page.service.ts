@@ -11,50 +11,40 @@
  */
 
 import {HttpClient, HttpParams} from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {map} from 'rxjs/operators';
 
-import { ParserModel } from '../chain-page/chain-page.models';
-import {ClusterModel, PipelineModel} from "../chain-list-page/chain.model";
-import {
-  getFinalBaseUrl,
-  getHttpParams
-} from "../chain-list-page/chain-list-page.utils";
+import {ParserModel} from '../chain-page/chain-page.models';
+import {PipelineModel} from "../chain-list-page/chain.model";
+import {getHttpParams} from "../chain-list-page/chain-list-page.utils";
 
 @Injectable({
   providedIn: 'root'
 })
 export class AddParserPageService {
 
-  private readonly URL_PREFIX = '/api/v1';
-  private readonly BASE_URL = '/parserconfig/';
+  private readonly BASE_URL = '/api/v1/parserconfig/';
 
   constructor(
     private http: HttpClient
   ) {}
 
-  public add(chainId: string, parser: ParserModel, pipeline: PipelineModel = null, cluster: ClusterModel) {
-    let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+  public add(chainId: string, parser: ParserModel, pipeline: PipelineModel = null) {
+    let httpParams: HttpParams = getHttpParams(pipeline);
 
-    let httpParams: HttpParams = getHttpParams(pipeline, cluster);
-
-    return this.http.post(url + `chains/${chainId}/parsers`, parser, {params: httpParams});
+    return this.http.post(this.BASE_URL + `chains/${chainId}/parsers`, parser, {params: httpParams});
   }
 
-  public getParserTypes(cluster: ClusterModel) {
-    let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+  public getParserTypes() {
+    let httpParams: HttpParams = getHttpParams(null);
 
-    let httpParams: HttpParams = getHttpParams(null, cluster);
-
-    return this.http.get<{ id: string, name: string }[]>(url + `parser-types`, {params: httpParams});
+    return this.http.get<{ id: string, name: string }[]>(this.BASE_URL + `parser-types`, {params: httpParams});
   }
 
-  public getParsers(chainId: string, pipeline: PipelineModel = null, cluster: ClusterModel) {
-    let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+  public getParsers(chainId: string, pipeline: PipelineModel = null) {
+    let httpParams: HttpParams = getHttpParams(pipeline);
 
-    let httpParams: HttpParams = getHttpParams(pipeline, cluster);
-
-    return this.http.get<ParserModel[]>(url + `chains/${chainId}/parsers`, {params: httpParams})
+    return this.http.get<ParserModel[]>(this.BASE_URL + `chains/${chainId}/parsers`, {params: httpParams})
       .pipe(
         map((parsers: ParserModel[]) => {
           return parsers;
