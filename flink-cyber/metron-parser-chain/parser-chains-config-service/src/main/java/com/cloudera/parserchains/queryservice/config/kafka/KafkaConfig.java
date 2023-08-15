@@ -18,9 +18,9 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.ProducerFactory;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.GenericMessageListenerContainer;
-import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 
 @Slf4j
 @EnableKafka
@@ -66,7 +66,7 @@ public class KafkaConfig {
     replyKafkaPropertiesMap.forEach((clusterId, kafkaProperties) -> {
       final ProducerFactory<String, String> producerFactory = producerFactory(kafkaProperties);
       final ConsumerFactory<String, String> consumerFactory = consumerFactory(kafkaProperties);
-      final KafkaMessageListenerContainer<String, String> replyContainer = replyContainer(consumerFactory,
+      final GenericMessageListenerContainer<String, String> replyContainer = replyContainer(consumerFactory,
           kafkaProperties.getReplyTopic());
 
       final ClouderaReplyingKafkaTemplate<String, String, String> kafkaTemplate = replyingKafkaTemplate(producerFactory,
@@ -93,10 +93,10 @@ public class KafkaConfig {
     return new ClouderaReplyingKafkaTemplate<>(producerFactory, replyContainer, requestTopic);
   }
 
-  private static KafkaMessageListenerContainer<String, String> replyContainer(
+  private static GenericMessageListenerContainer<String, String> replyContainer(
       ConsumerFactory<String, String> consumerFactory, String replyTopic) {
     ContainerProperties containerProperties = new ContainerProperties(replyTopic);
-    return new KafkaMessageListenerContainer<>(consumerFactory, containerProperties);
+    return new ConcurrentMessageListenerContainer<>(consumerFactory, containerProperties);
   }
 
 }
