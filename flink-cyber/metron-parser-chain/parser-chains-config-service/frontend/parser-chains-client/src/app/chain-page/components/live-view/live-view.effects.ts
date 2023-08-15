@@ -10,12 +10,12 @@
  * limitations governing your use of the file.
  */
 
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Action } from '@ngrx/store';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {Action} from '@ngrx/store';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {Observable, of} from 'rxjs';
+import {catchError, map, switchMap, tap} from 'rxjs/operators';
 
 import {
   executionTriggered,
@@ -28,17 +28,15 @@ import {
   sampleDataInputChanged,
   sampleDataRestored,
 } from './live-view.actions';
-import { LiveViewConsts } from './live-view.consts';
-import { LiveViewService } from './services/live-view.service';
-import {ClusterService} from "../../../services/cluster.service";
+import {LiveViewConsts} from './live-view.consts';
+import {LiveViewService} from './services/live-view.service';
 
 @Injectable()
 export class LiveViewEffects {
   constructor(
     private actions$: Actions<LiveViewActionsType>,
     private liveViewService: LiveViewService,
-    private messageService: NzMessageService,
-    private clusterService: ClusterService
+    private messageService: NzMessageService
   ) {}
 
   @Effect()
@@ -47,7 +45,7 @@ export class LiveViewEffects {
       executionTriggered.type,
     ),
     switchMap(({ sampleData, chainConfig }) => {
-      return this.liveViewService.execute(sampleData, chainConfig, this.clusterService.getCurrentCluster()).pipe(
+      return this.liveViewService.execute(sampleData, chainConfig).pipe(
         map(liveViewResult => liveViewRefreshedSuccessfully({ liveViewResult })),
         catchError(( error: { message: string }) => {
           this.messageService.create('error', error.message);

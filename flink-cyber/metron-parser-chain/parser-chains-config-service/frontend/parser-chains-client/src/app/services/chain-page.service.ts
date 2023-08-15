@@ -15,8 +15,8 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 
 import {ChainDetailsModel} from '../chain-page/chain-page.models';
-import {ClusterModel, PipelineModel} from "../chain-list-page/chain.model";
-import {getFinalBaseUrl, getHttpParams} from "../chain-list-page/chain-list-page.utils";
+import {PipelineModel} from "../chain-list-page/chain.model";
+import {getHttpParams} from "../chain-list-page/chain-list-page.utils";
 
 @Injectable({
     providedIn: 'root'
@@ -24,61 +24,48 @@ import {getFinalBaseUrl, getHttpParams} from "../chain-list-page/chain-list-page
 export class ChainPageService {
     private parserChainCollapseState: BehaviorSubject<boolean[]>;
     private parserChainSize: number;
-    private readonly URL_PREFIX = '/api/v1';
-    private readonly BASE_URL = '/parserconfig/';
+    private readonly BASE_URL = '/api/v1/parserconfig/';
     public collapseAll = new BehaviorSubject(false);
 
     constructor(
       private http: HttpClient
     ) {}
 
-    public getChain(id: string, pipeline: PipelineModel = null, cluster: ClusterModel) {
-      let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+    public getChain(id: string, pipeline: PipelineModel = null) {
+      let httpParams: HttpParams = getHttpParams(pipeline);
 
-      let httpParams: HttpParams = getHttpParams(pipeline, cluster);
-
-      return this.http.get(url + `chains/${id}`,{params: httpParams});
+      return this.http.get(this.BASE_URL + `chains/${id}`,{params: httpParams});
     }
 
-    public getParsers(id: string, pipeline: PipelineModel = null, cluster: ClusterModel) {
-      let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+    public getParsers(id: string, pipeline: PipelineModel = null) {
+      let httpParams: HttpParams = getHttpParams(pipeline);
 
-      let httpParams: HttpParams = getHttpParams(pipeline, cluster);
-
-      return this.http.get(url + `chains/${id}/parsers`,{params: httpParams});
+      return this.http.get(this.BASE_URL + `chains/${id}/parsers`,{params: httpParams});
     }
 
-    public saveParserConfig(chainId: string, config: ChainDetailsModel, pipeline: PipelineModel = null, cluster: ClusterModel) {
-      let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+    public saveParserConfig(chainId: string, config: ChainDetailsModel, pipeline: PipelineModel = null) {
+      let httpParams: HttpParams = getHttpParams(pipeline);
 
-      let httpParams: HttpParams = getHttpParams(pipeline, cluster);
-
-      return this.http.put(url + `chains/${chainId}`, config,{params: httpParams});
+      return this.http.put(this.BASE_URL + `chains/${chainId}`, config,{params: httpParams});
     }
 
-    public getFormConfig(type: string, cluster: ClusterModel) {
-      let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+    public getFormConfig(type: string) {
+      let httpParams: HttpParams = getHttpParams(null);
 
-      let httpParams: HttpParams = getHttpParams(null, cluster);
-
-      return this.http.get(url + `parser-form-configuration/${type}`,{params: httpParams});
+      return this.http.get(this.BASE_URL + `parser-form-configuration/${type}`,{params: httpParams});
     }
 
-    public getFormConfigs(cluster: ClusterModel) {
-      let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+    public getFormConfigs() {
+      let httpParams: HttpParams = getHttpParams(null);
 
-      let httpParams: HttpParams = getHttpParams(null, cluster);
-
-      return this.http.get(url + `parser-form-configuration`,{params: httpParams});
+      return this.http.get(this.BASE_URL + `parser-form-configuration`,{params: httpParams});
     }
 
-    public getIndexMappings(cluster: ClusterModel, payload?: { filePath: string}) {
-      let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
-
-      let httpParams: HttpParams = getHttpParams(null, cluster);
+    public getIndexMappings(payload?: { filePath: string }) {
+      let httpParams: HttpParams = getHttpParams(null);
 
       let finalPayload = payload ? payload : {}
-      return this.http.post(url + `indexing`, finalPayload,{params: httpParams});
+      return this.http.post(this.BASE_URL + `indexing`, finalPayload,{params: httpParams});
     }
 
     public createChainCollapseArray(size: number) {

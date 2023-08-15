@@ -48,9 +48,7 @@ public interface ChainController {
   @GetMapping(value = API_CHAINS)
   ResponseEntity<List<ParserChainSummary>> findAll(
       @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
-      @RequestParam(name = "pipelineName", required = false) String pipelineName,
-      @ApiParam(name = "clusterId", value = "The ID of the cluster to execute request in.")
-      @RequestParam(name = "clusterId", required = false) String clusterId
+      @RequestParam(name = "pipelineName", required = false) String pipelineName
   ) throws IOException;
 
   @ApiOperation(value = "Creates a new parser chain.")
@@ -62,8 +60,6 @@ public interface ChainController {
   ResponseEntity<ParserChainSchema> create(
       @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
       @RequestParam(name = "pipelineName", required = false) String pipelineName,
-      @ApiParam(name = "clusterId", value = "The ID of the cluster to execute request in.")
-      @RequestParam(name = "clusterId", required = false) String clusterId,
       @ApiParam(name = "parserChain", value = "The parser chain to create.", required = true)
       @RequestBody ParserChainSchema chain) throws IOException;
 
@@ -76,8 +72,6 @@ public interface ChainController {
   ResponseEntity<ParserChainSchema> read(
       @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
       @RequestParam(name = "pipelineName", required = false) String pipelineName,
-      @ApiParam(name = "clusterId", value = "The ID of the cluster to execute request in.")
-      @RequestParam(name = "clusterId", required = false) String clusterId,
       @ApiParam(name = "id", value = "The ID of the parser chain to retrieve.", required = true)
       @PathVariable String id) throws IOException;
 
@@ -90,8 +84,6 @@ public interface ChainController {
   ResponseEntity<ParserChainSchema> update(
       @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
       @RequestParam(name = "pipelineName", required = false) String pipelineName,
-      @ApiParam(name = "clusterId", value = "The ID of the cluster to execute request in.")
-      @RequestParam(name = "clusterId", required = false) String clusterId,
       @ApiParam(name = "parserChain", value = "The new parser chain definition.", required = true)
       @RequestBody ParserChainSchema chain,
       @ApiParam(name = "id", value = "The ID of the parser chain to update.")
@@ -106,8 +98,6 @@ public interface ChainController {
   ResponseEntity<Void> delete(
       @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
       @RequestParam(name = "pipelineName", required = false) String pipelineName,
-      @ApiParam(name = "clusterId", value = "The ID of the cluster to execute request in.")
-      @RequestParam(name = "clusterId", required = false) String clusterId,
       @ApiParam(name = "id", value = "The ID of the parser chain to delete.", required = true)
       @PathVariable String id) throws IOException;
 
@@ -119,8 +109,6 @@ public interface ChainController {
   ResponseEntity<Map<String, Object>> getMappingsFromPath(
       @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
       @RequestParam(name = "pipelineName", required = false) String pipelineName,
-      @ApiParam(name = "clusterId", value = "The ID of the cluster to execute request in.")
-      @RequestParam(name = "clusterId", required = false) String clusterId,
       @RequestBody IndexMappingDescriptor body) throws IOException;
 
   @ApiOperation(value = "Executes a parser chain to parse sample data.")
@@ -129,8 +117,6 @@ public interface ChainController {
   })
   @PostMapping(value = API_PARSER_TEST)
   ResponseEntity<ChainTestResponse> test(
-      @ApiParam(name = "clusterId", value = "The ID of the cluster to execute request in.")
-      @RequestParam(name = "clusterId", required = false) String clusterId,
       @ApiParam(name = "testRun", value = "Describes the parser chain test to run.", required = true)
       @RequestBody ChainTestRequest testRun) throws IOException;
 

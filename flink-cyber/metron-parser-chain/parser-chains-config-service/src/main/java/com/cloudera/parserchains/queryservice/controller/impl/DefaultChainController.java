@@ -70,14 +70,14 @@ public class DefaultChainController implements ChainController {
 
   private final AppProperties appProperties;
 
-  public ResponseEntity<List<ParserChainSummary>> findAll(String pipelineName, String clusterId) throws IOException {
+  public ResponseEntity<List<ParserChainSummary>> findAll(String pipelineName) throws IOException {
     String configPath = getConfigPath(pipelineName);
 
     List<ParserChainSummary> configs = chainPersistenceService.findAll(Paths.get(configPath));
     return ResponseEntity.ok(configs);
   }
 
-  public ResponseEntity<ParserChainSchema> create(String pipelineName, String clusterId, ParserChainSchema chain)
+  public ResponseEntity<ParserChainSchema> create(String pipelineName, ParserChainSchema chain)
       throws IOException {
     String configPath = getConfigPath(pipelineName);
 
@@ -91,7 +91,7 @@ public class DefaultChainController implements ChainController {
     }
   }
 
-  public ResponseEntity<ParserChainSchema> read(String pipelineName, String clusterId, String id) throws IOException {
+  public ResponseEntity<ParserChainSchema> read(String pipelineName, String id) throws IOException {
     String configPath = getConfigPath(pipelineName);
 
     ParserChainSchema chain = chainPersistenceService.read(id, Paths.get(configPath));
@@ -102,7 +102,7 @@ public class DefaultChainController implements ChainController {
     }
   }
 
-  public ResponseEntity<ParserChainSchema> update(String pipelineName, String clusterId,
+  public ResponseEntity<ParserChainSchema> update(String pipelineName,
       ParserChainSchema chain, String id) throws IOException {
     String configPath = getConfigPath(pipelineName);
 
@@ -118,7 +118,7 @@ public class DefaultChainController implements ChainController {
     }
   }
 
-  public ResponseEntity<Void> delete(String pipelineName, String clusterId, String id) throws IOException {
+  public ResponseEntity<Void> delete(String pipelineName, String id) throws IOException {
     String configPath = getConfigPath(pipelineName);
 
     if (chainPersistenceService.delete(id, Paths.get(configPath))) {
@@ -128,7 +128,7 @@ public class DefaultChainController implements ChainController {
     }
   }
 
-  public ResponseEntity<Map<String, Object>> getMappingsFromPath(String pipelineName, String clusterId, IndexMappingDescriptor body)
+  public ResponseEntity<Map<String, Object>> getMappingsFromPath(String pipelineName, IndexMappingDescriptor body)
       throws IOException {
     final String indexPath = getIndexingPath(body.getFilePath(), pipelineName);
 
@@ -147,7 +147,7 @@ public class DefaultChainController implements ChainController {
     }
   }
 
-  public ResponseEntity<ChainTestResponse> test(String clusterId, ChainTestRequest testRun) {
+  public ResponseEntity<ChainTestResponse> test(ChainTestRequest testRun) {
     ParserChainSchema chain = testRun.getParserChainSchema();
     ChainTestResponse results = new ChainTestResponse();
     testRun.getSampleData().getSource()

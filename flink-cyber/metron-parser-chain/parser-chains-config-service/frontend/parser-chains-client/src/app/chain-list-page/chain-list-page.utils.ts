@@ -11,24 +11,14 @@
  */
 
 import {HttpParams} from "@angular/common/http";
-import {ClusterModel, PipelineModel} from "./chain.model";
+import {PipelineModel} from "./chain.model";
 
-export function getHttpParams(pipeline: PipelineModel, cluster: ClusterModel) {
+export function getHttpParams(pipeline: PipelineModel) {
   let httpParams: HttpParams = new HttpParams();
 
   if (pipeline) {
     return httpParams.set('pipelineName', pipeline.name);
   }
-  if (cluster) {
-    return httpParams.set('clusterId', cluster.id);
-  }
 
   return httpParams
-}
-
-export function getFinalBaseUrl(urlPrefix: string, baseUrl: string, cluster: ClusterModel) {
-  if (cluster) {
-    return urlPrefix + "-proxy" + baseUrl;
-  }
-  return urlPrefix + baseUrl
 }

@@ -19,7 +19,6 @@ import com.cloudera.parserchains.core.model.define.ParserID;
 import com.cloudera.parserchains.queryservice.model.describe.ParserDescriptor;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummary;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
@@ -27,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The controller responsible for operations on parsers.
@@ -39,10 +37,7 @@ public interface ParserController {
       @ApiResponse(code = 200, message = "A list of all parser types.")
   })
   @GetMapping(value = API_PARSER_TYPES)
-  ResponseEntity<List<ParserSummary>> findAll(
-      @ApiParam(name = "clusterId", value = "The ID of the cluster to execute request in.")
-      @RequestParam(name = "clusterId", required = false) String clusterId
-  ) throws IOException;
+  ResponseEntity<List<ParserSummary>> findAll() throws IOException;
 
   @ApiOperation(value = "Describes the configuration parameters for all available parsers.")
   @ApiResponses(value = {
@@ -50,9 +45,6 @@ public interface ParserController {
       @ApiResponse(code = 404, message = "Unable to retrieve.")
   })
   @GetMapping(value = API_PARSER_FORM_CONFIG)
-  ResponseEntity<Map<ParserID, ParserDescriptor>> describeAll(
-      @ApiParam(name = "clusterId", value = "The ID of the cluster to execute request in.")
-      @RequestParam(name = "clusterId", required = false) String clusterId
-  ) throws IOException;
+  ResponseEntity<Map<ParserID, ParserDescriptor>> describeAll() throws IOException;
 
 }

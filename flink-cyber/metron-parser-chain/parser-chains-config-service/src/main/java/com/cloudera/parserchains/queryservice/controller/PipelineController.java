@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.Set;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 /**
  * The controller responsible for operations on pipelines.
@@ -31,6 +33,13 @@ public interface PipelineController {
       @ApiResponse(code = 404, message = "No valid pipelines found.")
   })
   @GetMapping
-  ResponseEntity<Set<String>> findAll(String clusterId) throws IOException;
+  ResponseEntity<Set<String>> findAll() throws IOException;
+
+  @ApiOperation(value = "Allows to create a new pipeline.")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "A new list of all pipelines.")
+  })
+  @PostMapping("/{pipelineName}")
+  ResponseEntity<Set<String>> createPipeline(@PathVariable String pipelineName) throws IOException;
 
 }

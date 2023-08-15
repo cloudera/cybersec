@@ -24,7 +24,6 @@ import {getChainPageState} from './chain-page.reducers';
 import {denormalizeParserConfig, normalizeParserConfig} from './chain-page.utils';
 import {CustomFormConfig} from './components/custom-form/custom-form.component';
 import {PipelineService} from "../services/pipeline.service";
-import {ClusterService} from "../services/cluster.service";
 
 @Injectable()
 export class ChainPageEffects {
@@ -33,16 +32,14 @@ export class ChainPageEffects {
     private store$: Store<any>,
     private messageService: NzMessageService,
     private chainPageService: ChainPageService,
-    private pipelineService: PipelineService,
-    private clusterService: ClusterService
+    private pipelineService: PipelineService
   ) {}
 
   @Effect()
   loadChainDetails$: Observable<Action> = this.actions$.pipe(
     ofType(fromActions.LOAD_CHAIN_DETAILS),
     switchMap((action: fromActions.LoadChainDetailsAction) => {
-      return this.chainPageService.getChain(action.payload.id,
-          this.pipelineService.getCurrentPipeline(), this.clusterService.getCurrentCluster()).pipe(
+      return this.chainPageService.getChain(action.payload.id, this.pipelineService.getCurrentPipeline()).pipe(
         map((chain: ChainDetailsModel) => {
           const normalizedParserConfig = normalizeParserConfig(chain);
           return new fromActions.LoadChainDetailsSuccessAction(
@@ -67,8 +64,7 @@ export class ChainPageEffects {
     switchMap(([action, state]) => {
       const chainId = (action as fromActions.SaveParserConfigAction).payload.chainId;
       const config = denormalizeParserConfig(state.chains[chainId], state);
-      return this.chainPageService.saveParserConfig(chainId, config,
-          this.pipelineService.getCurrentPipeline(), this.clusterService.getCurrentCluster()).pipe(
+      return this.chainPageService.saveParserConfig(chainId, config, this.pipelineService.getCurrentPipeline()).pipe(
         map(() => {
           return new fromActions.SaveParserConfigSuccessAction();
         }),
@@ -84,7 +80,7 @@ export class ChainPageEffects {
   getFormConfig$: Observable<Action> = this.actions$.pipe(
     ofType(fromActions.GET_FORM_CONFIG),
     switchMap((action: fromActions.GetFormConfigAction) => {
-      return this.chainPageService.getFormConfig(action.payload.type, this.clusterService.getCurrentCluster()).pipe(
+      return this.chainPageService.getFormConfig(action.payload.type).pipe(
         map((formConfig: CustomFormConfig[]) => {
           return new fromActions.GetFormConfigSuccessAction({
             parserType: action.payload.type,
@@ -103,7 +99,7 @@ export class ChainPageEffects {
   getFormConfigs$: Observable<Action> = this.actions$.pipe(
     ofType(fromActions.GET_FORM_CONFIGS),
     switchMap((action: fromActions.GetFormConfigsAction) => {
-      return this.chainPageService.getFormConfigs(this.clusterService.getCurrentCluster()).pipe(
+      return this.chainPageService.getFormConfigs().pipe(
         map((formConfigs: { [key: string]: CustomFormConfig[] }) => {
           return new fromActions.GetFormConfigsSuccessAction({
             formConfigs
@@ -121,7 +117,7 @@ export class ChainPageEffects {
   getIndexMappings$: Observable<Action> = this.actions$.pipe(
     ofType(fromActions.GET_INDEX_MAPPINGS),
     switchMap((action: fromActions.GetIndexMappingsAction) => {
-      return this.chainPageService.getIndexMappings(this.clusterService.getCurrentCluster(), action.payload).pipe(
+      return this.chainPageService.getIndexMappings(action.payload).pipe(
         map((response:{path:string, result:Map<string, object>}) => {
             return new fromActions.GetIndexMappingsSuccessAction({
               path: response.path, result: response.result

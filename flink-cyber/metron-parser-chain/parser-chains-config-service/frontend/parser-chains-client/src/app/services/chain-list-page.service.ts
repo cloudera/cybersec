@@ -11,56 +11,44 @@
  */
 
 import {HttpClient, HttpParams} from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 
-import {ChainModel, ChainOperationalModel, ClusterModel, PipelineModel} from '../chain-list-page/chain.model';
-import {
-    getFinalBaseUrl,
-    getHttpParams
-} from "../chain-list-page/chain-list-page.utils";
+import {ChainModel, ChainOperationalModel, PipelineModel} from '../chain-list-page/chain.model';
+import {getHttpParams} from "../chain-list-page/chain-list-page.utils";
 
 @Injectable({
     providedIn: 'root'
 })
 export class ChainListPageService {
 
-    private readonly URL_PREFIX = '/api/v1';
-    private readonly BASE_URL = '/parserconfig/';
+    private readonly BASE_URL = '/api/v1/parserconfig/';
 
     constructor(
       private http: HttpClient
     ) {}
 
-    public createChain(chain: ChainOperationalModel, pipeline: PipelineModel = null, cluster: ClusterModel) {
-        let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+    public createChain(chain: ChainOperationalModel, pipeline: PipelineModel = null) {
+        let httpParams: HttpParams = getHttpParams(pipeline);
 
-        let httpParams: HttpParams = getHttpParams(pipeline, cluster);
-
-        return this.http.post<ChainModel>(url + 'chains', chain,{params: httpParams});
+        return this.http.post<ChainModel>(this.BASE_URL + 'chains', chain,{params: httpParams});
     }
 
-    public getChains(pipeline: PipelineModel = null, cluster: ClusterModel, params = null) {
-        let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+    public getChains(pipeline: PipelineModel = null, params = null) {
+        let httpParams: HttpParams = getHttpParams(pipeline);
 
-        let httpParams: HttpParams = getHttpParams(pipeline, cluster);
-
-        return this.http.get<ChainModel[]>(url + 'chains',{params: httpParams});
+        return this.http.get<ChainModel[]>(this.BASE_URL + 'chains',{params: httpParams});
     }
 
-    public deleteChain(chainId: string, pipeline: PipelineModel = null, cluster: ClusterModel) {
-        let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+    public deleteChain(chainId: string, pipeline: PipelineModel = null) {
+        let httpParams: HttpParams = getHttpParams(pipeline);
 
-        let httpParams: HttpParams = getHttpParams(pipeline, cluster);
-
-        return this.http.delete(url + 'chains/' + chainId,{params: httpParams});
+        return this.http.delete(this.BASE_URL + 'chains/' + chainId,{params: httpParams});
     }
 
-    public getPipelines(cluster: ClusterModel) {
-        let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+    public getPipelines() {
+        let httpParams: HttpParams = getHttpParams(null);
 
-        let httpParams: HttpParams = getHttpParams(null, cluster);
-
-        return this.http.delete(url + 'pipeline', {params: httpParams});
+        return this.http.delete(this.BASE_URL + 'pipeline', {params: httpParams});
     }
 
 }

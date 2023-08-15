@@ -13,20 +13,19 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 
-import {ClusterModel, PipelineModel} from '../chain-list-page/chain.model';
+import {PipelineModel} from '../chain-list-page/chain.model';
 import {map, take} from "rxjs/operators";
 import {Observable} from "rxjs";
 import {select, Store} from "@ngrx/store";
 import {ChainListPageState, getCurrentPipeline} from "../chain-list-page/chain-list-page.reducers";
-import {getFinalBaseUrl, getHttpParams} from "../chain-list-page/chain-list-page.utils";
+import {getHttpParams} from "../chain-list-page/chain-list-page.utils";
 
 @Injectable({
     providedIn: 'root'
 })
 export class PipelineService {
 
-    private readonly URL_PREFIX = '/api/v1';
-    private readonly BASE_URL = '/pipeline';
+    private readonly BASE_URL = '/api/v1/pipeline';
 
     currentPipeline$: Observable<PipelineModel>;
 
@@ -37,12 +36,10 @@ export class PipelineService {
         this.currentPipeline$ = store.pipe(select(getCurrentPipeline))
     }
 
-    public getPipelines(cluster: ClusterModel) {
-        let url = getFinalBaseUrl(this.URL_PREFIX, this.BASE_URL, cluster);
+    public getPipelines() {
+        let httpParams: HttpParams = getHttpParams(null);
 
-        let httpParams: HttpParams = getHttpParams(null, cluster);
-
-        return this.http.get<string[]>(url, {params: httpParams})
+        return this.http.get<string[]>(this.BASE_URL, {params: httpParams})
             .pipe(map(strArr => strArr.map(str => {
                 return {name: str} as PipelineModel
             })));
