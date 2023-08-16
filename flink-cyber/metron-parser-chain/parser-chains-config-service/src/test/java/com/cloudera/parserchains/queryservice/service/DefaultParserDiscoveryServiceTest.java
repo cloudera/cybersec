@@ -98,7 +98,8 @@ public class DefaultParserDiscoveryServiceTest {
    *     "multiple" : true,
    *     "defaultValue" : [ {
    *       "delimiter" : ","
-   *     } ]
+   *     } ],
+   *     "outputName" : false
    *   }, {
    *     "name" : "fieldIndex",
    *     "type" : "text",
@@ -107,7 +108,8 @@ public class DefaultParserDiscoveryServiceTest {
    *     "required" : false,
    *     "multipleValues" : true,
    *     "path" : "config.outputField",
-   *     "multiple" : true
+   *     "multiple" : true,
+   *     "outputName" : false
    *   }, {
    *     "name" : "fieldName",
    *     "type" : "text",
@@ -116,7 +118,8 @@ public class DefaultParserDiscoveryServiceTest {
    *     "required" : false,
    *     "multipleValues" : true,
    *     "path" : "config.outputField",
-   *     "multiple" : true
+   *     "multiple" : true,
+   *     "outputName" : true
    *   }, {
    *     "name" : "inputField",
    *     "type" : "text",
@@ -128,7 +131,8 @@ public class DefaultParserDiscoveryServiceTest {
    *     "multiple" : true,
    *     "defaultValue" : [ {
    *       "inputField" : "original_string"
-   *     } ]
+   *     } ],
+   *     "outputName" : false
    *   }, {
    *     "name" : "trim",
    *     "type" : "text",
@@ -140,7 +144,8 @@ public class DefaultParserDiscoveryServiceTest {
    *     "multiple" : true,
    *     "defaultValue" : [ {
    *       "trim" : "true"
-   *     } ]
+   *     } ],
+   *     "outputName" : false
    *   } ]
    * }
    */
@@ -168,7 +173,8 @@ public class DefaultParserDiscoveryServiceTest {
    *       "required" : true,
    *       "multipleValues" : true,
    *       "path" : "config.fieldToRemove",
-   *       "multiple" : true
+   *       "multiple" : true,
+   *       "outputName" : false
    *     } ]
    *   },
    *   "com.cloudera.parserchains.parsers.DelimitedTextParser" : {
@@ -185,7 +191,8 @@ public class DefaultParserDiscoveryServiceTest {
    *       "multiple" : true,
    *       "defaultValue" : [ {
    *         "delimiter" : ","
-   *       } ]
+   *       } ],
+   *       "outputName" : false
    *     }, {
    *       "name" : "fieldIndex",
    *       "type" : "text",
@@ -194,7 +201,8 @@ public class DefaultParserDiscoveryServiceTest {
    *       "required" : false,
    *       "multipleValues" : true,
    *       "path" : "config.outputField",
-   *       "multiple" : true
+   *       "multiple" : true,
+   *       "outputName" : false
    *     }, {
    *       "name" : "fieldName",
    *       "type" : "text",
@@ -203,7 +211,8 @@ public class DefaultParserDiscoveryServiceTest {
    *       "required" : false,
    *       "multipleValues" : true,
    *       "path" : "config.outputField",
-   *       "multiple" : true
+   *       "multiple" : true,
+   *       "outputName" : true
    *     }, {
    *       "name" : "inputField",
    *       "type" : "text",
@@ -215,7 +224,8 @@ public class DefaultParserDiscoveryServiceTest {
    *       "multiple" : true,
    *       "defaultValue" : [ {
    *         "inputField" : "original_string"
-   *       } ]
+   *       } ],
+   *       "outputName" : false
    *     }, {
    *       "name" : "trim",
    *       "type" : "text",
@@ -227,7 +237,8 @@ public class DefaultParserDiscoveryServiceTest {
    *       "multiple" : true,
    *       "defaultValue" : [ {
    *         "trim" : "true"
-   *       } ]
+   *       } ],
+   *       "outputName" : false
    *     } ]
    *   }
    * }

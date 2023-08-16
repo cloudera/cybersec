@@ -31,9 +31,11 @@ public class ApplicationConstants {
   public static final String PARSER_CONFIG_BASE_URL = API_BASE_URL + "/parserconfig";
   // Endpoint names
   public static final String API_CHAINS = "/chains";
+  public static final String API_INDEXING = "/indexing";
   public static final String API_PARSER_FORM_CONFIG = "/parser-form-configuration";
   public static final String API_PARSER_TYPES = "/parser-types";
   public static final String API_PARSER_TEST = "/tests";
+  public static final String API_PARSER_TEST_SAMPLES = API_PARSER_TEST + "/samples";
   // URLs
   public static final String API_CHAINS_URL = PARSER_CONFIG_BASE_URL + API_CHAINS;
   public static final String API_CHAINS_CREATE_URL = API_CHAINS_URL;

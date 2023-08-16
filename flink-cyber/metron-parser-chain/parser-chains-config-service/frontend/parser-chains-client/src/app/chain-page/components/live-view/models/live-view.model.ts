@@ -23,6 +23,13 @@ export interface EntryParsingResultModel {
   parserResults?: ParserResultsModel[];
 }
 
+export enum ParserFieldStatus {
+  NEW,
+  DIFF,
+  REMOVED,
+  SAME
+}
+
 export interface ParserResultsModel {
   output: {};
   log: {

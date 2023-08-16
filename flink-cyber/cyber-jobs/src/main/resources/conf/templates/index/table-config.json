@@ -1,0 +1,14 @@
+{
+  "hive_table": [
+    {
+      "name": "full_hostname",
+      "type": "string"
+    },
+    {
+      "name": "action",
+      "type": "string"
+    }
+  ],
+  "another_hive_table": [
+  ]
+}
