@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.parserchains.queryservice.controller;
+package com.cloudera.parserchains.queryservice.controller.impl;
 
 import com.cloudera.parserchains.core.catalog.WidgetType;
 import com.cloudera.parserchains.core.model.define.ParserID;
@@ -51,7 +51,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class ParserControllerTest {
+public class DefaultParserControllerTest {
 
   @Autowired
   private MockMvc mvc;

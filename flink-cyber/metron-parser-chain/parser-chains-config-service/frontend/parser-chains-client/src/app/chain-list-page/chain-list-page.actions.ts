@@ -12,7 +12,7 @@
 
 import { Action } from '@ngrx/store';
 
-import { ChainModel, ChainOperationalModel } from './chain.model';
+import {ChainModel, ChainOperationalModel, PipelineModel} from './chain.model';
 
 export const LOAD_CHAINS = '[Chain List] load all start';
 export const LOAD_CHAINS_SUCCESS = '[Chain List] load all success';
@@ -28,6 +28,10 @@ export const SHOW_DELETE_MODAL = '[Chain List] show delete modal';
 export const HIDE_DELETE_MODAL = '[Chain List] hide delete modal';
 export const CREATE_CHAIN_SUCCESS = '[Chain List] create item success';
 export const CREATE_CHAIN_FAIL = '[Chain List] create item fail';
+export const LOAD_PIPELINES = '[Chain List] load pipelines start';
+export const LOAD_PIPELINES_SUCCESS = '[Chain List] load pipelines success';
+export const LOAD_PIPELINES_FAIL = '[Chain List] load pipelines fail';
+export const PIPELINE_CHANGED = '[Chain List] pipeline changed';
 
 export class NoopChainAction implements Action {
   readonly type: '';
@@ -102,6 +106,26 @@ export class CreateChainFailAction implements Action {
     constructor(public error: { message: string }) {}
   }
 
+export class LoadPipelinesAction implements Action {
+    readonly type = LOAD_PIPELINES;
+    constructor() {}
+  }
+
+export class LoadPipelinesSuccessAction implements Action {
+    readonly type = LOAD_PIPELINES_SUCCESS;
+    constructor(public pipelines: PipelineModel[]) {}
+  }
+
+export class LoadPipelinesFailAction implements Action {
+    readonly type = LOAD_PIPELINES_FAIL;
+    constructor(public error: { message: string }) {}
+  }
+
+export class PipelineChangedAction implements Action {
+    readonly type = PIPELINE_CHANGED;
+    constructor(public newPipeline: PipelineModel) {}
+}
+
 export type ChainListAction = LoadChainsAction
   | LoadChainsSuccessAction
   | LoadChainsFailAction
@@ -116,4 +140,8 @@ export type ChainListAction = LoadChainsAction
   | HideCreateModalAction
   | CreateChainSuccessAction
   | CreateChainFailAction
-  | NoopChainAction;
+  | NoopChainAction
+  | LoadPipelinesAction
+  | LoadPipelinesSuccessAction
+  | LoadPipelinesFailAction
+  | PipelineChangedAction;

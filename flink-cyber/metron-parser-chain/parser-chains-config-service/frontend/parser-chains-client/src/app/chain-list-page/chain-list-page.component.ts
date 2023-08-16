@@ -18,15 +18,15 @@ import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
 import {switchMap, take} from 'rxjs/operators';
 
 import * as fromActions from './chain-list-page.actions';
-import {LoadChainsAction} from './chain-list-page.actions';
+import {LoadChainsAction, LoadPipelinesAction} from './chain-list-page.actions';
 import {
   ChainListPageState,
   getChains,
-  getCreateModalVisible, getDeleteChain,
+  getCreateModalVisible, getCurrentPipeline, getDeleteChain,
   getDeleteModalVisible,
-  getLoading,
+  getLoading, getPipelines,
 } from './chain-list-page.reducers';
-import {ChainModel, ChainOperationalModel} from './chain.model';
+import {ChainModel, ChainOperationalModel, PipelineModel} from './chain.model';
 import {NzMessageService} from "ng-zorro-antd/message";
 
 @Component({
@@ -40,10 +40,23 @@ export class ChainListPageComponent implements OnInit {
   chains$: Observable<ChainModel[]>;
   isChainDeleteModalVisible$: Observable<boolean>;
   deleteChainItem$: Observable<ChainModel>;
+  pipelineList$: Observable<PipelineModel[]>;
   totalRecords = 200;
   chainDataSorted$: Observable<ChainModel[]>;
   sortDescription$: BehaviorSubject<{ key: string, value: string }> = new BehaviorSubject({key: 'name', value: ''});
   newChainForm: FormGroup;
+  private _selectedPipeline: PipelineModel;
+
+  get selectedPipeline(): PipelineModel {
+    let value;
+    this.store.pipe(select(getCurrentPipeline)).pipe(take(1)).subscribe(v => value = v);
+    return value;
+  }
+
+  set selectedPipeline(value: PipelineModel) {
+    this._selectedPipeline = value;
+  }
+
 
   constructor(
     private store: Store<ChainListPageState>,
@@ -51,12 +64,14 @@ export class ChainListPageComponent implements OnInit {
     private route: ActivatedRoute,
     private messageService: NzMessageService,
   ) {
+    store.dispatch(new LoadPipelinesAction());
     store.dispatch(new LoadChainsAction());
     this.chains$ = store.pipe(select(getChains));
     this.isOkLoading$ = store.pipe(select(getLoading));
     this.isChainCreateModalVisible$ = store.pipe(select(getCreateModalVisible));
     this.isChainDeleteModalVisible$ = store.pipe(select(getDeleteModalVisible));
     this.deleteChainItem$ = this.store.pipe(select(getDeleteChain));
+    this.pipelineList$ = this.store.pipe(select(getPipelines));
 
     this.chainDataSorted$ = combineLatest([
       this.chains$,
@@ -64,6 +79,11 @@ export class ChainListPageComponent implements OnInit {
     ]).pipe(
       switchMap(([chains, sortDescription]) => this.sortTable(chains, sortDescription))
     );
+  }
+
+  pipelineChanged($event: PipelineModel) {
+    this.store.dispatch(new fromActions.PipelineChangedAction($event))
+    this.store.dispatch(new LoadChainsAction());
   }
 
   get chainName() {
