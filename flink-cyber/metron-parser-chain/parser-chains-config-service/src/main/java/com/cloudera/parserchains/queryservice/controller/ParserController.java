@@ -46,10 +46,10 @@ import static com.cloudera.parserchains.queryservice.common.ApplicationConstants
 public class ParserController {
 
   @Autowired
-  ParserDiscoveryService parserDiscoveryService;
+  private ParserDiscoveryService parserDiscoveryService;
 
   @Autowired
-  AppProperties appProperties;
+  private AppProperties appProperties;
 
   @ApiOperation(value = "Retrieves all available parsers.")
   @ApiResponses(value = {

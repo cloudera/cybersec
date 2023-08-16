@@ -16,6 +16,21 @@ export enum SampleDataType {
     HDFS = 'hdfs'
 }
 
+export enum SampleTestStatus {
+    UNKNOWN,
+    SUCCESS ,
+    FAIL
+}
+
+export interface SampleDataInternalModel {
+    id: number
+    name: string;
+    description: string;
+    source: string;
+    expectedFailure: boolean;
+    expectedResult: string;
+}
+
 export interface SampleDataModel {
     type: SampleDataType;
     source: string;

@@ -12,7 +12,18 @@
 
 <div *ngIf='results'>
   <button nz-button (click)="downloadEntries()" class="download-btn"><i nz-icon nzType="download" nzTheme="outline"></i>Download Output</button>
+  <button nz-button (click)="copyOutput()" class="download-btn"><i nz-icon nzType="copy" nzTheme="outline"></i>Copy to Clipboard</button>
   <div *ngFor="let entry of results; index as i">
+    <button nz-button
+            class="parser-by-parser-button"
+            *ngIf="parserByParserViewId === null && entry.parserResults"
+            (click)="enableParserByParserView(i)">Parser-by-Parser View</button>
+    <button nz-button
+            class="parser-by-parser-button"
+            *ngIf="parserByParserViewId === i" (click)="parserByParserViewId = null">
+      <span nz-icon nzType="left"></span>
+      Return to Message Results View
+    </button>
     <nz-card [ngClass]="entry.log.type" [nzBodyStyle]="{ padding: 0 }" *ngIf="parserByParserViewId === null">
       <div nz-row class="output">
         <div nz-col nzSpan="2" class="label">Output</div>
@@ -27,14 +38,9 @@
         <div nz-col nzSpan="2" class="label">Log</div>
         <div nz-col nzSpan="22" class="message">{{ entry.log.message }}</div>
         <button nz-button *ngIf="entry.log.type === 'error'" (click)="onInvestigateParserClicked(entry.log.parserId)">Click to see failed Parser</button>
-        <button nz-button *ngIf="entry.parserResults" (click)="enableParserByParserView(i)">Parser-by-Parser View</button>
         <app-stack-trace *ngIf="entry.log.stackTrace" [stackTraceMsg]="entry.log.stackTrace"></app-stack-trace>
       </div>
     </nz-card>
-    <button *ngIf="parserByParserViewId === i" nz-button nzType="link" (click)="parserByParserViewId = null" style="padding-left: 0; margin-bottom: 1rem;">
-      <i nz-icon nzType="left"></i>
-      Return to Message Results View
-    </button>
     <app-parser-by-parser *ngIf="parserByParserViewId === i"
                           [parserResults]="entry.parserResults"
                           [logMessage]="entry.log.message"
