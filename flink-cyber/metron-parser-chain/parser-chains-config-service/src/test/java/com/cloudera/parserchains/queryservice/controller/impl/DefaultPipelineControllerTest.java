@@ -20,6 +20,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import com.cloudera.parserchains.queryservice.model.exec.PipelineResult;
 import com.cloudera.parserchains.queryservice.service.PipelineService;
 import java.io.File;
 import java.util.HashMap;
@@ -48,9 +49,9 @@ public class DefaultPipelineControllerTest {
 
   @Test
   public void returns_list_of_all_pipelines() throws Exception {
-    final Map<String, Path> givenResult = new HashMap<>();
-    givenResult.put("test", Path.fromLocalFile(new File(".")));
-    givenResult.put("test2", Path.fromLocalFile(new File("..")));
+    final Map<String, PipelineResult> givenResult = new HashMap<>();
+    givenResult.put("test", new PipelineResult("test", Path.fromLocalFile(new File("."))));
+    givenResult.put("test2", new PipelineResult("test2", Path.fromLocalFile(new File(".."))));
 
     given(pipelineService.findAll()).willReturn(givenResult);
     mvc.perform(MockMvcRequestBuilders.get(PIPELINE_BASE_URL)

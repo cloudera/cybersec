@@ -13,7 +13,6 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 
-import {PipelineModel} from '../chain-list-page/chain.model';
 import {map, take} from "rxjs/operators";
 import {Observable} from "rxjs";
 import {select, Store} from "@ngrx/store";
@@ -27,7 +26,7 @@ export class PipelineService {
 
     private readonly BASE_URL = '/api/v1/pipeline';
 
-    currentPipeline$: Observable<PipelineModel>;
+    currentPipeline$: Observable<string>;
 
     constructor(
         private http: HttpClient,
@@ -40,15 +39,45 @@ export class PipelineService {
         let httpParams: HttpParams = getHttpParams(null);
 
         return this.http.get<string[]>(this.BASE_URL, {params: httpParams})
-            .pipe(map(strArr => strArr.map(str => {
-                return {name: str} as PipelineModel
+            .pipe(map(strArr => strArr.map(pipelineName => {
+                return pipelineName
+            })));
+    }
+
+    public createPipeline(pipelineName: string) {
+        let httpParams: HttpParams = getHttpParams(null);
+
+        return this.http.post<string[]>(this.BASE_URL + "/" + pipelineName,
+            null,{params: httpParams})
+            .pipe(map(strArr => strArr.map(pipelineName => {
+                return pipelineName
+            })));
+    }
+
+    public renamePipeline(pipelineName: string, newPipelineName: string) {
+        let httpParams: HttpParams = getHttpParams(null);
+        httpParams = httpParams.set('newName', newPipelineName)
+
+        return this.http.put<string[]>(this.BASE_URL + "/" + pipelineName,
+            null,{params: httpParams})
+            .pipe(map(strArr => strArr.map(pipelineName => {
+                return pipelineName
+            })));
+    }
+
+    public deletePipeline(pipelineName: string) {
+        let httpParams: HttpParams = getHttpParams(null);
+
+        return this.http.delete<string[]>(this.BASE_URL + "/" + pipelineName, {params: httpParams})
+            .pipe(map(strArr => strArr.map(pipelineName => {
+                return pipelineName
             })));
     }
 
     public getCurrentPipeline() {
-        let currentPipeline: PipelineModel;
+        let currentPipeline: string;
         this.currentPipeline$.pipe(take(1))
-            .subscribe(value => currentPipeline = value);
+            .subscribe(pipelineName => currentPipeline = pipelineName);
         return currentPipeline;
     }
 

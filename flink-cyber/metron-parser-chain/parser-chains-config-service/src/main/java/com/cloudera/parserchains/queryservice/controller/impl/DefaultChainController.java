@@ -23,6 +23,7 @@ import com.cloudera.parserchains.queryservice.model.describe.IndexMappingDescrip
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestRequest;
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestResponse;
 import com.cloudera.parserchains.queryservice.model.exec.ParserResult;
+import com.cloudera.parserchains.queryservice.model.exec.PipelineResult;
 import com.cloudera.parserchains.queryservice.model.exec.ResultLog;
 import com.cloudera.parserchains.queryservice.model.summary.ParserChainSummary;
 import com.cloudera.parserchains.queryservice.service.ChainBuilderService;
@@ -201,6 +202,7 @@ public class DefaultChainController implements ChainController {
 
     return Optional.ofNullable(pipelineService.findAll())
         .map(pipelineMap -> pipelineMap.get(pipelineName))
+        .map(PipelineResult::getPath)
         .map(Path::getPath)
         .orElseGet(defaultPathSupplier);
   }

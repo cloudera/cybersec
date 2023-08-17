@@ -14,12 +14,12 @@ package com.cloudera.parserchains.queryservice.controller.impl;
 
 import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PIPELINE_BASE_URL;
 import com.cloudera.parserchains.queryservice.controller.PipelineController;
+import com.cloudera.parserchains.queryservice.model.exec.PipelineResult;
 import com.cloudera.parserchains.queryservice.service.PipelineService;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.apache.flink.core.fs.Path;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,7 +32,7 @@ public class DefaultPipelineController implements PipelineController {
   private final PipelineService pipelineService;
 
   public ResponseEntity<Set<String>> findAll() throws IOException {
-    Map<String, Path> pipelineMap = pipelineService.findAll();
+    Map<String, PipelineResult> pipelineMap = pipelineService.findAll();
     if (pipelineMap == null || pipelineMap.isEmpty()) {
       return ResponseEntity.notFound().build();
     }
@@ -40,8 +40,27 @@ public class DefaultPipelineController implements PipelineController {
   }
 
   public ResponseEntity<Set<String>> createPipeline(String pipelineName) throws IOException {
-    Set<String> pipelineList = pipelineService.createPipeline(pipelineName);
-    return ResponseEntity.ok(pipelineList);
+    PipelineResult newPipeline = pipelineService.createPipeline(pipelineName);
+    if (newPipeline != null) {
+      return findAll();
+    }
+    return ResponseEntity.badRequest().build();
+  }
+
+  public ResponseEntity<Set<String>> renamePipeline(String pipelineName, String newName) throws IOException {
+    PipelineResult updatedPipeline = pipelineService.renamePipeline(pipelineName, newName);
+    if (updatedPipeline != null) {
+      return findAll();
+    }
+    return ResponseEntity.badRequest().build();
+  }
+
+  public ResponseEntity<Set<String>> deletePipeline(String pipelineName) throws IOException {
+    boolean pipelineDeleted = pipelineService.deletePipeline(pipelineName);
+    if (pipelineDeleted) {
+      return findAll();
+    }
+    return ResponseEntity.badRequest().build();
   }
 
 }

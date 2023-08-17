@@ -15,7 +15,6 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 
 import {ChainDetailsModel} from '../chain-page/chain-page.models';
-import {PipelineModel} from "../chain-list-page/chain.model";
 import {getHttpParams} from "../chain-list-page/chain-list-page.utils";
 
 @Injectable({
@@ -31,19 +30,19 @@ export class ChainPageService {
       private http: HttpClient
     ) {}
 
-    public getChain(id: string, pipeline: PipelineModel = null) {
+    public getChain(id: string, pipeline: string = null) {
       let httpParams: HttpParams = getHttpParams(pipeline);
 
       return this.http.get(this.BASE_URL + `chains/${id}`,{params: httpParams});
     }
 
-    public getParsers(id: string, pipeline: PipelineModel = null) {
+    public getParsers(id: string, pipeline: string = null) {
       let httpParams: HttpParams = getHttpParams(pipeline);
 
       return this.http.get(this.BASE_URL + `chains/${id}/parsers`,{params: httpParams});
     }
 
-    public saveParserConfig(chainId: string, config: ChainDetailsModel, pipeline: PipelineModel = null) {
+    public saveParserConfig(chainId: string, config: ChainDetailsModel, pipeline: string = null) {
       let httpParams: HttpParams = getHttpParams(pipeline);
 
       return this.http.put(this.BASE_URL + `chains/${chainId}`, config,{params: httpParams});
