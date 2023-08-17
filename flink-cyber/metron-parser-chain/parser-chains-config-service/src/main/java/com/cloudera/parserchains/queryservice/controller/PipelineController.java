@@ -18,9 +18,12 @@ import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import java.util.Set;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The controller responsible for operations on pipelines.
@@ -41,5 +44,21 @@ public interface PipelineController {
   })
   @PostMapping("/{pipelineName}")
   ResponseEntity<Set<String>> createPipeline(@PathVariable String pipelineName) throws IOException;
+
+
+  @ApiOperation(value = "Allows to rename existing pipeline.")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "A new list of all pipelines.")
+  })
+  @PutMapping("/{pipelineName}")
+  ResponseEntity<Set<String>> renamePipeline(@PathVariable String pipelineName,
+      @RequestParam String newName) throws IOException;
+
+  @ApiOperation(value = "Allows to delete existing pipeline.")
+  @ApiResponses(value = {
+      @ApiResponse(code = 200, message = "A new list of all pipelines.")
+  })
+  @DeleteMapping("/{pipelineName}")
+  ResponseEntity<Set<String>> deletePipeline(@PathVariable String pipelineName) throws IOException;
 
 }

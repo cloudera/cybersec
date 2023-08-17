@@ -43,6 +43,24 @@
   </form>
 </nz-modal>
 <nz-modal
+  [nzVisible]="isPipelineRenameModalVisible$ | async"
+  nzTitle="Rename Pipeline"
+  (nzOnCancel)="handlePipelineRenameModalCancel()"
+  (nzOnOk)="renamePipeline()"
+  [nzOkDisabled]="!newPipelineName.valid"
+  [nzOkLoading]="isOkLoading$ | async"
+>
+  <form nz-form *nzModalContent [formGroup]="renamePipelineForm" (ngSubmit)='renamePipeline()' [nzLayout]="'vertical'">
+    <nz-form-item>
+      <nz-form-label>Pipeline name:</nz-form-label>
+      <nz-form-control nzErrorTip="Pipeline Name is Required with at least 3 characters" nzSpan="14">
+        <input nz-input data-qe-id="pipeline-name" formControlName="pipelineName" type="text" id="pipelineName"
+               placeholder="{{selectedPipeline$ | async}}">
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>
+<nz-modal
   *ngIf="deleteChainItem$ | async as deleteChainItem"
   [nzVisible]="isChainDeleteModalVisible$ | async"
   [nzTitle]="modalTitle"
@@ -64,13 +82,36 @@
   <nz-select
           nzShowSearch
           nzAllowClear
+          [nzDropdownRender]="newPipelineRenderTemplate"
           nzPlaceHolder="Select a pipeline"
-          class="pipeline-select-dropdown"
+          class="pipeline-select-dropdown pipeline-element"
           [nzDisabled]="(pipelineList$ | async) && (pipelineList$ | async).length < 1"
-          [(ngModel)]="selectedPipeline"
+          [ngModel]="selectedPipeline$ | async"
           (ngModelChange)="pipelineChanged($event)">
-    <nz-option *ngFor="let item of (pipelineList$ | async)" [nzLabel]="item.name" [nzValue]="item"></nz-option>
+    <nz-option *ngFor="let item of (pipelineList$ | async)" [nzLabel]="item" [nzValue]="item"></nz-option>
   </nz-select>
+  <ng-template #newPipelineRenderTemplate>
+    <nz-divider class="add-pipeline-divider"></nz-divider>
+    <div class="add-pipeline-container">
+      <input type="text" nz-input #inputElement />
+      <a class="add-pipeline-button" (click)="createPipeline(inputElement)">
+        <span nz-icon nzType="plus"></span>
+        Add pipeline
+      </a>
+    </div>
+  </ng-template>
+  <button *ngIf="selectedPipeline$ | async"
+          class="pipeline-element"
+          nz-tooltip="Delete selected pipeline"
+          nz-button
+          nzType="default"
+          (click)="deletePipeline()">Delete</button>
+  <button *ngIf="selectedPipeline$ | async"
+          class="pipeline-element"
+          nz-tooltip="Rename selected pipeline"
+          nz-button
+          nzType="default"
+          (click)="showPipelineRenameModal()">Rename</button>
 </div>
 
 <nz-card nzTitle="Parser Chains" [nzExtra]="AddButton">

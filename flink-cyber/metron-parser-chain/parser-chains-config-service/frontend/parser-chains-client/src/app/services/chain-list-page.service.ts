@@ -13,7 +13,7 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 
-import {ChainModel, ChainOperationalModel, PipelineModel} from '../chain-list-page/chain.model';
+import {ChainModel, ChainOperationalModel} from '../chain-list-page/chain.model';
 import {getHttpParams} from "../chain-list-page/chain-list-page.utils";
 
 @Injectable({
@@ -27,19 +27,19 @@ export class ChainListPageService {
       private http: HttpClient
     ) {}
 
-    public createChain(chain: ChainOperationalModel, pipeline: PipelineModel = null) {
+    public createChain(chain: ChainOperationalModel, pipeline: string = null) {
         let httpParams: HttpParams = getHttpParams(pipeline);
 
         return this.http.post<ChainModel>(this.BASE_URL + 'chains', chain,{params: httpParams});
     }
 
-    public getChains(pipeline: PipelineModel = null, params = null) {
+    public getChains(pipeline: string = null, params = null) {
         let httpParams: HttpParams = getHttpParams(pipeline);
 
         return this.http.get<ChainModel[]>(this.BASE_URL + 'chains',{params: httpParams});
     }
 
-    public deleteChain(chainId: string, pipeline: PipelineModel = null) {
+    public deleteChain(chainId: string, pipeline: string = null) {
         let httpParams: HttpParams = getHttpParams(pipeline);
 
         return this.http.delete(this.BASE_URL + 'chains/' + chainId,{params: httpParams});
