@@ -2,7 +2,6 @@
   {
     "profileGroupName": "ip_outgoing",
     "sources": [
-      "netflow",
       "squid"
     ],
     "keyFieldNames": [
@@ -14,52 +13,15 @@
     "statsSlideUnit": "MINUTES",
     "measurements": [
       {
-        "fieldName": "dst_bytes",
+        "fieldName": "bytes",
         "resultExtensionName": "total_bytes_out",
-        "aggregationMethod": "SUM",
-        "calculateStats": true
-      },
-      {
-        "fieldName": "ip_dst_addr",
-        "resultExtensionName": "distinct_dest",
-        "aggregationMethod": "COUNT_DISTINCT",
-        "calculateStats": true
-      },
-      {
-        "fieldName": "total_transfer_bytes",
-        "resultExtensionName": "transfer_size",
         "aggregationMethod": "SUM",
         "calculateStats": true
       },
       {
         "fieldName": "domain",
         "resultExtensionName": "distict_domains",
-        "aggregationMethod": "COUNT_DISTINCT",
-        "calculateStats": true
-      }
-    ]
-  },
-  {
-    "profileGroupName": "domain_activity",
-    "sources": [
-      "squid"
-    ],
-    "keyFieldNames": [
-      "domain"
-    ],
-    "periodDuration": 1,
-    "periodDurationUnit": "MINUTES",
-    "measurements": [
-      {
-        "resultExtensionName": "domain_first_seen",
-        "aggregationMethod": "FIRST_SEEN",
-        "firstSeenExpirationDuration": 60,
-        "firstSeenExpirationDurationUnit": "DAYS"
-      },
-      {
-        "fieldName": "transfer_size",
-        "resultExtensionName": "total_transfer_size",
-        "aggregationMethod": "SUM"
+        "aggregationMethod": "COUNT_DISTINCT"
       }
     ]
   }

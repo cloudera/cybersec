@@ -25,3 +25,5 @@ cs-upsert-rule --branch ${branch_name} --pipe ${pipe_name} --rule dga_rule.json
 echo "start triaging"
 cs-restart-triage ${branch_name} ${pipe_name}
 
+cs-upsert-rule --branch ${branch_name} --pipe ${pipe_name} --profile main --rule anomalous_bytes.json
+cs-restart-profile ${branch_name} ${pipe_name} main

@@ -1,32 +1,32 @@
-profile.config.file=network/profile/main/profile.json
+profile.config.file=basic/profile/main/profile.json
 
 profile.first.seen.table=enrichments
 profile.first.seen.column.family=first_seen
 
-phoenix.db.init=true
-phoenix.db.batchSize=40
+phoenix.db.init=false
+#phoenix.db.batchSize=40
 
-phoenix.db.query.param.measurement_data_table_name=prf_measure
-phoenix.db.query.param.measurement_metadata_table_name=prf_measure_meta
-phoenix.db.query.param.measurement_sequence_name=prf_measure_seq
-phoenix.db.query.param.profile_metadata_table_name=prf_meta
-phoenix.db.query.param.profile_sequence_name=prf_seq
-phoenix.db.query.param.measurement_sequence_start_with=0
-phoenix.db.query.param.measurement_sequence_cache=20
-phoenix.db.query.param.profile_sequence_start_with=0
-phoenix.db.query.param.profile_sequence_cache=20
-phoenix.db.query.param.field_key_count=10
-phoenix.db.interval_millis=60000
-phoenix.db.max_retries_times=3
+#phoenix.db.query.param.measurement_data_table_name=prf_measure
+#phoenix.db.query.param.measurement_metadata_table_name=prf_measure_meta
+#phoenix.db.query.param.measurement_sequence_name=prf_measure_seq
+#phoenix.db.query.param.profile_metadata_table_name=prf_meta
+#phoenix.db.query.param.profile_sequence_name=prf_seq
+#phoenix.db.query.param.measurement_sequence_start_with=0
+#phoenix.db.query.param.measurement_sequence_cache=20
+#phoenix.db.query.param.profile_sequence_start_with=0
+#phoenix.db.query.param.profile_sequence_cache=20
+#phoenix.db.query.param.field_key_count=10
+#phoenix.db.interval_millis=60000
+#phoenix.db.max_retries_times=3
 
 parallelism=1
 checkpoint.interval.ms=60000
 
-kafka.group.id=BRANCH.network.profile.main
+kafka.group.id=BRANCH.basic.profile.main
 
-topic.output=BRANCH.network.profile.main.output
-topic.input=BRANCH.network.triage.output
-query.input.topic=BRANCH.network.profile.main.scoring.input
-query.output.topic=BRANCH.network.profile.main.scoring.output
+topic.output=BRANCH.basic.profile.main.output
+topic.input=BRANCH.basic.triage.output
+query.input.topic=BRANCH.basic.profile.main.scoring.input
+query.output.topic=BRANCH.basic.profile.main.scoring.output
 
-flink.job.name=BRANCH.network.profile.main
+flink.job.name=BRANCH.basic.profile.main
