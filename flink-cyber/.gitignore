@@ -157,3 +157,4 @@ local.properties
 /cyber-jobs/src/main/resources/examples/pipelines/*.zip
 /cyber-jobs/src/main/resources/examples/pipelines/hbase-conf/
 /cyber-jobs/src/main/resources/examples/pipelines/hive-conf/
+/cyber-jobs/src/main/resources/examples/pipelines/configs/

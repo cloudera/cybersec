@@ -1,5 +1,5 @@
 if [ ! -f "mockserver-netty-5.13.2-shaded.jar" ]; then
-    wget -O mockserver-netty-5.13.2-shaded.jar https://search.maven.org/remotecontent?filepath=org/mock-server/mockserver-netty/5.13.2/mockserver-netty-5.13.2-shaded.jar
+    curl -i -L -H "Accept: application/zip" https://search.maven.org/remotecontent?filepath=org/mock-server/mockserver-netty/5.13.2/mockserver-netty-5.13.2-shaded.jar -o mockserver-netty-5.13.2-shaded.jar
 fi
 
 my_hostname=$(hostname -f)

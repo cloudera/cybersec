@@ -2,9 +2,8 @@ source geo_dir.sh
 hdfs dfs -mkdir -p $geo_data_dir
 
 echo "extracting maxmind enrichment mmdbs to hdfs:$geo_data_dir"
-gunzip GeoLite2-*.gz
-tar xvf Geo*City*.tar
-tar xvf Geo*ASN*.tar
+for MMDB_FILE in  GeoLite2-*.gz; do  tar -zxvf "${MMDB_FILE}"; done
+
 set -x 
 geo_city=$(ls -1 GeoLite*/GeoLite2-City.mmdb)
 geo_asn=$(ls -1 GeoLite*/GeoLite2-ASN.mmdb)
