@@ -28,6 +28,6 @@ query.input.topic=BRANCH.full.profile.main.scoring.input
 query.output.topic=BRANCH.full.profile.main.scoring.output
 
 flink.job.name=BRANCH.full.profile.main
-profile.first.seen.table=cyb60_met_enrich
+profile.first.seen.table=example_enrichments
 profile.first.seen.column.family=cf
 profile.first.seen.format=HBASE_METRON
