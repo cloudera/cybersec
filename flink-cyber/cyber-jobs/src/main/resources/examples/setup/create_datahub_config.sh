@@ -22,7 +22,7 @@ if [[ ! -z "$hive_dh" ]]; then
     echo resetting hive configs from datahub ${hive_dh}
     rm -f "$hive_zip"
     rm -rf "$hive_conf"
-    curl -o "${hive_zip}" -u "${workload_user}" ${hive_cm_api}/v41/clusters/${hive_dh}/services/hive_on_tez/clientConfig
+    curl -S -s -o "${hive_zip}" -u "${workload_user}" ${hive_cm_api}/v41/clusters/${hive_dh}/services/hive_on_tez/clientConfig
     if [[ -f "$hive_zip" ]]; then
        tar -zxvf "$hive_zip" -C "$config_dir"
        rm -f "$hive_conf/core-site.xml"
@@ -42,6 +42,7 @@ kafka_broker=$(cdp datahub describe-cluster --cluster-name  ${kafka_dh_name} | j
 
 # opdb (hbase and phoenix) connection config
 opdb_cluster_name=$(cdp opdb list-databases --environment-name ${env_name} | jq -r '.databases[] | select(.databaseName | contains ("'"${cluster_prefix}"'")) | .databaseName') 
+phoenix_query_server_host=NO_OPDB_CLUSTER
 if [[ ! -z "$opdb_cluster_name" ]]; then
     echo resetting opdb configs from datahub ${opdb_cluster_name}
     opdb_client_url=$(cdp opdb describe-client-connectivity --environment-name ${env_name} --database-name ${opdb_cluster_name} | jq -r '.connectors[] | select(.name=="hbase") | .configuration.clientConfigurationDetails[].url')
@@ -49,13 +50,16 @@ if [[ ! -z "$opdb_cluster_name" ]]; then
     hbase_conf="$config_dir/hbase-conf"
     rm -f "$hbase_zip"
     rm -rf "$hbase_conf"
-    curl -f -o "$hbase_zip" -u "${workload_user}" "${opdb_client_url}"
+    curl -S -s -f -o "$hbase_zip" -u "${workload_user}" "${opdb_client_url}"
     if [[ -f "$hbase_zip" ]]; then
        tar -zxvf "$hbase_zip" -C "$config_dir"
     else 
         echo "ERROR: could not get hbase configuration."
         exit 2
     fi
+    base_opdb_services_url=$(echo ${opdb_client_url} | sed -e 's/hbase\/clientConfig//')
+    echo "getting phoenix connection settings"
+    phoenix_query_server_host=$(curl -S -s -u ${workload_user} ${base_opdb_services_url}/phoenix/roles | jq -r '.items[] | select (.type | contains("PHOENIX_QUERY_SERVER")) | .hostRef.hostname')
 fi 
 
 cdp environments get-keytab --environment-name $env_name | jq -r '.contents' | base64 --decode > ${config_dir}/krb5.keytab
@@ -73,4 +77,4 @@ keytool -import  -trustcacerts -keystore "${env_truststore_file}" -alias trust_c
 cybersec_user_princ=`ktutil --keytab=${config_dir}/krb5.keytab list | awk '(NR>3) {print $3}' | uniq`
 
 hostname=$(hostname -f)
-for TEMPLATE in templates/*; do filename=$(basename $TEMPLATE); cat $TEMPLATE | sed -e 's,ENV_TRUSTSTORE_PW,'"$env_truststore_pass"',g' -e 's/KAFKA_BROKER/'"${kafka_broker}"'/g' -e 's/KERBEROS_PRINCIPAL/'"$cybersec_user_princ"'/g' -e 's/SCHEMA_REGISTRY/'"$schema_registry"'/g' > ${config_dir}/$filename ; done
+for TEMPLATE in templates/*; do filename=$(basename $TEMPLATE); cat $TEMPLATE | sed -e 's,ENV_TRUSTSTORE_PW,'"$env_truststore_pass"',g' -e 's/KAFKA_BROKER/'"${kafka_broker}"'/g' -e 's/KERBEROS_PRINCIPAL/'"$cybersec_user_princ"'/g' -e 's/SCHEMA_REGISTRY/'"$schema_registry"'/g' -e 's/PHOENIX_QUERY_SERVER/'"$phoenix_query_server_host"'/g' > ${config_dir}/$filename ; done

@@ -12,9 +12,9 @@ The basic pipeline operates on a minimal cluster and performs the pipeline:
 ## Full Pipeline
 The full pipeline operates on a complete cluster and performs the pipeline:
 1. Parses squid logs.
-2. Enriches with domain category and stellar extension language enrichments in addition to basic pipeline enrichments.
+2. Enriches with domain category and threatq threat intelligence stored in HBase and stellar extension language statements in addition to basic pipeline enrichments.
 3. Scores same as basic pipeline.
-4. Indexes events to a Hive table.
+4. Writes events to a Hive table.
 5. Applies first seen profile in addition to the basic pipeline profiles.
 6. Writes profile measurements to Phoenix.
 7. Writes first seen times to HBase.
@@ -60,7 +60,7 @@ Provision the resources below in the same CDP Environment and use the same prefi
 ### Option 2 - For demo: Add cybersec parcel to the command line path.
 1. If you don't have admin permissions or sudo access on the cluster containing Flink, scp the cyber-parcel/target/CYBERSEC-*.parcel to a Flink gateway node.
 2. Ssh to the Flink gateway node.
-3. Extract the parcel using tar.  This will create a directory with the same name as the .parcel file:
+3. Extract the parcel using tar to create a directory with the same name as the .parcel file:
 ```shell script
 [cduby@cduby-csa-081423-master0 ~]$ tar xvf CYBERSEC-2.3.1-1.16.1-csadh1.10.0.0-cdh7.2.17.0-334-2308141830-el7.parcel 
 CYBERSEC-2.3.1-1.16.1-csadh1.10.0.0-cdh7.2.17.0-334-2308141830/meta/
@@ -74,7 +74,7 @@ lrwxrwxrwx. 1 cduby cduby 62 Aug 14 20:41 CYBERSEC -> CYBERSEC-2.3.1-1.16.1-csad
 [cduby@cduby-csa-081423-master0 ~]$ ls CYBERSEC
 bin  etc  jobs  lib  meta  tools
 ```
-5. Edit the shell configuration where the PATH is defined.  For example, edit .bash_profile.  
+5. Edit the shell configuration defining the PATH variable.  For example, edit .bash_profile.  
 ```shell script
 ## The shell config file, maybe different.  Locate the definition of PATH in your configs.
 [cduby@cduby-csa-081423-master0 ~]$ vi .bash_profile
@@ -95,8 +95,9 @@ export PATH
 ## Configuration
 
 ### Add Ranger policies required by each pipeline
-1. Open the Ranger UI and add permissions required by the pipeline.
-
+1. Open the Ranger UI and add policies required by the pipeline.
+* Basic and Full Pipelines
+* Full pipeline
 ### Prepare configuration files
 
 #### CDP Base
