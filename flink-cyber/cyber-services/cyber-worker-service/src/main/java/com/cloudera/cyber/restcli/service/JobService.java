@@ -2,16 +2,12 @@ package com.cloudera.cyber.restcli.service;
 
 import com.cloudera.service.common.Utils;
 import com.cloudera.service.common.response.Job;
-import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,19 +26,24 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class JobService {
+    public static final String LOG_CLI_JOB_INFO = "Successfully read jobs from cli with exit code {}. job count '{}' jobs data '[{}]'";
     private final Pattern pattern = Pattern.compile("^(?<date>[\\d.:\\s]+)\\s:\\s(?<jobId>[a-fA-F0-9]+)\\s:\\s(?<jobFullName>[\\w.-]+)\\s\\((?<jobStatus>\\w+)\\)$");
 
     public List<Job> getJobs() throws IOException, InterruptedException {
-        List<Job> jobs = new ArrayList<>();
-        int exitValue = fillJobList(jobs);
-        log.info("Successfully read jobs from cli with exit code {}. job count '{}' jobs data '[{}]'", exitValue, jobs.size(), jobs.stream().map(Objects::toString).collect(Collectors.joining(",")));
-        return jobs;
+        return getJobs(null);
     }
 
-    public Job getJob(String id) throws IOException, InterruptedException {
+    public List<Job> getJobs(String id) throws IOException, InterruptedException {
         List<Job> jobs = new ArrayList<>();
         int exitValue = fillJobList(jobs);
-        log.info("Successfully read jobs from cli with exit code {}. job count '{}' jobs data '[{}]'. Searched id {}", exitValue, jobs.size(), jobs.stream().map(Objects::toString).collect(Collectors.joining(",")), id);
+        log.info(LOG_CLI_JOB_INFO, exitValue, jobs.size(), jobs.stream().map(Objects::toString).collect(Collectors.joining(",")));
+        if (id != null) {
+            log.info("Searched id: '{}'", id);
+        }
+        return jobs;    }
+
+    public Job getJob(String id) throws IOException, InterruptedException {
+        List<Job> jobs = getJobs(id);
         return jobs.stream()
                 .filter(job -> StringUtils.equalsIgnoreCase(job.getJobId().toHexString(), id))
                 .findFirst()
@@ -50,13 +51,7 @@ public class JobService {
     }
 
     public Job restartJob(String id, String pipelineDir) throws IOException, InterruptedException {
-        List<Job> jobs = new ArrayList<>();
-        int exitValue = fillJobList(jobs);
-        log.info("Successfully read jobs from cli with exit code {}. job count '{}' jobs data '[{}]'", exitValue, jobs.size(), jobs.stream().map(Objects::toString).collect(Collectors.joining(",")));
-
-        Job job = jobs.stream()
-                .filter(j -> StringUtils.equalsIgnoreCase(j.getJobId().toHexString(), id))
-                .findFirst().orElse(null);
+        Job job = getJob(id);
         if (job != null) {
             log.info("Job '{}'", job);
             log.info("Script command = '{}'", Arrays.toString(job.getJobType().getScript(job)));
@@ -85,15 +80,10 @@ public class JobService {
     }
 
     public Job stopJob(String id) throws IOException, InterruptedException {
-        List<Job> jobs = new ArrayList<>();
-        int exitValue = fillJobList(jobs);
-        log.info("Successfully read jobs from cli with exit code {}. job count '{}' jobs data '[{}]'", exitValue, jobs.size(), jobs.stream().map(Objects::toString).collect(Collectors.joining(",")));
-        Job job = jobs.stream()
-                .filter(j -> StringUtils.equalsIgnoreCase(j.getJobId().toHexString(), id))
-                .findFirst().orElse(null);
+        Job job = getJob(id);
         if (job != null) {
             try {
-                ProcessBuilder processBuilder = new ProcessBuilder("flink", "stop", id);
+                ProcessBuilder processBuilder = new ProcessBuilder("flink", "cancel", id);
                 Process process = processBuilder.start();
                 log.info("Command input stream '{}' \n Command error stream '{}'", IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8), IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8));
                 process.waitFor();
@@ -141,16 +131,18 @@ public class JobService {
                 if (stringMatcher.matches()) {
                     String jobFullName = stringMatcher.group("jobFullName");
                     Job.JobType jobType = Utils.getEnumFromString(jobFullName, Job.JobType.class, Job.JobType::getName);
-                    Job job = Job.builder()
-                            .jobId(JobID.fromHexString(stringMatcher.group("jobId")))
-                            .jobIdString(stringMatcher.group("jobId"))
-                            .jobFullName(jobFullName)
-                            .jobType(jobType)
-                            .jobState(JobStatus.valueOf(StringUtils.toRootUpperCase(stringMatcher.group("jobStatus"))))
-                            .startTime(stringMatcher.group("date"))
-                            .build();
-                    setJobParameters(job, jobFullName);
-                    jobs.add(job);
+                    if (jobType != null) {
+                        Job job = Job.builder()
+                                .jobId(JobID.fromHexString(stringMatcher.group("jobId")))
+                                .jobIdString(stringMatcher.group("jobId"))
+                                .jobFullName(jobFullName)
+                                .jobType(jobType)
+                                .jobState(JobStatus.valueOf(StringUtils.toRootUpperCase(stringMatcher.group("jobStatus"))))
+                                .startTime(stringMatcher.group("date"))
+                                .build();
+                        setJobParameters(job, jobFullName);
+                        jobs.add(job);
+                    }
                 }
             }
         } catch (IOException ioe) {
