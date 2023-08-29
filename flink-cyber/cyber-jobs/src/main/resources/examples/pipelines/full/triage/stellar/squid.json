@@ -6,9 +6,9 @@
       ],
       "stellar": {
         "config": [
-          "majestic_million := ENRICHMENT_GET('majestic_million', full_hostname, 'example_enrichments', 'cf')",
+          "majestic_million := ENRICHMENT_GET('majestic_million', domain_no_subdomains, 'example_enrichments', 'cf')",
           "majestic_million_rank := IF EXISTS(majestic_million) THEN MAP_GET('rank', majestic_million) else null",
-          "is_mm := ENRICHMENT_EXISTS('majestic_million', full_hostname, 'example_enrichments', 'cf')",
+          "is_mm := ENRICHMENT_EXISTS('majestic_million', domain_no_subdomains, 'example_enrichments', 'cf')",
           "majestic_million := null"
 
         ]

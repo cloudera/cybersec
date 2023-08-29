@@ -1,38 +1,106 @@
 {
   "squid": {
     "table_name": "examples.basic.proxy_events",
-    "ignore_fields": [
-      "code"
-    ],
     "column_mapping": [
       {
-        "kafka_name": "full_hostname",
-        "name": "full_hostname"
+        "kafka_name": "domain",
+        "name": "domain"
       },
       {
-        "kafka_name": "action",
-        "name": "action"
+        "kafka_name": "top_level_domain",
+        "name": "domain_top_level"
       },
       {
-        "kafka_name": "ip_dst_addr.geo.country",
-        "name": "dst_country"
-      },
-      {
-        "kafka_name": "ip_src_addr",
-        "name": "ip_src_addr"
-      },
-      {
-        "kafka_name": "ip_dst_addr",
-        "name": "ip_dst_addr"
+        "kafka_name": "second_level_domain",
+        "name": "domain_second_level"
       },
       {
         "kafka_name": "domain_no_subdomains",
         "name": "domain_no_subdomains"
       },
       {
+        "kafka_name": "dga_model.legit",
+        "name": "domain_legit",
+        "transformation": "TRY_CAST(%s AS BOOLEAN)"
+      },
+      {
+        "kafka_name": "ip_dst_addr",
+        "name": "ip_dst_addr"
+      },
+      {
+        "kafka_name": "ip_dst_addr.asn.org",
+        "name": "ip_dst_asn_org"
+      },
+      {
+        "kafka_name": "ip_dst_addr.geo.country",
+        "name": "ip_dst_country"
+      },
+      {
+        "kafka_name": "ip_dst_addr.geo.city",
+        "name": "ip_dst_city"
+      },
+      {
+        "kafka_name": "ip_dst_addr.geo.latitude",
+        "name": "ip_dst_lat",
+        "transformation": "TRY_CAST(%s AS FLOAT)"
+      },
+      {
+        "kafka_name": "ip_dst_addr.geo.longitude",
+        "name": "ip_dst_lon",
+        "transformation": "TRY_CAST(%s AS FLOAT)"
+      },
+      {
+        "kafka_name": "ip_src_addr",
+        "name": "ip_src_addr"
+      },
+      {
+        "kafka_name": "ip_src_addr.asn.org",
+        "name": "ip_src_asn_org"
+      },
+      {
+        "kafka_name": "ip_src_addr.geo.country",
+        "name": "ip_src_country"
+      },
+      {
+        "kafka_name": "ip_src_addr.geo.city",
+        "name": "ip_src_city"
+      },
+      {
+        "kafka_name": "ip_src_addr.geo.latitude",
+        "name": "ip_src_lat",
+        "transformation": "TRY_CAST(%s AS FLOAT)"
+      },
+      {
+        "kafka_name": "ip_src_addr.geo.longitude",
+        "name": "ip_src_lon",
+        "transformation": "TRY_CAST(%s AS FLOAT)"
+      },
+      {
+        "kafka_name": "action",
+        "name": "http_action"
+      },
+      {
+        "kafka_name": "url",
+        "name": "http_url"
+      },
+      {
          "kafka_name": "bytes",
-         "name": "request_bytes",
+         "name": "http_bytes",
          "transformation": "TRY_CAST(%s AS INT)"
+      },
+      {
+         "kafka_name": "code",
+         "name": "http_code",
+         "transformation": "TRY_CAST(%s AS INT)"
+      },
+      {
+         "kafka_name": "elapsed",
+         "name": "http_elapsed",
+         "transformation": "TRY_CAST(%s AS INT)"
+      },
+      {
+        "kafka_name": "method",
+        "name": "http_method"
       }
     ]
   }

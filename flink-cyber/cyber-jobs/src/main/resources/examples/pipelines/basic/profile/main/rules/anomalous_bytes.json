@@ -5,6 +5,6 @@
   "tsStart" : "2020-01-01T00:00:00.00Z",
   "tsEnd" : "2050-01-01T00:00:00.00Z",
   "type" : "JS",
-  "ruleScript" : "     if (message.containsKey(\"total_bytes_out.mean\") && message.get(\"profile\") === \"ip_outgoing\") {        var total_byte_mean = parseFloat(message.get(\"total_bytes_out.mean\"));        var total_byte_stddev = parseFloat(message.get(\"total_bytes_out.stddev\"));        var total_bytes = parseFloat(message.get(\"total_bytes_out\"));        if (total_bytes > (total_byte_mean + (2 * total_byte_stddev))) {            return {score: 30.0, reason: 'total_bytes_out great than 2 standard deviations.'}        } else {            return { score: 0.0, reason: 'total_bytes_out within 2 standard deviations.'}        }    } else {        return { score: 0.0, reason: 'Not ip_outgoing profile'}    } ",
+  "ruleScript" : "     if (message.containsKey(\"total_bytes_out.mean\") && message.get(\"profile\") === \"ip_outgoing\") {        var total_byte_mean = parseFloat(message.get(\"total_bytes_out.mean\"));        var total_byte_stddev = parseFloat(message.get(\"total_bytes_out.stddev\"));        var total_bytes = parseFloat(message.get(\"total_bytes_out\"));        if (total_bytes > (total_byte_mean + (2 * total_byte_stddev))) {            return {score: 30.0, reason: 'total_bytes_out greater than 2 standard deviations.'}        } else {            return { score: 0.0, reason: 'total_bytes_out within 2 standard deviations.'}        }    } else {        return { score: 0.0, reason: 'Not ip_outgoing profile'}    } ",
   "enabled" : true
 }

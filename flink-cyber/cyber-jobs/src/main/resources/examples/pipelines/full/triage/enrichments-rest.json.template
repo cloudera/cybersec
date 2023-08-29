@@ -1,6 +1,6 @@
 [ {
   "endpointTemplate" : "${protocol}://${server}/model",
-  "entityTemplate" : "{\"accessKey\":\"${access_key}\",\"request\":{\"domain\":\"${full_hostname}\"}}",
+  "entityTemplate" : "{\"accessKey\":\"${access_key}\",\"request\":{\"domain\":\"${second_level_domain}\"}}",
   "method" : "POST",
   "tls" : null,
   "sources" : [ "ANY" ],

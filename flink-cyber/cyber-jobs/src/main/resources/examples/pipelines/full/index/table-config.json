@@ -1,14 +1,46 @@
 {
-  "hive_table": [
+  "examples.basic.proxy_events": [
     {
-      "name": "full_hostname",
+      "name": "domain",
       "type": "string"
+    },
+    {
+      "name": "second_level_domain",
+      "type": "string"
+    },
+    {
+      "name": "top_level_domain",
+      "type": "string"
+    },
+    {
+      "name": "domain_no_subdomains",
+      "type": "string"
+    },
+    {
+      "name": "dst_country",
+      "type": "string"
+    },
+    {
+      "name": "ip_src_addr",
+      "type": "string"
+    },
+    {
+      "name": "ip_dst_addr",
+      "type": "string"
+    },
+    {
+      "name": "domain_no_subdomains",
+      "type": "string"
+    },
+    {
+      "name": "request_bytes",
+      "type": "int"
     },
     {
       "name": "action",
       "type": "string"
     }
-  ],
-  "another_hive_table": [
   ]
 }
+
+

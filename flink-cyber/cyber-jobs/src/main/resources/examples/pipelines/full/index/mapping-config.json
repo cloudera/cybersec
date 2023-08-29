@@ -1,21 +1,40 @@
 {
   "squid": {
-    "table_name": "hive_table",
+    "table_name": "examples.basic.proxy_events",
     "ignore_fields": [
       "code"
     ],
     "column_mapping": [
       {
-        "name": "full_hostname"
+        "kafka_name": "domain",
+        "name": "domain"
       },
       {
+        "kafka_name": "action",
         "name": "action"
+      },
+      {
+        "kafka_name": "ip_dst_addr.geo.country",
+        "name": "dst_country"
+      },
+      {
+        "kafka_name": "ip_src_addr",
+        "name": "ip_src_addr"
+      },
+      {
+        "kafka_name": "ip_dst_addr",
+        "name": "ip_dst_addr"
+      },
+      {
+        "kafka_name": "domain_no_subdomains",
+        "name": "domain_no_subdomains"
+      },
+      {
+         "kafka_name": "bytes",
+         "name": "request_bytes",
+         "transformation": "TRY_CAST(%s AS INT)"
       }
-    ]
-  },
-  "test": {
-    "table_name": "another_hive_table",
-    "column_mapping": [
     ]
   }
 }
+

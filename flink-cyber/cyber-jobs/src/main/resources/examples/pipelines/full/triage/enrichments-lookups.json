@@ -4,11 +4,11 @@
     "kind": "LOCAL",
     "fields": [
       {
-        "name": "full_hostname",
+        "name": "domain_no_subdomains",
         "enrichmentType": "malicious_domain"
       },
       {
-        "name": "full_hostname",
+        "name": "domain_no_subdomains",
         "enrichmentType": "majestic_million"
       }
     ]
@@ -18,7 +18,7 @@
     "kind": "HBASE",
     "fields": [
       {
-        "name": "full_hostname",
+        "name": "domain_no_subdomains",
         "enrichmentType": "domain_category"
       }
     ]

@@ -21,8 +21,8 @@
         "aggregationMethod": "COUNT_DISTINCT"
       },
       {
-        "fieldName": "full_hostname",
-        "resultExtensionName": "distict_domains",
+        "fieldName": "domain",
+        "resultExtensionName": "distinct_domains",
         "aggregationMethod": "COUNT_DISTINCT"
       }
     ]
@@ -33,7 +33,7 @@
       "squid"
     ],
     "keyFieldNames": [
-      "full_hostname"
+      "domain"
     ],
     "periodDuration": 1,
     "periodDurationUnit": "MINUTES",
