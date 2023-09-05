@@ -14,9 +14,6 @@ package com.cloudera.parserchains.queryservice.service;
 
 import com.cloudera.parserchains.queryservice.config.AppProperties;
 import com.cloudera.parserchains.queryservice.model.exec.PipelineResult;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.core.fs.FileStatus;
@@ -25,6 +22,10 @@ import org.apache.flink.core.fs.Path;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -55,7 +56,7 @@ public class PipelineService {
           final String name = pipelinePath.getName();
           final PipelineResult pipeline = PipelineResult.builder()
               .name(name)
-              .path(pipelinePath)
+              .path(appendChainsPath(pipelinePath))
               .build();
           pipelineMap.put(name, pipeline);
         }
@@ -130,8 +131,12 @@ public class PipelineService {
     return false;
   }
 
+  private Path appendChainsPath(Path originalPath){
+    return new Path(originalPath, "parse/chains");
+  }
+
   private boolean isValidPipeline(Path originalPath, FileSystem fileSystem) throws IOException {
-    final Path fullPath = new Path(originalPath, "parse/chains");
+    final Path fullPath = appendChainsPath(originalPath);
     return fileSystem.exists(fullPath);
   }
 

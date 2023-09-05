@@ -26,15 +26,11 @@ public class ApplicationConstants {
   public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
   // root
   public static final String API_BASE_URL = "/api/v1";
-  // root
-  public static final String API_PROXY_BASE_URL = "/api/v1-proxy";
 
   // parser-config endpoint constants
   public static final String PARSER_CONFIG_BASE_URL = API_BASE_URL + "/parserconfig";
-  public static final String PARSER_CONFIG_PROXY_BASE_URL = API_PROXY_BASE_URL + "/parserconfig";
   // pipeline controller constants
   public static final String PIPELINE_BASE_URL = API_BASE_URL + "/pipeline";
-  public static final String PIPELINE_PROXY_BASE_URL = API_PROXY_BASE_URL + "/pipeline";
   // Endpoint names
   public static final String API_CHAINS = "/chains";
   public static final String API_INDEXING = "/indexing";
@@ -51,16 +47,6 @@ public class ApplicationConstants {
   public static final String API_PARSER_FORM_CONFIG_URL = PARSER_CONFIG_BASE_URL + API_PARSER_FORM_CONFIG;
   public static final String API_PARSER_TYPES_URL = PARSER_CONFIG_BASE_URL + API_PARSER_TYPES;
   public static final String API_PARSER_TEST_URL = PARSER_CONFIG_BASE_URL + API_PARSER_TEST;
-
-  public static final String API_CHAINS_PROXY_URL = PARSER_CONFIG_PROXY_BASE_URL + API_CHAINS;
-  public static final String API_CHAINS_PROXY_CREATE_URL = API_CHAINS_PROXY_URL;
-  public static final String API_CHAINS_PROXY_READ_URL = API_CHAINS_PROXY_URL + "/{id}";
-  public static final String API_CHAINS_PROXY_UPDATE_URL = API_CHAINS_PROXY_READ_URL;
-  public static final String API_CHAINS_PROXY_DELETE_URL = API_CHAINS_PROXY_READ_URL;
-  public static final String API_PARSER_PROXY_FORM_CONFIG_URL = PARSER_CONFIG_PROXY_BASE_URL + API_PARSER_FORM_CONFIG;
-  public static final String API_PARSER_PROXY_TYPES_URL = PARSER_CONFIG_PROXY_BASE_URL + API_PARSER_TYPES;
-  public static final String API_PARSER_PROXY_TEST_URL = PARSER_CONFIG_PROXY_BASE_URL + API_PARSER_TEST;
-  public static final String API_INDEXING_PROXY_URL = PARSER_CONFIG_PROXY_BASE_URL + API_INDEXING;
 
   //Param names
   public static final String TEST_RUN_PARAM = "testRun";
