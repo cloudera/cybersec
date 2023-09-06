@@ -4,7 +4,7 @@
     "kind": "LOCAL",
     "fields": [
       {
-        "name": "domain_no_subdomains",
+        "name": "domain",
         "enrichmentType": "malicious_domain"
       },
       {

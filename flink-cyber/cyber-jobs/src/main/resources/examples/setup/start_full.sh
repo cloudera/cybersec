@@ -9,7 +9,6 @@ pipe_name=full
 cd ../pipelines/
 mkdir -p logs/${pipe_name}
 
-#../setup/create_hive_tables.sh
 ../setup/create_hbase.sh
 
 echo "starting generator"

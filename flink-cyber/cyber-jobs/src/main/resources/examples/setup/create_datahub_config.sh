@@ -27,8 +27,6 @@ if [[ ! -z "$hive_dh" ]]; then
        tar -zxvf "$hive_zip" -C "$config_dir"
        rm -f "$hive_conf/core-site.xml"
        rm -f "$hive_conf/yarn-site.xml"
-       hive_jdbc_url=$(cdp datahub describe-cluster --cluster-name "$hive_dh" | jq -r '.cluster.endpoints.endpoints[] | select (.serviceName | contains("HIVESERVER2")) | .serviceUrl')
-       echo "hive_jdbc_url=$hive_jdbc_url" > "$config_dir/beeline.properties"
     else
         echo "ERROR: could not get hive configuration."
         exit 2

@@ -2,15 +2,15 @@ hive.catalog=hive
 hive.schema=cyber
 hive.table=events
 
-#flink.writer=tableapi
+flink.writer=tableapi
 
 #Uncomment one of the following lines in case flink.writer=tableapi is specified
-#flink.output-connector=hive
+flink.output-connector=hive
 #flink.output-connector=kafka
 
 #Uncomment following two lines in case flink.writer=tableapi is specified
-#flink.tables-init-file=full/index/table-config.json
-#flink.mapping-file=full/index/mapping-config.json
+flink.tables-init-file=full/index/table-config.json
+flink.mapping-file=full/index/mapping-config.json
 
 #hive.confdir=/etc/hive/conf/
 
