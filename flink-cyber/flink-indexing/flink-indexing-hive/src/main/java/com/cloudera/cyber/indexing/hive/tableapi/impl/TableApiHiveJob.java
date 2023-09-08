@@ -27,18 +27,13 @@ public class TableApiHiveJob extends TableApiAbstractJob {
     }
 
     @Override
-    protected void setConnectorDialect(StreamTableEnvironment tableEnv) {
-        tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
-    }
-
-    @Override
     protected String getTableConnector() {
         return "hive";
     }
 
     @Override
     protected FormatDescriptor getFormatDescriptor() {
-        return FormatDescriptor.forFormat("parquet").build();
+        return FormatDescriptor.forFormat("orc").build();
     }
 
     @Override
