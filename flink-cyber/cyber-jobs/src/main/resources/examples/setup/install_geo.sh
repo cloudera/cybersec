@@ -4,7 +4,6 @@ hdfs dfs -mkdir -p $geo_data_dir
 echo "extracting maxmind enrichment mmdbs to hdfs:$geo_data_dir"
 for MMDB_FILE in  GeoLite2-*.gz; do  tar -zxvf "${MMDB_FILE}"; done
 
-set -x 
 geo_city=$(ls -1 GeoLite*/GeoLite2-City.mmdb)
 geo_asn=$(ls -1 GeoLite*/GeoLite2-ASN.mmdb)
 if [ -f "$geo_city" ]; then

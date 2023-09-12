@@ -1,4 +1,3 @@
-set -x 
 source ref_dir.sh
 
 cybersec_user=$(whoami)
