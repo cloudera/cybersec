@@ -14,6 +14,7 @@ package com.cloudera.cyber.scoring;
 
 import com.cloudera.cyber.IdentifiedMessage;
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.avro.AvroSchemas;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +23,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
-import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -54,8 +54,7 @@ public class ScoredMessage extends SpecificRecordBase implements IdentifiedMessa
         return message.getTs();
     }
 
-    public static final Schema SCHEMA$ = SchemaBuilder.record(ScoredMessage.class.getName())
-            .namespace(ScoredMessage.class.getPackage().getName())
+    public static final Schema SCHEMA$ = AvroSchemas.createRecordBuilder(ScoredMessage.class.getPackage().getName(), ScoredMessage.class.getName())
             .fields()
             .name("message").type(Message.SCHEMA$).noDefault()
             .name("cyberScoresDetails").type(Schema.createArray(Scores.SCHEMA$)).noDefault()
