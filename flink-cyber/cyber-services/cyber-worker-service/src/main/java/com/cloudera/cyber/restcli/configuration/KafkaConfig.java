@@ -1,5 +1,6 @@
 package com.cloudera.cyber.restcli.configuration;
 
+import com.cloudera.service.common.config.kafka.ClouderaKafkaProperties;
 import com.cloudera.service.common.request.RequestBody;
 import com.cloudera.service.common.response.ResponseBody;
 import lombok.AllArgsConstructor;
@@ -24,20 +25,12 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @EnableKafka
 @Configuration
 @AllArgsConstructor
-@EnableConfigurationProperties({KafkaProperties.class})
+@EnableConfigurationProperties({ClouderaKafkaProperties.class})
 public class KafkaConfig {
 
-    public final KafkaProperties kafkaProperties;
+    public final ClouderaKafkaProperties kafkaProperties;
 
-    @Bean
-    public ProducerFactory<String, ResponseBody> kafkaProducerFactory() {
-        return new DefaultKafkaProducerFactory<>(kafkaProperties.buildConsumerProperties(), new StringSerializer(), new JsonSerializer<>());
-    }
 
-    @Bean
-    public ConsumerFactory<String, RequestBody> kafkaConsumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(kafkaProperties.buildConsumerProperties(), new StringDeserializer(), new JsonDeserializer<>(RequestBody.class));
-    }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, RequestBody> kafkaListenerContainerFactory() {
@@ -50,5 +43,13 @@ public class KafkaConfig {
     @Bean
     public KafkaTemplate<String, ResponseBody> kafkaTemplate() {
         return new KafkaTemplate<>(kafkaProducerFactory());
+    }
+
+    private ProducerFactory<String, ResponseBody> kafkaProducerFactory() {
+        return new DefaultKafkaProducerFactory<>(kafkaProperties.buildConsumerProperties(), new StringSerializer(), new JsonSerializer<>());
+    }
+
+    private ConsumerFactory<String, RequestBody> kafkaConsumerFactory() {
+        return new DefaultKafkaConsumerFactory<>(kafkaProperties.buildConsumerProperties(), new StringDeserializer(), new JsonDeserializer<>(RequestBody.class));
     }
 }
