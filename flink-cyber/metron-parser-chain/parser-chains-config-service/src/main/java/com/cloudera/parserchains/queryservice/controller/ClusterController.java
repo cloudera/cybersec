@@ -42,11 +42,12 @@ public class ClusterController {
 
     @ApiOperation(value = "Retrieves information about a cluster with specified id.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A response with cluster information.")
+            @ApiResponse(code = 200, message = "A response with cluster information."),
+            @ApiResponse(code = 404, message = "The cluster does not exist.")
+
     })
     @GetMapping(value = "/{id}")
     public ResponseBody getClusterService(
-            @RequestBody com.cloudera.service.common.request.RequestBody requestBody,
             @ApiParam(name = "id", value = "The ID of the cluster to retrieve.", required = true)
             @PathVariable("id") String clusterId) throws FailedClusterReponseException {
         return clusterService.getClusterInfo(clusterId);
