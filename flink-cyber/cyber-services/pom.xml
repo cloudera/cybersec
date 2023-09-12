@@ -8,6 +8,15 @@
     </parent>
     <artifactId>cyber-services</artifactId>
     <packaging>pom</packaging>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-autoconfigure</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <modules>
         <module>cyber-worker-service</module>
         <module>cyber-service-common</module>
