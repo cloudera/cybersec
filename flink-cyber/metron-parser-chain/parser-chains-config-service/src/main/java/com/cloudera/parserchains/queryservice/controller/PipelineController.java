@@ -12,34 +12,55 @@
 
 package com.cloudera.parserchains.queryservice.controller;
 
+import com.cloudera.parserchains.queryservice.service.PipelineService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.io.IOException;
-import java.util.Set;
+import lombok.RequiredArgsConstructor;
+import org.apache.flink.core.fs.Path;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PIPELINE_BASE_URL;
 
 /**
  * The controller responsible for operations on pipelines.
  */
-public interface PipelineController {
+@RestController
+@RequiredArgsConstructor
+@RequestMapping(value = PIPELINE_BASE_URL)
+public class PipelineController {
+    private final PipelineService pipelineService;
 
-  @ApiOperation(value = "Finds and returns all available pipelines.")
-  @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "A list of all pipelines."),
-      @ApiResponse(code = 404, message = "No valid pipelines found.")
-  })
-  @GetMapping
-  ResponseEntity<Set<String>> findAll() throws IOException;
+    @ApiOperation(value = "Finds and returns all available pipelines.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "A list of all pipelines."),
+            @ApiResponse(code = 404, message = "No valid pipelines found.")
+    })
+    @GetMapping
+    public ResponseEntity<Set<String>> findAll() throws IOException {
+        Map<String, Path> pipelineMap = pipelineService.findAll();
+        if (pipelineMap == null || pipelineMap.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(pipelineMap.keySet());
+    }
 
-  @ApiOperation(value = "Allows to create a new pipeline.")
-  @ApiResponses(value = {
-      @ApiResponse(code = 200, message = "A new list of all pipelines.")
-  })
-  @PostMapping("/{pipelineName}")
-  ResponseEntity<Set<String>> createPipeline(@PathVariable String pipelineName) throws IOException;
-
+    @ApiOperation(value = "Allows to create a new pipeline.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "A new list of all pipelines.")
+    })
+    @PostMapping("/{pipelineName}")
+    public ResponseEntity<Set<String>> createPipeline(@PathVariable String pipelineName) {
+        Set<String> pipelineList = pipelineService.createPipeline(pipelineName);
+        return ResponseEntity.ok(pipelineList);
+    }
 }
