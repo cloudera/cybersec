@@ -12,6 +12,7 @@
 
 package com.cloudera.cyber;
 
+import com.cloudera.cyber.avro.AvroSchemas;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -52,7 +53,7 @@ public class Message extends SpecificRecordBase implements SpecificRecord, Ident
     @NonNull private String source;
     private List<DataQualityMessage> dataQualityMessages;
 
-    public static final Schema SCHEMA$ = SchemaBuilder.record(Message.class.getName()).namespace(Message.class.getPackage().getName())
+    public static final Schema SCHEMA$ = AvroSchemas.createRecordBuilder(Message.class.getPackage().getName(), Message.class.getName())
             .fields()
             .requiredString("id")
             .requiredLong("ts")
