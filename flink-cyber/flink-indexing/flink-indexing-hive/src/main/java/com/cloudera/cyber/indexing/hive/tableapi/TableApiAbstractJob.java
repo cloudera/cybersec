@@ -10,18 +10,8 @@ import com.cloudera.cyber.scoring.ScoredMessage;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Streams;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -29,15 +19,13 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.FormatDescriptor;
-import org.apache.flink.table.api.Schema;
-import org.apache.flink.table.api.SqlDialect;
-import org.apache.flink.table.api.TableDescriptor;
+import org.apache.flink.table.api.*;
 import org.apache.flink.table.api.bridge.java.StreamStatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Column;
 import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.table.types.DataType;
+import org.apache.flink.table.types.logical.LogicalTypeFamily;
 import org.apache.flink.types.Row;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -103,10 +91,14 @@ public abstract class TableApiAbstractJob {
     createKafkaTable(tableEnv);
 
     System.out.printf("Executing %s insert...%n", connectorName);
-    executeInsert(tableEnv, topicMapping, tablesConfig);
+    executeInsert(tableEnv, topicMapping, tablesConfig, tableSchemaMap);
 
     System.out.println("TableApiJob is done!");
     return jobReturnValue();
+  }
+
+  protected boolean isNonDefaultColumn(String columnName) {
+    return defaultColumnList.stream().noneMatch(c -> c.getName().equals(columnName));
   }
 
   /**
@@ -127,7 +119,7 @@ public abstract class TableApiAbstractJob {
   }
 
   protected void validateMappings(Map<String, ResolvedSchema> tableSchemaMap,
-      Map<String, MappingDto> topicMapping) {
+                                  Map<String, MappingDto> topicMapping) {
     for (Entry<String, MappingDto> entry : topicMapping.entrySet()) {
       final String source = entry.getKey();
       final MappingDto mappingDto = entry.getValue();
@@ -143,21 +135,56 @@ public abstract class TableApiAbstractJob {
       }
 
       final Set<String> tableColumns = schema.getColumns().stream()
-          .map(Column::getName)
-          .collect(Collectors.toSet());
+              .map(Column::getName)
+              .collect(Collectors.toSet());
 
       final List<String> invalidColumnList = mappingDto.getColumnMapping().stream()
-          .map(MappingColumnDto::getName)
-          .filter(columnName -> !StringUtils.hasText(columnName) || !tableColumns.contains(columnName))
-          .collect(Collectors.toList());
+              .map(MappingColumnDto::getName)
+              .filter(columnName -> !StringUtils.hasText(columnName) || !tableColumns.contains(columnName))
+              .collect(Collectors.toList());
       if (!invalidColumnList.isEmpty()) {
         throw new RuntimeException(
-            String.format(
-                "Found invalid column mappings for source [%s]. Those columns are either not present in the table config or have empty names: %s",
-                source, invalidColumnList));
+                String.format(
+                        "Found invalid column mappings for source [%s]. Those columns are either not present in the table config or have empty names: %s",
+                        source, invalidColumnList));
       }
+
+      validateTransformations(source, schema, mappingDto);
     }
   }
+
+  private void validateTransformations(String source, ResolvedSchema tableSchema, MappingDto mappingDto) {
+
+    final Map<String, DataType> tableColumnMap = tableSchema.getColumns().stream()
+            .collect(Collectors.toMap(Column::getName, Column::getDataType));
+
+    final List<String> columnListWithoutTransformation = mappingDto.getColumnMapping().stream()
+            .map(mapping -> {
+              final String columnName = mapping.getName();
+              final DataType tableColumnDataType = tableColumnMap.get(columnName);
+
+              if (DataTypes.STRING().equals(tableColumnDataType)) {
+                return null;
+              }
+
+              if (StringUtils.hasText(getTransformation(tableColumnDataType, mapping))) {
+                return null;
+              }
+
+              return columnName;
+            })
+            .filter(Objects::nonNull)
+            .filter(this::isNonDefaultColumn)
+            .collect(Collectors.toList());
+
+    if (!columnListWithoutTransformation.isEmpty()) {
+      throw new RuntimeException(
+              String.format(
+                      "Found column mappings of non-string type without transformations for source [%s]: %s",
+                      source, columnListWithoutTransformation));
+    }
+  }
+
 
   protected HashSet<String> getExistingTableList(StreamTableEnvironment tableEnv) {
     return new HashSet<>(Arrays.asList(tableEnv.listTables()));
@@ -168,12 +195,13 @@ public abstract class TableApiAbstractJob {
   }
 
   protected void executeInsert(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping,
-      Map<String, List<TableColumnDto>> tablesConfig) {
+                               Map<String, List<TableColumnDto>> tablesConfig, Map<String, ResolvedSchema> tableSchemaMap) {
     System.out.printf("Filling Insert statement list...%s%n", Arrays.toString(tableEnv.listTables()));
     final StreamStatementSet insertStatementSet = tableEnv.createStatementSet();
 
     topicMapping.forEach((topic, mappingDto) -> {
-      final String insertSql = buildInsertSql(topic, mappingDto);
+      ResolvedSchema tableSchema = tableSchemaMap.get(mappingDto.getTableName());
+      final String insertSql = buildInsertSql(topic, mappingDto, tableSchema);
       try {
         insertStatementSet.addInsertSql(insertSql);
         System.out.printf("Insert SQL added to the queue for the table: %s%nSQL: %s%n", mappingDto.getTableName(),
@@ -207,8 +235,17 @@ public abstract class TableApiAbstractJob {
     return createTable(tableEnv, tableName, columnList);
   }
 
+  protected String getTransformation(DataType tableColumnDataType, MappingColumnDto mapping) {
+    String transformation = mapping.getTransformation();
+    if (transformation == null && isNonDefaultColumn(mapping.getName()) && (DataTypes.BOOLEAN().equals(tableColumnDataType) || tableColumnDataType.getLogicalType().is(LogicalTypeFamily.NUMERIC))) {
+      transformation = String.format("TRY_CAST(%%s AS %s)", tableColumnDataType.getLogicalType().getTypeRoot().name());
+    }
+
+    return transformation;
+  }
+
   protected ResolvedSchema createTable(StreamTableEnvironment tableEnv, String tableName,
-      List<TableColumnDto> columnList) {
+                                       List<TableColumnDto> columnList) {
     System.out.printf("Creating %s table %s...%n", connectorName, tableName);
     final ResolvedSchema resolvedSchema = FlinkSchemaUtil.getResolvedSchema(columnList);
     final Schema schema = FlinkSchemaUtil.buildSchema(resolvedSchema);
@@ -295,11 +332,11 @@ public abstract class TableApiAbstractJob {
     tableEnv.createTemporarySystemFunction("filterMap", FilterMapFunction.class);
   }
 
-  protected final String buildInsertSql(String topic, MappingDto mappingDto) {
+  protected final String buildInsertSql(String topic, MappingDto mappingDto, ResolvedSchema tableSchema) {
     return String.join("\n",
         getInsertSqlPrefix() + " " + mappingDto.getTableName() + "(" + getInsertColumns(mappingDto) + ") "
         + getInsertSqlSuffix(),
-        " SELECT " + getFromColumns(mappingDto),
+        " SELECT " + getFromColumns(mappingDto, tableSchema),
         " from " + KAFKA_TABLE,
         String.format(" where `source`='%s'", topic));
   }
@@ -318,7 +355,7 @@ public abstract class TableApiAbstractJob {
         .collect(Collectors.joining(", ", " ", " "));
   }
 
-  private String getFromColumns(MappingDto mappingDto) {
+  private String getFromColumns(MappingDto mappingDto, ResolvedSchema tableSchema) {
     return mappingDto.getColumnMapping().stream()
         .map(mappingColumnDto -> {
           final String kafkaName = mappingColumnDto.getKafkaName();
@@ -336,7 +373,9 @@ public abstract class TableApiAbstractJob {
 
           fullPath = fullPath + kafkaName;
 
-          final String transformation = mappingColumnDto.getTransformation();
+          Optional<Column> column = tableSchema.getColumn(mappingColumnDto.getName());
+          final String transformation = column.map(value -> getTransformation(value.getDataType(), mappingColumnDto)).orElse("");
+
           return StringUtils.hasText(transformation)
               ? String.format(transformation, "(" + fullPath + ")", mappingDto.getIgnoreFields().stream()
               .collect(Collectors.joining("','", "'", "'")))
