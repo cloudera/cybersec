@@ -6,7 +6,7 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.FormatDescriptor;
-import org.apache.flink.table.api.SqlDialect;
+import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.hive.HiveCatalog;
 
@@ -27,18 +27,13 @@ public class TableApiHiveJob extends TableApiAbstractJob {
     }
 
     @Override
-    protected void setConnectorDialect(StreamTableEnvironment tableEnv) {
-        tableEnv.getConfig().setSqlDialect(SqlDialect.HIVE);
-    }
-
-    @Override
     protected String getTableConnector() {
         return "hive";
     }
 
     @Override
     protected FormatDescriptor getFormatDescriptor() {
-        return FormatDescriptor.forFormat("parquet").build();
+        return FormatDescriptor.forFormat("orc").build();
     }
 
     @Override
@@ -52,5 +47,10 @@ public class TableApiHiveJob extends TableApiAbstractJob {
         tableEnv.useCatalog(name);
     }
 
+    @Override
+    protected TableDescriptor.Builder fillTableOptions(TableDescriptor.Builder builder) {
+        return super.fillTableOptions(builder)
+                .option("hive.storage.file-format", "orc");
+    }
 
 }
