@@ -172,7 +172,8 @@ public abstract class TableApiAbstractJob {
                 .option("partition.time-extractor.timestamp-pattern", "$dt $hr:00:00")
                 .option("sink.partition-commit.trigger", "process-time")
                 .option("sink.partition-commit.delay", "1 h")
-                .option("sink.partition-commit.policy.kind", "metastore,success-file");
+                .option("sink.partition-commit.policy.kind", "metastore,success-file")
+                .option("hive.storage.file-format", "orc");
     }
 
     private StreamTableEnvironment getTableEnvironment() {
