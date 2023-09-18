@@ -29,7 +29,11 @@ public class ClusterService {
     }
 
     public ResponseBody getClusterInfo(String clusterId) throws FailedClusterReponseException {
-        Pair<ResponseType, ResponseBody> response = kafkaService.sendWithReply(RequestType.GET_CLUSTER_SERVICE_REQUEST, clusterId, RequestBody.builder().build());
+        return getClusterInfo(clusterId, RequestBody.builder().build());
+    }
+
+    public ResponseBody getClusterInfo(String clusterId, RequestBody body) throws FailedClusterReponseException {
+        Pair<ResponseType, ResponseBody> response = kafkaService.sendWithReply(RequestType.GET_CLUSTER_SERVICE_REQUEST, clusterId, body);
         if (response.getKey() != ResponseType.GET_CLUSTER_SERVICE_RESPONSE) {
             throw new FailedClusterReponseException(response.getValue());
         }
