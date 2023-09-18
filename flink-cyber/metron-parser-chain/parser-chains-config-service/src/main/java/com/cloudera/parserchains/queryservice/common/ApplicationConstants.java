@@ -39,6 +39,7 @@ public class ApplicationConstants {
   public static final String API_CHAINS = "/chains";
 
   public static final String API_CLUSTERS = "/clusters";
+  public static final String API_JOBS = API_CLUSTERS + "/{clusterId}/jobs";
   public static final String API_INDEXING = "/indexing";
   public static final String API_PARSER_FORM_CONFIG = "/parser-form-configuration";
   public static final String API_PARSER_TYPES = "/parser-types";
