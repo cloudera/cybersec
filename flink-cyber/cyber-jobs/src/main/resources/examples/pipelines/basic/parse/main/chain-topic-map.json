@@ -1,0 +1,6 @@
+{
+  "examples.basic.squid":{
+     "chainKey":"squid",
+     "source":"squid"
+  }
+}

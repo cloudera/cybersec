@@ -1,0 +1,1 @@
+${((ts)/1000)?string["0.000"]}  ${params.elapsed} ${utils.randomChoice('132.75.74.3', '149.121.7.171', '52.218.52.75')} ${params.action}/${params.code} ${params.elapsed} ${params.method} ${params.url} - HIER_DIRECT/${params.ip_dst_addr} -
