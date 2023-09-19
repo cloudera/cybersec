@@ -7,6 +7,11 @@ import com.cloudera.cyber.indexing.hive.tableapi.TableApiAbstractJob;
 import com.cloudera.cyber.indexing.hive.util.AvroSchemaUtil;
 import com.cloudera.cyber.indexing.hive.util.FlinkSchemaUtil;
 import com.cloudera.cyber.scoring.ScoredMessage;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -18,12 +23,6 @@ import org.apache.flink.table.api.FormatDescriptor;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.ResolvedSchema;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class TableApiKafkaJob extends TableApiAbstractJob {
 
