@@ -1,0 +1,4 @@
+[
+  { "field": "ip_src_addr", "indicatorType": "IP Address" },
+  { "field": "ip_dst_addr", "indicatorType": "IP Address" }
+]

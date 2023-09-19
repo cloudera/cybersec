@@ -1,0 +1,54 @@
+[
+  {
+    "profileGroupName": "ip_out",
+    "sources": [
+      "squid"
+    ],
+    "keyFieldNames": [
+      "ip_src_addr"
+    ],
+    "periodDuration": 1,
+    "periodDurationUnit": "MINUTES",
+    "measurements": [
+      {
+        "fieldName": "bytes",
+        "resultExtensionName": "total_bytes",
+        "aggregationMethod": "SUM"
+      },
+      {
+        "fieldName": "ip_dst_addr",
+        "resultExtensionName": "distinct_dest",
+        "aggregationMethod": "COUNT_DISTINCT"
+      },
+      {
+        "fieldName": "domain",
+        "resultExtensionName": "distinct_domains",
+        "aggregationMethod": "COUNT_DISTINCT"
+      }
+    ]
+  },
+  {
+    "profileGroupName": "domain_activity",
+    "sources": [
+      "squid"
+    ],
+    "keyFieldNames": [
+      "domain"
+    ],
+    "periodDuration": 1,
+    "periodDurationUnit": "MINUTES",
+    "measurements": [
+      {
+        "resultExtensionName": "domain_first_seen",
+        "aggregationMethod": "FIRST_SEEN",
+        "firstSeenExpirationDuration": 60,
+        "firstSeenExpirationDurationUnit": "DAYS"
+      },
+      {
+        "fieldName": "bytes",
+        "resultExtensionName": "total_bytes",
+        "aggregationMethod": "SUM"
+      }
+    ]
+  }
+]

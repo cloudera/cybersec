@@ -1,0 +1,33 @@
+{
+  "storageConfigs": {
+    "default": {
+      "format": "HBASE_SIMPLE",
+      "hbaseTableName": "basic_enrichments"
+    }
+  },
+  "enrichmentConfigs": {
+    "malicious_domain": {
+      "storage": "default",
+      "fieldMapping": {
+        "keyFields": [
+          "domain"
+        ],
+        "valueFields": [
+          "source"
+        ]
+      }
+    },
+    "majestic_million": {
+      "storage": "default",
+      "fieldMapping": {
+        "keyFields": [
+          "domain"
+        ],
+        "valueFields": [
+          "rank"
+        ]
+      }
+    }
+  }
+}
+~            
