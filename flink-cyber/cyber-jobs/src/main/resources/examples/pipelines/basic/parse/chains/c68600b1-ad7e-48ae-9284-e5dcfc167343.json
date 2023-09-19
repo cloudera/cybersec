@@ -1,0 +1,28 @@
+{
+  "id" : "c68600b1-ad7e-48ae-9284-e5dcfc167343",
+  "name" : "squid",
+  "parsers" : [ {
+    "id" : "701bd2d0-e605-11ed-9ec2-015449c42dc0",
+    "name" : "intial_grok",
+    "type" : "com.cloudera.parserchains.parsers.GrokParser",
+    "config" : {
+      "grokExpression" : [ {
+        "grokExpression" : "%{NUMBER:timestamp}[^0-9]*%{INT:elapsed} %{IP:ip_src_addr} %{WORD:action}/%{NUMBER:code} %{NUMBER:bytes} %{WORD:method} %{NOTSPACE:url}[^0-9]*(%{IP:ip_dst_addr})?"
+      } ]
+    }
+  }, {
+    "id" : "01bd9f70-e606-11ed-a369-f1d98be76658",
+    "name" : "extract_url",
+    "type" : "com.cloudera.parserchains.parsers.SimpleStellarParser",
+    "config" : {
+      "stellarPath" : [ {
+        "stellarPath" : "stellar/extract_url.stellar"
+      } ]
+    }
+  }, {
+    "id" : "dd237a10-e608-11ed-98b7-1bfbe07cf871",
+    "name" : "timestamp",
+    "type" : "com.cloudera.parserchains.parsers.TimestampParser",
+    "config" : { }
+  } ]
+}

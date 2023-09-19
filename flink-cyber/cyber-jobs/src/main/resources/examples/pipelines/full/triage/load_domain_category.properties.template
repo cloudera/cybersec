@@ -1,0 +1,12 @@
+enrichment.type=domain_category
+enrichment.config.file=generated/full/triage/enrichments-storage.json
+
+enrichment.source.skipfirstline=false
+enrichment.source.columns=domain,category
+
+parallelism=1
+
+# uncomment for local enrichment
+# enrichment.topic.input=BRANCH.full.enrichments.input
+
+flink.job.name=BRANCH.full.load.domain_category
