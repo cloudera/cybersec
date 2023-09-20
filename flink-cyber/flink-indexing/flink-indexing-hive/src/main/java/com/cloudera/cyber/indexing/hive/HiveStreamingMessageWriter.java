@@ -15,7 +15,6 @@ package com.cloudera.cyber.indexing.hive;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import com.cloudera.cyber.scoring.Scores;
-import com.google.inject.internal.util.$ToStringBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -235,7 +234,13 @@ public class HiveStreamingMessageWriter  {
     byte[] serializeRow(Row row) {
         if (jsonRowSerializationSchema == null)
             jsonRowSerializationSchema = new JsonRowSerializationSchema.Builder(typeInfo).build();
-        return jsonRowSerializationSchema.serialize(row);
+
+        try {
+            jsonRowSerializationSchema.open(null);
+            return jsonRowSerializationSchema.serialize(row);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Unable to serialize row '%s'", row.toString()), e);
+        }
     }
 
     private static String toHiveColumnName(String messageExtensionName) {
