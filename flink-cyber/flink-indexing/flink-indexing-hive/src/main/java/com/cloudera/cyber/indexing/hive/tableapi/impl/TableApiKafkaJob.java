@@ -41,9 +41,9 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
 
   @Override
   protected void executeInsert(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping,
-      Map<String, List<TableColumnDto>> tablesConfig) {
+                               Map<String, List<TableColumnDto>> tablesConfig, Map<String, ResolvedSchema> tableSchemaMap) {
     topicMapping.forEach((topic, mappingDto) -> {
-      final String insertSql = buildInsertSql(topic, mappingDto);
+      final String insertSql = buildInsertSql(topic, mappingDto, tableSchemaMap.get(mappingDto.getTableName()));
       try {
         //create view
         tableEnv.executeSql(insertSql);
