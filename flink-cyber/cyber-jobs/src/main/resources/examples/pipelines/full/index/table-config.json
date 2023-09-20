@@ -1,0 +1,118 @@
+{
+  "examples_full_events": [
+    {
+      "name": "domain",
+      "type": "string"
+    },
+    {
+      "name": "domain_second_level",
+      "type": "string"
+    },
+    {
+      "name": "domain_top_level",
+      "type": "string"
+    },
+    {
+      "name": "domain_no_subdomains",
+      "type": "string"
+    },
+    {
+      "name": "domain_legit",
+      "type": "boolean"
+    },
+    {
+      "name": "domain_threat_source",
+      "type": "string"
+    },
+    {
+      "name": "domain_majestic_million_rank",
+      "type": "int"
+    },
+    {
+      "name": "domain_category",
+      "type": "string"
+    },
+    {
+      "name": "ip_dst_addr",
+      "type": "string"
+    },
+    {
+      "name": "ip_dst_addr_region",
+      "type": "string"
+    },
+    {
+      "name": "ip_dst_asn_org",
+      "type": "string"
+    },
+    {
+      "name": "ip_dst_country",
+      "type": "string"
+    },
+    {
+      "name": "ip_dst_city",
+      "type": "string"
+    },
+    {
+      "name": "ip_dst_lat",
+      "type": "float"
+    },
+    {
+      "name": "ip_dst_lon",
+      "type": "float"
+    },
+    {
+      "name": "ip_src_addr",
+      "type": "string"
+    },
+    {
+      "name": "ip_src_addr_region",
+      "type": "string"
+    },
+    {
+      "name": "ip_src_asn_org",
+      "type": "string"
+    },
+    {
+      "name": "ip_src_country",
+      "type": "string"
+    },
+    {
+      "name": "ip_src_city",
+      "type": "string"
+    },
+    {
+      "name": "ip_src_lat",
+      "type": "float"
+    },
+    {
+      "name": "ip_src_lon",
+      "type": "float"
+    },
+    {
+      "name": "http_url",
+      "type": "string"
+    },
+    {
+      "name": "http_bytes",
+      "type": "int"
+    },
+    {
+      "name": "http_code",
+      "type": "int"
+    },
+    {
+      "name": "http_elapsed",
+      "type": "int"
+    },
+    {
+      "name": "http_action",
+      "type": "string"
+    },
+    {
+      "name": "http_method",
+      "type": "string"
+    }
+  ]
+}
+
+

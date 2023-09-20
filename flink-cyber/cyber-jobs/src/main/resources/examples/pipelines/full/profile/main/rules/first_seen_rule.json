@@ -1,0 +1,10 @@
+{
+  "name": "First seen",
+  "id" : "606a534f-0b33-4053-a67b-d61aad93a941",
+  "order" : "1",
+  "tsStart" : "2020-01-01T00:00:00.00Z",
+  "tsEnd" : "2025-01-01T00:00:00.00Z",
+  "type" : "JS",
+  "ruleScript" : "if (message.containsKey(\"domain_first_seen\") && message.get(\"domain_first_seen\") == \"1\") {return {score: 25.0, reason: 'New Domain'};} else { return {score: 0.0, reason: 'Known Domain'}};",
+  "enabled" : true
+}

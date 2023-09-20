@@ -1,5 +1,6 @@
 package com.cloudera.cyber.indexing.hive.util;
 
+import com.cloudera.cyber.avro.AvroSchemas;
 import com.cloudera.cyber.indexing.TableColumnDto;
 import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
@@ -28,9 +29,7 @@ public class AvroSchemaUtil {
 
     //method that converts from flink Schema to avro Schema
     public static Schema convertToAvro(ResolvedSchema schema) {
-        SchemaBuilder.FieldAssembler<Schema> fieldAssembler = SchemaBuilder.record("base")
-                .prop("ssb.rowtimeAttribute", "ts")
-                .prop("ssb.watermarkExpression", "`ts` - INTERVAL '30' SECOND")
+        SchemaBuilder.FieldAssembler<Schema> fieldAssembler = AvroSchemas.createRecordBuilder("com.cloudera.cyber","base")
                 .fields();
 
         for (Column col : schema.getColumns()) {
