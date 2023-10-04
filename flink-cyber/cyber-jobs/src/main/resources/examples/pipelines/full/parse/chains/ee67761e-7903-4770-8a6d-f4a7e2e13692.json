@@ -1,0 +1,23 @@
+{
+  "id" : "ee67761e-7903-4770-8a6d-f4a7e2e13692",
+  "name" : "domain_category",
+  "parsers" : [ {
+    "id" : "affffcb0-5923-11ed-b623-a74de6a703e8",
+    "name" : "delimited",
+    "type" : "com.cloudera.parserchains.parsers.DelimitedTextParser",
+    "config" : {
+      "outputField" : [ {
+        "fieldIndex" : "0",
+        "fieldName" : "domain"
+      }, {
+        "fieldIndex" : "1",
+        "fieldName" : "category"
+      } ]
+    }
+  }, {
+    "id" : "32326c90-5929-11ed-b623-a74de6a703e8",
+    "name" : "timestamp",
+    "type" : "com.cloudera.parserchains.parsers.TimestampParser",
+    "config" : { }
+  } ]
+}

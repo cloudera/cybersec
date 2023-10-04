@@ -1,0 +1,4 @@
+[
+  { "field": "field_name1", "indicatorType": "IP Address" },
+  { "field": "field_name2", "indicatorType": "IP Address" }
+]
