@@ -1,0 +1,28 @@
+[
+  {
+    "profileGroupName": "ip_outgoing",
+    "sources": [
+      "squid"
+    ],
+    "keyFieldNames": [
+      "ip_src_addr"
+    ],
+    "periodDuration": 10,
+    "periodDurationUnit": "MINUTES",
+    "statsSlide": 5,
+    "statsSlideUnit": "MINUTES",
+    "measurements": [
+      {
+        "fieldName": "bytes",
+        "resultExtensionName": "total_bytes_out",
+        "aggregationMethod": "SUM",
+        "calculateStats": true
+      },
+      {
+        "fieldName": "domain",
+        "resultExtensionName": "distict_domains",
+        "aggregationMethod": "COUNT_DISTINCT"
+      }
+    ]
+  }
+]

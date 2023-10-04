@@ -116,9 +116,6 @@ local.properties
 # CDT- autotools
 .autotools
 
-# Java annotation processor (APT)
-.factorypath
-
 # PDT-specific (PHP Development Tools)
 .buildpath
 
@@ -150,3 +147,14 @@ local.properties
 # Typically, this file would be tracked if it contains build/dependency configurations:
 #.project
 /metron-parser-chain/parser-chains-config-service/jars/
+/cyber-jobs/src/main/resources/examples/pipelines/*.properties
+/cyber-jobs/src/main/resources/examples/pipelines/*.properties.template
+/cyber-jobs/src/main/resources/examples/pipelines/*.keytab
+/cyber-jobs/src/main/resources/examples/pipelines/generated
+/cyber-jobs/src/main/resources/examples/setup/logs/
+/cyber-jobs/src/main/resources/examples/pipelines/*.crt
+/cyber-jobs/src/main/resources/examples/pipelines/*.jks
+/cyber-jobs/src/main/resources/examples/pipelines/*.zip
+/cyber-jobs/src/main/resources/examples/pipelines/hbase-conf/
+/cyber-jobs/src/main/resources/examples/pipelines/hive-conf/
+/cyber-jobs/src/main/resources/examples/pipelines/configs/
