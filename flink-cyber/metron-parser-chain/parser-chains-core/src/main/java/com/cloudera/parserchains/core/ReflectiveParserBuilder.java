@@ -12,22 +12,24 @@
 
 package com.cloudera.parserchains.core;
 
+import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedMethodsInOrder;
+import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedParameters;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.Parameter;
 import com.cloudera.parserchains.core.catalog.ParserInfo;
 import com.cloudera.parserchains.core.model.define.ConfigValueSchema;
 import com.cloudera.parserchains.core.model.define.ParserSchema;
-import lombok.extern.slf4j.Slf4j;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedMethodsInOrder;
-import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedParameters;
+import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
 /**
  * A {@link ParserBuilder} that uses Java's Reflection API to build and configure a {@link Parser}.
@@ -69,10 +71,15 @@ public class ReflectiveParserBuilder implements ParserBuilder {
             final List<ConfigValueSchema> valuesSchema = parserConfig.get(annotationKey);
 
             if (valuesSchema != null) {
+                configureParams(parserSchema, valuesSchema, method);
                 // execute each method with values present in schema
                 for (ConfigValueSchema value : valuesSchema) {
                     invokeMethod(parser, parserSchema, annotationKey, method, value.getValues());
                 }
+            } else if (StringUtils.hasText(key.defaultValue())){
+                final Map<String, String> value = new HashMap<>();
+                value.put(annotationKey, key.defaultValue());
+                invokeMethod(parser, parserSchema, annotationKey, method, value);
             } else if (key.required()) {
                 throw new InvalidParserException(parserSchema,
                         String.format("Required field isn't provided: %s", annotationKey));
@@ -80,7 +87,31 @@ public class ReflectiveParserBuilder implements ParserBuilder {
         }
     }
 
-    private void invokeMethod(Parser parser,
+    private void configureParams(ParserSchema parserSchema, List<ConfigValueSchema> valuesSchema, Method method)
+        throws InvalidParserException {
+        final List<Parameter> paramsAnnotations = Arrays.stream(method.getParameterAnnotations())
+            .flatMap(Arrays::stream)
+            .filter(annotation -> annotation instanceof Parameter)
+            .map(annotation -> (Parameter) annotation)
+            .collect(Collectors.toList());
+
+        for (Parameter paramAnnotation : paramsAnnotations) {
+            for (ConfigValueSchema value : valuesSchema) {
+                final Map<String, String> valueMap = value.getValues();
+                final String annotationKey = paramAnnotation.key();
+
+                if (StringUtils.hasText(paramAnnotation.defaultValue()) && valueMap.get(annotationKey) == null){
+                    valueMap.put(annotationKey, paramAnnotation.defaultValue());
+                }
+                if (paramAnnotation.required() && valueMap.get(annotationKey) == null){
+                    throw new InvalidParserException(parserSchema,
+                        String.format("Required parameter isn't provided: %s", annotationKey));
+                }
+            }
+        }
+    }
+
+  private void invokeMethod(Parser parser,
                               ParserSchema parserSchema,
                               String configKey,
                               Method method,

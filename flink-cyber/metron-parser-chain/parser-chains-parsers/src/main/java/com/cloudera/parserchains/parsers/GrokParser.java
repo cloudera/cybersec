@@ -12,6 +12,7 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static java.lang.String.format;
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
@@ -22,14 +23,11 @@ import com.cloudera.parserchains.core.catalog.Parameter;
 import com.cloudera.parserchains.core.catalog.WidgetType;
 import io.krakens.grok.api.Grok;
 import io.krakens.grok.api.GrokCompiler;
-import org.apache.commons.lang3.StringUtils;
-
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static java.lang.String.format;
+import org.apache.commons.lang3.StringUtils;
 
 @MessageParser(
         name = "Grok",
@@ -109,7 +107,7 @@ public class GrokParser implements Parser {
 
     @Configurable(key = "inputField",
             label = "Input Field",
-            description = "The name of the input field to parse.",
+            description = "The name of the input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
             defaultValue = Constants.DEFAULT_INPUT_FIELD)
     public GrokParser inputField(String inputField) {
         if (StringUtils.isNotBlank(inputField)) {
@@ -129,7 +127,7 @@ public class GrokParser implements Parser {
 
     @Configurable(key = "zoneOffset",
             label = "Zone Offset",
-            description = "Set the zone offset. For example \"+02:00\".",
+            description = "Set the zone offset. For example \"+02:00\". Default value: '" + DEFAULT_ZONE_OFFSET + "'",
             defaultValue = DEFAULT_ZONE_OFFSET)
     public void zoneOffset(String offset) {
         if (StringUtils.isNotBlank(offset)) {
