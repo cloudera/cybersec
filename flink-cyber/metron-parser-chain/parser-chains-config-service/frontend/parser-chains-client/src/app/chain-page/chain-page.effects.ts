@@ -117,9 +117,15 @@ export class ChainPageEffects {
     switchMap((action: fromActions.GetIndexMappingsAction) => {
       return this.chainPageService.getIndexMappings(action.payload).pipe(
         map((response:{path:string, result:Map<string, object>}) => {
+          if (response){
             return new fromActions.GetIndexMappingsSuccessAction({
               path: response.path, result: response.result
             });
+          } else {
+            return new fromActions.GetIndexMappingsSuccessAction({
+              path: '', result: new Map<string, object>()
+            });
+          }
           }),
         catchError((error: { message: string }) => {
           this.messageService.create('error', error.message);
