@@ -19,9 +19,8 @@ import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A parser that adds the current system time as a field to the message. Useful for
@@ -52,7 +51,7 @@ public class TimestampParser implements Parser {
 
     @Configurable(key="outputField",
             label="Output Field",
-            description="The field that will contain the timestamp.",
+            description="The field that will contain the timestamp. Default value: '" + DEFAULT_OUTPUT_FIELD + "'",
             isOutputName=true,
             defaultValue=DEFAULT_OUTPUT_FIELD)
     public TimestampParser withOutputField(String fieldName) {

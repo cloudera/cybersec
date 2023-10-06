@@ -12,6 +12,8 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
+import static java.lang.String.format;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
@@ -24,18 +26,14 @@ import com.jayway.jsonpath.InvalidJsonException;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import com.jayway.jsonpath.ReadContext;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
-import static java.lang.String.format;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Allows a JSON document to be parsed by providing one or more path expressions.
@@ -66,8 +64,17 @@ public class JSONPathParser implements Parser {
      */
     @Configurable(key = "expr", multipleValues = true)
     public JSONPathParser expression(
-            @Parameter(key = "field", label = "Field Name", description = "The field to create or modify.", isOutputName = true) String fieldName,
-            @Parameter(key = "expr", label = "Path Expression", description = "The path expression.") String expr) {
+            @Parameter(key = "field",
+                label = "Field Name",
+                description = "The field to create or modify. Default value: '" + DEFAULT_INPUT_FIELD + "'",
+                defaultValue = DEFAULT_INPUT_FIELD,
+                isOutputName = true)
+            String fieldName,
+            @Parameter(key = "expr",
+                label = "Path Expression",
+                description = "The path expression.",
+                required = true)
+            String expr) {
         if (StringUtils.isNoneBlank(fieldName, expr)) {
             expressions.put(FieldName.of(fieldName), JsonPath.compile(expr));
         }
