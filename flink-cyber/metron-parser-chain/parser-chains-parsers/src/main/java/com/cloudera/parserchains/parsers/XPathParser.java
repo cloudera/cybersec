@@ -12,6 +12,8 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
+import static java.lang.String.format;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
@@ -19,12 +21,9 @@ import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.w3c.dom.Document;
-import org.xml.sax.SAXException;
-
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.LinkedHashMap;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
@@ -32,12 +31,11 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.LinkedHashMap;
-
-import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
-import static java.lang.String.format;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
 @MessageParser(
         name="XPath",
@@ -63,7 +61,7 @@ public class XPathParser implements Parser {
     @Configurable(
             key="input",
             label="Input Field",
-            description="The input field to parse.",
+            description= "The input field to parse. Default value: '" + DEFAULT_INPUT_FIELD + "'",
             defaultValue=DEFAULT_INPUT_FIELD)
     public XPathParser inputField(String inputField) {
         if(StringUtils.isNotBlank(inputField)) {
@@ -75,8 +73,17 @@ public class XPathParser implements Parser {
     @Configurable(key="xpath",
             multipleValues = true)
     public XPathParser expression(
-            @Parameter(key="field", label="Field Name", description="The field to create or modify.", isOutputName = true) String fieldName,
-            @Parameter(key="expr", label="XPath", description="The XPath expression.") String expression) {
+            @Parameter(key="field",
+                label="Field Name",
+                description="The field to create or modify.",
+                isOutputName = true,
+                required = true)
+            String fieldName,
+            @Parameter(key="expr",
+                label="XPath",
+                description="The XPath expression.",
+                required = true)
+            String expression) {
         if(StringUtils.isNoneBlank(fieldName, expression)) {
             FieldName field = FieldName.of(fieldName);
             this.compiledExpressions.put(field, compile(expression));
@@ -99,7 +106,7 @@ public class XPathParser implements Parser {
     @Configurable(
             key="nsAware",
             label="Namespace Aware",
-            description="Should the parser support XML namespaces.",
+            description="Should the parser support XML namespaces. Default value: '" + DEFAULT_NAMESPACE_AWARE + "'",
             defaultValue=DEFAULT_NAMESPACE_AWARE)
     public XPathParser namespaceAware(String namespaceAware) {
         if(StringUtils.isNotBlank(namespaceAware)) {
