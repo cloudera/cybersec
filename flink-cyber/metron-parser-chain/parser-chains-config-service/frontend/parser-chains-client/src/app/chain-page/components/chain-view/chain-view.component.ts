@@ -24,6 +24,8 @@ import {Observable} from "rxjs";
 })
 export class ChainViewComponent implements OnInit {
 
+  private readonly _selectedSourceKey = "selectedIndexingSource";
+
   @Input() parsers: any [];
   @Input() dirtyParsers: string[];
   @Input() chainId: string;
@@ -35,9 +37,12 @@ export class ChainViewComponent implements OnInit {
   collapseAll: boolean;
   parserCollapseStateArray: boolean[];
   selectedSource: string;
+
   constructor(public chainPageService: ChainPageService) {
   }
+
   ngOnInit() {
+    this.selectedSource = localStorage.getItem(this._selectedSourceKey);
     this.chainPageService.collapseAll.subscribe(value => this.collapseAll = value);
     this.chainPageService.createChainCollapseArray(this.parsers.length);
     this.chainPageService.getCollapseExpandState().subscribe(stateArray => {
@@ -66,5 +71,10 @@ export class ChainViewComponent implements OnInit {
 
   collapseExpandAllParsers() {
     this.chainPageService.collapseExpandAllParsers();
+  }
+
+  selectedSourceChanged(newSelectedSource: string) {
+    this.selectedSource = newSelectedSource;
+    localStorage.setItem(this._selectedSourceKey, newSelectedSource);
   }
 }

@@ -13,6 +13,8 @@ import {GetIndexMappingsAction} from "../../chain-page.actions";
 })
 export class IndexingFormComponent implements OnInit {
 
+    private readonly _indexingPathKey = 'indexingPath';
+
     form!: FormGroup;
     @Output() fieldSetUpdated = new EventEmitter<Map<string, Map<string, boolean>>>()
     mappingJson: any;
@@ -24,6 +26,7 @@ export class IndexingFormComponent implements OnInit {
 
     ngOnInit(): void {
         this.form = this.fb.group({filePath: ''})
+        this.form.setValue(JSON.parse(localStorage.getItem(this._indexingPathKey)))
         this.submitForm()
     }
 
@@ -58,6 +61,7 @@ export class IndexingFormComponent implements OnInit {
     }
 
     submitForm() {
+        localStorage.setItem(this._indexingPathKey, JSON.stringify(this.form.value))
         this.store.dispatch(new GetIndexMappingsAction(this.form.value))
         this.store.pipe(select(getIndexMappings))
             .subscribe(indexMappings => {
