@@ -14,9 +14,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.kafka.core.KafkaOperations;
 import org.springframework.kafka.requestreply.RequestReplyFuture;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -48,9 +50,9 @@ public class KafkaService {
     private Pair<ResponseType, ResponseBody> send(RequestType requestType, RequestBody body, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody> kafkaTemplate) {
         ProducerRecord<String, RequestBody> producerRecord = new ProducerRecord<>(kafkaTemplate.getRequestTopic(),
                 requestType.name(), body);
-        RequestReplyFuture<String, RequestBody, ResponseBody> replyFuture = kafkaTemplate.sendAndReceive(producerRecord);
+        RequestReplyFuture<String, RequestBody, ResponseBody> replyFuture = kafkaTemplate.sendAndReceive(producerRecord, Duration.ofMinutes(2));
         try {
-            ConsumerRecord<String, ResponseBody> consumerRecord = replyFuture.get(15, TimeUnit.SECONDS);
+            ConsumerRecord<String, ResponseBody> consumerRecord = replyFuture.get(120, TimeUnit.SECONDS);
             if (consumerRecord == null) {
                 throw new KafkaException("Got no reply from kafka");
             }
