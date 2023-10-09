@@ -3,6 +3,7 @@ package com.cloudera.cyber.restcli.configuration;
 import com.cloudera.service.common.config.kafka.ClouderaKafkaProperties;
 import com.cloudera.service.common.request.RequestBody;
 import com.cloudera.service.common.response.ResponseBody;
+import jdk.nashorn.internal.objects.annotations.Property;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
@@ -25,12 +27,12 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @EnableKafka
 @Configuration
 @AllArgsConstructor
-@EnableConfigurationProperties({ClouderaKafkaProperties.class})
 public class KafkaConfig {
 
-    public final ClouderaKafkaProperties kafkaProperties;
-
-
+    @Bean
+    public ClouderaKafkaProperties kafkaProperties() {
+        return new ClouderaKafkaProperties();
+    }
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, RequestBody> kafkaListenerContainerFactory() {
@@ -46,10 +48,10 @@ public class KafkaConfig {
     }
 
     private ProducerFactory<String, ResponseBody> kafkaProducerFactory() {
-        return new DefaultKafkaProducerFactory<>(kafkaProperties.buildConsumerProperties(), new StringSerializer(), new JsonSerializer<>());
+        return new DefaultKafkaProducerFactory<>(kafkaProperties().buildConsumerProperties(), new StringSerializer(), new JsonSerializer<>());
     }
 
     private ConsumerFactory<String, RequestBody> kafkaConsumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(kafkaProperties.buildConsumerProperties(), new StringDeserializer(), new JsonDeserializer<>(RequestBody.class));
+        return new DefaultKafkaConsumerFactory<>(kafkaProperties().buildConsumerProperties(), new StringDeserializer(), new JsonDeserializer<>(RequestBody.class));
     }
 }

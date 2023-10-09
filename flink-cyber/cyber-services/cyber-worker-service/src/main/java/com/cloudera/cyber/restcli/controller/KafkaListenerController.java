@@ -30,8 +30,8 @@ public class KafkaListenerController {
 
     private final JobService jobService;
 
-    @KafkaListener(topics = "${spring.kafka.request-topic}", containerFactory = "kafkaListenerContainerFactory")
-    @SendTo({"${spring.kafka.reply-topic}"})
+    @KafkaListener(topics = "#{kafkaProperties.getRequestTopic()}", containerFactory = "kafkaListenerContainerFactory")
+    @SendTo({"#{kafkaProperties.getReplyTopic()}"})
     public Message<ResponseBody> replyTest(RequestBody requestBody, @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String key, @Header(KafkaHeaders.REPLY_TOPIC) byte[] replyTo,
                                            @Header(KafkaHeaders.CORRELATION_ID) byte[] correlationId) {
         log.info("Start processing message\n Message key: '{}' \n value: '{}'", key, requestBody);
@@ -39,25 +39,9 @@ public class KafkaListenerController {
         RequestType requestType = Utils.getEnumFromString(key, RequestType.class, RequestType::name);
         switch (requestType) {
             case GET_ALL_CLUSTERS_SERVICE_REQUEST:
-                try {
-                    List<Job> jobs = jobService.getJobs();
-                    ResponseBody responseBody = ResponseBody.builder()
-                            .jobs(jobs)
-                            .build();
-                    return buildResponseMessage(responseBody, ResponseType.GET_ALL_CLUSTERS_SERVICE_RESPONSE, replyTo, correlationId);
-                } catch (IOException | InterruptedException e) {
-                    return handleErrorResponse(e, replyTo, correlationId);
-                }
+                return getResponseBodyMessage(replyTo, correlationId, ResponseType.GET_ALL_CLUSTERS_SERVICE_RESPONSE);
             case GET_CLUSTER_SERVICE_REQUEST:
-                try {
-                    Job job = jobService.getJob(requestBody.getJobIdHex());
-                    ResponseBody responseBody = ResponseBody.builder()
-                            .jobs(Collections.singletonList(job))
-                            .build();
-                    return buildResponseMessage(responseBody, ResponseType.GET_CLUSTER_SERVICE_RESPONSE, replyTo, correlationId);
-                } catch (IOException | InterruptedException e) {
-                    return handleErrorResponse(e, replyTo, correlationId);
-                }
+                return getResponseBodyMessage(replyTo, correlationId, ResponseType.GET_CLUSTER_SERVICE_RESPONSE);
             case START_JOB_REQUEST:
                 break;
             case RESTART_JOB_REQUEST:
@@ -88,6 +72,18 @@ public class KafkaListenerController {
         return null;
     }
 
+    private Message<ResponseBody> getResponseBodyMessage(byte[] replyTo, byte[] correlationId, ResponseType responseType) {
+        try {
+            List<Job> jobs = jobService.getJobs();
+            ResponseBody responseBody = ResponseBody.builder()
+                    .jobs(jobs)
+                    .build();
+            return buildResponseMessage(responseBody, responseType, replyTo, correlationId);
+        } catch (IOException | InterruptedException e) {
+            return handleErrorResponse(e, replyTo, correlationId);
+        }
+    }
+
     private Message<ResponseBody> handleErrorResponse(Exception e, byte[] replyTo, byte[] correlationId) {
         ResponseBody responseBody = ResponseBody.builder()
                 .errorMessage(Collections.singletonMap(e.getClass().toString(), e.getMessage()))
@@ -100,7 +96,6 @@ public class KafkaListenerController {
         MessageHeaderAccessor accessor = new MessageHeaderAccessor();
         accessor.setHeader(KafkaHeaders.MESSAGE_KEY, responseType.name());
         accessor.setHeader(KafkaHeaders.CORRELATION_ID, correlationId);
-        accessor.setHeader(KafkaHeaders.REPLY_TOPIC, replyTo);
         MessageHeaders headers = accessor.getMessageHeaders();
         return MessageBuilder.createMessage(body, headers);
     }
