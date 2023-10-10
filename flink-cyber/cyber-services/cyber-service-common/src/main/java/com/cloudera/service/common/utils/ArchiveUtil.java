@@ -13,6 +13,7 @@ import org.apache.flink.core.fs.FileStatus;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,14 +28,26 @@ import java.util.List;
 @UtilityClass
 public class ArchiveUtil {
 
-    public static void compressToTarGz(String inputPath, String outputPath) throws IOException {
+    public static void compressToTarGzFile(String inputPath, String outputPath) throws IOException {
+        try (OutputStream fOut = Files.newOutputStream(Paths.get(outputPath))) {
+            compressToTarGz(inputPath, fOut);
+        }
+    }
+
+    public static byte[] compressToTarGzInMemory(String inputPath) throws IOException {
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            compressToTarGz(inputPath, bos);
+            return bos.toByteArray();
+        }
+    }
+
+    private static void compressToTarGz(String inputPath, OutputStream outputStream) throws IOException {
         final List<FileStatus> fileList = FileUtil.listFiles(inputPath, true);
         if (fileList == null || fileList.isEmpty()) {
             return;
         }
 
-        try (OutputStream fOut = Files.newOutputStream(Paths.get(outputPath));
-             BufferedOutputStream buffOut = new BufferedOutputStream(fOut);
+        try (BufferedOutputStream buffOut = new BufferedOutputStream(outputStream);
              GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(buffOut);
              TarArchiveOutputStream tOut = new TarArchiveOutputStream(gzOut)) {
 
@@ -69,7 +82,7 @@ public class ArchiveUtil {
         tOut.closeArchiveEntry();
     }
 
-    public static void decompressFromTarGz(String pathToTar, String outputPath) throws IOException {
+    public static void decompressFromTarGzFile(String pathToTar, String outputPath) throws IOException {
         final Path path = Paths.get(pathToTar);
         if (Files.notExists(path)) {
             throw new IOException(String.format("File [%s] doesn't exists!", pathToTar));
@@ -79,7 +92,10 @@ public class ArchiveUtil {
         }
     }
 
-    public static void decompressFromTarGz(byte[] rawData, String outputPath) throws IOException {
+    public static void decompressFromTarGzInMemory(byte[] rawData, String outputPath) throws IOException {
+        if (rawData == null) {
+            throw new IOException("Provided null as .tar.gz data which is not allowed!");
+        }
         try (InputStream bi = new ByteArrayInputStream(rawData)) {
             decompressFromTarGz(bi, outputPath);
         }
