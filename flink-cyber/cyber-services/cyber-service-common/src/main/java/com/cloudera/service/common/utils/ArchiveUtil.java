@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Base64;
 import java.util.List;
 
 @Slf4j
@@ -31,6 +32,15 @@ public class ArchiveUtil {
     public static void compressToTarGzFile(String inputPath, String outputPath) throws IOException {
         try (OutputStream fOut = Files.newOutputStream(Paths.get(outputPath))) {
             compressToTarGz(inputPath, fOut);
+        }
+    }
+
+    public static byte[] compressToTarGzInMemory(String inputPath, boolean base64) throws IOException {
+        final byte[] bytes = compressToTarGzInMemory(inputPath);
+        if (base64){
+            return Base64.getEncoder().encode(bytes);
+        } else {
+            return bytes;
         }
     }
 
@@ -93,10 +103,21 @@ public class ArchiveUtil {
     }
 
     public static void decompressFromTarGzInMemory(byte[] rawData, String outputPath) throws IOException {
+        decompressFromTarGzInMemory(rawData, outputPath, false);
+    }
+
+    public static void decompressFromTarGzInMemory(byte[] rawData, String outputPath, boolean base64) throws IOException {
         if (rawData == null) {
             throw new IOException("Provided null as .tar.gz data which is not allowed!");
         }
-        try (InputStream bi = new ByteArrayInputStream(rawData)) {
+        final byte[] data;
+        if (base64){
+            data = Base64.getDecoder().decode(rawData);
+        } else {
+            data = rawData;
+        }
+
+        try (InputStream bi = new ByteArrayInputStream(data)) {
             decompressFromTarGz(bi, outputPath);
         }
     }
