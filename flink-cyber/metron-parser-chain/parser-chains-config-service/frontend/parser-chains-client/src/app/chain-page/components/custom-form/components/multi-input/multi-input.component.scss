@@ -30,3 +30,9 @@ nz-form-control textarea {
   display: flex;
   margin-bottom: .5rem;
 }
+
+.field-dropdown {
+  max-height: 20rem;
+  overflow: hidden;
+  overflow-y: scroll;
+}
