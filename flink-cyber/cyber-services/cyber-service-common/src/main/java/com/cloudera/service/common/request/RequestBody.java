@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -15,5 +13,5 @@ public class RequestBody {
     private String clusterServiceId;
     private String jobIdHex;
     private String pipelineDir;
-    private Map<String, String> jobConfigs;
+    private byte[] payload;
 }
