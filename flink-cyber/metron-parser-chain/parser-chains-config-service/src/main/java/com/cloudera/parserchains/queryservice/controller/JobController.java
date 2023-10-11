@@ -3,6 +3,7 @@ package com.cloudera.parserchains.queryservice.controller;
 import com.cloudera.parserchains.queryservice.common.ApplicationConstants;
 import com.cloudera.parserchains.queryservice.common.exception.FailedAllClusterReponseException;
 import com.cloudera.parserchains.queryservice.common.exception.FailedClusterReponseException;
+import com.cloudera.parserchains.queryservice.config.AppProperties;
 import com.cloudera.parserchains.queryservice.model.enums.JobActions;
 import com.cloudera.parserchains.queryservice.service.JobService;
 import com.cloudera.service.common.response.ResponseBody;
@@ -12,6 +13,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
+import org.apache.flink.core.fs.Path;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -35,6 +37,7 @@ import java.util.List;
 @RequestMapping(value = ApplicationConstants.API_BASE_URL + ApplicationConstants.API_JOBS)
 public class JobController {
 
+    private final AppProperties appProperties;
     private final JobService jobService;
 
     @ApiOperation(value = "Retrieves information about all cluster services.")
@@ -51,9 +54,11 @@ public class JobController {
         return null;
     }
 
-    @PostMapping("/config/{clusterId}/{jobIdHex}")
+    @PostMapping("/config/{clusterId}/{pipeline}/{jobIdHex}")
     public ResponseBody updateJobConfig(@ApiParam(name = "clusterId", value = "The ID of the cluster to update config on.", required = true)
                                         @PathVariable("clusterId") String clusterId,
+                                        @Schema(name = "pipeline", description = "Pipeline in which the job is running", allowableValues = {JobActions.Constants.START_VALUE, JobActions.Constants.RESTART_VALUE, JobActions.Constants.STOP_VALUE, JobActions.Constants.STATUS_VALUE, JobActions.Constants.GET_CONFIG_VALUE, JobActions.Constants.UPDATE_CONFIG_VALUE}, required = true)
+                                        @PathVariable("pipeline") String pipeline,
                                         @Schema(name = "jobIdHex", description = "Job ID to update config of", allowableValues = {JobActions.Constants.START_VALUE, JobActions.Constants.RESTART_VALUE, JobActions.Constants.STOP_VALUE, JobActions.Constants.STATUS_VALUE, JobActions.Constants.GET_CONFIG_VALUE, JobActions.Constants.UPDATE_CONFIG_VALUE}, required = true)
                                         @PathVariable("jobIdHex") String jobIdHex,
                                         @RequestParam("config") MultipartFile config) throws FailedClusterReponseException, IOException {
@@ -66,11 +71,14 @@ public class JobController {
             throw new RuntimeException("Provided file should be less than ~750Kb in size.");
         }
 
+        final Path pipelinePath = new Path(appProperties.getPipelinesPath(), pipeline);
+        final Path fullPipelinePath = pipelinePath.makeQualified(pipelinePath.getFileSystem());
+
         final com.cloudera.service.common.request.RequestBody requestBody =
                 com.cloudera.service.common.request.RequestBody.builder()
-//                        .clusterServiceId() FIXME what it's for and should we set it?
+                        .clusterServiceId(clusterId)
                         .jobIdHex(jobIdHex)
-//                        .pipelineDir() FIXME get from jobIdHex?
+                        .pipelineDir(fullPipelinePath.getPath())
                         .payload(Base64.getEncoder().encode(config.getBytes()))
                         .build();
         return jobService.makeRequest(clusterId, requestBody, JobActions.Constants.UPDATE_CONFIG_VALUE);
