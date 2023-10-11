@@ -122,7 +122,7 @@ public class ArchiveUtil {
         }
     }
 
-    public static void decompressFromTarGz(InputStream inputStream, String outputPath) throws IOException {
+    private static void decompressFromTarGz(InputStream inputStream, String outputPath) throws IOException {
         try (BufferedInputStream bi = new BufferedInputStream(inputStream);
              GzipCompressorInputStream gzi = new GzipCompressorInputStream(bi);
              TarArchiveInputStream ti = new TarArchiveInputStream(gzi)) {
