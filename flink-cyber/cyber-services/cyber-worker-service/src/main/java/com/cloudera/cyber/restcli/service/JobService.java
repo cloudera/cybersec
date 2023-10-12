@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -26,6 +27,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class JobService {
+    @Value("${cluster.pipeline.dir}")
+    private String pipelineDir;
     public static final String LOG_CLI_JOB_INFO = "Successfully read jobs from cli with exit code {}. job count '{}' jobs data '[{}]'";
     private final Pattern pattern = Pattern.compile("^(?<date>[\\d.:\\s]+)\\s:\\s(?<jobId>[a-fA-F0-9]+)\\s:\\s(?<jobFullName>[\\w.-]+)\\s\\((?<jobStatus>\\w+)\\)$");
 
@@ -50,7 +53,7 @@ public class JobService {
                 .orElse(null);
     }
 
-    public Job restartJob(String id, String pipelineDir) throws IOException, InterruptedException {
+    public Job restartJob(String id) throws IOException, InterruptedException {
         Job job = getJob(id);
         if (job != null) {
             log.info("Job '{}'", job);
