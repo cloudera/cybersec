@@ -8,7 +8,7 @@ public enum JobActions {
     public final String action;
 
     JobActions(String action) {
-        if (StringUtils.equalsIgnoreCase(this.name(), action)) {
+        if (!StringUtils.equalsIgnoreCase(this.name(), action)) {
             throw new IllegalArgumentException("Invalid action: " + action);
         }
         this.action = action;

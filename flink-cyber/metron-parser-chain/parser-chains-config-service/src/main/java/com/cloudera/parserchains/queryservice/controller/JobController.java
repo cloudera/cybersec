@@ -30,8 +30,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping(value = ApplicationConstants.API_BASE_URL + ApplicationConstants.API_JOBS)
 public class JobController {
-
-    private JobService jobService;
+    private final JobService jobService;
 
 
     @ApiOperation(value = "Retrieves information about all cluster services.")
@@ -43,7 +42,7 @@ public class JobController {
                                       @RequestBody com.cloudera.service.common.request.RequestBody body,
                                       @ApiParam(name = "clusterId", value = "The ID of the cluster to retrieve.", required = true)
                                       @PathVariable("clusterId") String clusterId,
-                                      @Schema(name = "action", description = "Jobs action for start stop restart Job", allowableValues = {JobActions.Constants.START_VALUE, JobActions.Constants.RESTART_VALUE, JobActions.Constants.STOP_VALUE, JobActions.Constants.STATUS_VALUE, JobActions.Constants.GET_CONFIG_VALUE, JobActions.Constants.UPDATE_CONFIG_VALUE}, required = true)
+                                      @Schema(name = "action", description = "Jobs action for start stop restart Job", required = true)
                                       @PathVariable("action") String action) throws FailedClusterReponseException {
         return jobService.jobAction(clusterId, body, action);
     }

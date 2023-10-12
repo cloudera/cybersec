@@ -22,7 +22,7 @@ public class Utils {
      */
     public static <T extends Enum<T>> T getEnumFromString(String name, Class<T> enumClass, Function<T, String> nameFunction) {
         return Arrays.stream(enumClass.getEnumConstants())
-                .filter(type -> StringUtils.containsIgnoreCase(name, nameFunction.apply(type)))
+                .filter(type -> StringUtils.equalsIgnoreCase(name, nameFunction.apply(type)))
                 .findFirst()
                 .orElse(null);
     }
