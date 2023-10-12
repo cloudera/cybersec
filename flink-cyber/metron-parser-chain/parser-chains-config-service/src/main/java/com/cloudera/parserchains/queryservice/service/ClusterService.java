@@ -19,9 +19,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ClusterService {
     private final KafkaService kafkaService;
+
     public List<ResponseBody> getAllClusterInfo() throws FailedAllClusterReponseException {
         List<Pair<ResponseType, ResponseBody>> response = kafkaService.sendWithReply(RequestType.GET_ALL_CLUSTERS_SERVICE_REQUEST, RequestBody.builder().build());
-        List<ResponseBody> failedResponses = response.stream().filter(pair -> ResponseType.GET_ALL_CLUSTERS_SERVICE_RESPONSE != pair.getKey()).map(Pair::getValue).collect(Collectors.toList());
+        List<ResponseBody> failedResponses = response.stream()
+                .filter(pair -> pair.getKey() != null && ResponseType.GET_ALL_CLUSTERS_SERVICE_RESPONSE != pair.getKey())
+                .map(Pair::getValue)
+                .collect(Collectors.toList());
         if (!failedResponses.isEmpty()) {
             throw new FailedAllClusterReponseException(failedResponses);
         }

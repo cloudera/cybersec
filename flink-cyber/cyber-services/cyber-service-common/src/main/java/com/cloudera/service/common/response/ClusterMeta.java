@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ClusterMeta {
     private String name;
+    private String clusterId;
+    private String clusterStatus;
     private String version;
     private String flinkVersion;
 }

@@ -13,8 +13,6 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResponseBody {
-    private String clusterServiceId;
-    private String jobIdHex;
     private Map<String, String> jobConfigs;
     private List<Job> jobs;
     private Map<String, String> errorMessage;

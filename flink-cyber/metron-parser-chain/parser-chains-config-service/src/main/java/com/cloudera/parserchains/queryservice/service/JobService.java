@@ -23,7 +23,7 @@ public class JobService {
     private final KafkaService kafkaService;
     private final ClusterService clusterService;
 
-    public ResponseBody getClusterInfo(String clusterId, RequestBody body, String actionString) throws FailedClusterReponseException {
+    public ResponseBody jobAction(String clusterId, RequestBody body, String actionString) throws FailedClusterReponseException {
         JobActions action = Utils.getEnumFromString(actionString, JobActions.class, JobActions::getAction);
         switch (action) {
             case START:

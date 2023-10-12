@@ -31,8 +31,8 @@ export const routes: Routes = [
     component: ChainPageComponent,
     canDeactivate: [ CanDeactivateComponent ]
   },
-  { path: 'cluster', component: ClusterListPageComponent },
-  { path: 'cluster/:clusterId', component: ClusterPageComponent},
+  { path: 'clusters', component: ClusterListPageComponent },
+  { path: 'clusters/:clusterId', component: ClusterPageComponent},
 
   { path: 'parserconfig/chains/:id/new', component: ChainAddParserPageComponent },
   { path: ':type', component: MainContainerComponent },

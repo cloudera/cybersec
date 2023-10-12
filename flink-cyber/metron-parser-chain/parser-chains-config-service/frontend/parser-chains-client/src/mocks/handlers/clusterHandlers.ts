@@ -21,7 +21,7 @@ export const clusterHandlers = [
   rest.get<ClusterModel, { clusterId: string }>('/api/v1/clusters/:clusterId', (req, res, ctx) => {
     const {clusterId} = req.params;
     const storedChains: ClusterModel[] = JSON.parse(localStorage.getItem('cluster'));
-    const chain = storedChains.find(chain => chain.id === clusterId);
+    const chain = storedChains.find(chain => chain.clusterMeta.clusterId === clusterId);
     if (chain) {
       return res(
         ctx.status(200),
@@ -39,8 +39,8 @@ export const clusterHandlers = [
     const reqBody: Map<string,string> = req.body;
 
     const storedClusters: ClusterModel[] = JSON.parse(localStorage.getItem('cluster'));
-    const clusterModel = storedClusters.find(chain => chain.id === clusterId);
-    const job: Job = clusterModel?.jobs.find(job => job.name === jobName);
+    const clusterModel = storedClusters.find(chain => chain.clusterMeta.clusterId === clusterId);
+    const job: Job = clusterModel?.jobs.find(job => job.jobName === jobName);
     if (jobName.toLowerCase().includes('triage')) {
       return res(
         ctx.status(400)

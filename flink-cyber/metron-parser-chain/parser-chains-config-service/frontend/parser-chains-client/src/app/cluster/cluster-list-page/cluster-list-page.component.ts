@@ -39,10 +39,10 @@ export class ClusterListPageComponent implements OnInit {
   ngOnInit() {
   }
 
-  getBranches = (jobs: Job[]) => [...new Set(jobs.map(job => job.branch))].join(', ');
+  getBranches = (jobs: Job[]) => [...new Set(jobs.map(job => job.jobPipeline))].join(', ');
 
   goToDetailCluster = (clusterId: string | number) => {
-    this.router.navigate(['cluster', clusterId]);
+    this.router.navigate(['clusters', clusterId]);
 
   }
 }

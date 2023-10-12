@@ -6,6 +6,7 @@ import com.cloudera.parserchains.queryservice.config.kafka.ClouderaReplyingKafka
 import com.cloudera.service.common.Utils;
 import com.cloudera.service.common.request.RequestBody;
 import com.cloudera.service.common.request.RequestType;
+import com.cloudera.service.common.response.ClusterMeta;
 import com.cloudera.service.common.response.ResponseBody;
 import com.cloudera.service.common.response.ResponseType;
 import lombok.RequiredArgsConstructor;
@@ -40,36 +41,37 @@ public class KafkaService {
             log.error("Cluster not found with cluster id: '{}'", clusterId);
             throw new KafkaClusterNotFound("Cluster not found! with cluster id '" + clusterId + "'");
         }
-        return send(requestType, body, kafkaTemplate);
+        return send(requestType, body, clusterId, kafkaTemplate);
     }
 
     public List<Pair<ResponseType, ResponseBody>> sendWithReply(RequestType requestType, RequestBody body) {
-        return kafkaTemplatePool.values().stream().map(template -> send(requestType, body, template)).collect(Collectors.toList());
+        return kafkaTemplatePool.entrySet().stream()
+                .map(entry -> send(requestType, body, entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
 
-    private Pair<ResponseType, ResponseBody> send(RequestType requestType, RequestBody body, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody> kafkaTemplate) {
-        ProducerRecord<String, RequestBody> producerRecord = new ProducerRecord<>(kafkaTemplate.getRequestTopic(),
-                requestType.name(), body);
-        RequestReplyFuture<String, RequestBody, ResponseBody> replyFuture = kafkaTemplate.sendAndReceive(producerRecord, Duration.ofMinutes(2));
+    private Pair<ResponseType, ResponseBody> send(RequestType requestType, RequestBody body, String clusterId, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody> kafkaTemplate) {
+        ProducerRecord<String, RequestBody> producerRecord = new ProducerRecord<>(kafkaTemplate.getRequestTopic(), requestType.name(), body);
+        RequestReplyFuture<String, RequestBody, ResponseBody> replyFuture = kafkaTemplate.sendAndReceive(producerRecord, Duration.ofMinutes(1));
         try {
-            ConsumerRecord<String, ResponseBody> consumerRecord = replyFuture.get(120, TimeUnit.SECONDS);
+            ConsumerRecord<String, ResponseBody> consumerRecord = replyFuture.get(45, TimeUnit.SECONDS);
             if (consumerRecord == null) {
                 throw new KafkaException("Got no reply from kafka");
             }
-            return Pair.of(Utils.getEnumFromString(consumerRecord.key(), ResponseType.class, ResponseType::name), consumerRecord.value());
+            ResponseBody responseBody = consumerRecord.value();
+            return Pair.of(Utils.getEnumFromString(consumerRecord.key(), ResponseType.class, ResponseType::name), responseBody);
         } catch (ExecutionException e) {
             // Handle exception
             log.error("Exception thrown when attempting to retrieve the information from kafka. Message: '{}' \n Cause: '{}'", e.getMessage(), e.getCause().getMessage());
-            throw new KafkaException("Exception thrown when attempting to retrieve the information from kafka.");
+            return Pair.of(null, ResponseBody.builder().clusterMeta(ClusterMeta.builder().clusterId(clusterId).clusterStatus("offline").build()).build());
         } catch (TimeoutException e) {
             // Handle exception
             log.error("Timeout while waiting for reply");
-            throw new KafkaException("Timeout while waiting for reply");
+            return Pair.of(null, ResponseBody.builder().clusterMeta(ClusterMeta.builder().clusterId(clusterId).clusterStatus("offline").build()).build());
         } catch (InterruptedException e) {
-            log.warn("Kafka throws interruption exception. Message: '{}' Cause: '{}'", e.getMessage(),
-                    Optional.ofNullable(e.getCause()).map(Throwable::getMessage).orElse("Cause is empty"));
+            log.warn("Kafka throws interruption exception. Message: '{}' Cause: '{}'", e.getMessage(), Optional.ofNullable(e.getCause()).map(Throwable::getMessage).orElse("Cause is empty"));
             Thread.currentThread().interrupt();
+            return Pair.of(null, ResponseBody.builder().clusterMeta(ClusterMeta.builder().clusterId(clusterId).clusterStatus("offline").build()).build());
         }
-        return Pair.of(null, null);
     }
 }

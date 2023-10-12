@@ -15,19 +15,19 @@
 <!--  &lt;!&ndash; Position Column &ndash;&gt;-->
   <ng-container matColumnDef="id">
     <th mat-header-cell *matHeaderCellDef>ID</th>
-    <td mat-cell *matCellDef="let element">{{element.id}}</td>
+    <td mat-cell *matCellDef="let element">{{element.clusterMeta.clusterId}}</td>
   </ng-container>
 
   <!-- Name Column -->
   <ng-container matColumnDef="name">
     <th mat-header-cell *matHeaderCellDef>Name</th>
-    <td mat-cell *matCellDef="let element">{{element.name}}</td>
+    <td mat-cell *matCellDef="let element">{{element.clusterMeta.name}}</td>
   </ng-container>
 
   <!-- Status Column -->
   <ng-container matColumnDef="status">
     <th mat-header-cell *matHeaderCellDef>Status</th>
-    <td mat-cell *matCellDef="let element;"><span class="status-container"><app-status-icon iconName="{{element.status}}" ></app-status-icon>{{element.status}}</span></td>
+    <td mat-cell *matCellDef="let element;"><span class="status-container"><app-status-icon iconName="{{element.clusterMeta.clusterStatus}}" ></app-status-icon>{{element.clusterMeta.clusterStatus}}</span></td>
   </ng-container>
 
   <!-- Branches Column -->
@@ -39,11 +39,11 @@
   <!-- Version Column -->
   <ng-container matColumnDef="version">
     <th mat-header-cell *matHeaderCellDef>Version</th>
-    <td mat-cell *matCellDef="let element">{{element.version}}</td>
+    <td mat-cell *matCellDef="let element">{{element.clusterMeta.version}}</td>
   </ng-container>
 
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
   <tr mat-row
-      (click)="(goToDetailCluster(row.id))"
+      (click)="(goToDetailCluster(row.clusterMeta.clusterId))"
       *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>

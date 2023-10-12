@@ -31,7 +31,10 @@ export class StatusIconComponent implements OnInit {
       case 'offline':
         return 'offline_bolt';
       case 'restart' :
+      case 'restarting' :
         return 'replay';
+      case 'update-config' :
+        return 'settings';
       default:
         return 'error';
     }
@@ -51,6 +54,8 @@ export class StatusIconComponent implements OnInit {
       case 'online':
       case 'restart' :
         return 'green-icon';
+      case 'update-config' :
+        return 'yellow-icon';
       default:
         return 'red-icon';
     }

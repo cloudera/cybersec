@@ -30,7 +30,7 @@ export class ClusterPageComponent implements OnInit {
   jobs: Job[];
   cluster$!: Observable<ClusterModel>;
   clusterId = '0';
-  displayedColumns: string[] = ['select', 'name', 'branch', 'pipeline', 'status', 'created'];
+  displayedColumns: string[] = ['select', 'name', 'type', 'branch', 'pipeline', 'status', 'created'];
   selection = new SelectionModel<Job>(true, []);
 
   constructor(
@@ -65,13 +65,18 @@ export class ClusterPageComponent implements OnInit {
     }
   }
 
-  changeJobStatus(newStatus: 'running' | 'started' | 'stopped') {
+  changeJobStatus(action: 'start' | 'restart' | 'stop' | 'update_config') {
     forkJoin(
       this.selection.selected.reduce((acc, job) =>
           ({
             ...acc,
-            [job.name]:
-              this.clusterService.sendJobCommand(this.clusterId, job.name, {status: newStatus}).pipe(catchError(err => {
+            [job.jobName]:
+              this.clusterService.sendJobCommand(this.clusterId, action,
+                {
+                  jobIdHex: job.jobIdString,
+                  pipelineDir: job.jobPipeline,
+                  branch: job.jobPipeline
+                }).pipe(catchError(err => {
                 this.snackBarService.showMessage(err.message, SnackBarStatus.Fail);
                 return of(null);
               }))
@@ -79,7 +84,7 @@ export class ClusterPageComponent implements OnInit {
         {})
     ).subscribe((value: { [jobName: string]: HttpResponse<any> }) => {
         Object.entries(value).forEach(([jobName, res]) => {
-          this.jobs = this.jobs.map(this.updateJobStatus(jobName, res, newStatus));
+          this.jobs = this.jobs.map(this.updateJobStatus(jobName, res, action));
         });
       },
       (error) => {
@@ -91,7 +96,7 @@ export class ClusterPageComponent implements OnInit {
       });
   }
 
-  private updateJobStatus(jobName: string, res: HttpResponse<any>, newStatus: 'running' | 'started' | 'stopped') {
+  private updateJobStatus(jobName: string, res: HttpResponse<any>, newStatus: 'start' | 'restart' | 'stop' | 'update_config') {
     return job => {
       if (job.name === jobName && res !== null) {
         if (res.status === 204) {

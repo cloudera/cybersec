@@ -4,11 +4,13 @@ import com.cloudera.cyber.restcli.service.JobService;
 import com.cloudera.service.common.Utils;
 import com.cloudera.service.common.request.RequestBody;
 import com.cloudera.service.common.request.RequestType;
+import com.cloudera.service.common.response.ClusterMeta;
 import com.cloudera.service.common.response.Job;
 import com.cloudera.service.common.response.ResponseBody;
 import com.cloudera.service.common.response.ResponseType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -27,6 +29,15 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class KafkaListenerController {
+
+    @Value("${cluster.name}")
+    private String clusterName;
+    @Value("${cluster.id}")
+    private String clusterId;
+    @Value("${cluster.status}")
+    private String clusterStatus;
+    @Value("${cluster.version}")
+    private String clusterVersion;
 
     private final JobService jobService;
 
@@ -77,6 +88,12 @@ public class KafkaListenerController {
             List<Job> jobs = jobService.getJobs();
             ResponseBody responseBody = ResponseBody.builder()
                     .jobs(jobs)
+                    .clusterMeta(ClusterMeta.builder()
+                            .name(clusterName)
+                            .clusterId(clusterId)
+                            .clusterStatus(clusterStatus)
+                            .version(clusterVersion)
+                            .build())
                     .build();
             return buildResponseMessage(responseBody, responseType, replyTo, correlationId);
         } catch (IOException | InterruptedException e) {

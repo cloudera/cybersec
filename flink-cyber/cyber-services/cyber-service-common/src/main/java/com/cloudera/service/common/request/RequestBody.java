@@ -15,5 +15,6 @@ public class RequestBody {
     private String clusterServiceId;
     private String jobIdHex;
     private String pipelineDir;
+    private String branch;
     private Map<String, String> jobConfigs;
 }
