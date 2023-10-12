@@ -46,7 +46,7 @@ public class KafkaListenerController {
                 break;
             case RESTART_JOB_REQUEST:
                 try {
-                    Job job = jobService.restartJob(requestBody.getJobIdHex(), requestBody.getPipelineDir());
+                    Job job = jobService.restartJob(requestBody.getJobIdHex());
                     ResponseBody responseBody = ResponseBody.builder()
                             .jobs(Collections.singletonList(job))
                             .build();
