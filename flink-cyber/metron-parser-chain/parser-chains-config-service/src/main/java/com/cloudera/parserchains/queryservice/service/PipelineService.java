@@ -13,16 +13,18 @@
 package com.cloudera.parserchains.queryservice.service;
 
 import com.cloudera.parserchains.queryservice.config.AppProperties;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import com.cloudera.service.common.utils.FileUtil;
 import lombok.RequiredArgsConstructor;
 import org.apache.flink.core.fs.FileStatus;
-import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -33,13 +35,8 @@ public class PipelineService {
     @Cacheable("pipelinePathMap")
     public Map<String, Path> findAll() throws IOException {
         String pipelinePathStr = appProperties.getPipelinesPath();
-        Path pipelinesPath = new Path(pipelinePathStr);
 
-        final FileSystem fileSystem = pipelinesPath.getFileSystem();
-        if (!fileSystem.exists(pipelinesPath)) {
-            return null;
-        }
-        final FileStatus[] statusList = fileSystem.listStatus(pipelinesPath);
+        final List<FileStatus> statusList = FileUtil.listFiles(pipelinePathStr, false);;
         if (statusList == null) {
             return null;
         }
@@ -48,9 +45,11 @@ public class PipelineService {
         for (FileStatus fileStatus : statusList) {
             if (fileStatus.isDir()) {
                 //check if pipeline is valid
-                final Path chainsPath = new Path(fileStatus.getPath(), "parse/chains");
-                if (fileSystem.exists(chainsPath)) {
-                    pipelineMap.put(fileStatus.getPath().getName(), chainsPath);
+                final Path pipelinePath = fileStatus.getPath();
+                final Path chainsPath = new Path(pipelinePath, "parse/chains");
+
+                if (pipelinePath.getFileSystem().exists(chainsPath)) {
+                    pipelineMap.put(pipelinePath.getName(), chainsPath);
                 }
             }
         }

@@ -2,6 +2,7 @@ package com.cloudera.cyber.restcli.service;
 
 import com.cloudera.service.common.Utils;
 import com.cloudera.service.common.response.Job;
+import com.cloudera.service.common.utils.ArchiveUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -157,5 +158,9 @@ public class JobService {
         if (job.getJobType() == Job.JobType.PROFILE || job.getJobType() == Job.JobType.GENERATOR || job.getJobType() == Job.JobType.PARSER) {
             job.setJobName(jobParameters[jobParameters.length - 1]);
         }
+    }
+
+    public void updateConfig(String pipelineDir, byte[] payload) throws IOException {
+        ArchiveUtil.decompressFromTarGzInMemory(payload, pipelineDir, true);
     }
 }

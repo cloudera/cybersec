@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -19,7 +20,6 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
-import org.springframework.kafka.support.KafkaHeaders;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -43,8 +43,8 @@ public class KafkaListenerController {
 
     @KafkaListener(topics = "#{kafkaProperties.getRequestTopic()}", containerFactory = "kafkaListenerContainerFactory")
     @SendTo({"#{kafkaProperties.getReplyTopic()}"})
-    public Message<ResponseBody> replyTest(RequestBody requestBody, @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String key, @Header(KafkaHeaders.REPLY_TOPIC) byte[] replyTo,
-                                           @Header(KafkaHeaders.CORRELATION_ID) byte[] correlationId) {
+    public Message<ResponseBody> handleMessage(RequestBody requestBody, @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String key, @Header(KafkaHeaders.REPLY_TOPIC) byte[] replyTo,
+                                               @Header(KafkaHeaders.CORRELATION_ID) byte[] correlationId) {
         log.info("Start processing message\n Message key: '{}' \n value: '{}'", key, requestBody);
 
         RequestType requestType = Utils.getEnumFromString(key, RequestType.class, RequestType::name);
@@ -78,7 +78,14 @@ public class KafkaListenerController {
             case GET_JOB_CONFIG_REQUEST:
                 break;
             case UPDATE_JOB_CONFIG_REQUEST:
-                break;
+                try {
+                    jobService.updateConfig(requestBody.getPipelineDir(), requestBody.getPayload());
+                    //TODO responseBody
+                    final ResponseBody responseBody = ResponseBody.builder().build();
+                    return buildResponseMessage(responseBody, ResponseType.UPDATE_JOB_CONFIG_RESPONSE, replyTo, correlationId);
+                } catch (IOException e) {
+                    return handleErrorResponse(e, replyTo, correlationId);
+                }
         }
         return null;
     }
