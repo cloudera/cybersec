@@ -26,4 +26,11 @@ public class Utils {
                 .findFirst()
                 .orElse(null);
     }
+
+    public static <T extends Enum<T>> T getEnumFromStringContains(String name, Class<T> enumClass, Function<T, String> nameFunction) {
+        return Arrays.stream(enumClass.getEnumConstants())
+                .filter(type -> StringUtils.containsIgnoreCase(name, nameFunction.apply(type)))
+                .findFirst()
+                .orElse(null);
+    }
 }

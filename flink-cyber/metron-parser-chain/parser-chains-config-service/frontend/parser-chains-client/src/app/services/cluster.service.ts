@@ -21,4 +21,9 @@ export class ClusterService {
 
   public sendJobCommand = (clusterId : string | number, action : string , requestBody: RequestBody) =>
     this.http.post<HttpResponse<any>>(`${this.BASE_URL}clusters/${clusterId}/jobs/${action}`, requestBody);
+
+  public uploadFile = (clusterId : string | number, pipeline : string, jobIdHex : string , file: any) =>
+    this.http.post<HttpResponse<any>>(`${this.BASE_URL}clusters/${clusterId}/jobs/config/${pipeline}/${jobIdHex}`, file);
+
+
 }

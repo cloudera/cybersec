@@ -46,10 +46,13 @@ import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {BrowserModule} from "@angular/platform-browser";
+import {UploadDialogComponent} from "./dialog/upload-dialog.component";
+import {FileUploadModule} from "../component/file-upload/file-upload.module";
 
 @NgModule({
   declarations: [
-    ClusterPageComponent
+    ClusterPageComponent,
+    UploadDialogComponent,
   ],
   imports: [
     CommonModule,
@@ -99,9 +102,9 @@ import {BrowserModule} from "@angular/platform-browser";
     BrowserModule,
     BrowserAnimationsModule,
     StatusIconModule,
+    FileUploadModule
   ],
-  providers: [
-  ],
+  providers: [],
   bootstrap: [ClusterPageComponent],
   exports: [ClusterPageComponent]
 })

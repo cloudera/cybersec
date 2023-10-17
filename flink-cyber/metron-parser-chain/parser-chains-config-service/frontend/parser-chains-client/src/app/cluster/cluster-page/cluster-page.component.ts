@@ -19,6 +19,8 @@ import {ClusterService} from "../../services/cluster.service";
 import {SelectionModel} from '@angular/cdk/collections';
 import {HttpErrorResponse, HttpResponse} from "@angular/common/http";
 import {SnackbarService, SnackBarStatus} from "../../services/snack-bar.service";
+import {MatDialog} from "@angular/material/dialog";
+import {UploadDialogComponent} from "./dialog/upload-dialog.component";
 
 
 @Component({
@@ -37,7 +39,8 @@ export class ClusterPageComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private clusterService: ClusterService,
-    private snackBarService: SnackbarService
+    private snackBarService: SnackbarService,
+    private dialog: MatDialog
   ) {
     this.cluster$ = this.route.paramMap.pipe(
       switchMap(params => {
@@ -124,6 +127,17 @@ export class ClusterPageComponent implements OnInit {
     }
     // Return an observable with a user-facing error message.
     return throwError(() => new Error('Something bad happened; please try again later.'));
+  }
+
+  openUploadDialog() {
+    this.selection.selected.forEach(job => {
+      this.dialog.open(UploadDialogComponent, {
+        data: {
+          targetUrl: `/api/v1/clusters/${this.clusterId}/jobs/config/${job.jobPipeline}/${job.jobIdString}`,
+        },
+        width: '1200px',
+      });
+    });
   }
 }
 

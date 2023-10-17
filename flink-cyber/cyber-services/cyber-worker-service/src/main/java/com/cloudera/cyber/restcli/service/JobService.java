@@ -32,21 +32,16 @@ public class JobService {
     public static final String LOG_CLI_JOB_INFO = "Successfully read jobs from cli with exit code {}. job count '{}' jobs data '[{}]'";
     private final Pattern pattern = Pattern.compile("^(?<date>[\\d.:\\s]+)\\s:\\s(?<jobId>[a-fA-F0-9]+)\\s:\\s(?<jobFullName>[\\w.-]+)\\s\\((?<jobStatus>\\w+)\\)$");
 
-    public List<Job> getJobs() throws IOException, InterruptedException {
-        return getJobs(null);
-    }
 
-    public List<Job> getJobs(String id) throws IOException, InterruptedException {
+
+    public List<Job> getJobs() throws IOException, InterruptedException {
         List<Job> jobs = new ArrayList<>();
         int exitValue = fillJobList(jobs);
         log.info(LOG_CLI_JOB_INFO, exitValue, jobs.size(), jobs.stream().map(Objects::toString).collect(Collectors.joining(",")));
-        if (id != null) {
-            log.info("Searched id: '{}'", id);
-        }
         return jobs;    }
 
     public Job getJob(String id) throws IOException, InterruptedException {
-        List<Job> jobs = getJobs(id);
+        List<Job> jobs = getJobs();
         return jobs.stream()
                 .filter(job -> StringUtils.equalsIgnoreCase(job.getJobId().toHexString(), id))
                 .findFirst()
@@ -133,7 +128,7 @@ public class JobService {
                 Matcher stringMatcher = pattern.matcher(stringLine);
                 if (stringMatcher.matches()) {
                     String jobFullName = stringMatcher.group("jobFullName");
-                    Job.JobType jobType = Utils.getEnumFromString(jobFullName, Job.JobType.class, Job.JobType::getName);
+                    Job.JobType jobType = Utils.getEnumFromStringContains(jobFullName, Job.JobType.class, Job.JobType::getName);
                     if (jobType != null) {
                         Job job = Job.builder()
                                 .jobId(JobID.fromHexString(stringMatcher.group("jobId")))
