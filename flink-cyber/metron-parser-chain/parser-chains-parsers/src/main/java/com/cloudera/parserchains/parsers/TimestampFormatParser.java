@@ -84,7 +84,7 @@ public class TimestampFormatParser implements Parser {
     public TimestampFormatParser withOutputField(
             @Parameter(key = "field", label = "Input Field", description = "Field to be parsed", required = true) String fieldName,
             @Parameter(key = "format", label = "Time format", description = "A compatible time format", required = true) String format,
-            @Parameter(key = "tz", label = "Timezome", description = "Optionally set the expected timezone", required = true) String tz
+            @Parameter(key = "tz", label = "Timezone", description = "Optionally set the expected timezone", required = true) String tz
     ) {
 
         List<String> formats = Arrays.asList(format.split(","));
