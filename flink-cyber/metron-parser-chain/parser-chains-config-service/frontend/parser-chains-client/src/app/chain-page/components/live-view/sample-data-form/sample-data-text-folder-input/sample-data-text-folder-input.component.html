@@ -85,25 +85,29 @@
             </td>
         </tr>
         <tr [nzExpand]="expandSet.has(data.id)">
-            <nz-collapse>
-                <nz-collapse-panel nzHeader="Source">
-                    <p>{{data.source}}</p>
-                </nz-collapse-panel>
-                <nz-collapse-panel nzHeader="Expected result">
-                    <p>Failure: {{data.expectedFailure}}</p>
-                    <p>{{data.expectedResult}}</p>
-                </nz-collapse-panel>
-                <nz-collapse-panel nzHeader="Actual result" [nzDisabled]="(runResults$ | async).get(data.id) === undefined">
-                    <p>Failure: {{(runResults$ | async).get(data.id)?.failure}}</p>
-                    <p>{{(runResults$ | async).get(data.id)?.result}}</p>
-                </nz-collapse-panel>
-                <nz-collapse-panel nzHeader="Difference"
-                                   *ngIf="(getStatus(data.id) | async) === SampleTestStatus.FAIL">
-                    <app-text-diff-view
-                            originalModel="Failure: {{data.expectedFailure}}, Data: {{(runResults$ | async).get(data.id)?.expected}}"
-                            modifiedModel="Failure: {{(runResults$ | async).get(data.id)?.failure}}, Data: {{(runResults$ | async).get(data.id)?.result}}"></app-text-diff-view>
-                </nz-collapse-panel>
-            </nz-collapse>
+            <ng-container *ngIf="(runResults$ | async).get(data.id) as runResult">
+                <nz-collapse>
+                    <nz-collapse-panel nzHeader="Source">
+                        <p>{{data.source}}</p>
+                    </nz-collapse-panel>
+                    <nz-collapse-panel nzHeader="Expected result">
+                        <p>Failure: {{data.expectedFailure}}</p>
+                        <p>{{data.expectedResult}}</p>
+                    </nz-collapse-panel>
+                    <nz-collapse-panel nzHeader="Actual result" [nzDisabled]="runResult === undefined">
+                        <p>Failure: {{runResult?.failure}}</p>
+                        <p>{{runResult?.result}}</p>
+                    </nz-collapse-panel>
+                    <nz-collapse-panel nzHeader="Difference"
+                                       *ngIf="(getStatus(data.id) | async) === SampleTestStatus.FAIL">
+                        <app-text-diff-view
+                                originalModel="Failure: {{data.expectedFailure}}, Data: {{runResult?.expected}}"
+                                modifiedModel="Failure: {{runResult?.failure}}, Data: {{runResult?.result}}"
+                                (updateExpectedValue)="updateExpectedValue(runResult?.failure, runResult?.result, i, runResult.timestamp)"
+                        ></app-text-diff-view>
+                    </nz-collapse-panel>
+                </nz-collapse>
+            </ng-container>
         </tr>
     </ng-container>
     </tbody>

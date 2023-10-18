@@ -12,11 +12,13 @@ import {
     getEditModalVisible,
     getExecutionStatus,
     getRunResults,
-    getSampleData, getSampleFolderPath
+    getSampleData,
+    getSampleFolderPath
 } from "./sample-data-text-folder-input.selectors";
 import {Observable} from "rxjs";
 import {
-    FetchSampleListTriggeredAction, SampleFolderViewInitializedAction,
+    FetchSampleListTriggeredAction,
+    SampleFolderViewInitializedAction,
     SaveSampleListTriggeredAction,
     ShowEditModalAction
 } from "./sample-data-text-folder-input.actions";
@@ -40,7 +42,8 @@ export class SampleDataTextFolderInputComponent implements OnInit {
         expected: string,
         result: string,
         failure: boolean,
-        raw: EntryParsingResultModel[]
+        raw: EntryParsingResultModel[],
+        timestamp: bigint
     }>>;
     sampleData$: Observable<SampleDataInternalModel[]>;
     sampleFolderPath$: Observable<string>;
@@ -192,5 +195,23 @@ export class SampleDataTextFolderInputComponent implements OnInit {
                 ? SampleTestStatus.UNKNOWN
                 : dataById.status;
         }));
+    }
+
+    updateExpectedValue(failure: boolean, result: string, i: number, timestamp: bigint) {
+        let sample = this.currentSampleData[i];
+
+        this.selectedSample = [i, sample]
+
+        let finalResult = result
+
+        if (timestamp){
+            finalResult = finalResult.replace(String(timestamp), "%timestamp%")
+        }
+
+        this.updateSample({
+            ...sample,
+            expectedFailure: failure,
+            expectedResult: finalResult
+        })
     }
 }

@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {MonacoDiffEditorConstructionOptions} from "@materia-ui/ngx-monaco-editor/lib/interfaces";
 
 @Component({
@@ -10,6 +10,7 @@ export class TextDiffViewComponent implements OnInit {
 
     @Input() originalModel: string;
     @Input() modifiedModel: string;
+    @Output() updateExpectedValue = new EventEmitter<void>();
 
     diffOptions: MonacoDiffEditorConstructionOptions = {theme: "vs", automaticLayout: true, readOnly: true, renderSideBySide: true};
 
@@ -20,5 +21,9 @@ export class TextDiffViewComponent implements OnInit {
 
     onChangeInline(checked) {
         this.diffOptions = Object.assign({}, this.diffOptions, {renderSideBySide: !checked});
+    }
+
+    updateExpectedValueButtonClick($event: MouseEvent) {
+        this.updateExpectedValue.emit()
     }
 }
