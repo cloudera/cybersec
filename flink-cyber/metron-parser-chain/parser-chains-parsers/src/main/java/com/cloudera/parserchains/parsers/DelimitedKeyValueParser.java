@@ -12,7 +12,6 @@
 
 package com.cloudera.parserchains.parsers;
 
-import static java.lang.String.format;
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
@@ -22,9 +21,12 @@ import com.cloudera.parserchains.core.Regex;
 import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.Optional;
+
+import static java.lang.String.format;
 
 @MessageParser(
         name="Delimited Key Values",
@@ -57,7 +59,8 @@ public class DelimitedKeyValueParser implements Parser {
             key="input",
             label="Input Field",
             description="The input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
-            defaultValue=Constants.DEFAULT_INPUT_FIELD)
+            defaultValue=Constants.DEFAULT_INPUT_FIELD,
+            isOutputName = true)
     public DelimitedKeyValueParser inputField(String inputField) {
         if(StringUtils.isNotBlank(inputField)) {
             this.inputField = FieldName.of(inputField);
