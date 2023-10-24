@@ -28,9 +28,6 @@ springdoc:
   swagger-ui:
     path: /swagger-ui
 
-security:
-  kerberos:
-    enabled: true
 
 # Kafka
 spring:

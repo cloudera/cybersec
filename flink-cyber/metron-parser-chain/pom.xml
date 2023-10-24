@@ -57,7 +57,6 @@
         <!-- main dependency versions -->
         <lombok.version>1.18.12</lombok.version>
         <spring-boot.version>2.7.6</spring-boot.version>
-        <kerberos.extension.version>1.0.1.RELEASE</kerberos.extension.version>
         <evo-inflector.version>1.2.2</evo-inflector.version>
         <slf4j.version>1.7.15</slf4j.version>
 
@@ -96,39 +95,9 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-security</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security.kerberos</groupId>
-                <artifactId>spring-security-kerberos-web</artifactId>
-                <version>${kerberos.extension.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.security.kerberos</groupId>
-                <artifactId>spring-security-kerberos-client</artifactId>
-                <version>${kerberos.extension.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-hateoas</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.atteo</groupId>
                 <artifactId>evo-inflector</artifactId>
                 <version>${evo-inflector.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-actuator</artifactId>
-                <version>${spring-boot.version}</version>
             </dependency>
 
             <dependency>
