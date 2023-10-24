@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-package com.cloudera.parserchains.queryservice.controller.impl;
+package com.cloudera.parserchains.queryservice.controller;
 
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.core.utils.JSONUtils;
@@ -38,8 +38,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.*;
-import static com.cloudera.parserchains.queryservice.controller.impl.DefaultChainController.MAX_SAMPLES_PER_TEST;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_CREATE_URL;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_DELETE_URL;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_READ_URL;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_UPDATE_URL;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_URL;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_PARSER_TEST_URL;
+import static com.cloudera.parserchains.queryservice.controller.ChainController.MAX_SAMPLES_PER_TEST;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,11 +52,13 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class DefaultChainControllerTest {
+public class ChainControllerTest {
 
     @Autowired
     private MockMvc mvc;
