@@ -12,15 +12,19 @@
 
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.*;
+import static java.lang.String.format;
+import com.cloudera.parserchains.core.Constants;
+import com.cloudera.parserchains.core.FieldName;
+import com.cloudera.parserchains.core.FieldValue;
+import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.Parser;
+import com.cloudera.parserchains.core.Regex;
+import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.Optional;
-
-import static java.lang.String.format;
 
 @MessageParser(
         name="Delimited Key Values",
@@ -52,7 +56,7 @@ public class DelimitedKeyValueParser implements Parser {
     @Configurable(
             key="input",
             label="Input Field",
-            description="The input field to parse.",
+            description="The input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
             defaultValue=Constants.DEFAULT_INPUT_FIELD)
     public DelimitedKeyValueParser inputField(String inputField) {
         if(StringUtils.isNotBlank(inputField)) {
@@ -68,7 +72,7 @@ public class DelimitedKeyValueParser implements Parser {
     @Configurable(
             key="delimiter",
             label="Key Value Delimiter",
-            description="A regex that separates different key-value pairs.",
+            description="A regex that separates different key-value pairs. Default value: '" + DEFAULT_DELIMITER + "'",
             defaultValue=DEFAULT_DELIMITER
     )
     public DelimitedKeyValueParser keyValueDelimiter(String keyValueDelimiter) {
@@ -85,7 +89,7 @@ public class DelimitedKeyValueParser implements Parser {
     @Configurable(
             key="separator",
             label="Key Value Separator",
-            description="A regex that separates a key and value within a key-value pair.",
+            description="A regex that separates a key and value within a key-value pair. Default value: '" + DEFAULT_SEPARATOR + "'",
             defaultValue=DEFAULT_SEPARATOR
     )
     public DelimitedKeyValueParser keyValueSeparator(String keyValueSeparator) {

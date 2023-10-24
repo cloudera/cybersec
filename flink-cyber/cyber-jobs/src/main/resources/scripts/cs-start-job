@@ -131,6 +131,8 @@ job_properties=("$CYBERSEC_CONF_DIR/kafka.properties" "${job_properties[@]}")
 
 job_properties=("/etc/cybersec/conf/kafka.properties" "${job_properties[@]}")
 
+ship_config "-yt" "configs"
+
 flink run \
   "${savepoint_options[@]}" \
   "${classpath_options[@]}" \

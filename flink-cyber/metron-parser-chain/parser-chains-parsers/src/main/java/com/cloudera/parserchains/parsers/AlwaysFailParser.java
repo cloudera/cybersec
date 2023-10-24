@@ -18,9 +18,8 @@ import com.cloudera.parserchains.core.RouterLink;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A {@link Parser} that always fails.
@@ -51,7 +50,7 @@ public class AlwaysFailParser implements Parser {
     public AlwaysFailParser withError(
             @Parameter(key="errorMessage",
                     label="Error Message",
-                    description="The error message explaining the error.",
+                    description="The error message explaining the error. Default value: '" + DEFAULT_ERROR_MESSAGE + "'",
                     defaultValue=DEFAULT_ERROR_MESSAGE) String message) {
         if(StringUtils.isNotEmpty(message)) {
             error = new IllegalStateException(message);

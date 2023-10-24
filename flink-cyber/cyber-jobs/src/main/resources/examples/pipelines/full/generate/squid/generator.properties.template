@@ -1,0 +1,7 @@
+generator.eps=20
+generator.metrics=generator.count
+
+generator.config=full/generate/squid/config.json
+
+parallelism=1
+flink.job.name=BRANCH.full.generate.squid
