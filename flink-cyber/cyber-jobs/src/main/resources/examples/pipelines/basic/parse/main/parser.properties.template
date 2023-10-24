@@ -1,0 +1,15 @@
+chain.dir=basic/parse/chains
+chain.topic.map.file=basic/parse/main/chain-topic-map.json
+#chain.enrichments.file=generated/basic/parse/main/enrichments-storage.json
+
+kafka.group.id=BRANCH.basic.parse.main
+
+topic.output=BRANCH.basic.triage.input
+topic.error=BRANCH.basic.parser.error
+
+parallelism=1
+flink.job.name=BRANCH.basic.parse.main
+
+signature.enabled=false
+original.enabled=false
+

@@ -1,0 +1,25 @@
+[ {
+  "endpointTemplate" : "${protocol}://${server}/model",
+  "entityTemplate" : "{\"accessKey\":\"${access_key}\",\"request\":{\"domain\":\"${second_level_domain}\"}}",
+  "method" : "POST",
+  "tls" : null,
+  "sources" : [ "ANY" ],
+  "authorization" : {
+    "type" : "token",
+    "bearerTokenTemplate" : "${bearer_token}"
+  },
+  "headers" : {
+    "Content-Type" : "application/json"
+  },
+  "properties" : {
+    "server" : "REST_HOST:1081",
+    "protocol" : "http",
+    "access_key" : "MOCK_ACCESS",
+    "bearer_token" : "MOCK_BEARER"
+  },
+  "capacity" : "4",
+  "prefix" : "dga_model",
+  "successJsonPath" : "$['success']",
+  "resultsJsonPath" : "$['response']"
+}]
+
