@@ -20,6 +20,9 @@ logging:
         tomcat: INFO
         catalina: INFO
 
+security:
+  kerberos:
+    enabled: true
 
 # Swagger
 springdoc:
