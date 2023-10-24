@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package com.cloudera.parserchains.queryservice.controller.impl;
+package com.cloudera.parserchains.queryservice.controller;
 
 import com.cloudera.parserchains.core.catalog.WidgetType;
 import com.cloudera.parserchains.core.model.define.ParserID;
@@ -47,11 +47,13 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class DefaultParserControllerTest {
+public class ParserControllerTest {
 
   @Autowired
   private MockMvc mvc;

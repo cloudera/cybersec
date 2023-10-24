@@ -10,22 +10,10 @@
  * limitations governing your use of the file.
  */
 
-package com.cloudera.parserchains.queryservice.controller.impl;
+package com.cloudera.parserchains.queryservice.controller;
 
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PIPELINE_BASE_URL;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.cloudera.parserchains.queryservice.model.exec.PipelineResult;
 import com.cloudera.parserchains.queryservice.service.PipelineService;
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.flink.core.fs.Path;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -38,9 +26,23 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PIPELINE_BASE_URL;
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @SpringBootTest
 @AutoConfigureMockMvc
-public class DefaultPipelineControllerTest {
+public class PipelineControllerTest {
 
   @Autowired
   private MockMvc mvc;
