@@ -55,7 +55,7 @@ public class PipelineService {
           final String name = pipelinePath.getName();
           final PipelineResult pipeline = PipelineResult.builder()
               .name(name)
-              .path(appendChainsPath(pipelinePath))
+              .path(pipelinePath)
               .build();
           pipelineMap.put(name, pipeline);
         }
@@ -130,12 +130,8 @@ public class PipelineService {
     return false;
   }
 
-  private Path appendChainsPath(Path originalPath){
-    return new Path(originalPath, "parse/chains");
-  }
-
   private boolean isValidPipeline(Path originalPath, FileSystem fileSystem) throws IOException {
-    final Path fullPath = appendChainsPath(originalPath);
+    final Path fullPath = new Path(originalPath, "parse/chains");
     return fileSystem.exists(fullPath);
   }
 
