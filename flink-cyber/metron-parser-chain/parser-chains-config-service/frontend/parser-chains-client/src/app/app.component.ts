@@ -11,6 +11,7 @@
  */
 
 import { Component } from '@angular/core';
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-root',
@@ -23,6 +24,19 @@ export class AppComponent {
   width: string | number = 200;
   isCollapsed = false;
   isOpen: Array<boolean> = [false, false];
+
+  constructor(private router: Router) {
+  }
+
+  getTitle() {
+    if (this.router.url.startsWith('/cluster')) {
+      return 'Cluster Management';
+    }
+    else if (this.router.url.startsWith('/parserconfig')) {
+      return 'Parser Chaining';
+    }
+    return '';
+  }
 
   stop(event: Event) {
     event.stopPropagation();
