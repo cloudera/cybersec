@@ -12,6 +12,8 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
@@ -21,19 +23,15 @@ import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.github.wnameless.json.flattener.JsonFlattener;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
 import org.json.XMLParserConfiguration;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @MessageParser(
         name = "XML Flattener",
@@ -54,7 +52,7 @@ public class XMLFlattener implements Parser {
 
     @Configurable(key = "inputField",
             label = "Input Field",
-            description = "The name of the input field to parse.",
+            description = "The name of the input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
             defaultValue = Constants.DEFAULT_INPUT_FIELD)
     public XMLFlattener inputField(String fieldName) {
         if (StringUtils.isNotEmpty(fieldName)) {
@@ -65,7 +63,7 @@ public class XMLFlattener implements Parser {
 
     @Configurable(key = "separator",
             label = "Separator",
-            description = "The character used to separate each nested XML element.",
+            description = "The character used to separate each nested XML element. Default value: '" + DEFAULT_SEPARATOR + "'",
             defaultValue = DEFAULT_SEPARATOR
     )
     public XMLFlattener separator(String separator) {

@@ -99,7 +99,6 @@ public class ChainController {
             @RequestParam(name = "pipelineName", required = false) String pipelineName
     ) throws IOException {
         String configPath = getConfigPath(pipelineName);
-
         List<ParserChainSummary> configs = chainPersistenceService.findAll(Paths.get(configPath));
         return ResponseEntity.ok(configs);
     }
@@ -210,7 +209,7 @@ public class ChainController {
         try {
             final Object mappingDtoMap = indexingService.getMappingsFromPath(indexPath);
             if (null == mappingDtoMap) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.noContent().build();
             } else {
                 Map<String, Object> result = new HashMap<>();
                 result.put("path", indexPath);
