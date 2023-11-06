@@ -47,6 +47,12 @@ $theme: mat.define-light-theme((
 // that you are using.
 @include mat.all-component-themes($theme);
 
+@mixin md-icon-size($size: 24px) {
+  font-size: $size;
+  height: $size;
+  width: $size;
+  line-height: $size;
+}
 
 .ant-card-body {
   padding: 16px;

@@ -9,9 +9,6 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class ClouderaKafkaProperties extends KafkaProperties {
-
   private String replyTopic;
-
   private String requestTopic;
-
 }

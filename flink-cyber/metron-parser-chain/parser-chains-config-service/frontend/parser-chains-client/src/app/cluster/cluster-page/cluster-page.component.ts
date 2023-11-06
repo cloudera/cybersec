@@ -32,6 +32,7 @@ export class ClusterPageComponent implements OnInit {
   jobs: Job[];
   cluster$!: Observable<ClusterModel>;
   clusterId = '0';
+  isLoading = true;
   displayedColumns: string[] = ['select', 'name', 'type', 'branch', 'pipeline', 'status', 'created'];
   selection = new SelectionModel<Job>(true, []);
 
@@ -50,6 +51,7 @@ export class ClusterPageComponent implements OnInit {
     );
     this.cluster$.subscribe(cluster => {
       this.jobs = cluster.jobs;
+      this.isLoading = false;
     })
   }
 
@@ -135,8 +137,10 @@ export class ClusterPageComponent implements OnInit {
         data: {
           targetUrl: `/api/v1/clusters/${this.clusterId}/jobs/config/${job.jobPipeline}/${job.jobIdString}`,
         },
-        width: '1200px',
-      });
+        maxWidth: '70vw',
+        maxHeight: '80vh',
+        height: '50%',
+        width: '70%',      });
     });
   }
 }

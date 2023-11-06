@@ -160,7 +160,7 @@ public class JobService {
         }
     }
 
-    public void updateConfig(String pipelineDir, byte[] payload) throws IOException {
+    public void updateConfig(byte[] payload) throws IOException {
         ArchiveUtil.decompressFromTarGzInMemory(payload, pipelineDir, true);
     }
 }

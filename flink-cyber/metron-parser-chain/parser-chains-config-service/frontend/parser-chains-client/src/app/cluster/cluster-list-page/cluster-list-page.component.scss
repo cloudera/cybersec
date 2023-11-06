@@ -49,12 +49,18 @@
   gap: 5px;
 }
 
-//::ng-deep .mat-checkbox-checked .mat-checkbox-background,
-//.mat-checkbox-indeterminate .mat-checkbox-background {
-//  background-color: black;
-//}
-//
-//// overwrite the ripple overlay on hover and click
-//::ng-deep .mat-checkbox:not(.mat-checkbox-disabled) .mat-checkbox-ripple .mat-ripple-element {
-//  background-color: black;
-//}
+.table-container {
+  position: relative;
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000; /* Ensures spinner is above the table */
+  background: rgba(255, 255, 255, 0.8); /* Optional: white background with slight transparency to mask the table */
+  border-radius: 5px; /* Optional: for a rounded background */
+  padding: 20px; /* Optional: to give some space around the spinner */
+}
+

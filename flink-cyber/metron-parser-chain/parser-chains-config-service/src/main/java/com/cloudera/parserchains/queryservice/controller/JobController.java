@@ -14,6 +14,7 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import org.apache.flink.core.fs.Path;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,9 +38,8 @@ import java.util.List;
 @RequestMapping(value = ApplicationConstants.API_BASE_URL + ApplicationConstants.API_JOBS)
 public class JobController {
     private final JobService jobService;
-
-    private final AppProperties appProperties;
-    private final JobService jobService;
+    @Value("${upload.file.max.size:1000000}")
+    private Integer uploadFileMaxSize;
 
     @ApiOperation(value = "Retrieves information about all cluster services.")
     @ApiResponses(value = {
@@ -50,12 +50,12 @@ public class JobController {
                                       @RequestBody com.cloudera.service.common.request.RequestBody body,
                                       @ApiParam(name = "clusterId", value = "The ID of the cluster to retrieve.", required = true)
                                       @PathVariable("clusterId") String clusterId,
-                                      @Schema(name = "action", description = "Jobs action for start stop restart Job", required = true)
+                                      @Schema(name = "action", description = "Jobs action for start stop restart Job", allowableValues = {JobActions.Constants.START_VALUE, JobActions.Constants.RESTART_VALUE, JobActions.Constants.STOP_VALUE, JobActions.Constants.STATUS_VALUE, JobActions.Constants.GET_CONFIG_VALUE, JobActions.Constants.UPDATE_CONFIG_VALUE}, required = true)
                                       @PathVariable("action") String action) throws FailedClusterReponseException {
-        return jobService.jobAction(clusterId, body, action);
+        return jobService.makeRequest(clusterId, body, action);
     }
 
-    @PostMapping("/config/{clusterId}/{pipeline}/{jobIdHex}")
+    @PostMapping("/config/{pipeline}/{jobIdHex}")
     public ResponseBody updateJobConfig(@ApiParam(name = "clusterId", value = "The ID of the cluster to update config on.", required = true)
                                         @PathVariable("clusterId") String clusterId,
                                         @Schema(name = "pipeline", description = "Pipeline in which the job is running", allowableValues = {JobActions.Constants.START_VALUE, JobActions.Constants.RESTART_VALUE, JobActions.Constants.STOP_VALUE, JobActions.Constants.STATUS_VALUE, JobActions.Constants.GET_CONFIG_VALUE, JobActions.Constants.UPDATE_CONFIG_VALUE}, required = true)
@@ -68,18 +68,13 @@ public class JobController {
             throw new RuntimeException("You should provide config as a .tar.gz archive");
         }
         //Kafka message body should be less than 1Mb, but we should fit a base64 encoded file + other JSON fields.
-        if (Math.ceil(config.getSize() / 3d) * 4 >= 1000000){
+        if (Math.ceil(config.getSize() / 3d) * 4 >= uploadFileMaxSize){
             throw new RuntimeException("Provided file should be less than ~750Kb in size.");
         }
-
-        final Path pipelinePath = new Path(appProperties.getPipelinesPath(), pipeline);
-        final Path fullPipelinePath = pipelinePath.makeQualified(pipelinePath.getFileSystem());
-
         final com.cloudera.service.common.request.RequestBody requestBody =
                 com.cloudera.service.common.request.RequestBody.builder()
                         .clusterServiceId(clusterId)
                         .jobIdHex(jobIdHex)
-                        .pipelineDir(fullPipelinePath.getPath())
                         .payload(Base64.getEncoder().encode(config.getBytes()))
                         .build();
         return jobService.makeRequest(clusterId, requestBody, JobActions.Constants.UPDATE_CONFIG_VALUE);

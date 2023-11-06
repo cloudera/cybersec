@@ -79,8 +79,7 @@ public class KafkaListenerController {
                 break;
             case UPDATE_JOB_CONFIG_REQUEST:
                 try {
-                    jobService.updateConfig(requestBody.getPipelineDir(), requestBody.getPayload());
-                    //TODO responseBody
+                    jobService.updateConfig(requestBody.getPayload());
                     final ResponseBody responseBody = ResponseBody.builder().build();
                     return buildResponseMessage(responseBody, ResponseType.UPDATE_JOB_CONFIG_RESPONSE, replyTo, correlationId);
                 } catch (IOException e) {

@@ -11,7 +11,7 @@ import {
   selector: '[appDragDrop]'
 })
 export class DragDropDirective {
-  @HostBinding('class.fileover') fileOver: boolean;
+  @HostBinding('class.file-over') fileOver: boolean;
   @Output() fileDropped = new EventEmitter<any>();
 
   // Dragover listener

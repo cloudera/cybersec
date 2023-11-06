@@ -10,8 +10,8 @@
   ~ limitations governing your use of the file.
   -->
 <!-- Created Table -->
+
 <table mat-table [dataSource]="clusters$" class="mat-elevation-z8 demo-table">
-  <caption>Clusters table list</caption>
 <!--  &lt;!&ndash; Position Column &ndash;&gt;-->
   <ng-container matColumnDef="id">
     <th mat-header-cell *matHeaderCellDef>ID</th>
@@ -47,3 +47,11 @@
       (click)="(goToDetailCluster(row.clusterMeta.clusterId))"
       *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
+
+<mat-card *ngIf="isLoading$ | async" style="display: flex; justify-content: center; align-items: center">
+  <mat-progress-spinner
+    color="primary"
+    mode="indeterminate">
+  </mat-progress-spinner>
+</mat-card>
+
