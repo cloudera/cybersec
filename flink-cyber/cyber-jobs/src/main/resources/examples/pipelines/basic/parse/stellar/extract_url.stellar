@@ -1,0 +1,4 @@
+domain := IF (IS_URL(url)) THEN URL_TO_HOST(url) ELSE GET_FIRST(SPLIT(url, ':'))
+domain_no_subdomains := DOMAIN_REMOVE_SUBDOMAINS(domain)
+second_level_domain := DOMAIN_REMOVE_TLD(DOMAIN_REMOVE_SUBDOMAINS(domain_no_subdomains))
+top_level_domain := DOMAIN_TO_TLD(domain)

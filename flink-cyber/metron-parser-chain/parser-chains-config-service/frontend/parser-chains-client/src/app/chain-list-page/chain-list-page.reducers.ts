@@ -13,23 +13,25 @@
 import {createSelector} from '@ngrx/store';
 
 import * as chainListPageActions from './chain-list-page.actions';
-import {ChainModel, PipelineModel} from './chain.model';
+import {ChainModel} from './chain.model';
 
 export interface ChainListPageState {
   loading: boolean;
   createModalVisible: boolean;
   deleteModalVisible: boolean;
+  pipelineRenameModalVisible: boolean;
   deleteItem: ChainModel;
   error: string;
   items: ChainModel[];
-  currentPipeline: PipelineModel;
-  pipelines: PipelineModel[];
+  currentPipeline: string;
+  pipelines: string[];
 }
 
 export const initialState: ChainListPageState = {
   loading: false,
   createModalVisible: false,
   deleteModalVisible: false,
+  pipelineRenameModalVisible: false,
   deleteItem: null,
   items: [],
   currentPipeline: null,
@@ -80,6 +82,18 @@ export function reducer(
       return {
         ...state,
         createModalVisible: false,
+      }
+    }
+    case chainListPageActions.SHOW_RENAME_PIPELINE_MODAL: {
+      return {
+        ...state,
+        pipelineRenameModalVisible: true,
+      }
+    }
+    case chainListPageActions.HIDE_RENAME_PIPELINE_MODAL: {
+      return {
+        ...state,
+        pipelineRenameModalVisible: false,
       }
     }
     case chainListPageActions.SHOW_DELETE_MODAL: {
@@ -137,20 +151,29 @@ export function reducer(
         deleteItem: null,
       };
     }
-    case chainListPageActions.LOAD_PIPELINES: {
+    case chainListPageActions.LOAD_PIPELINES:
+    case chainListPageActions.CREATE_PIPELINE:
+    case chainListPageActions.RENAME_PIPELINE:
+    case chainListPageActions.DELETE_PIPELINE: {
       return {
         ...state,
         loading: true,
       };
     }
-    case chainListPageActions.LOAD_PIPELINES_SUCCESS: {
+    case chainListPageActions.LOAD_PIPELINES_SUCCESS:
+    case chainListPageActions.CREATE_PIPELINE_SUCCESS:
+    case chainListPageActions.RENAME_PIPELINE_SUCCESS:
+    case chainListPageActions.DELETE_PIPELINE_SUCCESS: {
       return {
         ...state,
         loading: false,
         pipelines: action.pipelines
       };
     }
-    case chainListPageActions.LOAD_PIPELINES_FAIL: {
+    case chainListPageActions.LOAD_PIPELINES_FAIL:
+    case chainListPageActions.CREATE_PIPELINE_FAIL:
+    case chainListPageActions.RENAME_PIPELINE_FAIL:
+    case chainListPageActions.DELETE_PIPELINE_FAIL: {
       return {
         ...state,
         error: action.error.message,
@@ -160,7 +183,7 @@ export function reducer(
     case chainListPageActions.PIPELINE_CHANGED: {
       return {
         ...state,
-        currentPipeline: action.newPipeline,
+        currentPipeline: action.newPipelineName,
       };
     }
     default: {
@@ -191,6 +214,11 @@ export const getCreateModalVisible = createSelector(
 export const getDeleteModalVisible = createSelector(
   getChainListPageState,
   (state: ChainListPageState) => state.deleteModalVisible
+);
+
+export const getPipelineRenameModalVisible = createSelector(
+  getChainListPageState,
+  (state: ChainListPageState) => state.pipelineRenameModalVisible
 );
 
 export const getDeleteChain = createSelector(

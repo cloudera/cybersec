@@ -12,12 +12,6 @@
 
 package com.cloudera.parserchains.queryservice.controller;
 
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_READ_URL;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_INDEXING;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_PARSER_TEST;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PARSER_CONFIG_BASE_URL;
-
 import com.cloudera.parserchains.core.ChainLink;
 import com.cloudera.parserchains.core.InvalidParserException;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
@@ -26,6 +20,7 @@ import com.cloudera.parserchains.queryservice.model.describe.IndexMappingDescrip
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestRequest;
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestResponse;
 import com.cloudera.parserchains.queryservice.model.exec.ParserResult;
+import com.cloudera.parserchains.queryservice.model.exec.PipelineResult;
 import com.cloudera.parserchains.queryservice.model.exec.ResultLog;
 import com.cloudera.parserchains.queryservice.model.summary.ParserChainSummary;
 import com.cloudera.parserchains.queryservice.service.ChainBuilderService;
@@ -38,16 +33,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Supplier;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.core.fs.Path;
@@ -62,6 +47,21 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_READ_URL;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_INDEXING;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_PARSER_TEST;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PARSER_CONFIG_BASE_URL;
 
 /**
  * The controller responsible for operations on parser chains.
@@ -210,7 +210,7 @@ public class ChainController {
         try {
             final Object mappingDtoMap = indexingService.getMappingsFromPath(indexPath);
             if (null == mappingDtoMap) {
-                return ResponseEntity.notFound().build();
+                return ResponseEntity.noContent().build();
             } else {
                 Map<String, Object> result = new HashMap<>();
                 result.put("path", indexPath);
@@ -230,7 +230,7 @@ public class ChainController {
     @PostMapping(value = API_PARSER_TEST)
     public ResponseEntity<ChainTestResponse> test(
             @ApiParam(name = "testRun", value = "Describes the parser chain test to run.", required = true)
-            @RequestBody ChainTestRequest testRun) {
+            @RequestBody ChainTestRequest testRun) throws IOException {
         ParserChainSchema chain = testRun.getParserChainSchema();
         ChainTestResponse results = new ChainTestResponse();
         testRun.getSampleData().getSource()
@@ -284,8 +284,8 @@ public class ChainController {
 
         return Optional.ofNullable(pipelineService.findAll())
                 .map(pipelineMap -> pipelineMap.get(pipelineName))
+                .map(PipelineResult::getPath)
                 .map(Path::getPath)
                 .orElseGet(defaultPathSupplier);
     }
-
 }

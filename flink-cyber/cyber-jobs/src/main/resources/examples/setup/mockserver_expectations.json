@@ -1,0 +1,64 @@
+[
+  {
+    "httpRequest": {
+      "path": "/simpleFirst"
+    },
+    "httpResponse": {
+      "body": "some first response"
+    }
+  },
+  {
+    "id": "c143d692-76d7-4cf1-8db8-95e574927edb",
+    "priority": 1,
+    "httpRequest": {
+      "method": "POST",
+      "path": "/model",
+      "headers": {
+        "content-type": [
+          "application/json"
+        ],
+        "Authorization": [
+          "Bearer MOCK_BEARER"
+        ]
+      },
+      "body": {
+        "type": "JSON",
+        "json": {
+          "accessKey": "MOCK_ACCESS",
+          "request": {
+            "domain": "zsrycovuxfgzyn"
+          }
+        },
+        "matchType": "STRICT"
+      }
+    },
+    "times": {
+      "unlimited": true
+    },
+    "timeToLive": {
+      "unlimited": true
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": "{\"success\":true,\"response\":{\"legit\":false}}"
+    }
+  },
+  {
+    "id": "d143d692-76d7-4cf1-8db8-95e574927edb",
+    "priority": 0,
+    "httpRequest": {
+      "path": "/model"
+    },
+    "times": {
+      "unlimited": true
+    },
+    "timeToLive": {
+      "unlimited": true
+    },
+    "httpResponse": {
+      "statusCode": 200,
+      "body": "{\"success\":true,\"response\":{\"legit\":true}}"
+    }
+  }
+]
+

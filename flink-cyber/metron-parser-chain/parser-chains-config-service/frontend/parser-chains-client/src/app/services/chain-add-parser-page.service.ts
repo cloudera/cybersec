@@ -15,7 +15,6 @@ import {Injectable} from '@angular/core';
 import {map} from 'rxjs/operators';
 
 import {ParserModel} from '../chain-page/chain-page.models';
-import {PipelineModel} from "../chain-list-page/chain.model";
 import {getHttpParams} from "../chain-list-page/chain-list-page.utils";
 
 @Injectable({
@@ -29,7 +28,7 @@ export class AddParserPageService {
     private http: HttpClient
   ) {}
 
-  public add(chainId: string, parser: ParserModel, pipeline: PipelineModel = null) {
+  public add(chainId: string, parser: ParserModel, pipeline: string = null) {
     let httpParams: HttpParams = getHttpParams(pipeline);
 
     return this.http.post(this.BASE_URL + `chains/${chainId}/parsers`, parser, {params: httpParams});
@@ -41,7 +40,7 @@ export class AddParserPageService {
     return this.http.get<{ id: string, name: string }[]>(this.BASE_URL + `parser-types`, {params: httpParams});
   }
 
-  public getParsers(chainId: string, pipeline: PipelineModel = null) {
+  public getParsers(chainId: string, pipeline: string = null) {
     let httpParams: HttpParams = getHttpParams(pipeline);
 
     return this.http.get<ParserModel[]>(this.BASE_URL + `chains/${chainId}/parsers`, {params: httpParams})

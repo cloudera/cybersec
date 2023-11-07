@@ -11,13 +11,12 @@
  */
 
 import {HttpParams} from "@angular/common/http";
-import {PipelineModel} from "./chain.model";
 
-export function getHttpParams(pipeline: PipelineModel) {
+export function getHttpParams(pipeline: string) {
   let httpParams: HttpParams = new HttpParams();
 
   if (pipeline) {
-    return httpParams.set('pipelineName', pipeline.name);
+    return httpParams.set('pipelineName', pipeline);
   }
 
   return httpParams

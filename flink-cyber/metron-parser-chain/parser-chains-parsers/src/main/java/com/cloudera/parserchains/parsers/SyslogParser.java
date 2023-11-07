@@ -12,16 +12,18 @@
 
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.*;
+import static java.lang.String.format;
+import com.cloudera.parserchains.core.Constants;
+import com.cloudera.parserchains.core.FieldName;
+import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.Parser;
+import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.github.palindromicity.syslog.SyslogParserBuilder;
 import com.github.palindromicity.syslog.SyslogSpecification;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Objects;
-
-import static java.lang.String.format;
+import org.apache.commons.lang3.StringUtils;
 
 @MessageParser(
     name="Syslog",
@@ -39,7 +41,7 @@ public class SyslogParser implements Parser {
     @Configurable(
             key="specification",
             label="Specification",
-            description="The Syslog specification; 'RFC_5424' or 'RFC_3164'",
+            description="The Syslog specification; 'RFC_5424' or 'RFC_3164'. Default value: '" + DEFAULT_SYSLOG_SPEC + "'",
             defaultValue=DEFAULT_SYSLOG_SPEC)
     public void withSpecification(String specification) {
         if(StringUtils.isNotBlank(specification)) {
@@ -59,7 +61,7 @@ public class SyslogParser implements Parser {
 
     @Configurable(key="inputField",
             label="Input Field",
-            description="The name of the input field to parse.",
+            description="The name of the input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
             defaultValue = Constants.DEFAULT_INPUT_FIELD)
     public SyslogParser withInputField(String inputField) {
         if(StringUtils.isNotBlank(inputField)) {

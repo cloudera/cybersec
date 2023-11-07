@@ -19,7 +19,7 @@ import {catchError, map, switchMap} from 'rxjs/operators';
 
 import {ChainListPageService} from '../services/chain-list-page.service';
 import * as fromActions from './chain-list-page.actions';
-import {ChainModel, PipelineModel} from './chain.model';
+import {ChainModel} from './chain.model';
 import {PipelineService} from "../services/pipeline.service";
 
 @Injectable()
@@ -34,7 +34,7 @@ export class ChainListEffects {
   }
 
   loadChains$: Observable<Action> = createEffect(() => this.actions$.pipe(
-    ofType(fromActions.LOAD_CHAINS),
+    ofType(fromActions.LOAD_CHAINS, fromActions.LOAD_PIPELINES_SUCCESS),
     switchMap((action: fromActions.LoadChainsAction) => {
         return this.chainListService.getChains(this.pipelineService.getCurrentPipeline())
         .pipe(
@@ -73,6 +73,14 @@ export class ChainListEffects {
     ),
     map(() => new fromActions.HideCreateModalAction())
   ))
+
+  hideRenamePipelineModal$: Observable<Action> = createEffect(() => this.actions$.pipe(
+    ofType(
+      fromActions.RENAME_PIPELINE_SUCCESS,
+      fromActions.RENAME_PIPELINE_FAIL
+    ),
+    map(() => new fromActions.HideRenamePipelineModalAction())
+  ))
   hideDeleteModal$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(
       fromActions.DELETE_CHAIN_SUCCESS,
@@ -109,7 +117,7 @@ export class ChainListEffects {
     switchMap((action: fromActions.LoadPipelinesAction) => {
       return this.pipelineService.getPipelines()
         .pipe(
-          map((pipelines: PipelineModel[]) => {
+          map((pipelines: string[]) => {
             return new fromActions.LoadPipelinesSuccessAction(pipelines);
           }),
           catchError((error: { message: string }) => {
@@ -118,5 +126,67 @@ export class ChainListEffects {
           })
         );
     })
+  ));
+
+  createPipeline$: Observable<Action> = createEffect(() => this.actions$.pipe(
+    ofType(fromActions.CREATE_PIPELINE),
+    switchMap((action: fromActions.CreatePipelineAction) => {
+      return this.pipelineService.createPipeline(action.pipelineName)
+        .pipe(
+          map((pipelines: string[]) => {
+            return new fromActions.CreatePipelineSuccessAction(action.pipelineName, pipelines);
+          }),
+          catchError((error: { message: string }) => {
+            this.messageService.create('error', error.message);
+            return of(new fromActions.CreatePipelineFailAction(error));
+          })
+        );
+    })
+  ));
+
+  renamePipeline$: Observable<Action> = createEffect(() => this.actions$.pipe(
+    ofType(fromActions.RENAME_PIPELINE),
+    switchMap((action: fromActions.RenamePipelineAction) => {
+      return this.pipelineService.renamePipeline(action.pipelineName, action.newPipelineName)
+        .pipe(
+          map((pipelines: string[]) => {
+            return new fromActions.RenamePipelineSuccessAction(action.newPipelineName, pipelines);
+          }),
+          catchError((error: { message: string }) => {
+            this.messageService.create('error', error.message);
+            return of(new fromActions.RenamePipelineFailAction(error));
+          })
+        );
+    })
+  ));
+
+  deletePipeline$: Observable<Action> = createEffect(() => this.actions$.pipe(
+    ofType(fromActions.DELETE_PIPELINE),
+    switchMap((action: fromActions.DeletePipelineAction) => {
+      return this.pipelineService.deletePipeline(action.pipelineName)
+        .pipe(
+          map((pipelines: string[]) => {
+            return new fromActions.DeletePipelineSuccessAction(pipelines);
+          }),
+          catchError((error: { message: string }) => {
+            this.messageService.create('error', error.message);
+            return of(new fromActions.DeletePipelineFailAction(error));
+          })
+        );
+    })
+  ));
+
+  triggerPipelineChanged$: Observable<Action> = createEffect(() => this.actions$.pipe(
+      ofType(fromActions.RENAME_PIPELINE_SUCCESS, fromActions.DELETE_PIPELINE_SUCCESS),
+      switchMap((action: fromActions.RenamePipelineSuccessAction) => {
+        return of(new fromActions.PipelineChangedAction(action.newPipelineName))
+      })
+  ));
+
+  pipelineChanged$: Observable<Action> = createEffect(() => this.actions$.pipe(
+      ofType(fromActions.PIPELINE_CHANGED),
+      switchMap((action: fromActions.PipelineChangedAction) => {
+        return of(new fromActions.LoadChainsAction())
+      })
   ));
 }
