@@ -12,10 +12,11 @@
 
 import {Component, OnInit} from '@angular/core';
 import {Router} from '@angular/router';
-import {Observable} from 'rxjs';
+import {BehaviorSubject, Observable} from 'rxjs';
 import {ClusterModel, Job} from "./cluster-list-page.model";
 import {ClusterService} from "../../services/cluster.service";
 import {ThemePalette} from "@angular/material/core/common-behaviors/color";
+import {tap} from "rxjs/operators";
 
 
 @Component({
@@ -24,15 +25,15 @@ import {ThemePalette} from "@angular/material/core/common-behaviors/color";
   styleUrls: ['./cluster-list-page.component.scss']
 })
 export class ClusterListPageComponent implements OnInit {
-
   clusters$: Observable<ClusterModel[]>;
   displayedColumns: string[] = ['id', 'name', 'status', 'version', 'branches'];
-  checkBoxColor: ThemePalette = 'primary';
+  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+
   constructor(
     private clusterService: ClusterService,
     private router: Router,
   ) {
-    this.clusters$ = clusterService.getClusters();
+    this.clusters$ = clusterService.getClusters().pipe(tap(() => this.isLoading$.next(false)));
   }
 
 
@@ -43,6 +44,5 @@ export class ClusterListPageComponent implements OnInit {
 
   goToDetailCluster = (clusterId: string | number) => {
     this.router.navigate(['clusters', clusterId]);
-
   }
 }

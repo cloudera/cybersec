@@ -12,7 +12,15 @@
 import {worker} from '../mocks/browser';
 
 
-worker.start();
+worker.start({
+    onUnhandledRequest(req, print) {
+      if (req.url.pathname.includes('assets')){
+        return;
+      }
+      print.warning();
+    }
+  }
+);
 
 export const environment = {
   production: false

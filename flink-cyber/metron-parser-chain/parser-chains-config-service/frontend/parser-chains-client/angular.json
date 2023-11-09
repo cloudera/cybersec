@@ -51,6 +51,12 @@
                 "output": "./assets/min-maps/"
               }
             ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src"
+              ]
+            },
+
             "styles": [
               "src/theme.less",
               "src/styles.scss"
