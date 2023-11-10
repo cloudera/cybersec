@@ -51,8 +51,8 @@
         <maven-source-plugin.version>3.2.0</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
         <maven-assembly-plugin.version>3.2.0</maven-assembly-plugin.version>
-        <frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
-        <frontend-maven-plugin.nodeVersion>v14.16.0</frontend-maven-plugin.nodeVersion>
+        <frontend-maven-plugin.version>1.14.2</frontend-maven-plugin.version>
+        <frontend-maven-plugin.nodeVersion>v18.18.2</frontend-maven-plugin.nodeVersion>
 
         <evo-inflector.version>1.2.2</evo-inflector.version>
         <slf4j.version>1.7.15</slf4j.version>
