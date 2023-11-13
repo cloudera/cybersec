@@ -38,7 +38,6 @@ export class UploadDialogComponent {
   }
 
   preparedFile($event: boolean) {
-    console.log("preparedFile: " + $event);
     if ($event === true) {
       this.disabledUpload = false;
     }
@@ -48,7 +47,6 @@ export class UploadDialogComponent {
   }
 
   inProgressFile($event: boolean) {
-    console.log("inProgressFile: " + $event)
     if ($event === true) {
       this.disabledUpload = true;
       this.disabledClose = true;
