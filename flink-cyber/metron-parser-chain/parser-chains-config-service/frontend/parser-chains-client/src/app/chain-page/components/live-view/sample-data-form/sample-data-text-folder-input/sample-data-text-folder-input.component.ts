@@ -198,7 +198,7 @@ export class SampleDataTextFolderInputComponent implements OnInit {
     }
 
     updateExpectedValue(failure: boolean, result: string, i: number, timestamp: bigint) {
-        let sample = this.currentSampleData[i];
+        const sample = this.currentSampleData[i];
 
         this.selectedSample = [i, sample]
 

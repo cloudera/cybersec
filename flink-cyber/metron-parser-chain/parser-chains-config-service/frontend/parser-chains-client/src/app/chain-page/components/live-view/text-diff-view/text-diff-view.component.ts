@@ -10,7 +10,7 @@ export class TextDiffViewComponent implements OnInit {
 
     @Input() originalModel: string;
     @Input() modifiedModel: string;
-    @Output() updateExpectedValue = new EventEmitter<void>();
+    @Output() expectedValueChange = new EventEmitter<void>();
 
     diffOptions: MonacoDiffEditorConstructionOptions = {theme: "vs", automaticLayout: true, readOnly: true, renderSideBySide: true};
 
@@ -24,6 +24,6 @@ export class TextDiffViewComponent implements OnInit {
     }
 
     updateExpectedValueButtonClick($event: MouseEvent) {
-        this.updateExpectedValue.emit()
+        this.expectedValueChange.emit()
     }
 }

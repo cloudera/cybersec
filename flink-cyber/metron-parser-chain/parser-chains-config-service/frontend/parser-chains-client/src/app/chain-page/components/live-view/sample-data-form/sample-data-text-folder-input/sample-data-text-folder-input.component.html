@@ -103,7 +103,7 @@
                         <app-text-diff-view
                                 originalModel="Failure: {{data.expectedFailure}}, Data: {{runResult?.expected}}"
                                 modifiedModel="Failure: {{runResult?.failure}}, Data: {{runResult?.result}}"
-                                (updateExpectedValue)="updateExpectedValue(runResult?.failure, runResult?.result, i, runResult.timestamp)"
+                                (expectedValueChange)="updateExpectedValue(runResult?.failure, runResult?.result, i, runResult.timestamp)"
                         ></app-text-diff-view>
                     </nz-collapse-panel>
                 </nz-collapse>
