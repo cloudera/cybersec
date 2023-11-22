@@ -12,21 +12,23 @@
 
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {Action} from '@ngrx/store';
+import {Action, Store} from '@ngrx/store';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {Observable, of} from 'rxjs';
-import {catchError, map, switchMap} from 'rxjs/operators';
+import {catchError, map, switchMap, withLatestFrom} from 'rxjs/operators';
 
 import {ChainListPageService} from '../services/chain-list-page.service';
 import * as fromActions from './chain-list-page.actions';
 import {ChainModel} from './chain.model';
 import {PipelineService} from "../services/pipeline.service";
+import {ChainListPageState, getCurrentPipeline} from "./chain-list-page.reducers";
 
 @Injectable()
 export class ChainListEffects {
 
   constructor(
     private actions$: Actions,
+    private store$: Store<ChainListPageState>,
     private messageService: NzMessageService,
     private chainListService: ChainListPageService,
     private pipelineService: PipelineService
@@ -35,8 +37,9 @@ export class ChainListEffects {
 
   loadChains$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.LOAD_CHAINS, fromActions.LOAD_PIPELINES_SUCCESS),
-    switchMap((action: fromActions.LoadChainsAction) => {
-        return this.chainListService.getChains(this.pipelineService.getCurrentPipeline())
+    withLatestFrom(this.store$.select(getCurrentPipeline)),
+    switchMap(([action, currentPipeline]) => {
+        return this.chainListService.getChains(currentPipeline)
         .pipe(
           map((chains: ChainModel[]) => {
             return new fromActions.LoadChainsSuccessAction(chains);
@@ -49,13 +52,15 @@ export class ChainListEffects {
     })
   ));
 
-    createChain$: Observable<Action> = createEffect(() => this.actions$.pipe(
+  createChain$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.CREATE_CHAIN),
-    switchMap((action: fromActions.CreateChainAction) => {
-      return this.chainListService.createChain(action.newChain, this.pipelineService.getCurrentPipeline())
+    withLatestFrom(this.store$.select(getCurrentPipeline)),
+    switchMap(([action, currentPipeline]) => {
+      const finalAction = (action as fromActions.CreateChainAction)
+      return this.chainListService.createChain(finalAction.newChain, currentPipeline)
         .pipe(
           map((chain: ChainModel) => {
-            this.messageService.create('success', 'Chain ' + action.newChain.name + ' has been created');
+            this.messageService.create('success', 'Chain ' + finalAction.newChain.name + ' has been created');
             return new fromActions.CreateChainSuccessAction(chain);
           }),
           catchError((error: { message: string }) => {
@@ -97,12 +102,14 @@ export class ChainListEffects {
 
   deleteChain$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.DELETE_CHAIN),
-    switchMap((action: fromActions.DeleteChainAction) => {
-      return this.chainListService.deleteChain(action.chainId, this.pipelineService.getCurrentPipeline())
+    withLatestFrom(this.store$.select(getCurrentPipeline)),
+    switchMap(([action, currentPipeline]) => {
+      const finalAction = action as fromActions.DeleteChainAction
+      return this.chainListService.deleteChain(finalAction.chainId, currentPipeline)
         .pipe(
           map(() => {
-            this.messageService.create('success', 'Chain ' + action.chainName + ' deleted Successfully');
-            return new fromActions.DeleteChainSuccessAction(action.chainId);
+            this.messageService.create('success', 'Chain ' + finalAction.chainName + ' deleted Successfully');
+            return new fromActions.DeleteChainSuccessAction(finalAction.chainId);
           }),
           catchError((error: { message: string }) => {
             this.messageService.create('error', error.message);

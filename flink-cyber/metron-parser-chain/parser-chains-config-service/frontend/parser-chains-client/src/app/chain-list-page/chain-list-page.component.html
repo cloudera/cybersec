@@ -55,7 +55,7 @@
       <nz-form-label>Pipeline name:</nz-form-label>
       <nz-form-control nzErrorTip="Pipeline Name is Required with at least 3 characters" nzSpan="14">
         <input nz-input data-qe-id="pipeline-name" formControlName="pipelineName" type="text" id="pipelineName"
-               placeholder="{{selectedPipeline$ | async}}">
+               placeholder="{{selectedPipeline}}">
       </nz-form-control>
     </nz-form-item>
   </form>
@@ -86,7 +86,7 @@
           nzPlaceHolder="Select a pipeline"
           class="pipeline-select-dropdown pipeline-element"
           [nzDisabled]="(pipelineList$ | async) && (pipelineList$ | async).length < 1"
-          [ngModel]="selectedPipeline$ | async"
+          [ngModel]="selectedPipeline"
           (ngModelChange)="pipelineChanged($event)">
     <nz-option *ngFor="let item of (pipelineList$ | async)" [nzLabel]="item" [nzValue]="item"></nz-option>
   </nz-select>
@@ -100,13 +100,13 @@
       </a>
     </div>
   </ng-template>
-  <button *ngIf="selectedPipeline$ | async"
+  <button *ngIf="selectedPipeline"
           class="pipeline-element"
           nz-tooltip="Delete selected pipeline"
           nz-button
           nzType="default"
           (click)="deletePipeline()">Delete</button>
-  <button *ngIf="selectedPipeline$ | async"
+  <button *ngIf="selectedPipeline"
           class="pipeline-element"
           nz-tooltip="Rename selected pipeline"
           nz-button
