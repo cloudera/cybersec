@@ -21,7 +21,7 @@ import {ChainListPageService} from '../services/chain-list-page.service';
 import * as fromActions from './chain-list-page.actions';
 import {ChainModel} from './chain.model';
 import {PipelineService} from "../services/pipeline.service";
-import {ChainListPageState, getCurrentPipeline} from "./chain-list-page.reducers";
+import {ChainListPageState, getSelectedPipeline} from "./chain-list-page.reducers";
 
 @Injectable()
 export class ChainListEffects {
@@ -37,9 +37,9 @@ export class ChainListEffects {
 
   loadChains$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.LOAD_CHAINS, fromActions.LOAD_PIPELINES_SUCCESS),
-    withLatestFrom(this.store$.select(getCurrentPipeline)),
-    switchMap(([action, currentPipeline]) => {
-        return this.chainListService.getChains(currentPipeline)
+    withLatestFrom(this.store$.select(getSelectedPipeline)),
+    switchMap(([action, selectedPipeline]) => {
+        return this.chainListService.getChains(selectedPipeline)
         .pipe(
           map((chains: ChainModel[]) => {
             return new fromActions.LoadChainsSuccessAction(chains);
@@ -54,10 +54,10 @@ export class ChainListEffects {
 
   createChain$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.CREATE_CHAIN),
-    withLatestFrom(this.store$.select(getCurrentPipeline)),
-    switchMap(([action, currentPipeline]) => {
+    withLatestFrom(this.store$.select(getSelectedPipeline)),
+    switchMap(([action, selectedPipeline]) => {
       const finalAction = (action as fromActions.CreateChainAction)
-      return this.chainListService.createChain(finalAction.newChain, currentPipeline)
+      return this.chainListService.createChain(finalAction.newChain, selectedPipeline)
         .pipe(
           map((chain: ChainModel) => {
             this.messageService.create('success', 'Chain ' + finalAction.newChain.name + ' has been created');
@@ -102,10 +102,10 @@ export class ChainListEffects {
 
   deleteChain$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.DELETE_CHAIN),
-    withLatestFrom(this.store$.select(getCurrentPipeline)),
-    switchMap(([action, currentPipeline]) => {
+    withLatestFrom(this.store$.select(getSelectedPipeline)),
+    switchMap(([action, selectedPipeline]) => {
       const finalAction = action as fromActions.DeleteChainAction
-      return this.chainListService.deleteChain(finalAction.chainId, currentPipeline)
+      return this.chainListService.deleteChain(finalAction.chainId, selectedPipeline)
         .pipe(
           map(() => {
             this.messageService.create('success', 'Chain ' + finalAction.chainName + ' deleted Successfully');
@@ -151,13 +151,15 @@ export class ChainListEffects {
     })
   ));
 
-  renamePipeline$: Observable<Action> = createEffect(() => this.actions$.pipe(
-    ofType(fromActions.RENAME_PIPELINE),
-    switchMap((action: fromActions.RenamePipelineAction) => {
-      return this.pipelineService.renamePipeline(action.pipelineName, action.newPipelineName)
+  renameSelectedPipeline$: Observable<Action> = createEffect(() => this.actions$.pipe(
+    ofType(fromActions.RENAME_SELECTED_PIPELINE),
+    withLatestFrom(this.store$.select(getSelectedPipeline)),
+    switchMap(([action, selectedPipeline]) => {
+      const finalAction = action as fromActions.RenameSelectedPipelineAction;
+      return this.pipelineService.renamePipeline(selectedPipeline, finalAction.newPipelineName)
         .pipe(
           map((pipelines: string[]) => {
-            return new fromActions.RenamePipelineSuccessAction(action.newPipelineName, pipelines);
+            return new fromActions.RenamePipelineSuccessAction(finalAction.newPipelineName, pipelines);
           }),
           catchError((error: { message: string }) => {
             this.messageService.create('error', error.message);
@@ -167,10 +169,11 @@ export class ChainListEffects {
     })
   ));
 
-  deletePipeline$: Observable<Action> = createEffect(() => this.actions$.pipe(
-    ofType(fromActions.DELETE_PIPELINE),
-    switchMap((action: fromActions.DeletePipelineAction) => {
-      return this.pipelineService.deletePipeline(action.pipelineName)
+  deleteSelectedPipeline$: Observable<Action> = createEffect(() => this.actions$.pipe(
+    ofType(fromActions.DELETE_SELECTED_PIPELINE),
+    withLatestFrom(this.store$.select(getSelectedPipeline)),
+    switchMap(([action, selectedPipeline]) => {
+      return this.pipelineService.deletePipeline(selectedPipeline)
         .pipe(
           map((pipelines: string[]) => {
             return new fromActions.DeletePipelineSuccessAction(pipelines);
