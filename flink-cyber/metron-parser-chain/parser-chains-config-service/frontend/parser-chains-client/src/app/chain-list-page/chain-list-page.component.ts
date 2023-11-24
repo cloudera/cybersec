@@ -22,12 +22,12 @@ import {
   ChainListPageState,
   getChains,
   getCreateModalVisible,
-  getCurrentPipeline,
   getDeleteChain,
   getDeleteModalVisible,
   getLoading,
   getPipelineRenameModalVisible,
   getPipelines,
+  getSelectedPipeline,
 } from './chain-list-page.reducers';
 import {ChainModel, ChainOperationalModel} from './chain.model';
 import {NzMessageService} from "ng-zorro-antd/message";
@@ -50,7 +50,7 @@ export class ChainListPageComponent implements OnInit {
   sortDescription$: BehaviorSubject<{ key: string, value: string }> = new BehaviorSubject({key: 'name', value: ''});
   newChainForm: FormGroup;
   renamePipelineForm: FormGroup;
-  selectedPipeline:string;
+  selectedPipeline$: Observable<string>;
 
 
   constructor(
@@ -66,8 +66,7 @@ export class ChainListPageComponent implements OnInit {
     this.isPipelineRenameModalVisible$ = store.pipe(select(getPipelineRenameModalVisible));
     this.deleteChainItem$ = this.store.pipe(select(getDeleteChain));
     this.pipelineList$ = this.store.pipe(select(getPipelines));
-
-    store.pipe(select(getCurrentPipeline)).subscribe(pipeline => this.selectedPipeline = pipeline)
+    this.selectedPipeline$ = this.store.pipe(select(getSelectedPipeline));
 
     this.chainDataSorted$ = combineLatest([
       this.chains$,
@@ -151,7 +150,7 @@ export class ChainListPageComponent implements OnInit {
   }
 
   showPipelineRenameModal() {
-    this.store.dispatch(new fromActions.ShowRenamePipelineModalAction(this.selectedPipeline));
+    this.store.dispatch(new fromActions.ShowRenameSelectedPipelineModalAction());
   }
 
   handlePipelineRenameModalCancel() {
@@ -164,12 +163,12 @@ export class ChainListPageComponent implements OnInit {
   }
 
   deletePipeline() {
-    this.store.dispatch(new fromActions.DeletePipelineAction(this.selectedPipeline));
+    this.store.dispatch(new fromActions.DeleteSelectedPipelineAction());
   }
 
   renamePipeline() {
     let newPipelineName = this.newPipelineName.value;
     this.renamePipelineForm.reset();
-    this.store.dispatch(new fromActions.RenamePipelineAction(this.selectedPipeline, newPipelineName));
+    this.store.dispatch(new fromActions.RenameSelectedPipelineAction(newPipelineName));
   }
 }
