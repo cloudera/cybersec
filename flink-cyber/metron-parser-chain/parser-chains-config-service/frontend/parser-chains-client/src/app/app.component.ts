@@ -22,4 +22,9 @@ export class AppComponent {
   isReverseArrow = false;
   width: string | number = 200;
   isCollapsed = false;
+  isOpen: Array<boolean> = [false, false];
+
+  stop(event: Event) {
+    event.stopPropagation();
+  }
 }

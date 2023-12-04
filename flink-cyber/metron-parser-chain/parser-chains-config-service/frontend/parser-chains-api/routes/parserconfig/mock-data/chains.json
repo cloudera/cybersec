@@ -10,7 +10,7 @@
   },
   {
     "id": "222",
-    "name": "Dummy Chain B",
+    "name": "Dummy Chain B2",
     "parsers": [
       {"id":"444","name":"Syslog","type":"Grok","config": {},"outputs":""},
       {"id":"555","name":"Asa","type":"Grok","config": {},"outputs":""},

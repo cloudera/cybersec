@@ -1,0 +1,66 @@
+[
+  {
+    "id": "com.cloudera.parserchains.parsers.CsvTextParser",
+    "name": "CSV/TSV Parser"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.JSONParser",
+    "name": "Simple JSON"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.DelimitedKeyValueParser",
+    "name": "Delimited Key Values"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.RenameFieldParser",
+    "name": "Rename Field(s)"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.TimestampParser",
+    "name": "Timestamp"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.RemoveFieldParser",
+    "name": "Remove Field(s)"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.DelimitedTextParser",
+    "name": "Delimited Text"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.AvroParser",
+    "name": "Simple Avro parser"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.AlwaysFailParser",
+    "name": "Error"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.TimestampFormatParser",
+    "name": "TimestampFormat"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.XPathParser",
+    "name": "XPath"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.SyslogParser",
+    "name": "Syslog"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.GrokParser",
+    "name": "Grok"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.XMLFlattener",
+    "name": "XML Flattener"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.StellarParser",
+    "name": "Metron Stellar parser"
+  },
+  {
+    "id": "com.cloudera.parserchains.parsers.JSONPathParser",
+    "name": "JSON Path"
+  }
+]

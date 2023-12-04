@@ -1,0 +1,81 @@
+{
+  "id": "1",
+  "status": "online",
+  "name": "Developer cluster",
+  "version": "0.1.1",
+  "jobs": [
+    {
+      "name": "main.netflow.parser",
+      "branch": "main",
+      "pipeline": "netflow",
+      "type": "parser",
+      "status": "running",
+      "created": "1681213301000"
+    },
+    {
+      "name": "main.netflow.triage",
+      "branch": "main",
+      "pipeline": "netflow",
+      "type": "triage",
+      "status": "stopped",
+      "created": "1681213501110"
+    },
+    {
+      "name": "main.netflow.profile",
+      "branch": "main",
+      "pipeline": "netflow",
+      "type": "profile",
+      "status": "running",
+      "created": "1681213701150"
+    },
+    {
+      "name": "main.netflow.indexing",
+      "branch": "main",
+      "pipeline": "netflow",
+      "type": "indexing",
+      "status": "running",
+      "created": "1681213801310"
+    },
+    {
+      "name": "main.squid.parser",
+      "branch": "main",
+      "pipeline": "squid",
+      "type": "parser",
+      "status": "running",
+      "created": "1681213301000"
+    },
+    {
+      "name": "main.squid.triage",
+      "branch": "main",
+      "pipeline": "squid",
+      "type": "triage",
+      "status": "running",
+      "created": "1681213501110"
+    },
+    {
+      "name": "develop.squid.parser",
+      "branch": "develop",
+      "pipeline": "squid",
+      "type": "parser",
+      "status": "running",
+      "created": "1681213301000"
+    },
+    {
+      "name": "develop.netflow.parser",
+      "branch": "develop",
+      "pipeline": "netflow",
+      "type": "parser",
+      "status": "failed",
+      "created": "1681213301000"
+    },
+    {
+      "name": "develop.squid.triage",
+      "branch": "develop",
+      "pipeline": "squid",
+      "type": "triage",
+      "status": "stopped",
+      "created": "1681213501110"
+    }
+  ]
+}
+
