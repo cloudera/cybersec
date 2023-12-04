@@ -15,7 +15,7 @@
   <mat-icon>more_vert</mat-icon>
 </button>
 <mat-menu #menu="matMenu">
-  <button mat-menu-item (click)="this.changeJobStatus('start')">
+  <button mat-menu-item (click)="this.changeJobStatus('start')" [disabled]="true">
     <app-status-icon iconName="start"></app-status-icon>
     <span>Start</span>
   </button>
@@ -27,7 +27,7 @@
     <app-status-icon iconName="stop"></app-status-icon>
     <span>Stop</span>
   </button>
-  <button mat-menu-item (click)="this.openUploadDialog()">
+  <button mat-menu-item (click)="this.openUploadDialog()" [disabled]="this.selection.isEmpty() || this.selection.selected.length > 1">
     <app-status-icon iconName="update-config"></app-status-icon>
     <span>Update config</span>
   </button>

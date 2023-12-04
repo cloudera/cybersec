@@ -62,7 +62,7 @@ public class KafkaListenerController {
                             .jobs(Collections.singletonList(job))
                             .build();
                     return buildResponseMessage(responseBody, ResponseType.RESTART_JOB_RESPONSE, replyTo, correlationId);
-                } catch (IOException | InterruptedException e) {
+                } catch (IOException e) {
                     return handleErrorResponse(e, replyTo, correlationId);
                 }
             case STOP_JOB_REQUEST:
@@ -72,7 +72,7 @@ public class KafkaListenerController {
                             .jobs(Collections.singletonList(job))
                             .build();
                     return buildResponseMessage(responseBody, ResponseType.STOP_JOB_RESPONSE, replyTo, correlationId);
-                } catch (IOException | InterruptedException e) {
+                } catch (IOException e) {
                     return handleErrorResponse(e, replyTo, correlationId);
                 }
             case GET_JOB_CONFIG_REQUEST:
@@ -102,7 +102,7 @@ public class KafkaListenerController {
                             .build())
                     .build();
             return buildResponseMessage(responseBody, responseType, replyTo, correlationId);
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             return handleErrorResponse(e, replyTo, correlationId);
         }
     }
@@ -111,7 +111,6 @@ public class KafkaListenerController {
         ResponseBody responseBody = ResponseBody.builder()
                 .errorMessage(Collections.singletonMap(e.getClass().toString(), e.getMessage()))
                 .build();
-        Thread.currentThread().interrupt();
         return buildResponseMessage(responseBody, ResponseType.ERROR_RESPONSE, replyTo, correlationId);
     }
 

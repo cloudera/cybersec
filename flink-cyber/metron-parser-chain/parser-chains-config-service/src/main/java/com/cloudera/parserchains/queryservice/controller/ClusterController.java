@@ -52,14 +52,4 @@ public class ClusterController {
             @PathVariable("id") String clusterId) throws FailedClusterReponseException {
         return clusterService.getClusterInfo(clusterId);
     }
-
-    @ExceptionHandler(FailedAllClusterReponseException.class)
-    protected ResponseEntity<List<ResponseBody>> handleFailedAllClusterRequest(FailedAllClusterReponseException ex) {
-        return new ResponseEntity<>(ex.getResponseBodies(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(FailedClusterReponseException.class)
-    protected ResponseEntity<ResponseBody> handleFailedClusterRequest(FailedClusterReponseException ex) {
-        return new ResponseEntity<>(ex.getResponseBody(), HttpStatus.BAD_REQUEST);
-    }
 }

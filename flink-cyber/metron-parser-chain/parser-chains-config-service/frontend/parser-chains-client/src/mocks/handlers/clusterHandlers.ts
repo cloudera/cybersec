@@ -44,37 +44,4 @@ export const clusterHandlers = [
       ctx.delay(100),
     );
   }),
-  //   rest.patch<any, { clusterId: string, jobName: string }>('/api/v1/clusters/:clusterId/jobs/:jobName', (req, res, ctx) => {
-  //   const {clusterId, jobName} = req.params;
-  //   const reqBody: Map<string,string> = req.body;
-  //
-  //   const storedClusters: ClusterModel[] = JSON.parse(localStorage.getItem('cluster'));
-  //   const clusterModel = storedClusters.find(chain => chain.clusterMeta.clusterId === clusterId);
-  //   const job: Job = clusterModel?.jobs.find(job => job.jobName === jobName);
-  //   if (jobName.toLowerCase().includes('triage')) {
-  //     return res(
-  //       ctx.status(400)
-  //     );
-  //   }
-  //   if (!job) {
-  //     return res(
-  //       ctx.status(404)
-  //     );
-  //   }
-  //
-  //   Object.entries(reqBody).forEach(([key, value]) => {
-  //     if (job.hasOwnProperty(key)) {
-  //       job[key] = value;
-  //     } else {
-  //       return res(
-  //         ctx.status(415)
-  //       );
-  //     }
-  //   });
-  //
-  //   localStorage.setItem('cluster', JSON.stringify(storedClusters));
-  //   return res(
-  //     ctx.status(204),
-  //   );
-  // }),
 ];

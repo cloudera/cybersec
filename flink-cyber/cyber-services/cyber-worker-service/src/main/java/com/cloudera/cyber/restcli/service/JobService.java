@@ -34,14 +34,14 @@ public class JobService {
     private final Pattern pattern = Pattern.compile("^(?<date>[\\d.:\\s]+)\\s:\\s(?<jobId>[a-fA-F0-9]+)\\s:\\s(?<jobFullName>[\\w.-]+)\\s\\((?<jobStatus>\\w+)\\)$");
 
 
-
-    public List<Job> getJobs() throws IOException, InterruptedException {
+    public List<Job> getJobs() throws IOException {
         List<Job> jobs = new ArrayList<>();
         int exitValue = fillJobList(jobs);
         log.info(LOG_CLI_JOB_INFO, exitValue, jobs.size(), jobs.stream().map(Objects::toString).collect(Collectors.joining(",")));
-        return jobs;    }
+        return jobs;
+    }
 
-    public Job getJob(String id) throws IOException, InterruptedException {
+    public Job getJob(String id) throws IOException {
         List<Job> jobs = getJobs();
         return jobs.stream()
                 .filter(job -> StringUtils.equalsIgnoreCase(job.getJobId().toHexString(), id))
@@ -49,7 +49,7 @@ public class JobService {
                 .orElse(null);
     }
 
-    public Job restartJob(String id) throws IOException, InterruptedException {
+    public Job restartJob(String id) throws IOException {
         Job job = getJob(id);
         if (job != null) {
             log.info("Job '{}'", job);
@@ -72,13 +72,13 @@ public class JobService {
                 throw ioe;
             } catch (InterruptedException ie) {
                 log.error("An unexpected event occurred while waiting for the restart to complete for the job {}. {}", job, ie.getMessage());
-                throw ie;
+                Thread.currentThread().interrupt();
             }
         }
         return job;
     }
 
-    public Job stopJob(String id) throws IOException, InterruptedException {
+    public Job stopJob(String id) throws IOException {
         Job job = getJob(id);
         if (job != null) {
             try {
@@ -96,13 +96,13 @@ public class JobService {
                 throw ioe;
             } catch (InterruptedException ie) {
                 log.error("An unexpected event occurred while waiting for the restart to complete for the job {}. {}", job, ie.getMessage());
-                throw ie;
+                Thread.currentThread().interrupt();
             }
         }
         return job;
     }
 
-    private int fillJobList(List<Job> jobs) throws IOException, InterruptedException {
+    private int fillJobList(List<Job> jobs) throws IOException {
         Process process = null;
         try {
             ProcessBuilder processBuilder = new ProcessBuilder("flink", "list");
@@ -115,7 +115,7 @@ public class JobService {
             throw ioe;
         } catch (InterruptedException ie) {
             log.error("An unexpected event occurred while waiting for the command to complete. {}", ie.getMessage());
-            throw ie;
+            Thread.currentThread().interrupt();
         }
         return process.exitValue();
 

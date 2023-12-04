@@ -15,6 +15,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaOperations;
 import org.springframework.kafka.requestreply.RequestReplyFuture;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,11 @@ import java.util.stream.Collectors;
 public class KafkaService {
     @Qualifier("kafkaTemplatePool")
     private final Map<String, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody>> kafkaTemplatePool;
+    @Value("${kafka.reply.future.timeout:45}")
+    private Long replyFutureTimeout;
+    @Value("${kafka.reply.timeout:45}")
+    private Long kafkaTemplateTimeout;
+
 
     public Pair<ResponseType, ResponseBody> sendWithReply(RequestType requestType, String clusterId, RequestBody body) {
         final ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody> kafkaTemplate = kafkaTemplatePool.get(clusterId);
@@ -52,9 +58,9 @@ public class KafkaService {
 
     private Pair<ResponseType, ResponseBody> send(RequestType requestType, RequestBody body, String clusterId, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody> kafkaTemplate) {
         ProducerRecord<String, RequestBody> producerRecord = new ProducerRecord<>(kafkaTemplate.getRequestTopic(), requestType.name(), body);
-        RequestReplyFuture<String, RequestBody, ResponseBody> replyFuture = kafkaTemplate.sendAndReceive(producerRecord, Duration.ofMinutes(1));
+        RequestReplyFuture<String, RequestBody, ResponseBody> replyFuture = kafkaTemplate.sendAndReceive(producerRecord, Duration.ofSeconds(kafkaTemplateTimeout));
         try {
-            ConsumerRecord<String, ResponseBody> consumerRecord = replyFuture.get(45, TimeUnit.SECONDS);
+            ConsumerRecord<String, ResponseBody> consumerRecord = replyFuture.get(replyFutureTimeout, TimeUnit.SECONDS);
             if (consumerRecord == null) {
                 throw new KafkaException("Got no reply from kafka");
             }
