@@ -17,17 +17,41 @@
     [nzXs]="20"
   >
     <div class="input-group-container">
-      <nz-input-group [nzSuffix]="suffixIconSearch"
-                      nzTrigger="click"
-                      nz-dropdown
-                      [nzDropdownMenu]="config.outputName ? menu : null">
+      <nz-input-group [nzSuffix]="suffixIconSearch">
         <input
-          *ngIf="config.type === 'text'"
+          *ngIf="config.type === 'text' && !config.outputName"
           nz-input
           [formControl]="controls[i]"
           (keyup)="onChange(config)"
           (keyup.enter)="onAddClick()"
         />
+        <nz-select nzAllowClear nzShowSearch nzBorderless
+                   nzSize="small"
+                   *ngIf="config.type === 'text' && config.outputName"
+                   [(ngModel)]="controls[i].value"
+                   (ngModelChange)="updateValue($event, controls[i], config)"
+                   (nzOnSearch)="selectSearch($event)">
+          <!--When user types anything, it's always shown as the first option-->
+          <nz-option nzValue="{{selectSearchValue}}" nzLabel="{{selectSearchValue}}"
+                     *ngIf="selectSearchValue"
+                     (click)="updateValue(selectSearchValue, controls[i], config)"></nz-option>
+          <!--Current select value so that it's shown even if no such value is in the list-->
+          <nz-option nzValue="{{controls[i].value}}" nzLabel="{{controls[i].value}}"
+                     *ngIf="controls[i].value"></nz-option>
+          <nz-option-group nzLabel="Column mappings">
+            <nz-option nzValue="{{item}}" nzLabel="{{item}}"
+                       *ngFor="let item of mappingColumns; let j = index;"
+                       #columnMapping
+                       (click)="updateValue(columnMapping.nzValue, controls[i], config)"></nz-option>
+          </nz-option-group>
+          <nz-option-group nzLabel="Ignore fields"
+                           *ngIf="mappingColumns.length > 0 && ignoreColumns.length > 0">
+            <nz-option nzValue="{{item}}" nzLabel="{{item}}"
+                       *ngFor="let item of ignoreColumns; let j = index;"
+                       #ignore_value
+                       (click)="updateValue(ignore_value.nzValue, controls[i], config)"></nz-option>
+          </nz-option-group>
+        </nz-select>
         <textarea
           *ngIf="config.type === 'textarea'"
           nz-input
@@ -67,20 +91,5 @@
       <i *ngIf="i === 0" nz-icon nzType="info-circle" nzTheme="outline" nzTooltipTitle="{{ config.description }}"
     nzTooltipPlacement="right" nz-tooltip></i>
     </ng-template>
-    <nz-dropdown-menu
-            #menu="nzDropdownMenu">
-      <ul nz-menu>
-        <li nz-menu-item
-            *ngFor="let item of mappingColumns; let j = index;"
-            #columnMapping
-            (click)="updateValue(columnMapping.innerHTML, controls[i], config)">{{item}}</li>
-        <li nz-menu-divider
-            *ngIf="mappingColumns.length > 0 && ignoreColumns.length > 0"></li>
-        <li nz-menu-item nzDanger
-            *ngFor="let item of ignoreColumns; let j = index;"
-            #ignore_value
-            (click)="updateValue(ignore_value.innerHTML, controls[i], config)">{{item}}</li>
-      </ul>
-    </nz-dropdown-menu>
   </nz-form-control>
 </div>
