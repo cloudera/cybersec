@@ -30,3 +30,32 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui
+
+
+# Kafka
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    reply-topic: reply-topic
+    request-topic: request-topic
+    consumer:
+      group-id: my-consumer-group
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    external-clusters:
+      clusterId1:
+        bootstrap-servers: localhost:9092
+        reply-topic: reply-topic
+        request-topic: request-topic
+        consumer:
+          group-id: my-consumer-group
+          auto-offset-reset: latest
+          key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+          value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        producer:
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.apache.kafka.common.serialization.StringSerializer
