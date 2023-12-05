@@ -41,6 +41,11 @@
     },
     {
       "itemId": 3,
+      "name": "put",
+      "label": "put"
+    },
+    {
+      "itemId": 4,
       "name": "delete",
       "label": "delete"
     }

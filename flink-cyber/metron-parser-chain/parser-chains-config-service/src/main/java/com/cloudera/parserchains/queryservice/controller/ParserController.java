@@ -22,6 +22,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,6 +50,7 @@ public class ParserController {
             @ApiResponse(code = 200, message = "A list of all parser types.")
     })
     @GetMapping(value = API_PARSER_TYPES)
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', '*')")
     public ResponseEntity<List<ParserSummary>> findAll() throws IOException {
         List<ParserSummary> types = parserDiscoveryService.findAll();
         return ResponseEntity.ok(types);
@@ -60,6 +62,7 @@ public class ParserController {
             @ApiResponse(code = 404, message = "Unable to retrieve.")
     })
     @GetMapping(value = API_PARSER_FORM_CONFIG)
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', '*')")
     public ResponseEntity<Map<ParserID, ParserDescriptor>> describeAll() throws IOException {
         Map<ParserID, ParserDescriptor> configs = parserDiscoveryService.describeAll();
         if (configs != null || configs.size() >= 0) {

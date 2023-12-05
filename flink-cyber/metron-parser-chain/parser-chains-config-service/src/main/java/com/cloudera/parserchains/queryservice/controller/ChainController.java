@@ -233,6 +233,7 @@ public class ChainController {
             @ApiResponse(code = 200, message = "The result of parsing the message."),
     })
     @PostMapping(value = API_PARSER_TEST)
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', '*')")
     public ResponseEntity<ChainTestResponse> test(
             @ApiParam(name = "testRun", value = "Describes the parser chain test to run.", required = true)
             @RequestBody ChainTestRequest testRun) throws IOException {
