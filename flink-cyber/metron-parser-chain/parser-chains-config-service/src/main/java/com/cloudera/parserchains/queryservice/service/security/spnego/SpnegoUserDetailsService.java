@@ -19,78 +19,66 @@
 
 package com.cloudera.parserchains.queryservice.service.security.spnego;
 
+import com.cloudera.parserchains.queryservice.model.ranger.CybersecUserDetails;
 import com.cloudera.parserchains.queryservice.service.security.UserDetailsServiceBase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.User;
+import org.apache.ranger.plugin.policyengine.RangerAccessRequestImpl;
+import org.apache.ranger.plugin.policyengine.RangerAccessResourceImpl;
+import org.apache.ranger.plugin.policyengine.RangerAccessResult;
+import org.apache.ranger.plugin.service.RangerBasePlugin;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 
-//TODO user details
 /**
  * The service is responsible for calculating and loading
  * the real user after a successful SPNEGO authentication.
  */
+@ConditionalOnProperty(value = "security.kerberos.enabled", havingValue = "true")
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class SpnegoUserDetailsService extends UserDetailsServiceBase {
 
-    private static final String DO_AS_PARAM_NAME = "doAs";
+    private final RangerBasePlugin rangerBasePlugin;
 
-    private final HttpServletRequest request;
-
-    @Value("${parsers.proxy.users:}")
-    private List<String> proxyUsers = Collections.emptyList();
-
-    private static String getSimpleName(String principal) {
-        if (ObjectUtils.isEmpty(principal)) {
-            return principal;
-        } else {
-            return principal.split("@")[0].split("/")[0];
-        }
-    }
-
-    //TODO Ranger
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.info("loadUserByUsername {}", username);
-        return new User(username, "notUsed", true, true,
-            true, true, Collections.singletonList(USER));
+        return new CybersecUserDetails(cleanUsername(username), username, "notUsed", true, true,
+                true, true, Collections.singletonList(USER));
     }
 
-    public UserDetails loadUserByUsername(HttpServletRequest request, String username) throws UsernameNotFoundException {
-        String doAs = request.getParameter(DO_AS_PARAM_NAME);
-        String simpleName = getSimpleName(username);
-
-        simpleName = applyDoAs(simpleName, doAs);
-        log.info("Logged in user={}, req.doAs={}, derived_user={}", username, doAs, simpleName);
-
-        return null;
+    private static String cleanUsername(String username) {
+        return username.substring(0, username.lastIndexOf("@"));
     }
 
-    private boolean isProxyUser(String userId) {
-        return proxyUsers.contains(userId);
-    }
+    @Override
+    public boolean hasAccess(String accessType, String pipeline) {
+        String finalPipeline = StringUtils.hasText(pipeline) ? pipeline : "%default%";
 
-    private String applyDoAs(String username, String doAs) {
-        if (ObjectUtils.isEmpty(doAs) || doAs.equals(username)) {
-            return username;
+        final RangerAccessRequestImpl request = new RangerAccessRequestImpl();
+        request.setAccessType(accessType);
+
+        final HashMap<String, Object> map = new HashMap<>();
+        map.put("path", finalPipeline);
+
+        request.setResource(new RangerAccessResourceImpl(map));
+
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            return false;
         }
+        request.setUser(authentication.getName());
 
-        if (!isProxyUser(username)) {
-            throw new RuntimeException("User " + username + " is not allowed to impersonate user " + doAs);
-        }
-
-        log.info("User {} is impersonating user {}", username, doAs);
-
-        return doAs;
+        final RangerAccessResult accessAllowed = rangerBasePlugin.isAccessAllowed(request);
+        return accessAllowed.getIsAllowed();
     }
 }

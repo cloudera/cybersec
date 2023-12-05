@@ -41,6 +41,8 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 
 import javax.servlet.http.HttpServletRequest;
 
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.DEFAULT_ROLE;
+
 /**
  * The class is responsible for setting up the SPNEGO authentication
  * for the API endpoints.
@@ -76,7 +78,7 @@ public class SpnegoConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(UNSECURED_ENDPOINTS)
                 .permitAll()
                 .anyRequest()
-                .access("hasAuthority('USER')")
+                .access("hasAuthority('" + DEFAULT_ROLE + "')")
                 .and().addFilterBefore(spnegoAuthenticationProcessingFilter(), BasicAuthenticationFilter.class);
     }
 

@@ -1,0 +1,62 @@
+{
+  "name": "cybersec",
+  "label": "cybersec",
+  "description": "Ranger plugin to enforce security on top of a Cybersec Service",
+  "guid": "9514b5f8-83a0-42c8-a20e-b0e96cd0e864",
+  "version": 1,
+  "isEnabled": 1,
+  "resources": [
+    {
+      "itemId": 1,
+      "name": "path",
+      "type": "path",
+      "level": 10,
+      "parent": "",
+      "mandatory": true,
+      "lookupSupported": false,
+      "recursiveSupported": false,
+      "excludesSupported": true,
+      "matcher": "org.apache.ranger.plugin.resourcematcher.RangerPathResourceMatcher",
+      "matcherOptions": {
+        "wildCard": true,
+        "ignoreCase": true
+      },
+      "validationRegEx": "",
+      "validationMessage": "",
+      "uiHint": "",
+      "label": "Pipeline",
+      "description": "Pipeline"
+    }
+  ],
+  "accessTypes": [
+    {
+      "itemId": 1,
+      "name": "get",
+      "label": "get"
+    },
+    {
+      "itemId": 2,
+      "name": "post",
+      "label": "post"
+    },
+    {
+      "itemId": 3,
+      "name": "delete",
+      "label": "delete"
+    }
+  ],
+  "configs": [
+    {
+      "username": "cybersec",
+      "password": "cybersec",
+      "policy.download.auth.users": "cybersec",
+      "tag.download.auth.users": "cybersec"
+    }
+  ],
+  "enums": [
+  ],
+  "contextEnrichers": [
+  ],
+  "policyConditions": [
+  ]
+}
