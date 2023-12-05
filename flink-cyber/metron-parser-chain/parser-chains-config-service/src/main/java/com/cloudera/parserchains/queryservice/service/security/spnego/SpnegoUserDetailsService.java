@@ -39,8 +39,7 @@ import java.util.Collections;
 import java.util.HashMap;
 
 /**
- * The service is responsible for calculating and loading
- * the real user after a successful SPNEGO authentication.
+ * The service is responsible for calculating access with Ranger.
  */
 @ConditionalOnProperty(value = "security.kerberos.enabled", havingValue = "true")
 @Service

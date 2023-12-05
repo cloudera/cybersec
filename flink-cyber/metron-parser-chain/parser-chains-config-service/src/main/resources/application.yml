@@ -22,7 +22,7 @@ logging:
 
 security:
   kerberos:
-    enabled: true
+    enabled: false
     serviceName: cybersec
     appId: cybersec
     spnego:

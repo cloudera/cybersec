@@ -22,18 +22,16 @@ package com.cloudera.parserchains.queryservice.config.security;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 
 /**
- * The class is responsible for setting up the SPNEGO authentication for the API endpoints.
+ * The class is responsible for disabling the auth for the API endpoints.
  */
 
 @ConditionalOnProperty(value = "security.kerberos.enabled", havingValue = "false", matchIfMissing = true)
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 @Slf4j
 public class NoAuthConfig extends WebSecurityConfigurerAdapter {
