@@ -37,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.core.fs.Path;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -94,6 +95,7 @@ public class ChainController {
             @ApiResponse(code = 200, message = "A list of all parser chains.")
     })
     @GetMapping(value = API_CHAINS)
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', #pipelineName)")
     public ResponseEntity<List<ParserChainSummary>> findAll(
             @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName
@@ -110,6 +112,7 @@ public class ChainController {
             @ApiResponse(code = 404, message = "Unable to create a new parser chain.")
     })
     @PostMapping(value = API_CHAINS)
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('post', #pipelineName)")
     public ResponseEntity<ParserChainSchema> create(
             @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
@@ -133,6 +136,7 @@ public class ChainController {
             @ApiResponse(code = 404, message = "The parser chain does not exist.")
     })
     @GetMapping(value = API_CHAINS + "/{id}")
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', #pipelineName)")
     public ResponseEntity<ParserChainSchema> read(
             @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
@@ -154,6 +158,7 @@ public class ChainController {
             @ApiResponse(code = 404, message = "The parser chain does not exist.")
     })
     @PutMapping(value = API_CHAINS + "/{id}")
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('put', #pipelineName)")
     public ResponseEntity<ParserChainSchema> update(
             @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
@@ -181,6 +186,7 @@ public class ChainController {
             @ApiResponse(code = 404, message = "The parser chain does not exist.")
     })
     @DeleteMapping(value = API_CHAINS + "/{id}")
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('delete', #pipelineName)")
     public ResponseEntity<Void> delete(
             @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
@@ -200,6 +206,7 @@ public class ChainController {
             @ApiResponse(code = 200, message = "The mapping file parsed successfully."),
     })
     @PostMapping(value = API_INDEXING)
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', #pipelineName)")
     public ResponseEntity<Map<String, Object>> getMappingsFromPath(
             @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,

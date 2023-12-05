@@ -21,13 +21,13 @@
     </appender>
     <appender name="RFA" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!--See also http://logback.qos.ch/manual/appenders.html#RollingFileAppender-->
-        <File>/tmp/parser-ui-vpavlenko-sec-1.vpavlenko-sec.root.hwx.site.log</File>
+        <File>/tmp/parser-ui.log</File>
         <encoder>
             <pattern>%d{ISO8601} %p %c: %m%n</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
             <maxIndex>10</maxIndex>
-            <FileNamePattern>/tmp/parser-ui-vpavlenko-sec-1.vpavlenko-sec.root.hwx.site.log.%i</FileNamePattern>
+            <FileNamePattern>/tmp/parser-ui.log.%i</FileNamePattern>
         </rollingPolicy>
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
             <maxFileSize>200MB</maxFileSize>
