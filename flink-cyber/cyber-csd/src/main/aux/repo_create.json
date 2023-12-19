@@ -1,0 +1,19 @@
+{
+  "isEnabled": "true",
+  "type": "cybersec",
+  "configs": {
+    "username": "${cybersec_service_user_name}",
+    "password": "${cybersec_service_user_name}",
+    "policy.download.auth.users": "${cybersec_repo_users}",
+    "tag.download.auth.users": "${cybersec_repo_users}",
+    "default.policy.users": "${cybersec_repo_users}",
+    "setup.additional.default.policies": "true",
+    "default-policy.1.name": "path",
+    "default-policy.1.description": "Policy for access pipeline",
+    "default-policy.1.resource.topic": "__pipeline_meta",
+    "default-policy.1.policyItem.1.accessTypes": "create,delete,configure,alter,alter_configs,describe,describe_configs,consume,publish",
+    "default-policy.1.isDenyAllElse": "true"
+  },
+  "name": "${SANITIZED_RANGER_SERVICE_NAME}",
+  "description": "Cybersec service for ${CLUSTER_NAME}"
+}
