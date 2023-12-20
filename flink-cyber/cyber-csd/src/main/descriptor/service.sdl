@@ -43,6 +43,16 @@
     {
       "type": "kafkaDependency",
       "extensionId": "kafka_dependency"
+    },
+    {
+      "type" : "rangerPlugin",
+      "extensionId": "ranger_plugin",
+      "pluginType": "CYBERSEC",
+      "repositoryStrategy" : "uniquePerService"
+    },
+    {
+      "type": "clusterInfo",
+      "extensionId": "cluster_info"
     }
   ],
   "hdfsDirs": [
@@ -93,70 +103,6 @@
       "type": "boolean",
       "default": "false",
       "configurableInWizard": true
-    },
-    {
-      "name": "ranger_repo_name",
-      "label": "Ranger repo name",
-      "description": "ranger_repo_name",
-      "type": "string",
-      "default": "cybersec",
-      "configurableInWizard": true
-    },
-    {
-      "name": "keystore_type",
-      "label": "Keystore type",
-      "description": "keystore_type",
-      "type": "string",
-      "default": "jceks",
-      "configurableInWizard": true
-    },
-    {
-      "name": "ranger_rest_url",
-      "label": "Ranger rest URL",
-      "description": "ranger_rest_url",
-      "type": "string",
-      "default": "http://${host}:port",
-      "configurableInWizard": true
-    },
-    {
-      "name": "ranger_base_audit_url",
-      "label": "ranger_base_audit_url",
-      "description": "ranger_base_audit_url",
-      "type": "string",
-      "default": "",
-      "configurableInWizard": true
-    },
-    {
-      "name": "solr_audit_collection",
-      "label": "solr_audit_collection",
-      "description": "solr_audit_collection",
-      "type": "string",
-      "default": "",
-      "configurableInWizard": true
-    },
-    {
-      "name": "ranger_cybersec_plugin_service_name",
-      "label": "ranger_cybersec_plugin_service_name",
-      "description": "ranger_cybersec_plugin_service_name",
-      "type": "string",
-      "default": "cybersec",
-      "configurableInWizard": true
-    },
-    {
-      "name": "cluster_name",
-      "label": "cluster_name",
-      "description": "cluster_name",
-      "type": "string",
-      "default": "Cluster 1",
-      "configurableInWizard": true
-    },
-    {
-      "name": "cluster_display_name",
-      "label": "cluster_display_name",
-      "description": "cluster_display_name",
-      "type": "string",
-      "default": "Cluster 1",
-      "configurableInWizard": true
     }
   ],
   "rolesWithExternalLinks" : ["PARSER_CHAINING"],
@@ -175,7 +121,6 @@
           "SERVER_SSL_KEY_PASSWORD": "${ssl_server_keystore_keypassword}",
           "SERVER_SSL_KEY_STORE_TYPE": "jks",
           "SERVER_SSL_ENABLED": "${ssl_enabled}",
-
           "ENABLE_SECURITY" : "${kerberos_auth_enabled}",
           "CYBERSEC_TRUSTSTORE_LOCATION": "${ssl_client_truststore_location}",
           "CYBERSEC_TRUSTORE_PASSWORD": "${ssl_client_truststore_password}",
@@ -251,6 +196,15 @@
           "configName": "config.path",
           "type": "string",
           "default": "/var/lib/cybersec"
+        },
+        {
+          "name": "enable_trusted_proxy",
+          "label": "Enable Kerberos Authentication with Trusted Proxy",
+          "description": "Enables knox as Trusted proxy with Kerberos authentication for this SMM service.",
+          "configName": "enable.trusted.proxy",
+          "type": "boolean",
+          "default": "true",
+          "configurableInWizard": true
         },
         {
           "name": "logging_org_springframework_level",
@@ -407,7 +361,8 @@
             ],
             "includedParams": [
               "parser_ui_port",
-              "config_path"
+              "config_path",
+              "enable_trusted_proxy"
              ],
             "additionalConfigs": [
               {

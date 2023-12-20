@@ -10,7 +10,6 @@
     "setup.additional.default.policies": "true",
     "default-policy.1.name": "path",
     "default-policy.1.description": "Policy for access pipeline",
-    "default-policy.1.resource.topic": "__pipeline_meta",
     "default-policy.1.policyItem.1.accessTypes": "create,delete,configure,alter,alter_configs,describe,describe_configs,consume,publish",
     "default-policy.1.isDenyAllElse": "true"
   },

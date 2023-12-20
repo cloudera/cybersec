@@ -30,16 +30,14 @@ function check_dependencies() {
       exit 0
   fi
 
-  [[ "${RANGER_INIT_HIDE_KEYTAB}" == "true" ]] && set +x
   # get kerberos ticket
-  if [[ -n "${RANGER_CLIENT_KEYTAB}" ]]
+  if [[ ${ENABLE_SECURITY} == "true" ]]
   then
-    kinit -k -t "${RANGER_CLIENT_KEYTAB}" "${RANGER_CLIENT_PRINCIPAL}"
+    kinit -k -t "${CONF_DIR}/cybersec.keytab" "${cybersec_principal}"
     log "kerberos tickets" $(klist)
   else
       log "Kerberos not enabled."
   fi
-  [[ "${RANGER_INIT_HIDE_KEYTAB}" == "true" ]] && set -x
 }
 
 function check_env_variables() {

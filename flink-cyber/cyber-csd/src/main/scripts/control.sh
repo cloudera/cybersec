@@ -79,6 +79,7 @@ if [[ -n "${RANGER_SERVICE}" && "${RANGER_SERVICE}" != "none" ]]; then
   # Optionally create the Cybersec service in Ranger.
   "${CONF_DIR}"/scripts/ranger_init.sh -c create -s "${RANGER_CYBERSEC_SERVICE_NAME}"
 
+  . "${CONF_DIR}/scripts/vars.sh"
   perl -pi -e "s#\Q${RANGER_CYBERSEC_SERVICE_NAME}\E#${SANITIZED_RANGER_SERVICE_NAME}#g" ${CONF_DIR}/ranger-cybersec-security.xml
 fi
 
