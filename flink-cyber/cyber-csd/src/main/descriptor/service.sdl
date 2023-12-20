@@ -93,6 +93,70 @@
       "type": "boolean",
       "default": "false",
       "configurableInWizard": true
+    },
+    {
+      "name": "ranger_repo_name",
+      "label": "Ranger repo name",
+      "description": "ranger_repo_name",
+      "type": "string",
+      "default": "cybersec",
+      "configurableInWizard": true
+    },
+    {
+      "name": "keystore_type",
+      "label": "Keystore type",
+      "description": "keystore_type",
+      "type": "string",
+      "default": "jceks",
+      "configurableInWizard": true
+    },
+    {
+      "name": "ranger_rest_url",
+      "label": "Ranger rest URL",
+      "description": "ranger_rest_url",
+      "type": "string",
+      "default": "http://${host}:port",
+      "configurableInWizard": true
+    },
+    {
+      "name": "ranger_base_audit_url",
+      "label": "ranger_base_audit_url",
+      "description": "ranger_base_audit_url",
+      "type": "string",
+      "default": "",
+      "configurableInWizard": true
+    },
+    {
+      "name": "solr_audit_collection",
+      "label": "solr_audit_collection",
+      "description": "solr_audit_collection",
+      "type": "string",
+      "default": "",
+      "configurableInWizard": true
+    },
+    {
+      "name": "ranger_cybersec_plugin_service_name",
+      "label": "ranger_cybersec_plugin_service_name",
+      "description": "ranger_cybersec_plugin_service_name",
+      "type": "string",
+      "default": "cybersec",
+      "configurableInWizard": true
+    },
+    {
+      "name": "cluster_name",
+      "label": "cluster_name",
+      "description": "cluster_name",
+      "type": "string",
+      "default": "Cluster 1",
+      "configurableInWizard": true
+    },
+    {
+      "name": "cluster_display_name",
+      "label": "cluster_display_name",
+      "description": "cluster_display_name",
+      "type": "string",
+      "default": "Cluster 1",
+      "configurableInWizard": true
     }
   ],
   "rolesWithExternalLinks" : ["PARSER_CHAINING"],
@@ -118,7 +182,7 @@
           "RANGER_KEYSTORE_TYPE": "${keystore_type}",
           "RANGER_SERVICE": "${dependency:RANGER}",
           "RANGER_AUDIT_BASE_PATH": "${ranger_base_audit_url}",
-          "RANGER_CYBERSEC_SERVICE_NAME": "${ranger_kudu_plugin_service_name}",
+          "RANGER_CYBERSEC_SERVICE_NAME": "${ranger_cybersec_plugin_service_name}",
           "RANGER_REST_URL" : "${ranger_rest_url}",
           "CLUSTER_NAME" : "${cluster_name}",
           "RANGER_REPO_NAME" : "${ranger_repo_name}",
@@ -288,7 +352,7 @@
           "name": "ranger_cybersec_plugin_use_x_forwarded_for_ipaddress",
           "label": "Ranger Plugin Use X-Forwarded For IP Address",
           "description": "The parameter is used for identifying the originating IP address of a user connecting to a component through proxy for audit logs.",
-          "configName": "ranger.plugin.kudu.use.x-forwarded-for.ipaddress",
+          "configName": "ranger.plugin.cybersec.use.x-forwarded-for.ipaddress",
           "type": "boolean",
           "default": "false"
         },
@@ -296,13 +360,13 @@
           "name": "ranger_cybersec_plugin_trusted_proxy_ipaddress",
           "label": "Ranger Plugin Trusted Proxy IP Address",
           "description": "Accepts a list of IP addresses of proxy servers for trusting.",
-          "configName": "ranger.plugin.kudu.trusted.proxy.ipaddress",
+          "configName": "ranger.plugin.cybersec.trusted.proxy.ipaddress",
           "type": "string"
         },
         {
           "name": "ranger_cybersec_plugin_service_name",
           "label": "Ranger service name for this Cybersec service",
-          "description": "Name of the Kudu Ranger service, that is used for authorization by this Kudu service. If this parameter is set to the placeholder value '{{GENERATED_RANGER_SERVICE_NAME}}', a generated service name will be used, and if necessary, created. The generated service name will refer to the name of the cluster and the name of this Kudu service. The name can consist of alphanumeric and '_' characters.",
+          "description": "Name of the Cybersec Ranger service, that is used for authorization by this Cybersec service. If this parameter is set to the placeholder value '{{GENERATED_RANGER_SERVICE_NAME}}', a generated service name will be used, and if necessary, created. The generated service name will refer to the name of the cluster and the name of this Cybersec service. The name can consist of alphanumeric and '_' characters.",
           "configName": "ranger.plugin.cybersec.service.name",
           "conformRegex" : "[\\p{Alnum}_\\{\\}]+",
           "default": "cm_cybersec",
@@ -389,7 +453,7 @@
           ]
           },
           {
-            "filename": "ranger-kudu-policymgr-ssl.xml",
+            "filename": "ranger-cybersec-policymgr-ssl.xml",
             "configFormat": "hadoop_xml",
             "includedParams": [],
             "additionalConfigs": [
@@ -408,7 +472,7 @@
             ]
           },
           {
-            "filename": "ranger-kudu-audit.xml",
+            "filename": "ranger-cybersec-audit.xml",
             "configFormat": "hadoop_xml",
             "kerberosPrincipals": [
               {
