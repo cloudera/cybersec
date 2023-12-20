@@ -36,12 +36,12 @@ log "CMD: $CMD"
 # If Ranger service is selected as dependency, add Ranger plugin specific parameters
 if [[ -n "${RANGER_SERVICE}" && "${RANGER_SERVICE}" != "none" ]]; then
 
-  # Populate the required field for 'ranger-kudu-security.xml'
+  # Populate the required field for 'ranger-cybersec-security.xml'
   RANGER_CYBERSEC_PLUGIN_SSL_FILE="${CONF_DIR}/ranger-cybersec-policymgr-ssl.xml"
-  perl -pi -e "s#\{\{RANGER_KUDU_PLUGIN_SSL_FILE}}#${RANGER_CYBERSEC_PLUGIN_SSL_FILE}#g" "${CONF_DIR}"/ranger-cybersec-security.xml
+  perl -pi -e "s#\{\{RANGER_CYBERSEC_PLUGIN_SSL_FILE}}#${RANGER_CYBERSEC_PLUGIN_SSL_FILE}#g" "${CONF_DIR}"/ranger-cybersec-security.xml
 
   # set +x
-  # Populate the required fields for 'ranger-kudu-cyberse-ssl.xml'. Disable printing
+  # Populate the required fields for 'ranger-cybersec-policymgr-ssl.xml'. Disable printing
   # the commands as they are sensitive fields.
   if [ -n "${CYBERSEC_TRUSTSTORE_LOCATION}" ] && [ -n "${CYBERSEC_TRUSTORE_PASSWORD}" ]; then
     perl -pi -e "s#\{\{RANGER_PLUGIN_TRUSTSTORE}}#${CYBERSEC_TRUSTSTORE_LOCATION}#g" "${CONF_DIR}"/ranger-cybersec-policymgr-ssl.xml
@@ -63,9 +63,9 @@ if [[ -n "${RANGER_SERVICE}" && "${RANGER_SERVICE}" != "none" ]]; then
   fi
   set -x
 
-  # Populate the required fields for 'ranger-kudu-audit.xml'
+  # Populate the required fields for 'ranger-cybersec-audit.xml'
   KEYTAB_FILE="${CONF_DIR}/cybersec.keytab"
-  perl -pi -e "s#\{\{KEYTAB_FILE}}#${KEYTAB_FILE}#g" ${CONF_DIR}/ranger-kudu-audit.xml
+  perl -pi -e "s#\{\{KEYTAB_FILE}}#${KEYTAB_FILE}#g" ${CONF_DIR}/ranger-cybersec-audit.xml
 
   cp -f ${CONF_DIR}/hadoop-conf/core-site.xml ${CONF_DIR}/
 
@@ -76,7 +76,7 @@ if [[ -n "${RANGER_SERVICE}" && "${RANGER_SERVICE}" != "none" ]]; then
   fi
   export cybersec_repo_users
 
-  # Optionally create the Kudu service in Ranger.
+  # Optionally create the Cybersec service in Ranger.
   "${CONF_DIR}"/scripts/ranger_init.sh -c create -s "${RANGER_CYBERSEC_SERVICE_NAME}"
 
   perl -pi -e "s#\Q${RANGER_CYBERSEC_SERVICE_NAME}\E#${SANITIZED_RANGER_SERVICE_NAME}#g" ${CONF_DIR}/ranger-cybersec-security.xml

@@ -51,12 +51,6 @@
     }
   ],
   "configs": [
-    {
-      "username": "cybersec",
-      "password": "cybersec",
-      "policy.download.auth.users": "cybersec",
-      "tag.download.auth.users": "cybersec"
-    }
   ],
   "enums": [
   ],
