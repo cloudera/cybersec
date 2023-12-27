@@ -54,7 +54,7 @@ if [[ -n "${RANGER_SERVICE}" && "${RANGER_SERVICE}" != "none" ]]; then
     RANGER_PLUGIN_TRUSTSTORE_CRED_FILE="${STORETYPE}://file${CONF_DIR}/rangerpluginssl.${STORETYPE}"
 
     # Use jars from Ranger admin package to generate the trsustore credential file.
-    RANGER_ADMIN_CRED_LIB="${PARCELS_ROOT}/${PARCEL_DIRNAMES}/lib/ranger-admin/cred/lib/"
+    RANGER_ADMIN_CRED_LIB="${PARCELS_ROOT}/CDH/lib/ranger-admin/cred/lib/"
     export JAVA_HOME=${JAVA_HOME};"${JAVA_HOME}"/bin/java ${CSD_JAVA_OPTS} -cp "${RANGER_ADMIN_CRED_LIB}/*" org.apache.ranger.credentialapi.buildks create sslTrustStore -value "${CYBERSEC_TRUSTORE_PASSWORD}" -provider "${RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}"
     perl -pi -e "s#\{\{RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}}#${RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}#g" "${CONF_DIR}"/ranger-cybersec-policymgr-ssl.xml
   else
