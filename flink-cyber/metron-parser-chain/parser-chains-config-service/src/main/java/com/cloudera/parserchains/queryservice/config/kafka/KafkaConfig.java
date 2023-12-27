@@ -63,18 +63,18 @@ public class KafkaConfig {
       @Qualifier("kafka-external-cluster-map") Map<String, ClouderaKafkaProperties> replyKafkaPropertiesMap) {
     final Map<String, ClouderaReplyingKafkaTemplate<String, String, String>> templatePool = new HashMap<>();
 
-    replyKafkaPropertiesMap.forEach((clusterId, kafkaProperties) -> {
-      final ProducerFactory<String, String> producerFactory = producerFactory(kafkaProperties);
-      final ConsumerFactory<String, String> consumerFactory = consumerFactory(kafkaProperties);
-      final GenericMessageListenerContainer<String, String> replyContainer = replyContainer(consumerFactory,
-          kafkaProperties.getReplyTopic());
-
-      final ClouderaReplyingKafkaTemplate<String, String, String> kafkaTemplate = replyingKafkaTemplate(producerFactory,
-          replyContainer, kafkaProperties.getRequestTopic());
-      kafkaTemplate.start();
-
-      templatePool.put(clusterId, kafkaTemplate);
-    });
+//    replyKafkaPropertiesMap.forEach((clusterId, kafkaProperties) -> {
+//      final ProducerFactory<String, String> producerFactory = producerFactory(kafkaProperties);
+//      final ConsumerFactory<String, String> consumerFactory = consumerFactory(kafkaProperties);
+//      final GenericMessageListenerContainer<String, String> replyContainer = replyContainer(consumerFactory,
+//          kafkaProperties.getReplyTopic());
+//
+//      final ClouderaReplyingKafkaTemplate<String, String, String> kafkaTemplate = replyingKafkaTemplate(producerFactory,
+//          replyContainer, kafkaProperties.getRequestTopic());
+//      kafkaTemplate.start();
+//
+//      templatePool.put(clusterId, kafkaTemplate);
+//    });
 
     return Collections.unmodifiableMap(templatePool);
   }

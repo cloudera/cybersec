@@ -36,36 +36,50 @@ log "CMD: $CMD"
 # If Ranger service is selected as dependency, add Ranger plugin specific parameters
 if [[ -n "${RANGER_SERVICE}" && "${RANGER_SERVICE}" != "none" ]]; then
 
-  # Populate the required field for 'ranger-cybersec-security.xml'
-  RANGER_CYBERSEC_PLUGIN_SSL_FILE="${CONF_DIR}/ranger-cybersec-policymgr-ssl.xml"
-  perl -pi -e "s#\{\{RANGER_CYBERSEC_PLUGIN_SSL_FILE}}#${RANGER_CYBERSEC_PLUGIN_SSL_FILE}#g" "${CONF_DIR}"/ranger-cybersec-security.xml
+  RANGER_PLUGIN_SSL_FILE="${CONF_DIR}/ranger-cybersec-policymgr-ssl.xml"
+  RANGER_PLUGIN_SECURITY_FILE="${CONF_DIR}/ranger-cybersec-security.xml"
+  RANGER_PLUGIN_AUDIT_FILE="${CONF_DIR}/ranger-cybersec-audit.xml"
+  PARSER_UI_PROPERTIES="${CYBERSEC_CONF_DIR}/parser-ui.properties"
 
   # set +x
   # Populate the required fields for 'ranger-cybersec-policymgr-ssl.xml'. Disable printing
   # the commands as they are sensitive fields.
-  if [ -n "${CYBERSEC_TRUSTSTORE_LOCATION}" ] && [ -n "${CYBERSEC_TRUSTORE_PASSWORD}" ]; then
-    perl -pi -e "s#\{\{RANGER_PLUGIN_TRUSTSTORE}}#${CYBERSEC_TRUSTSTORE_LOCATION}#g" "${CONF_DIR}"/ranger-cybersec-policymgr-ssl.xml
+  if [ -n "${CYBERSEC_TRUSTSTORE_LOCATION}" ] && [ -n "${CYBERSEC_TRUSTSTORE_PASSWORD}" ]; then
     if [[ "${RANGER_KEYSTORE_TYPE}" = "bcfks" ]]
     then
       STORETYPE="bcfks"
     else
       STORETYPE="jceks"
     fi
-    RANGER_PLUGIN_TRUSTSTORE_CRED_FILE="${STORETYPE}://file${CONF_DIR}/rangerpluginssl.${STORETYPE}"
 
-    # Use jars from Ranger admin package to generate the trsustore credential file.
+
+    RANGER_PLUGIN_KEYSTORE_CRED_FILE="${STORETYPE}://file${CONF_DIR}/rangerPluginKeyStore.${STORETYPE}"
+    RANGER_PLUGIN_TRUSTSTORE_CRED_FILE="${STORETYPE}://file${CONF_DIR}/rangerPluginTrustStore.${STORETYPE}"
+    echo "RANGER_PLUGIN_KEYSTORE_CRED_FILE=${RANGER_PLUGIN_KEYSTORE_CRED_FILE}"
+    echo "RANGER_PLUGIN_TRUSTSTORE_CRED_FILE=${RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}"
     RANGER_ADMIN_CRED_LIB="${PARCELS_ROOT}/${PARCEL_DIRNAMES}/lib/ranger-admin/cred/lib/"
-    export JAVA_HOME=${JAVA_HOME};"${JAVA_HOME}"/bin/java ${CSD_JAVA_OPTS} -cp "${RANGER_ADMIN_CRED_LIB}/*" org.apache.ranger.credentialapi.buildks create sslTrustStore -value "${CYBERSEC_TRUSTORE_PASSWORD}" -provider "${RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}"
-    perl -pi -e "s#\{\{RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}}#${RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}#g" "${CONF_DIR}"/ranger-cybersec-policymgr-ssl.xml
+    set +x
+    export JAVA_HOME=${JAVA_HOME};${JAVA_HOME}/bin/java -cp "${RANGER_ADMIN_CRED_LIB}/*" org.apache.ranger.credentialapi.buildks create sslKeyStore -value "${CYBERSEC_KEYSTORE_PASSWORD}" -provider "${RANGER_PLUGIN_KEYSTORE_CRED_FILE}" -storetype "${STORETYPE}"
+    export JAVA_HOME=${JAVA_HOME};${JAVA_HOME}/bin/java -cp "${RANGER_ADMIN_CRED_LIB}/*" org.apache.ranger.credentialapi.buildks create sslTrustStore -value "${CYBERSEC_TRUSTSTORE_PASSWORD}" -provider "${RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}" -storetype "${STORETYPE}"
+    set -x
+
+    echo "CYBERSEC_KEYSTORE_LOCATION=${CYBERSEC_KEYSTORE_LOCATION}"
+    echo "CYBERSEC_TRUSTSTORE_LOCATION=${CYBERSEC_TRUSTSTORE_LOCATION}"
+    perl -pi -e "s#\{\{RANGER_PLUGIN_KEYSTORE}}#${CYBERSEC_KEYSTORE_LOCATION}#g" "${RANGER_PLUGIN_SSL_FILE}"
+    perl -pi -e "s#\{\{RANGER_PLUGIN_KEYSTORE_CRED_FILE}}#${RANGER_PLUGIN_KEYSTORE_CRED_FILE}#g" "${RANGER_PLUGIN_SSL_FILE}"
+    perl -pi -e "s#\{\{RANGER_PLUGIN_TRUSTSTORE}}#${CYBERSEC_TRUSTSTORE_LOCATION}#g" "${RANGER_PLUGIN_SSL_FILE}"
+    perl -pi -e "s#\{\{RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}}#${RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}#g" "${RANGER_PLUGIN_SSL_FILE}"
+
   else
-    perl -pi -e "s#\{\{RANGER_PLUGIN_TRUSTSTORE}}##g" ${CONF_DIR}/ranger-cybersec-policymgr-ssl.xml
-    perl -pi -e "s#\{\{RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}}##g" ${CONF_DIR}/ranger-cybersec-policymgr-ssl.xml
+    perl -pi -e "s#\{\{RANGER_PLUGIN_TRUSTSTORE}}##g" "${RANGER_PLUGIN_SSL_FILE}"
+    perl -pi -e "s#\{\{RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}}##g" "${RANGER_PLUGIN_SSL_FILE}"
   fi
   set -x
 
   # Populate the required fields for 'ranger-cybersec-audit.xml'
   KEYTAB_FILE="${CONF_DIR}/cybersec.keytab"
-  perl -pi -e "s#\{\{KEYTAB_FILE}}#${KEYTAB_FILE}#g" ${CONF_DIR}/ranger-cybersec-audit.xml
+  perl -pi -e "s#\{\{KEYTAB_FILE}}#${KEYTAB_FILE}#g" "${RANGER_PLUGIN_AUDIT_FILE}"
+  perl -pi -e "s#\{\{KEYTAB_FILE}}#${KEYTAB_FILE}#g" "${PARSER_UI_PROPERTIES}"
 
   cp -f ${CONF_DIR}/hadoop-conf/core-site.xml ${CONF_DIR}/
 
@@ -80,7 +94,23 @@ if [[ -n "${RANGER_SERVICE}" && "${RANGER_SERVICE}" != "none" ]]; then
   "${CONF_DIR}"/scripts/ranger_init.sh -c create -s "${RANGER_CYBERSEC_SERVICE_NAME}"
 
   . "${CONF_DIR}/scripts/vars.sh"
-  perl -pi -e "s#\Q${RANGER_CYBERSEC_SERVICE_NAME}\E#${SANITIZED_RANGER_SERVICE_NAME}#g" ${CONF_DIR}/ranger-cybersec-security.xml
+  perl -pi -e "s#\Q${RANGER_CYBERSEC_SERVICE_NAME}\E#${SANITIZED_RANGER_SERVICE_NAME}#g" "${RANGER_PLUGIN_SECURITY_FILE}"
+
+  perl -pi -e "s#\Q{{CYBERSEC_SERVICE_NAME}}\E#${SANITIZED_RANGER_SERVICE_NAME}#g" "${RANGER_PLUGIN_SECURITY_FILE}"
+  perl -pi -e "s#\Q{{CYBERSEC_SERVICE_NAME}}\E#${SANITIZED_RANGER_SERVICE_NAME}#g" "${RANGER_PLUGIN_AUDIT_FILE}"
+  perl -pi -e "s#\Q{{CYBERSEC_SERVICE_NAME}}\E#${SANITIZED_RANGER_SERVICE_NAME}#g" "${RANGER_PLUGIN_SSL_FILE}"
+
+  # New filenames with proper service name in them
+  NEW_RANGER_PLUGIN_SSL_FILE="${CONF_DIR}/ranger-${SANITIZED_RANGER_SERVICE_NAME}-policymgr-ssl.xml"
+  NEW_RANGER_PLUGIN_SECURITY_FILE="${CONF_DIR}/ranger-${SANITIZED_RANGER_SERVICE_NAME}-security.xml"
+  NEW_RANGER_PLUGIN_AUDIT_FILE="${CONF_DIR}/ranger-${SANITIZED_RANGER_SERVICE_NAME}-audit.xml"
+
+  # Populate the required field for 'ranger-cybersec-security.xml'
+  perl -pi -e "s#\{\{RANGER_CYBERSEC_PLUGIN_SSL_FILE}}#${NEW_RANGER_PLUGIN_SSL_FILE}#g" "${RANGER_PLUGIN_SECURITY_FILE}"
+
+  mv "${RANGER_PLUGIN_SSL_FILE}" "${NEW_RANGER_PLUGIN_SSL_FILE}"
+  mv "${RANGER_PLUGIN_SECURITY_FILE}" "${NEW_RANGER_PLUGIN_SECURITY_FILE}"
+  mv "${RANGER_PLUGIN_AUDIT_FILE}" "${NEW_RANGER_PLUGIN_AUDIT_FILE}"
 fi
 
 case $CMD in

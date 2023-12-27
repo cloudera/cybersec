@@ -123,7 +123,9 @@
           "SERVER_SSL_ENABLED": "${ssl_enabled}",
           "ENABLE_SECURITY" : "${kerberos_auth_enabled}",
           "CYBERSEC_TRUSTSTORE_LOCATION": "${ssl_client_truststore_location}",
-          "CYBERSEC_TRUSTORE_PASSWORD": "${ssl_client_truststore_password}",
+          "CYBERSEC_TRUSTSTORE_PASSWORD": "${ssl_client_truststore_password}",
+          "CYBERSEC_KEYSTORE_LOCATION": "${ssl_server_keystore_location}",
+          "CYBERSEC_KEYSTORE_PASSWORD": "${ssl_server_keystore_password}",
           "RANGER_KEYSTORE_TYPE": "${keystore_type}",
           "RANGER_SERVICE": "${dependency:RANGER}",
           "RANGER_AUDIT_BASE_PATH": "${ranger_base_audit_url}",
@@ -292,10 +294,19 @@
           ]
         },
         {
+          "name": "ranger_cybersec_plugin_service_name",
+          "label": "Ranger service name for this Cybersec service",
+          "description": "Name of the Cybersec Ranger service, that is used for authorization by this Cybersec service. If this parameter is set to the placeholder value '{{GENERATED_RANGER_SERVICE_NAME}}', a generated service name will be used, and if necessary, created. The generated service name will refer to the name of the cluster and the name of this Cybersec service. The name can consist of alphanumeric and '_' characters.",
+          "configName": "ranger.plugin.{{CYBERSEC_SERVICE_NAME}}.service.name",
+          "conformRegex" : "[\\p{Alnum}_\\{\\}]+",
+          "default": "cm_cybersec",
+          "type": "string"
+        },
+        {
           "name": "ranger_cybersec_plugin_policy_cache_directory",
           "label": "Ranger Cybersec Plugin Policy Cache Directory Path",
           "description": "The directory where Ranger security policies are cached locally.",
-          "configName": "ranger.plugin.cybersec.policy.cache.dir",
+          "configName": "ranger.plugin.{{CYBERSEC_SERVICE_NAME}}.policy.cache.dir",
           "type": "path",
           "pathType": "localDataDir",
           "default": "/var/lib/ranger/cybersec/policy-cache",
@@ -306,7 +317,7 @@
           "name": "ranger_cybersec_plugin_use_x_forwarded_for_ipaddress",
           "label": "Ranger Plugin Use X-Forwarded For IP Address",
           "description": "The parameter is used for identifying the originating IP address of a user connecting to a component through proxy for audit logs.",
-          "configName": "ranger.plugin.cybersec.use.x-forwarded-for.ipaddress",
+          "configName": "ranger.plugin.{{CYBERSEC_SERVICE_NAME}}.use.x-forwarded-for.ipaddress",
           "type": "boolean",
           "default": "false"
         },
@@ -314,16 +325,7 @@
           "name": "ranger_cybersec_plugin_trusted_proxy_ipaddress",
           "label": "Ranger Plugin Trusted Proxy IP Address",
           "description": "Accepts a list of IP addresses of proxy servers for trusting.",
-          "configName": "ranger.plugin.cybersec.trusted.proxy.ipaddress",
-          "type": "string"
-        },
-        {
-          "name": "ranger_cybersec_plugin_service_name",
-          "label": "Ranger service name for this Cybersec service",
-          "description": "Name of the Cybersec Ranger service, that is used for authorization by this Cybersec service. If this parameter is set to the placeholder value '{{GENERATED_RANGER_SERVICE_NAME}}', a generated service name will be used, and if necessary, created. The generated service name will refer to the name of the cluster and the name of this Cybersec service. The name can consist of alphanumeric and '_' characters.",
-          "configName": "ranger.plugin.cybersec.service.name",
-          "conformRegex" : "[\\p{Alnum}_\\{\\}]+",
-          "default": "cm_cybersec",
+          "configName": "ranger.plugin.{{CYBERSEC_SERVICE_NAME}}.trusted.proxy.ipaddress",
           "type": "string"
         }
       ],
@@ -368,6 +370,22 @@
               {
                 "key": "logging.config",
                 "value": "cybersec-conf/logback.xml"
+              },
+              {
+                "key": "security.kerberos.enabled",
+                "value": "${kerberos_auth_enabled}"
+              },
+              {
+                "key": "security.kerberos.spnego.keytab",
+                "value": "{{KEYTAB_FILE}}"
+              },
+              {
+                "key": "security.kerberos.serviceName",
+                "value": "${ranger_cybersec_plugin_service_name}"
+              },
+              {
+                "key": "security.kerberos.appId",
+                "value": "${ranger_cybersec_plugin_service_name}"
               }
             ]
           },
@@ -382,27 +400,27 @@
           ],
           "additionalConfigs": [
             {
-              "key": "ranger.plugin.cybersec.policy.rest.url",
+              "key": "ranger.plugin.{{CYBERSEC_SERVICE_NAME}}.policy.rest.url",
               "value": "${ranger_rest_url}"
             },
             {
-              "key": "ranger.plugin.cybersec.policy.source.impl",
+              "key": "ranger.plugin.{{CYBERSEC_SERVICE_NAME}}.policy.source.impl",
               "value": "org.apache.ranger.admin.client.RangerAdminRESTClient"
             },
             {
-              "key": "ranger.plugin.cybersec.policy.rest.ssl.config.file",
+              "key": "ranger.plugin.{{CYBERSEC_SERVICE_NAME}}.policy.rest.ssl.config.file",
               "value": "{{RANGER_CYBERSEC_PLUGIN_SSL_FILE}}"
             },
             {
-              "key": "ranger.plugin.cybersec.policy.pollIntervalMs",
+              "key": "ranger.plugin.{{CYBERSEC_SERVICE_NAME}}.policy.pollIntervalMs",
               "value": "30000"
             },
             {
-              "key": "ranger.plugin.cybersec.access.cluster.name",
+              "key": "ranger.plugin.{{CYBERSEC_SERVICE_NAME}}.access.cluster.name",
               "value": "${cluster_display_name}"
             },
             {
-              "key": "ranger.plugin.cybersec.disable.cache.if.servicenotfound",
+              "key": "ranger.plugin.{{CYBERSEC_SERVICE_NAME}}.disable.cache.if.servicenotfound",
               "value": "false"
             }
           ]
@@ -421,7 +439,19 @@
                 "value": "{{RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}}"
               },
               {
+                "key": "xasecure.policymgr.clientssl.keystore",
+                "value": "{{RANGER_PLUGIN_KEYSTORE}}"
+              },
+              {
+                "key": "xasecure.policymgr.clientssl.keystore.credential.file",
+                "value": "{{RANGER_PLUGIN_KEYSTORE_CRED_FILE}}"
+              },
+              {
                 "key": "xasecure.policymgr.clientssl.truststore.type",
+                "value": "${keystore_type}"
+              },
+              {
+                "key": "xasecure.policymgr.clientssl.keystore.type",
                 "value": "${keystore_type}"
               }
             ]

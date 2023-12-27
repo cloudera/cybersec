@@ -23,10 +23,10 @@ logging:
 security:
   kerberos:
     enabled: false
-    serviceName: cybersec
-    appId: cybersec
+    serviceName: cm_cybersec
+    appId: cm_cybersec
     spnego:
-      keytab: /path/to/cybersec.keytab
+      keytab: cybersec.keytab
 
 # Swagger
 springdoc:

@@ -147,6 +147,7 @@ check_dependencies
 check_env_variables RANGER_REST_URL CLUSTER_NAME RANGER_REPO_NAME
 
 repo_json="repo_create.json"
+servicedef_json="ranger-servicedef-cybersec.json"
 
 # Process command line arguments
 while getopts "c:s:r:" arg
@@ -179,6 +180,7 @@ case $command in
     # create, if does not exist
     if [[ "${http_code}" == "404" ]]
     then
+      ranger_service_rest "service/plugins/definitions" POST <(envsubst < "$CONF_DIR/aux/$servicedef_json")
       ranger_service_rest "service/public/v2/api/service" POST <(envsubst < "$CONF_DIR/aux/$repo_json")
 
       if [[ "${http_code}" == "200" ]]
