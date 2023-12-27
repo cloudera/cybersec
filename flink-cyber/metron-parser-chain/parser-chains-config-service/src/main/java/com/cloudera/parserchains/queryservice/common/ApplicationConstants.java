@@ -59,4 +59,6 @@ public class ApplicationConstants {
 
   //Security
   public static final String DEFAULT_ROLE = "ROLE_USER";
+  public static final String SECURITY_PIPELINE_PARAM = "pipeline";
+  public static final String DEFAULT_PIPELINE = "%default%";
 }

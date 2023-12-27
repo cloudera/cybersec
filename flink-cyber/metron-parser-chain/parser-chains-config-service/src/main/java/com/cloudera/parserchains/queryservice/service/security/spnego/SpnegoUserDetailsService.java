@@ -38,6 +38,9 @@ import org.springframework.util.StringUtils;
 import java.util.Collections;
 import java.util.HashMap;
 
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.DEFAULT_PIPELINE;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.SECURITY_PIPELINE_PARAM;
+
 /**
  * The service is responsible for calculating access with Ranger.
  */
@@ -61,13 +64,13 @@ public class SpnegoUserDetailsService extends UserDetailsServiceBase {
 
     @Override
     public boolean hasAccess(String accessType, String pipeline) {
-        String finalPipeline = StringUtils.hasText(pipeline) ? pipeline : "%default%";
+        String finalPipeline = StringUtils.hasText(pipeline) ? pipeline : DEFAULT_PIPELINE;
 
         final RangerAccessRequestImpl request = new RangerAccessRequestImpl();
         request.setAccessType(accessType);
 
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("path", finalPipeline);
+        map.put(SECURITY_PIPELINE_PARAM, finalPipeline);
 
         request.setResource(new RangerAccessResourceImpl(map));
 

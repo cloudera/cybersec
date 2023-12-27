@@ -8,8 +8,8 @@
   "resources": [
     {
       "itemId": 1,
-      "name": "path",
-      "type": "path",
+      "name": "pipeline",
+      "type": "string",
       "level": 10,
       "parent": "",
       "mandatory": true,

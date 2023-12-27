@@ -8,10 +8,11 @@
     "tag.download.auth.users": "${cybersec_repo_users}",
     "default.policy.users": "${cybersec_repo_users}",
     "setup.additional.default.policies": "true",
-    "default-policy.1.name": "path",
-    "default-policy.1.description": "Policy for access pipeline",
-    "default-policy.1.policyItem.1.accessTypes": "create,delete,configure,alter,alter_configs,describe,describe_configs,consume,publish",
-    "default-policy.1.isDenyAllElse": "true"
+    "default-policy.1.name": "default pipeline",
+    "default-policy.1.resource.pipeline": "%default%",
+    "default-policy.1.description": "Policy for default pipeline access",
+    "default-policy.1.policyItem.1.accessTypes": "get,post,put,delete",
+    "default-policy.1.policyItem.1.users": "${cybersec_repo_users}"
   },
   "name": "${SANITIZED_RANGER_SERVICE_NAME}",
   "description": "Cybersec service for ${CLUSTER_NAME}"
