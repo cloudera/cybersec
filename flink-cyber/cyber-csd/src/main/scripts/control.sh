@@ -52,15 +52,15 @@ if [[ -n "${RANGER_SERVICE}" && "${RANGER_SERVICE}" != "none" ]]; then
       STORETYPE="jceks"
     fi
 
-
+    # Use jars from Ranger admin package to generate the trsustore credential file.
     RANGER_PLUGIN_KEYSTORE_CRED_FILE="${STORETYPE}://file${CONF_DIR}/rangerPluginKeyStore.${STORETYPE}"
     RANGER_PLUGIN_TRUSTSTORE_CRED_FILE="${STORETYPE}://file${CONF_DIR}/rangerPluginTrustStore.${STORETYPE}"
     echo "RANGER_PLUGIN_KEYSTORE_CRED_FILE=${RANGER_PLUGIN_KEYSTORE_CRED_FILE}"
     echo "RANGER_PLUGIN_TRUSTSTORE_CRED_FILE=${RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}"
-    RANGER_ADMIN_CRED_LIB="${PARCELS_ROOT}/${PARCEL_DIRNAMES}/lib/ranger-admin/cred/lib/"
+    RANGER_ADMIN_CRED_LIB="${PARCELS_ROOT}/CDH/lib/ranger-admin/cred/lib/"
     set +x
-    export JAVA_HOME=${JAVA_HOME};${JAVA_HOME}/bin/java -cp "${RANGER_ADMIN_CRED_LIB}/*" org.apache.ranger.credentialapi.buildks create sslKeyStore -value "${CYBERSEC_KEYSTORE_PASSWORD}" -provider "${RANGER_PLUGIN_KEYSTORE_CRED_FILE}" -storetype "${STORETYPE}"
-    export JAVA_HOME=${JAVA_HOME};${JAVA_HOME}/bin/java -cp "${RANGER_ADMIN_CRED_LIB}/*" org.apache.ranger.credentialapi.buildks create sslTrustStore -value "${CYBERSEC_TRUSTSTORE_PASSWORD}" -provider "${RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}" -storetype "${STORETYPE}"
+    export JAVA_HOME=${JAVA_HOME};${JAVA_HOME}/bin/java ${CSD_JAVA_OPTS} -cp "${RANGER_ADMIN_CRED_LIB}/*" org.apache.ranger.credentialapi.buildks create sslKeyStore -value "${CYBERSEC_KEYSTORE_PASSWORD}" -provider "${RANGER_PLUGIN_KEYSTORE_CRED_FILE}" -storetype "${STORETYPE}"
+    export JAVA_HOME=${JAVA_HOME};${JAVA_HOME}/bin/java ${CSD_JAVA_OPTS} -cp "${RANGER_ADMIN_CRED_LIB}/*" org.apache.ranger.credentialapi.buildks create sslTrustStore -value "${CYBERSEC_TRUSTSTORE_PASSWORD}" -provider "${RANGER_PLUGIN_TRUSTSTORE_CRED_FILE}" -storetype "${STORETYPE}"
     set -x
 
     echo "CYBERSEC_KEYSTORE_LOCATION=${CYBERSEC_KEYSTORE_LOCATION}"
