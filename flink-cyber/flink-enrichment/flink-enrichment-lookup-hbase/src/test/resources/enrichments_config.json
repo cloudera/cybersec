@@ -8,9 +8,34 @@
     "simple": {
       "format": "HBASE_SIMPLE",
       "hbaseTableName": "enrichments_metron"
+    },
+    "domain_rep_storage": {
+      "format": "HBASE_SIMPLE",
+      "hbaseTableName": "simple"
+    },
+    "domain_rep_storage_2": {
+      "format": "HBASE_METRON",
+      "hbaseTableName": "test_metron",
+      "columnFamily": "cf555"
     }
   },
   "enrichmentConfigs": {
+    "domain_rep": {
+      "storage": "domain_rep_storage",
+      "fieldMapping": {
+        "keyFields": [
+          "k1"
+        ]
+      }
+    },
+    "domain_rep_2": {
+      "storage": "domain_rep_storage_2",
+      "fieldMapping": {
+        "keyFields": [
+          "b2"
+        ]
+      }
+    },
     "metron_enrich": {
       "storage": null,
       "fieldMapping": {

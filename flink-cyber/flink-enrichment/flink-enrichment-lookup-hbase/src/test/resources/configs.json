@@ -20,6 +20,10 @@
       {
         "name": "hostname",
         "enrichmentType": "domain_rep"
+      },
+      {
+        "name": "hostname2",
+        "enrichmentType": "domain_rep_2"
       }
     ]
   }

@@ -10,6 +10,14 @@
       {
         "name": "ip_dst_addr",
         "enrichmentType": "ip_whitelist"
+      },
+      {
+        "name": "ip_src_addr",
+        "enrichmentType": "asset"
+      },
+      {
+        "name": "ip_src_addr",
+        "enrichmentType": "internal_ip"
       }
     ]
   }, {
