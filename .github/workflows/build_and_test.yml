@@ -27,7 +27,6 @@ jobs:
         java-version: '8'
         distribution: 'temurin'
         cache: maven
-        cache-dependency-path: flink-cyber/pom.xml
     - name: Build with Maven
       run: mvn -B package --file flink-cyber/pom.xml
 
