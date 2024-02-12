@@ -70,7 +70,9 @@ public class RestFunctionsIntegrationTest {
 
   @BeforeEach
   public void setup() throws Exception {
+    System.out.println("TESTING Setting up....");
     mockServerClient = startClientAndServer(MOCK_PROXY_PORT);
+    System.out.println("TESTING MOCK_PROXY_PORT: " + MOCK_PROXY_PORT);
 
     context = new Context.Builder()
             .with(Context.Capabilities.GLOBAL_CONFIG, HashMap::new)
@@ -83,11 +85,17 @@ public class RestFunctionsIntegrationTest {
     FileUtils.writeStringToFile(proxyBasicAuthPasswordFile, proxyAuthPassword, StandardCharsets.UTF_8);
 
     // By default, the mock server expects a GET request with the path set to /get
+    System.out.println("TESTING MOCK_PROXY_PORT: " + MOCK_PROXY_PORT);
     baseUri = String.format("http://localhost:%d", MOCK_PROXY_PORT);
+    System.out.println("TESTING baseUri: " + baseUri);
     getUri = baseUri + "/get";
+    System.out.println("TESTING getUri: " + getUri);
     emptyGetUri = baseUri + "/get/empty";
+    System.out.println("TESTING emptyGetUri: " + emptyGetUri);
     postUri = baseUri + "/post";
+    System.out.println("TESTING postUri: " + postUri);
     emptyPostUri = baseUri + "/post/empty";
+    System.out.println("TESTING emptyPostUri: " + emptyPostUri);
     mockServerClient.when(
             request()
                     .withMethod("GET")
