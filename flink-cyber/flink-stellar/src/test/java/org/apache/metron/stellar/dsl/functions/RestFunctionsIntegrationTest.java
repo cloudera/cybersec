@@ -71,7 +71,6 @@ public class RestFunctionsIntegrationTest {
   @BeforeEach
   public void setup() throws Exception {
     mockServerClient = startClientAndServer(MOCK_PROXY_PORT);
-//    System.out.println("TESTING MOCK_PROXY_PORT: " + MOCK_PROXY_PORT);
 
     context = new Context.Builder()
             .with(Context.Capabilities.GLOBAL_CONFIG, HashMap::new)

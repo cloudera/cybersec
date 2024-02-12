@@ -74,9 +74,8 @@
         <multiline-string.version>0.1.2</multiline-string.version>
         <testcontainers.version>1.15.0</testcontainers.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
-        <maven-assembly-plugin.version>3.2.0</maven-assembly-plugin.version>
-        <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
-        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <solr.version>8.4.1.${cdh.version}</solr.version>
         <maxmind.version>2.13.1</maxmind.version>
@@ -570,13 +569,6 @@
                             </configuration>
                         </execution>
                     </executions>
-                </plugin>
-
-                <!-- Assembly -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>${maven-assembly-plugin.version}</version>
                 </plugin>
 
                 <!-- NiFi Nar Builder -->
