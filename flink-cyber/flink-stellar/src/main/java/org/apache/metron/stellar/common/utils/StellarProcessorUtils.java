@@ -223,6 +223,7 @@ public class StellarProcessorUtils {
    * @return The result of executing the expression.
    */
   public static Object run(String expression, Context context) {
+    System.out.println("TESTING: " + expression + ", context: " + context);
     return run(expression, Collections.emptyMap(), context);
   }
 

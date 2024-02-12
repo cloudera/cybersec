@@ -127,6 +127,7 @@ public class RestFunctionsIntegrationTest {
   @Test
   @SuppressWarnings("unchecked")
   public void restGetShouldSucceed() {
+    System.out.printf("TESTING[restGetShouldSucceed] getUri: [%s]%n", getUri);
     Map<String, Object> actual = (Map<String, Object>) run(String.format("REST_GET('%s')", getUri), context);
 
     assertEquals(1, actual.size());
@@ -148,6 +149,7 @@ public class RestFunctionsIntegrationTest {
                     .withBody("{\"get.with.query.parameters\":\"success\"}"));
 
     Map<String, Object> variables = ImmutableMap.of("queryParameters", ImmutableMap.of("key", "value"));
+    System.out.printf("TESTING[restGetShouldSucceedWithQueryParameters] baseUri: [%s], variables: [%s]%n", baseUri, variables);
     Map<String, Object> actual = (Map<String, Object>) run(String.format("REST_GET('%s', {}, queryParameters)",
             baseUri + "/get/with/query/parameters"), variables, context);
 
@@ -173,6 +175,7 @@ public class RestFunctionsIntegrationTest {
       put(PROXY_PORT, MOCK_PROXY_PORT);
     }});
 
+    System.out.printf("TESTING[restGetShouldSucceedWithProxy] getUri: [%s]%n", getUri);
     Map<String, Object> actual = (Map<String, Object>) run(String.format("REST_GET('%s')", getUri), context);
 
     assertEquals(1, actual.size());
@@ -191,6 +194,7 @@ public class RestFunctionsIntegrationTest {
             .respond(response()
                     .withStatusCode(403));
 
+    System.out.printf("TESTING[restGetShouldHandleErrorStatusCode] getUri: [%s]%n", getUri);
     assertNull(run(String.format("REST_GET('%s')", getUri), context));
   }
 
@@ -208,6 +212,7 @@ public class RestFunctionsIntegrationTest {
    */
   @Test
   public void restGetShouldReturnEmptyContentOverride() {
+    System.out.printf("TESTING[restGetShouldReturnEmptyContentOverride] emptyGetUri: [%s], emptyContentOverride: [%s]%n", emptyGetUri, emptyContentOverride);
     assertEquals("function config override", run(String.format("REST_GET('%s', %s)", emptyGetUri, emptyContentOverride), context));
   }
 
@@ -231,6 +236,7 @@ public class RestFunctionsIntegrationTest {
             .respond(response()
                     .withStatusCode(500));
 
+    System.out.printf("TESTING[restGetShouldReturnErrorValueOverride] getUri: [%s], errorValueOverride: [%s]%n", getUri, errorValueOverride);
     Object result = run(String.format("REST_GET('%s', %s)", getUri, errorValueOverride), context);
     assertEquals("error message" , result);
   }
@@ -259,6 +265,7 @@ public class RestFunctionsIntegrationTest {
 
     context.addCapability(Context.Capabilities.GLOBAL_CONFIG, () -> globalConfig);
 
+    System.out.printf("TESTING[restGetShouldTimeout] uri: [%s]%n", uri);
     Map<String, Object> actual = (Map<String, Object>) run(String.format("REST_GET('%s')", uri), context);
     assertNull(actual);
   }
@@ -287,6 +294,7 @@ public class RestFunctionsIntegrationTest {
                     .withBody("{\"get\":\"success\"}"));
 
     String expression = String.format("REST_GET('%s', %s)", uri, timeoutConfig);
+    System.out.printf("TESTING[restGetShouldTimeoutWithSuppliedTimeout] expression: [%s]%n", expression);
     Map<String, Object> actual = (Map<String, Object>) run(expression, context);
     assertNull(actual);
   }
@@ -296,6 +304,7 @@ public class RestFunctionsIntegrationTest {
    */
   @Test
   public void restGetShouldHandleURISyntaxException() {
+    System.out.printf("TESTING[restGetShouldHandleURISyntaxException]%n");
     ParseException e = assertThrows(ParseException.class, () -> run("REST_GET('some invalid uri')", context));
     assertEquals("Unable to parse REST_GET('some invalid uri'): Unable to parse: REST_GET('some invalid uri') due to: Illegal character in path at index 4: some invalid uri", e.getMessage());
   }
@@ -307,6 +316,7 @@ public class RestFunctionsIntegrationTest {
    */
   @Test
   public void restGetShouldThrownExceptionOnMissingParameter() {
+    System.out.printf("TESTING[restGetShouldThrownExceptionOnMissingParameter]%n");
     ParseException e = assertThrows(ParseException.class, () -> run("REST_GET()", context));
     assertEquals("Unable to parse REST_GET(): Unable to parse: REST_GET() due to: Expected at least 1 argument(s), found 0", e.getMessage());
   }
@@ -324,6 +334,7 @@ public class RestFunctionsIntegrationTest {
     }};
     context.addCapability(Context.Capabilities.GLOBAL_CONFIG, () -> globalConfig);
 
+    System.out.printf("TESTING[restGetShouldUseGlobalConfig] emptyGetUri: [%s]%n", emptyGetUri);
     assertEquals("global config override", run(String.format("REST_GET('%s')", emptyGetUri), context));
   }
 
@@ -343,6 +354,7 @@ public class RestFunctionsIntegrationTest {
     }};
     context.addCapability(Context.Capabilities.GLOBAL_CONFIG, () -> globalConfig);
 
+    System.out.printf("TESTING[restGetShouldUseGetConfig] emptyGetUri: [%s]%n", emptyGetUri);
     assertEquals("get config override", run(String.format("REST_GET('%s')", emptyGetUri), context));
   }
 
@@ -362,6 +374,7 @@ public class RestFunctionsIntegrationTest {
     }};
     context.addCapability(Context.Capabilities.GLOBAL_CONFIG, () -> globalConfig);
 
+    System.out.printf("TESTING[restGetShouldUseFunctionConfig] emptyGetUri: [%s], emptyContentOverride: [%s]%n", emptyGetUri, emptyContentOverride);
     assertEquals("function config override", run(String.format("REST_GET('%s', %s)", emptyGetUri, emptyContentOverride), context));
   }
 
@@ -371,6 +384,7 @@ public class RestFunctionsIntegrationTest {
   @Test
   @SuppressWarnings("unchecked")
   public void restPostShouldSucceed() {
+    System.out.printf("TESTING[restPostShouldSucceed] postUri: [%s]%n", postUri);
     Map<String, Object> actual = (Map<String, Object>) run(String.format("REST_POST('%s', '{\"key\":\"value\"}')", postUri), context);
 
     assertEquals(1, actual.size());
@@ -392,6 +406,7 @@ public class RestFunctionsIntegrationTest {
                     .withBody("{\"post.with.query.parameters\":\"success\"}"));
 
     Map<String, Object> variables = ImmutableMap.of("queryParameters", ImmutableMap.of("key", "value"));
+    System.out.printf("TESTING[restPostShouldSucceedWithQueryParameters] baseUri: [%s], variables: [%s]%n", baseUri,variables);
     Map<String, Object> actual = (Map<String, Object>) run(String.format("REST_POST('%s', {}, {}, queryParameters)",
             baseUri + "/post/with/query/parameters"), variables, context);
 
@@ -406,6 +421,7 @@ public class RestFunctionsIntegrationTest {
   @SuppressWarnings("unchecked")
   public void restPostShouldSucceedWithStellarMap() {
     Map<String, Object> variables = ImmutableMap.of("body", ImmutableMap.of("key", "value"));
+    System.out.printf("TESTING[restPostShouldSucceedWithStellarMap] postUri: [%s], variables: [%s]%n", postUri,variables);
     Map<String, Object> actual = (Map<String, Object>) run(String.format("REST_POST('%s', body)", postUri), variables, context);
 
     assertEquals(1, actual.size());
@@ -417,6 +433,7 @@ public class RestFunctionsIntegrationTest {
    */
   @Test
   public void restPostShouldHandleURISyntaxException() {
+    System.out.printf("TESTING[restPostShouldHandleURISyntaxException]%n");
     ParseException e = assertThrows(ParseException.class, () -> run("REST_POST('some invalid uri', {})", context));
     assertEquals("Unable to parse REST_POST('some invalid uri', {}): Unable to parse: REST_POST('some invalid uri', {}) due to: Illegal character in path at index 4: some invalid uri", e.getMessage());
   }
@@ -426,6 +443,7 @@ public class RestFunctionsIntegrationTest {
    */
   @Test
   public void restPostShouldThrowExceptionOnMalformedJson() {
+    System.out.printf("TESTING[restPostShouldThrowExceptionOnMalformedJson] postUri: [%s]%n", postUri);
     ParseException e = assertThrows(ParseException.class, () -> run(String.format("REST_POST('%s', 'malformed json')", postUri), context));
     assertEquals(
         String.format(
@@ -449,6 +467,7 @@ public class RestFunctionsIntegrationTest {
     }};
     context.addCapability(Context.Capabilities.GLOBAL_CONFIG, () -> globalConfig);
 
+    System.out.printf("TESTING[restPostShouldUseGlobalConfig] emptyGetUri: [%s]%n", emptyGetUri);
     assertEquals("global config override", run(String.format("REST_POST('%s', {})", emptyGetUri), context));
   }
 
@@ -468,6 +487,7 @@ public class RestFunctionsIntegrationTest {
     }};
     context.addCapability(Context.Capabilities.GLOBAL_CONFIG, () -> globalConfig);
 
+    System.out.printf("TESTING[restPostShouldUseGetConfig] emptyGetUri: [%s]%n", emptyGetUri);
     assertEquals("post config override", run(String.format("REST_POST('%s', {})", emptyGetUri), context));
   }
 
@@ -487,6 +507,7 @@ public class RestFunctionsIntegrationTest {
     }};
     context.addCapability(Context.Capabilities.GLOBAL_CONFIG, () -> globalConfig);
 
+    System.out.printf("TESTING[restPostShouldUseFunctionConfig] emptyGetUri: [%s], emptyContentOverride: [%s]%n", emptyGetUri, emptyContentOverride);
     assertEquals("function config override", run(String.format("REST_POST('%s', {}, %s)", emptyGetUri, emptyContentOverride), context));
   }
 
