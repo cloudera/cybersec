@@ -591,6 +591,9 @@
 
             <activation>
                 <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>idea.version</name>
+                </property>
             </activation>
 
             <dependencies>
