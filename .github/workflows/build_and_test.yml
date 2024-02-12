@@ -24,8 +24,8 @@ jobs:
       - name: Set up JDK 8
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
-          distribution: 'temurin'
+          java-version: '8'
+          distribution: 'adopt'
 #          cache: maven
       - name: Build with Maven
         run: mvn -B -DskipTests=true package --file flink-cyber/pom.xml -pl flink-stellar -am
