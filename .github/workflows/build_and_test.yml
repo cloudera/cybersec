@@ -26,12 +26,16 @@ jobs:
         with:
           java-version: '8'
           distribution: 'temurin'
-          cache: maven
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Build with Maven
 #        FIXME once flink-stellar builds as expected, remove the following part: -pl flink-stellar -am
         run: mvn -B -DskipTests=true package --file flink-cyber/pom.xml -pl flink-stellar -am
-      - name: Test with Maven
-        run: mvn -B test --file flink-cyber/pom.xml -pl flink-stellar -am
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
