@@ -29,8 +29,10 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+      - name: Maven M2 path
+        run: mvn help:evaluate -Dexpression=settings.localRepository -q -DforceStdout
       - name: Build and Test with Maven
-        run: mvn -B package --file flink-cyber/pom.xml
+        run: mvn -B package --file flink-cyber/pom.xml  -pl flink-stellar -am
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
