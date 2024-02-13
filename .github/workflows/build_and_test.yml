@@ -25,12 +25,10 @@ jobs:
       - name: Cache local Maven repository
         uses: actions/cache@v3
         with:
-          path: ~/.m2/repository
+          path: /root/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
-      - name: Maven M2 path
-        run: mvn help:evaluate -Dexpression=settings.localRepository -q -DforceStdout
       - name: Build and Test with Maven
         run: mvn -B package --file flink-cyber/pom.xml  -pl flink-stellar -am
 
