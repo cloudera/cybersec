@@ -9,6 +9,9 @@
 name: Future compatibility Java CI with Maven
 
 on:
+#  TODO remove after tested
+  push:
+    branches: [ "build_and_test_ci" ]
   schedule:
 #    At 2:30am each Saturday on the default branch
     - cron: '30 2 * * 6'

@@ -535,6 +535,12 @@
                 <artifactId>multiline-string</artifactId>
                 <version>${multiline-string.version}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>tools</artifactId>
+                        <groupId>sun.jdk</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>

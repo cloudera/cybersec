@@ -9,6 +9,9 @@
 name: Java CI with Maven
 
 on:
+  #  TODO remove after tested
+  push:
+    branches: [ "build_and_test_ci" ]
   pull_request:
     branches: [ "develop" ]
 
