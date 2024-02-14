@@ -21,7 +21,6 @@ jobs:
 
     runs-on: ubuntu-latest
     container: maven:3-eclipse-temurin-11
-    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v3
@@ -39,7 +38,6 @@ jobs:
 
     runs-on: ubuntu-latest
     container: maven:3-eclipse-temurin-17
-    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v3
@@ -57,7 +55,6 @@ jobs:
 
     runs-on: ubuntu-latest
     container: maven:3-eclipse-temurin-21
-    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v3
