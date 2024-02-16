@@ -33,11 +33,25 @@ class TableApiAbstractJobTest {
 
         Arguments.of(Collections.singletonMap(GIVEN_TABLE_NAME, ResolvedSchema.of(
                 Column.physical("column1", DataTypes.STRING()),
-                Column.physical("column2", DataTypes.STRING()))),
+                Column.physical("column2", DataTypes.STRING()),
+                Column.physical("column3", DataTypes.INT()),
+                Column.physical("column4", DataTypes.BOOLEAN()),
+                Column.physical("column5", DataTypes.BIGINT()),
+                Column.physical("column6", DataTypes.DOUBLE()),
+                Column.physical("column7", DataTypes.FLOAT()),
+                Column.physical("column8", DataTypes.SMALLINT()),
+                Column.physical("column9", DataTypes.TINYINT()))),
             Collections.singletonMap(GIVEN_SOURCE,
                 new MappingDto(GIVEN_TABLE_NAME, new ArrayList<>(), Arrays.asList(
                     new MappingColumnDto("column1", null, null, null, false),
-                    new MappingColumnDto("column2", null, null, null, false))))));
+                    new MappingColumnDto("column2", null, null, null, false),
+                    new MappingColumnDto("column3", null, null, null, false),
+                    new MappingColumnDto("column4", null, null, null, false),
+                    new MappingColumnDto("column5", null, null, null, false),
+                    new MappingColumnDto("column6", null, null, null, false),
+                    new MappingColumnDto("column7", null, null, null, false),
+                    new MappingColumnDto("column8", null, null, null, false),
+                    new MappingColumnDto("column9", null, null, null, false))))));
   }
 
   public static Stream<Arguments> mappingsExceptionData() {
@@ -65,8 +79,8 @@ class TableApiAbstractJobTest {
                 GIVEN_SOURCE, "[ , someName]")),
 
         Arguments.of(Collections.singletonMap(GIVEN_TABLE_NAME, ResolvedSchema.of(
-                Column.physical("column1", DataTypes.INT()),
-                Column.physical("column2", DataTypes.INT()),
+                Column.physical("column1", DataTypes.DATE()),
+                Column.physical("column2", DataTypes.DATE()),
                 Column.physical("column3", DataTypes.STRING()))),
             Collections.singletonMap(GIVEN_SOURCE,
                 new MappingDto(GIVEN_TABLE_NAME, new ArrayList<>(), Arrays.asList(
@@ -78,7 +92,6 @@ class TableApiAbstractJobTest {
                 "Found column mappings of non-string type without transformations for source [%s]: %s",
                 GIVEN_SOURCE, "[column1]")));
   }
-
   @ParameterizedTest
   @MethodSource("mappingsData")
   void shouldValidateMappings(Map<String, ResolvedSchema> givenTableSchemaMap,
