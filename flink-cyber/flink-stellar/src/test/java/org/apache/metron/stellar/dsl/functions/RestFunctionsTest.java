@@ -277,6 +277,7 @@ public class RestFunctionsTest {
 
     Object result = restGet.apply(Collections.singletonList("http://www.host.com:8080/some/uri"), context);
     assertNull(result);
+    restGet.close();
   }
 
   @Test
