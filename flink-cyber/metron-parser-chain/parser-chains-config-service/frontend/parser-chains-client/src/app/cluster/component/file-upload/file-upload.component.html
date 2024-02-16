@@ -1,0 +1,31 @@
+<div class="container" appDragDrop (fileDropped)="onFileDropped($event)">
+  <input type="file" id="fileDropRef" accept="{{accept}}" (change)="fileBrowseHandler($event)"/>
+  <mat-icon>cloud_upload</mat-icon>
+  <h3>Drag and drop file here</h3>
+  <h3>or</h3>
+  <label for="fileDropRef">Browse for file</label>
+</div>
+<div class="files-list">
+  <div class="single-file" *ngFor="let file of files; let i = index">
+    <div class="file-icon" style="width: 50px">
+      <mat-icon>file_copy</mat-icon>
+    </div>
+    <div class="info">
+      <h4 class="name">
+        {{ file?.data?.name }}
+      </h4>
+      <p class="size">
+        {{ formatBytes(file?.data?.size) }}
+      </p>
+      <app-progress [progress]="file?.progress"></app-progress>
+    </div>
+
+    <a title="Retry" (click)="retryFile(file, i)" *ngIf="file.canRetry">
+      <mat-icon>refresh</mat-icon>
+    </a>
+
+    <a title="Cancel" (click)="cancelFile(file, i)" *ngIf="file.canCancel">
+      <mat-icon>cancel</mat-icon>
+    </a>
+  </div>
+</div>

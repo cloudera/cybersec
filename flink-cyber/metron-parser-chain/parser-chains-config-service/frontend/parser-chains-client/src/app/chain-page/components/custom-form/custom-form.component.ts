@@ -28,7 +28,7 @@ export interface CustomFormConfig {
   outputName?: boolean;
   description?: string;
   placeholder?: string;
-  defaultValue?: string;
+  defaultValue?: any;
 }
 
 @Component({
