@@ -50,6 +50,7 @@ import {NzSelectModule} from 'ng-zorro-antd/select';
 import {NzDropDownModule} from "ng-zorro-antd/dropdown";
 import {IndexingFormComponent} from './components/indexing-form/indexing-form.component';
 import {NzLayoutModule} from "ng-zorro-antd/layout";
+import {NzAutocompleteModule} from "ng-zorro-antd/auto-complete";
 
 @NgModule({
   declarations: [
@@ -91,6 +92,7 @@ import {NzLayoutModule} from "ng-zorro-antd/layout";
         NzSelectModule,
         NzDropDownModule,
         NzLayoutModule,
+        NzAutocompleteModule,
     ],
   providers: [
     NzMessageService,
