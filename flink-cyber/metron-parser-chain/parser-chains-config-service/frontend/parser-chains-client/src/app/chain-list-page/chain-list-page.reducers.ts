@@ -19,17 +19,23 @@ export interface ChainListPageState {
   loading: boolean;
   createModalVisible: boolean;
   deleteModalVisible: boolean;
+  pipelineRenameModalVisible: boolean;
   deleteItem: ChainModel;
   error: string;
   items: ChainModel[];
+  selectedPipeline: string;
+  pipelines: string[];
 }
 
 export const initialState: ChainListPageState = {
   loading: false,
   createModalVisible: false,
   deleteModalVisible: false,
+  pipelineRenameModalVisible: false,
   deleteItem: null,
   items: [],
+  selectedPipeline: null,
+  pipelines: [],
   error: ''
 };
 
@@ -76,6 +82,18 @@ export function reducer(
       return {
         ...state,
         createModalVisible: false,
+      }
+    }
+    case chainListPageActions.SHOW_RENAME_SELECTED_PIPELINE_MODAL: {
+      return {
+        ...state,
+        pipelineRenameModalVisible: true,
+      }
+    }
+    case chainListPageActions.HIDE_RENAME_PIPELINE_MODAL: {
+      return {
+        ...state,
+        pipelineRenameModalVisible: false,
       }
     }
     case chainListPageActions.SHOW_DELETE_MODAL: {
@@ -133,6 +151,41 @@ export function reducer(
         deleteItem: null,
       };
     }
+    case chainListPageActions.LOAD_PIPELINES:
+    case chainListPageActions.CREATE_PIPELINE:
+    case chainListPageActions.RENAME_SELECTED_PIPELINE:
+    case chainListPageActions.DELETE_SELECTED_PIPELINE: {
+      return {
+        ...state,
+        loading: true,
+      };
+    }
+    case chainListPageActions.LOAD_PIPELINES_SUCCESS:
+    case chainListPageActions.CREATE_PIPELINE_SUCCESS:
+    case chainListPageActions.RENAME_PIPELINE_SUCCESS:
+    case chainListPageActions.DELETE_PIPELINE_SUCCESS: {
+      return {
+        ...state,
+        loading: false,
+        pipelines: action.pipelines
+      };
+    }
+    case chainListPageActions.LOAD_PIPELINES_FAIL:
+    case chainListPageActions.CREATE_PIPELINE_FAIL:
+    case chainListPageActions.RENAME_PIPELINE_FAIL:
+    case chainListPageActions.DELETE_PIPELINE_FAIL: {
+      return {
+        ...state,
+        error: action.error.message,
+        loading: false,
+      };
+    }
+    case chainListPageActions.PIPELINE_CHANGED: {
+      return {
+        ...state,
+        selectedPipeline: action.newPipelineName,
+      };
+    }
     default: {
       return state;
     }
@@ -163,7 +216,23 @@ export const getDeleteModalVisible = createSelector(
   (state: ChainListPageState) => state.deleteModalVisible
 );
 
+export const getPipelineRenameModalVisible = createSelector(
+  getChainListPageState,
+  (state: ChainListPageState) => state.pipelineRenameModalVisible
+);
+
 export const getDeleteChain = createSelector(
   getChainListPageState,
   (state: ChainListPageState) => state.deleteItem
 );
+
+export const getPipelines = createSelector(
+  getChainListPageState,
+  (state: ChainListPageState) => state.pipelines
+);
+
+export const getSelectedPipeline = createSelector(
+  getChainListPageState,
+  (state: ChainListPageState) => state.selectedPipeline
+);
+

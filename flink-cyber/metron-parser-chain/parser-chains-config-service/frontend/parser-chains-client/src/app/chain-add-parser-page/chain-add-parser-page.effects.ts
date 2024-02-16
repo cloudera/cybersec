@@ -10,14 +10,14 @@
  * limitations governing your use of the file.
  */
 
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Action } from '@ngrx/store';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {Actions, Effect, ofType} from '@ngrx/effects';
+import {Action} from '@ngrx/store';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {Observable, of} from 'rxjs';
+import {catchError, map, switchMap} from 'rxjs/operators';
 
-import { AddParserPageService } from '../services/chain-add-parser-page.service';
+import {AddParserPageService} from '../services/chain-add-parser-page.service';
 
 import * as fromActions from './chain-add-parser-page.actions';
 
@@ -26,7 +26,7 @@ export class AddParserEffects {
   constructor(
     private actions$: Actions,
     private messageService: NzMessageService,
-    private addParserService: AddParserPageService,
+    private addParserService: AddParserPageService
   ) { }
 
   @Effect()

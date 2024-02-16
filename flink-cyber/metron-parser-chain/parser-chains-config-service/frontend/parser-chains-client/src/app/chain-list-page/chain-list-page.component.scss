@@ -52,3 +52,28 @@
     height: 30px;
     font-size: 20px;
 }
+
+.pipeline-select {
+    margin: 1rem;
+    width: 40rem;
+    display-model: inline-block;
+}
+
+.pipeline-element {
+    margin: 0 0.25rem;
+}
+
+.pipeline-select-dropdown {
+    width: 12rem;
+}
+.add-pipeline-divider {
+    margin: 4px 0;
+}
+.add-pipeline-container {
+    padding: 8px;
+}
+.add-pipeline-button {
+    flex: 0 0 auto;
+    padding: 8px;
+    display: block;
+}

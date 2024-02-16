@@ -10,11 +10,12 @@
  * limitations governing your use of the file.
  */
 
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 
 import {ChainDetailsModel} from '../chain-page/chain-page.models';
+import {getHttpParams} from "../chain-list-page/chain-list-page.utils";
 
 @Injectable({
     providedIn: 'root'
@@ -29,29 +30,41 @@ export class ChainPageService {
       private http: HttpClient
     ) {}
 
-    public getChain(id: string) {
-      return this.http.get(this.BASE_URL + `chains/${id}`);
+    public getChain(id: string, pipeline: string = null) {
+      let httpParams: HttpParams = getHttpParams(pipeline);
+
+      return this.http.get(this.BASE_URL + `chains/${id}`,{params: httpParams});
     }
 
-    public getParsers(id: string) {
-      return this.http.get(this.BASE_URL + `chains/${id}/parsers`);
+    public getParsers(id: string, pipeline: string = null) {
+      let httpParams: HttpParams = getHttpParams(pipeline);
+
+      return this.http.get(this.BASE_URL + `chains/${id}/parsers`,{params: httpParams});
     }
 
-    public saveParserConfig(chainId: string, config: ChainDetailsModel) {
-      return this.http.put(this.BASE_URL + `chains/${chainId}`, config);
+    public saveParserConfig(chainId: string, config: ChainDetailsModel, pipeline: string = null) {
+      let httpParams: HttpParams = getHttpParams(pipeline);
+
+      return this.http.put(this.BASE_URL + `chains/${chainId}`, config,{params: httpParams});
     }
 
     public getFormConfig(type: string) {
-      return this.http.get(this.BASE_URL + `parser-form-configuration/${type}`);
+      let httpParams: HttpParams = getHttpParams(null);
+
+      return this.http.get(this.BASE_URL + `parser-form-configuration/${type}`,{params: httpParams});
     }
 
     public getFormConfigs() {
-      return this.http.get(this.BASE_URL + `parser-form-configuration`);
+      let httpParams: HttpParams = getHttpParams(null);
+
+      return this.http.get(this.BASE_URL + `parser-form-configuration`,{params: httpParams});
     }
 
-    public getIndexMappings(payload?: { filePath: string} ) {
+    public getIndexMappings(payload?: { filePath: string }) {
+      let httpParams: HttpParams = getHttpParams(null);
+
       let finalPayload = payload ? payload : {}
-      return this.http.post(this.BASE_URL + `indexing`, finalPayload);
+      return this.http.post(this.BASE_URL + `indexing`, finalPayload,{params: httpParams});
     }
 
     public createChainCollapseArray(size: number) {

@@ -28,8 +28,9 @@ public class AppProperties {
 
   private enum Options implements ConfigOption<String, Environment> {
     CONFIG_PATH("."),
+    PIPELINES_PATH("../../.."),
     SAMPLE_FOLDER_PATH("../samples/"),
-    INDEX_PATH("../../index/conf/table-config.json");
+    INDEX_PATH("../../index/conf/mapping-config.json");
 
     @Override
     public String get(Environment source) {
@@ -62,6 +63,10 @@ public class AppProperties {
 
   public String getConfigPath() {
     return Options.CONFIG_PATH.get(environment);
+  }
+
+  public String getPipelinesPath() {
+    return Options.PIPELINES_PATH.get(environment);
   }
 
   public String getIndexPath() {

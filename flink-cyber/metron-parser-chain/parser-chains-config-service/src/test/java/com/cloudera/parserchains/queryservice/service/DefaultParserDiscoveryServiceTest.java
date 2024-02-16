@@ -29,6 +29,7 @@ import com.cloudera.parserchains.parsers.RemoveFieldParser;
 import com.cloudera.parserchains.queryservice.model.describe.ParserDescriptor;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummary;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummaryMapper;
+import com.cloudera.parserchains.queryservice.service.impl.DefaultParserDiscoveryService;
 import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

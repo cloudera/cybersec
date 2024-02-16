@@ -16,8 +16,10 @@
  * limitations under the License.
  */
 
-package com.cloudera.parserchains.queryservice.service;
+package com.cloudera.parserchains.queryservice.service.impl;
 
+import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedMethods;
+import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedParameters;
 import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.Parameter;
@@ -29,10 +31,7 @@ import com.cloudera.parserchains.queryservice.model.describe.ConfigParamDescript
 import com.cloudera.parserchains.queryservice.model.describe.ParserDescriptor;
 import com.cloudera.parserchains.queryservice.model.summary.ObjectMapper;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummary;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.cloudera.parserchains.queryservice.service.ParserDiscoveryService;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -43,9 +42,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedMethods;
-import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedParameters;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class DefaultParserDiscoveryService implements ParserDiscoveryService {
@@ -73,12 +72,12 @@ public class DefaultParserDiscoveryService implements ParserDiscoveryService {
   }
 
   @Override
-  public ParserDescriptor describe(ParserID name) throws IOException {
+  public ParserDescriptor describe(ParserID name) {
     return describeAll().get(name);
   }
 
   @Override
-  public Map<ParserID, ParserDescriptor> describeAll() throws IOException {
+  public Map<ParserID, ParserDescriptor> describeAll() {
     return catalog.getParsers()
             .stream()
             .collect(Collectors.toMap(
