@@ -19,6 +19,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,6 +51,7 @@ public class PipelineController {
             @ApiResponse(code = 404, message = "No valid pipelines found.")
     })
     @GetMapping
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', '*')")
     public ResponseEntity<Set<String>> findAll() throws IOException {
         Map<String, PipelineResult> pipelineMap = pipelineService.findAll();
         if (pipelineMap == null || pipelineMap.isEmpty()) {
@@ -63,6 +65,7 @@ public class PipelineController {
             @ApiResponse(code = 200, message = "A new list of all pipelines.")
     })
     @PostMapping("/{pipelineName}")
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('post', '*')")
     public ResponseEntity<Set<String>> createPipeline(@PathVariable String pipelineName) throws IOException {
         PipelineResult newPipeline = pipelineService.createPipeline(pipelineName);
         if (newPipeline != null) {
@@ -76,6 +79,7 @@ public class PipelineController {
             @ApiResponse(code = 200, message = "A new list of all pipelines.")
     })
     @PutMapping("/{pipelineName}")
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('put', '*')")
     public ResponseEntity<Set<String>> renamePipeline(@PathVariable String pipelineName,
                                                       @RequestParam String newName) throws IOException {
         PipelineResult updatedPipeline = pipelineService.renamePipeline(pipelineName, newName);
@@ -90,6 +94,7 @@ public class PipelineController {
             @ApiResponse(code = 200, message = "A new list of all pipelines.")
     })
     @DeleteMapping("/{pipelineName}")
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('delete', '*')")
     public ResponseEntity<Set<String>> deletePipeline(@PathVariable String pipelineName) throws IOException {
         boolean pipelineDeleted = pipelineService.deletePipeline(pipelineName);
         if (pipelineDeleted) {

@@ -20,6 +20,13 @@ logging:
         tomcat: INFO
         catalina: INFO
 
+security:
+  kerberos:
+    enabled: false
+    serviceName: cybersec
+    appId: cybersec
+    spnego:
+      keytab: /path/to/cybersec.keytab
 
 # Swagger
 springdoc:
