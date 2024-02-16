@@ -53,6 +53,7 @@
         <frontend-maven-plugin.version>1.14.2</frontend-maven-plugin.version>
         <frontend-maven-plugin.nodeVersion>v18.18.2</frontend-maven-plugin.nodeVersion>
 
+        <!-- main dependency versions -->
         <evo-inflector.version>1.2.2</evo-inflector.version>
         <slf4j.version>1.7.15</slf4j.version>
 
