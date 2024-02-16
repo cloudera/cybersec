@@ -21,9 +21,9 @@ export CYBERSEC_CONF_DIR=${CONF_DIR}/cybersec-conf
 
 case $CMD in
   (start-parser-ui)
-    echo "ParserUI echo $CYBERSEC_BIN/start-parser-ui"
+    echo "ParserUI echo $CYBERSEC_BIN/cs-start-parser-ui"
     get_generic_java_opts
-    exec ${CYBERSEC_BIN}/start-parser-ui start
+    exec ${CYBERSEC_BIN}/cs-start-parser-ui start
     ;;
   (*)
     echo "Don't understand [$CMD]"

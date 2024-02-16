@@ -32,6 +32,7 @@ export class MultiInputComponent implements OnInit, OnChanges {
   controls = [];
   ignoreColumns: string[] = [];
   mappingColumns: string[] = [];
+  selectSearchValue = "";
 
   constructor() { }
 
@@ -104,5 +105,9 @@ export class MultiInputComponent implements OnInit, OnChanges {
       };
     });
     this.changeValue.emit(value);
+  }
+
+  selectSearch($event: string) {
+    this.selectSearchValue=$event;
   }
 }
