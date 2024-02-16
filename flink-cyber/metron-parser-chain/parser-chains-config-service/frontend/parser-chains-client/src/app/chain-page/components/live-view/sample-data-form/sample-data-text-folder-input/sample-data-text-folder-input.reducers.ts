@@ -14,10 +14,13 @@ import {SampleDataInternalModel, SampleTestStatus} from "../../models/sample-dat
 import {
     ExecutionListFailedAction,
     ExecutionListSuccessfulAction,
-    ExecutionListTriggeredAction, FetchSampleListFailedAction, FetchSampleListSuccessfulAction,
+    ExecutionListTriggeredAction,
+    FetchSampleListFailedAction,
+    FetchSampleListSuccessfulAction,
     FetchSampleListTriggeredAction,
     HideEditModalAction,
-    SampleFolderActionsType, SampleFolderPathRestoredAction,
+    SampleFolderActionsType,
+    SampleFolderPathRestoredAction,
     SaveSampleListFailedAction,
     SaveSampleListSuccessfulAction,
     SaveSampleListTriggeredAction,
@@ -38,7 +41,8 @@ export interface SampleDataTextFolderInputState {
         expected: string,
         result: string,
         failure: boolean,
-        raw: EntryParsingResultModel[]
+        raw: EntryParsingResultModel[],
+        timestamp: bigint
     }>;
 }
 
@@ -150,14 +154,16 @@ function prepareResult(rawResult: Map<number, [SampleDataInternalModel, EntryPar
     expected: string,
     result: string,
     failure: boolean,
-    raw: EntryParsingResultModel[]
+    raw: EntryParsingResultModel[],
+    timestamp: bigint
 }> {
     let resultMap = new Map<number, {
         status: SampleTestStatus,
         expected: string,
         result: string,
         failure: boolean,
-        raw: EntryParsingResultModel[]
+        raw: EntryParsingResultModel[],
+        timestamp: bigint
     }>();
     rawResult.forEach((value, key) => {
         let sample = value[0];
@@ -169,6 +175,7 @@ function prepareResult(rawResult: Map<number, [SampleDataInternalModel, EntryPar
         let output: string;
         let failure: boolean;
         let finalExpectedResult = sample.expectedResult;
+        let timestamp = null;
 
         if (failedParser) {
             output = failedParser.log.message;
@@ -181,7 +188,7 @@ function prepareResult(rawResult: Map<number, [SampleDataInternalModel, EntryPar
             }
         } else {
             let rawOutput = result[result.length - 1].output;
-            let timestamp = rawOutput['timestamp']
+            timestamp = rawOutput['timestamp']
 
             output = JSON.stringify(rawOutput);
             failure = false;
@@ -200,7 +207,8 @@ function prepareResult(rawResult: Map<number, [SampleDataInternalModel, EntryPar
             expected: finalExpectedResult,
             result: output,
             failure: failure,
-            raw: result
+            raw: result,
+            timestamp: timestamp
         })
     })
     return resultMap
