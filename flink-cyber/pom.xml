@@ -53,7 +53,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.verion>1.8</java.verion>
+        <java.version>11</java.version>
         <flink.version>1.15.1-csa1.9.0.1</flink.version>
         <flink.hbase.version>2.4</flink.hbase.version>
         <cdh.version>7.1.7.0-551</cdh.version>
@@ -109,6 +109,7 @@
         <commons-text.version>1.10.0</commons-text.version>
         <java-grok.version>0.1.9</java-grok.version>
         <everit-json-schema.version>1.14.2</everit-json-schema.version>
+        <graalvm.version>22.3.5</graalvm.version>
     </properties>
 
     <repositories>
@@ -431,6 +432,36 @@
                 <version>2.5.5</version>
             </dependency>
 
+            <!--JS-->
+            <dependency>
+                <groupId>org.graalvm.sdk</groupId>
+                <artifactId>graal-sdk</artifactId>
+                <version>${graalvm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js</artifactId>
+                <version>${graalvm.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js-scriptengine</artifactId>
+                <version>${graalvm.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.tools</groupId>
+                <artifactId>profiler</artifactId>
+                <version>${graalvm.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.tools</groupId>
+                <artifactId>chromeinspector</artifactId>
+                <version>${graalvm.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+
             <!-- Logging and Metrics -->
             <dependency>
                 <groupId>org.slf4j</groupId>
@@ -554,8 +585,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
                     <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
                     </configuration>
                 </plugin>
 

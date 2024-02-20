@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @Data
 @Slf4j
 public class JavaScriptEngine implements RuleEngine {
-    private static final String ENGINE_NAME = "javascript";
+    private static final String ENGINE_NAME = "graal.js";
 
     private static final String SCORE_FUNCTION = "score";
 
@@ -91,7 +91,7 @@ public class JavaScriptEngine implements RuleEngine {
                 Class<?> implementationClass = func.getImplementationClass();
                 try {
                     log.info("Registering {} as {}", implementationClass, udfFunctionName);
-                    globalBindings.put("_".concat(udfFunctionName), implementationClass.newInstance());
+                    globalBindings.put("_".concat(udfFunctionName), implementationClass.getDeclaredConstructor().newInstance());
                     log.info("Successfully registered {} as {}", implementationClass, udfFunctionName);
                 } catch (Exception e) {
                     log.debug(String.format("Could not register %s as %s", implementationClass, udfFunctionName), e);
