@@ -53,7 +53,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>11</java.version>
+        <java.version>1.8</java.version>
         <flink.version>1.15.1-csa1.9.0.1</flink.version>
         <flink.hbase.version>2.4</flink.hbase.version>
         <cdh.version>7.1.7.0-551</cdh.version>
