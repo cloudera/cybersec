@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java 8 Build and Test
+name: Build and Test
 
 on:
   push:
@@ -15,7 +15,7 @@ on:
     branches: [ "develop" ]
 
 jobs:
-  build_and_test_java8:
+  build_and_test:
     runs-on: ubuntu-latest
     container: maven:3-eclipse-temurin-8
     steps:
