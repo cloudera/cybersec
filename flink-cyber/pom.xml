@@ -109,7 +109,7 @@
         <commons-text.version>1.10.0</commons-text.version>
         <java-grok.version>0.1.9</java-grok.version>
         <everit-json-schema.version>1.14.2</everit-json-schema.version>
-        <graalvm.version>22.3.5</graalvm.version>
+        <graalvm.version>21.3.9</graalvm.version>
     </properties>
 
     <repositories>
