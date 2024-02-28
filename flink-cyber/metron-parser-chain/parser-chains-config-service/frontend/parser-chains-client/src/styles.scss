@@ -9,13 +9,23 @@
  * either express or implied. Refer to the License for the specific permissions and
  * limitations governing your use of the file.
  */
+@use '@angular/material' as mat;
 
-// Ant overrides
-// These styles should only be here for two reasons:
-// 1. The less variable in the theme.less file needs a compile-time value.
-// 2. The desired styling cannot be applied from a parent component
-//    due to Angular encapsulation.
+@include mat.core();
+@import "./theme.scss";
+@import "./custom-component-theme";
+@import "./custom-palite";
 
+@include mat.all-component-themes($theming-material-components-theme);
+@include custom-components-theme($theming-material-components-theme, $notifications-theme);
+
+$theme-primary: mat.define-palette($md-cyber-blue-primary);
+$theme-accent: mat.define-palette($md-cyber-gray-secondary);
+
+// The warn palette is optional (defaults to red).
+$theme-warn: mat.define-palette(mat.$yellow-palette);
+
+//Old css. ToDo: refactor.
 .ant-card-body {
   padding: 16px;
 }
@@ -123,6 +133,39 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.success-snackbar {
+  background: rgb(0, 110, 37);
+  color: white;
+  font-weight: bold;
+  margin-bottom: 5px;
+  letter-spacing: .05em
+}
+
+.fail-snackbar {
+  background: #850900;
+  color: white;
+  font-weight: bold;
+  margin-bottom: 5px;
+  letter-spacing: .05em
+}
+
+.warning-snackbar {
+  background: rgb(255, 166, 0);
+  color: white;
+}
+
+.success-snackbar .mat-simple-snackbar-action {
+  color: black;
+}
+
+.warning-snackbar .mat-simple-snackbar-action {
+  color: black;
+}
+
+.fail-snackbar .mat-simple-snackbar-action {
+  color: black;
 }
 
 .chain-item {
