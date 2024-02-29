@@ -20,7 +20,11 @@ package org.apache.metron.parsers.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -104,10 +108,15 @@ public class DateUtils {
 			for (SimpleDateFormat pattern : validPatterns) {
 				try {
 					Calendar cal = Calendar.getInstance();
-					cal.setTime(pattern.parse(candidate));
+					Date parsedDate = pattern.parse(candidate);
+					cal.setTime(parsedDate);
 					Calendar current = Calendar.getInstance();
 					if (cal.get(Calendar.YEAR) == 1970) {
-						cal.set(Calendar.YEAR, current.get(Calendar.YEAR));
+						//leap year workaround
+						LocalDateTime startOfYear = LocalDate.now().withDayOfYear(1).atStartOfDay();
+						long startOfYearMillis = startOfYear.toInstant(ZoneOffset.UTC).toEpochMilli();
+
+						cal.setTimeInMillis(startOfYearMillis + parsedDate.getTime());
 					}
 					current.add(Calendar.DAY_OF_MONTH, 4);
 					if (cal.after(current)) {
