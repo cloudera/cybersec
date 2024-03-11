@@ -15,9 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Slf4j
 public class JavaScriptGraaljsEngine extends JavaScriptEngine {
 
-    private static final Engine ENGINE =
-            Engine.newBuilder()
-                    .build();
+    private static final Engine ENGINE = Engine.newBuilder().build();
     private static final String LANGUAGE_ID = "js";
     private static final Map<String, Source> cachedScripts = new HashMap<>();
 
