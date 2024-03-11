@@ -110,6 +110,8 @@
         <java-grok.version>0.1.9</java-grok.version>
         <everit-json-schema.version>1.14.2</everit-json-schema.version>
         <graalvm.version>21.3.9</graalvm.version>
+        <junit.version>4.12</junit.version>
+        <junit5.version>5.7.0</junit5.version>
     </properties>
 
     <repositories>
@@ -444,23 +446,6 @@
                 <version>${graalvm.version}</version>
                 <scope>runtime</scope>
             </dependency>
-            <dependency>
-                <groupId>org.graalvm.js</groupId>
-                <artifactId>js-scriptengine</artifactId>
-                <version>${graalvm.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.graalvm.tools</groupId>
-                <artifactId>profiler</artifactId>
-                <version>${graalvm.version}</version>
-                <scope>runtime</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.graalvm.tools</groupId>
-                <artifactId>chromeinspector</artifactId>
-                <version>${graalvm.version}</version>
-                <scope>runtime</scope>
-            </dependency>
 
             <!-- Logging and Metrics -->
             <dependency>
@@ -510,9 +495,16 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.12</version>
+                <version>${junit.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit5.version}</version>
+                <scope>test</scope>
+            </dependency>
+
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
