@@ -5,11 +5,12 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.annotation.VisibleForTesting;
-import org.graalvm.polyglot.*;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Engine;
+import org.graalvm.polyglot.HostAccess;
+import org.graalvm.polyglot.Value;
 
 import javax.script.ScriptException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -17,7 +18,6 @@ public class JavaScriptGraaljsEngine extends JavaScriptEngine {
 
     private static final Engine ENGINE = Engine.newBuilder().build();
     private static final String LANGUAGE_ID = "js";
-    private static final Map<String, Source> cachedScripts = new HashMap<>();
 
     private final AtomicBoolean isOpen = new AtomicBoolean(false);
     private ValidatedContext validatedContext;
@@ -32,14 +32,6 @@ public class JavaScriptGraaljsEngine extends JavaScriptEngine {
     public JavaScriptGraaljsEngine(String script) {
         super(script);
         validatedContext = new ValidatedContext(false, null);
-    }
-
-    private static Source getCachedScript(String script) {
-        if (StringUtils.isEmpty(script)) {
-            return null;
-        }
-        cachedScripts.computeIfAbsent(script, (s) -> Source.create(LANGUAGE_ID, s));
-        return cachedScripts.get(script);
     }
 
     @Override
@@ -62,12 +54,7 @@ public class JavaScriptGraaljsEngine extends JavaScriptEngine {
 
                     log.info(setupScript);
                     log.info(functionScript);
-                    Source cachedScript = getCachedScript(setupScript + ";" + functionScript);
-                    if (cachedScript != null) {
-                        context.eval(cachedScript);
-                    } else {
-                        isValid = false;
-                    }
+                    context.eval(LANGUAGE_ID, setupScript + ";" + functionScript);
                 }
             } catch (Exception e) {
                 isValid = false;
@@ -104,17 +91,19 @@ public class JavaScriptGraaljsEngine extends JavaScriptEngine {
     @Override
     @VisibleForTesting
     public void eval(String script) throws ScriptException {
-        Source cachedScript = getCachedScript(script);
-        if (cachedScript == null){
-            throw new ScriptException("Wasn't able to compile the provided script!");
-        }
-        getContext().eval(cachedScript);
+        synchronizedEval(script);
     }
 
     @Override
     public Object invokeFunction(String function, Object... args) throws ScriptException, NoSuchMethodException {
-        Source source = getCachedScript(function);
-        return getContext().eval(source).execute(args).as(Object.class);
+        return synchronizedEval(function).execute(args).as(Object.class);
+    }
+
+    private Value synchronizedEval(String script) {
+        Context context = getContext();
+        synchronized (context) {
+            return context.eval(LANGUAGE_ID, script);
+        }
     }
 
     public static JavaScriptGraaljsEngineBuilder builder() {
