@@ -21,6 +21,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@Deprecated
 public class JavaScriptNashornEngineBuilder extends RuleEngineBuilder<JavaScriptNashornEngine> {
     @Override
     public JavaScriptNashornEngine build() {

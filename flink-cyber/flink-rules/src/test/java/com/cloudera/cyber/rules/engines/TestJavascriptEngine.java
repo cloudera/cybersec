@@ -149,9 +149,8 @@ public class TestJavascriptEngine {
         assertThat(validEngine.validate(), equalTo(true));
     }
 
-    //FIXME resolve GraalJS 1.0 -> 1 conversion problem
-//    @ParameterizedTest
-//    @MethodSource("jsBuilders")
+    @ParameterizedTest
+    @MethodSource("jsBuilders")
     public void testProperNumberConversion(RuleEngineBuilder<? extends JavaScriptEngine> jsBuilder) {
         RuleEngine engine = jsBuilder.script("return { testInt: 1, testDouble: 1.0 }").build();
         Map<String, Object> result = engine.feed(createMessage(Message.builder()
