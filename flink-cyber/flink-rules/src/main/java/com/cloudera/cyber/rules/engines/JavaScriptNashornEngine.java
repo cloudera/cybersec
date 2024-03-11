@@ -24,6 +24,7 @@ import javax.script.*;
 
 
 @Slf4j
+@Deprecated
 public class JavaScriptNashornEngine extends JavaScriptEngine {
     private static final String ENGINE_NAME = "javascript";
 
