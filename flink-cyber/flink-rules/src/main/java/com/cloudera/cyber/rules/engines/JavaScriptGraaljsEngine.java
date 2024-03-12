@@ -12,6 +12,7 @@ import org.graalvm.polyglot.Value;
 
 import javax.script.ScriptException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 @Slf4j
 public class JavaScriptGraaljsEngine extends JavaScriptEngine {
@@ -91,19 +92,20 @@ public class JavaScriptGraaljsEngine extends JavaScriptEngine {
     @Override
     @VisibleForTesting
     public void eval(String script) throws ScriptException {
-        synchronizedEval(script);
+        synchronizedEval(script, null);
     }
 
     @Override
     public Object invokeFunction(String function, Object... args) throws ScriptException, NoSuchMethodException {
-        return synchronizedEval(function).execute(args).as(Object.class);
+        return synchronizedEval(function, (value) -> value.execute(args).as(Object.class));
     }
 
-    private Value synchronizedEval(String script) {
-        Context context = getContext();
-        synchronized (context) {
-            return context.eval(LANGUAGE_ID, script);
+    private synchronized Object synchronizedEval(String script, Function<Value, Object> postProcessor) {
+        Value value = getContext().eval(LANGUAGE_ID, script);
+        if (postProcessor != null) {
+            return postProcessor.apply(value);
         }
+        return value;
     }
 
     public static JavaScriptGraaljsEngineBuilder builder() {
