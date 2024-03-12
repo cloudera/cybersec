@@ -15,7 +15,6 @@ package com.cloudera.cyber.rules.engines;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.google.common.collect.ImmutableMap;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -148,20 +147,6 @@ public class TestJavascriptEngine {
 
         RuleEngine validEngine = jsBuilder.script("return { local: in_subnet(message.local, '192.168.0.1/24') }").build();
         assertThat(validEngine.validate(), equalTo(true));
-    }
-
-    //TODO decide if we need to fix this in GraalJS or not
-    @Disabled
-    @ParameterizedTest
-    @MethodSource("jsBuilders")
-    public void testProperNumberConversion(RuleEngineBuilder<? extends JavaScriptEngine> jsBuilder) {
-        RuleEngine engine = jsBuilder.script("return { testInt: 1, testDouble: 1.0 }").build();
-        Map<String, Object> result = engine.feed(createMessage(Message.builder()
-                .ts(Instant.now().toEpochMilli())
-                .extensions(ImmutableMap.of())));
-
-        assertThat(result.get("testInt"), equalTo(1));
-        assertThat(result.get("testDouble"), equalTo(1.0));
     }
 
     private Message createMessage(Message.MessageBuilder builder) {
