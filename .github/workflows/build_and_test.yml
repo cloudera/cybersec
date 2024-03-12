@@ -10,14 +10,14 @@ name: Build and Test
 
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "develop", "CYB-77" ]
   pull_request:
     branches: [ "develop" ]
 
 jobs:
   build_and_test:
     runs-on: ubuntu-latest
-    container: maven:3-eclipse-temurin-8
+    container: maven:3-eclipse-temurin-11
     steps:
       - uses: actions/checkout@v3
       - name: Cache local Maven repository
