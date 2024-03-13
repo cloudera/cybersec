@@ -17,7 +17,7 @@
     <parent>
         <artifactId>flink-cyber</artifactId>
         <groupId>com.cloudera.cyber</groupId>
-        <version>2.3.1</version>
+        <version>2.4.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -27,11 +27,5 @@
     <modules>
         <module>flink-parse-metron</module>
     </modules>
-
-    <properties>
-        <json.simple.version>1.1.1</json.simple.version>
-        <commons.lang3.version>3.2</commons.lang3.version>
-        <jackson.version>2.10.1</jackson.version>
-    </properties>
 
 </project>
