@@ -11,7 +11,6 @@ import {getDiffModalVisible, getNewDiffValue, getPreviousDiffValue} from "./diff
     styleUrls: ['./diff-popup.component.scss']
 })
 export class DiffPopupComponent {
-
     diffModalVisible$: Observable<boolean>;
     previousDiffValue$: Observable<string>;
     newDiffValue$: Observable<string>;

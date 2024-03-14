@@ -10,48 +10,66 @@
  * limitations governing your use of the file.
  */
 
-import { Component, Input } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { CheckCircleOutline, CloseCircleOutline, WarningFill } from '@ant-design/icons-angular/icons';
-import {  NZ_ICONS } from 'ng-zorro-antd/icon';
-import { NzCardModule } from 'ng-zorro-antd/card'
-import { NzResultModule } from 'ng-zorro-antd/result'
-import { NzTimelineModule } from 'ng-zorro-antd/timeline'
+import {ComponentFixture, fakeAsync, TestBed, tick, waitForAsync} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
+import {CheckCircleOutline, CloseCircleOutline, WarningFill} from '@ant-design/icons-angular/icons';
+import {NzIconModule} from 'ng-zorro-antd/icon';
+import {NzCardModule} from 'ng-zorro-antd/card'
+import {NzResultModule} from 'ng-zorro-antd/result'
+import {NzTimelineModule} from 'ng-zorro-antd/timeline'
 
-import { ParserByParserComponent } from './parser-by-parser.component';
+import {ParserByParserComponent} from './parser-by-parser.component';
+import {MockStore, provideMockStore} from "@ngrx/store/testing";
+import {Store} from "@ngrx/store";
+import {DiffPopupState} from "../diff-popup/diff-popup.reducers";
+import {StackTraceComponent} from "../stack-trace/stack-trace.component";
+import {DiffPopupComponent} from "../diff-popup/diff-popup.component";
+import {NzModalModule} from "ng-zorro-antd/modal";
+import {NzPopoverModule} from "ng-zorro-antd/popover";
+import {FormsModule} from "@angular/forms";
+import {NoopAnimationsModule} from "@angular/platform-browser/animations";
+import {findEl} from "../../../../shared/test/test-helper";
+import {ShowDiffModalAction} from "../diff-popup/diff-popup.actions";
+import {MonacoEditorModule} from "@materia-ui/ngx-monaco-editor";
+import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
+import {MockComponent} from "ng-mocks";
 
-@Component({
-  selector: 'app-stack-trace',
-  template: '',
-})
-class FakeStackTraceComponent {
-  @Input() stackTraceMsg = '';
-}
 
 describe('ParserByParserComponent', () => {
   let component: ParserByParserComponent;
   let fixture: ComponentFixture<ParserByParserComponent>;
+  let store: MockStore<DiffPopupState>;
+  let stackTraceComponent: StackTraceComponent;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         ParserByParserComponent,
-        FakeStackTraceComponent,
+        MockComponent(StackTraceComponent),
+        MockComponent(DiffPopupComponent)
       ],
-      imports: [NzCardModule, NzTimelineModule, NzResultModule],
+      imports: [
+        FormsModule,
+        NzModalModule,
+        NzPopoverModule,
+        NzCardModule,
+        NzTimelineModule,
+        NzResultModule,
+        NoopAnimationsModule,
+        MonacoEditorModule,
+        NzIconModule.forRoot([CheckCircleOutline, CloseCircleOutline, WarningFill])
+      ],
       providers: [
-        {
-          provide: NZ_ICONS,
-          useValue: [CheckCircleOutline, CloseCircleOutline, WarningFill]
-        }
-      ]
+        provideMockStore({})
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
     }).compileComponents();
   }));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ParserByParserComponent);
     component = fixture.componentInstance;
+    store = TestBed.inject(Store) as MockStore<DiffPopupState>;
     fixture.detectChanges();
   });
 
@@ -110,11 +128,53 @@ describe('ParserByParserComponent', () => {
       }
     ];
     fixture.detectChanges();
+    stackTraceComponent = fixture.debugElement.query(By.directive(StackTraceComponent)).componentInstance;
+    fixture.detectChanges();
 
-    const stackTraceComp = fixture.debugElement.query(
-      By.directive(FakeStackTraceComponent)
-      ).componentInstance;
+    expect(stackTraceComponent.stackTraceMsg).toContain('Fake Strack Trace Msg');
+  });
 
-    expect(stackTraceComp.stackTraceMsg).toBe('Fake Strack Trace Msg');
+  it('should shod diff', () => {
+    spyOn(store, 'dispatch').and.callThrough();
+    component.parserResults = [
+      {
+        output: {
+          fooType: "foo",
+          barType: "bar"
+        },
+        log: {
+          type: 'info',
+          message: 'this is a message',
+          parserId: '1234',
+          stackTrace: 'Fake Strack Trace Msg',
+        }
+      },
+      {
+        output: {
+          fooType: "foo4",
+          barType: "bar4"
+        },
+        log: {
+          type: 'info',
+          message: 'this is a message',
+          parserId: '1234',
+          stackTrace: 'Fake Str'
+        }
+      }
+    ];
+    component.diffOnly = true;
+    fixture.detectChanges();
+
+    const btns = fixture.debugElement.queryAll(By.css('.diff-param-button'));
+    btns[0].nativeElement.click();
+    fixture.detectChanges();
+
+    expect(store.dispatch).toHaveBeenCalledWith(ShowDiffModalAction({previousDiffValue: 'bar', newDiffValue: 'bar4'}));
+
+    btns[1].nativeElement.click();
+    fixture.detectChanges();
+
+    expect(store.dispatch).toHaveBeenCalledWith(ShowDiffModalAction({previousDiffValue: 'foo', newDiffValue: 'foo4'}));
+
   });
 });

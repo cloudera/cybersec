@@ -1,10 +1,4 @@
-import {Component, OnInit, Input, Output, EventEmitter, ViewChild} from '@angular/core';
-import {
-  HttpClient, HttpRequest,
-  HttpEventType, HttpErrorResponse
-} from '@angular/common/http';
-import {Subscription, of} from 'rxjs';
-import {catchError, last, map, tap, timeout} from 'rxjs/operators';
+import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {MatButtonToggleGroup} from "@angular/material/button-toggle";
 
 type button = {

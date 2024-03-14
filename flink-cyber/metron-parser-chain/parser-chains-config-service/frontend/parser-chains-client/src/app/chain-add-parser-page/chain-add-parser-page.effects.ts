@@ -10,14 +10,14 @@
  * limitations governing your use of the file.
  */
 
-import { Injectable } from '@angular/core';
-import { Actions, Effect, ofType } from '@ngrx/effects';
-import { Action } from '@ngrx/store';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
+import {Action} from '@ngrx/store';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {Observable, of} from 'rxjs';
+import {catchError, map, switchMap} from 'rxjs/operators';
 
-import { AddParserPageService } from '../services/chain-add-parser-page.service';
+import {AddParserPageService} from '../services/chain-add-parser-page.service';
 
 import * as fromActions from './chain-add-parser-page.actions';
 
@@ -27,10 +27,10 @@ export class AddParserEffects {
     private actions$: Actions,
     private messageService: NzMessageService,
     private addParserService: AddParserPageService,
-  ) { }
+  ) {
+  }
 
-  @Effect()
-  getParserTypes$: Observable<Action> = this.actions$.pipe(
+  getParserTypes$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.GET_PARSER_TYPES),
     switchMap(() => {
       return this.addParserService.getParserTypes()
@@ -40,9 +40,9 @@ export class AddParserEffects {
           }),
           catchError((error: { message: string }) => {
             this.messageService.create('error', error.message);
-            return of(new fromActions.GetParserTypesFailAction(error));
+            return of(new fromActions.GetParserTypesFailAction({message: error.message}));
           })
         );
     })
-  );
+  ));
 }

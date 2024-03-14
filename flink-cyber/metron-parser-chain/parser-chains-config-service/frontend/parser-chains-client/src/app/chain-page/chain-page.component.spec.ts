@@ -10,83 +10,85 @@
  * limitations governing your use of the file.
  */
 
-import { Component, Input } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { ActivatedRoute, Router } from '@angular/router';
-import { IconDefinition } from '@ant-design/icons-angular';
-import { EditFill, PlusOutline } from '@ant-design/icons-angular/icons';
-import { StoreModule } from '@ngrx/store';
-import { Store } from '@ngrx/store';
-import { NzModalModule } from 'ng-zorro-antd/modal';
-import { NZ_ICONS } from 'ng-zorro-antd/icon';
-import { Observable, of } from 'rxjs';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {ReactiveFormsModule} from '@angular/forms';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {ActivatedRoute, Router} from '@angular/router';
+import {EditFill, PlusOutline} from '@ant-design/icons-angular/icons';
+import {Store} from '@ngrx/store';
+import {NzModalModule} from 'ng-zorro-antd/modal';
+import {NzIconModule} from 'ng-zorro-antd/icon';
+import {of} from 'rxjs';
 
 import * as fromActions from './chain-page.actions';
-import { ChainPageComponent } from './chain-page.component';
-import { ParserModel } from './chain-page.models';
-import * as fromReducers from './chain-page.reducers';
-import * as fromLiveViewReducers from './components/live-view/live-view.reducers';
-
-const icons: IconDefinition[] = [EditFill, PlusOutline];
-@Component({
-  selector: 'app-chain-view',
-  template: ''
-})
-class MockChainViewComponent {
-  @Input() parsers: ParserModel[];
-  @Input() dirtyParsers;
-  @Input() chainId;
-  @Input() failedParser;
-}
-
-@Component({
-  selector: 'app-live-view',
-  template: ''
-})
-class MockLiveViewComponent {
-  @Input() chainConfig$: Observable<{}>;
-}
-
-const fakeActivatedRoute = {
-  params: of({})
-};
+import {ChainPageComponent} from './chain-page.component';
+import {NzCardModule} from "ng-zorro-antd/card";
+import {provideMockStore} from "@ngrx/store/testing";
+import {NzTableModule} from "ng-zorro-antd/table";
+import {NzTabsModule} from 'ng-zorro-antd/tabs';
+import {IndexingFormComponent} from "./components/indexing-form/indexing-form.component";
+import {ChainViewComponent} from "./components/chain-view/chain-view.component";
+import {MockComponent} from 'ng-mocks';
+import {LiveViewComponent} from "./components/live-view/live-view.component";
+import {NzBreadCrumbModule} from "ng-zorro-antd/breadcrumb";
+import {NzPopoverModule} from "ng-zorro-antd/popover";
+import {findEl} from "src/app/shared/test/test-helper";
 
 describe('ChainPageComponent', () => {
   let component: ChainPageComponent;
   let fixture: ComponentFixture<ChainPageComponent>;
   let store: Store<ChainPageComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        NzTableModule,
+        NzTabsModule,
         NzModalModule,
-        StoreModule.forRoot({
-          'chain-page': fromReducers.reducer,
-          'live-view': fromLiveViewReducers.reducer
-        }),
+        NzCardModule,
+        NzBreadCrumbModule,
         NoopAnimationsModule,
         ReactiveFormsModule,
+        NzPopoverModule,
+        NzIconModule.forRoot([EditFill, PlusOutline])
       ],
-      declarations: [ChainPageComponent, MockChainViewComponent, MockLiveViewComponent],
+      declarations: [
+        ChainPageComponent,
+        MockComponent(ChainViewComponent),
+        MockComponent(LiveViewComponent),
+        MockComponent(IndexingFormComponent)
+      ],
       providers: [
-        { provide: ActivatedRoute, useFactory: () => fakeActivatedRoute },
-        { provide: Router, useValue: { events: of({}) } },
-        { provide: NZ_ICONS, useValue: icons }
+        provideMockStore({
+          initialState: {
+            'chain-page': {
+              chains:
+                {
+                  123: {
+                    id: '123',
+                    name: 'chain',
+                    parsers: []
+                  }
+                },
+              dirtyParsers: [],
+              dirtyChains: [],
+              parserToBeInvestigated: ""
+            },
+            'live-view': {
+              chainConfig: {}
+            },
+          }
+        }),
+        {provide: ActivatedRoute, useValue: {params: of({id: '123'})}},
+        {provide: Router, useValue: {events: of({})}},
       ]
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    store = TestBed.get(Store);
+    store = TestBed.inject(Store);
     fixture = TestBed.createComponent(ChainPageComponent);
     component = fixture.componentInstance;
-    component.chain = {
-      id: '1',
-      name: 'chain',
-      parsers: []
-    };
     fixture.detectChanges();
   });
 
@@ -120,8 +122,7 @@ describe('ChainPageComponent', () => {
   });
 
   it('should enable the chain name set btn if input length > 3', () => {
-    const editBtn: HTMLButtonElement = fixture.nativeElement.querySelector('[data-qe-id="chain-name-edit-btn"]');
-    editBtn.click();
+    findEl(fixture, 'chain-name-edit-btn').nativeElement.click();
     fixture.detectChanges();
 
     const nameField: HTMLInputElement = document.querySelector('[data-qe-id="chain-name-field"]');
@@ -168,7 +169,7 @@ describe('ChainPageComponent', () => {
     submitBtn.click();
     fixture.detectChanges();
 
-    const actionUpdate = new fromActions.UpdateChainAction({chain: {id: '1', name: 'new_name'}});
+    const actionUpdate = new fromActions.UpdateChainAction({chain: {id: '123', name: 'new_name'}});
 
     expect(store.dispatch).toHaveBeenCalledWith(actionUpdate);
   });
