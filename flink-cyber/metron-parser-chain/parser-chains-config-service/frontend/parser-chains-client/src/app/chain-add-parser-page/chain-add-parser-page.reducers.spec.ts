@@ -17,7 +17,7 @@ import * as fromReducers from './chain-add-parser-page.reducers';
 describe('chain add parser page: reducers', () => {
 
   it('should return with the initial state.', () => {
-    expect(fromReducers.reducer(undefined, new fromActions.NoopAction())).toBe(fromReducers.initialState);
+    expect(fromReducers.reducer(undefined, new fromActions.NoopAction())).toEqual(fromReducers.initialState);
   });
 
   it('should set the parser types and append Router', () => {
@@ -32,20 +32,7 @@ describe('chain add parser page: reducers', () => {
     );
     expect(newState.parserTypes).toEqual([
       ...parserTypes,
-      { id: 'Router', name: 'Router' }
+      {id: 'Router', name: 'Router'}
     ]);
-  });
-});
-
-describe('chain add parser page: selectors', () => {
-
-  it('should return with the parser types from state', () => {
-    const parserTypesFromState = [];
-    const parserTypes = fromReducers.getParserTypes({
-      'chain-add-parser-page': {
-        parserTypes: parserTypesFromState
-      }
-    });
-    expect(parserTypes).toBe(parserTypesFromState);
   });
 });

@@ -10,7 +10,7 @@
   ~ limitations governing your use of the file.
   -->
 <div class="pbp-container">
-  <label nz-checkbox class="diff-only-checkbox" [(ngModel)]="diffOnly">Differences only</label>
+  <label nz-checkbox class="diff-only-checkbox" [(ngModel)]="diffOnly" ngDefaultControl>Differences only</label>
   <nz-timeline class="nz-timeline">
     <nz-timeline-item
       *ngFor="let parser of parserResults"

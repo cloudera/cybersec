@@ -298,30 +298,30 @@ export const getIndexMappings = createSelector(
   }
 );
 
-export const getChain = createSelector(
+export const getChain = (props: { id: string }) => createSelector(
   getChainPageState,
-  (state, props): ParserChainModel => {
+  (state) => {
     return state.chains[props.id];
   }
 );
 
-export const getParser = createSelector(
+export const getParser = (props: { id: string }) => createSelector(
   getChainPageState,
-  (state, props): ParserModel => {
+  (state) => {
     return state.parsers[props.id];
   }
 );
 
-export const getRoute = createSelector(
+export const getRoute = (props: { id: string }) => createSelector(
   getChainPageState,
-  (state, props): RouteModel => {
+  (state) => {
     return state.routes[props.id];
   }
 );
 
-export const getChainDetails = createSelector(
+export const getChainDetails = (props: { chainId: string }) => createSelector(
   getChainPageState,
-  (state, props) => {
+  (state) => {
     const mainChain = state.chains[props.chainId];
     return denormalizeParserConfig(mainChain, state);
   }
@@ -353,9 +353,11 @@ export const getDirtyStatus = createSelector(
   })
 );
 
-export const getFormConfigByType = createSelector(
+export const getFormConfigByType = (props: { type: string }) => createSelector(
   getChainPageState,
-  (state, props) => (state.formConfigs || {})[props.type]
+  (state) => {
+    return (state.formConfigs || {})[props.type];
+  }
 );
 
 export const getFormConfigs = createSelector(

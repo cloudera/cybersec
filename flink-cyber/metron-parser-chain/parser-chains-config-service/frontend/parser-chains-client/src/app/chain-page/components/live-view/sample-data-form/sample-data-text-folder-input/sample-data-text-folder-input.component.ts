@@ -14,14 +14,14 @@ import {
     getRunResults,
     getSampleData, getSampleFolderPath
 } from "./sample-data-text-folder-input.selectors";
-import {Observable} from "rxjs";
+import {Observable, Subject} from "rxjs";
 import {
     FetchSampleListTriggeredAction, SampleFolderViewInitializedAction,
     SaveSampleListTriggeredAction,
     ShowEditModalAction
 } from "./sample-data-text-folder-input.actions";
 import {FormBuilder, FormGroup} from "@angular/forms";
-import {map} from "rxjs/operators";
+import {map, takeUntil} from "rxjs/operators";
 
 @Component({
     selector: 'app-sample-data-text-folder-input',
@@ -45,23 +45,21 @@ export class SampleDataTextFolderInputComponent implements OnInit {
     sampleData$: Observable<SampleDataInternalModel[]>;
     sampleFolderPath$: Observable<string>;
     editSampleModalVisible$: Observable<boolean>;
-
     expandSet = new Set<number>();
-
     folderForm!: FormGroup;
     currentSampleData: SampleDataInternalModel[];
-
     selectedSample: [number, SampleDataInternalModel] = [null, null];
+    private unsubscribe$: Subject<void> = new Subject<void>();
 
-    constructor(private store: Store<SampleDataTextFolderInputState>,
+
+  constructor(private store: Store<SampleDataTextFolderInputState>,
                 private fb: FormBuilder) {
         this.isExecuting$ = this.store.pipe(select(getExecutionStatus));
         this.runResults$ = this.store.pipe(select(getRunResults));
         this.sampleData$ = this.store.pipe(select(getSampleData));
         this.sampleFolderPath$ = this.store.pipe(select(getSampleFolderPath));
         this.editSampleModalVisible$ = store.pipe(select(getEditModalVisible));
-
-        this.sampleData$.subscribe(value => this.currentSampleData = value)
+        this.sampleData$.pipe(takeUntil(this.unsubscribe$)).subscribe(value => this.currentSampleData = value)
     }
 
     get folderPath() {
@@ -70,8 +68,9 @@ export class SampleDataTextFolderInputComponent implements OnInit {
 
     ngOnInit(): void {
         this.store.dispatch(SampleFolderViewInitializedAction());
-        this.sampleFolderPath$.subscribe(value => {
-            this.folderForm = this.fb.group({folderPath: value})
+        this.folderForm = this.fb.group({folderPath: ""});
+        this.sampleFolderPath$.pipe(takeUntil(this.unsubscribe$)).subscribe(value => {
+            this.folderForm.patchValue({folderPath: value});
             this.fetchSamples()
         })
     }
@@ -193,4 +192,9 @@ export class SampleDataTextFolderInputComponent implements OnInit {
                 : dataById.status;
         }));
     }
+
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
 }
