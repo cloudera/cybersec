@@ -47,9 +47,6 @@ jobs:
       - name: Install dependencies
         run: npm install
         working-directory: ./flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client
-      - name: Build and Test with Angular
-        run: npm run build
-        working-directory: ./flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client
       - name: Run test
         run: npm test
         working-directory: ./flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client
