@@ -90,7 +90,7 @@ export class ChainListEffects {
       return this.chainListService.deleteChain(action.chainId)
         .pipe(
           map(() => {
-            this.messageService.create('success', 'Chain ' + action.chainName + ' deleted Successfully');
+            this.messageService.create('success', 'Chain "' + action.chainName + '" deleted Successfully');
             return new fromActions.DeleteChainSuccessAction(action.chainId);
           }),
           catchError((error: { message: string }) => {

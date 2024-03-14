@@ -11,9 +11,10 @@
  */
 
 import { Component, Input } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {async, ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CustomFormComponent } from './custom-form.component';
+import {NzFormModule} from "ng-zorro-antd/form";
 
 @Component({
   selector: 'app-multi-input',
@@ -28,10 +29,11 @@ describe('CustomFormComponent', () => {
   let component: CustomFormComponent;
   let fixture: ComponentFixture<CustomFormComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         ReactiveFormsModule,
+        NzFormModule
       ],
       declarations: [
         MockMultiInputComponent,

@@ -10,13 +10,13 @@
  * limitations governing your use of the file.
  */
 
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { select, Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {select, Store} from '@ngrx/store';
+import {Subscription} from 'rxjs';
 
 import * as fromActions from '../../chain-page.actions';
-import { ParserChainModel, ParserModel, RouteModel } from '../../chain-page.models';
-import { ChainPageState, getChain, getRoute } from '../../chain-page.reducers';
+import {ParserChainModel, ParserModel, RouteModel} from '../../chain-page.models';
+import {ChainPageState, getChain, getRoute} from '../../chain-page.reducers';
 
 @Component({
   selector: 'app-route',
@@ -36,19 +36,20 @@ export class RouteComponent implements OnInit, OnDestroy {
 
   constructor(
     private store: Store<ChainPageState>,
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
-    this.getRouteSub = this.store.pipe(select(getRoute, {
+    this.getRouteSub = this.store.pipe(select(getRoute({
       id: this.routeId
-    })).subscribe((route) => {
+    }))).subscribe((route) => {
       this.route = route;
       if (route && route.subchain) {
-        this.getChainSub = this.store.pipe(select(getChain, {
-          id: this.route.subchain
-        })).subscribe((subchain) => {
-          this.subchain = subchain;
-        });
+        const id = typeof route.subchain === 'string' ? route.subchain : route.subchain.id;
+        this.getChainSub = this.store.pipe(select(getChain({id})))
+          .subscribe((subchain) => {
+            this.subchain = subchain;
+          });
       }
     });
   }

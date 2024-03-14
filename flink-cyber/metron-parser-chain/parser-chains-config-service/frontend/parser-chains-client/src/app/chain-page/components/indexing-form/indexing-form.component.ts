@@ -1,72 +1,74 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {ConfigChangedEvent} from "../parser/advanced-editor/advanced-editor.component";
-import {ChainPageService} from "../../../services/chain-page.service";
 import {FormBuilder, FormGroup} from "@angular/forms";
 import {select, Store} from "@ngrx/store";
 import {ChainPageState, getIndexMappings} from "../../chain-page.reducers";
 import {GetIndexMappingsAction} from "../../chain-page.actions";
+import {takeUntil} from "rxjs/operators";
+import {Observable, Subject} from "rxjs";
 
 @Component({
-    selector: 'app-indexing-form',
-    templateUrl: './indexing-form.component.html',
-    styleUrls: ['./indexing-form.component.scss']
+  selector: 'app-indexing-form',
+  templateUrl: './indexing-form.component.html',
+  styleUrls: ['./indexing-form.component.scss']
 })
-export class IndexingFormComponent implements OnInit {
+export class IndexingFormComponent implements OnInit, OnDestroy {
 
-    private readonly _indexingPathKey = 'indexingPath';
+  form!: FormGroup;
+  @Output() fieldSetUpdated = new EventEmitter<Map<string, Map<string, boolean>>>();
+  mappingJson: any;
+  unSubscribe$ = new Subject<void>();
+  private indexMappings$: Observable<{ path: string; result: object }>;
 
-    form!: FormGroup;
-    @Output() fieldSetUpdated = new EventEmitter<Map<string, Map<string, boolean>>>()
-    mappingJson: any;
+  constructor(private fb: FormBuilder,
+              private store: Store<ChainPageState>) {
+    this.indexMappings$ = this.store.pipe(select(getIndexMappings), takeUntil(this.unSubscribe$));
+  }
 
-    constructor(public chainPageService: ChainPageService,
-                private fb: FormBuilder,
-                private store: Store<ChainPageState>) {
+  ngOnInit(): void {
+    this.form = this.fb.group({filePath: ''});
+    this.indexMappings$.subscribe(indexMappings => {
+      this.store.dispatch(new GetIndexMappingsAction({filePath: indexMappings.path}));
+      this.form.patchValue({filePath: indexMappings.path});
+      this.onAdvancedEditorChanged({value: indexMappings.result});
+    });
+  }
+
+  onAdvancedEditorChanged(e: ConfigChangedEvent) {
+    let result = new Map<string, Map<string, boolean>>();
+
+    this.mappingJson = e['value'];
+    for (let s in this.mappingJson) {
+      let sourceMap = new Map<string, boolean>();
+      result.set(s, sourceMap);
+      this.findValues(this.mappingJson[s], 'ignore_fields').forEach(ignore_list =>
+        ignore_list.forEach(value => sourceMap.set(value, true)));
+
+      this.findValues(this.mappingJson[s], 'column_mapping').forEach(mapping =>
+        this.findValues(mapping, 'name').forEach(value => sourceMap.set(value, false)));
     }
+    this.fieldSetUpdated.emit(result);
+  }
 
-    ngOnInit(): void {
-        this.form = this.fb.group({filePath: ''})
-        this.form.setValue(JSON.parse(localStorage.getItem(this._indexingPathKey)))
-        this.submitForm()
+  findValues(obj, key) {
+    let values = [];
+
+    for (let prop in obj) {
+      if (prop === key) {
+        values.push(obj[prop]);
+      } else if (typeof obj[prop] === 'object') {
+        values = values.concat(this.findValues(obj[prop], key));
+      }
     }
+    return values;
+  }
 
-    onAdvancedEditorChanged(e: ConfigChangedEvent) {
-        let result = new Map<string, Map<string, boolean>>()
+  submitForm() {
+    this.store.dispatch(new GetIndexMappingsAction(this.form.value));
+  }
 
-        this.mappingJson = e['value']
-        for (let s in this.mappingJson) {
-            let sourceMap = new Map<string, boolean>();
-            result.set(s, sourceMap)
-            this.findValues(this.mappingJson[s], 'ignore_fields').forEach(ignore_list =>
-                ignore_list.forEach(value => sourceMap.set(value, true)));
-
-            this.findValues(this.mappingJson[s], 'column_mapping').forEach(mapping =>
-                this.findValues(mapping, 'name').forEach(value => sourceMap.set(value, false)))
-        }
-        this.fieldSetUpdated.emit(result)
-    }
-
-    findValues(obj, key) {
-        let values = [];
-
-        for (let prop in obj) {
-            if (prop === key) {
-                values.push(obj[prop]);
-            } else if (typeof obj[prop] === 'object') {
-                values = values.concat(this.findValues(obj[prop], key));
-            }
-        }
-
-        return values;
-    }
-
-    submitForm() {
-        localStorage.setItem(this._indexingPathKey, JSON.stringify(this.form.value))
-        this.store.dispatch(new GetIndexMappingsAction(this.form.value))
-        this.store.pipe(select(getIndexMappings))
-            .subscribe(indexMappings => {
-                this.form.setValue({filePath: indexMappings.path});
-                this.onAdvancedEditorChanged({value: indexMappings.result})
-            })
-    }
+  ngOnDestroy() {
+    this.unSubscribe$.next();
+    this.unSubscribe$.complete();
+  }
 }

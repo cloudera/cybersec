@@ -90,7 +90,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
       this.breadcrumbs = path;
     });
 
-    this.getChainSubscription = this.store.pipe(select(getChain, { id: this.chainId })).subscribe((chain: ParserChainModel) => {
+    this.getChainSubscription = this.store.pipe(select(getChain({ id: this.chainId }))).subscribe((chain: ParserChainModel) => {
       if (!chain) {
         this.store.dispatch(new fromActions.LoadChainDetailsAction({
           id: this.chainId
@@ -104,9 +104,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
       this.dirtyParsers = status.dirtyParsers;
       this.dirtyChains = status.dirtyChains;
     });
-
-    this.chainConfig$ = this.store.pipe(select(getChainDetails, { chainId: this.chainId }));
-
+    this.chainConfig$ = this.store.pipe(select(getChainDetails({ chainId: this.chainId })));
     this.store.pipe(select(getParserToBeInvestigated)).subscribe((id: string) => {
       this.parserToBeInvestigated = id === '' ? [] : [id];
     });
@@ -144,7 +142,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   }
 
   onChainLevelChange(chainId: string) {
-    this.store.pipe(select(getChain, { id: chainId })).pipe(take(1)).subscribe((chain: ParserChainModel) => {
+    this.store.pipe(select(getChain({ id: chainId }))).pipe(take(1)).subscribe((chain: ParserChainModel) => {
       this.store.dispatch(
         new fromActions.AddToPathAction({ chainId })
       );

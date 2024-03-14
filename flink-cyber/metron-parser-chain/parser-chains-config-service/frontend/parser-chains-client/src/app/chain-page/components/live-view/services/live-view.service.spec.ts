@@ -12,7 +12,7 @@
 
 import { HttpClient } from '@angular/common/http';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { TestBed } from '@angular/core/testing';
+import {TestBed, waitForAsync} from '@angular/core/testing';
 
 import { SampleDataType } from '../models/sample-data.model';
 
@@ -26,11 +26,10 @@ describe('LiveViewService', () => {
     TestBed.configureTestingModule({
       imports: [
         HttpClientTestingModule,
-      ],
+      ]
     });
-
-    service = TestBed.get(LiveViewService);
-    http = TestBed.get(HttpClient);
+    service = TestBed.inject(LiveViewService);
+    http = TestBed.inject(HttpClient);
   });
 
   it('should be created', () => {

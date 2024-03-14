@@ -6,17 +6,12 @@ import {MonacoDiffEditorConstructionOptions} from "@materia-ui/ngx-monaco-editor
     templateUrl: './text-diff-view.component.html',
     styleUrls: ['./text-diff-view.component.scss']
 })
-export class TextDiffViewComponent implements OnInit {
+export class TextDiffViewComponent {
 
     @Input() originalModel: string;
     @Input() modifiedModel: string;
 
     diffOptions: MonacoDiffEditorConstructionOptions = {theme: "vs", automaticLayout: true, readOnly: true, renderSideBySide: true};
-
-
-    public ngOnInit() {
-
-    }
 
     onChangeInline(checked) {
         this.diffOptions = Object.assign({}, this.diffOptions, {renderSideBySide: !checked});

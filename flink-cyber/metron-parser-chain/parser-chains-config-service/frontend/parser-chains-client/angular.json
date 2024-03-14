@@ -141,7 +141,7 @@
               {
                 "glob": "**/*",
                 "input": "node_modules/ngx-monaco-editor-v13/assets/monaco",
-                "output": "./assets/monaco/"
+                "output": "./assets/monaco-editor/min"
               }
             ]
           }

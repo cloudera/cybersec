@@ -22,12 +22,8 @@ import {EntryParsingResultModel} from "../models/live-view.model";
   styleUrls: ['./sample-data-form.component.scss']
 })
 export class SampleDataFormComponent {
-
   @Input() sampleData: SampleDataModel;
-  @Input() sampleDataFolder: string;
   @Input() chainConfig: {};
   @Output() sampleDataChange = new EventEmitter<SampleDataModel>();
   @Output() sampleDataForceChange = new EventEmitter<SampleDataInternalModel[]>();
-  @ViewChild('sampleDataInput', { static: true }) sampleDataInput: ElementRef;
-
 }

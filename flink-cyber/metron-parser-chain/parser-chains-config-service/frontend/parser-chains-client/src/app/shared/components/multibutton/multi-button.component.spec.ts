@@ -1,22 +1,22 @@
 // generate unit test for multi-button component
 
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import { MultiButtonComponent } from './multi-button.component';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import {MatButtonToggleModule} from "@angular/material/button-toggle";
 
 describe('MultiButtonComponent', () => {
   let component: MultiButtonComponent;
   let fixture: ComponentFixture<MultiButtonComponent>;
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
+  beforeEach(waitForAsync((() => {
+    TestBed.configureTestingModule({
       declarations: [MultiButtonComponent],
       imports: [MatButtonToggleModule, NoopAnimationsModule] // Add other necessary modules here
     })
       .compileComponents();
-  });
+  })));
 
   beforeEach(() => {
     fixture = TestBed.createComponent(MultiButtonComponent);

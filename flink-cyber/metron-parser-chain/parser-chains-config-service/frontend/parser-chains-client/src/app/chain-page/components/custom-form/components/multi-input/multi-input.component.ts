@@ -33,9 +33,6 @@ export class MultiInputComponent implements OnInit, OnChanges {
   ignoreColumns: string[] = [];
   mappingColumns: string[] = [];
   selectSearchValue = "";
-
-  constructor() { }
-
   ngOnInit() {
     if (Array.isArray(this.value)) {
       this.controls = this.value.filter(item => !!item[this.config.name]).map(item =>
