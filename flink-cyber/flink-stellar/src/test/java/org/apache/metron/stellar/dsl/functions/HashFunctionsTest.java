@@ -53,7 +53,7 @@ public class HashFunctionsTest {
 
   @Test
   public void listSupportedHashTypesReturnsAtMinimumTheHashingAlgorithmsThatMustBeSupported() {
-    final List<String> requiredAlgorithmsByJava = Arrays.asList("MD5", "SHA", "SHA-256"); // These are required for all Java platforms (see java.security.MessageDigest). Note: SHA is SHA-1
+    final List<String> requiredAlgorithmsByJava = Arrays.asList("MD5", "SHA-1", "SHA-256"); // These are required for all Java platforms (see java.security.MessageDigest). Note: SHA is SHA-1
     final Collection<String> supportedHashes = listSupportedHashTypes.apply(Collections.emptyList());
     requiredAlgorithmsByJava.forEach(a -> assertTrue(supportedHashes.contains(a)));
   }

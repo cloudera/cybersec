@@ -82,8 +82,8 @@ public class DefaultChainExecutorServiceTest {
      *     "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309"
      *   },
      *   "output" : {
-     *     "address" : "1600 Pennsylvania Ave",
      *     "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309",
+     *     "address" : "1600 Pennsylvania Ave",
      *     "phone" : "614-867-5309",
      *     "name" : "Jane Doe"
      *   },
@@ -98,8 +98,8 @@ public class DefaultChainExecutorServiceTest {
      *       "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309"
      *     },
      *     "output" : {
-     *       "address" : "1600 Pennsylvania Ave",
      *       "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309",
+     *       "address" : "1600 Pennsylvania Ave",
      *       "phone" : "614-867-5309",
      *       "name" : "Jane Doe"
      *     },
