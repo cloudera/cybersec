@@ -33,7 +33,6 @@
         <module>parser-chains-core</module>
         <module>parser-chains-parsers</module>
         <module>parser-chains-config-service</module>
-        <module>parser-chains-config-service/frontend/parser-chains-client</module>
     </modules>
 
     <properties>
