@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.util.StringUtils;
 
 @Data
 @NoArgsConstructor
@@ -43,12 +42,15 @@ public class MappingColumnDto {
     }
 
     public String getPath() {
-        return StringUtils.hasText(path)
-                ? (path.equals(".") ? "" : path)
-                : "extensions";
+        if (path == null || path.isEmpty()) {
+            return "extensions";
+        } else if (path.equals(".")) {
+            return "";
+        }
+        return path;
     }
 
-    public Boolean getIsMap() {
+    public boolean getIsMap() {
         return isMap == null ? path == null : isMap;
     }
 }
