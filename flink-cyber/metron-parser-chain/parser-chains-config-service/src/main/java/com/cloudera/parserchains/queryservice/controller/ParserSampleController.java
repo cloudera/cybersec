@@ -20,17 +20,22 @@ package com.cloudera.parserchains.queryservice.controller;
 
 import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_PARSER_TEST_SAMPLES;
 import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PARSER_CONFIG_BASE_URL;
+
 import com.cloudera.parserchains.queryservice.config.AppProperties;
 import com.cloudera.parserchains.queryservice.model.describe.SampleFolderDescriptor;
 import com.cloudera.parserchains.queryservice.model.sample.ParserSample;
 import com.cloudera.parserchains.queryservice.service.ParserSampleService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
@@ -54,32 +59,33 @@ public class ParserSampleController {
     @Autowired
     private AppProperties appProperties;
 
-    @ApiOperation(value = "Retrieves all parser samples for the specified chain.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A list of all parser samples for the specified chain.")
-    })
+    @Operation(summary = "Retrieves all parser samples for the specified chain.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "A list of all parser samples for the specified chain.")
+            })
     @PostMapping(value = API_PARSER_TEST_SAMPLES + "/{id}")
-    ResponseEntity<List<ParserSample>> findAllById(@ApiParam(name = "id", value = "The ID of the parser chain to retrieve samples for.", required = true)
+    ResponseEntity<List<ParserSample>> findAllById(@Parameter(name = "id", description = "The ID of the parser chain to retrieve samples for.", required = true)
                                                    @PathVariable String id,
                                                    @RequestBody SampleFolderDescriptor body) throws IOException {
         String sampleFolderPath = getSampleFolderPath(body);
         List<ParserSample> types = parserSampleService.findAllById(sampleFolderPath, id);
-        if (types == null){
+        if (types == null) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(types);
     }
 
-    @ApiOperation(value = "Create or replace parser chain sample list.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "The parser chain list was created/replaced."),
-            @ApiResponse(code = 404, message = "The parser chain does not exist.")
-    })
+
+    @Operation(summary = "Create or replace parser chain sample list.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "The parser chain list was created/replaced.", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ParserSample.class)))),
+                    @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
+            })
     @PutMapping(value = API_PARSER_TEST_SAMPLES + "/{id}")
     ResponseEntity<List<ParserSample>> update(
-            @ApiParam(name = "sampleList", value = "The new sample definition list.", required = true)
+            @Parameter(name = "sampleList", description = "The new sample definition list.", required = true)
             @RequestBody SampleFolderDescriptor body,
-            @ApiParam(name = "id", value = "The ID of the parser chain sample to update.")
+            @Parameter(name = "id", description = "The ID of the parser chain sample to update.")
             @PathVariable String id) {
         String sampleFolderPath = getSampleFolderPath(body);
         try {
@@ -99,7 +105,7 @@ public class ParserSampleController {
         String sampleFolderPath = StringUtils.hasText(body.getFolderPath())
                 ? body.getFolderPath()
                 : appProperties.getSampleFolderPath();
-        if (!sampleFolderPath.endsWith("/")){
+        if (!sampleFolderPath.endsWith("/")) {
             sampleFolderPath = sampleFolderPath.concat("/");
         }
         return sampleFolderPath;
