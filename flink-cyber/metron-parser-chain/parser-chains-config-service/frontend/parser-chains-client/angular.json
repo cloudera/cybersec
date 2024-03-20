@@ -25,6 +25,7 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
+            "baseHref": "/ui/",
             "preserveSymlinks": true,
             "allowedCommonJsDependencies": [
               "lodash",
@@ -41,12 +42,12 @@
               {
                 "glob": "**/*",
                 "input": "node_modules/monaco-editor",
-                "output": "assets/monaco-editor"
+                "output": "/assets/monaco/"
               },
               {
                 "glob": "**/*",
                 "input": "node_modules/monaco-editor/min-maps",
-                "output": "./assets/min-maps/"
+                "output": "/assets/min-maps/"
               }
             ],
             "styles": [
@@ -140,8 +141,8 @@
               "src/assets",
               {
                 "glob": "**/*",
-                "input": "node_modules/ngx-monaco-editor-v13/assets/monaco",
-                "output": "./assets/monaco-editor/min"
+                "input": "node_modules/ngx-monaco-editor-v2",
+                "output": "/assets/monaco-editor/min"
               }
             ]
           }

@@ -18,7 +18,6 @@ import {EffectsModule} from '@ngrx/effects';
 import {StoreModule} from '@ngrx/store';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {NzModalModule} from 'ng-zorro-antd/modal';
-import {MonacoEditorModule} from '@materia-ui/ngx-monaco-editor';
 
 import {AutofocusDirective} from '../misc/autofocus.directive';
 
@@ -52,6 +51,8 @@ import {IndexingFormComponent} from './components/indexing-form/indexing-form.co
 import {NzLayoutModule} from "ng-zorro-antd/layout";
 import {NzAutocompleteModule} from "ng-zorro-antd/auto-complete";
 import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
+import {MatDialogModule} from "@angular/material/dialog";
+import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 
 @NgModule({
   declarations: [
@@ -99,7 +100,7 @@ import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
   providers: [
     NzMessageService,
   ],
-  exports: [ ChainPageComponent, ChainViewComponent ],
+  exports: [ ChainPageComponent, ChainViewComponent, AdvancedEditorComponent ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 export class ChainPageModule { }

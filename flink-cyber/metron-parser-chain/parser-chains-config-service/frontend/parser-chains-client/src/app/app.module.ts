@@ -24,7 +24,6 @@ import {  NzLayoutModule } from 'ng-zorro-antd/layout';
 import { en_US,  NZ_I18N } from 'ng-zorro-antd/i18n'
 import { NzModalModule } from 'ng-zorro-antd/modal'
 import { storeFreeze } from 'ngrx-store-freeze';
-import { MonacoEditorModule } from '@materia-ui/ngx-monaco-editor';
 
 import { environment } from '../environments/environment';
 
@@ -40,6 +39,11 @@ import { PageNotFoundComponent } from './page-not-found/page-not-found.component
 import { MonacoEditorService } from './services/monaco-editor.service';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzIconModule } from 'ng-zorro-antd/icon';
+import { JsonEditorPopupComponent } from './components/popup/json-editor-popup/json-editor-popup.component';
+import {MatDialogModule} from "@angular/material/dialog";
+import {MatButtonModule} from "@angular/material/button";
+import {DragDropModule} from "@angular/cdk/drag-drop";
+import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 
 registerLocaleData(en);
 
@@ -51,27 +55,31 @@ export const metaReducers: MetaReducer<{}>[] = !environment.production
   declarations: [
     AppComponent,
     MainContainerComponent,
-    PageNotFoundComponent
+    PageNotFoundComponent,
+    JsonEditorPopupComponent
   ],
-    imports: [
-        BrowserModule,
-        AppRoutingModule,
-        NzModalModule,
-        NzLayoutModule,
-        ReactiveFormsModule,
-        HttpClientModule,
-        BrowserAnimationsModule,
-        StoreModule.forRoot({}, {metaReducers}),
-        StoreDevtoolsModule.instrument(),
-        EffectsModule.forRoot([]),
-        ThemeSwitchModule,
-        ChainListPageModule,
-        ChainPageModule,
-        ChainAddParserPageModule,
-        MonacoEditorModule,
-        NzMenuModule,
-        NzIconModule,
-    ],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    NzModalModule,
+    NzLayoutModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    BrowserAnimationsModule,
+    StoreModule.forRoot({}, {metaReducers}),
+    StoreDevtoolsModule.instrument(),
+    EffectsModule.forRoot([]),
+    ThemeSwitchModule,
+    ChainListPageModule,
+    ChainPageModule,
+    ChainAddParserPageModule,
+    MonacoEditorModule.forRoot(),
+    NzMenuModule,
+    NzIconModule,
+    MatDialogModule,
+    MatButtonModule,
+    DragDropModule,
+  ],
   providers: [
     { provide: NZ_I18N, useValue: en_US },
     CanDeactivateComponent,

@@ -10,9 +10,8 @@
  * limitations governing your use of the file.
  */
 
-import {async, ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { MonacoEditorModule } from '@materia-ui/ngx-monaco-editor';
 
 import { AdvancedEditorComponent } from './advanced-editor.component';
 import {NzFormModule} from "ng-zorro-antd/form";
@@ -26,7 +25,6 @@ describe('AdvancedEditorComponent', () => {
       imports: [
         FormsModule,
         NzFormModule,
-        MonacoEditorModule,
       ],
       declarations: [ AdvancedEditorComponent ]
     })
