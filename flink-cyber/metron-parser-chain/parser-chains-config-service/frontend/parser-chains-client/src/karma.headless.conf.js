@@ -9,8 +9,7 @@
  * either express or implied. Refer to the License for the specific permissions and
  * limitations governing your use of the file.
  */
-const path = require('path');
-
+const path = require("path");
 module.exports = function (config) {
   config.set({
     basePath: '',
@@ -18,29 +17,26 @@ module.exports = function (config) {
     plugins: [
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
-      require('karma-jasmine-html-reporter'),
-      require('karma-coverage-istanbul-reporter'),
       require('karma-spec-reporter'),
       require('@angular-devkit/build-angular/plugins/karma')
     ],
     client: {
       jasmine: {
         random: false
-      },
-      clearContext: false // leave Jasmine Spec Runner output visible in browser
+      }
     },
     coverageIstanbulReporter: {
       dir: path.join(__dirname, '../coverage/enrichment'),
       reports: ['html', 'lcovonly', 'text-summary'],
       fixWebpackSourcePaths: true
     },
-    reporters: ['progress', 'kjhtml'],
+    reporters: ['spec'],
     port: 9876,
     colors: true,
     logLevel: config.INFO,
-    autoWatch: true,
-    browsers: ['Chrome'],
-    singleRun: false,
-    restartOnFileChange: true
+    autoWatch: false,
+    browsers: ['ChromeHeadless'],
+    singleRun: true,
+    restartOnFileChange: false
   });
 };
