@@ -1,0 +1,26 @@
+<div class="popup-content">
+  <h1 cdkDrag
+      cdkDragHandle
+      cdkDragRootElement=".cdk-overlay-pane"
+      class="popup-title">JSON Editor</h1>
+  <div class="json-editor-container">
+    <app-advanced-editor class="json-editor"
+                         [isReadOnly]="false"
+                         [config]="json"
+    ></app-advanced-editor>
+  </div>
+  <div class="popup-action-buttons">
+    <button mat-flat-button
+            class="popup-action-button"
+            color="primary"
+            [mat-dialog-close]="json" cdkFocusInitial>
+      Save
+    </button>
+    <button mat-flat-button
+            class="popup-action-button"
+            [mat-dialog-close]="json"
+            cdkFocusInitial>
+      Cancel
+    </button>
+  </div>
+</div>

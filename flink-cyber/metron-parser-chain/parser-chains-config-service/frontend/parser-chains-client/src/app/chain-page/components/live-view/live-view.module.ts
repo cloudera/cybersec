@@ -48,9 +48,9 @@ import {
 } from "./sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.module";
 import {NzCollapseModule} from "ng-zorro-antd/collapse";
 import { TextDiffViewComponent } from './text-diff-view/text-diff-view.component';
-import {MonacoEditorModule} from '@materia-ui/ngx-monaco-editor';
 import {DiffPopupComponent} from "./diff-popup/diff-popup.component";
 import {DiffPopupModule} from "./diff-popup/diff-popup.module";
+import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 
 @NgModule({
   declarations: [

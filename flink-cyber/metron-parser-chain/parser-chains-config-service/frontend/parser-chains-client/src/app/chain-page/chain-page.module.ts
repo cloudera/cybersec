@@ -18,7 +18,6 @@ import {EffectsModule} from '@ngrx/effects';
 import {StoreModule} from '@ngrx/store';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {NzModalModule} from 'ng-zorro-antd/modal';
-import {MonacoEditorModule} from '@materia-ui/ngx-monaco-editor';
 
 import {AutofocusDirective} from '../misc/autofocus.directive';
 
@@ -51,22 +50,23 @@ import {NzDropDownModule} from "ng-zorro-antd/dropdown";
 import {IndexingFormComponent} from './components/indexing-form/indexing-form.component';
 import {NzLayoutModule} from "ng-zorro-antd/layout";
 import {NzAutocompleteModule} from "ng-zorro-antd/auto-complete";
+import {MatDialogModule} from "@angular/material/dialog";
+import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 
 @NgModule({
-  declarations: [
-    ChainPageComponent,
-    ChainViewComponent,
-    ParserComponent,
-    RouterComponent,
-    CustomFormComponent,
-    ParserComposerComponent,
-    RouteComponent,
-    AdvancedEditorComponent,
-    AutofocusDirective,
-    MultiInputComponent,
-    IndexingFormComponent,
-  ],
-  entryComponents: [ ChainViewComponent ],
+    declarations: [
+        ChainPageComponent,
+        ChainViewComponent,
+        ParserComponent,
+        RouterComponent,
+        CustomFormComponent,
+        ParserComposerComponent,
+        RouteComponent,
+        AdvancedEditorComponent,
+        AutofocusDirective,
+        MultiInputComponent,
+        IndexingFormComponent,
+    ],
     imports: [
         NzModalModule,
         CommonModule,
@@ -94,9 +94,9 @@ import {NzAutocompleteModule} from "ng-zorro-antd/auto-complete";
         NzLayoutModule,
         NzAutocompleteModule,
     ],
-  providers: [
-    NzMessageService,
-  ],
-  exports: [ ChainPageComponent, ChainViewComponent ]
+    providers: [
+        NzMessageService,
+    ],
+    exports: [ChainPageComponent, ChainViewComponent, AdvancedEditorComponent]
 })
 export class ChainPageModule { }

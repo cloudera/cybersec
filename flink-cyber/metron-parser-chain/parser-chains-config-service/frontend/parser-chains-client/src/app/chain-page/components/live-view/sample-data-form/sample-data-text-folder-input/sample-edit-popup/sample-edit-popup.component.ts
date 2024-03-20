@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
+import {UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {Store} from "@ngrx/store";
 import {SampleDataTextFolderInputState} from "../sample-data-text-folder-input.reducers";
 import {HideEditModalAction} from "../sample-data-text-folder-input.actions";
@@ -17,23 +17,23 @@ export class SampleEditPopupComponent implements OnChanges {
 
     @Output() sampleDataChange = new EventEmitter<SampleDataInternalModel>();
 
-    editSampleForm: FormGroup;
+    editSampleForm: UntypedFormGroup;
     isOkLoading = false;
 
 
     constructor(private store: Store<SampleDataTextFolderInputState>,
-                private fb: FormBuilder) {
+                private fb: UntypedFormBuilder) {
 
     }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.sample !== undefined && !changes.sample.isFirstChange()){
             this.editSampleForm = this.fb.group({
-                source: new FormControl(this.sample.source),
-                name: new FormControl(this.sample.name, [Validators.required, Validators.minLength(3)]),
-                description: new FormControl(this.sample.description),
-                expectedFailure: new FormControl(this.sample.expectedFailure, Validators.required),
-                expectedResult: new FormControl(this.sample.expectedResult)
+                source: new UntypedFormControl(this.sample.source),
+                name: new UntypedFormControl(this.sample.name, [Validators.required, Validators.minLength(3)]),
+                description: new UntypedFormControl(this.sample.description),
+                expectedFailure: new UntypedFormControl(this.sample.expectedFailure, Validators.required),
+                expectedResult: new UntypedFormControl(this.sample.expectedResult)
             });
         }
     }
