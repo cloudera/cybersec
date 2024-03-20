@@ -21,7 +21,7 @@ import {NZ_ICONS} from 'ng-zorro-antd/icon';
 
 import {AdvancedEditorComponent} from './advanced-editor/advanced-editor.component';
 import {ParserComponent} from './parser.component';
-import {MonacoEditorModule} from '@materia-ui/ngx-monaco-editor';
+import {MonacoEditorModule} from 'ngx-monaco-editor-v2';
 import {NzTabsModule} from "ng-zorro-antd/tabs";
 import {NzCollapseModule} from "ng-zorro-antd/collapse";
 import {MockComponent} from "ng-mocks";

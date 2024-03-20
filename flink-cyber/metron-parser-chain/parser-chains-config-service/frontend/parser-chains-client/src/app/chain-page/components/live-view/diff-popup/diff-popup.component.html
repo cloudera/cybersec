@@ -8,8 +8,8 @@
 >
     <ng-template #modalContent>
         <app-text-diff-view
-                [originalModel]="previousDiffValue$ | async"
-                [modifiedModel]="newDiffValue$ | async">
+                [originalModelJson]="previousDiffValue$ | async"
+                [modifiedModelJson]="newDiffValue$ | async">
         </app-text-diff-view>
     </ng-template>
   <ng-template #modalFooter>

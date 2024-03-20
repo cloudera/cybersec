@@ -1,6 +1,6 @@
 import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {ConfigChangedEvent} from "../parser/advanced-editor/advanced-editor.component";
-import {FormBuilder, FormGroup} from "@angular/forms";
+import {FormBuilder, FormGroup, UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
 import {select, Store} from "@ngrx/store";
 import {ChainPageState, getIndexMappings} from "../../chain-page.reducers";
 import {GetIndexMappingsAction} from "../../chain-page.actions";
@@ -14,13 +14,13 @@ import {Observable, Subject} from "rxjs";
 })
 export class IndexingFormComponent implements OnInit, OnDestroy {
 
-  form!: FormGroup;
+  form!: UntypedFormGroup;
   @Output() fieldSetUpdated = new EventEmitter<Map<string, Map<string, boolean>>>();
   mappingJson: any;
   unSubscribe$ = new Subject<void>();
   private indexMappings$: Observable<{ path: string; result: object }>;
 
-  constructor(private fb: FormBuilder,
+  constructor(private fb: UntypedFormBuilder,
               private store: Store<ChainPageState>) {
     this.indexMappings$ = this.store.pipe(select(getIndexMappings), takeUntil(this.unSubscribe$));
   }
