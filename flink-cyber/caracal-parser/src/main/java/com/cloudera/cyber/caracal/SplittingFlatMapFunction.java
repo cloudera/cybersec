@@ -15,7 +15,7 @@ package com.cloudera.cyber.caracal;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.SignedSourceKey;
 import com.cloudera.cyber.parser.MessageToParse;
-import com.cloudera.cyber.rules.engines.JavascriptEngineBuilder;
+import com.cloudera.cyber.rules.RuleType;
 import com.cloudera.cyber.rules.engines.RuleEngine;
 import com.google.common.collect.Streams;
 import com.jayway.jsonpath.DocumentContext;
@@ -110,9 +110,7 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
         }
 
         if(config.getTimestampFunction() != null & !config.getTimestampFunction().isEmpty()) {
-            this.engine = new JavascriptEngineBuilder()
-                    .script("")
-                    .build();
+            this.engine = RuleType.JS.engine("");
 
             this.setTimestampFunction(config.getTimestampFunction());
         } else {

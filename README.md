@@ -1,6 +1,6 @@
 # Cybersec Toolkit
 
-[![Java CI with Maven](https://github.com/cloudera/cybersec/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/cloudera/cybersec/actions/workflows/build_and_test.yml)
+[![Build and Test](https://github.com/cloudera/cybersec/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/cloudera/cybersec/actions/workflows/build_and_test.yml)
 
 ## Overview
 Enterprises deploy many point solutions to defend their networks.  These point solutions provide a wealth of data about the enterprise assets and networks but it is difficult to provide analytics on this data because there is no common repository and the events are in different formats.  The Cybersec Toolkit is a pipeline that ingests, correlates and prepares cybersecurity data for analytics.  The Cyber Toolkit leverages the Cloudera Data Platform to build a Security Data Lakehouse.

@@ -25,7 +25,6 @@
 
     <properties>
         <main.class>com.cloudera.cyber.indexing.hive.HiveJobKafka</main.class>
-        <java.version>1.8</java.version>
         <hive.version>3.1.3000.${cdh.version}</hive.version>
     </properties>
 

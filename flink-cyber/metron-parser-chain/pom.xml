@@ -41,10 +41,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <!-- source code versions -->
-        <java-source.version>1.8</java-source.version>
-        <java-target.version>1.8</java-target.version>
-
         <!-- plugin versions -->
         <maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
@@ -278,8 +274,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                     <configuration>
-                        <source>${java-source.version}</source>
-                        <target>${java-target.version}</target>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
                     </configuration>
                 </plugin>
                 <plugin>

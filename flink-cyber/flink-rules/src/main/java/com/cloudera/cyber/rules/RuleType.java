@@ -19,7 +19,9 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import java.util.concurrent.TimeUnit;
 
 public enum RuleType {
-    JS(new JavascriptEngineBuilder()),
+    JS(new JavaScriptGraaljsEngineBuilder()),
+    @Deprecated
+    JS_NASHORN(new JavaScriptNashornEngineBuilder()),
     PYTHON(new PythonEngineBuilder()),
     STELLAR(new StellarEngineBuilder());
 
