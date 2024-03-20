@@ -1,6 +1,6 @@
 import {Component, EventEmitter, OnDestroy, OnInit, Output} from '@angular/core';
 import {ConfigChangedEvent} from "../parser/advanced-editor/advanced-editor.component";
-import {FormBuilder, FormGroup, UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
+import {UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
 import {select, Store} from "@ngrx/store";
 import {ChainPageState, getIndexMappings} from "../../chain-page.reducers";
 import {GetIndexMappingsAction} from "../../chain-page.actions";

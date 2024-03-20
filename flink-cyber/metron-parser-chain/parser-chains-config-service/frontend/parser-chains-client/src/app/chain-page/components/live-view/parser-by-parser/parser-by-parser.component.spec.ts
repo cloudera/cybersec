@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-import {ComponentFixture, fakeAsync, TestBed, tick, waitForAsync} from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {CheckCircleOutline, CloseCircleOutline, WarningFill} from '@ant-design/icons-angular/icons';
 import {NzIconModule} from 'ng-zorro-antd/icon';
@@ -28,9 +28,7 @@ import {NzModalModule} from "ng-zorro-antd/modal";
 import {NzPopoverModule} from "ng-zorro-antd/popover";
 import {FormsModule} from "@angular/forms";
 import {NoopAnimationsModule} from "@angular/platform-browser/animations";
-import {findEl} from "../../../../shared/test/test-helper";
 import {ShowDiffModalAction} from "../diff-popup/diff-popup.actions";
-import {MonacoEditorModule} from "@materia-ui/ngx-monaco-editor";
 import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
 import {MockComponent} from "ng-mocks";
 
@@ -56,7 +54,6 @@ describe('ParserByParserComponent', () => {
         NzTimelineModule,
         NzResultModule,
         NoopAnimationsModule,
-        MonacoEditorModule,
         NzIconModule.forRoot([CheckCircleOutline, CloseCircleOutline, WarningFill])
       ],
       providers: [
