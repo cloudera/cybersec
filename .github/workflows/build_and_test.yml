@@ -49,5 +49,5 @@ jobs:
         run: npm install
         working-directory: ./flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client
       - name: Run test
-        run: npm test
+        run: npm run test:headless
         working-directory: ./flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client
