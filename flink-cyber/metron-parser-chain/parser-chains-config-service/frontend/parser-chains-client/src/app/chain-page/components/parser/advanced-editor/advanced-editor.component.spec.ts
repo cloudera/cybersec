@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 
 import { AdvancedEditorComponent } from './advanced-editor.component';
 import {NzFormModule} from "ng-zorro-antd/form";
+import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 
 describe('AdvancedEditorComponent', () => {
   let component: AdvancedEditorComponent;
@@ -24,6 +25,7 @@ describe('AdvancedEditorComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         FormsModule,
+        MonacoEditorModule.forRoot({}),
         NzFormModule,
       ],
       declarations: [ AdvancedEditorComponent ]

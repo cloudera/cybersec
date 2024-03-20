@@ -25,7 +25,7 @@ export class TextDiffViewComponent implements OnChanges {
         }
     }
 
-    onChangeInline(checked) {
-        this.diffOptions = Object.assign({}, this.diffOptions, {renderSideBySide: !checked});
+    onChangeInline(checked: boolean) {
+        this.diffOptions = {...this.diffOptions, renderSideBySide: !checked};
     }
 }
