@@ -15,7 +15,7 @@ on:
     branches: [ "develop" ]
 
 jobs:
-  build_and_test:
+  build_and_test_java:
     runs-on: ubuntu-latest
     container: maven:3-eclipse-temurin-8
     steps:
