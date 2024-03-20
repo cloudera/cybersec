@@ -1,8 +1,8 @@
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
 import { TextDiffViewComponent } from './text-diff-view.component';
-import {MonacoEditorModule} from "@materia-ui/ngx-monaco-editor";
 import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
+import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 
 describe('TextDiffViewComponent', () => {
   let component: TextDiffViewComponent;
@@ -10,7 +10,7 @@ describe('TextDiffViewComponent', () => {
 
   beforeEach(waitForAsync( () => {
     TestBed.configureTestingModule({
-      imports: [MonacoEditorModule],
+      imports: [],
       declarations: [ TextDiffViewComponent ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
     })
@@ -20,8 +20,8 @@ describe('TextDiffViewComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(TextDiffViewComponent);
     component = fixture.componentInstance;
-    component.originalModel = 'original';
-    component.modifiedModel = 'modified';
+    component.originalModelJson = 'original';
+    component.modifiedModelJson = 'modified';
     fixture.detectChanges();
   });
 

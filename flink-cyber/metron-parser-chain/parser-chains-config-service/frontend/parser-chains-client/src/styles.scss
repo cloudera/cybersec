@@ -1,13 +1,20 @@
-
-// Custom Theming for Angular Material
-// For more information: https://material.angular.io/guide/theming
+/*!
+ * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+ *
+ * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. Refer to the License for the specific permissions and
+ * limitations governing your use of the file.
+ */
 @use '@angular/material' as mat;
-// Plus imports for other components in your app.
 
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
 @include mat.core();
+@import "./theme.scss";
+@import "./custom-component-theme";
+@import "./custom-palite";
 
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
@@ -32,24 +39,6 @@ $parser-chaining-theme: mat.define-light-theme((
 // Alternatively, you can import and @include the theme mixins for each component
 // that you are using.
 @include mat.all-component-themes($parser-chaining-theme);
-
-/*!
- * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
- *
- * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0.
- *
- * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. Refer to the License for the specific permissions and
- * limitations governing your use of the file.
- */
-@use '@angular/material' as mat;
-
-@include mat.core();
-@import "./theme.scss";
-@import "./custom-component-theme";
-@import "./custom-palite";
 
 @include mat.all-component-themes($theming-material-components-theme);
 @include custom-components-theme($theming-material-components-theme, $notifications-theme);

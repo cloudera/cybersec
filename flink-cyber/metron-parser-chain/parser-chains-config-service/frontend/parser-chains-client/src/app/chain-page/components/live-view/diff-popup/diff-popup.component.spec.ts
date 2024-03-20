@@ -9,7 +9,6 @@ import {CommonModule} from "@angular/common";
 import {NzModalModule} from "ng-zorro-antd/modal";
 import {NoopAnimationsModule} from "@angular/platform-browser/animations";
 import {TextDiffViewComponent} from "../text-diff-view/text-diff-view.component";
-import {MonacoEditorModule} from "@materia-ui/ngx-monaco-editor";
 import {MockComponent} from "ng-mocks";
 import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
 
@@ -25,7 +24,6 @@ describe('DiffPopupComponent', () => {
         CommonModule,
         NoopAnimationsModule,
         NzModalModule,
-        MonacoEditorModule
       ],
       providers: [
         provideMockStore({

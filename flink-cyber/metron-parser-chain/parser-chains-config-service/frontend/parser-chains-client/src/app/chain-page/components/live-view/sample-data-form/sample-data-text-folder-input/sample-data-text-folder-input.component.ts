@@ -1,24 +1,26 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {
-    SampleDataInternalModel,
-    SampleDataModel,
-    SampleDataType,
-    SampleTestStatus
+  SampleDataInternalModel,
+  SampleDataModel,
+  SampleDataType,
+  SampleTestStatus
 } from "../../models/sample-data.model";
 import {EntryParsingResultModel} from "../../models/live-view.model";
 import {select, Store} from "@ngrx/store";
 import {SampleDataTextFolderInputState} from "./sample-data-text-folder-input.reducers";
 import {
-    getEditModalVisible,
-    getExecutionStatus,
-    getRunResults,
-    getSampleData, getSampleFolderPath
+  getEditModalVisible,
+  getExecutionStatus,
+  getRunResults,
+  getSampleData,
+  getSampleFolderPath
 } from "./sample-data-text-folder-input.selectors";
 import {Observable, Subject} from "rxjs";
 import {
-    FetchSampleListTriggeredAction, SampleFolderViewInitializedAction,
-    SaveSampleListTriggeredAction,
-    ShowEditModalAction
+  FetchSampleListTriggeredAction,
+  SampleFolderViewInitializedAction,
+  SaveSampleListTriggeredAction,
+  ShowEditModalAction
 } from "./sample-data-text-folder-input.actions";
 import {UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
 import {map, takeUntil} from "rxjs/operators";
