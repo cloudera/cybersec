@@ -11,7 +11,7 @@
  */
 
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { UntypedFormControl, ReactiveFormsModule } from '@angular/forms';
 import { MinusCircleFill, PlusCircleFill } from '@ant-design/icons-angular/icons';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import {  NZ_ICONS } from 'ng-zorro-antd/icon';
@@ -68,9 +68,9 @@ describe('MultiInputComponent', () => {
   it('should emit change with the proper payload', () => {
     const spy = spyOn(component.changeValue, 'emit');
     component.controls = [
-      new FormControl('value 1'),
-      new FormControl('value 2'),
-      new FormControl('value 3'),
+      new UntypedFormControl('value 1'),
+      new UntypedFormControl('value 2'),
+      new UntypedFormControl('value 3'),
     ];
     component.onChange({
       type: 'text',

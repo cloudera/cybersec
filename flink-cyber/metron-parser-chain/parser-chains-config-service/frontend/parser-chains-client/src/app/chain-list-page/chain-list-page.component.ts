@@ -11,7 +11,7 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {select, Store} from '@ngrx/store';
 import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
@@ -43,11 +43,11 @@ export class ChainListPageComponent implements OnInit {
   totalRecords = 200;
   chainDataSorted$: Observable<ChainModel[]>;
   sortDescription$: BehaviorSubject<{ key: string, value: string }> = new BehaviorSubject({key: 'name', value: ''});
-  newChainForm: FormGroup;
+  newChainForm: UntypedFormGroup;
 
   constructor(
     private store: Store<ChainListPageState>,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private route: ActivatedRoute,
     private messageService: NzMessageService,
   ) {
@@ -67,7 +67,7 @@ export class ChainListPageComponent implements OnInit {
   }
 
   get chainName() {
-    return this.newChainForm.get('chainName') as FormControl;
+    return this.newChainForm.get('chainName') as UntypedFormControl;
   }
 
   showAddChainModal(): void {
@@ -124,7 +124,7 @@ export class ChainListPageComponent implements OnInit {
 
   ngOnInit() {
     this.newChainForm = this.fb.group({
-      chainName: new FormControl('', [Validators.required, Validators.minLength(3)]),
+      chainName: new UntypedFormControl('', [Validators.required, Validators.minLength(3)]),
     });
   }
 }

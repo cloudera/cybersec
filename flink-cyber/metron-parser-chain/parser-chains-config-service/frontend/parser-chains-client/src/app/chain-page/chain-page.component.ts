@@ -11,7 +11,7 @@
  */
 
 import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, NavigationStart, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
 import {NzModalService} from 'ng-zorro-antd/modal';
@@ -53,7 +53,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   getChainsSubscription: Subscription;
   popOverVisible = false;
   @ViewChild('chainNameInput', { static: false }) chainNameInput: ElementRef;
-  editChainNameForm: FormGroup;
+  editChainNameForm: UntypedFormGroup;
   failedParser$: Observable<string>;
   indexingFieldMap: Map<string,Map<string, boolean>>;
 
@@ -62,7 +62,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
     private activatedRoute: ActivatedRoute,
     private modal: NzModalService,
     private router: Router,
-    private fb: FormBuilder
+    private fb: UntypedFormBuilder
   ) { }
 
   get dirty() {
@@ -121,7 +121,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
     });
 
     this.editChainNameForm = this.fb.group({
-      name: new FormControl(null, [Validators.required, Validators.minLength(3)])
+      name: new UntypedFormControl(null, [Validators.required, Validators.minLength(3)])
     });
 
     this.store.dispatch(new fromActions.GetFormConfigsAction());
