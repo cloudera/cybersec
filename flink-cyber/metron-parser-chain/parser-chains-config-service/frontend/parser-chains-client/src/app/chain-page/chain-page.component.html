@@ -114,10 +114,10 @@
   </div>
   <div nz-col nzSpan="4" class="chain-actions">
     <div nz-row nzType="flex" nzJustify="end">
-      <button nz-button nzType="default" type="button" (click)="onResetChanges($event)" [disabled]="!dirty">
+      <button nz-button nzType="default" type="button" (click)="onResetChanges()" [disabled]="!dirty">
       Reset
     </button>
-    <button nz-button nzType="primary" type="button" (click)="onSaveChanges($event)" [disabled]="!dirty">
+    <button nz-button nzType="primary" type="button" (click)="onSaveChanges()" [disabled]="!dirty">
       Save
     </button>
     </div>

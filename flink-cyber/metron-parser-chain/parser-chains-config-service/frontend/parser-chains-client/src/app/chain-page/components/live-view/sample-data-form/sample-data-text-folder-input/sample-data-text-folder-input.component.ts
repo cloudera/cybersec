@@ -20,7 +20,7 @@ import {
     SaveSampleListTriggeredAction,
     ShowEditModalAction
 } from "./sample-data-text-folder-input.actions";
-import {FormBuilder, FormGroup} from "@angular/forms";
+import {UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
 import {map, takeUntil} from "rxjs/operators";
 
 @Component({
@@ -46,14 +46,14 @@ export class SampleDataTextFolderInputComponent implements OnInit {
     sampleFolderPath$: Observable<string>;
     editSampleModalVisible$: Observable<boolean>;
     expandSet = new Set<number>();
-    folderForm!: FormGroup;
+    folderForm!: UntypedFormGroup;
     currentSampleData: SampleDataInternalModel[];
     selectedSample: [number, SampleDataInternalModel] = [null, null];
     private unsubscribe$: Subject<void> = new Subject<void>();
 
 
   constructor(private store: Store<SampleDataTextFolderInputState>,
-                private fb: FormBuilder) {
+                private fb: UntypedFormBuilder) {
         this.isExecuting$ = this.store.pipe(select(getExecutionStatus));
         this.runResults$ = this.store.pipe(select(getRunResults));
         this.sampleData$ = this.store.pipe(select(getSampleData));
