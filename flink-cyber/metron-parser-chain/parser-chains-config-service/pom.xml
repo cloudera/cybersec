@@ -26,17 +26,6 @@
     <dependencies>
         <dependency>
             <groupId>com.cloudera.parserchains</groupId>
-            <artifactId>parser-chains-client</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>swagger-annotations</artifactId>
-                    <groupId>io.swagger</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.cloudera.parserchains</groupId>
             <artifactId>parser-chains-parsers</artifactId>
             <version>${project.version}</version>
             <exclusions>
@@ -190,6 +179,19 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>com.cloudera.parserchains</groupId>
+                    <artifactId>parser-chains-client</artifactId>
+                    <version>${project.version}</version>
+                    <exclusions>
+                        <exclusion>
+                            <artifactId>swagger-annotations</artifactId>
+                            <groupId>io.swagger</groupId>
+                        </exclusion>
+                    </exclusions>
+                </dependency>
+            </dependencies>
             <build>
                 <plugins>
                     <plugin>
