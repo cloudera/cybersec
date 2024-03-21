@@ -14,11 +14,7 @@ import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.types.Row;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class AvroSchemaUtil {
 
@@ -52,7 +48,6 @@ public class AvroSchemaUtil {
             }
         }
         record.put(avroFieldName, value);
-        System.out.println("fieldName: " + fieldName + " value: " + value);
     }
 
     private static Object convertToAvroObject(Schema fieldSchema, Object value) {
