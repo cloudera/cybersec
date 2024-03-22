@@ -54,20 +54,20 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.verion>1.8</java.verion>
-        <flink.version>1.15.1-csa1.9.0.1</flink.version>
+        <flink.version>1.16.2-csadh1.10.0.100</flink.version>
         <flink.hbase.version>2.4</flink.hbase.version>
-        <cdh.version>7.1.7.0-551</cdh.version>
+        <cdh.version>7.2.17.0-334</cdh.version>
         <lombok.version>1.18.22</lombok.version>
         <lombok.plugin.version>1.18.16.0</lombok.plugin.version>
         <guava.version>21.0</guava.version>
-        <avro.version>1.10.0</avro.version>
-        <log4j.kafka.version>2.5.0.${cdh.version}</log4j.kafka.version>
+        <avro.version>1.11.1</avro.version>
+        <log4j.kafka.version>3.4.0.${cdh.version}</log4j.kafka.version>
         <scala.binary.version>2.12</scala.binary.version>
-        <kafka.version>2.5.0.${cdh.version}</kafka.version>
+        <kafka.version>3.4.0.${cdh.version}</kafka.version>
         <nifi.version>1.11.4</nifi.version>
         <jackson.version>2.11.2</jackson.version>
         <jackson.datatype.version>2.10.1</jackson.datatype.version>
-        <smm.intercepter.version>2.1.0.${cdh.version}</smm.intercepter.version>
+        <smm.intercepter.version>2.3.0.${cdh.version}</smm.intercepter.version>
         <flink.format.parquet.version>1.11.1</flink.format.parquet.version>
         <slf4j.version>1.7.36</slf4j.version>
         <log4j.version>2.17.2</log4j.version>
@@ -81,13 +81,13 @@
         <solr.version>8.4.1.${cdh.version}</solr.version>
         <maxmind.version>2.13.1</maxmind.version>
         <hadoop.version>3.1.1.${cdh.version}</hadoop.version>
-        <hbase.version>2.2.3.${cdh.version}</hbase.version>
+        <hbase.version>2.4.6.${cdh.version}</hbase.version>
         <mockito.version>3.6.0</mockito.version>
         <datasketches.version>1.3.0-incubating</datasketches.version>
         <assertj.version>3.13.2</assertj.version>
         <json.simple.version>1.1.1</json.simple.version>
         <jupiter.junit.version>5.9.3</jupiter.junit.version>
-        <phoenix.version>5.1.0.${cdh.version}</phoenix.version>
+        <phoenix.version>5.1.1.${cdh.version}</phoenix.version>
         <phoenix.queryserver>6.0.0.${cdh.version}</phoenix.queryserver>
         <classindex.version>3.4</classindex.version>
         <antlr.version>4.9.3</antlr.version>
@@ -109,6 +109,9 @@
         <commons-text.version>1.10.0</commons-text.version>
         <java-grok.version>0.1.9</java-grok.version>
         <everit-json-schema.version>1.14.2</everit-json-schema.version>
+        <orc.version>1.5.1.${cdh.version}</orc.version>
+        <spring-boot.version>2.7.6</spring-boot.version>
+        <swagger-annotations.version>1.6.0</swagger-annotations.version>
     </properties>
 
     <repositories>
@@ -157,6 +160,12 @@
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-kafka</artifactId>
                 <version>${flink.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.kafka</groupId>
+                        <artifactId>kafka-clients</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -211,6 +220,12 @@
                 <artifactId>flink-orc</artifactId>
                 <version>${flink.version}</version>
                 <scope>provided</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.orc</groupId>
+                        <artifactId>orc-core</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -222,10 +237,21 @@
 
             <dependency>
                 <groupId>org.apache.flink</groupId>
-                <artifactId>flink-connector-hbase</artifactId>
+                <artifactId>flink-connector-hbase-${flink.hbase.version}</artifactId>
                 <version>${flink.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.hbase</groupId>
+                        <artifactId>hbase-client</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.orc</groupId>
+                <artifactId>orc-core</artifactId>
+                <version>${orc.version}</version>
+            </dependency>
 <!--            replacing inside flink-cloudera-registry-->
             <dependency>
                 <groupId>com.github.erosb</groupId>
@@ -243,8 +269,20 @@
                         <artifactId>avro</artifactId>
                     </exclusion>
                     <exclusion>
+                        <groupId>org.apache.avro</groupId>
+                        <artifactId>avro</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.hortonworks.registries</groupId>
+                        <artifactId>schema-registry-serdes</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>org.everit.json</groupId>
                         <artifactId>org.everit.json.schema</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>log4j-over-slf4j</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -374,6 +412,12 @@
                 <groupId>com.hortonworks.registries</groupId>
                 <artifactId>schema-registry-serdes</artifactId>
                 <version>0.9.1</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>log4j-over-slf4j</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- Utilities -->
@@ -624,11 +668,6 @@
                 <dependency>
                     <groupId>org.apache.flink</groupId>
                     <artifactId>flink-connector-kafka</artifactId>
-                    <version>${flink.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.apache.flink</groupId>
-                    <artifactId>flink-cloudera-registry</artifactId>
                     <version>${flink.version}</version>
                 </dependency>
             </dependencies>
