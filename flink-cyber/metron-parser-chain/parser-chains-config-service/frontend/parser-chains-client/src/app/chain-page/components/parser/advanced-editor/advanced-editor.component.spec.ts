@@ -10,19 +10,23 @@
  * limitations governing your use of the file.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 
 import { AdvancedEditorComponent } from './advanced-editor.component';
+import {NzFormModule} from "ng-zorro-antd/form";
+import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 
 describe('AdvancedEditorComponent', () => {
   let component: AdvancedEditorComponent;
   let fixture: ComponentFixture<AdvancedEditorComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         FormsModule,
+        MonacoEditorModule.forRoot({}),
+        NzFormModule,
       ],
       declarations: [ AdvancedEditorComponent ]
     })

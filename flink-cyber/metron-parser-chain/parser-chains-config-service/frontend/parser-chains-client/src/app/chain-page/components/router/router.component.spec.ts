@@ -10,47 +10,37 @@
  * limitations governing your use of the file.
  */
 
-import { Component, Input } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { DeleteFill } from '@ant-design/icons-angular/icons';
-import { NzModalModule } from 'ng-zorro-antd/modal';
-import { NZ_ICONS } from 'ng-zorro-antd/icon';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {FormsModule} from '@angular/forms';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {DeleteFill} from '@ant-design/icons-angular/icons';
+import {NzModalModule} from 'ng-zorro-antd/modal';
+import {NZ_ICONS} from 'ng-zorro-antd/icon';
 
-import { RouterComponent } from './router.component';
+import {RouterComponent} from './router.component';
+import {NzCollapseModule} from "ng-zorro-antd/collapse";
+import {NzTabsModule} from "ng-zorro-antd/tabs";
+import {NzFormModule} from "ng-zorro-antd/form";
+import {MockComponent} from "ng-mocks";
+import {CustomFormComponent} from "../custom-form/custom-form.component";
 
-@Component({
-  selector: 'app-custom-form',
-  template: '',
-})
-export class MockCustomFormComponent {
-  @Input() config = [];
-}
-
-@Component({
-  selector: 'app-route',
-  template: ''
-})
-export class MockRouteComponent {
-  @Input() routeId;
-  @Input() parser;
-}
 
 describe('RouterComponent', () => {
   let component: RouterComponent;
   let fixture: ComponentFixture<RouterComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         NzModalModule,
         NoopAnimationsModule,
+        NzCollapseModule,
+        NzTabsModule,
+        NzFormModule,
         FormsModule,
       ],
       declarations: [
-        MockRouteComponent,
-        MockCustomFormComponent,
+        MockComponent(CustomFormComponent),
         RouterComponent
       ],
       providers: [

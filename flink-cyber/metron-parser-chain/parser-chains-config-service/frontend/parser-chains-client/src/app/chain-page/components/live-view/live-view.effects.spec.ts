@@ -30,6 +30,9 @@ import { LiveViewConsts } from './live-view.consts';
 import { LiveViewEffects } from './live-view.effects';
 import { SampleDataModel, SampleDataType } from './models/sample-data.model';
 import { LiveViewService } from './services/live-view.service';
+import {EntryParsingResultModel} from "./models/live-view.model";
+
+
 
 class MockLiveViewService {
   execute(sampleData: SampleDataModel, chainConfig: {}) {
@@ -55,14 +58,13 @@ describe('live-view.effects', () => {
     }
   };
 
-  const testResult = {
-    entries: [
+  const testResult:EntryParsingResultModel[] =
+     [
       {
         output: 'output result',
-        log: { type: '', message: 'log result'},
+        log: { type: '', message: 'log result', stackTrace: '' },
       }
-    ]
-  };
+    ];
 
   const actions$ = new Subject<Action>();
   let liveViewEffects: LiveViewEffects;
@@ -79,9 +81,9 @@ describe('live-view.effects', () => {
         provideMockActions(() => actions$)],
     });
 
-    liveViewEffects = TestBed.get(LiveViewEffects);
-    fakeLiveViewService = TestBed.get(LiveViewService);
-    fakeMessageService = TestBed.get(NzMessageService);
+    liveViewEffects = TestBed.inject(LiveViewEffects);
+    fakeLiveViewService = TestBed.inject(LiveViewService);
+    fakeMessageService = TestBed.inject(NzMessageService);
   });
 
   it('should call liveViewService.execute on executionTriggered', () => {
@@ -89,11 +91,7 @@ describe('live-view.effects', () => {
     liveViewEffects.execute$.subscribe(testSubscriber);
 
     spyOn(fakeLiveViewService, 'execute').and.returnValue(
-        of({
-          ...testPayload,
-          result: testResult
-         }
-        )
+        of({results: testResult})
     );
 
     actions$.next(executionTriggered({ ...testPayload }));
@@ -105,17 +103,15 @@ describe('live-view.effects', () => {
     const testSubscriber = jasmine.createSpy('executionTriggeredSpy');
     liveViewEffects.execute$.subscribe(testSubscriber);
 
-    spyOn(fakeLiveViewService, 'execute').and.returnValue(of({
-      ...testPayload,
-      result: testResult,
-    }));
+    spyOn(fakeLiveViewService, 'execute').and.returnValue(
+      of({results: testResult})
+    );
 
     actions$.next(executionTriggered({ ...testPayload }));
 
     expect(testSubscriber).toHaveBeenCalledWith({
       liveViewResult: {
-        ...testPayload,
-        result: testResult,
+        results: testResult,
       },
       type: liveViewRefreshedSuccessfully.type
     });

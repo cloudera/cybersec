@@ -142,7 +142,7 @@
               {
                 "glob": "**/*",
                 "input": "node_modules/ngx-monaco-editor-v2",
-                "output": "/assets/monaco-editor/"
+                "output": "/assets/monaco-editor/min"
               }
             ]
           }
@@ -194,5 +194,6 @@
         }
       }
     }
-  }
+  },
+  "defaultProject": "parser-chaining"
 }

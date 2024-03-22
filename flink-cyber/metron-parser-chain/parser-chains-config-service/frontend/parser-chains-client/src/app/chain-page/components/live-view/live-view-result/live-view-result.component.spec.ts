@@ -10,40 +10,26 @@
  * limitations governing your use of the file.
  */
 
-import { Component, Input } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-import { NzCardModule } from 'ng-zorro-antd/card';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
+import {NzCardModule} from 'ng-zorro-antd/card';
 
-import { LiveViewResultComponent } from './live-view-result.component';
+import {LiveViewResultComponent} from './live-view-result.component';
+import {MockComponent} from "ng-mocks";
+import {StackTraceComponent} from "../stack-trace/stack-trace.component";
+import {ParserByParserComponent} from "../parser-by-parser/parser-by-parser.component";
 
-@Component({
-  selector: 'app-parser-by-parser',
-  template: '',
-})
-export class MockParserByParserComponent {
-  @Input() parserResults = [];
-  @Input() logMessage = 'test';
-}
-
-@Component({
-  selector: 'app-stack-trace',
-  template: '',
-})
-class FakeStackTraceComponent {
-  @Input() stackTraceMsg = '';
-}
 
 describe('LiveViewResultComponent', () => {
   let component: LiveViewResultComponent;
   let fixture: ComponentFixture<LiveViewResultComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [
         LiveViewResultComponent,
-        MockParserByParserComponent,
-        FakeStackTraceComponent,
+        MockComponent(ParserByParserComponent),
+        MockComponent(StackTraceComponent),
       ],
       imports: [ NzCardModule ],
     })
@@ -75,7 +61,7 @@ describe('LiveViewResultComponent', () => {
     fixture.detectChanges();
 
     const stackTraceComp = fixture.debugElement.query(
-      By.directive(FakeStackTraceComponent)
+      By.directive(StackTraceComponent)
       ).componentInstance;
 
     expect(stackTraceComp.stackTraceMsg).toBe('Fake Strack Trace Msg');

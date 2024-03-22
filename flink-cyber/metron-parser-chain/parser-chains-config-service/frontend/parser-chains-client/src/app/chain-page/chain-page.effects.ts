@@ -11,7 +11,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
 import {Action, Store} from '@ngrx/store';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {Observable, of} from 'rxjs';
@@ -31,10 +31,10 @@ export class ChainPageEffects {
     private store$: Store<any>,
     private messageService: NzMessageService,
     private chainPageService: ChainPageService
-  ) {}
+  ) {
+  }
 
-  @Effect()
-  loadChainDetails$: Observable<Action> = this.actions$.pipe(
+  loadChainDetails$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.LOAD_CHAIN_DETAILS),
     switchMap((action: fromActions.LoadChainDetailsAction) => {
       return this.chainPageService.getChain(action.payload.id).pipe(
@@ -53,10 +53,10 @@ export class ChainPageEffects {
         })
       );
     })
-  );
+  ));
 
-  @Effect()
-  saveParserConfig$: Observable<Action> = this.actions$.pipe(
+
+  saveParserConfig$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.SAVE_PARSER_CONFIG),
     withLatestFrom(this.store$.select(getChainPageState)),
     switchMap(([action, state]) => {
@@ -72,10 +72,9 @@ export class ChainPageEffects {
         })
       );
     })
-  );
+  ));
 
-  @Effect()
-  getFormConfig$: Observable<Action> = this.actions$.pipe(
+  getFormConfig$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.GET_FORM_CONFIG),
     switchMap((action: fromActions.GetFormConfigAction) => {
       return this.chainPageService.getFormConfig(action.payload.type).pipe(
@@ -91,10 +90,9 @@ export class ChainPageEffects {
         })
       );
     })
-  );
+  ));
 
-  @Effect()
-  getFormConfigs$: Observable<Action> = this.actions$.pipe(
+  getFormConfigs$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.GET_FORM_CONFIGS),
     switchMap((action: fromActions.GetFormConfigsAction) => {
       return this.chainPageService.getFormConfigs().pipe(
@@ -109,15 +107,14 @@ export class ChainPageEffects {
         })
       );
     })
-  );
+  ));
 
-  @Effect()
-  getIndexMappings$: Observable<Action> = this.actions$.pipe(
+  getIndexMappings$: Observable<Action> = createEffect(() => this.actions$.pipe(
     ofType(fromActions.GET_INDEX_MAPPINGS),
     switchMap((action: fromActions.GetIndexMappingsAction) => {
       return this.chainPageService.getIndexMappings(action.payload).pipe(
-        map((response:{path:string, result:Map<string, object>}) => {
-          if (response){
+        map((response: { path: string, result: Map<string, object> }) => {
+          if (response) {
             return new fromActions.GetIndexMappingsSuccessAction({
               path: response.path, result: response.result
             });
@@ -126,12 +123,12 @@ export class ChainPageEffects {
               path: '', result: new Map<string, object>()
             });
           }
-          }),
+        }),
         catchError((error: { message: string }) => {
           this.messageService.create('error', error.message);
           return of(new fromActions.GetIndexMappingsFailAction(error));
         })
       );
     })
-  );
+  ));
 }

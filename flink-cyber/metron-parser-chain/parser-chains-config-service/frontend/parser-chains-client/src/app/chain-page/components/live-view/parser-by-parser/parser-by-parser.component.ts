@@ -25,14 +25,18 @@ import {ShowDiffModalAction} from "../diff-popup/diff-popup.actions";
 export class ParserByParserComponent implements OnInit {
   @Input() logMessage: string;
   @Output() investigateParser = new EventEmitter<string>();
-
-
-
   compileErrorDescription =
     'There was an error that prevented your parser chain from being constructed. Please review your configuration settings.';
   private _diffOnly: boolean = false;
   private _parserResults: ParserResultsModel[];
   private _calculatedParserResults: ParserResultsModel[];
+
+  constructor(private store: Store<DiffPopupState>) {
+  }
+
+  ngOnInit() {
+    this.updateParserResults()
+  }
 
   @Input()
   set parserResults(value: ParserResultsModel[]) {
@@ -53,14 +57,6 @@ export class ParserByParserComponent implements OnInit {
     this.updateParserResults();
   }
 
-
-  constructor(private store: Store<DiffPopupState>) {
-  }
-
-  ngOnInit() {
-    this.updateParserResults()
-  }
-
   private updateParserResults() {
     if (this.diffOnly){
       this._calculatedParserResults = this.calculateParsersDiff();
@@ -79,7 +75,6 @@ export class ParserByParserComponent implements OnInit {
 
   private calculateParsersDiff() {
     let parserDiffs: ParserResultsModel[] = []
-
     let previous: ParserResultsModel = null
 
     for (const res of this._parserResults) {
@@ -119,4 +114,5 @@ export class ParserByParserComponent implements OnInit {
 
   protected readonly ParserFieldStatus = ParserFieldStatus;
 
+  protected readonly console = console;
 }

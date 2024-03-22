@@ -33,7 +33,7 @@ export class ParserComposerComponent implements OnInit {
   @Input() chainId: string;
   @Input() failedParser: string;
   @Input() selectedSource: string;
-  @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
+  @Input() indexingFieldMap: Map<string, Map<string, boolean>>;
   @Output() subchainSelect = new EventEmitter<string>();
   @Output() parserRemove = new EventEmitter<string>();
   @Output() parserChange = new EventEmitter<PartialParserModel>();
@@ -45,21 +45,22 @@ export class ParserComposerComponent implements OnInit {
 
   constructor(
     private store: Store<ChainPageState>
-  ) { }
+  ) {
+  }
 
   ngOnInit() {
-    this.store.pipe(select(getParser, {
+    this.store.pipe(select(getParser({
       id: this.parserId
-    })).subscribe((parser) => {
+    }))).subscribe((parser) => {
       this.parser = parser;
       if (parser) {
-        this.store.pipe(select(getFormConfigByType, { type: parser.type }))
-        .subscribe((formConfig) => {
-          if (formConfig) {
-            this.configForm = formConfig.schemaItems;
-            this.parserType = formConfig.name;
-          }
-        });
+        this.store.pipe(select(getFormConfigByType({type: parser.type})))
+          .subscribe((formConfig: CustomFormConfig[]) => {
+            if (formConfig) {
+              this.configForm = formConfig;
+              this.parserType = parser.type;
+            }
+          });
       }
     });
 
@@ -110,5 +111,4 @@ export class ParserComposerComponent implements OnInit {
       })
     );
   }
-
 }

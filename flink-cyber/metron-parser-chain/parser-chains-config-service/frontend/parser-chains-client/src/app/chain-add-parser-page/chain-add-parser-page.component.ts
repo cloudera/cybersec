@@ -83,7 +83,7 @@ export class ChainAddParserPageComponent implements OnInit, OnDestroy {
       this.subchainId = params.subchain;
     });
 
-    this.getChainSubscription = this.store.pipe(select(getChain, { id: this.chainId })).subscribe((chain: ParserChainModel) => {
+    this.getChainSubscription = this.store.pipe(select(getChain({ id: this.chainId }))).subscribe((chain: ParserChainModel) => {
       if (!chain) {
         this.store.dispatch(new fromParserPageAction.LoadChainDetailsAction({
           id: this.chainId

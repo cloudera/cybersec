@@ -11,39 +11,36 @@
   -->
 
 <form nz-form>
-
-    <nz-form-item>
-        <label
-                class="upload-btn-label"
-                nz-button
-                nzType="default"
-                for="upload"
-                (input)="uploadToForm($event)"
-        ><i nz-icon nzType="upload" nzTheme="outline"></i>Upload From File
-        </label>
-        <input
-                class="upload-btn"
-                nz-input
-                id="upload"
-                name="upload"
-                type="file"
-                value="Upload from file"
-                (input)="uploadToForm($event)"
-        />
-    </nz-form-item>
-    <nz-form-item>
-        <nz-form-label nzFor="sourceType">Sample data</nz-form-label>
-        <nz-form-control>
+  <nz-form-item>
+    <label
+      class="upload-btn-label"
+      nz-button
+      for="upload"
+      (input)="uploadToForm($event)"
+    ><i nz-icon nzType="upload" nzTheme="outline"></i>Upload From File
+    </label>
+    <input
+      data-qe-id="upload-input"
+      class="upload-btn"
+      nz-input
+      id="upload"
+      name="upload"
+      type="file"
+      (input)="uploadToForm($event)"
+    />
+  </nz-form-item>
+  <nz-form-item>
+    <nz-form-label nzFor="sourceType">Sample data</nz-form-label>
+    <nz-form-control>
       <textarea
-          #sampleDataInput
-          data-qe-id="sample-input"
-          nz-input
-          placeholder="Add sample data here..."
-          [value]="sampleData.source"
-          [nzAutosize]="{ minRows: 10, maxRows: 44 }"
-          (input)="onApply(sampleDataInput.value)"
-          name="sampleDataInput"
+        data-qe-id="sample-input"
+        nz-input
+        placeholder="Add sample data here..."
+        [value]="sampleData.source"
+        [nzAutosize]="{ minRows: 10, maxRows: 44 }"
+        (input)="sampleData.source=onApply($event)"
+        name="sampleDataInput"
       ></textarea>
-        </nz-form-control>
-    </nz-form-item>
+    </nz-form-control>
+  </nz-form-item>
 </form>

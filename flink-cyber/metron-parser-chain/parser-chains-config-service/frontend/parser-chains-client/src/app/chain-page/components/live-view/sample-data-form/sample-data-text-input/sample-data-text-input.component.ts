@@ -1,6 +1,7 @@
-import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {SampleDataModel} from "../../models/sample-data.model";
 import {NzMessageService} from "ng-zorro-antd/message";
+import {convertToString} from "../../../../../shared/utils";
 
 @Component({
   selector: 'app-sample-data-text-input',
@@ -11,15 +12,16 @@ export class SampleDataTextInputComponent {
 
   @Input() sampleData: SampleDataModel;
   @Output() sampleDataChange = new EventEmitter<SampleDataModel>();
-  @ViewChild('sampleDataInput', { static: true }) sampleDataInput: ElementRef;
 
   constructor(private messageService: NzMessageService) {}
 
-  onApply(sampleDataInput: string) {
+  onApply(event: Event) {
+    const source = (event.target as HTMLInputElement).value;
     this.sampleDataChange.emit({
-      ...this.sampleData,
-      source: sampleDataInput
+      type: this.sampleData.type,
+      source
     });
+    return source;
   }
 
   uploadToForm(e) {
@@ -30,8 +32,8 @@ export class SampleDataTextInputComponent {
       if (fileTypeError) {
         return;
       }
-      this.sampleDataInput.nativeElement.value = reader.result;
-      this.onApply(this.sampleDataInput.nativeElement.value);
+      this.sampleData.source = convertToString(reader.result);
+      this.sampleDataChange.emit(this.sampleData);
     };
     reader.readAsText(file);
   }
