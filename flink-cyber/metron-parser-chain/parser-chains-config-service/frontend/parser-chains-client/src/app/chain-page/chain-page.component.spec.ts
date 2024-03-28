@@ -72,6 +72,7 @@ describe('ChainPageComponent', () => {
                 },
               dirtyParsers: [],
               dirtyChains: [],
+              path: [],
               parserToBeInvestigated: ""
             },
             'live-view': {
