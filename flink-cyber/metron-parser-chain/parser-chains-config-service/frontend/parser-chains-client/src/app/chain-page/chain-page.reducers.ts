@@ -27,13 +27,18 @@ export interface ChainPageState {
   error: string;
   parserToBeInvestigated: string;
   failedParser: string;
-  formConfigs?: { [key: string]: CustomFormConfig[] };
+  formConfigs?: { [key: string]: ParserDescriptor };
   dirtyParsers: string[];
   dirtyChains: string[];
   path: string[];
   indexMappings: { path: string, result: object };
 }
 
+export interface ParserDescriptor {
+  id: string;
+  name: string;
+  schemaItems: CustomFormConfig[];
+}
 export const initialState: ChainPageState = {
   chains: {},
   parsers: {},
@@ -356,7 +361,7 @@ export const getDirtyStatus = createSelector(
 export const getFormConfigByType = (props: { type: string }) => createSelector(
   getChainPageState,
   (state) => {
-    return (state.formConfigs || {})[props.type];
+    return state?.formConfigs[props.type];
   }
 );
 

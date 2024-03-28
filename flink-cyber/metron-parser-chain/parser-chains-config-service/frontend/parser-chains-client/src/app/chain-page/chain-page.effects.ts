@@ -20,7 +20,7 @@ import {catchError, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ChainPageService} from '../services/chain-page.service';
 import * as fromActions from './chain-page.actions';
 import {ChainDetailsModel} from './chain-page.models';
-import {getChainPageState} from './chain-page.reducers';
+import {getChainPageState, ParserDescriptor} from './chain-page.reducers';
 import {denormalizeParserConfig, normalizeParserConfig} from './chain-page.utils';
 import {CustomFormConfig} from './components/custom-form/custom-form.component';
 
@@ -78,10 +78,10 @@ export class ChainPageEffects {
     ofType(fromActions.GET_FORM_CONFIG),
     switchMap((action: fromActions.GetFormConfigAction) => {
       return this.chainPageService.getFormConfig(action.payload.type).pipe(
-        map((formConfig: CustomFormConfig[]) => {
+        map((descriptor: ParserDescriptor) => {
           return new fromActions.GetFormConfigSuccessAction({
             parserType: action.payload.type,
-            formConfig
+            formConfig: descriptor
           });
         }),
         catchError((error: { message: string }) => {
@@ -96,7 +96,7 @@ export class ChainPageEffects {
     ofType(fromActions.GET_FORM_CONFIGS),
     switchMap((action: fromActions.GetFormConfigsAction) => {
       return this.chainPageService.getFormConfigs().pipe(
-        map((formConfigs: { [key: string]: CustomFormConfig[] }) => {
+        map((formConfigs: { [key: string]: ParserDescriptor }) => {
           return new fromActions.GetFormConfigsSuccessAction({
             formConfigs
           });
