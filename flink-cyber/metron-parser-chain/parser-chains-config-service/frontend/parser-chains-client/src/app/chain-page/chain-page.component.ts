@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
 import {UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, NavigationStart, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
@@ -52,7 +52,6 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   chainIdBeingEdited: string;
   getChainsSubscription: Subscription;
   popOverVisible = false;
-  @ViewChild('chainNameInput', { static: false }) chainNameInput: ElementRef;
   editChainNameForm: UntypedFormGroup;
   failedParser$: Observable<string>;
   indexingFieldMap: Map<string,Map<string, boolean>>;
@@ -62,7 +61,8 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
     private activatedRoute: ActivatedRoute,
     private modal: NzModalService,
     private router: Router,
-    private fb: UntypedFormBuilder
+    private fb: UntypedFormBuilder,
+    private zone: NgZone
   ) { }
 
   get dirty() {
@@ -83,13 +83,16 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
 
   ngOnInit() {
     this.activatedRoute.params.subscribe((params) => {
-      this.chainId = params.id;
+      this.zone.run(() => {
+        this.chainId = params.id;
+      });
     });
 
     this.getChainsSubscription = this.store.pipe(select(getPathWithChains)).subscribe((path) => {
-      this.breadcrumbs = path;
+      this.zone.run(() => {
+        this.breadcrumbs = path;
+      });
     });
-
     this.getChainSubscription = this.store.pipe(select(getChain({ id: this.chainId }))).subscribe((chain: ParserChainModel) => {
       if (!chain) {
         this.store.dispatch(new fromActions.LoadChainDetailsAction({
@@ -101,12 +104,16 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
     });
 
     this.store.pipe(select(getDirtyStatus)).subscribe((status) => {
-      this.dirtyParsers = status.dirtyParsers;
-      this.dirtyChains = status.dirtyChains;
+      this.zone.run(() => {
+        this.dirtyParsers = status.dirtyParsers;
+        this.dirtyChains = status.dirtyChains;
+      });
     });
     this.chainConfig$ = this.store.pipe(select(getChainDetails({ chainId: this.chainId })));
     this.store.pipe(select(getParserToBeInvestigated)).subscribe((id: string) => {
-      this.parserToBeInvestigated = id === '' ? [] : [id];
+      this.zone.run(() => {
+        this.parserToBeInvestigated = id === '' ? [] : [id];
+      });
     });
 
     this.router.events.subscribe((event) => {

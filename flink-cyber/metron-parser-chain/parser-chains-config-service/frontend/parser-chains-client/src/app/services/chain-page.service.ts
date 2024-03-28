@@ -15,6 +15,7 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 
 import {ChainDetailsModel} from '../chain-page/chain-page.models';
+import {ParserDescriptor} from "../chain-page/chain-page.reducers";
 
 @Injectable({
     providedIn: 'root'
@@ -42,11 +43,11 @@ export class ChainPageService {
     }
 
     public getFormConfig(type: string) {
-      return this.http.get(this.BASE_URL + `parser-form-configuration/${type}`);
+      return this.http.get<ParserDescriptor>(this.BASE_URL + `parser-form-configuration/${type}`);
     }
 
     public getFormConfigs() {
-      return this.http.get(this.BASE_URL + `parser-form-configuration`);
+      return this.http.get<{[key: string] : ParserDescriptor}>(this.BASE_URL + `parser-form-configuration`);
     }
 
     public getIndexMappings(payload?: { filePath: string} ) {

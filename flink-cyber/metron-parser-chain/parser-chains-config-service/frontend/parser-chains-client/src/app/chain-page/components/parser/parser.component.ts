@@ -37,9 +37,7 @@ export class ParserComponent implements OnInit, OnChanges {
   @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() removeParser = new EventEmitter<string>();
   @Output() parserChange = new EventEmitter<any>();
-
   editName = false;
-
   areFormsReadyToRender = false;
   parserCollapseState = [];
 
@@ -50,19 +48,11 @@ export class ParserComponent implements OnInit, OnChanges {
   ngOnInit() {
     this.configForm = this.setFormFieldValues(this.configForm);
 
-
-    setTimeout(() => {
-      this.areFormsReadyToRender = true;
-    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.configForm) {
-      this.areFormsReadyToRender = false;
       this.configForm = this.setFormFieldValues(this.configForm);
-      setTimeout(() => {
-        this.areFormsReadyToRender = true;
-      });
     }
     if (changes.parser && changes.parser.previousValue) {
       Object.keys(changes.parser.previousValue).forEach(key => {

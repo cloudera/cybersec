@@ -16,6 +16,7 @@
       <nz-tabset class="left-side-tabs">
         <nz-tab class="parsers-tab" nzTitle="Parser config">
           <app-chain-view
+            *ngIf="this.parserToBeInvestigated?.length || this.breadcrumbs?.length || this.chain?.parsers?.length"
             [parsers]="parsers"
             [chainId]="(breadcrumbs.length > 0 && breadcrumbs[breadcrumbs.length - 1].id) || (chain && chain.id)"
             [dirtyParsers]="dirtyParsers"
@@ -78,7 +79,6 @@
                   formControlName="name"
                   required
                   nz-input
-                  #chainNameInput
                   type="text"
                   placeholder="Min 3 Characters"
                   data-qe-id="chain-name-field" />

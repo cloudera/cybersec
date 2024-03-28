@@ -17,7 +17,13 @@ import {v1 as uuidv1} from 'uuid';
 
 import * as fromActions from '../../chain-page.actions';
 import {ParserModel, PartialParserModel} from '../../chain-page.models';
-import {ChainPageState, getFormConfigByType, getParser, getParserToBeInvestigated} from '../../chain-page.reducers';
+import {
+  ChainPageState,
+  getFormConfigByType,
+  getParser,
+  getParserToBeInvestigated,
+  ParserDescriptor
+} from '../../chain-page.reducers';
 import {CustomFormConfig} from '../custom-form/custom-form.component';
 
 @Component({
@@ -55,10 +61,10 @@ export class ParserComposerComponent implements OnInit {
       this.parser = parser;
       if (parser) {
         this.store.pipe(select(getFormConfigByType({type: parser.type})))
-          .subscribe((formConfig: CustomFormConfig[]) => {
-            if (formConfig) {
-              this.configForm = formConfig;
-              this.parserType = parser.type;
+          .subscribe((descriptor: ParserDescriptor) => {
+            if (descriptor) {
+              this.configForm = descriptor.schemaItems;
+              this.parserType = descriptor.name;
             }
           });
       }
