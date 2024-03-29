@@ -22,19 +22,19 @@ import { SampleDataModel, SampleDataRequestModel } from '../models/sample-data.m
 })
 export class LiveViewService {
 
-  readonly SAMPLE_PARSER_URL = '/api/v1/parserconfig/tests';
+  static readonly SAMPLE_PARSER_URL = '/api/v1/parserconfig/tests';
 
   constructor(
-    private http: HttpClient,
+    private _http: HttpClient,
   ) { }
 
-  execute(sampleData: SampleDataModel, chainConfig: {}): Observable<{ results: EntryParsingResultModel[]}> {
+  execute(sampleData: SampleDataModel, chainConfig: unknown): Observable<{ results: EntryParsingResultModel[]}> {
     const sampleDataRequest: SampleDataRequestModel = {
       ...sampleData,
       source: sampleData.source.trimEnd().split('\n')
     };
-    return this.http.post<{ results: EntryParsingResultModel[]}>(
-      this.SAMPLE_PARSER_URL,
+    return this._http.post<{ results: EntryParsingResultModel[]}>(
+      LiveViewService.SAMPLE_PARSER_URL,
       { sampleData: sampleDataRequest, chainConfig } as LiveViewRequestModel);
   }
 }

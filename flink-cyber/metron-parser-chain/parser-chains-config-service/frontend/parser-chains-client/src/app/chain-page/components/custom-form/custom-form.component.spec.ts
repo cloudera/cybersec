@@ -10,20 +10,13 @@
  * limitations governing your use of the file.
  */
 
-import { Component, Input } from '@angular/core';
-import {async, ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CustomFormComponent } from './custom-form.component';
 import {NzFormModule} from "ng-zorro-antd/form";
+import {MockComponent} from "ng-mocks";
+import {MultiInputComponent} from "./components/multi-input/multi-input.component";
 
-@Component({
-  selector: 'app-multi-input',
-  template: '',
-})
-export class MockMultiInputComponent {
-  @Input() config = [];
-  @Input() value;
-}
 
 describe('CustomFormComponent', () => {
   let component: CustomFormComponent;
@@ -36,8 +29,8 @@ describe('CustomFormComponent', () => {
         NzFormModule
       ],
       declarations: [
-        MockMultiInputComponent,
-        CustomFormComponent
+        CustomFormComponent,
+        MockComponent(MultiInputComponent)
       ]
     })
     .compileComponents();

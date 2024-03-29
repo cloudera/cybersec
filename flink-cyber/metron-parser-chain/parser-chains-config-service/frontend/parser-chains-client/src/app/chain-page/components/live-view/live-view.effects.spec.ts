@@ -10,11 +10,11 @@
  * limitations governing your use of the file.
  */
 
-import { TestBed } from '@angular/core/testing';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { Action } from '@ngrx/store';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { of, Subject, throwError } from 'rxjs';
+import {TestBed} from '@angular/core/testing';
+import {provideMockActions} from '@ngrx/effects/testing';
+import {Action} from '@ngrx/store';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {of, Subject, throwError} from 'rxjs';
 
 import {
   executionTriggered,
@@ -26,23 +26,11 @@ import {
   sampleDataInputChanged,
   sampleDataRestored
 } from './live-view.actions';
-import { LiveViewConsts } from './live-view.consts';
-import { LiveViewEffects } from './live-view.effects';
-import { SampleDataModel, SampleDataType } from './models/sample-data.model';
-import { LiveViewService } from './services/live-view.service';
+import {LiveViewConsts} from './live-view.consts';
+import {LiveViewEffects} from './live-view.effects';
+import {SampleDataType} from './models/sample-data.model';
+import {LiveViewService} from './services/live-view.service';
 import {EntryParsingResultModel} from "./models/live-view.model";
-
-
-
-class MockLiveViewService {
-  execute(sampleData: SampleDataModel, chainConfig: {}) {
-    return new Subject();
-  }
-}
-
-class MockMessageService {
-  create(type: string, message: string) {}
-}
 
 describe('live-view.effects', () => {
 
@@ -75,8 +63,8 @@ describe('live-view.effects', () => {
     TestBed.configureTestingModule({
       providers: [
         LiveViewEffects,
-        { provide: LiveViewService, useClass: MockLiveViewService },
-        { provide: NzMessageService, useClass: MockMessageService },
+        { provide: LiveViewService, useValue: jasmine.createSpyObj('LiveViewService', ['execute']) },
+        { provide: NzMessageService, useValue: jasmine.createSpyObj('NzMessageService', ['create']) },
 
         provideMockActions(() => actions$)],
     });

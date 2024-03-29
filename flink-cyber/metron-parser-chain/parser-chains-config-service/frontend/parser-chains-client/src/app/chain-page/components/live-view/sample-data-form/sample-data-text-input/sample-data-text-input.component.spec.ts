@@ -7,7 +7,7 @@ import {NzFormModule} from "ng-zorro-antd/form";
 import {SampleDataType} from "../../models/sample-data.model";
 import {NzInputModule} from "ng-zorro-antd/input";
 import {NoopAnimationsModule} from "@angular/platform-browser/animations";
-import {findEl} from "../../../../../shared/test/test-helper";
+import {findEl} from "src/app/shared/test/test-helper";
 
 describe('SampleDataTextInputComponent', () => {
   let component: SampleDataTextInputComponent;

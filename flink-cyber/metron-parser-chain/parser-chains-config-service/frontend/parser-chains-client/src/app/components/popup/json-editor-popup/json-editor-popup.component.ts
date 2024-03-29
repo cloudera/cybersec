@@ -9,7 +9,7 @@ import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 export class JsonEditorPopupComponent {
 
   constructor(public dialogRef: MatDialogRef<JsonEditorPopupComponent>,
-              @Inject(MAT_DIALOG_DATA) public json: {}) {  }
+              @Inject(MAT_DIALOG_DATA) public json: unknown) {  }
 
   closeDialog() {
     this.dialogRef.close();

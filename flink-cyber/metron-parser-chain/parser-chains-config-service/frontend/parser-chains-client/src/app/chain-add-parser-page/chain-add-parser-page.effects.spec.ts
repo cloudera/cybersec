@@ -22,10 +22,11 @@ import * as fromActions from './chain-add-parser-page.actions';
 import {AddParserEffects} from './chain-add-parser-page.effects';
 import {NzMessageService} from "ng-zorro-antd/message";
 import {GetParserTypesFailAction} from "./chain-add-parser-page.actions";
+import {Action} from "@ngrx/store";
 
 describe('chain add parser page: effects', () => {
   let effects: AddParserEffects;
-  let actions: ReplaySubject<any>;
+  let actions: ReplaySubject<Action>;
   let service: jasmine.SpyObj<AddParserPageService>;
   let messageService: jasmine.SpyObj<NzMessageService>;
 

@@ -87,7 +87,7 @@ describe('LiveViewComponent', () => {
 
     fixture = TestBed.createComponent(LiveViewComponent);
     component = fixture.componentInstance;
-    component.chainConfig$ = new Subject<{}>();
+    component.chainConfig$ = new Subject<unknown>();
     fixture.detectChanges();
   });
 
@@ -118,7 +118,7 @@ describe('LiveViewComponent', () => {
     });
     fixture.detectChanges();
 
-    (component.chainConfig$ as Subject<{}>).next({});
+    (component.chainConfig$ as Subject<unknown>).next({});
     tick(LiveViewConsts.LIVE_VIEW_DEBOUNCE_RATE);
 
     const action = executionTriggered({sampleData: testSampleData, chainConfig: {}});
@@ -127,7 +127,7 @@ describe('LiveViewComponent', () => {
   }));
 
   it('should filter out events without sample data input', fakeAsync(() => {
-    (component.chainConfig$ as Subject<{}>).next({});
+    (component.chainConfig$ as Subject<unknown>).next({});
     tick(LiveViewConsts.LIVE_VIEW_DEBOUNCE_RATE);
     const action = executionTriggered({sampleData: testSampleData, chainConfig: {}});
 
@@ -142,7 +142,7 @@ describe('LiveViewComponent', () => {
       }
     });
 
-    (component.chainConfig$ as Subject<{}>).next({});
+    (component.chainConfig$ as Subject<unknown>).next({});
 
     tick(LiveViewConsts.LIVE_VIEW_DEBOUNCE_RATE / 2);
     const action = executionTriggered({sampleData: testSampleData, chainConfig: {}});

@@ -8,7 +8,6 @@ import {AdvancedEditorComponent} from "../../../chain-page/components/parser/adv
 describe('JsonEditorPopupComponent', () => {
   let component: JsonEditorPopupComponent;
   let fixture: ComponentFixture<JsonEditorPopupComponent>;
-  let dialogRef: MatDialogRef<JsonEditorPopupComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
@@ -33,7 +32,6 @@ describe('JsonEditorPopupComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(JsonEditorPopupComponent);
     component = fixture.componentInstance;
-    dialogRef = TestBed.inject(MatDialogRef);
     fixture.detectChanges();
   });
 

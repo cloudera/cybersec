@@ -23,11 +23,11 @@ import {ChainPageService} from '../services/chain-page.service';
 import * as fromActions from './chain-page.actions';
 import {ChainPageEffects} from './chain-page.effects';
 import {NzMessageService} from "ng-zorro-antd/message";
-import {CustomFormConfig} from "./components/custom-form/custom-form.component";
 import {ParserDescriptor} from "./chain-page.reducers";
+import {Action} from "@ngrx/store";
 
 describe('chain parser page: effects', () => {
-  let actions: ReplaySubject<any>;
+  let actions: ReplaySubject<Action>;
   let effects: ChainPageEffects;
   let service: jasmine.SpyObj<ChainPageService>;
 
@@ -81,7 +81,7 @@ describe('chain parser page: effects', () => {
         ChainPageEffects,
         provideMockActions(() => actions),
         provideMockStore({
-          initialState: initialState,
+          initialState,
           selectors: []
         }),
         {provide: ChainPageService, useValue: jasmine.createSpyObj('ChainPageService', ['getChain', 'saveParserConfig', 'getFormConfig', 'getFormConfigs', 'getIndexMappings'])},
@@ -222,7 +222,7 @@ describe('chain parser page: effects', () => {
         }]
       }
     };
-    service.getFormConfig.and.returnValue(of(descriptor['foo']));
+    service.getFormConfig.and.returnValue(of(descriptor.foo));
 
     actions = new ReplaySubject(1);
     actions.next(new fromActions.GetFormConfigAction({
@@ -232,7 +232,7 @@ describe('chain parser page: effects', () => {
     effects.getFormConfig$.subscribe(result => {
       expect(result).toEqual(new fromActions.GetFormConfigSuccessAction({
         parserType: 'foo',
-        formConfig: descriptor['foo']
+        formConfig: descriptor.foo
       }));
       done();
     });

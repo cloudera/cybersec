@@ -21,22 +21,22 @@ import { ParserModel } from '../chain-page/chain-page.models';
 })
 export class AddParserPageService {
 
-  private readonly BASE_URL = '/api/v1/parserconfig/';
+  static readonly BASE_URL = '/api/v1/parserconfig/';
 
   constructor(
-    private http: HttpClient
+    private _http: HttpClient
   ) {}
 
   public add(chainId: string, parser: ParserModel) {
-    return this.http.post(this.BASE_URL + `chains/${chainId}/parsers`, parser);
+    return this._http.post(AddParserPageService.BASE_URL + `chains/${chainId}/parsers`, parser);
   }
 
   public getParserTypes() {
-    return this.http.get<{ id: string, name: string }[]>(this.BASE_URL + `parser-types`);
+    return this._http.get<{ id: string, name: string }[]>(AddParserPageService.BASE_URL + `parser-types`);
   }
 
   public getParsers(chainId: string){
-    return this.http.get<ParserModel[]>(this.BASE_URL + `chains/${chainId}/parsers`)
+    return this._http.get<ParserModel[]>(AddParserPageService.BASE_URL + `chains/${chainId}/parsers`)
       .pipe(
         map((parsers: ParserModel[]) => {
           return parsers;

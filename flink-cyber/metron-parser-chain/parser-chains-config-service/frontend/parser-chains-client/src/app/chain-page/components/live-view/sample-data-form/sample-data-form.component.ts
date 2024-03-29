@@ -23,7 +23,7 @@ import {EntryParsingResultModel} from "../models/live-view.model";
 })
 export class SampleDataFormComponent {
   @Input() sampleData: SampleDataModel;
-  @Input() chainConfig: {};
+  @Input() chainConfig: unknown;
   @Output() sampleDataChange = new EventEmitter<SampleDataModel>();
   @Output() sampleDataForceChange = new EventEmitter<SampleDataInternalModel[]>();
 }
