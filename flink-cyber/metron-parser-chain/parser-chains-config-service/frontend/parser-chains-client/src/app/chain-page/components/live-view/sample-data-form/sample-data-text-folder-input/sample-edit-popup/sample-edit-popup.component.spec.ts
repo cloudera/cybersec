@@ -2,7 +2,6 @@ import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
 import {SampleEditPopupComponent} from './sample-edit-popup.component';
 import {provideMockStore} from "@ngrx/store/testing";
-import {SampleDataInternalModel} from "../../../models/sample-data.model";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NoopAnimationsModule} from "@angular/platform-browser/animations";
 import {NzFormModule} from "ng-zorro-antd/form";

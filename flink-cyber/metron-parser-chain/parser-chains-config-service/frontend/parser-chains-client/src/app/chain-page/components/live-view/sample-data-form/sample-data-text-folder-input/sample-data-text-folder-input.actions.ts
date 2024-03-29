@@ -13,6 +13,7 @@
 import {createAction, props, union} from '@ngrx/store';
 import {SampleDataInternalModel} from "../../models/sample-data.model";
 import {EntryParsingResultModel} from "../../models/live-view.model";
+import {ChainDetailsModel} from "../../../../chain-page.models";
 
 export const SampleFolderViewInitializedAction = createAction(
   '[SampleFolder] Sample Folder View Initialized'
@@ -25,7 +26,7 @@ export const SampleFolderPathRestoredAction = createAction(
 
 export const ExecutionListTriggeredAction = createAction(
   '[SampleFolder] Sample Data List Parsing Triggered',
-  props<{ sampleData: SampleDataInternalModel[], chainConfig: {} }>()
+  props<{ sampleData: SampleDataInternalModel[], chainConfig: ChainDetailsModel }>()
 );
 
 export const ExecutionListSuccessfulAction = createAction(

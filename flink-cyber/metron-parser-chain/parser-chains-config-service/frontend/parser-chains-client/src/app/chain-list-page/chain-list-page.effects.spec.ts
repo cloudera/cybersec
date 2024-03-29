@@ -13,8 +13,6 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import {TestBed, waitForAsync} from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { IconDefinition } from '@ant-design/icons-angular';
-import { PlusCircleOutline } from '@ant-design/icons-angular/icons';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { NzModalModule, } from 'ng-zorro-antd/modal';
 import {  NzMessageService } from 'ng-zorro-antd/message';
@@ -24,19 +22,11 @@ import { ChainListPageService } from '../services/chain-list-page.service';
 import * as fromActions from './chain-list-page.actions';
 import { ChainListEffects } from './chain-list-page.effects';
 import { ChainModel } from './chain.model';
-export class MockChainListPageService {
-  deleteChain(id: string) {
-    return of({});
-  }
-  createChain(name: string) {
-    return of({});
-  }
-}
-const icons: IconDefinition[] = [PlusCircleOutline];
+import {Action} from "@ngrx/store";
 
 describe('ChainListPage: effects', () => {
   let effects: ChainListEffects;
-  let actions: ReplaySubject<any>;
+  let actions: ReplaySubject<Action>;
   let service: ChainListPageService;
   let msgService: NzMessageService;
 
@@ -50,7 +40,7 @@ describe('ChainListPage: effects', () => {
         providers: [
           ChainListEffects,
           provideMockActions(() => actions),
-          { provide: ChainListPageService, useClass: MockChainListPageService },
+          { provide: ChainListPageService, useValue: jasmine.createSpyObj('ChainListPageService', ["createChain", "deleteChain", "getChains"]) },
           NzMessageService
         ]
       });

@@ -20,22 +20,22 @@ import {ChainModel, ChainOperationalModel} from '../chain-list-page/chain.model'
 })
 export class ChainListPageService {
 
-    private readonly BASE_URL = '/api/v1/parserconfig/';
+    static readonly BASE_URL = '/api/v1/parserconfig/';
 
     constructor(
-      private http: HttpClient
+      private _http: HttpClient
     ) {}
 
     public createChain(chain: ChainOperationalModel) {
-        return this.http.post<ChainModel>('/api/v1/parserconfig/chains', chain);
+        return this._http.post<ChainModel>('/api/v1/parserconfig/chains', chain);
     }
 
     public getChains(params = null) {
-        return this.http.get<ChainModel[]>(this.BASE_URL + 'chains');
+        return this._http.get<ChainModel[]>(ChainListPageService.BASE_URL + 'chains');
     }
 
     public deleteChain(chainId: string) {
-        return this.http.delete(this.BASE_URL + 'chains/' + chainId);
+        return this._http.delete(ChainListPageService.BASE_URL + 'chains/' + chainId);
     }
 
 }

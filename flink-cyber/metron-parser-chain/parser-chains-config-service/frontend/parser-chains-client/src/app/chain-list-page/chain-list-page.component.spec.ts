@@ -17,7 +17,7 @@ import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {RouterTestingModule} from '@angular/router/testing';
 import {IconDefinition} from '@ant-design/icons-angular';
 import {DeleteFill, PlusOutline, RightSquareFill} from '@ant-design/icons-angular/icons';
-import {Store} from '@ngrx/store';
+import {Action, Store} from '@ngrx/store';
 import {MockStore, provideMockStore} from '@ngrx/store/testing';
 import {NzModalModule} from 'ng-zorro-antd/modal';
 import {NzIconModule} from 'ng-zorro-antd/icon'
@@ -66,7 +66,7 @@ class FakeChainListPageService {
 describe('ChainListPageComponent', () => {
   let component: ChainListPageComponent;
   let fixture: ComponentFixture<ChainListPageComponent>;
-  let actions: ReplaySubject<any>;
+  let actions: ReplaySubject<Action>;
   let store: MockStore<{
     'chain-list-page': {
       loading: boolean;
@@ -119,7 +119,7 @@ describe('ChainListPageComponent', () => {
       providers: [
         provideMockActions(() => actions),
         provideMockStore({
-          initialState: initialState,
+          initialState,
           selectors: [
             {selector: getDeleteModalVisible, value: false},
             {selector: getDeleteChain, value: null},
@@ -136,7 +136,15 @@ describe('ChainListPageComponent', () => {
   }));
 
   beforeEach(() => {
-    store = TestBed.inject(Store) as MockStore<any>;
+    store = TestBed.inject(Store) as MockStore<{
+      'chain-list-page': {
+        loading: boolean;
+        error: string;
+        items: ChainModel[];
+        createModalVisible: boolean;
+        deleteModalVisible: boolean;
+      }
+    }>;
     fixture = TestBed.createComponent(ChainListPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -211,7 +219,7 @@ describe('ChainListPageComponent', () => {
     store.refreshState();
     fixture.detectChanges();
 
-    let modalWindow = document.querySelector('.ant-modal');
+    const modalWindow = document.querySelector('.ant-modal');
 
     expect(modalWindow).toBeNull();
     expect(isVisible).toBe(false);

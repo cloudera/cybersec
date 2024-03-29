@@ -10,12 +10,12 @@
  * limitations governing your use of the file.
  */
 
-import {async, ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
-import {FormControl, FormsModule, UntypedFormControl, ReactiveFormsModule} from '@angular/forms';
-import { MinusCircleFill, PlusCircleFill } from '@ant-design/icons-angular/icons';
-import { NzModalModule } from 'ng-zorro-antd/modal';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {FormsModule, ReactiveFormsModule, UntypedFormControl} from '@angular/forms';
+import {MinusCircleFill, PlusCircleFill} from '@ant-design/icons-angular/icons';
+import {NzModalModule} from 'ng-zorro-antd/modal';
 import {NzIconModule} from 'ng-zorro-antd/icon';
-import { MultiInputComponent } from './multi-input.component';
+import {MultiInputComponent} from './multi-input.component';
 import {NzToolTipModule} from "ng-zorro-antd/tooltip";
 import {NzMessageService} from "ng-zorro-antd/message";
 import {NzPopconfirmModule} from "ng-zorro-antd/popconfirm";

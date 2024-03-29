@@ -23,54 +23,48 @@ import {ChainModel} from './chain.model';
 
 @Injectable()
 export class ChainListEffects {
-  constructor(
-    private actions$: Actions,
-    private messageService: NzMessageService,
-    private chainListService: ChainListPageService
-  ) {
-  }
 
-  loadChains$: Observable<Action> = createEffect(() => this.actions$.pipe(
+  loadChains$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(fromActions.LOAD_CHAINS),
     switchMap((action: fromActions.LoadChainsAction) => {
-      return this.chainListService.getChains()
+      return this._chainListService.getChains()
         .pipe(
           map((chains: ChainModel[]) => {
             return new fromActions.LoadChainsSuccessAction(chains);
           }),
           catchError((error: { message: string }) => {
-            this.messageService.create('error', error.message);
+            this._messageService.create('error', error.message);
             return of(new fromActions.LoadChainsFailAction(error));
           })
         );
     })
   ));
 
-  createChain$: Observable<Action> = createEffect(() => this.actions$.pipe(
+  createChain$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(fromActions.CREATE_CHAIN),
     switchMap((action: fromActions.CreateChainAction) => {
-      return this.chainListService.createChain(action.newChain)
+      return this._chainListService.createChain(action.newChain)
         .pipe(
           map((chain: ChainModel) => {
-            this.messageService.create('success', 'Chain ' + action.newChain.name + ' has been created');
+            this._messageService.create('success', 'Chain ' + action.newChain.name + ' has been created');
             return new fromActions.CreateChainSuccessAction(chain);
           }),
           catchError((error: { message: string }) => {
-            this.messageService.create('error', error.message);
+            this._messageService.create('error', error.message);
             return of(new fromActions.CreateChainFailAction(error));
           })
         );
     })
   ));
 
-  hideCreateModal$: Observable<Action> = createEffect(() => this.actions$.pipe(
+  hideCreateModal$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(
       fromActions.CREATE_CHAIN_SUCCESS,
       fromActions.CREATE_CHAIN_FAIL
     ),
     map(() => new fromActions.HideCreateModalAction())
   ))
-  hideDeleteModal$: Observable<Action> = createEffect(() => this.actions$.pipe(
+  hideDeleteModal$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(
       fromActions.DELETE_CHAIN_SUCCESS,
       fromActions.DELETE_CHAIN_FAIL
@@ -78,26 +72,32 @@ export class ChainListEffects {
     map(() => new fromActions.HideDeleteModalAction())
   ))
 
-  showDeleteModal$: Observable<Action> = createEffect(() => this.actions$.pipe(
+  showDeleteModal$: Observable<Action> = createEffect(() => this._actions$.pipe(
       ofType(fromActions.DELETE_CHAIN_SELECT),
       map(() => new fromActions.ShowDeleteModalAction())
     ),
   )
 
-  deleteChain$: Observable<Action> = createEffect(() => this.actions$.pipe(
+  deleteChain$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(fromActions.DELETE_CHAIN),
     switchMap((action: fromActions.DeleteChainAction) => {
-      return this.chainListService.deleteChain(action.chainId)
+      return this._chainListService.deleteChain(action.chainId)
         .pipe(
           map(() => {
-            this.messageService.create('success', 'Chain "' + action.chainName + '" deleted Successfully');
+            this._messageService.create('success', 'Chain "' + action.chainName + '" deleted Successfully');
             return new fromActions.DeleteChainSuccessAction(action.chainId);
           }),
           catchError((error: { message: string }) => {
-            this.messageService.create('error', error.message);
+            this._messageService.create('error', error.message);
             return of(new fromActions.DeleteChainFailAction(error));
           })
         );
     })
   ));
+  constructor(
+    private _actions$: Actions,
+    private _messageService: NzMessageService,
+    private _chainListService: ChainListPageService
+  ) {
+  }
 }

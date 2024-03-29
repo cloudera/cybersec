@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {MatButtonToggleGroup} from "@angular/material/button-toggle";
 
-type button = {
+type MultiButton = {
   label: string,
   value: string,
 }
@@ -14,7 +14,7 @@ type button = {
   ]
 })
 export class MultiButtonComponent  {
-  @Input() buttons: button[]      = [
+  @Input() buttons: MultiButton[]      = [
     {label: 'Archive', value: 'Archive'},
     {label: 'Git', value: 'Git'},
     {label: 'Manual', value: 'Manual'},

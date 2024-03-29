@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-import {async, ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -27,7 +27,6 @@ import {SampleDataTextInputComponent} from "./sample-data-text-input/sample-data
 import {
   SampleDataTextFolderInputComponent
 } from "./sample-data-text-folder-input/sample-data-text-folder-input.component";
-import {findEl} from "../../../../shared/test/test-helper";
 
 
 describe('SampleDataFormComponent', () => {
@@ -76,6 +75,7 @@ describe('SampleDataFormComponent', () => {
     const sampleDataTextInput: SampleDataTextInputComponent = fixture.debugElement.query(By.directive(SampleDataTextInputComponent)).componentInstance;
     sampleDataTextInput.sampleDataChange.emit(expected);
   });
+
   it('should dispatch change action from SampleDataFolder', (done) => {
     fixture.debugElement.queryAll(By.css('.ant-tabs-tab-btn'))[1].nativeElement.click();
     fixture.detectChanges();

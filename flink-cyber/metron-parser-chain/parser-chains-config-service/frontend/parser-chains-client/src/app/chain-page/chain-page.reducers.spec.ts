@@ -150,7 +150,7 @@ describe('chain-page: reducers', () => {
     const state = {
       chains: null,
       parsers: {
-        456: {
+        '456': {
           id: '456',
           type: 'grok',
           name: 'some parser',
@@ -187,7 +187,7 @@ describe('chain-page: reducers', () => {
     const state = {
       parsers: null,
       chains: {
-        456: {
+        '456': {
           id: '456',
           name: 'old',
           parsers: []

@@ -11,8 +11,7 @@
  */
 
 import {HttpClientTestingModule} from '@angular/common/http/testing';
-import {Component, Input} from '@angular/core';
-import {async, ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {FormsModule, NgControl, ReactiveFormsModule} from '@angular/forms';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
 import {NzMessageService, NzMessageServiceModule} from 'ng-zorro-antd/message';
@@ -29,7 +28,6 @@ import {MockComponent} from "ng-mocks";
 describe('ChainViewComponent', () => {
   let component: ChainViewComponent;
   let fixture: ComponentFixture<ChainViewComponent>;
-  let chainPageService: ChainPageService;
   const parsers: ParserModel[] = [
     {
       id: '123',
@@ -74,7 +72,6 @@ describe('ChainViewComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ChainViewComponent);
     component = fixture.componentInstance;
-    chainPageService = TestBed.inject(ChainPageService);
     component.parsers = parsers;
     fixture.detectChanges();
   });

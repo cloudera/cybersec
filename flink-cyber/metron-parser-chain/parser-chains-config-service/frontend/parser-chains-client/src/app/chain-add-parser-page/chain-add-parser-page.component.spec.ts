@@ -21,14 +21,14 @@ import {NzModalModule} from 'ng-zorro-antd/modal';
 import {of} from 'rxjs';
 
 import {ChainAddParserPageComponent} from './chain-add-parser-page.component';
-import {AddParserPageState, getParserTypes, initialState} from './chain-add-parser-page.reducers';
+import {AddParserPageState, getParserTypes} from './chain-add-parser-page.reducers';
 import {NzCardModule} from "ng-zorro-antd/card";
 import {NzFormModule} from "ng-zorro-antd/form";
 import {CommonModule} from "@angular/common";
 import {NzSelectModule} from "ng-zorro-antd/select";
 import {getChain} from "../chain-page/chain-page.reducers";
 import * as fromActions from "./chain-add-parser-page.actions";
-import {setFieldValue} from "../shared/test/test-helper";
+import {setFieldValue} from "src/app/shared/test/test-helper";
 import {NzIconTestModule} from "ng-zorro-antd/icon/testing";
 import {By} from "@angular/platform-browser";
 
