@@ -26,8 +26,9 @@ export class MonacoEditorService {
     value?: string
   } = {}) {
     if (!this.registeredSchemas[uri]) {
+      const { monaco } = window as any;
       monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas.push(schema);
-      const model = this.createModel(uri, options);
+      const model = this.createModel(monaco, uri, options);
       this.registeredSchemas[uri] = model;
       return model;
     }
@@ -42,7 +43,7 @@ export class MonacoEditorService {
    * Internal function to generate a model using the appropriate helper
    * function in the monaco object.
    */
-  private createModel(uri, options: {
+  private createModel(monaco, uri, options: {
     value?: string
   } = {}) {
     const modelUri = monaco.Uri.parse(uri);

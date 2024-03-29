@@ -13,6 +13,7 @@
 <ngx-monaco-editor
   data-qe-id="monaco-editor"
   class="advanced-editor"
+  style="height: 100%"
   [ngModel]="config | json"
   [options]="monacoOptions"
   (ngModelChange)="onChange($event)">
