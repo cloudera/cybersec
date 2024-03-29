@@ -2,7 +2,6 @@ import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
 import {SampleDataTextFolderInputComponent} from './sample-data-text-folder-input.component';
 import {provideMockStore} from "@ngrx/store/testing";
-import {Store} from "@ngrx/store";
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {NzFormModule} from "ng-zorro-antd/form";
 import {NzTableModule} from "ng-zorro-antd/table";
@@ -23,7 +22,6 @@ import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
 describe('SampleDataTextFolderInputComponent', () => {
   let component: SampleDataTextFolderInputComponent;
   let fixture: ComponentFixture<SampleDataTextFolderInputComponent>;
-  let store: Store;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
@@ -63,7 +61,6 @@ describe('SampleDataTextFolderInputComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(SampleDataTextFolderInputComponent);
     component = fixture.componentInstance;
-    store = TestBed.inject(Store);
     fixture.detectChanges();
   });
 

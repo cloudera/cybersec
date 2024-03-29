@@ -14,7 +14,7 @@ import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '
 import {isEqual} from 'lodash';
 
 export interface ConfigChangedEvent {
-  value: {};
+  value: unknown;
 }
 
 @Component({
@@ -25,7 +25,7 @@ export interface ConfigChangedEvent {
 export class AdvancedEditorComponent implements OnChanges {
 
   @Input() config = {};
-  @Input() isReadOnly: boolean = false;
+  @Input() isReadOnly = false;
   @Output() configChanged = new EventEmitter<ConfigChangedEvent>();
 
   monacoOptions = {
@@ -45,7 +45,7 @@ export class AdvancedEditorComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.isReadOnly !== undefined){
-      this.monacoOptions["readOnly"]= this.isReadOnly;
+      this.monacoOptions.readOnly= this.isReadOnly;
     }
   }
 

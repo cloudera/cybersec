@@ -50,17 +50,17 @@ export class ParserComposerComponent implements OnInit {
   isolatedParserView = false;
 
   constructor(
-    private store: Store<ChainPageState>
+    private _store: Store<ChainPageState>
   ) {
   }
 
   ngOnInit() {
-    this.store.pipe(select(getParser({
+    this._store.pipe(select(getParser({
       id: this.parserId
     }))).subscribe((parser) => {
       this.parser = parser;
       if (parser) {
-        this.store.pipe(select(getFormConfigByType({type: parser.type})))
+        this._store.pipe(select(getFormConfigByType({type: parser.type})))
           .subscribe((descriptor: ParserDescriptor) => {
             if (descriptor) {
               this.configForm = descriptor.schemaItems;
@@ -70,7 +70,7 @@ export class ParserComposerComponent implements OnInit {
       }
     });
 
-    this.store
+    this._store
       .pipe(select(getParserToBeInvestigated))
       .subscribe(id => this.isolatedParserView = !!id);
   }
@@ -80,7 +80,7 @@ export class ParserComposerComponent implements OnInit {
   }
 
   onParserChange(partialParser) {
-    this.store.dispatch(
+    this._store.dispatch(
       new fromActions.UpdateParserAction({
         chainId: this.chainId,
         parser: partialParser
@@ -96,7 +96,7 @@ export class ParserComposerComponent implements OnInit {
   onRouteAdd(parser: ParserModel) {
     const chainId = uuidv1();
     const routeId = uuidv1();
-    this.store.dispatch(
+    this._store.dispatch(
       new fromActions.AddChainAction({
         chain: {
           id: chainId,
@@ -104,7 +104,7 @@ export class ParserComposerComponent implements OnInit {
         }
       })
     );
-    this.store.dispatch(
+    this._store.dispatch(
       new fromActions.AddRouteAction({
         chainId,
         parserId: parser.id,

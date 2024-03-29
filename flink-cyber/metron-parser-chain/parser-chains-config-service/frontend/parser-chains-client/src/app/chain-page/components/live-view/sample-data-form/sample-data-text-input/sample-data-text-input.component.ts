@@ -13,7 +13,7 @@ export class SampleDataTextInputComponent {
   @Input() sampleData: SampleDataModel;
   @Output() sampleDataChange = new EventEmitter<SampleDataModel>();
 
-  constructor(private messageService: NzMessageService) {}
+  constructor(private _messageService: NzMessageService) {}
 
   onApply(event: Event) {
     const source = (event.target as HTMLInputElement).value;
@@ -28,7 +28,7 @@ export class SampleDataTextInputComponent {
     const file = e.target.files[0];
     const reader = new FileReader();
     reader.onload = () => {
-      const fileTypeError = this.checkFileType(file);
+      const fileTypeError = this._checkFileType(file);
       if (fileTypeError) {
         return;
       }
@@ -38,7 +38,7 @@ export class SampleDataTextInputComponent {
     reader.readAsText(file);
   }
 
-  private checkFileType(file: File) {
+  private _checkFileType(file: File) {
     if (!file) {
       return false;
     }
@@ -47,7 +47,7 @@ export class SampleDataTextInputComponent {
     const fileTypes = ['text/plain', 'text/csv'];
 
     if (!fileExt.find(ext => ext === extension.toLowerCase()) || !fileTypes.find(type => file.type === type)) {
-        this.messageService.create('error', 'The file must be a .txt or .csv');
+        this._messageService.create('error', 'The file must be a .txt or .csv');
         return true;
     }
     return false;

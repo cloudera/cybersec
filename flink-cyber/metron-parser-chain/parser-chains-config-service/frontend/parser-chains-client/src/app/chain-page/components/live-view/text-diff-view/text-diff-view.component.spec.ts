@@ -2,7 +2,6 @@ import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
 import { TextDiffViewComponent } from './text-diff-view.component';
 import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
-import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 
 describe('TextDiffViewComponent', () => {
   let component: TextDiffViewComponent;

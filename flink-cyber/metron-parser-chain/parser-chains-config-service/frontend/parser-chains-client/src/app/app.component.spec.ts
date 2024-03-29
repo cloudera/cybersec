@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-import {async, TestBed, waitForAsync} from '@angular/core/testing';
+import {TestBed, waitForAsync} from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 

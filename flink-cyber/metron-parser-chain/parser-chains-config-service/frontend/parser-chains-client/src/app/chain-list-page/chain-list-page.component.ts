@@ -12,7 +12,6 @@
 
 import {Component, OnInit} from '@angular/core';
 import {UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
 import {select, Store} from '@ngrx/store';
 import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
 import {switchMap, take} from 'rxjs/operators';
@@ -22,7 +21,8 @@ import {LoadChainsAction} from './chain-list-page.actions';
 import {
   ChainListPageState,
   getChains,
-  getCreateModalVisible, getDeleteChain,
+  getCreateModalVisible,
+  getDeleteChain,
   getDeleteModalVisible,
   getLoading,
 } from './chain-list-page.reducers';
@@ -40,23 +40,21 @@ export class ChainListPageComponent implements OnInit {
   chains$: Observable<ChainModel[]>;
   isChainDeleteModalVisible$: Observable<boolean>;
   deleteChainItem$: Observable<ChainModel>;
-  totalRecords = 200;
   chainDataSorted$: Observable<ChainModel[]>;
   sortDescription$: BehaviorSubject<{ key: string, value: string }> = new BehaviorSubject({key: 'name', value: ''});
   newChainForm: UntypedFormGroup;
 
   constructor(
-    private store: Store<ChainListPageState>,
-    private fb: UntypedFormBuilder,
-    private route: ActivatedRoute,
-    private messageService: NzMessageService,
+    private _store: Store<ChainListPageState>,
+    private _fb: UntypedFormBuilder,
+    private _messageService: NzMessageService,
   ) {
-    store.dispatch(new LoadChainsAction());
-    this.chains$ = store.pipe(select(getChains));
-    this.isOkLoading$ = store.pipe(select(getLoading));
-    this.isChainCreateModalVisible$ = store.pipe(select(getCreateModalVisible));
-    this.isChainDeleteModalVisible$ = store.pipe(select(getDeleteModalVisible));
-    this.deleteChainItem$ = this.store.pipe(select(getDeleteChain));
+    _store.dispatch(new LoadChainsAction());
+    this.chains$ = _store.pipe(select(getChains));
+    this.isOkLoading$ = _store.pipe(select(getLoading));
+    this.isChainCreateModalVisible$ = _store.pipe(select(getCreateModalVisible));
+    this.isChainDeleteModalVisible$ = _store.pipe(select(getDeleteModalVisible));
+    this.deleteChainItem$ = this._store.pipe(select(getDeleteChain));
 
     this.chainDataSorted$ = combineLatest([
       this.chains$,
@@ -71,39 +69,39 @@ export class ChainListPageComponent implements OnInit {
   }
 
   showAddChainModal(): void {
-    this.store.dispatch(new fromActions.ShowCreateModalAction());
+    this._store.dispatch(new fromActions.ShowCreateModalAction());
   }
 
   showDeleteModal(id): void {
-    this.store.dispatch(new fromActions.SelectDeleteChainAction(id));
+    this._store.dispatch(new fromActions.SelectDeleteChainAction(id));
   }
 
   pushChain(): void {
-    let chainName = this.chainName.value;
+    const chainName = this.chainName.value;
     this.chains$.pipe(take(1)).subscribe(chainArr => {
       const duplicate = chainArr.some(value => {
-        return value.name == chainName;
+        return value.name === chainName;
       });
       if (!duplicate) {
         const chainData: ChainOperationalModel = {name: chainName};
         this.newChainForm.reset();
-        this.store.dispatch(new fromActions.CreateChainAction(chainData));
+        this._store.dispatch(new fromActions.CreateChainAction(chainData));
       } else {
-        this.messageService.create('Error', "Duplicate chain names aren't allowed!");
+        this._messageService.create('Error', "Duplicate chain names aren't allowed!");
       }
     })
   }
 
   deleteChain(chainId: string, chainName): void {
-    this.store.dispatch(new fromActions.DeleteChainAction(chainId, chainName));
+    this._store.dispatch(new fromActions.DeleteChainAction(chainId, chainName));
   }
 
   handleCancelChainModal(): void {
-    this.store.dispatch(new fromActions.HideCreateModalAction());
+    this._store.dispatch(new fromActions.HideCreateModalAction());
   }
 
   handleCancelDeleteModal(): void {
-    this.store.dispatch(new fromActions.HideDeleteModalAction());
+    this._store.dispatch(new fromActions.HideDeleteModalAction());
   }
 
   sortTable(data: ChainModel[], sortDescription: any): Observable<ChainModel[]> {
@@ -123,7 +121,7 @@ export class ChainListPageComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.newChainForm = this.fb.group({
+    this.newChainForm = this._fb.group({
       chainName: new UntypedFormControl('', [Validators.required, Validators.minLength(3)]),
     });
   }

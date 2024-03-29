@@ -26,18 +26,12 @@ import {CustomFormConfig} from './components/custom-form/custom-form.component';
 
 @Injectable()
 export class ChainPageEffects {
-  constructor(
-    private actions$: Actions,
-    private store$: Store<any>,
-    private messageService: NzMessageService,
-    private chainPageService: ChainPageService
-  ) {
-  }
 
-  loadChainDetails$: Observable<Action> = createEffect(() => this.actions$.pipe(
+
+  loadChainDetails$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(fromActions.LOAD_CHAIN_DETAILS),
     switchMap((action: fromActions.LoadChainDetailsAction) => {
-      return this.chainPageService.getChain(action.payload.id).pipe(
+      return this._chainPageService.getChain(action.payload.id).pipe(
         map((chain: ChainDetailsModel) => {
           const normalizedParserConfig = normalizeParserConfig(chain);
           return new fromActions.LoadChainDetailsSuccessAction(
@@ -48,7 +42,7 @@ export class ChainPageEffects {
           );
         }),
         catchError((error: { message: string }) => {
-          this.messageService.create('error', error.message);
+          this._messageService.create('error', error.message);
           return of(new fromActions.LoadChainDetailsFailAction(error));
         })
       );
@@ -56,28 +50,28 @@ export class ChainPageEffects {
   ));
 
 
-  saveParserConfig$: Observable<Action> = createEffect(() => this.actions$.pipe(
+  saveParserConfig$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(fromActions.SAVE_PARSER_CONFIG),
-    withLatestFrom(this.store$.select(getChainPageState)),
+    withLatestFrom(this._store$.select(getChainPageState)),
     switchMap(([action, state]) => {
       const chainId = (action as fromActions.SaveParserConfigAction).payload.chainId;
       const config = denormalizeParserConfig(state.chains[chainId], state);
-      return this.chainPageService.saveParserConfig(chainId, config).pipe(
+      return this._chainPageService.saveParserConfig(chainId, config).pipe(
         map(() => {
           return new fromActions.SaveParserConfigSuccessAction();
         }),
         catchError((error: { message: string }) => {
-          this.messageService.create('error', error.message);
+          this._messageService.create('error', error.message);
           return of(new fromActions.SaveParserConfigFailAction(error));
         })
       );
     })
   ));
 
-  getFormConfig$: Observable<Action> = createEffect(() => this.actions$.pipe(
+  getFormConfig$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(fromActions.GET_FORM_CONFIG),
     switchMap((action: fromActions.GetFormConfigAction) => {
-      return this.chainPageService.getFormConfig(action.payload.type).pipe(
+      return this._chainPageService.getFormConfig(action.payload.type).pipe(
         map((descriptor: ParserDescriptor) => {
           return new fromActions.GetFormConfigSuccessAction({
             parserType: action.payload.type,
@@ -85,34 +79,34 @@ export class ChainPageEffects {
           });
         }),
         catchError((error: { message: string }) => {
-          this.messageService.create('error', error.message);
+          this._messageService.create('error', error.message);
           return of(new fromActions.GetFormConfigFailAction(error));
         })
       );
     })
   ));
 
-  getFormConfigs$: Observable<Action> = createEffect(() => this.actions$.pipe(
+  getFormConfigs$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(fromActions.GET_FORM_CONFIGS),
     switchMap((action: fromActions.GetFormConfigsAction) => {
-      return this.chainPageService.getFormConfigs().pipe(
+      return this._chainPageService.getFormConfigs().pipe(
         map((formConfigs: { [key: string]: ParserDescriptor }) => {
           return new fromActions.GetFormConfigsSuccessAction({
             formConfigs
           });
         }),
         catchError((error: { message: string }) => {
-          this.messageService.create('error', error.message);
+          this._messageService.create('error', error.message);
           return of(new fromActions.GetFormConfigsFailAction(error));
         })
       );
     })
   ));
 
-  getIndexMappings$: Observable<Action> = createEffect(() => this.actions$.pipe(
+  getIndexMappings$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(fromActions.GET_INDEX_MAPPINGS),
     switchMap((action: fromActions.GetIndexMappingsAction) => {
-      return this.chainPageService.getIndexMappings(action.payload).pipe(
+      return this._chainPageService.getIndexMappings(action.payload).pipe(
         map((response: { path: string, result: Map<string, object> }) => {
           if (response) {
             return new fromActions.GetIndexMappingsSuccessAction({
@@ -125,10 +119,17 @@ export class ChainPageEffects {
           }
         }),
         catchError((error: { message: string }) => {
-          this.messageService.create('error', error.message);
+          this._messageService.create('error', error.message);
           return of(new fromActions.GetIndexMappingsFailAction(error));
         })
       );
     })
   ));
+  constructor(
+    private _actions$: Actions,
+    private _store$: Store<any>,
+    private _messageService: NzMessageService,
+    private _chainPageService: ChainPageService
+  ) {
+  }
 }

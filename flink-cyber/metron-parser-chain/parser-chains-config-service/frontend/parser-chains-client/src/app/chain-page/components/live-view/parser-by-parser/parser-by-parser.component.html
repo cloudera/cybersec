@@ -34,16 +34,16 @@
             <div nz-row
                  *ngFor="let item of parser.output | keyvalue"
                  [ngClass]="{
-                   'fieldNew': diffOnly && item.value.status === ParserFieldStatus.NEW,
-                   'fieldDiff': diffOnly && item.value.status === ParserFieldStatus.DIFF,
-                   'fieldRemoved': diffOnly && item.value.status === ParserFieldStatus.REMOVED
+                   'fieldNew': diffOnly && item.value.status === parserFieldStatus.NEW,
+                   'fieldDiff': diffOnly && item.value.status === parserFieldStatus.DIFF,
+                   'fieldRemoved': diffOnly && item.value.status === parserFieldStatus.REMOVED
                  }">
               <div nz-col nzSpan="6" nzFlex="2" class="fieldName">{{ item.key }}:</div>
               <div nz-col nzFlex="6">{{ diffOnly ? item.value.currentValue : item.value }}</div>
               <button nz-button nz-col nzFlex="1"
                       class="diff-param-button"
                       (click)="showDiff(item.value.previousValue, item.value.currentValue)"
-                      *ngIf="diffOnly && item.value.status === ParserFieldStatus.DIFF">Show diff</button>
+                      *ngIf="diffOnly && item.value.status === parserFieldStatus.DIFF">Show diff</button>
             </div>
           </div>
         </div>

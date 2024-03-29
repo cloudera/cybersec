@@ -103,12 +103,12 @@ describe('ParserByParserComponent', () => {
     const emptyMessage = fixture.debugElement.query(By.css('.ant-result-title'));
     const logMessage = fixture.debugElement.query(By.css('[data-qe-id="logMessage"'));
 
-    expect(emptyMessage.nativeElement.textContent).toContain(component.compileErrorDescription);
+    expect(emptyMessage.nativeElement.textContent).toContain(component.ERROR_DESCRIPTOR);
 
     component.parserResults = [];
     fixture.detectChanges();
 
-    expect(emptyMessage.nativeElement.textContent).toContain(component.compileErrorDescription);
+    expect(emptyMessage.nativeElement.textContent).toContain(component.ERROR_DESCRIPTOR);
     expect(logMessage.nativeElement.textContent).toContain(component.logMessage);
   });
 

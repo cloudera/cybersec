@@ -47,7 +47,7 @@ import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 
 registerLocaleData(en);
 
-export const metaReducers: MetaReducer<{}>[] = !environment.production
+export const metaReducers: MetaReducer<unknown>[] = !environment.production
   ? [storeFreeze]
   : [];
 

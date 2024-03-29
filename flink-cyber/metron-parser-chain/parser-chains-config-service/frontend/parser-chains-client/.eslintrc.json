@@ -3,11 +3,13 @@
   "ignorePatterns": [
     "projects/**/*"
   ],
+  "rules": {
+    "valid-jsdoc" : "off"
+  },
   "overrides": [
     {
-      "files": [
-        "*.ts"
-      ],
+
+      "files": ["*.actions.ts"],
       "parserOptions": {
         "project": [
           "tsconfig.json",
@@ -16,10 +18,91 @@
         "createDefaultProgram": true
       },
       "extends": [
+        "plugin:@angular-eslint/ng-cli-compat",
         "plugin:@angular-eslint/recommended",
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
+        "@typescript-eslint/naming-convention": [
+          "error",
+          {
+            "selector": "class",
+            "format": ["PascalCase"],
+            "custom": {
+              "regex": "Action$",
+              "match": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "*.ts"
+      ],
+      "excludedFiles": ["*.actions.ts", "*.spec.ts"],
+      "parserOptions": {
+        "project": [
+          "tsconfig.json",
+          "e2e/tsconfig.json"
+        ],
+        "createDefaultProgram": true
+      },
+      "extends": [
+        "plugin:@angular-eslint/ng-cli-compat",
+        "plugin:@angular-eslint/recommended",
+        "plugin:@angular-eslint/template/process-inline-templates"
+      ],
+      "rules": {
+        "jsdoc/check-alignment": "off",
+        "jsdoc/check-param-names": "off",
+        "@typescript-eslint/adjacent-overload-signatures": "off",
+        "jsdoc/newline-after-description": "off",
+        "eslint-plugin/require-meta-fixable": "off",
+        "prefer-arrow/prefer-arrow-functions": "off",
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/prefer-enum-initializers": "off",
+        "indent": "off",
+        "simple-import-sort/imports": "off",
+        "array-bracket-spacing": "off",
+        "no-underscore-dangle": "off",
+        "@typescript-eslint/naming-convention": [
+          "error",
+          {
+            "selector": "enumMember",
+            "format": ["UPPER_CASE"]
+          },
+          {
+            "selector": "classProperty",
+            "modifiers": ["static"],
+            "format": ["UPPER_CASE"]
+          },
+          {
+            "selector": "variable",
+            "format": ["camelCase", "UPPER_CASE", "PascalCase"],
+            "leadingUnderscore": "allow",
+            "trailingUnderscore": "allow"
+          },
+          {
+            "selector": "function",
+            "format": ["camelCase", "PascalCase"]
+          },
+          {
+            "selector": "typeLike",
+            "format": ["PascalCase"]
+          },
+          {
+            "selector": "memberLike",
+            "format": ["camelCase"],
+            "leadingUnderscore": "forbid"
+          },
+          {
+            "selector": "memberLike",
+            "modifiers": ["private"],
+            "format": ["camelCase"],
+            "leadingUnderscore": "require"
+          }
+        ],
         "@angular-eslint/component-selector": [
           "error",
           {
@@ -36,7 +119,7 @@
             "type": "attribute"
           }
         ],
-        "@angular-eslint/no-empty-lifecycle-method": "off"
+        "@angular-eslint/no-empty-lifecycle-method": "error"
       }
     },
     {
@@ -46,7 +129,53 @@
       "extends": [
         "plugin:@angular-eslint/template/recommended"
       ],
-      "rules": {}
+      "rules": {
+        "@angular-eslint/template/no-negated-async": "warn",
+        "@angular-eslint/template/eqeqeq": "off"
+      }
+    },
+    {
+      "files": [
+        "*.spec.ts"
+      ],
+      "parserOptions": {
+        "project": [
+          "tsconfig.json",
+          "e2e/tsconfig.json"
+        ],
+        "createDefaultProgram": true
+      },
+      "plugins": [
+        "jasmine"
+      ],
+      "extends": [
+        "plugin:jasmine/recommended",
+        "plugin:@typescript-eslint/recommended"
+      ],
+      "rules": {
+        "simple-import-sort/imports": "off",
+        "jasmine/new-line-before-expect": "off",
+        "@typescript-eslint/naming-convention": "off",
+        "jasmine/no-unsafe-spy": "off",
+        "no-restricted-globals": [
+          "error",
+          "event"
+        ],
+        "@typescript-eslint/no-shadow": "warn",
+        "no-underscore-dangle": "off",
+        "no-useless-escape": "off",
+        "@angular-eslint/prefer-on-push-component-change-detection": "off",
+        "jasmine/prefer-toHaveBeenCalledWith": "off",
+        "jasmine/no-spec-dupes": [
+          "error",
+          "branch"
+        ],
+        "jasmine/no-suite-dupes": [
+          "error",
+          "branch"
+        ],
+        "jasmine/no-global-setup": "off"
+      }
     }
   ]
 }

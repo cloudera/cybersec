@@ -13,10 +13,25 @@ export const convertToString = (value: string | ArrayBuffer | null): string => {
   } else if (value instanceof ArrayBuffer) {
     // Convert ArrayBuffer to string
     // Assuming the ArrayBuffer contains text data encoded in UTF-8
-    let decoder = new TextDecoder('utf-8');
+    const decoder = new TextDecoder('utf-8');
     return decoder.decode(new Uint8Array(value));
   } else {
     // It's already a string, return as is
     return value;
   }
+}
+
+/**
+ * Get a property from an object.
+ * If the object has the property, return the property value.
+ * Otherwise, return null.
+ *
+ * @param obj
+ * @param key
+ */
+export const getObjProp= (obj: any, key: string): any => {
+  if (Object.prototype.hasOwnProperty.call(obj, key)) {
+    return obj[key];
+  }
+  return null;
 }

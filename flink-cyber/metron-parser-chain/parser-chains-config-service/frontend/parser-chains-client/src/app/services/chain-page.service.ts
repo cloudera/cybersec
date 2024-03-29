@@ -21,49 +21,50 @@ import {ParserDescriptor} from "../chain-page/chain-page.reducers";
     providedIn: 'root'
 })
 export class ChainPageService {
-    private parserChainCollapseState: BehaviorSubject<boolean[]>;
-    private parserChainSize: number;
-    private readonly BASE_URL = '/api/v1/parserconfig/';
-    public collapseAll = new BehaviorSubject(false);
+  static readonly BASE_URL = '/api/v1/parserconfig/';
+  public collapseAll = new BehaviorSubject(false);
+    private _parserChainCollapseState: BehaviorSubject<boolean[]>;
+    private _parserChainSize: number;
+
 
     constructor(
-      private http: HttpClient
+      private _http: HttpClient
     ) {}
 
     public getChain(id: string) {
-      return this.http.get(this.BASE_URL + `chains/${id}`);
+      return this._http.get(ChainPageService.BASE_URL + `chains/${id}`);
     }
 
     public getParsers(id: string) {
-      return this.http.get(this.BASE_URL + `chains/${id}/parsers`);
+      return this._http.get(ChainPageService.BASE_URL + `chains/${id}/parsers`);
     }
 
     public saveParserConfig(chainId: string, config: ChainDetailsModel) {
-      return this.http.put(this.BASE_URL + `chains/${chainId}`, config);
+      return this._http.put(ChainPageService.BASE_URL + `chains/${chainId}`, config);
     }
 
     public getFormConfig(type: string) {
-      return this.http.get<ParserDescriptor>(this.BASE_URL + `parser-form-configuration/${type}`);
+      return this._http.get<ParserDescriptor>(ChainPageService.BASE_URL + `parser-form-configuration/${type}`);
     }
 
     public getFormConfigs() {
-      return this.http.get<{[key: string] : ParserDescriptor}>(this.BASE_URL + `parser-form-configuration`);
+      return this._http.get<{[key: string] : ParserDescriptor}>(ChainPageService.BASE_URL + `parser-form-configuration`);
     }
 
     public getIndexMappings(payload?: { filePath: string} ) {
-      let finalPayload = payload ? payload : {}
-      return this.http.post(this.BASE_URL + `indexing`, finalPayload);
+      const finalPayload = payload ? payload : {}
+      return this._http.post(ChainPageService.BASE_URL + `indexing`, finalPayload);
     }
 
     public createChainCollapseArray(size: number) {
-      this.parserChainSize = size;
-      this.parserChainCollapseState = new BehaviorSubject(new Array(this.parserChainSize).fill(false));
+      this._parserChainSize = size;
+      this._parserChainCollapseState = new BehaviorSubject(new Array(this._parserChainSize).fill(false));
     }
     public getCollapseExpandState() {
-      return this.parserChainCollapseState;
+      return this._parserChainCollapseState;
     }
     public collapseExpandAllParsers() {
       this.collapseAll.next(!this.collapseAll.value);
-      this.parserChainCollapseState.next(new Array(this.parserChainSize).fill(this.collapseAll.value));
+      this._parserChainCollapseState.next(new Array(this._parserChainSize).fill(this.collapseAll.value));
     }
 }

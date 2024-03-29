@@ -15,17 +15,17 @@ export class DiffPopupComponent {
     previousDiffValue$: Observable<string>;
     newDiffValue$: Observable<string>;
 
-    constructor(private store: Store<DiffPopupState>) {
-        this.diffModalVisible$ = store.pipe(select(getDiffModalVisible));
-        this.previousDiffValue$ = store.pipe(select(getPreviousDiffValue));
-        this.newDiffValue$ = store.pipe(select(getNewDiffValue));
+    constructor(private _store: Store<DiffPopupState>) {
+        this.diffModalVisible$ = _store.pipe(select(getDiffModalVisible));
+        this.previousDiffValue$ = _store.pipe(select(getPreviousDiffValue));
+        this.newDiffValue$ = _store.pipe(select(getNewDiffValue));
     }
 
     handleOkModal() {
-        this.store.dispatch(HideDiffModalAction());
+        this._store.dispatch(HideDiffModalAction());
     }
 
     handleCancelModal() {
-        this.store.dispatch(HideDiffModalAction());
+        this._store.dispatch(HideDiffModalAction());
     }
 }

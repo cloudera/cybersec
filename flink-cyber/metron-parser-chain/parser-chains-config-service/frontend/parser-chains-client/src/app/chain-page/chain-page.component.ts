@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-import {Component, NgZone, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, NavigationStart, Router} from '@angular/router';
 import {select, Store} from '@ngrx/store';
@@ -57,12 +57,11 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   indexingFieldMap: Map<string,Map<string, boolean>>;
 
   constructor(
-    private store: Store<ChainPageState>,
-    private activatedRoute: ActivatedRoute,
-    private modal: NzModalService,
-    private router: Router,
-    private fb: UntypedFormBuilder,
-    private zone: NgZone
+    private _store: Store<ChainPageState>,
+    private _activatedRoute: ActivatedRoute,
+    private _modal: NzModalService,
+    private _router: Router,
+    private _fb: UntypedFormBuilder,
   ) { }
 
   get dirty() {
@@ -82,20 +81,16 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   }
 
   ngOnInit() {
-    this.activatedRoute.params.subscribe((params) => {
-      this.zone.run(() => {
+    this._activatedRoute.params.subscribe((params) => {
         this.chainId = params.id;
-      });
     });
 
-    this.getChainsSubscription = this.store.pipe(select(getPathWithChains)).subscribe((path) => {
-      this.zone.run(() => {
+    this.getChainsSubscription = this._store.pipe(select(getPathWithChains)).subscribe((path) => {
         this.breadcrumbs = path;
-      });
     });
-    this.getChainSubscription = this.store.pipe(select(getChain({ id: this.chainId }))).subscribe((chain: ParserChainModel) => {
+    this.getChainSubscription = this._store.pipe(select(getChain({ id: this.chainId }))).subscribe((chain: ParserChainModel) => {
       if (!chain) {
-        this.store.dispatch(new fromActions.LoadChainDetailsAction({
+        this._store.dispatch(new fromActions.LoadChainDetailsAction({
           id: this.chainId
         }));
       } else {
@@ -103,20 +98,16 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
       }
     });
 
-    this.store.pipe(select(getDirtyStatus)).subscribe((status) => {
-      this.zone.run(() => {
+    this._store.pipe(select(getDirtyStatus)).subscribe((status) => {
         this.dirtyParsers = status.dirtyParsers;
         this.dirtyChains = status.dirtyChains;
-      });
     });
-    this.chainConfig$ = this.store.pipe(select(getChainDetails({ chainId: this.chainId })));
-    this.store.pipe(select(getParserToBeInvestigated)).subscribe((id: string) => {
-      this.zone.run(() => {
+    this.chainConfig$ = this._store.pipe(select(getChainDetails({ chainId: this.chainId })));
+    this._store.pipe(select(getParserToBeInvestigated)).subscribe((id: string) => {
         this.parserToBeInvestigated = id === '' ? [] : [id];
-      });
     });
 
-    this.router.events.subscribe((event) => {
+    this._router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
         const regex = new RegExp('^\/parserconfig\/chains\/' + this.chainId + '\/new', 'gi');
         if (event.url && event.url.match(regex)) {
@@ -125,32 +116,32 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
       }
     });
 
-    this.editChainNameForm = this.fb.group({
+    this.editChainNameForm = this._fb.group({
       name: new UntypedFormControl(null, [Validators.required, Validators.minLength(3)])
     });
 
-    this.store.dispatch(new fromActions.GetFormConfigsAction());
+    this._store.dispatch(new fromActions.GetFormConfigsAction());
 
-    this.failedParser$ = this.store.pipe(select(getFailedParser));
+    this.failedParser$ = this._store.pipe(select(getFailedParser));
   }
 
   exitFailedParserEditView() {
-    this.store.dispatch(new fromActions.InvestigateParserAction({ id: '' }));
+    this._store.dispatch(new fromActions.InvestigateParserAction({ id: '' }));
   }
 
   removeParser(id: string) {
     const chainId = this.breadcrumbs.length > 0
       ? this.breadcrumbs[this.breadcrumbs.length - 1].id
       : this.chainId;
-    this.store.dispatch(new fromActions.RemoveParserAction({
+    this._store.dispatch(new fromActions.RemoveParserAction({
       id,
       chainId
     }));
   }
 
   onChainLevelChange(chainId: string) {
-    this.store.pipe(select(getChain({ id: chainId }))).pipe(take(1)).subscribe((chain: ParserChainModel) => {
-      this.store.dispatch(
+    this._store.pipe(select(getChain({ id: chainId }))).pipe(take(1)).subscribe((chain: ParserChainModel) => {
+      this._store.dispatch(
         new fromActions.AddToPathAction({ chainId })
       );
     });
@@ -161,7 +152,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
     const index = this.breadcrumbs.findIndex((breadcrumb: ParserChainModel) => breadcrumb.id === chain.id);
     const removeFromPathList = this.breadcrumbs.slice(index + 1).map(ch => ch.id);
     if (removeFromPathList.length) {
-      this.store.dispatch(
+      this._store.dispatch(
         new fromActions.RemoveFromPathAction({ chainId: removeFromPathList })
       );
     }
@@ -176,7 +167,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
     this.popOverVisible = false;
     const value = (this.editChainNameForm.get('name').value || '').trim();
     if (value !== chain.name) {
-      this.store.dispatch(new fromActions.UpdateChainAction({
+      this._store.dispatch(new fromActions.UpdateChainAction({
         chain: {
           id: chain.id,
           name: value
@@ -195,7 +186,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
 
     return new Observable((observer: Observer<boolean>) => {
       if (this.dirty && !this.forceDeactivate) {
-        this.modal.confirm({
+        this._modal.confirm({
           nzTitle: 'You have unsaved changes',
           nzContent: 'Are you sure you want to leave this page?',
           nzOkText: 'Leave',
@@ -212,31 +203,31 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   }
 
   onResetChanges() {
-    this.modal.confirm({
+    this._modal.confirm({
       nzTitle: 'Your changes will be lost',
       nzContent: 'Are you sure you want to reset?',
       nzOkText: 'Reset',
       nzOkType: 'default',
       nzCancelText: 'Cancel',
       nzOnOk: () => {
-        this.store.dispatch(new fromActions.LoadChainDetailsAction({
+        this._store.dispatch(new fromActions.LoadChainDetailsAction({
           id: this.chainId
         }));
-        this.store.dispatch(new fromActions.InvestigateParserAction({ id: '' }));
+        this._store.dispatch(new fromActions.InvestigateParserAction({ id: '' }));
       }
     });
   }
 
   onSaveChanges() {
-    this.modal.confirm({
+    this._modal.confirm({
       nzTitle: 'You are about the save your changes',
       nzContent: 'Are you sure you want to save?',
       nzOkText: 'Save',
       nzOkType: 'primary',
       nzCancelText: 'Cancel',
       nzOnOk: () => {
-        this.store.dispatch(new fromActions.SaveParserConfigAction({ chainId: this.chainId }));
-        this.store.dispatch(new fromActions.InvestigateParserAction({ id: '' }));
+        this._store.dispatch(new fromActions.SaveParserConfigAction({ chainId: this.chainId }));
+        this._store.dispatch(new fromActions.InvestigateParserAction({ id: '' }));
       }
     });
   }
@@ -246,7 +237,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
     const routeParams = this.breadcrumbs.length > 1
       ? { subchain: this.breadcrumbs[this.breadcrumbs.length - 1].id }
       : {};
-    this.router.navigate([`/parserconfig/chains/${this.chainId}/new`, routeParams]);
+    this._router.navigate([`/parserconfig/chains/${this.chainId}/new`, routeParams]);
   }
 
   ngOnDestroy() {

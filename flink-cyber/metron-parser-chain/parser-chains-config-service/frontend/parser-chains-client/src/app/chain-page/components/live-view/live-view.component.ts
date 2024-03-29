@@ -36,6 +36,7 @@ import {SampleDataInternalModel, SampleDataModel} from './models/sample-data.mod
 import {
   ExecutionListTriggeredAction
 } from "./sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.actions";
+import {ChainDetailsModel} from "../../chain-page.models";
 
 @Component({
   selector: 'app-live-view',
@@ -43,44 +44,49 @@ import {
   styleUrls: ['./live-view.component.scss']
 })
 export class LiveViewComponent implements OnInit, AfterViewInit, OnDestroy {
-  @Input() chainConfig$: Observable<{}>;
+  @Input() chainConfig$: Observable<ChainDetailsModel>;
   @Output() failedParser = new EventEmitter<string>();
   @Output() parserToBeInvestigated = new EventEmitter<string>();
-
-  private unsubscribe$: Subject<void> = new Subject<void>();
-
   isLiveViewOn$: Observable<boolean>;
   isExecuting$: Observable<boolean>;
   results$: Observable<EntryParsingResultModel[]>;
   sampleData$: Observable<SampleDataModel>;
-
   sampleDataChange$ = new Subject<SampleDataModel>();
   sampleDataForceChange$ = new Subject<SampleDataInternalModel[]>();
   featureToggleChange$ = new Subject<boolean>();
-
   selectedTabIndex = 0;
+  private _unsubscribe$: Subject<void> = new Subject<void>();
 
-  constructor(private store: Store<LiveViewState>) {
-    this.isExecuting$ = this.store.pipe(select(getExecutionStatus));
-    this.results$ = this.store.pipe(select(getResults));
-    this.sampleData$ = this.store.pipe(select(getSampleData));
-    this.isLiveViewOn$ = this.store.pipe(select(getIsLiveViewOn));
+  constructor(private _store: Store<LiveViewState>) {
+    this.isExecuting$ = this._store.pipe(select(getExecutionStatus));
+    this.results$ = this._store.pipe(select(getResults));
+    this.sampleData$ = this._store.pipe(select(getSampleData));
+    this.isLiveViewOn$ = this._store.pipe(select(getIsLiveViewOn));
   }
 
   ngOnInit() {
-    this.store.dispatch(liveViewInitialized());
-    this.selectedTabIndex = this.restoreSelectedTab();
+    this._store.dispatch(liveViewInitialized());
+    this.selectedTabIndex = this._restoreSelectedTab();
   }
 
   ngAfterViewInit() {
-    this.subscribeToRelevantChanges();
+    this._subscribeToRelevantChanges();
   }
 
   onInvestigateParserAction(parserId) {
-    this.store.dispatch(new InvestigateParserAction({ id: parserId }));
+    this._store.dispatch(new InvestigateParserAction({ id: parserId }));
   }
 
-  private subscribeToRelevantChanges() {
+  onSelectedTabChange(index: number) {
+    this._persistSelectedTab(index);
+  }
+
+  ngOnDestroy(): void {
+    this._unsubscribe$.next();
+    this._unsubscribe$.complete();
+  }
+
+  private _subscribeToRelevantChanges() {
     combineLatest([
       this.sampleData$,
       this.chainConfig$,
@@ -88,49 +94,40 @@ export class LiveViewComponent implements OnInit, AfterViewInit, OnDestroy {
     ]).pipe(
       debounceTime(LiveViewConsts.LIVE_VIEW_DEBOUNCE_RATE),
       filter(([ sampleData, chainConfig, isLiveViewOn ]) => isLiveViewOn && !!sampleData.source),
-      takeUntil(this.unsubscribe$)
+      takeUntil(this._unsubscribe$)
     ).subscribe(([ sampleData, chainConfig ]) => {
-      this.store.dispatch(executionTriggered({ sampleData, chainConfig }));
+      this._store.dispatch(executionTriggered({ sampleData, chainConfig }));
     });
 
     this.featureToggleChange$.pipe(
-        takeUntil(this.unsubscribe$),
-        filter(value => value !== null),
-      ).subscribe(value => {
-      this.store.dispatch(onOffToggleChanged({ value }));
+      takeUntil(this._unsubscribe$),
+      filter(value => value !== null),
+    ).subscribe(value => {
+      this._store.dispatch(onOffToggleChanged({ value }));
     });
 
     this.sampleDataChange$.pipe(
-      takeUntil(this.unsubscribe$),
+      takeUntil(this._unsubscribe$),
       filter(sampleData => sampleData !== null),
     ).subscribe(sampleData => {
-      this.store.dispatch(sampleDataInputChanged({ sampleData }));
+      this._store.dispatch(sampleDataInputChanged({ sampleData }));
     });
 
     combineLatest([
-        this.sampleDataForceChange$,
+      this.sampleDataForceChange$,
       this.chainConfig$]).pipe(
-        takeUntil(this.unsubscribe$),
-        filter((sampleData, chainConfig) => sampleData !== null),
+      takeUntil(this._unsubscribe$),
+      filter((sampleData, chainConfig) => sampleData !== null),
     ).subscribe(([sampleData, chainConfig]) => {
-      this.store.dispatch(ExecutionListTriggeredAction({ sampleData, chainConfig }));
+      this._store.dispatch(ExecutionListTriggeredAction({ sampleData, chainConfig }));
     });
   }
 
-  onSelectedTabChange(index: number) {
-    this.persistSelectedTab(index);
-  }
-
-  private persistSelectedTab(index: number) {
+  private _persistSelectedTab(index: number) {
     localStorage.setItem('liveViewSelectedTabIndex', JSON.stringify(index));
   }
 
-  private restoreSelectedTab() {
+  private _restoreSelectedTab() {
     return parseInt(localStorage.getItem('liveViewSelectedTabIndex'), 10);
-  }
-
-  ngOnDestroy(): void {
-    this.unsubscribe$.next();
-    this.unsubscribe$.complete();
   }
 }

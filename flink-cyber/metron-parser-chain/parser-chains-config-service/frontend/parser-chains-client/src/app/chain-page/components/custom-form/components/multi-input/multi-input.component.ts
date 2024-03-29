@@ -47,31 +47,12 @@ export class MultiInputComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.indexingFieldMap || changes.selectedSource) {
-      this.updateDropdownLists();
+      this._updateDropdownLists();
     }
-  }
-
-  private updateDropdownLists() {
-    // clear the existing lists
-    this.ignoreColumns = [];
-    this.mappingColumns = [];
-
-    // split the items into two lists based on the boolean value
-    if (this.indexingFieldMap && this.selectedSource) {
-      this.indexingFieldMap.get(this.selectedSource).forEach((value, key) => {
-        if (value) {
-          this.ignoreColumns.push(key);
-        } else {
-          this.mappingColumns.push(key);
-        }
-      });
-    }
-    this.ignoreColumns.sort()
-    this.mappingColumns.sort()
   }
 
   onAddClick() {
-    if (this.config.multipleValues==true) {
+    if (this.config.multipleValues) {
       this.controls.push(
           new UntypedFormControl('')
       );
@@ -87,7 +68,7 @@ export class MultiInputComponent implements OnInit, OnChanges {
     this.changeValue.emit(value);
   }
 
-  updateValue(selectedValue: String, control: UntypedFormControl, config: CustomFormConfig) {
+  updateValue(selectedValue: string, control: UntypedFormControl, config: CustomFormConfig) {
     control.setValue(selectedValue)
     this.onChange(config)
   }
@@ -106,5 +87,24 @@ export class MultiInputComponent implements OnInit, OnChanges {
 
   selectSearch($event: string) {
     this.selectSearchValue=$event;
+  }
+
+  private _updateDropdownLists() {
+    // clear the existing lists
+    this.ignoreColumns = [];
+    this.mappingColumns = [];
+
+    // split the items into two lists based on the boolean value
+    if (this.indexingFieldMap && this.selectedSource) {
+      this.indexingFieldMap.get(this.selectedSource).forEach((value, key) => {
+        if (value) {
+          this.ignoreColumns.push(key);
+        } else {
+          this.mappingColumns.push(key);
+        }
+      });
+    }
+    this.ignoreColumns.sort()
+    this.mappingColumns.sort()
   }
 }
