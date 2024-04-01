@@ -27,8 +27,8 @@ export class IndexingFormComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.form = this._fb.group({filePath: ''});
+    this._store.dispatch(new GetIndexMappingsAction({filePath: this.form.value.filePath}));
     this._indexMappings$.subscribe(indexMappings => {
-      this._store.dispatch(new GetIndexMappingsAction({filePath: indexMappings.path}));
       this.form.patchValue({filePath: indexMappings.path});
       this.onAdvancedEditorChanged({value: indexMappings.result});
     });
