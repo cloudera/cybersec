@@ -11,7 +11,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import { Action } from '@ngrx/store';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Observable, of } from 'rxjs';
@@ -30,8 +30,6 @@ import {
 } from './live-view.actions';
 import { LiveViewConsts } from './live-view.consts';
 import { LiveViewService } from './services/live-view.service';
-import {editor} from "monaco-editor";
-import create = editor.create;
 
 @Injectable()
 export class LiveViewEffects {
