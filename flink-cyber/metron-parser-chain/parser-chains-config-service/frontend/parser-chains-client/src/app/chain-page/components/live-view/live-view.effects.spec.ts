@@ -55,32 +55,30 @@ describe('live-view.effects', () => {
     ];
 
   const actions$ = new Subject<Action>();
-  let liveViewEffects: LiveViewEffects;
-  let fakeLiveViewService: LiveViewService;
-  let fakeMessageService: NzMessageService;
+  let liveViewEffects: jasmine.SpyObj<LiveViewEffects>;
+  let fakeLiveViewService: jasmine.SpyObj<LiveViewService>;
+  let fakeMessageService: jasmine.SpyObj<NzMessageService>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         LiveViewEffects,
-        { provide: LiveViewService, useValue: jasmine.createSpyObj('LiveViewService', ['execute']) },
+        { provide: LiveViewService, useValue: jasmine.createSpyObj('LiveViewService', {
+            execute: of({results: testResult})
+          }) },
         { provide: NzMessageService, useValue: jasmine.createSpyObj('NzMessageService', ['create']) },
 
         provideMockActions(() => actions$)],
     });
 
-    liveViewEffects = TestBed.inject(LiveViewEffects);
-    fakeLiveViewService = TestBed.inject(LiveViewService);
-    fakeMessageService = TestBed.inject(NzMessageService);
+    liveViewEffects = TestBed.inject(LiveViewEffects) as jasmine.SpyObj<LiveViewEffects>;
+    fakeLiveViewService = TestBed.inject(LiveViewService) as jasmine.SpyObj<LiveViewService>;
+    fakeMessageService = TestBed.inject(NzMessageService) as jasmine.SpyObj<NzMessageService>;
   });
 
   it('should call liveViewService.execute on executionTriggered', () => {
     const testSubscriber = jasmine.createSpy('executionTriggeredSpy');
     liveViewEffects.execute$.subscribe(testSubscriber);
-
-    spyOn(fakeLiveViewService, 'execute').and.returnValue(
-        of({results: testResult})
-    );
 
     actions$.next(executionTriggered({ ...testPayload }));
 
@@ -90,10 +88,6 @@ describe('live-view.effects', () => {
   it('should dispatch liveViewRefreshedSuccessfully if liveViewService execute successfully', () => {
     const testSubscriber = jasmine.createSpy('executionTriggeredSpy');
     liveViewEffects.execute$.subscribe(testSubscriber);
-
-    spyOn(fakeLiveViewService, 'execute').and.returnValue(
-      of({results: testResult})
-    );
 
     actions$.next(executionTriggered({ ...testPayload }));
 
@@ -109,7 +103,7 @@ describe('live-view.effects', () => {
     const testSubscriber = jasmine.createSpy('executionTriggeredSpy');
     liveViewEffects.execute$.subscribe(testSubscriber);
 
-    spyOn(fakeLiveViewService, 'execute').and.returnValue(throwError({ message: 'something went wrong' }));
+    fakeLiveViewService.execute.and.returnValue(throwError({ message: 'something went wrong' }));
 
     actions$.next(executionTriggered({ ...testPayload }));
 
@@ -122,8 +116,7 @@ describe('live-view.effects', () => {
   });
 
   it('should show error message if liveViewService execution fail', () => {
-    spyOn(fakeLiveViewService, 'execute').and.returnValue(throwError({ message: 'something went wrong' }));
-    spyOn(fakeMessageService, 'create');
+    fakeLiveViewService.execute.and.returnValue(throwError({ message: 'something went wrong' }));
 
     liveViewEffects.execute$.subscribe();
 

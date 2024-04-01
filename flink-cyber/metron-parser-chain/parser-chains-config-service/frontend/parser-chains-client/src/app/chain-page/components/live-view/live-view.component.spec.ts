@@ -31,6 +31,7 @@ import {LiveViewResultComponent} from "./live-view-result/live-view-result.compo
 import {LiveViewConsts} from "./live-view.consts";
 import {NzFormModule} from "ng-zorro-antd/form";
 import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
+import {ChainDetailsModel} from "../../chain-page.models";
 
 
 describe('LiveViewComponent', () => {
@@ -87,7 +88,7 @@ describe('LiveViewComponent', () => {
 
     fixture = TestBed.createComponent(LiveViewComponent);
     component = fixture.componentInstance;
-    component.chainConfig$ = new Subject<unknown>();
+    component.chainConfig$ = new Subject<ChainDetailsModel>();
     fixture.detectChanges();
   });
 

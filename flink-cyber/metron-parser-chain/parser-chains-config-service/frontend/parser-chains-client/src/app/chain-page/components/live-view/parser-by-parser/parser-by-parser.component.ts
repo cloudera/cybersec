@@ -28,8 +28,7 @@ export class ParserByParserComponent implements OnInit {
     'There was an error that prevented your parser chain from being constructed. Please review your configuration settings.';
   @Output() investigateParser = new EventEmitter<string>();
   @Input() logMessage: string;
-
-
+  errorDescriptor = ParserByParserComponent.ERROR_DESCRIPTOR;
   protected readonly parserFieldStatus = ParserFieldStatus;
   protected readonly console = console;
   private _diffOnly = false;
