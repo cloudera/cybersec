@@ -46,7 +46,7 @@
         <maven-source-plugin.version>3.2.0</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
         <frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
-        <frontend-maven-plugin.nodeVersion>v14.16.0</frontend-maven-plugin.nodeVersion>
+        <frontend-maven-plugin.nodeVersion>v14.20.0</frontend-maven-plugin.nodeVersion>
 
         <!-- main dependency versions -->
         <lombok.version>1.18.12</lombok.version>
