@@ -59,9 +59,9 @@ public class RestLookupJobTest extends RestLookupJob {
         mockRestServer = new MockRestServer(true);
         File configFile = configTempFolder.newFile("rest-job-test.json");
         List<RestEnrichmentConfig> modelRestConfig = new ArrayList<>();
-        modelRestConfig.add(mockRestServer.configureModelPostRequest().build());
-        modelRestConfig.add(mockRestServer.configureGetAssetRequest().build());
-        modelRestConfig.add(mockRestServer.configureGetUserRequest().build());
+        modelRestConfig.add(mockRestServer.configureModelPostRequest(MockRestServer.ENCRYPTED_PROTOCOL).build());
+        modelRestConfig.add(mockRestServer.configureGetAssetRequest(MockRestServer.ENCRYPTED_PROTOCOL).build());
+        modelRestConfig.add(mockRestServer.configureGetUserRequest(MockRestServer.ENCRYPTED_PROTOCOL).build());
         ObjectWriter ow = getConfigObjectMapper().writerFor(new TypeReference<ArrayList<RestEnrichmentConfig>>() {
         });
         ow.writeValue(configFile, modelRestConfig);

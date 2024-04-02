@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.AsyncDataStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -30,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -60,7 +60,7 @@ public abstract class RestLookupJob {
             Preconditions.checkNotNull(config.getSources(),"specify a list of source names or ANY to match any source");
             Preconditions.checkArgument(!config.getSources().isEmpty(), "specify a list of source names or ANY to match any source");
             AsyncHttpRequest asyncHttpRequest = new AsyncHttpRequest(config);
-            String processId = "rest-" + md5(source + config.getEndpointTemplate());
+            String processId = "rest-" + Base64.getEncoder().encodeToString(md5(source + config.getEndpointTemplate()));
 
             return AsyncDataStream.unorderedWait(
                     in,
@@ -72,7 +72,6 @@ public abstract class RestLookupJob {
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws IOException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         env.enableCheckpointing(5000);
         FlinkUtils.setupEnv(env, params);
 

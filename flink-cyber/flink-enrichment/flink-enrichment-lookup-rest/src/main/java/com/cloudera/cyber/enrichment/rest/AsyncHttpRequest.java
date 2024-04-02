@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.function.Predicate;
 import java.util.List;
 
 import static com.cloudera.cyber.DataQualityMessageLevel.ERROR;
