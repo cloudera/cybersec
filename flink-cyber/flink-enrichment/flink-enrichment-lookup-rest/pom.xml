@@ -51,8 +51,13 @@
 
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-cloudera-registry</artifactId>
+            <artifactId>flink-connector-cloudera-registry</artifactId>
             <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hortonworks.registries</groupId>
+            <artifactId>schema-registry-serdes</artifactId>
         </dependency>
 
         <dependency>
@@ -196,8 +201,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
-                    <!-- use separate jvm to run each test.  mockserver secure and insecure get confused if tests run in the same jvm -->
-                    <forkMode>always</forkMode>
+                    <forkCount>1</forkCount>
+                    <reuseForks>false</reuseForks>
                 </configuration>
             </plugin>
         </plugins>
