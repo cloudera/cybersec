@@ -56,7 +56,7 @@ export class LiveViewEffects {
     tap(({ sampleData }) => {
       localStorage.setItem(LiveViewConsts.SAMPLE_DATA_STORAGE_KEY, JSON.stringify(sampleData));
     })
-  ));
+  ), { dispatch: false });
 
   persistingOnOffToggle$ = createEffect( () => this._actions$.pipe(
     ofType(
@@ -65,7 +65,7 @@ export class LiveViewEffects {
     tap(({ value }) => {
       localStorage.setItem(LiveViewConsts.FEATURE_TOGGLE_STORAGE_KEY, JSON.stringify(value));
     })
-  ));
+  ), { dispatch: false });
 
   restoreSampleDataFromLocalStore: Observable<Action> = createEffect( () => this._actions$.pipe(
     ofType(

@@ -82,6 +82,9 @@ export class LiveViewComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.sampleDataChange$.unsubscribe();
+    this.sampleDataForceChange$.unsubscribe();
+    this.featureToggleChange$.unsubscribe();
     this._unsubscribe$.next();
     this._unsubscribe$.complete();
   }
@@ -100,7 +103,6 @@ export class LiveViewComponent implements OnInit, AfterViewInit, OnDestroy {
     });
 
     this.featureToggleChange$.pipe(
-      takeUntil(this._unsubscribe$),
       filter(value => value !== null),
     ).subscribe(value => {
       this._store.dispatch(onOffToggleChanged({ value }));

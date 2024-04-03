@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-import {Component, EventEmitter, Input, NgZone, OnDestroy, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {select, Store} from '@ngrx/store';
 import {Subscription} from 'rxjs';
 
