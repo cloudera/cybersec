@@ -22,14 +22,8 @@ public abstract class RestRequestTest {
     protected static MockRestServer mockRestServer;
 
 
-    protected static void startMockServer() {
-        mockRestServer = new MockRestServer(true);
-    }
-
-    protected static void stopMockServer() {
-        if (mockRestServer != null) {
-            mockRestServer.close();
-        }
+    protected static void startMockServer(boolean enableTlsMutualAuth) {
+        mockRestServer = new MockRestServer(enableTlsMutualAuth);
     }
 
     protected RestRequestResult makeRequest(RestEnrichmentConfig config, Map<String, String> variables) throws Exception {
@@ -38,7 +32,7 @@ public abstract class RestRequestTest {
         }
     }
 
-    protected void verifyErrorResult(RestRequestResult result, String expectedErrorFormat, MockRestServer mockRestServer) {
+    protected void verifyErrorResult(RestRequestResult result, String expectedErrorFormat) {
         Assert.assertTrue(result.getExtensions().isEmpty());
         List<String> errors = result.getErrors();
         Assert.assertEquals(1, errors.size());
