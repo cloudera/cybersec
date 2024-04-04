@@ -32,14 +32,16 @@ import java.util.concurrent.TimeUnit;
 
 public class AsyncHttpRequestTest extends RestRequestTest {
 
+    private static MockRestServer mockRestServer;
+
     @BeforeClass
-    public static void createMockServices() {
-        startMockServer();
+    public static void startMockServer() {
+        mockRestServer = new MockRestServer(false);
     }
 
     @AfterClass
-    public static void stopMockServices() {
-        stopMockServer();
+    public static void stopMockServer() {
+        mockRestServer.close();
     }
 
     private Message buildMessage(String source, String fieldName, String fieldValue) {
@@ -131,7 +133,7 @@ public class AsyncHttpRequestTest extends RestRequestTest {
         }};
 
         String mockHostAndPort = mockRestServer.getMockHostAndPort();
-        String url = String.format("%s://%s/asset?id=56", MockRestServer.ENCRYPTED_PROTOCOL, mockHostAndPort);
+        String url = String.format("http://%s/asset?id=56", mockHostAndPort);
         String exceptionMessage = String.format(RestRequest.REST_REQUEST_HTTP_FAILURE, "HTTP/1.1 503 Service Unavailable");
         List<DataQualityMessage> expectedQualityMessages = Collections.singletonList(DataQualityMessage.builder().
                 feature(AsyncHttpRequest.REST_ENRICHMENT_FEATURE).
@@ -177,7 +179,7 @@ public class AsyncHttpRequestTest extends RestRequestTest {
     }
 
     private void testGetAsset(ArrayList<String> enrichmentSources, String messageSource, String fieldName, String assetId, Map<String, Object> expectedExtensions, Collection<DataQualityMessage> expectedDataQualityMessages) throws Exception {
-        AsyncHttpRequest  request = new AsyncHttpRequest(mockRestServer.configureGetAssetRequest(MockRestServer.ENCRYPTED_PROTOCOL).sources(enrichmentSources).build());
+        AsyncHttpRequest  request = new AsyncHttpRequest(mockRestServer.configureGetAssetRequest().sources(enrichmentSources).build());
         request.open(new Configuration());
 
         AsyncResult result = new AsyncResult();

@@ -12,8 +12,8 @@
 
 package com.cloudera.cyber.enrichment.rest.impl;
 
-import com.cloudera.cyber.enrichment.rest.*;
 import com.google.common.base.Joiner;
+import com.cloudera.cyber.enrichment.rest.*;
 import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,10 +30,7 @@ import org.mockserver.socket.tls.KeyStoreFactory;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
@@ -84,8 +81,6 @@ public class MockRestServer {
     private static final String BEARER_TOKEN = "mybearertokenaae6b840d045b574d96e35e271419720d0d7645534da6d5ba3d.74c9e8867ef7e0750b5772671acf7e413a744f6d77507eac83584014c71c5866";
     private static final int EXPECTED_CLIENT_ERROR_HTTP_CODE = 400;
     public static final String USER_NAME_PROPERTY = "name";
-    public static final String ENCRYPTED_PROTOCOL = "https";
-
     private ClientAndServer mockServer;
     private String mockHostAndPort;
     private String mockProtocol;
@@ -106,18 +101,16 @@ public class MockRestServer {
         initializePostExpectations();
     }
 
-    public RestEnrichmentConfig.RestEnrichmentConfigBuilder getBuilder(HashMap<String, String> properties, String protocol) {
+    public RestEnrichmentConfig.RestEnrichmentConfigBuilder getBuilder(HashMap<String, String> properties) {
         RestEnrichmentConfig.RestEnrichmentConfigBuilder builder = RestEnrichmentConfig.builder().
                 capacity(3);
-        if (protocol.equals(ENCRYPTED_PROTOCOL)) {
-            boolean mutualTlsAuth = mockServer.isSecure();
-            if (mutualTlsAuth) {
-                configureTLS(builder, null);
-            }
+        boolean mutualTlsAuth = mockServer.isSecure();
+        if (mutualTlsAuth) {
+            configureTLS(builder, null);
         }
         if (properties != null) {
             properties.put("server", mockHostAndPort);
-            properties.put("protocol", protocol);
+            properties.put("protocol", mockProtocol);
             builder.properties(properties);
         }
 
@@ -134,12 +127,12 @@ public class MockRestServer {
                 keyPassword(KEY_PASSWORD).keyAlias(keyAlias).build());
     }
 
-    public RestEnrichmentConfig.RestEnrichmentConfigBuilder configureModelPostRequest(String protocol) {
+    public RestEnrichmentConfig.RestEnrichmentConfigBuilder configureModelPostRequest() {
         HashMap<String, String> authTokenProperties = new HashMap<String, String>() {{
             put("bearer_token", BEARER_TOKEN);
             put("access_key", ACCESS_KEY);
         }};
-        return getBuilder(authTokenProperties, protocol).
+        return getBuilder(authTokenProperties).
                 sources(Lists.newArrayList(DNS_SOURCE)).
                 prefix(DGA_MODEL_PREFIX).
                 endpointTemplate("${protocol}://${server}/model").
@@ -154,20 +147,20 @@ public class MockRestServer {
 
     }
 
-    public RestEnrichmentConfig.RestEnrichmentConfigBuilder configureGetUserRequest(String protocol) {
-        return getBuilder(new HashMap<>(), protocol).
+    public RestEnrichmentConfig.RestEnrichmentConfigBuilder configureGetUserRequest() {
+        return getBuilder(new HashMap<>()).
                 sources(Lists.newArrayList(USER_SOURCE)).
                 prefix(USER_PREFIX).
                 endpointTemplate("${protocol}://${server}/user?name=${name}");
     }
 
-    public RestEnrichmentConfig.RestEnrichmentConfigBuilder configureGetAssetRequest(String protocol) {
+    public RestEnrichmentConfig.RestEnrichmentConfigBuilder configureGetAssetRequest() {
         HashMap<String, String> properties = new HashMap<String, String>() {{
             put("user", BASIC_USER_NAME);
             put("password", BASIC_PASSWORD);
         }};
 
-        return getBuilder(properties, protocol).
+        return getBuilder(properties).
                 sources(Lists.newArrayList(ASSET_SOURCE)).
                 prefix(ASSET_PREFIX).
                 endpointTemplate("${protocol}://${server}/asset?id=${id}").
@@ -225,7 +218,7 @@ public class MockRestServer {
         for (ExpectedModelResult expectedModelResult : expectedModelResults) {
             addModelResultExpectation(expectedModelResult.isSuccess(), expectedModelResult.getDomainName(), expectedModelResult.isLegit());
         }
-        addModelResultClientErrorExpectation();
+        addModelResultClientErrorExpectation(CLIENT_ERROR_DOMAIN, EXPECTED_CLIENT_ERROR_HTTP_CODE);
     }
 
     private void addModelResultExpectation(boolean success, String domain, boolean legit) {
@@ -244,18 +237,18 @@ public class MockRestServer {
                 );
     }
 
-    private void addModelResultClientErrorExpectation() {
+    private void addModelResultClientErrorExpectation(String domain, int statusCode) {
         mockServer.when(
                 request().
                         withMethod("POST").
                         withPath("/model").
                         withContentType(MediaType.APPLICATION_JSON).
                         withHeader(HttpHeaders.AUTHORIZATION, "Bearer ".concat(BEARER_TOKEN)).
-                        withBody(json(String.format("{\"accessKey\":\"%s\",\"request\":{\"domain\":\"%s\"}}", ACCESS_KEY, MockRestServer.CLIENT_ERROR_DOMAIN), MatchType.STRICT))
+                        withBody(json(String.format("{\"accessKey\":\"%s\",\"request\":{\"domain\":\"%s\"}}", ACCESS_KEY, domain), MatchType.STRICT))
         )
                 .respond(
                         response()
-                                .withStatusCode(MockRestServer.EXPECTED_CLIENT_ERROR_HTTP_CODE)
+                                .withStatusCode(statusCode)
                 );
     }
 
