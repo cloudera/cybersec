@@ -54,7 +54,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   popOverVisible = false;
   editChainNameForm: UntypedFormGroup;
   failedParser$: Observable<string>;
-  indexingFieldMap: Map<string,Map<string, boolean>>;
+  indexingFieldMap: { [key: string]: {[key:string]: boolean} };
 
   constructor(
     private _store: Store<ChainPageState>,
@@ -250,7 +250,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
     }
   }
 
-  updateAllFields($event: Map<string,Map<string, boolean>>) {
+  updateAllFields($event: { [key: string]: {[key:string]: boolean} }) {
     this.indexingFieldMap = $event
   }
 }

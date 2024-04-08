@@ -6,15 +6,13 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {MockComponent} from "ng-mocks";
 import {AdvancedEditorComponent} from "../parser/advanced-editor/advanced-editor.component";
 import {NoopAnimationsModule} from "@angular/platform-browser/animations";
-import {provideMockStore} from "@ngrx/store/testing";
 import {NzInputModule} from "ng-zorro-antd/input";
-import {Store} from "@ngrx/store";
-import {GetIndexMappingsAction} from "../../chain-page.actions";
+import {NzMessageService} from "ng-zorro-antd/message";
+import {ChainPageService} from "../../../services/chain-page.service";
 
 describe('IndexingFormComponent', () => {
   let component: IndexingFormComponent;
   let fixture: ComponentFixture<IndexingFormComponent>;
-  let store: Store;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
@@ -23,21 +21,11 @@ describe('IndexingFormComponent', () => {
         NzInputModule,
         FormsModule,
         ReactiveFormsModule,
-        NoopAnimationsModule
+        NoopAnimationsModule,
       ],
       providers: [
-        provideMockStore({
-          initialState: {
-            'chain-page': {
-              indexMappings: {
-                path: "foo-path",
-                result: {
-                  value: "foo-value"
-                }
-              }
-            }
-          }
-        })
+        {provide: NzMessageService, useValue: jasmine.createSpyObj('NzMessageService', ['create'])},
+        {provide: ChainPageService, useValue: jasmine.createSpyObj('ChainPageService', ['getIndexMappings'])},
       ],
       declarations: [IndexingFormComponent, MockComponent(AdvancedEditorComponent)]
     })
@@ -47,23 +35,10 @@ describe('IndexingFormComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(IndexingFormComponent);
     component = fixture.componentInstance;
-    store = TestBed.inject(Store);
     fixture.detectChanges();
   });
 
   it('should create', () => {
-    spyOn(store, 'dispatch').and.callThrough();
-    component.ngOnInit();
     expect(component).toBeTruthy();
-    const action = new GetIndexMappingsAction({filePath: "foo-path"});
-    expect(store.dispatch).toHaveBeenCalledWith(action);
-  });
-
-  it('should dispatch action and emit value on init', () => {
-    spyOn(store, 'dispatch').and.callThrough();
-    component.ngOnInit();
-    expect(component).toBeTruthy();
-    const action = new GetIndexMappingsAction({filePath: "foo-path"});
-    expect(store.dispatch).toHaveBeenCalledWith(action);
   });
 });
