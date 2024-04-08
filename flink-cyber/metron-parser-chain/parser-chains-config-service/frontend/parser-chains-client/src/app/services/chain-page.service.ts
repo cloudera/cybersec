@@ -16,6 +16,7 @@ import {BehaviorSubject} from 'rxjs';
 
 import {ChainDetailsModel} from '../chain-page/chain-page.models';
 import {ParserDescriptor} from "../chain-page/chain-page.reducers";
+import {finalize} from "rxjs/operators";
 
 @Injectable({
     providedIn: 'root'
@@ -23,8 +24,8 @@ import {ParserDescriptor} from "../chain-page/chain-page.reducers";
 export class ChainPageService {
   static readonly BASE_URL = '/api/v1/parserconfig/';
   public collapseAll = new BehaviorSubject(false);
-    private _parserChainCollapseState: BehaviorSubject<boolean[]>;
-    private _parserChainSize: number;
+  private _parserChainCollapseState: BehaviorSubject<boolean[]>;
+  private _parserChainSize: number;
 
 
     constructor(
@@ -51,9 +52,8 @@ export class ChainPageService {
       return this._http.get<{[key: string] : ParserDescriptor}>(ChainPageService.BASE_URL + `parser-form-configuration`);
     }
 
-    public getIndexMappings(payload?: { filePath: string} ) {
-      const finalPayload = payload ? payload : {}
-      return this._http.post(ChainPageService.BASE_URL + `indexing`, finalPayload);
+    public getIndexMappings(payload: { filePath?: string} = {filePath: ''}) {
+      return this._http.post(`${ChainPageService.BASE_URL}indexing`, payload, {headers: {'Content-Type': 'application/json; charset=utf-8'}, observe: 'response'});
     }
 
     public createChainCollapseArray(size: number) {

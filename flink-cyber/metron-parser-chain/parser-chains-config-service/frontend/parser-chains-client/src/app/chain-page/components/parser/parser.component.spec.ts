@@ -187,7 +187,7 @@ describe('ParserComponent', () => {
 
   it('should dispatch action if config changed by the advanced editor', () => {
     const mockListener = jasmine.createSpy('mockListener');
-    const value = { someField: 'some value' };
+    const value = { someField: {foo: 'bar'} };
 
     component.parserChange.subscribe(mockListener);
 

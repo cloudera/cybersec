@@ -44,31 +44,29 @@ describe('AdvancedEditorComponent', () => {
   });
 
   it('should dispatch event when value changes', () => {
-    const mockListener = jasmine.createSpy('mockListener');
-    component.configChanged.subscribe(mockListener);
+    spyOn(component.configChanged, 'emit');
 
-    component.onChange('{ "someField": "some value" }');
 
-    expect(mockListener).toHaveBeenCalledWith({ value: JSON.parse('{ "someField": "some value" }') });
+    component.onChange('{"someField": {"foo": "bar"}}');
+
+    expect(component.configChanged.emit).toHaveBeenCalledWith({ value: JSON.parse('{"someField": {"foo": "bar"}}') });
   });
 
   it('should ignore content if not valid json', () => {
-    const mockListener = jasmine.createSpy('mockListener');
-    component.configChanged.subscribe(mockListener);
+    spyOn(component.configChanged, 'emit');
 
     component.onChange('not a json, but sure it can be typed in to the editor');
 
-    expect(mockListener).not.toHaveBeenCalledWith();
+    expect(component.configChanged.emit).not.toHaveBeenCalledWith();
   });
 
   it('should not emit event if new value equals with the original', () => {
-    const mockListener = jasmine.createSpy('mockListener');
-    component.config = { initialField: 'initial value' };
-    component.configChanged.subscribe(mockListener);
+    spyOn(component.configChanged, 'emit');
+    component.config = { initialField: {foo: 'bar'} };
 
-    component.onChange('{ initialField: "initial value" }');
+    component.onChange('{"initialField": {"foo": "bar"}}');
 
-    expect(mockListener).not.toHaveBeenCalledWith();
+    expect(component.configChanged.emit).not.toHaveBeenCalledWith();
   });
 
 });
