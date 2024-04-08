@@ -266,24 +266,4 @@ describe('chain parser page: effects', () => {
 
     expect(service.getFormConfigs).toHaveBeenCalledWith();
   });
-
-  it('getIndexMappings should return the index mappings', (done) => {
-    const indexMappings = {
-      path: 'foo',
-      result: new Map<string, object>()
-    };
-    service.getIndexMappings.and.returnValue(of(indexMappings));
-
-    actions = new ReplaySubject(1);
-    actions.next(new fromActions.GetIndexMappingsAction({
-      filePath: 'foo'
-    }));
-
-    effects.getIndexMappings$.subscribe(result => {
-      expect(result).toEqual(new fromActions.GetIndexMappingsSuccessAction(indexMappings));
-      done();
-    });
-
-    expect(service.getIndexMappings).toHaveBeenCalledWith({filePath: 'foo'});
-  });
 });

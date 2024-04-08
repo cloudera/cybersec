@@ -103,28 +103,6 @@ export class ChainPageEffects {
     })
   ));
 
-  getIndexMappings$: Observable<Action> = createEffect(() => this._actions$.pipe(
-    ofType(fromActions.GET_INDEX_MAPPINGS),
-    switchMap((action: fromActions.GetIndexMappingsAction) => {
-      return this._chainPageService.getIndexMappings(action.payload).pipe(
-        map((response: { path: string, result: Map<string, object> }) => {
-          if (response) {
-            return new fromActions.GetIndexMappingsSuccessAction({
-              path: response.path, result: response.result
-            });
-          } else {
-            return new fromActions.GetIndexMappingsSuccessAction({
-              path: '', result: new Map<string, object>()
-            });
-          }
-        }),
-        catchError((error: { message: string }) => {
-          this._messageService.create('error', error.message);
-          return of(new fromActions.GetIndexMappingsFailAction(error));
-        })
-      );
-    })
-  ));
   constructor(
     private _actions$: Actions,
     private _store$: Store<any>,

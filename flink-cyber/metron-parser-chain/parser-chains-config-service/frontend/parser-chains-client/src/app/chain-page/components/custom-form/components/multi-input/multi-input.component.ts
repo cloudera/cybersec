@@ -22,7 +22,7 @@ import {
   SimpleChanges
 } from '@angular/core';
 import {UntypedFormControl} from '@angular/forms';
-
+import {isObject} from 'src/app/shared/utils';
 import {CustomFormConfig} from '../../custom-form.component';
 
 @Component({
@@ -35,7 +35,7 @@ export class MultiInputComponent implements OnInit, OnChanges, AfterContentCheck
   @Input() config: CustomFormConfig;
   @Input() value: string | any[] = "";
   @Input() selectedSource: string;
-  @Input() indexingFieldMap: Map<string, Map<string, boolean>>;
+  @Input() indexingFieldMap: {[key: string]: {[key:string]: boolean}};
   @Output() changeValue = new EventEmitter<{ [key: string]: string }[]>();
   controls = [];
   ignoreColumns: string[] = [];
@@ -112,13 +112,16 @@ export class MultiInputComponent implements OnInit, OnChanges, AfterContentCheck
 
     // split the items into two lists based on the boolean value
     if (this.indexingFieldMap && this.selectedSource) {
-      this.indexingFieldMap.get(this.selectedSource)?.forEach((value, key) => {
-        if (value) {
-          this.ignoreColumns.push(key);
-        } else {
-          this.mappingColumns.push(key);
-        }
-      });
+      const fields = this.indexingFieldMap[this.selectedSource];
+      if (isObject(fields)) {
+        Object.entries(fields).forEach(([key, value]) => {
+          if (value) {
+            this.ignoreColumns.push(key);
+          } else {
+            this.mappingColumns.push(key);
+          }
+        });
+      }
     }
     this.ignoreColumns.sort()
     this.mappingColumns.sort()

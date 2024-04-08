@@ -69,6 +69,10 @@
         "@typescript-eslint/naming-convention": [
           "error",
           {
+            "selector": "objectLiteralProperty",
+            "format": null
+          },
+          {
             "selector": "enumMember",
             "format": ["UPPER_CASE"]
           },
