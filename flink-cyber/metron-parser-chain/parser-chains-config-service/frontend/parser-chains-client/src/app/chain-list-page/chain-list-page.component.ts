@@ -87,7 +87,7 @@ export class ChainListPageComponent implements OnInit {
   }
 
   get newPipelineName() {
-    return this.renamePipelineForm.get('pipelineName') as FormControl;
+    return this.renamePipelineForm.get('pipelineName') as UntypedFormControl;
   }
 
   showAddChainModal(): void {
