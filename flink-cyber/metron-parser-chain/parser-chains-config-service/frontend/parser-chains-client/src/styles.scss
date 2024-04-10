@@ -45,19 +45,6 @@ $parser-chaining-theme: mat.define-light-theme((
  * limitations governing your use of the file.
  */
 
-// Ant overrides
-// These styles should only be here for two reasons:
-// 1. The less variable in the theme.less file needs a compile-time value.
-// 2. The desired styling cannot be applied from a parent component
-//    due to Angular encapsulation.
-@use '@angular/material' as mat;
-// Plus imports for other components in your app.
-
-// Include the common styles for Angular Material. We include this here so that you only
-// have to load a single css file for Angular Material in your app.
-// Be sure that you only ever include this mixin once!
-@include mat.core();
-
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
@@ -76,11 +63,6 @@ $theme: mat.define-light-theme((
     warn: $theme-warn,
   )
 ));
-
-// Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
-@include mat.all-component-themes($theme);
 
 @mixin md-icon-size($size: 24px) {
   font-size: $size;

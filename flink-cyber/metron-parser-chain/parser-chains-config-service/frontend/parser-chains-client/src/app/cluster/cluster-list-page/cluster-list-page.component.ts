@@ -15,7 +15,6 @@ import {Router} from '@angular/router';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {ClusterModel, Job} from "./cluster-list-page.model";
 import {ClusterService} from "../../services/cluster.service";
-import {ThemePalette} from "@angular/material/core/common-behaviors/color";
 import {tap} from "rxjs/operators";
 
 
