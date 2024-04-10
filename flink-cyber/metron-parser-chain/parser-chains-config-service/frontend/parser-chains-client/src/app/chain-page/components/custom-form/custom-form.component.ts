@@ -11,7 +11,7 @@
  */
 
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
-import {FormControl, FormGroup} from '@angular/forms';
+import {UntypedFormControl, UntypedFormGroup} from '@angular/forms';
 
 export interface CustomFormConfig {
   name: string;
@@ -43,13 +43,13 @@ export class CustomFormComponent implements OnInit, OnChanges {
   @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() valueChange = new EventEmitter<any>();
 
-  formGroup: FormGroup;
+  formGroup: UntypedFormGroup;
 
   constructor() { }
 
   ngOnInit() {
-    this.formGroup = new FormGroup(this.config.reduce((controls: any, fieldConfig) => {
-      controls[fieldConfig.name] = new FormControl(fieldConfig.value);
+    this.formGroup = new UntypedFormGroup(this.config.reduce((controls: any, fieldConfig) => {
+      controls[fieldConfig.name] = new UntypedFormControl(fieldConfig.value);
       return controls;
     }, {}));
   }
@@ -62,7 +62,7 @@ export class CustomFormComponent implements OnInit, OnChanges {
         const control : any = this.formGroup.get(fieldConfig.name);
         if (previousValue !== currentValue && control.value !== currentValue) {
           this.formGroup.removeControl(fieldConfig.name);
-          this.formGroup.setControl(fieldConfig.name, new FormControl(currentValue));
+          this.formGroup.setControl(fieldConfig.name, new UntypedFormControl(currentValue));
         }
       });
     }

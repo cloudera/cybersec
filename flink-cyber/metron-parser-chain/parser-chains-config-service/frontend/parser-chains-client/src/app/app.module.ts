@@ -24,22 +24,26 @@ import {NzLayoutModule} from 'ng-zorro-antd/layout';
 import {en_US, NZ_I18N} from 'ng-zorro-antd/i18n'
 import {NzModalModule} from 'ng-zorro-antd/modal'
 import {storeFreeze} from 'ngrx-store-freeze';
-import {MonacoEditorModule} from '@materia-ui/ngx-monaco-editor';
 
 import {environment} from '../environments/environment';
 
-import {AppRoutingModule} from './app-routing.module';
-import {AppComponent} from './app.component';
-import {ChainAddParserPageModule} from './chain-add-parser-page/chain-add-parser-page.module';
-import {ChainListPageModule} from './chain-list-page/chain-list-page.module';
-import {ChainPageModule} from './chain-page/chain-page.module';
-import {CanDeactivateComponent} from './misc/can-deactivate-component';
-import {MainContainerComponent} from './misc/main/main.container';
-import {ThemeSwitchModule} from './misc/theme-switch/theme-switch.module';
-import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
-import {MonacoEditorService} from './services/monaco-editor.service';
-import {NzMenuModule} from 'ng-zorro-antd/menu';
-import {NzIconModule} from 'ng-zorro-antd/icon';
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { ChainAddParserPageModule } from './chain-add-parser-page/chain-add-parser-page.module';
+import { ChainListPageModule } from './chain-list-page/chain-list-page.module';
+import { ChainPageModule } from './chain-page/chain-page.module';
+import { CanDeactivateComponent } from './misc/can-deactivate-component';
+import { MainContainerComponent } from './misc/main/main.container';
+import { ThemeSwitchModule } from './misc/theme-switch/theme-switch.module';
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { MonacoEditorService } from './services/monaco-editor.service';
+import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { JsonEditorPopupComponent } from './components/popup/json-editor-popup/json-editor-popup.component';
+import {MatDialogModule} from "@angular/material/dialog";
+import {MatButtonModule} from "@angular/material/button";
+import {DragDropModule} from "@angular/cdk/drag-drop";
+import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 import {ClusterListPageModule} from "./cluster/cluster-list-page/cluster-list-page.module";
 import {ClusterPageModule} from "./cluster/cluster-page/cluster-page.module";
 
@@ -53,7 +57,8 @@ export const metaReducers: MetaReducer<{}>[] = !environment.production
   declarations: [
     AppComponent,
     MainContainerComponent,
-    PageNotFoundComponent
+    PageNotFoundComponent,
+    JsonEditorPopupComponent
   ],
   imports: [
     BrowserModule,
@@ -72,9 +77,12 @@ export const metaReducers: MetaReducer<{}>[] = !environment.production
     ClusterListPageModule,
     ClusterPageModule,
     ChainAddParserPageModule,
-    MonacoEditorModule,
+    MonacoEditorModule.forRoot(),
     NzMenuModule,
     NzIconModule,
+  MatDialogModule,
+    MatButtonModule,
+    DragDropModule,
   ],
   providers: [
     {provide: NZ_I18N, useValue: en_US},

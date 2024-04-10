@@ -50,10 +50,12 @@
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.2.0</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
-        <frontend-maven-plugin.version>1.14.2</frontend-maven-plugin.version>
-        <frontend-maven-plugin.nodeVersion>v18.18.2</frontend-maven-plugin.nodeVersion>
+        <frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
+        <frontend-maven-plugin.nodeVersion>v14.20.0</frontend-maven-plugin.nodeVersion>
 
         <!-- main dependency versions -->
+        <lombok.version>1.18.12</lombok.version>
+        <spring-boot.version>2.7.6</spring-boot.version>
         <evo-inflector.version>1.2.2</evo-inflector.version>
         <slf4j.version>1.7.15</slf4j.version>
 
@@ -62,6 +64,7 @@
         <commons-io.version>2.6</commons-io.version>
         <commons-lang3.version>3.9</commons-lang3.version>
         <commons-collections4.version>4.4</commons-collections4.version>
+        <springdoc-openapi.version>1.6.11</springdoc-openapi.version>
         <json.version>20220320</json.version>
 
         <!-- test dependency versions -->
@@ -91,9 +94,24 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-hateoas</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.atteo</groupId>
                 <artifactId>evo-inflector</artifactId>
                 <version>${evo-inflector.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+                <version>${spring-boot.version}</version>
             </dependency>
 
             <dependency>

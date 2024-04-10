@@ -1,8 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="91afe71d-2769-452a-8318-8762615c38f7" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/flink-cyber/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/pom.xml" afterDir="false" />
+    <list default="true" id="b685e939-3677-4276-b163-ed6df85a4e16" name="default" comment="fix merge conflicts">
+      <change afterPath="$PROJECT_DIR$/48745170-92de-4960-9584-bf7a2cdb76f2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/64a266bd-958c-4dcc-88fd-09a0b1935300.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/components/popup/json-editor-popup/json-editor-popup.component.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/components/popup/json-editor-popup/json-editor-popup.component.scss" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/components/popup/json-editor-popup/json-editor-popup.component.spec.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/components/popup/json-editor-popup/json-editor-popup.component.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/index-map.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/angular.json" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/angular.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/app.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/app.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-add-parser-page/chain-add-parser-page.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-add-parser-page/chain-add-parser-page.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-list-page/chain-list-page.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-list-page/chain-list-page.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/chain-page.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/chain-page.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/chain-page.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/chain-page.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/chain-page.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/chain-page.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/custom-form/components/multi-input/multi-input.component.spec.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/custom-form/components/multi-input/multi-input.component.spec.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/custom-form/components/multi-input/multi-input.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/custom-form/components/multi-input/multi-input.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/custom-form/custom-form.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/custom-form/custom-form.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/indexing-form/indexing-form.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/indexing-form/indexing-form.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/diff-popup/diff-popup.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/diff-popup/diff-popup.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/live-view.module.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/live-view.module.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/sample-data-form/sample-data-text-folder-input/sample-edit-popup/sample-edit-popup.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/sample-data-form/sample-data-text-folder-input/sample-edit-popup/sample-edit-popup.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/text-diff-view/text-diff-view.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/text-diff-view/text-diff-view.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/text-diff-view/text-diff-view.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/live-view/text-diff-view/text-diff-view.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/parser/advanced-editor/advanced-editor.component.html" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/parser/advanced-editor/advanced-editor.component.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/parser/advanced-editor/advanced-editor.component.spec.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/parser/advanced-editor/advanced-editor.component.spec.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/parser/advanced-editor/advanced-editor.component.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/parser/advanced-editor/advanced-editor.component.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/parser/parser.component.spec.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/chain-page/components/parser/parser.component.spec.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/services/monaco-editor.service.ts" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/services/monaco-editor.service.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/styles.scss" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/styles.scss" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/flink-cyber/metron-parser-chain/pom.xml" afterDir="false" />
+    </list>
+    <list id="97520b7f-b977-4238-a046-9abd4fb07344" name="local" comment="local">
+      <change beforePath="$PROJECT_DIR$/.idea/cybersec.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/cybersec.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -13,6 +52,25 @@
     <option name="done" value="true" />
   </component>
   <component name="Git.Settings">
+    <favorite-branches>
+      <branch-storage>
+        <map>
+          <entry type="LOCAL">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="develop" />
+                <branch-info repo="$PROJECT_DIR$" source="CYB-201" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </favorite-branches>
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="b8a8cd5e21d9aa4fc959c3770ce9178e09d8f51f" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectCodeStyleSettingsMigration">
@@ -24,9 +82,183 @@
     <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.ReplaceJsonProperties.executor": "Run",
+    "JUnit.DefaultChainExecutorServiceTest.executor": "Run",
+    "JUnit.PostRestRequestTest.executor": "Run",
+    "JUnit.ReplaceJsonPropertiesTest.executor": "Run",
+    "JUnit.ReplaceJsonPropertiesTest.testJsonReplace.executor": "Run",
+    "Karma.AdvancedEditorComponent.executor": "Run",
+    "Karma.AdvancedEditorComponent.should create.executor": "Debug",
+    "Karma.AdvancedEditorComponent.should dispatch event when value changes.executor": "Debug",
+    "Karma.AdvancedEditorComponent.should not emit event if new value equals with the original.executor": "Debug",
+    "Karma.ChainPageComponent.executor": "Run",
+    "Karma.IndexingFormComponent.executor": "Run",
+    "Karma.IndexingFormComponent.should handle complex object.executor": "Run",
+    "Karma.IndexingFormComponent.should handle object with empty.executor": "Debug",
+    "Karma.IndexingFormComponent.should handle object with no fields.executor": "Debug",
+    "Karma.IndexingFormComponent.should handle object with null.executor": "Debug",
+    "Karma.JsonEditorPopupComponent.executor": "Run",
+    "Karma.ParserByParserComponent.executor": "Run",
+    "Karma.ParserComponent.executor": "Run",
+    "Karma.RouterComponent.executor": "Run",
+    "Karma.TextDiffViewComponent.executor": "Run",
+    "Karma.chain parser page: effects.executor": "Run",
+    "Karma.chain parser page: effects.getFormConfig should return the form config.executor": "Debug",
+    "Karma.live-view.effects.executor": "Run",
+    "Karma.live-view.effects.should show error message if liveViewService execution fail.executor": "Debug",
+    "Maven.flink-cyber [clean,install].executor": "Run",
+    "Maven.metron-parser-chain [clean,install].executor": "Run",
+    "Maven.parser-chains-client [clean,install].executor": "Run",
+    "Nx.parser-chaining:test.executor": "Run",
+    "Nx.parser-chaining:test:deploy.executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "SONARLINT_PRECOMMIT_ANALYSIS": "true",
+    "Spring Boot.Application.executor": "Run",
+    "git-widget-placeholder": "Merging new-rest-with-ui",
+    "js.last.introduce.type": "CONST",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/admin/IdeaProjects/cybersec/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/shared/components",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "npm.build.executor": "Run",
+    "npm.lint.executor": "Run",
+    "npm.start:dev.executor": "Run",
+    "npm.test.executor": "Run",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.42021278",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "ts.external.directory.path": "/Users/admin/IdeaProjects/cybersec/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/node_modules/typescript/lib",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "TEXT"
+    ]
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/shared/components" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="SpringBootApplicationConfigurationType" />
+      </set>
+    </option>
+  </component>
+  <component name="RunManager" selected="JUnit.HbaseJobTest.test">
+    <configuration name="HbaseJobTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="flink-enrichment-lookup-hbase" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.cloudera.cyber.enrichment.hbase.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.cloudera.cyber.enrichment.hbase" />
+      <option name="MAIN_CLASS_NAME" value="com.cloudera.cyber.enrichment.hbase.HbaseJobTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="HbaseJobTest.test" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="flink-enrichment-lookup-hbase" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.cloudera.cyber.enrichment.hbase.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.cloudera.cyber.enrichment.hbase" />
+      <option name="MAIN_CLASS_NAME" value="com.cloudera.cyber.enrichment.hbase.HbaseJobTest" />
+      <option name="METHOD_NAME" value="test" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="LookupJobTest.testEnrichments" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="flink-enrichment-lookup-raw" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.cloudera.cyber.enrichment.lookup.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.cloudera.cyber.enrichment.lookup" />
+      <option name="MAIN_CLASS_NAME" value="com.cloudera.cyber.enrichment.lookup.LookupJobTest" />
+      <option name="METHOD_NAME" value="testEnrichments" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Application" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="parser-chains-config-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.cloudera.parserchains.queryservice.Application" />
+      <option name="VM_PARAMETERS" value="-Dserver.port=3000" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CliApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+      <module name="cyber-worker-service" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.cloudera.cyber.restcli.CliApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="start:dev-mock" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="start:dev-mock" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="start:dev" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="start:dev" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="JUnit.HbaseJobTest" />
+      <item itemvalue="JUnit.HbaseJobTest.test" />
+      <item itemvalue="JUnit.LookupJobTest.testEnrichments" />
+      <item itemvalue="npm.start:dev" />
+      <item itemvalue="npm.start:dev-mock" />
+      <item itemvalue="Spring Boot.CliApplication" />
+      <item itemvalue="Spring Boot.Application" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.start:dev" />
+        <item itemvalue="npm.start:dev-mock" />
+        <item itemvalue="JUnit.LookupJobTest.testEnrichments" />
+        <item itemvalue="JUnit.HbaseJobTest.test" />
+        <item itemvalue="JUnit.HbaseJobTest" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="ServiceViewManager">
     <option name="viewStates">
@@ -47,7 +279,252 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1594835938681</updated>
+      <workItem from="1710935608912" duration="33858000" />
+      <workItem from="1711526448481" duration="517000" />
+      <workItem from="1711541880438" duration="48494000" />
+      <workItem from="1712151082065" duration="29092000" />
+      <workItem from="1712669493250" duration="303000" />
+      <workItem from="1712669820218" duration="6450000" />
+      <workItem from="1712738401910" duration="95000" />
+      <workItem from="1712738509289" duration="1308000" />
+      <workItem from="1712739831313" duration="11916000" />
+    </task>
+    <task id="LOCAL-00001" summary="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Update hook.">
+      <option name="closed" value="true" />
+      <created>1710425821512</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1710425821512</updated>
+    </task>
+    <task id="LOCAL-00002" summary="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Update hook.">
+      <option name="closed" value="true" />
+      <created>1710425898437</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1710425898437</updated>
+    </task>
+    <task id="LOCAL-00003" summary="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Chrome headless browser">
+      <option name="closed" value="true" />
+      <created>1710426303195</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1710426303195</updated>
+    </task>
+    <task id="LOCAL-00004" summary="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Some fix for maven build.">
+      <option name="closed" value="true" />
+      <created>1710786468460</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1710786468460</updated>
     </task>
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="RECENT_FILTERS">
+      <map>
+        <entry key="Branch">
+          <value>
+            <list>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="HEAD" />
+                </option>
+              </RecentGroup>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="CYB-201" />
+                </option>
+              </RecentGroup>
+              <RecentGroup>
+                <option name="FILTER_VALUES">
+                  <option value="develop" />
+                </option>
+              </RecentGroup>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Add github hook for angular test." />
+    <MESSAGE value="default" />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Update hook." />
+    <MESSAGE value="local" />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Chrome headless browser" />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Some fix for maven build." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Fix swagger update to v3." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Update node version and dependency graph tool." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Fixed merge-conflict." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Fixed build action." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Rollback node version to angular compatible." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Fixed console error." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Fixed eslint and remove tslint." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Fixed some test and lint problems." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Fixed issue with loops." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Fixed createEffect that did not fire a new action as a result.&#10;* Added change detector for multi-iput." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Fixed type mismatching between component.&#10;* Removed redundant effect." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Fixed type mismatching between component.&#10;* Removed redundant effect.&#10;* Fixed Eslint naming convention." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Updated unit tests." />
+    <MESSAGE value="[CYB-201] [UI][COMPONENT] Fixed Karma Unit tests.&#10;&#10;* Remove unnecessary pipe." />
+    <MESSAGE value="fix merge conflicts" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix merge conflicts" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/app/cluster/cluster.component.ts</url>
+          <line>91</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/flink-cyber/metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client/src/mocks/handlers/clusterHandlers.ts</url>
+          <option name="timeStamp" value="71" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/hbase/hbase-server/2.2.3.7.1.7.0-551/hbase-server-2.2.3.7.1.7.0-551-tests.jar!/org/apache/hadoop/hbase/HBaseTestingUtility.class</url>
+          <line>3040</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/hbase/hbase-server/2.2.3.7.1.7.0-551/hbase-server-2.2.3.7.1.7.0-551-tests.jar!/org/apache/hadoop/hbase/HBaseTestingUtility.class</url>
+          <line>3042</line>
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/hbase/hbase-server/2.2.3.7.1.7.0-551/hbase-server-2.2.3.7.1.7.0-551-tests.jar!/org/apache/hadoop/hbase/HBaseTestingUtility.class</url>
+          <line>3053</line>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/hbase/hbase-server/2.2.3.7.1.7.0-551/hbase-server-2.2.3.7.1.7.0-551-tests.jar!/org/apache/hadoop/hbase/HBaseTestingUtility.class</url>
+          <line>622</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/hbase/hbase-server/2.2.3.7.1.7.0-551/hbase-server-2.2.3.7.1.7.0-551-tests.jar!/org/apache/hadoop/hbase/HBaseTestingUtility.class</url>
+          <line>638</line>
+          <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/hbase/hbase-server/2.2.3.7.1.7.0-551/hbase-server-2.2.3.7.1.7.0-551-tests.jar!/org/apache/hadoop/hbase/MiniHBaseCluster.class</url>
+          <line>76</line>
+          <option name="timeStamp" value="14" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/hbase/hbase-server/2.2.3.7.1.7.0-551/hbase-server-2.2.3.7.1.7.0-551-tests.jar!/org/apache/hadoop/hbase/MiniHBaseCluster.class</url>
+          <line>80</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/hbase/hbase-server/2.2.3.7.1.7.0-551/hbase-server-2.2.3.7.1.7.0-551.jar!/org/apache/hadoop/hbase/util/JVMClusterUtil.class</url>
+          <line>34</line>
+          <option name="timeStamp" value="16" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/hbase/hbase-server/2.2.3.7.1.7.0-551/hbase-server-2.2.3.7.1.7.0-551.jar!/org/apache/hadoop/hbase/regionserver/HRegionServer.class</url>
+          <line>408</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/springframework/kafka/spring-kafka/2.8.11/spring-kafka-2.8.11.jar!/org/springframework/kafka/annotation/KafkaListenerAnnotationBeanPostProcessor.class</url>
+          <line>885</line>
+          <option name="timeStamp" value="22" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/springframework/kafka/spring-kafka/2.8.11/spring-kafka-2.8.11.jar!/org/springframework/kafka/annotation/KafkaListenerAnnotationBeanPostProcessor.class</url>
+          <line>889</line>
+          <option name="timeStamp" value="23" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/springframework/kafka/spring-kafka/2.8.11/spring-kafka-2.8.11.jar!/org/springframework/kafka/annotation/KafkaListenerAnnotationBeanPostProcessor.class</url>
+          <line>888</line>
+          <option name="timeStamp" value="24" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/springframework/kafka/spring-kafka/2.8.11/spring-kafka-2.8.11.jar!/org/springframework/kafka/annotation/KafkaListenerAnnotationBeanPostProcessor.class</url>
+          <line>887</line>
+          <option name="timeStamp" value="25" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/springframework/kafka/spring-kafka/2.8.11/spring-kafka-2.8.11.jar!/org/springframework/kafka/annotation/KafkaListenerAnnotationBeanPostProcessor.class</url>
+          <line>883</line>
+          <option name="timeStamp" value="26" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/springframework/kafka/spring-kafka/2.8.11/spring-kafka-2.8.11-sources.jar!/org/springframework/kafka/annotation/KafkaListenerAnnotationBeanPostProcessor.java</url>
+          <line>783</line>
+          <option name="timeStamp" value="27" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/flink-cyber/cyber-services/cyber-worker-service/src/main/java/com/cloudera/cyber/restcli/controller/KafkaListenerController.java</url>
+          <line>81</line>
+          <option name="timeStamp" value="70" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/flink-cyber/flink-enrichment/flink-enrichment-lookup-raw/src/test/java/com/cloudera/cyber/enrichment/lookup/LookupJobTest.java</url>
+          <line>92</line>
+          <option name="timeStamp" value="73" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/flink-cyber/flink-hbase-common/src/main/java/com/cloudera/cyber/hbase/AbstractHbaseMapFunction.java</url>
+          <line>48</line>
+          <option name="timeStamp" value="101" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/flink/flink-core/1.15.1-csa1.9.0.1/flink-core-1.15.1-csa1.9.0.1.jar!/org/apache/flink/util/InstantiationUtil.class</url>
+          <line>218</line>
+          <option name="timeStamp" value="117" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/flink-cyber/flink-enrichment/flink-enrichment-lookup-hbase/src/test/java/com/cloudera/cyber/enrichment/hbase/HbaseJobTest.java</url>
+          <line>250</line>
+          <option name="timeStamp" value="131" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/flink-cyber/flink-enrichment/flink-enrichment-lookup-hbase/src/test/java/com/cloudera/cyber/enrichment/hbase/HbaseJobTest.java</url>
+          <line>223</line>
+          <option name="timeStamp" value="144" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <pin-to-top-manager>
+      <pinned-members>
+        <PinnedItemInfo parentTag="org.mockito.internal.util.DefaultMockingDetails" memberName="toInspect" />
+      </pinned-members>
+    </pin-to-top-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>
