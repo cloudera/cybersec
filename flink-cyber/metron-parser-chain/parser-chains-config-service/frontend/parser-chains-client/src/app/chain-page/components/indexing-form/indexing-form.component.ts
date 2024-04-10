@@ -14,16 +14,16 @@ import {HttpResponse} from "@angular/common/http";
   styleUrls: ['./indexing-form.component.scss']
 })
 export class IndexingFormComponent {
-  @Output() fieldSetUpdated = new EventEmitter<{[key: string]: {[key:string] : boolean}}>();
+  @Output() fieldSetUpdated = new EventEmitter<{ [key: string]: { [key: string]: boolean } }>();
   form: UntypedFormGroup = this._fb.group({filePath: ''});
   subjectMappingPath$ = new Subject<string>();
-  mappingJson$= this.subjectMappingPath$.pipe(
-    switchMap((value) =>  this._chainPageService.getIndexMappings({filePath: value})),
+  mappingJson$ = this.subjectMappingPath$.pipe(
+    switchMap((value) => this._chainPageService.getIndexMappings({filePath: value})),
     catchError(err => {
       this._messageService.create('Error', 'Error fetching indexing fields');
       return of(null);
     }),
-    map((response: HttpResponse<{ path: string, result: {[key:string]: object} }>) => {
+    map((response: HttpResponse<{ path: string, result: { [key: string]: object } }>) => {
       switch (response.status) {
         case 200:
           return {
@@ -35,10 +35,10 @@ export class IndexingFormComponent {
           return {
             path: '', result: {}
           };
-          default:
-            return null;
-          }
-      }),
+        default:
+          return null;
+      }
+    }),
     tap((response) => {
       if (response) {
         this.onAdvancedEditorChanged({value: response.result});
@@ -52,14 +52,21 @@ export class IndexingFormComponent {
   }
 
   onAdvancedEditorChanged(e: ConfigChangedEvent) {
-    const result = Object.entries(e.value).reduce((acc,[key, value]) => {
-      const sourceMap = {} as {[key:string] : boolean};
-      findValues<string[]>(value, 'ignore_fields').forEach(ignoreList =>
-        ignoreList.forEach((ignoreName) => Object.assign(sourceMap, {[ignoreName]: true})));
-      findValues<object>(value, 'column_mapping').forEach(mapping =>
-        findValues<string>(mapping, 'name').forEach(name => Object.assign(sourceMap, {[name]: false})));
-      return Object.assign(acc, {[key]: sourceMap});
-    }, {} as {[key: string]: {[key:string] : boolean}});
-    this.fieldSetUpdated.emit(result);
+    const data = e.value;
+    if (data === null || Object.keys(data).length === 0) {
+      return;
+    }
+    const fieldSet = Object.entries(data).reduce((result, [key, value]) => {
+      const ignoreNames = findValues<string>(value, 'ignore_fields').flat().reduce((acc, ignoreName) =>
+        Object.assign(acc, {[ignoreName]: true}), {} as { [key: string]: boolean });
+      const fieldNames = findValues<object>(value, 'column_mapping').flatMap(arr => findValues<string>(arr, 'name')).flat().reduce((acc, fieldName) => Object.assign(acc, {[fieldName]: false}), {} as {
+        [key: string]: boolean
+      });
+      if (Object.keys(fieldNames).length === 0 && Object.keys(ignoreNames).length === 0) {
+        return result;
+      }
+      return Object.assign(result, {[key]: {...ignoreNames, ...fieldNames}});
+    }, {} as { [key: string]: { [key: string]: boolean } });
+    this.fieldSetUpdated.emit(fieldSet);
   }
 }

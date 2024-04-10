@@ -74,7 +74,15 @@ export function deepEqual(object1: any, object2: any): boolean {
   return true;
 }
 
-export function findValues<T>(obj: Record<string, any>, searchKey: string): T[] {
+export function findValues<T>(obj: object, searchKey: string): T[] {
+  if (obj === null) {
+    return [] as T[];
+  }
+  if (Array.isArray(obj)) {
+    return obj.reduce<T[]>((values, value) => {
+      return [...values, ...findValues<T>(value, searchKey)];
+    }, []);
+  }
   return Object.entries(obj).reduce<T[]>((values, [key, value]) => {
     if (key === searchKey) {
       return [...values, value as T];
