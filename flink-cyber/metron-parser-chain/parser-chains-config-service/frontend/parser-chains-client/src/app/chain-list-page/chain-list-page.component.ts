@@ -11,7 +11,8 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router';
 import {select, Store} from '@ngrx/store';
 import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
 import {switchMap, take} from 'rxjs/operators';
@@ -48,14 +49,15 @@ export class ChainListPageComponent implements OnInit {
   totalRecords = 200;
   chainDataSorted$: Observable<ChainModel[]>;
   sortDescription$: BehaviorSubject<{ key: string, value: string }> = new BehaviorSubject({key: 'name', value: ''});
-  newChainForm: FormGroup;
-  renamePipelineForm: FormGroup;
+  newChainForm: UntypedFormGroup;
+  renamePipelineForm: UntypedFormGroup;
   selectedPipeline$: Observable<string>;
 
 
   constructor(
     private store: Store<ChainListPageState>,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
+    private route: ActivatedRoute,
     private messageService: NzMessageService,
   ) {
     store.dispatch(new LoadPipelinesAction());
@@ -81,7 +83,7 @@ export class ChainListPageComponent implements OnInit {
   }
 
   get chainName() {
-    return this.newChainForm.get('chainName') as FormControl;
+    return this.newChainForm.get('chainName') as UntypedFormControl;
   }
 
   get newPipelineName() {
@@ -142,10 +144,10 @@ export class ChainListPageComponent implements OnInit {
 
   ngOnInit() {
     this.newChainForm = this.fb.group({
-      chainName: new FormControl('', [Validators.required, Validators.minLength(3)]),
+      chainName: new UntypedFormControl('', [Validators.required, Validators.minLength(3)]),
     });
     this.renamePipelineForm = this.fb.group({
-      pipelineName: new FormControl('', [Validators.required, Validators.minLength(3)]),
+      pipelineName: new UntypedFormControl('', [Validators.required, Validators.minLength(3)]),
     });
   }
 
