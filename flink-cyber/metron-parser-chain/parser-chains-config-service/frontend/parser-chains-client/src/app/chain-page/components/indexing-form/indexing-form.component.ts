@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {ConfigChangedEvent} from "../parser/advanced-editor/advanced-editor.component";
 import {UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
-import {catchError, map, switchMap, tap} from "rxjs/operators";
-import {of, Subject} from "rxjs";
+import {map, switchMap, tap} from "rxjs/operators";
+import {Subject} from "rxjs";
 import {findValues} from "src/app/shared/utils";
 import {ChainPageService} from "src/app/services/chain-page.service";
 import {NzMessageService} from "ng-zorro-antd/message";
@@ -19,25 +19,17 @@ export class IndexingFormComponent {
   subjectMappingPath$ = new Subject<string>();
   mappingJson$ = this.subjectMappingPath$.pipe(
     switchMap((value) => this._chainPageService.getIndexMappings({filePath: value})),
-    catchError(err => {
-      this._messageService.create('Error', 'Error fetching indexing fields');
-      return of(null);
-    }),
     map((response: HttpResponse<{ path: string, result: { [key: string]: object } }>) => {
-      switch (response.status) {
-        case 200:
-          return {
-            path: response.body.path, result: response.body.result
-          };
-        case 204:
-        case 404:
-          this._messageService.create('warning', `No indexing fields found for the given path '${this.form.value.filePath}'`);
-          return {
-            path: '', result: {}
-          };
-        default:
-          return null;
+      if (response.status === 200) {
+        return {
+          path: response.body.path, result: response.body.result
+        };
+      } else if (response.status === 204 || response.status === 404) {
+        this._messageService.create('warning', `No indexing fields found for the given path '${this.form.value.filePath}'`);
       }
+      return {
+        path: '', result: {}
+      };
     }),
     tap((response) => {
       if (response) {
