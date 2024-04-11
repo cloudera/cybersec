@@ -9,6 +9,7 @@ import com.cloudera.service.common.request.RequestType;
 import com.cloudera.service.common.response.ClusterMeta;
 import com.cloudera.service.common.response.ResponseBody;
 import com.cloudera.service.common.response.ResponseType;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -31,14 +32,19 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class KafkaService {
-    @Qualifier("kafkaTemplatePool")
     private final Map<String, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody>> kafkaTemplatePool;
-    @Value("${kafka.reply.future.timeout:45}")
-    private Long replyFutureTimeout;
-    @Value("${kafka.reply.timeout:45}")
-    private Long kafkaTemplateTimeout;
+    private final Long replyFutureTimeout;
+    private final Long kafkaTemplateTimeout;
+
+
+    public KafkaService(@Qualifier("kafkaTemplatePool") Map<String, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody>> kafkaTemplatePool,
+                        @Value("${kafka.reply.future.timeout:45}") Long replyFutureTimeout,
+                        @Value("${kafka.reply.timeout:45}") Long kafkaTemplateTimeout) {
+        this.kafkaTemplatePool = kafkaTemplatePool;
+        this.replyFutureTimeout = replyFutureTimeout;
+        this.kafkaTemplateTimeout = kafkaTemplateTimeout;
+    }
 
 
     public Pair<ResponseType, ResponseBody> sendWithReply(RequestType requestType, String clusterId, RequestBody body) {
@@ -76,7 +82,6 @@ public class KafkaService {
             return Pair.of(null, ResponseBody.builder().clusterMeta(ClusterMeta.builder().clusterId(clusterId).clusterStatus("offline").build()).build());
         } catch (InterruptedException e) {
             log.warn("Kafka throws interruption exception. Message: '{}' Cause: '{}'", e.getMessage(), Optional.ofNullable(e.getCause()).map(Throwable::getMessage).orElse("Cause is empty"));
-            Thread.currentThread().interrupt();
             return Pair.of(null, ResponseBody.builder().clusterMeta(ClusterMeta.builder().clusterId(clusterId).clusterStatus("offline").build()).build());
         }
     }
