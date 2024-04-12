@@ -10,12 +10,13 @@
  * limitations governing your use of the file.
  */
 
-package com.cloudera.parserchains.queryservice.service;
+package com.cloudera.parserchains.queryservice.service.impl;
 
 import com.cloudera.parserchains.core.ChainBuilder;
 import com.cloudera.parserchains.core.ChainLink;
 import com.cloudera.parserchains.core.InvalidParserException;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
+import com.cloudera.parserchains.queryservice.service.ChainBuilderService;
 import org.springframework.stereotype.Service;
 
 @Service

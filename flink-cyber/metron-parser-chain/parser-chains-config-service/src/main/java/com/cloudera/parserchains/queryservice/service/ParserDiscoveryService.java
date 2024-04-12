@@ -15,7 +15,6 @@ package com.cloudera.parserchains.queryservice.service;
 import com.cloudera.parserchains.core.model.define.ParserID;
 import com.cloudera.parserchains.queryservice.model.describe.ParserDescriptor;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummary;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -26,20 +25,25 @@ import java.util.Map;
 public interface ParserDiscoveryService {
 
   /**
-   * Finds all of the parser types available for the user to build
-   * parser chains with.
+   * Finds all the parser types available for the user to build parser chains with.
+   *
+   * @return list of ParserSummaries
+   * @throws IOException in case there are issues reading parsers.
    */
   List<ParserSummary> findAll() throws IOException;
 
   /**
    * Describes the configuration parameters available for a given parser.
+   *
    * @param name The parser name.
+   * @return ParserDescriptor based on its ID.
    */
-  ParserDescriptor describe(ParserID name) throws IOException;
+  ParserDescriptor describe(ParserID name);
 
   /**
-   * Describes the configuration parameters for all available parser
-   * types.
+   * Describes the configuration parameters for all available parser types.
+   *
+   * @return ParserDescriptors with their IDs.
    */
-  Map<ParserID, ParserDescriptor> describeAll() throws IOException;
+  Map<ParserID, ParserDescriptor> describeAll();
 }
