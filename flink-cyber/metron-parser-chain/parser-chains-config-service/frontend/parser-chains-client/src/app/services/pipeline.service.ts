@@ -16,7 +16,7 @@ import {Injectable} from '@angular/core';
 import {map, take} from "rxjs/operators";
 import {Observable} from "rxjs";
 import {select, Store} from "@ngrx/store";
-import {ChainListPageState, getCurrentPipeline} from "../chain-list-page/chain-list-page.reducers";
+import {ChainListPageState, getSelectedPipeline} from "../chain-list-page/chain-list-page.reducers";
 import {getHttpParams} from "../chain-list-page/chain-list-page.utils";
 
 @Injectable({
@@ -32,7 +32,7 @@ export class PipelineService {
         private http: HttpClient,
         private store: Store<ChainListPageState>
     ) {
-        this.currentPipeline$ = store.pipe(select(getCurrentPipeline))
+        this.currentPipeline$ = store.pipe(select(getSelectedPipeline))
     }
 
     public getPipelines() {
