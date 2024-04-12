@@ -23,7 +23,7 @@ export interface ChainListPageState {
   deleteItem: ChainModel;
   error: string;
   items: ChainModel[];
-  currentPipeline: string;
+  selectedPipeline: string;
   pipelines: string[];
 }
 
@@ -34,7 +34,7 @@ export const initialState: ChainListPageState = {
   pipelineRenameModalVisible: false,
   deleteItem: null,
   items: [],
-  currentPipeline: null,
+  selectedPipeline: null,
   pipelines: [],
   error: ''
 };
@@ -84,7 +84,7 @@ export function reducer(
         createModalVisible: false,
       }
     }
-    case chainListPageActions.SHOW_RENAME_PIPELINE_MODAL: {
+    case chainListPageActions.SHOW_RENAME_SELECTED_PIPELINE_MODAL: {
       return {
         ...state,
         pipelineRenameModalVisible: true,
@@ -153,8 +153,8 @@ export function reducer(
     }
     case chainListPageActions.LOAD_PIPELINES:
     case chainListPageActions.CREATE_PIPELINE:
-    case chainListPageActions.RENAME_PIPELINE:
-    case chainListPageActions.DELETE_PIPELINE: {
+    case chainListPageActions.RENAME_SELECTED_PIPELINE:
+    case chainListPageActions.DELETE_SELECTED_PIPELINE: {
       return {
         ...state,
         loading: true,
@@ -183,7 +183,7 @@ export function reducer(
     case chainListPageActions.PIPELINE_CHANGED: {
       return {
         ...state,
-        currentPipeline: action.newPipelineName,
+        selectedPipeline: action.newPipelineName,
       };
     }
     default: {
@@ -231,8 +231,8 @@ export const getPipelines = createSelector(
   (state: ChainListPageState) => state.pipelines
 );
 
-export const getCurrentPipeline = createSelector(
+export const getSelectedPipeline = createSelector(
   getChainListPageState,
-  (state: ChainListPageState) => state.currentPipeline
+  (state: ChainListPageState) => state.selectedPipeline
 );
 

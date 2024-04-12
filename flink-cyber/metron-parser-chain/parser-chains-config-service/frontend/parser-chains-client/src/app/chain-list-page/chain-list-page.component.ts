@@ -23,12 +23,12 @@ import {
   ChainListPageState,
   getChains,
   getCreateModalVisible,
-  getCurrentPipeline,
   getDeleteChain,
   getDeleteModalVisible,
   getLoading,
   getPipelineRenameModalVisible,
   getPipelines,
+  getSelectedPipeline,
 } from './chain-list-page.reducers';
 import {ChainModel, ChainOperationalModel} from './chain.model';
 import {NzMessageService} from "ng-zorro-antd/message";
@@ -41,7 +41,6 @@ import {NzMessageService} from "ng-zorro-antd/message";
 export class ChainListPageComponent implements OnInit {
   isChainCreateModalVisible$: Observable<boolean>;
   isPipelineRenameModalVisible$: Observable<boolean>;
-  selectedPipeline$: Observable<string>;
   isOkLoading$: Observable<boolean>;
   chains$: Observable<ChainModel[]>;
   isChainDeleteModalVisible$: Observable<boolean>;
@@ -52,12 +51,7 @@ export class ChainListPageComponent implements OnInit {
   sortDescription$: BehaviorSubject<{ key: string, value: string }> = new BehaviorSubject({key: 'name', value: ''});
   newChainForm: UntypedFormGroup;
   renamePipelineForm: UntypedFormGroup;
-
-  selectedPipeline(): string {
-    let value;
-    this.store.pipe(select(getCurrentPipeline)).pipe(take(1)).subscribe(v => value = v);
-    return value;
-  }
+  selectedPipeline$: Observable<string>;
 
 
   constructor(
@@ -69,12 +63,12 @@ export class ChainListPageComponent implements OnInit {
     store.dispatch(new LoadPipelinesAction());
     this.chains$ = store.pipe(select(getChains));
     this.isOkLoading$ = store.pipe(select(getLoading));
-    this.selectedPipeline$ = store.pipe(select(getCurrentPipeline))
     this.isChainCreateModalVisible$ = store.pipe(select(getCreateModalVisible));
     this.isChainDeleteModalVisible$ = store.pipe(select(getDeleteModalVisible));
     this.isPipelineRenameModalVisible$ = store.pipe(select(getPipelineRenameModalVisible));
     this.deleteChainItem$ = this.store.pipe(select(getDeleteChain));
     this.pipelineList$ = this.store.pipe(select(getPipelines));
+    this.selectedPipeline$ = this.store.pipe(select(getSelectedPipeline));
 
     this.chainDataSorted$ = combineLatest([
       this.chains$,
@@ -158,7 +152,7 @@ export class ChainListPageComponent implements OnInit {
   }
 
   showPipelineRenameModal() {
-    this.store.dispatch(new fromActions.ShowRenamePipelineModalAction(this.selectedPipeline()));
+    this.store.dispatch(new fromActions.ShowRenameSelectedPipelineModalAction());
   }
 
   handlePipelineRenameModalCancel() {
@@ -171,12 +165,12 @@ export class ChainListPageComponent implements OnInit {
   }
 
   deletePipeline() {
-    this.store.dispatch(new fromActions.DeletePipelineAction(this.selectedPipeline()));
+    this.store.dispatch(new fromActions.DeleteSelectedPipelineAction());
   }
 
   renamePipeline() {
     let newPipelineName = this.newPipelineName.value;
     this.renamePipelineForm.reset();
-    this.store.dispatch(new fromActions.RenamePipelineAction(this.selectedPipeline(), newPipelineName));
+    this.store.dispatch(new fromActions.RenameSelectedPipelineAction(newPipelineName));
   }
 }
