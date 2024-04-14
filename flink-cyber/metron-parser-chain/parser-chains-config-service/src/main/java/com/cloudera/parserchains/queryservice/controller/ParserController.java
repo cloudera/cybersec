@@ -62,6 +62,7 @@ public class ParserController {
     @GetMapping(value = API_PARSER_FORM_CONFIG)
     public ResponseEntity<Map<ParserID, ParserDescriptor>> describeAll() throws IOException {
         Map<ParserID, ParserDescriptor> configs = parserDiscoveryService.describeAll();
+        // TODO: check the feasibility of this check
         if (configs != null || configs.size() >= 0) {
             return ResponseEntity.ok(configs);
         } else {

@@ -18,20 +18,21 @@
 
 package com.cloudera.parserchains.queryservice.config;
 
-import com.cloudera.parserchains.core.*;
+import com.cloudera.parserchains.core.ChainBuilder;
+import com.cloudera.parserchains.core.ChainRunner;
+import com.cloudera.parserchains.core.DefaultChainBuilder;
+import com.cloudera.parserchains.core.DefaultChainRunner;
+import com.cloudera.parserchains.core.ParserBuilder;
+import com.cloudera.parserchains.core.ReflectiveParserBuilder;
 import com.cloudera.parserchains.core.catalog.ClassIndexParserCatalog;
 import com.cloudera.parserchains.core.catalog.ParserCatalog;
 import com.cloudera.parserchains.core.catalog.ParserInfo;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.cloudera.parserchains.queryservice.common.utils.IDGenerator;
 import com.cloudera.parserchains.queryservice.common.utils.UUIDGenerator;
-import com.cloudera.parserchains.queryservice.config.kafka.ClouderaKafkaProperties;
 import com.cloudera.parserchains.queryservice.model.summary.ObjectMapper;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummary;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummaryMapper;
-import java.util.HashMap;
-import java.util.Map;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

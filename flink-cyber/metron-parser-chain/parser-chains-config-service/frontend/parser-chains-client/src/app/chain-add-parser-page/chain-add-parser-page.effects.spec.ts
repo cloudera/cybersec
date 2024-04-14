@@ -16,7 +16,7 @@ import { provideMockActions } from '@ngrx/effects/testing';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { Observable, of, ReplaySubject } from 'rxjs';
 
-import { AddParserPageService } from 'services/chain-add-parser-page.service';
+import { AddParserPageService } from '../services/chain-add-parser-page.service';
 
 import * as fromActions from './chain-add-parser-page.actions';
 import { AddParserEffects } from './chain-add-parser-page.effects';
