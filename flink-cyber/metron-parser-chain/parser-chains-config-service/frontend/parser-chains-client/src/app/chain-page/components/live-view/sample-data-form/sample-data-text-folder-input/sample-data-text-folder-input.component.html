@@ -101,8 +101,8 @@
                     <nz-collapse-panel nzHeader="Difference"
                                        *ngIf="(getStatus(data.id) | async) === SampleTestStatus.FAIL">
                         <app-text-diff-view
-                                originalModel="Failure: {{data.expectedFailure}}, Data: {{runResult?.expected}}"
-                                modifiedModel="Failure: {{runResult?.failure}}, Data: {{runResult?.result}}"
+                                originalModelJson="Failure: {{data.expectedFailure}}, Data: {{runResult?.expected}}"
+                                modifiedModelJson="Failure: {{runResult?.failure}}, Data: {{runResult?.result}}"
                                 (expectedValueChange)="updateExpectedValue(runResult?.failure, runResult?.result, i, runResult.timestamp)"
                         ></app-text-diff-view>
                     </nz-collapse-panel>

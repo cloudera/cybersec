@@ -1,22 +1,29 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {MonacoDiffEditorConstructionOptions} from "@materia-ui/ngx-monaco-editor/lib/interfaces";
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {DiffEditorModel} from "ngx-monaco-editor-v2";
 
 @Component({
     selector: 'app-text-diff-view',
     templateUrl: './text-diff-view.component.html',
     styleUrls: ['./text-diff-view.component.scss']
 })
-export class TextDiffViewComponent implements OnInit {
+export class TextDiffViewComponent implements OnChanges {
 
-    @Input() originalModel: string;
-    @Input() modifiedModel: string;
+    @Input() originalModelJson: string;
+    @Input() modifiedModelJson: string;
     @Output() expectedValueChange = new EventEmitter<void>();
 
-    diffOptions: MonacoDiffEditorConstructionOptions = {theme: "vs", automaticLayout: true, readOnly: true, renderSideBySide: true};
+    originalModel: DiffEditorModel;
+    modifiedModel: DiffEditorModel;
 
+    diffOptions = {theme: "vs", automaticLayout: true, readOnly: true, renderSideBySide: true};
 
-    public ngOnInit() {
-
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.originalModelJson !== undefined) {
+            this.originalModel = {code: changes.originalModelJson.currentValue} as DiffEditorModel;
+        }
+        if (changes.modifiedModelJson !== undefined) {
+            this.modifiedModel = {code: changes.modifiedModelJson.currentValue} as DiffEditorModel;
+        }
     }
 
     onChangeInline(checked) {

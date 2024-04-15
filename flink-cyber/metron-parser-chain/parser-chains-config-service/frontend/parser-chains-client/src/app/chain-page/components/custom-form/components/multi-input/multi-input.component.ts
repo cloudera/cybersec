@@ -11,7 +11,7 @@
  */
 
 import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
-import {FormControl} from '@angular/forms';
+import {UntypedFormControl} from '@angular/forms';
 
 import {CustomFormConfig} from '../../custom-form.component';
 
@@ -39,11 +39,11 @@ export class MultiInputComponent implements OnInit, OnChanges {
   ngOnInit() {
     if (Array.isArray(this.value)) {
       this.controls = this.value.filter(item => !!item[this.config.name]).map(item =>
-          new FormControl(item[this.config.name]));
+          new UntypedFormControl(item[this.config.name]));
     }
     if (this.controls.length === 0) {
       this.controls.push(
-        new FormControl('')
+        new UntypedFormControl('')
       );
     }
   }
@@ -76,7 +76,7 @@ export class MultiInputComponent implements OnInit, OnChanges {
   onAddClick() {
     if (this.config.multipleValues==true) {
       this.controls.push(
-          new FormControl('')
+          new UntypedFormControl('')
       );
     }
   }
@@ -90,7 +90,7 @@ export class MultiInputComponent implements OnInit, OnChanges {
     this.changeValue.emit(value);
   }
 
-  updateValue(selectedValue: String, control: FormControl, config: CustomFormConfig) {
+  updateValue(selectedValue: String, control: UntypedFormControl, config: CustomFormConfig) {
     control.setValue(selectedValue)
     this.onChange(config)
   }
