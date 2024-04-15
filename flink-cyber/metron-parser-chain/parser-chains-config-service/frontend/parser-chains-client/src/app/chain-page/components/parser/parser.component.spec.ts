@@ -22,7 +22,7 @@ import {  NZ_ICONS } from 'ng-zorro-antd/icon';
 
 import { ConfigChangedEvent } from './advanced-editor/advanced-editor.component';
 import { ParserComponent } from './parser.component';
-import { MonacoEditorModule } from '@materia-ui/ngx-monaco-editor';
+import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 
 @Component({
   selector: 'app-custom-form',

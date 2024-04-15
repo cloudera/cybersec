@@ -1,0 +1,24 @@
+.json-editor-container {
+  display: block;
+  margin: 8px 0;
+  height: 100%;
+  min-height: 100px;
+  min-width: 200px;
+}
+
+.json-editor {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.popup-action-buttons-containet {
+  width: 100%;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+.popup-action-button {
+  float: right;
+  margin-left: 8px;
+}

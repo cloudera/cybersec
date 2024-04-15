@@ -11,20 +11,24 @@
  */
 
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {select, Store} from '@ngrx/store';
 import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
 import {switchMap, take} from 'rxjs/operators';
 
 import * as fromActions from './chain-list-page.actions';
-import {LoadChainsAction} from './chain-list-page.actions';
+import {LoadPipelinesAction} from './chain-list-page.actions';
 import {
   ChainListPageState,
   getChains,
-  getCreateModalVisible, getDeleteChain,
+  getCreateModalVisible,
+  getDeleteChain,
   getDeleteModalVisible,
   getLoading,
+  getPipelineRenameModalVisible,
+  getPipelines,
+  getSelectedPipeline,
 } from './chain-list-page.reducers';
 import {ChainModel, ChainOperationalModel} from './chain.model';
 import {NzMessageService} from "ng-zorro-antd/message";
@@ -36,27 +40,35 @@ import {NzMessageService} from "ng-zorro-antd/message";
 })
 export class ChainListPageComponent implements OnInit {
   isChainCreateModalVisible$: Observable<boolean>;
+  isPipelineRenameModalVisible$: Observable<boolean>;
   isOkLoading$: Observable<boolean>;
   chains$: Observable<ChainModel[]>;
   isChainDeleteModalVisible$: Observable<boolean>;
   deleteChainItem$: Observable<ChainModel>;
+  pipelineList$: Observable<string[]>;
   totalRecords = 200;
   chainDataSorted$: Observable<ChainModel[]>;
   sortDescription$: BehaviorSubject<{ key: string, value: string }> = new BehaviorSubject({key: 'name', value: ''});
-  newChainForm: FormGroup;
+  newChainForm: UntypedFormGroup;
+  renamePipelineForm: UntypedFormGroup;
+  selectedPipeline$: Observable<string>;
+
 
   constructor(
     private store: Store<ChainListPageState>,
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private route: ActivatedRoute,
     private messageService: NzMessageService,
   ) {
-    store.dispatch(new LoadChainsAction());
+    store.dispatch(new LoadPipelinesAction());
     this.chains$ = store.pipe(select(getChains));
     this.isOkLoading$ = store.pipe(select(getLoading));
     this.isChainCreateModalVisible$ = store.pipe(select(getCreateModalVisible));
     this.isChainDeleteModalVisible$ = store.pipe(select(getDeleteModalVisible));
+    this.isPipelineRenameModalVisible$ = store.pipe(select(getPipelineRenameModalVisible));
     this.deleteChainItem$ = this.store.pipe(select(getDeleteChain));
+    this.pipelineList$ = this.store.pipe(select(getPipelines));
+    this.selectedPipeline$ = this.store.pipe(select(getSelectedPipeline));
 
     this.chainDataSorted$ = combineLatest([
       this.chains$,
@@ -66,8 +78,16 @@ export class ChainListPageComponent implements OnInit {
     );
   }
 
+  pipelineChanged($event: string) {
+    this.store.dispatch(new fromActions.PipelineChangedAction($event))
+  }
+
   get chainName() {
-    return this.newChainForm.get('chainName') as FormControl;
+    return this.newChainForm.get('chainName') as UntypedFormControl;
+  }
+
+  get newPipelineName() {
+    return this.renamePipelineForm.get('pipelineName') as UntypedFormControl;
   }
 
   showAddChainModal(): void {
@@ -124,7 +144,33 @@ export class ChainListPageComponent implements OnInit {
 
   ngOnInit() {
     this.newChainForm = this.fb.group({
-      chainName: new FormControl('', [Validators.required, Validators.minLength(3)]),
+      chainName: new UntypedFormControl('', [Validators.required, Validators.minLength(3)]),
     });
+    this.renamePipelineForm = this.fb.group({
+      pipelineName: new UntypedFormControl('', [Validators.required, Validators.minLength(3)]),
+    });
+  }
+
+  showPipelineRenameModal() {
+    this.store.dispatch(new fromActions.ShowRenameSelectedPipelineModalAction());
+  }
+
+  handlePipelineRenameModalCancel() {
+    this.store.dispatch(new fromActions.HideRenamePipelineModalAction());
+  }
+
+  createPipeline(inputElement: HTMLInputElement) {
+    let pipelineName = inputElement.value;
+    this.store.dispatch(new fromActions.CreatePipelineAction(pipelineName));
+  }
+
+  deletePipeline() {
+    this.store.dispatch(new fromActions.DeleteSelectedPipelineAction());
+  }
+
+  renamePipeline() {
+    let newPipelineName = this.newPipelineName.value;
+    this.renamePipelineForm.reset();
+    this.store.dispatch(new fromActions.RenameSelectedPipelineAction(newPipelineName));
   }
 }

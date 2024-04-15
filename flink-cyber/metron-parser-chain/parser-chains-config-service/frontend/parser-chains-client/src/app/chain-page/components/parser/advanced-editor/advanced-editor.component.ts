@@ -40,6 +40,7 @@ export class AdvancedEditorComponent implements OnChanges {
     },
     automaticLayout: true,
     formatOnPaste: true,
+    scrollBeyondLastLine: false
   };
 
   ngOnChanges(changes: SimpleChanges): void {

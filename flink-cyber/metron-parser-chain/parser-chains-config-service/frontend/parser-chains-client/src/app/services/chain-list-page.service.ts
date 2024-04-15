@@ -10,10 +10,11 @@
  * limitations governing your use of the file.
  */
 
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Injectable} from '@angular/core';
 
 import {ChainModel, ChainOperationalModel} from '../chain-list-page/chain.model';
+import {getHttpParams} from "../chain-list-page/chain-list-page.utils";
 
 @Injectable({
     providedIn: 'root'
@@ -26,16 +27,28 @@ export class ChainListPageService {
       private http: HttpClient
     ) {}
 
-    public createChain(chain: ChainOperationalModel) {
-        return this.http.post<ChainModel>('/api/v1/parserconfig/chains', chain);
+    public createChain(chain: ChainOperationalModel, pipeline: string = null) {
+        let httpParams: HttpParams = getHttpParams(pipeline);
+
+        return this.http.post<ChainModel>(this.BASE_URL + 'chains', chain,{params: httpParams});
     }
 
-    public getChains(params = null) {
-        return this.http.get<ChainModel[]>(this.BASE_URL + 'chains');
+    public getChains(pipeline: string = null, params = null) {
+        let httpParams: HttpParams = getHttpParams(pipeline);
+
+        return this.http.get<ChainModel[]>(this.BASE_URL + 'chains',{params: httpParams});
     }
 
-    public deleteChain(chainId: string) {
-        return this.http.delete(this.BASE_URL + 'chains/' + chainId);
+    public deleteChain(chainId: string, pipeline: string = null) {
+        let httpParams: HttpParams = getHttpParams(pipeline);
+
+        return this.http.delete(this.BASE_URL + 'chains/' + chainId,{params: httpParams});
+    }
+
+    public getPipelines() {
+        let httpParams: HttpParams = getHttpParams(null);
+
+        return this.http.delete(this.BASE_URL + 'pipeline', {params: httpParams});
     }
 
 }
