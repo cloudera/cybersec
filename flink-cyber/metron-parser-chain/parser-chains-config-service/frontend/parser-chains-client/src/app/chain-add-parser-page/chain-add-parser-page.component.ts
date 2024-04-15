@@ -11,7 +11,7 @@
  */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { select, Store } from '@ngrx/store';
 import { Subscription } from 'rxjs';
@@ -30,7 +30,7 @@ import { AddParserPageState, getParserTypes } from './chain-add-parser-page.redu
   styleUrls: ['./chain-add-parser-page.component.scss']
 })
 export class ChainAddParserPageComponent implements OnInit, OnDestroy {
-  addParserForm: FormGroup;
+  addParserForm: UntypedFormGroup;
   typesList: { id: string, name: string }[] = [];
   parsersList: ParserModel[] = [];
   chainId: string;
@@ -39,20 +39,20 @@ export class ChainAddParserPageComponent implements OnInit, OnDestroy {
   getParserTypesSubscription: Subscription;
 
   constructor(
-    private fb: FormBuilder,
+    private fb: UntypedFormBuilder,
     private store: Store<AddParserPageState>,
     private activatedRoute: ActivatedRoute,
     private router: Router
   ) {}
 
   get name() {
-    return this.addParserForm.get('name') as FormControl;
+    return this.addParserForm.get('name') as UntypedFormControl;
   }
   get type() {
-    return this.addParserForm.get('type') as FormControl;
+    return this.addParserForm.get('type') as UntypedFormControl;
   }
   get sourceParser() {
-    return this.addParserForm.get('chainId') as FormControl;
+    return this.addParserForm.get('chainId') as UntypedFormControl;
   }
 
   addParser() {
@@ -74,8 +74,8 @@ export class ChainAddParserPageComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.addParserForm = this.fb.group({
-      name: new FormControl('', [Validators.required, Validators.minLength(3)]),
-      type: new FormControl(null)
+      name: new UntypedFormControl('', [Validators.required, Validators.minLength(3)]),
+      type: new UntypedFormControl(null)
     });
 
     this.activatedRoute.params.subscribe((params) => {

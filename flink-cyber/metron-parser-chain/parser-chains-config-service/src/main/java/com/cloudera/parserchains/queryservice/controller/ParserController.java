@@ -65,6 +65,7 @@ public class ParserController {
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', '*')")
     public ResponseEntity<Map<ParserID, ParserDescriptor>> describeAll() throws IOException {
         Map<ParserID, ParserDescriptor> configs = parserDiscoveryService.describeAll();
+        // TODO: check the feasibility of this check
         if (configs != null || configs.size() >= 0) {
             return ResponseEntity.ok(configs);
         } else {

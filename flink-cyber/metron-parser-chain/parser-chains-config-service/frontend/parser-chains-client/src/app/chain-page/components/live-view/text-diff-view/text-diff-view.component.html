@@ -9,6 +9,10 @@
         </form>
     </div>
     <div class="row editor">
-        <ngx-monaco-diff-editor [options]="diffOptions" [original]="originalModel" [modified]="modifiedModel"></ngx-monaco-diff-editor>
+        <ngx-monaco-diff-editor
+          style="height: 100%"
+          [options]="diffOptions"
+          [originalModel]="originalModel"
+          [modifiedModel]="modifiedModel"></ngx-monaco-diff-editor>
     </div>
 </div>

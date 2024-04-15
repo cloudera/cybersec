@@ -31,7 +31,7 @@ export class ChainPageEffects {
     private actions$: Actions,
     private store$: Store<any>,
     private messageService: NzMessageService,
-    private chainPageService: ChainPageService
+    private chainPageService: ChainPageService,
   ) {}
 
   @Effect()
