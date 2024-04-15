@@ -32,6 +32,7 @@ import {NzPopconfirmModule} from "ng-zorro-antd/popconfirm";
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
+import {NzSelectModule} from "ng-zorro-antd/select";
 
 @NgModule({
   declarations: [ ChainListPageComponent ],
@@ -53,6 +54,7 @@ import { NzLayoutModule } from 'ng-zorro-antd/layout';
         NzIconModule,
         NzFormModule,
         NzLayoutModule,
+        NzSelectModule,
     ],
   providers: [
     NzMessageService,
