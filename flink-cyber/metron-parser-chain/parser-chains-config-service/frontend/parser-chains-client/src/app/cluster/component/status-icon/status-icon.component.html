@@ -1,0 +1,5 @@
+
+<div *ngIf="this.isSpinner(); then thenBlock else elseBlock"></div>
+
+<ng-template #thenBlock><mat-spinner [diameter]="20" [strokeWidth]="3"></mat-spinner></ng-template>
+<ng-template #elseBlock><mat-icon [class]='this.getIconClass()' >{{this.getIconType()}}</mat-icon></ng-template>

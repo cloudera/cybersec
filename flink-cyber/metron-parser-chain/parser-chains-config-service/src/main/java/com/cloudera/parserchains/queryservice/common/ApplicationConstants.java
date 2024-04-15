@@ -29,8 +29,13 @@ public class ApplicationConstants {
 
   // parser-config endpoint constants
   public static final String PARSER_CONFIG_BASE_URL = API_BASE_URL + "/parserconfig";
+  // pipeline controller constants
+  public static final String PIPELINE_BASE_URL = API_BASE_URL + "/pipeline";
   // Endpoint names
   public static final String API_CHAINS = "/chains";
+
+  public static final String API_CLUSTERS = "/clusters";
+  public static final String API_JOBS = API_CLUSTERS + "/{clusterId}/jobs";
   public static final String API_INDEXING = "/indexing";
   public static final String API_PARSER_FORM_CONFIG = "/parser-form-configuration";
   public static final String API_PARSER_TYPES = "/parser-types";
@@ -45,4 +50,13 @@ public class ApplicationConstants {
   public static final String API_PARSER_FORM_CONFIG_URL = PARSER_CONFIG_BASE_URL + API_PARSER_FORM_CONFIG;
   public static final String API_PARSER_TYPES_URL = PARSER_CONFIG_BASE_URL + API_PARSER_TYPES;
   public static final String API_PARSER_TEST_URL = PARSER_CONFIG_BASE_URL + API_PARSER_TEST;
+
+  //Param names
+  public static final String TEST_RUN_PARAM = "testRun";
+  public static final String PIPELINE_NAME_PARAM = "pipelineName";
+  public static final String CHAIN_PARAM = "chain";
+  public static final String ID_PARAM = "id";
+  public static final String BODY_PARAM = "body";
+  public static final String HEADERS_PARAM = "headers";
+  public static final String STATUS_PARAM = "status";
 }

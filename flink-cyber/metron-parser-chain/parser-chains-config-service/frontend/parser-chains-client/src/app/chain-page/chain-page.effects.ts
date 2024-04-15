@@ -23,6 +23,7 @@ import {ChainDetailsModel} from './chain-page.models';
 import {getChainPageState} from './chain-page.reducers';
 import {denormalizeParserConfig, normalizeParserConfig} from './chain-page.utils';
 import {CustomFormConfig} from './components/custom-form/custom-form.component';
+import {getSelectedPipeline} from "../chain-list-page/chain-list-page.reducers";
 
 @Injectable()
 export class ChainPageEffects {
@@ -30,14 +31,16 @@ export class ChainPageEffects {
     private actions$: Actions,
     private store$: Store<any>,
     private messageService: NzMessageService,
-    private chainPageService: ChainPageService
+    private chainPageService: ChainPageService,
   ) {}
 
   @Effect()
   loadChainDetails$: Observable<Action> = this.actions$.pipe(
     ofType(fromActions.LOAD_CHAIN_DETAILS),
-    switchMap((action: fromActions.LoadChainDetailsAction) => {
-      return this.chainPageService.getChain(action.payload.id).pipe(
+    withLatestFrom(this.store$.select(getSelectedPipeline)),
+    switchMap(([action, selectedPipeline]) => {
+        const finalAction = action as fromActions.LoadChainDetailsAction;
+        return this.chainPageService.getChain(finalAction.payload.id, selectedPipeline).pipe(
         map((chain: ChainDetailsModel) => {
           const normalizedParserConfig = normalizeParserConfig(chain);
           return new fromActions.LoadChainDetailsSuccessAction(
@@ -59,10 +62,12 @@ export class ChainPageEffects {
   saveParserConfig$: Observable<Action> = this.actions$.pipe(
     ofType(fromActions.SAVE_PARSER_CONFIG),
     withLatestFrom(this.store$.select(getChainPageState)),
-    switchMap(([action, state]) => {
-      const chainId = (action as fromActions.SaveParserConfigAction).payload.chainId;
+    withLatestFrom(this.store$.select(getSelectedPipeline)),
+    switchMap(([[action, state], selectedPipeline]) => {
+      const finalAction = action as fromActions.SaveParserConfigAction;
+      const chainId = finalAction.payload.chainId;
       const config = denormalizeParserConfig(state.chains[chainId], state);
-      return this.chainPageService.saveParserConfig(chainId, config).pipe(
+      return this.chainPageService.saveParserConfig(chainId, config, selectedPipeline).pipe(
         map(() => {
           return new fromActions.SaveParserConfigSuccessAction();
         }),
