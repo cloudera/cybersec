@@ -170,11 +170,12 @@ public class ChainController {
 
         try {
             ParserChainSchema updatedChain = chainPersistenceService.update(id, chain, Paths.get(configPath));
-            if (null == updatedChain) {
+            if (updatedChain == null) {
                 return ResponseEntity.notFound().build();
             } else {
                 return ResponseEntity.noContent().build();
             }
+            // TODO: fix exception handling
         } catch (IOException ioe) {
             throw new RuntimeException("Unable to update configuration with id=" + id);
         }
@@ -223,6 +224,7 @@ public class ChainController {
                 result.put("result", mappingDtoMap);
                 return ResponseEntity.ok(result);
             }
+            // TODO: fix exception handling
         } catch (IOException ioe) {
             throw new RuntimeException("Unable to read mappings from the provided path");
         }
@@ -252,7 +254,7 @@ public class ChainController {
      *
      * @param schema      Defines the parser chain that needs to be constructed.
      * @param textToParse The text to parse.
-     * @return
+     * @return The result of parsing the text.
      */
     private ParserResult doTest(ParserChainSchema schema, String textToParse) {
         ParserResult result;

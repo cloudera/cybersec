@@ -1,7 +1,7 @@
 import {Component, EventEmitter, OnInit, Output} from '@angular/core';
 import {ConfigChangedEvent} from "../parser/advanced-editor/advanced-editor.component";
 import {ChainPageService} from "../../../services/chain-page.service";
-import {FormBuilder, FormGroup} from "@angular/forms";
+import {UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
 import {select, Store} from "@ngrx/store";
 import {ChainPageState, getIndexMappings} from "../../chain-page.reducers";
 import {GetIndexMappingsAction} from "../../chain-page.actions";
@@ -15,12 +15,12 @@ export class IndexingFormComponent implements OnInit {
 
     private readonly _indexingPathKey = 'indexingPath';
 
-    form!: FormGroup;
+    form!: UntypedFormGroup;
     @Output() fieldSetUpdated = new EventEmitter<Map<string, Map<string, boolean>>>()
     mappingJson: any;
 
     constructor(public chainPageService: ChainPageService,
-                private fb: FormBuilder,
+                private fb: UntypedFormBuilder,
                 private store: Store<ChainPageState>) {
     }
 

@@ -26,16 +26,11 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -49,13 +44,12 @@ import static com.cloudera.parserchains.queryservice.common.ApplicationConstants
  */
 @RestController
 @RequestMapping(value = PARSER_CONFIG_BASE_URL)
+@RequiredArgsConstructor
 public class ParserSampleController {
 
-    @Autowired
-    private ParserSampleService parserSampleService;
+    private final ParserSampleService parserSampleService;
 
-    @Autowired
-    private AppProperties appProperties;
+    private final AppProperties appProperties;
 
     @ApiOperation(value = "Retrieves all parser samples for the specified chain.")
     @ApiResponses(value = {
@@ -95,6 +89,7 @@ public class ParserSampleController {
             return ResponseEntity
                     .created(URI.create(API_PARSER_TEST_SAMPLES + "/" + id))
                     .body(createdSampleList);
+            // TODO: fix this exception handling
         } catch (IOException ioe) {
             throw new RuntimeException("Unable to create parser chain samples with id=" + id);
         }
