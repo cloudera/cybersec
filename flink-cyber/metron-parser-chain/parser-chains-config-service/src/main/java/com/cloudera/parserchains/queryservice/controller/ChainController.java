@@ -29,6 +29,7 @@ import com.cloudera.parserchains.queryservice.service.ChainPersistenceService;
 import com.cloudera.parserchains.queryservice.service.IndexingService;
 import com.cloudera.parserchains.queryservice.service.PipelineService;
 import com.cloudera.parserchains.queryservice.service.ResultLogBuilder;
+import io.swagger.annotations.ApiParam;
 import lombok.RequiredArgsConstructor;
 
 import io.swagger.v3.oas.annotations.Operation;
