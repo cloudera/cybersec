@@ -10,44 +10,70 @@
  * limitations governing your use of the file.
  */
 
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {TestBed, waitForAsync} from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { NzModalModule, } from 'ng-zorro-antd/modal';
-import {  NzMessageService } from 'ng-zorro-antd/message';
-import { Observable, of, ReplaySubject, throwError } from 'rxjs';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {provideMockActions} from '@ngrx/effects/testing';
+import {NzModalModule,} from 'ng-zorro-antd/modal';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {of, ReplaySubject, throwError} from 'rxjs';
 
-import { ChainListPageService } from '../services/chain-list-page.service';
+import {ChainListPageService} from '../services/chain-list-page.service';
 import * as fromActions from './chain-list-page.actions';
-import { ChainListEffects } from './chain-list-page.effects';
-import { ChainModel } from './chain.model';
+import {ChainListEffects} from './chain-list-page.effects';
 import {Action} from "@ngrx/store";
+import {provideMockStore} from "@ngrx/store/testing";
+
+const selectedPipeline = 'foo-pipeline';
+const initialState = {
+  "chain-list-page": {
+    items: [],
+    createModalVisible: false,
+    deleteModalVisible: false,
+    deleteItem: null,
+    loading: false,
+    error: '',
+    pipelines: null,
+    pipelineRenameModalVisible: false,
+    selectedPipeline
+  }
+};
 
 describe('ChainListPage: effects', () => {
   let effects: ChainListEffects;
   let actions: ReplaySubject<Action>;
-  let service: ChainListPageService;
-  let msgService: NzMessageService;
+  let service: jasmine.SpyObj<ChainListPageService>;
+  let msgService: jasmine.SpyObj<NzMessageService>;
 
   beforeEach(waitForAsync(() => {
-      TestBed.configureTestingModule({
-        imports: [
-          NzModalModule,
-          HttpClientTestingModule,
-          NoopAnimationsModule,
-        ],
-        providers: [
-          ChainListEffects,
-          provideMockActions(() => actions),
-          { provide: ChainListPageService, useValue: jasmine.createSpyObj('ChainListPageService', ["createChain", "deleteChain", "getChains"]) },
-          NzMessageService
-        ]
-      });
+    TestBed.configureTestingModule({
+      imports: [
+        NzModalModule,
+        HttpClientTestingModule,
+        NoopAnimationsModule,
+      ],
+      providers: [
+        provideMockStore({
+          initialState,
+          selectors: []
+        }),
+        ChainListEffects,
+        provideMockActions(() => actions),
+        {
+          provide: ChainListPageService,
+          useValue: jasmine.createSpyObj('ChainListPageService', ["createChain", "deleteChain", "getChains"])
+        },
+        provideMockActions(() => actions),
+        {
+          provide: NzMessageService,
+          useValue: jasmine.createSpyObj('NzMessageService', ["create", "error"])
+        },
+      ]
+    });
 
-      effects = TestBed.inject(ChainListEffects);
-      service = TestBed.inject(ChainListPageService);
-      msgService = TestBed.inject(NzMessageService);
+    effects = TestBed.inject(ChainListEffects);
+    service = TestBed.inject(ChainListPageService) as jasmine.SpyObj<ChainListPageService>;
+    msgService = TestBed.inject(NzMessageService) as jasmine.SpyObj<NzMessageService>;
   }));
 
   it('loadChains should call the service and return with entries when it succeeds', (done) => {
@@ -56,9 +82,7 @@ describe('ChainListPage: effects', () => {
       name: 'Chain 1'
     }];
 
-    service.getChains = (): Observable<ChainModel[]> => of(expected);
-
-    const spy = spyOn(service, 'getChains').and.callThrough();
+    service.getChains.and.returnValue(of(expected));
 
     actions = new ReplaySubject(1);
     actions.next(new fromActions.LoadChainsAction());
@@ -68,15 +92,13 @@ describe('ChainListPage: effects', () => {
       done();
     });
 
-    expect(spy).toHaveBeenCalled();
+    expect(service.getChains).toHaveBeenCalledWith(selectedPipeline);
   });
 
   it('loadChains should return with an error when it fails and call ant`s message service', (done) => {
     const msg = 'Uh-oh!';
     const error = new Error(msg);
-    service.getChains = () => throwError(error);
-
-    const spy = spyOn(msgService, 'create').and.callThrough();
+    service.getChains.and.returnValue(throwError(error));
 
     actions = new ReplaySubject(1);
     actions.next(new fromActions.LoadChainsAction());
@@ -86,33 +108,24 @@ describe('ChainListPage: effects', () => {
       done();
     });
 
-    expect(spy).toHaveBeenCalledWith('error', msg);
+    expect(msgService.create).toHaveBeenCalledWith('error', msg);
   });
 
   it('createChain should call the service and return with entries when it succeeds', (done) => {
-    const initialValue = [{
-      id: 'id1',
-      name: 'Chain 1'
-    }];
-
-    service.getChains = (): Observable<ChainModel[]> => of(initialValue);
-    service.createChain = (): Observable<ChainModel> => of({id: 'id2', name: 'Chain 2'});
-
-    const spy = spyOn(service, 'createChain').and.callThrough();
-    const spyMsgSrv = spyOn(msgService, 'create').and.callThrough();
-
+    const chain = {id: 'id2', name: 'Chain 2'};
+    service.createChain.and.returnValue(of(chain));
     actions = new ReplaySubject(1);
-    actions.next(new fromActions.CreateChainAction({name: 'Chain 2'}));
+    actions.next(new fromActions.CreateChainAction({name: chain.name}));
 
     effects.createChain$.subscribe(result => {
       expect(result).toEqual(
-        new fromActions.CreateChainSuccessAction({id: 'id2', name: 'Chain 2'})
+        new fromActions.CreateChainSuccessAction(chain)
       );
       done();
     });
 
-    expect(spy).toHaveBeenCalledWith({name: 'Chain 2'});
-    expect(spyMsgSrv).toHaveBeenCalledWith(
+    expect(service.createChain).toHaveBeenCalledWith({name: chain.name}, selectedPipeline);
+    expect(msgService.create).toHaveBeenCalledWith(
       'success',
       'Chain Chain 2 has been created'
     );
@@ -123,19 +136,9 @@ describe('ChainListPage: effects', () => {
       id: 'id1',
       name: 'Chain 1'
     };
-    const initialValue = [deleteChain, {
-      id: 'id2',
-      name: 'Chain 2'
-    }];
-
-    service.getChains = (): Observable<ChainModel[]> => of(initialValue);
-    service.deleteChain = (): Observable<ChainModel[]> => of(initialValue);
-
-    const spy = spyOn(service, 'deleteChain').and.callThrough();
-    const spyMsgSrv = spyOn(msgService, 'create').and.callThrough();
-
     actions = new ReplaySubject(1);
     actions.next(new fromActions.DeleteChainAction(deleteChain.id, deleteChain.name));
+    service.deleteChain.and.returnValue(of(deleteChain));
 
     effects.deleteChain$.subscribe(result => {
       expect(result).toEqual(
@@ -144,31 +147,23 @@ describe('ChainListPage: effects', () => {
       done();
     });
 
-    expect(spy).toHaveBeenCalledWith(deleteChain.id);
-    expect(spyMsgSrv).toHaveBeenCalledWith(
+    expect(service.deleteChain).toHaveBeenCalledWith(deleteChain.id, selectedPipeline);
+    expect(msgService.create).toHaveBeenCalledWith(
       'success',
       `Chain "${deleteChain.name}" deleted Successfully`
     );
   });
 
   it('deleteChain should return with an error when it fails', (done) => {
-    const initialValue = [{
+    const deleteChain = {
       id: 'id1',
       name: 'Chain 1'
-    }, {
-      id: 'id2',
-      name: 'Chain 2'
-    }];
+    };
     const msg = 'Uh-oh!';
     const error = new Error(msg);
-
-    service.getChains = (): Observable<ChainModel[]> => of(initialValue);
-    service.deleteChain = () => throwError(error);
-
-    const spy = spyOn(service, 'deleteChain').and.callThrough();
-    const spyMsgSrv = spyOn(msgService, 'create').and.callThrough();
+    service.deleteChain.and.returnValue(throwError(error));
     actions = new ReplaySubject(1);
-    actions.next(new fromActions.DeleteChainAction('id1', 'Chain 1'));
+    actions.next(new fromActions.DeleteChainAction(deleteChain.id, deleteChain.name));
 
     effects.deleteChain$.subscribe(result => {
       expect(result).toEqual(
@@ -177,8 +172,8 @@ describe('ChainListPage: effects', () => {
       done();
     });
 
-    expect(spy).toHaveBeenCalledWith('id1');
-    expect(spyMsgSrv).toHaveBeenCalledWith(
+    expect(service.deleteChain).toHaveBeenCalledWith('id1', selectedPipeline);
+    expect(msgService.create).toHaveBeenCalledWith(
       'error',
       'Uh-oh!'
     );

@@ -10,16 +10,16 @@
  * limitations governing your use of the file.
  */
 
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 
 import {ChainDetailsModel} from '../chain-page/chain-page.models';
+import {getHttpParams} from "../shared/service.utils";
 import {ParserDescriptor} from "../chain-page/chain-page.reducers";
-import {finalize} from "rxjs/operators";
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class ChainPageService {
   static readonly BASE_URL = '/api/v1/parserconfig/';
@@ -28,43 +28,61 @@ export class ChainPageService {
   private _parserChainSize: number;
 
 
-    constructor(
-      private _http: HttpClient
-    ) {}
+  constructor(
+    private _http: HttpClient
+  ) {
+  }
 
-    public getChain(id: string) {
-      return this._http.get(ChainPageService.BASE_URL + `chains/${id}`);
-    }
+  public getChain(id: string, pipeline: string = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
 
-    public getParsers(id: string) {
-      return this._http.get(ChainPageService.BASE_URL + `chains/${id}/parsers`);
-    }
+    return this._http.get(ChainPageService.BASE_URL + `chains/${id}`, {params: httpParams});
+  }
 
-    public saveParserConfig(chainId: string, config: ChainDetailsModel) {
-      return this._http.put(ChainPageService.BASE_URL + `chains/${chainId}`, config);
-    }
+  public getParsers(id: string, pipeline: string = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
 
-    public getFormConfig(type: string) {
-      return this._http.get<ParserDescriptor>(ChainPageService.BASE_URL + `parser-form-configuration/${type}`);
-    }
+    return this._http.get(ChainPageService.BASE_URL + `chains/${id}/parsers`, {params: httpParams});
+  }
 
-    public getFormConfigs() {
-      return this._http.get<{[key: string] : ParserDescriptor}>(ChainPageService.BASE_URL + `parser-form-configuration`);
-    }
+  public saveParserConfig(chainId: string, config: ChainDetailsModel, pipeline: string = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
 
-    public getIndexMappings(payload: { filePath?: string} = {filePath: ''}) {
-      return this._http.post(`${ChainPageService.BASE_URL}indexing`, payload, {headers: {'Content-Type': 'application/json; charset=utf-8'}, observe: 'response'});
-    }
+    return this._http.put(ChainPageService.BASE_URL + `chains/${chainId}`, config, {params: httpParams});
+  }
 
-    public createChainCollapseArray(size: number) {
-      this._parserChainSize = size;
-      this._parserChainCollapseState = new BehaviorSubject(new Array(this._parserChainSize).fill(false));
-    }
-    public getCollapseExpandState() {
-      return this._parserChainCollapseState;
-    }
-    public collapseExpandAllParsers() {
-      this.collapseAll.next(!this.collapseAll.value);
-      this._parserChainCollapseState.next(new Array(this._parserChainSize).fill(this.collapseAll.value));
-    }
+  public getFormConfig(type: string) {
+    const httpParams: HttpParams = getHttpParams(null);
+
+    return this._http.get<ParserDescriptor>(ChainPageService.BASE_URL + `parser-form-configuration/${type}`, {params: httpParams});
+  }
+
+  public getFormConfigs() {
+    const httpParams: HttpParams = getHttpParams(null);
+
+    return this._http.get<{
+      [key: string]: ParserDescriptor
+    }>(ChainPageService.BASE_URL + `parser-form-configuration`, {params: httpParams});
+  }
+
+  public getIndexMappings(payload: { filePath?: string } = {filePath: ''}) {
+    return this._http.post(`${ChainPageService.BASE_URL}indexing`, payload, {
+      headers: {'Content-Type': 'application/json; charset=utf-8'},
+      observe: 'response'
+    });
+  }
+
+  public createChainCollapseArray(size: number) {
+    this._parserChainSize = size;
+    this._parserChainCollapseState = new BehaviorSubject(new Array(this._parserChainSize).fill(false));
+  }
+
+  public getCollapseExpandState() {
+    return this._parserChainCollapseState;
+  }
+
+  public collapseExpandAllParsers() {
+    this.collapseAll.next(!this.collapseAll.value);
+    this._parserChainCollapseState.next(new Array(this._parserChainSize).fill(this.collapseAll.value));
+  }
 }

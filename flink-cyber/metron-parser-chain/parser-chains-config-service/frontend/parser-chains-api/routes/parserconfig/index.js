@@ -25,6 +25,7 @@ const DELETE = router.delete.bind(router);
 let chains = require('./mock-data/chains.json');
 let parserTypes = require('./mock-data/parser-types.json');
 let formConfigs = require('./mock-data/form-configs.json');
+let clusters = require('./mock-data/clusters.json');
 
 GET('/chains', getChains);
 POST('/chains', createChain);
@@ -41,6 +42,8 @@ POST('/tests', createParseJob);
 
 GET('/parser-form-configuration/:type', getFormConfig);
 GET('/parser-form-configuration', getFormConfigs);
+
+GET('/clusters', getClusters)
 
 function createParseJob(req, res) {
   const parsers = req.body.chainConfig.parsers
@@ -190,6 +193,10 @@ function getFormConfig(req, res) {
 
 function getFormConfigs(req, res) {
   res.status(200).send(formConfigs);
+}
+
+function getClusters(req, res) {
+  res.status(200).send(clusters);
 }
 
 module.exports = router;

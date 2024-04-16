@@ -21,6 +21,7 @@ package com.cloudera.parserchains.queryservice.service;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.queryservice.common.utils.IDGenerator;
 import com.cloudera.parserchains.queryservice.model.summary.ParserChainSummary;
+import com.cloudera.parserchains.queryservice.service.impl.FileBasedChainPersistenceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -10,12 +10,12 @@
  * limitations governing your use of the file.
  */
 
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import { Action } from '@ngrx/store';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import {Action} from '@ngrx/store';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {Observable, of} from 'rxjs';
+import {catchError, map, switchMap, tap} from 'rxjs/operators';
 
 import {
   executionTriggered,
@@ -28,8 +28,8 @@ import {
   sampleDataInputChanged,
   sampleDataRestored,
 } from './live-view.actions';
-import { LiveViewConsts } from './live-view.consts';
-import { LiveViewService } from './services/live-view.service';
+import {LiveViewConsts} from './live-view.consts';
+import {LiveViewService} from './services/live-view.service';
 
 @Injectable()
 export class LiveViewEffects {

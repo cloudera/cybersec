@@ -40,6 +40,7 @@ import {NzPopconfirmModule} from "ng-zorro-antd/popconfirm";
 import {NzFormModule} from "ng-zorro-antd/form";
 import {NzLayoutModule} from "ng-zorro-antd/layout";
 import {provideMockActions} from "@ngrx/effects/testing";
+import {NzSelectModule} from "ng-zorro-antd/select";
 
 const icons: IconDefinition[] = [PlusOutline, DeleteFill, RightSquareFill];
 
@@ -112,6 +113,7 @@ describe('ChainListPageComponent', () => {
         NzIconModule.forChild(icons),
         NzFormModule,
         NzLayoutModule,
+        NzSelectModule,
         RouterTestingModule,
         NoopAnimationsModule,
       ],

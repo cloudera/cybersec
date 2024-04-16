@@ -1,0 +1,54 @@
+{
+  "jobs": [
+    {
+      "jobId": {
+        "upperPart": -6550733604872219319,
+        "lowerPart": 4568870240114688463,
+        "bytes": "P2fjRsbjwc+lFx5+X2CVSQ=="
+      },
+      "jobIdString": "3f67e346c6e3c1cfa5171e7e5f609549",
+      "jobFullName": "new-branch-2.cyb-105.parse.main",
+      "jobName": "main",
+      "jobState": "RUNNING",
+      "jobBranch": "new-branch-2",
+      "jobPipeline": "cyb-105",
+      "startTime": "20.10.2023 12:54:43",
+      "jobType": "PARSER"
+    },
+    {
+      "jobId": {
+        "upperPart": -31345749390703553,
+        "lowerPart": 1042334076944401418,
+        "bytes": "DncdUgmORAr/kKM0/llEPw=="
+      },
+      "jobIdString": "0e771d52098e440aff90a334fe59443f",
+      "jobFullName": "main.cyb-105.triage",
+      "jobState": "RESTARTING",
+      "jobBranch": "main",
+      "jobPipeline": "cyb-105",
+      "startTime": "21.10.2023 05:24:04",
+      "jobType": "TRIAGE"
+    },
+    {
+      "jobId": {
+        "upperPart": -7863068608433126059,
+        "lowerPart": 5967667151374593816,
+        "bytes": "UtFpp/dzLxiS4MTCzdGFVQ=="
+      },
+      "jobIdString": "52d169a7f7732f1892e0c4c2cdd18555",
+      "jobFullName": "main.cyb-105-new.parse.main",
+      "jobName": "main",
+      "jobState": "RUNNING",
+      "jobBranch": "main",
+      "jobPipeline": "cyb-105-new",
+      "startTime": "21.10.2023 05:24:10",
+      "jobType": "PARSER"
+    }
+  ],
+  "clusterMeta": {
+    "name": "vpavlenko-1",
+    "clusterId": "clusterId1",
+    "clusterStatus": "online",
+    "version": "1.0.0"
+  }
+}
