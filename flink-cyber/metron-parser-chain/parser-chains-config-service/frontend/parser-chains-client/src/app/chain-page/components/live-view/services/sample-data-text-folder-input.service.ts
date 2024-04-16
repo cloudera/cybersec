@@ -44,7 +44,8 @@ export class SampleDataTextFolderInputService {
                 source: value.source,
                 type: SampleDataType.MANUAL
             }
-            const postObservable = this._liveViewService.execute(sample, chainConfig)
+            const postObservable =
+                this._liveViewService.execute(sample, chainConfig)
                 .pipe(map(res => {
                     return {
                         id: value.id,

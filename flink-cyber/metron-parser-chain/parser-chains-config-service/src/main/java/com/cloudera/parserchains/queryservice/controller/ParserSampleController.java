@@ -29,6 +29,8 @@ import com.cloudera.parserchains.queryservice.service.ParserSampleService;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -51,20 +53,19 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(value = PARSER_CONFIG_BASE_URL)
+@RequiredArgsConstructor
 public class ParserSampleController {
 
-    @Autowired
-    private ParserSampleService parserSampleService;
+    private final ParserSampleService parserSampleService;
 
-    @Autowired
-    private AppProperties appProperties;
+    private final AppProperties appProperties;
 
     @Operation(summary = "Retrieves all parser samples for the specified chain.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "A list of all parser samples for the specified chain.")
             })
     @PostMapping(value = API_PARSER_TEST_SAMPLES + "/{id}")
-    ResponseEntity<List<ParserSample>> findAllById(@Parameter(name = "id", description = "The ID of the parser chain to retrieve samples for.", required = true)
+    public ResponseEntity<List<ParserSample>> findAllById(@Parameter(name = "id", description = "The ID of the parser chain to retrieve samples for.", required = true)
                                                    @PathVariable String id,
                                                    @RequestBody SampleFolderDescriptor body) throws IOException {
         String sampleFolderPath = getSampleFolderPath(body);
@@ -82,7 +83,7 @@ public class ParserSampleController {
                     @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
             })
     @PutMapping(value = API_PARSER_TEST_SAMPLES + "/{id}")
-    ResponseEntity<List<ParserSample>> update(
+    public ResponseEntity<List<ParserSample>> update(
             @Parameter(name = "sampleList", description = "The new sample definition list.", required = true)
             @RequestBody SampleFolderDescriptor body,
             @Parameter(name = "id", description = "The ID of the parser chain sample to update.")
@@ -96,6 +97,7 @@ public class ParserSampleController {
             return ResponseEntity
                     .created(URI.create(API_PARSER_TEST_SAMPLES + "/" + id))
                     .body(createdSampleList);
+            // TODO: fix this exception handling
         } catch (IOException ioe) {
             throw new RuntimeException("Unable to create parser chain samples with id=" + id);
         }

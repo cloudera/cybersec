@@ -10,32 +10,46 @@
  * limitations governing your use of the file.
  */
 
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Injectable} from '@angular/core';
 
 import {ChainModel, ChainOperationalModel} from '../chain-list-page/chain.model';
+import {getHttpParams} from "../shared/service.utils";
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class ChainListPageService {
 
-    static readonly BASE_URL = '/api/v1/parserconfig/';
+  static readonly BASE_URL = '/api/v1/parserconfig/';
 
-    constructor(
-      private _http: HttpClient
-    ) {}
+  constructor(
+    private _http: HttpClient
+  ) {
+  }
 
-    public createChain(chain: ChainOperationalModel) {
-        return this._http.post<ChainModel>('/api/v1/parserconfig/chains', chain);
-    }
+  public createChain(chain: ChainOperationalModel, pipeline: string = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
 
-    public getChains(params = null) {
-        return this._http.get<ChainModel[]>(ChainListPageService.BASE_URL + 'chains');
-    }
+    return this._http.post<ChainModel>(ChainListPageService.BASE_URL + 'chains', chain, {params: httpParams});
+  }
 
-    public deleteChain(chainId: string) {
-        return this._http.delete(ChainListPageService.BASE_URL + 'chains/' + chainId);
-    }
+  public getChains(pipeline: string = null, params = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
+
+    return this._http.get<ChainModel[]>(ChainListPageService.BASE_URL + 'chains', {params: httpParams});
+  }
+
+  public deleteChain(chainId: string, pipeline: string = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
+
+    return this._http.delete(ChainListPageService.BASE_URL + 'chains/' + chainId, {params: httpParams});
+  }
+
+  public getPipelines() {
+    const httpParams: HttpParams = getHttpParams(null);
+
+    return this._http.delete(ChainListPageService.BASE_URL + 'pipeline', {params: httpParams});
+  }
 
 }

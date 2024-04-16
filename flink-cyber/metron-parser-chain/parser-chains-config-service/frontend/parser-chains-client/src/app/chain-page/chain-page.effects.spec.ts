@@ -26,49 +26,60 @@ import {NzMessageService} from "ng-zorro-antd/message";
 import {ParserDescriptor} from "./chain-page.reducers";
 import {Action} from "@ngrx/store";
 
+const selectedPipeline = 'foo-pipeline';
+const initialChains = {
+  123: {
+    id: '123',
+    name: 'main chain',
+    parsers: ['123']
+  },
+  456: {
+    id: '456',
+    name: 'some chain',
+    parsers: ['456']
+  }
+};
+
+const initialParsers = {
+  123: {
+    id: '123',
+    name: 'some parser',
+    type: 'Router',
+    routing: {
+      routes: ['123']
+    }
+  },
+  456: {
+    id: '456',
+    name: 'some other parser',
+    type: 'grok'
+  }
+};
+
+const initialRoutes = {
+  123: {
+    id: '123',
+    name: 'some route',
+    subchain: '456'
+  }
+};
+
+const chainListPageInitialState = {
+  items: [],
+  createModalVisible: false,
+  deleteModalVisible: false,
+  deleteItem: null,
+  loading: false,
+  error: '',
+  pipelines: null,
+  pipelineRenameModalVisible: false,
+  selectedPipeline: selectedPipeline
+};
+
 describe('chain parser page: effects', () => {
   let actions: ReplaySubject<Action>;
   let effects: ChainPageEffects;
   let service: jasmine.SpyObj<ChainPageService>;
-
-  const initialState = {
-    'chain-page': {
-      chains: {
-        123: {
-          id: '123',
-          name: 'main chain',
-          parsers: ['123']
-        },
-        456: {
-          id: '456',
-          name: 'some chain',
-          parsers: ['456']
-        }
-      },
-      parsers: {
-        123: {
-          id: '123',
-          name: 'some parser',
-          type: 'Router',
-          routing: {
-            routes: ['123']
-          }
-        },
-        456: {
-          id: '456',
-          name: 'some other parser',
-          type: 'grok'
-        }
-      },
-      routes: {
-        123: {
-          id: '123',
-          name: 'some route',
-          subchain: '456'
-        }
-      }
-    }
-  };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -81,10 +92,20 @@ describe('chain parser page: effects', () => {
         ChainPageEffects,
         provideMockActions(() => actions),
         provideMockStore({
-          initialState,
+          initialState: {
+            'chain-page': {
+              chains: initialChains,
+              parsers: initialParsers,
+              routes: initialRoutes
+            },
+            'chain-list-page': chainListPageInitialState
+          },
           selectors: []
         }),
-        {provide: ChainPageService, useValue: jasmine.createSpyObj('ChainPageService', ['getChain', 'saveParserConfig', 'getFormConfig', 'getFormConfigs', 'getIndexMappings'])},
+        {
+          provide: ChainPageService,
+          useValue: jasmine.createSpyObj('ChainPageService', ['getChain', 'saveParserConfig', 'getFormConfig', 'getFormConfigs', 'getIndexMappings'])
+        },
         NzMessageService
       ]
     });
@@ -168,7 +189,7 @@ describe('chain parser page: effects', () => {
       expect(result).toEqual(new fromActions.LoadChainDetailsSuccessAction(normalizedChain));
       done();
     });
-    expect(service.getChain).toHaveBeenCalledWith('123');
+    expect(service.getChain).toHaveBeenCalledWith('123', selectedPipeline);
   });
 
   it('save should send the denormalized parser config', (done) => {
@@ -207,11 +228,11 @@ describe('chain parser page: effects', () => {
           }]
         }
       }]
-    });
+    }, selectedPipeline);
   });
 
   it('getFormConfig should return the form config', (done) => {
-    const descriptor: {[key: string] : ParserDescriptor} = {
+    const descriptor: { [key: string]: ParserDescriptor } = {
       foo: {
         id: 'foo-descriptor',
         name: 'foo-descriptor',
@@ -241,7 +262,7 @@ describe('chain parser page: effects', () => {
   });
 
   it('getFormConfigs should return the form configs', (done) => {
-    const descriptor: {[key: string] : ParserDescriptor} = {
+    const descriptor: { [key: string]: ParserDescriptor } = {
       foo: {
         id: 'foo-descriptor',
         name: 'foo-descriptor',

@@ -45,7 +45,7 @@ describe('LiveViewService', () => {
     );
 
     expect(http.post).toHaveBeenCalledWith(
-      LiveViewService.SAMPLE_PARSER_URL,
+      LiveViewService.BASE_URL,
       {
         sampleData: { type: SampleDataType.MANUAL, source: ['test sample input'] },
         chainConfig: { id: '456', name: 'gdf', parsers: [] }

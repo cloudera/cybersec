@@ -11,7 +11,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import {Actions, createEffect, Effect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import { Action } from '@ngrx/store';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { Observable, of } from 'rxjs';
@@ -31,7 +31,6 @@ import {
 } from "./sample-data-text-folder-input.actions";
 import {SampleDataTextFolderInputService} from "../../services/sample-data-text-folder-input.service";
 import {SampleFolderConsts} from "./sample-data-text-folder-input.consts";
-import {LiveViewConsts} from "../../live-view.consts";
 
 @Injectable()
 export class SampleDataTextFolderInputEffects {
