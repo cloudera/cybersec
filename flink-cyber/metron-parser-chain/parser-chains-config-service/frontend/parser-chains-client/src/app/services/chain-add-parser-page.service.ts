@@ -10,11 +10,12 @@
  * limitations governing your use of the file.
  */
 
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { map } from 'rxjs/operators';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {map} from 'rxjs/operators';
 
-import { ParserModel } from '../chain-page/chain-page.models';
+import {ParserModel} from '../chain-page/chain-page.models';
+import {getHttpParams} from "../shared/service.utils";
 
 @Injectable({
   providedIn: 'root'
@@ -27,16 +28,22 @@ export class AddParserPageService {
     private _http: HttpClient
   ) {}
 
-  public add(chainId: string, parser: ParserModel) {
-    return this._http.post(AddParserPageService.BASE_URL + `chains/${chainId}/parsers`, parser);
+  public add(chainId: string, parser: ParserModel, pipeline: string = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
+
+    return this._http.post(AddParserPageService.BASE_URL + `chains/${chainId}/parsers`, parser, {params: httpParams});
   }
 
   public getParserTypes() {
-    return this._http.get<{ id: string, name: string }[]>(AddParserPageService.BASE_URL + `parser-types`);
+    const httpParams: HttpParams = getHttpParams(null);
+
+    return this._http.get<{ id: string, name: string }[]>(AddParserPageService.BASE_URL + `parser-types`, {params: httpParams});
   }
 
-  public getParsers(chainId: string){
-    return this._http.get<ParserModel[]>(AddParserPageService.BASE_URL + `chains/${chainId}/parsers`)
+  public getParsers(chainId: string, pipeline: string = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
+
+    return this._http.get<ParserModel[]>(AddParserPageService.BASE_URL + `chains/${chainId}/parsers`, {params: httpParams})
       .pipe(
         map((parsers: ParserModel[]) => {
           return parsers;

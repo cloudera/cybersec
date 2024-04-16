@@ -10,40 +10,42 @@
  * limitations governing your use of the file.
  */
 
-import { registerLocaleData } from '@angular/common';
-import { HttpClientModule } from '@angular/common/http';
+import {registerLocaleData} from '@angular/common';
+import {HttpClientModule} from '@angular/common/http';
 import en from '@angular/common/locales/en';
 import {CUSTOM_ELEMENTS_SCHEMA, NgModule, NO_ERRORS_SCHEMA} from '@angular/core';
-import { ReactiveFormsModule } from '@angular/forms';
-import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { EffectsModule } from '@ngrx/effects';
-import { MetaReducer, StoreModule } from '@ngrx/store';
-import { StoreDevtoolsModule } from '@ngrx/store-devtools';
-import {  NzLayoutModule } from 'ng-zorro-antd/layout';
-import { en_US,  NZ_I18N } from 'ng-zorro-antd/i18n'
-import { NzModalModule } from 'ng-zorro-antd/modal'
-import { storeFreeze } from 'ngrx-store-freeze';
+import {ReactiveFormsModule} from '@angular/forms';
+import {BrowserModule} from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {EffectsModule} from '@ngrx/effects';
+import {MetaReducer, StoreModule} from '@ngrx/store';
+import {StoreDevtoolsModule} from '@ngrx/store-devtools';
+import {NzLayoutModule} from 'ng-zorro-antd/layout';
+import {en_US, NZ_I18N} from 'ng-zorro-antd/i18n'
+import {NzModalModule} from 'ng-zorro-antd/modal'
+import {storeFreeze} from 'ngrx-store-freeze';
 
-import { environment } from '../environments/environment';
+import {environment} from '../environments/environment';
 
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { ChainAddParserPageModule } from './chain-add-parser-page/chain-add-parser-page.module';
-import { ChainListPageModule } from './chain-list-page/chain-list-page.module';
-import { ChainPageModule } from './chain-page/chain-page.module';
-import { CanDeactivateComponent } from './misc/can-deactivate-component';
-import { MainContainerComponent } from './misc/main/main.container';
-import { ThemeSwitchModule } from './misc/theme-switch/theme-switch.module';
-import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
-import { MonacoEditorService } from './services/monaco-editor.service';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { JsonEditorPopupComponent } from './components/popup/json-editor-popup/json-editor-popup.component';
+import {AppRoutingModule} from './app-routing.module';
+import {AppComponent} from './app.component';
+import {ChainAddParserPageModule} from './chain-add-parser-page/chain-add-parser-page.module';
+import {ChainListPageModule} from './chain-list-page/chain-list-page.module';
+import {ChainPageModule} from './chain-page/chain-page.module';
+import {CanDeactivateComponent} from './misc/can-deactivate-component';
+import {MainContainerComponent} from './misc/main/main.container';
+import {ThemeSwitchModule} from './misc/theme-switch/theme-switch.module';
+import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
+import {MonacoEditorService} from './services/monaco-editor.service';
+import {NzMenuModule} from 'ng-zorro-antd/menu';
+import {NzIconModule} from 'ng-zorro-antd/icon';
+import {JsonEditorPopupComponent} from './components/popup/json-editor-popup/json-editor-popup.component';
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatButtonModule} from "@angular/material/button";
 import {DragDropModule} from "@angular/cdk/drag-drop";
 import {MonacoEditorModule} from "ngx-monaco-editor-v2";
+import {ClusterListPageModule} from "./cluster/cluster-list-page/cluster-list-page.module";
+import {ClusterPageModule} from "./cluster/cluster-page/cluster-page.module";
 
 registerLocaleData(en);
 
@@ -72,6 +74,8 @@ export const metaReducers: MetaReducer<unknown>[] = !environment.production
     ThemeSwitchModule,
     ChainListPageModule,
     ChainPageModule,
+    ClusterListPageModule,
+    ClusterPageModule,
     ChainAddParserPageModule,
     MonacoEditorModule.forRoot(),
     NzMenuModule,
@@ -81,11 +85,12 @@ export const metaReducers: MetaReducer<unknown>[] = !environment.production
     DragDropModule,
   ],
   providers: [
-    { provide: NZ_I18N, useValue: en_US },
+    {provide: NZ_I18N, useValue: en_US},
     CanDeactivateComponent,
     MonacoEditorService
   ],
   bootstrap: [AppComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
-export class AppModule { }
+export class AppModule {
+}
