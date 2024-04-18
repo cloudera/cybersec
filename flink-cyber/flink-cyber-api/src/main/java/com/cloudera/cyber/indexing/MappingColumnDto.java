@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 @Data
 @NoArgsConstructor
@@ -42,7 +43,7 @@ public class MappingColumnDto {
     }
 
     public String getPath() {
-        if (path == null || path.isEmpty()) {
+        if (StringUtils.isEmpty(path)) {
             return "extensions";
         } else if (path.equals(".")) {
             return "";

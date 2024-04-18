@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {ClusterModel, Job} from "./cluster-list-page.model";

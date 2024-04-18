@@ -14,7 +14,7 @@
 @include mat.core();
 @import "./theme.scss";
 @import "./custom-component-theme";
-@import "./custom-palite";
+@import "custom-palette";
 
 // Define the palettes for your theme using the Material Design palettes available in palette.scss
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker

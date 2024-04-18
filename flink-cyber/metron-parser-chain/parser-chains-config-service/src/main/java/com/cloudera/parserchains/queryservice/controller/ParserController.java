@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,8 +69,10 @@ public class ParserController {
                             mediaType = "application/json")),
                     @ApiResponse(responseCode = "404", description = "Unable to retrieve.")})
     @GetMapping(value = API_PARSER_FORM_CONFIG)
-    public ResponseEntity<Map<ParserID, ParserDescriptor>> describeAll() throws IOException {
-        Map<ParserID, ParserDescriptor> configs = parserDiscoveryService.describeAll();// TODO: check the feasibility of this check
+    public ResponseEntity<Map<ParserID, ParserDescriptor>> describeAll() {
+        Map<ParserID, ParserDescriptor> configs = parserDiscoveryService.describeAll();
+
+        // TODO: check the feasibility of this check
         if (configs != null || configs.size() >= 0) {
             return ResponseEntity.ok(configs);
         } else {

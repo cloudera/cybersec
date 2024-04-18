@@ -31,7 +31,6 @@ import {
 } from './chain-list-page.reducers';
 import {ChainModel, ChainOperationalModel} from './chain.model';
 import {NzMessageService} from "ng-zorro-antd/message";
-import {c} from "msw/lib/glossary-de6278a9";
 
 @Component({
   selector: 'app-chain-list-page',

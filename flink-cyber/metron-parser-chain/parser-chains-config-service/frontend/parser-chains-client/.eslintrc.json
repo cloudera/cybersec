@@ -54,6 +54,7 @@
         "plugin:@angular-eslint/template/process-inline-templates"
       ],
       "rules": {
+        "no-unused-vars": "off",
         "jsdoc/check-alignment": "off",
         "jsdoc/check-param-names": "off",
         "@typescript-eslint/adjacent-overload-signatures": "off",
@@ -66,6 +67,15 @@
         "simple-import-sort/imports": "off",
         "array-bracket-spacing": "off",
         "no-underscore-dangle": "off",
+        "@typescript-eslint/no-unused-vars": [
+          "warn",
+          {
+            "vars": "all",
+            "varsIgnorePattern": "^_",
+            "args": "after-used",
+            "argsIgnorePattern": "^_"
+          }
+        ],
         "@typescript-eslint/naming-convention": [
           "error",
           {

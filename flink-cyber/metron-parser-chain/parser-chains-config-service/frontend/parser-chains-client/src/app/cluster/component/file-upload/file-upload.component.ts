@@ -1,11 +1,8 @@
-import {Component, OnInit, Input, Output, EventEmitter} from '@angular/core';
-import {trigger, state, style, animate, transition} from '@angular/animations';
-import {
-  HttpClient, HttpRequest,
-  HttpEventType, HttpErrorResponse
-} from '@angular/common/http';
-import {Subscription, of} from 'rxjs';
-import {catchError, last, map, tap, timeout} from 'rxjs/operators';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {animate, state, style, transition, trigger} from '@angular/animations';
+import {HttpClient, HttpEventType, HttpRequest} from '@angular/common/http';
+import {of, Subscription} from 'rxjs';
+import {catchError, last, map, timeout} from 'rxjs/operators';
 
 @Component({
   selector: 'app-file-upload',
@@ -136,10 +133,8 @@ export class FileUploadComponent implements OnInit {
             return event;
         }
       }),
-      tap(message => {
-      }),
       last(),
-      catchError((error: HttpErrorResponse) => {
+      catchError(_ => {
         file.canRetry = true;
         this.inProgress.emit(false);
         return of(`${file.data.name} upload failed.`);

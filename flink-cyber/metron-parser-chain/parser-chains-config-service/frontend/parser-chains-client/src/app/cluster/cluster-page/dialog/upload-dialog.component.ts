@@ -1,6 +1,5 @@
-import {Component, Inject, InjectionToken, ViewChild} from "@angular/core";
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {Subscription} from "rxjs";
+import {Component, Inject, ViewChild} from "@angular/core";
+import {MAT_DIALOG_DATA} from "@angular/material/dialog";
 import {FileUploadComponent} from "../../component/file-upload/file-upload.component";
 import {DialogData} from "../cluster-page.component";
 import {DialogRef} from "@angular/cdk/dialog";

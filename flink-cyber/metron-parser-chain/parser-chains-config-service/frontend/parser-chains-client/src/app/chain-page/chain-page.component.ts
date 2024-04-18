@@ -140,7 +140,7 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   }
 
   onChainLevelChange(chainId: string) {
-    this._store.pipe(select(getChain({ id: chainId }))).pipe(take(1)).subscribe((chain: ParserChainModel) => {
+    this._store.pipe(select(getChain({ id: chainId }))).pipe(take(1)).subscribe(_ => {
       this._store.dispatch(
         new fromActions.AddToPathAction({ chainId })
       );

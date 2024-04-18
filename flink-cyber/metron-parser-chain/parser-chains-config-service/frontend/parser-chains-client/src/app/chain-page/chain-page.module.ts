@@ -51,7 +51,6 @@ import {IndexingFormComponent} from './components/indexing-form/indexing-form.co
 import {NzLayoutModule} from "ng-zorro-antd/layout";
 import {NzAutocompleteModule} from "ng-zorro-antd/auto-complete";
 import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
-import {MatDialogModule} from "@angular/material/dialog";
 import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 
 @NgModule({

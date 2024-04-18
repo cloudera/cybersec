@@ -14,7 +14,6 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 
 import {map, take} from "rxjs/operators";
-import {Observable} from "rxjs";
 import {select, Store} from "@ngrx/store";
 import {ChainListPageState, getSelectedPipeline} from "../chain-list-page/chain-list-page.reducers";
 import {getHttpParams} from "../shared/service.utils";

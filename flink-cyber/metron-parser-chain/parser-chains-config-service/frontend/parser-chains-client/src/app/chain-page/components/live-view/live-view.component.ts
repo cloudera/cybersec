@@ -96,7 +96,7 @@ export class LiveViewComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isLiveViewOn$,
     ]).pipe(
       debounceTime(LiveViewConsts.LIVE_VIEW_DEBOUNCE_RATE),
-      filter(([ sampleData, chainConfig, isLiveViewOn ]) => isLiveViewOn && !!sampleData.source),
+      filter(([ sampleData, isLiveViewOn ]) => isLiveViewOn && !!sampleData.source),
       takeUntil(this._unsubscribe$)
     ).subscribe(([ sampleData, chainConfig ]) => {
       this._store.dispatch(executionTriggered({ sampleData, chainConfig }));
@@ -119,7 +119,7 @@ export class LiveViewComponent implements OnInit, AfterViewInit, OnDestroy {
       this.sampleDataForceChange$,
       this.chainConfig$]).pipe(
       takeUntil(this._unsubscribe$),
-      filter((sampleData, chainConfig) => sampleData !== null),
+      filter((sampleData) => sampleData !== null),
     ).subscribe(([sampleData, chainConfig]) => {
       this._store.dispatch(ExecutionListTriggeredAction({ sampleData, chainConfig }));
     });

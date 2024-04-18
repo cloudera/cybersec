@@ -34,7 +34,7 @@ export class ChainListPageService {
     return this._http.post<ChainModel>(ChainListPageService.BASE_URL + 'chains', chain, {params: httpParams});
   }
 
-  public getChains(pipeline: string = null, params = null) {
+  public getChains(pipeline: string = null) {
     const httpParams: HttpParams = getHttpParams(pipeline);
 
     return this._http.get<ChainModel[]>(ChainListPageService.BASE_URL + 'chains', {params: httpParams});
