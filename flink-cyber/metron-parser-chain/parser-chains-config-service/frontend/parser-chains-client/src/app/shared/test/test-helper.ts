@@ -1,6 +1,6 @@
-import { DebugElement } from '@angular/core';
-import {ComponentFixture, tick} from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
+import {DebugElement} from '@angular/core';
+import {ComponentFixture} from '@angular/core/testing';
+import {By} from '@angular/platform-browser';
 
 /**
  * Spec helpers for working with the DOM
@@ -122,9 +122,4 @@ export function findEl<T>(fixture: ComponentFixture<T>, testId: string): DebugEl
  */
 export function findEls<T>(fixture: ComponentFixture<T>, testId: string): DebugElement[] {
   return fixture.debugElement.queryAll(By.css(testIdSelector(testId)));
-}
-
-function tickAndDetectChanges(fixture: ComponentFixture<any>) {
-  fixture.detectChanges();
-  tick();
 }

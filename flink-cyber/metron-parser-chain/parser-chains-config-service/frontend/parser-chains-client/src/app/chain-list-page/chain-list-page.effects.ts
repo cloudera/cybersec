@@ -112,7 +112,7 @@ export class ChainListEffects {
 
   loadPipelines$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(fromActions.LOAD_PIPELINES),
-    switchMap((action: fromActions.LoadPipelinesAction) => {
+    switchMap(_ => {
       return this._pipelineService.getPipelines()
         .pipe(
           map((pipelines: string[]) => {
@@ -163,7 +163,7 @@ export class ChainListEffects {
   deleteSelectedPipeline$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(fromActions.DELETE_SELECTED_PIPELINE),
     withLatestFrom(this._store$.select(getSelectedPipeline)),
-    switchMap(([action, selectedPipeline]) => {
+    switchMap(([_,selectedPipeline]) => {
       return this._pipelineService.deletePipeline(selectedPipeline)
         .pipe(
           map((pipelines: string[]) => {
@@ -186,7 +186,7 @@ export class ChainListEffects {
 
   pipelineChanged$: Observable<Action> = createEffect(() => this._actions$.pipe(
       ofType(fromActions.PIPELINE_CHANGED),
-      switchMap((action: fromActions.PipelineChangedAction) => {
+      switchMap(_ => {
         return of(new fromActions.LoadChainsAction())
       })
   ));

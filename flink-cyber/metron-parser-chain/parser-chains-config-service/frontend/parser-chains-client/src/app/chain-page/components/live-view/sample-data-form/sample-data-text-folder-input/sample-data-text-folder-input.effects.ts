@@ -10,12 +10,12 @@
  * limitations governing your use of the file.
  */
 
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import { Action } from '@ngrx/store';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { Observable, of } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import {Action} from '@ngrx/store';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {Observable, of} from 'rxjs';
+import {catchError, map, switchMap} from 'rxjs/operators';
 import {
   ExecutionListFailedAction,
   ExecutionListSuccessfulAction,
@@ -23,7 +23,8 @@ import {
   FetchSampleListFailedAction,
   FetchSampleListSuccessfulAction,
   FetchSampleListTriggeredAction,
-  SampleFolderActionsType, SampleFolderPathRestoredAction,
+  SampleFolderActionsType,
+  SampleFolderPathRestoredAction,
   SampleFolderViewInitializedAction,
   SaveSampleListFailedAction,
   SaveSampleListSuccessfulAction,

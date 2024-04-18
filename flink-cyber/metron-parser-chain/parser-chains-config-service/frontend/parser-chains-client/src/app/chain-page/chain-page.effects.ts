@@ -90,7 +90,7 @@ export class ChainPageEffects {
 
   getFormConfigs$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(fromActions.GET_FORM_CONFIGS),
-    switchMap((action: fromActions.GetFormConfigsAction) => {
+    switchMap(_ => {
       return this._chainPageService.getFormConfigs().pipe(
         map((formConfigs: { [key: string]: ParserDescriptor }) => {
           return new fromActions.GetFormConfigsSuccessAction({
