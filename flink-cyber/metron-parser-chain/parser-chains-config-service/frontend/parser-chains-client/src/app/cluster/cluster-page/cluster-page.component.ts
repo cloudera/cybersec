@@ -21,7 +21,6 @@ import {HttpErrorResponse, HttpResponse} from "@angular/common/http";
 import {SnackbarService, SnackBarStatus} from "../../services/snack-bar.service";
 import {MatDialog} from "@angular/material/dialog";
 import {UploadDialogComponent} from "./dialog/upload-dialog.component";
-import * as cluster from "node:cluster";
 
 export type DialogData = {
   targetUrl: string;
@@ -39,8 +38,6 @@ export type DialogData = {
 export class ClusterPageComponent {
   clusterSubject$ = new BehaviorSubject<void>(null);
   clusterId$: Observable<string> = this._route.paramMap.pipe(map((params) => params.get('clusterId')));
-  // cluster$ = this.clusterId$.pipe(switchMap((clusterId) => this._clusterService.getCluster(clusterId)));
-  // jobs$ = this.cluster$.pipe(map(cluster => cluster.jobs));
   cluster$ = combineLatest([this.clusterId$, this.clusterSubject$]).pipe(switchMap(([clusterId]) => this._clusterService.getCluster(clusterId)));
   vm$ = combineLatest([this.clusterId$, this.cluster$]).pipe(
     map(([clusterId, cl]) => ({clusterId, cl}))

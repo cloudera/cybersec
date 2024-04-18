@@ -10,11 +10,9 @@
  * limitations governing your use of the file.
  */
 
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 
 import {SampleDataInternalModel, SampleDataModel} from '../models/sample-data.model';
-import {EntryParsingResultModel} from "../models/live-view.model";
 
 @Component({
   selector: 'app-sample-data-form',
