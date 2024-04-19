@@ -28,7 +28,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Build and Test with Maven
-        run: mvn -P '!add-depebdencies-for-IDEA,!full-build,!include-front-end' -B package --file flink-cyber/pom.xml
+        run: mvn -P '!add-dependencies-for-IDEA,!include-front-end,!full-build' -B package --file flink-cyber/pom.xml
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph

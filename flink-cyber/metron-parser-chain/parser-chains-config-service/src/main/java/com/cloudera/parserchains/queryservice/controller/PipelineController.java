@@ -14,9 +14,9 @@ package com.cloudera.parserchains.queryservice.controller;
 
 import com.cloudera.parserchains.queryservice.model.exec.PipelineResult;
 import com.cloudera.parserchains.queryservice.service.PipelineService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,11 +44,9 @@ public class PipelineController {
 
     private final PipelineService pipelineService;
 
-    @ApiOperation(value = "Finds and returns all available pipelines.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A list of all pipelines."),
-            @ApiResponse(code = 404, message = "No valid pipelines found.")
-    })
+    @Operation(summary = "Retrieve all Pipelines", description = "Finds and returns a set of all available pipeline identifiers.")
+    @ApiResponse(responseCode = "200", description = "A list of all pipelines.")
+    @ApiResponse(responseCode = "404", description = "No pipelines found, empty set returned.")
     @GetMapping
     public ResponseEntity<Set<String>> findAll() throws IOException {
         Map<String, PipelineResult> pipelineMap = pipelineService.findAll();
@@ -58,12 +56,11 @@ public class PipelineController {
         return ResponseEntity.ok(pipelineMap.keySet());
     }
 
-    @ApiOperation(value = "Allows to create a new pipeline.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A new list of all pipelines.")
-    })
+    @Operation(summary = "Create a New Pipeline", description = "Creates a new pipeline with the specified name and returns the updated list of all pipelines.")
+    @ApiResponse(responseCode = "200", description = "Successfully created the pipeline and returned the new list of pipelines.")
     @PostMapping("/{pipelineName}")
-    public ResponseEntity<Set<String>> createPipeline(@PathVariable String pipelineName) throws IOException {
+    public ResponseEntity<Set<String>> createPipeline(
+            @Parameter(description = "The name of the pipeline to create") @PathVariable String pipelineName) throws IOException {
         PipelineResult newPipeline = pipelineService.createPipeline(pipelineName);
         if (newPipeline != null) {
             return findAll();
@@ -71,13 +68,12 @@ public class PipelineController {
         return ResponseEntity.badRequest().build();
     }
 
-    @ApiOperation(value = "Allows to rename existing pipeline.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A new list of all pipelines.")
-    })
+    @Operation(summary = "Rename an Existing Pipeline", description = "Renames an existing pipeline specified by its current name to a new name, and returns the updated list of all pipelines.")
+    @ApiResponse(responseCode = "200", description = "Successfully renamed the pipeline and returned the new list of pipelines.")
     @PutMapping("/{pipelineName}")
-    public ResponseEntity<Set<String>> renamePipeline(@PathVariable String pipelineName,
-                                                      @RequestParam String newName) throws IOException {
+    public ResponseEntity<Set<String>> renamePipeline(
+            @Parameter(description = "The current name of the pipeline to be renamed") @PathVariable String pipelineName,
+            @Parameter(description = "The new name for the pipeline") @RequestParam String newName) throws IOException {
         PipelineResult updatedPipeline = pipelineService.renamePipeline(pipelineName, newName);
         if (updatedPipeline != null) {
             return findAll();
@@ -85,17 +81,15 @@ public class PipelineController {
         return ResponseEntity.badRequest().build();
     }
 
-    @ApiOperation(value = "Allows to delete existing pipeline.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A new list of all pipelines.")
-    })
+    @Operation(summary = "Delete an Existing Pipeline", description = "Deletes the pipeline specified by name and returns the updated list of all pipelines if successful.")
+    @ApiResponse(responseCode = "200", description = "Successfully deleted the pipeline and returned the new list of pipelines.")
     @DeleteMapping("/{pipelineName}")
-    public ResponseEntity<Set<String>> deletePipeline(@PathVariable String pipelineName) throws IOException {
+    public ResponseEntity<Set<String>> deletePipeline(
+            @Parameter(description = "The name of the pipeline to be deleted") @PathVariable String pipelineName) throws IOException {
         boolean pipelineDeleted = pipelineService.deletePipeline(pipelineName);
         if (pipelineDeleted) {
             return findAll();
         }
         return ResponseEntity.badRequest().build();
     }
-
 }
