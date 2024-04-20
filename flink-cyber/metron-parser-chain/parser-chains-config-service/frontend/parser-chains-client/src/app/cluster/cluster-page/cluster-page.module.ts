@@ -102,11 +102,12 @@ import {FileUploadModule} from "../component/file-upload/file-upload.module";
     BrowserModule,
     BrowserAnimationsModule,
     StatusIconModule,
-    FileUploadModule
+    FileUploadModule,
   ],
-  providers: [],
-  bootstrap: [ClusterPageComponent],
-  exports: [ClusterPageComponent]
+  providers: [
+    ],
+  bootstrap: [],
+  exports: [ClusterPageComponent, UploadDialogComponent]
 })
 export class ClusterPageModule {
 }

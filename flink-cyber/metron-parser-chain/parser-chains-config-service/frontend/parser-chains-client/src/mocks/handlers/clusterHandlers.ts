@@ -19,7 +19,7 @@ export const clusterHandlers = [
   rest.get<any, { clusterId: string }>('/api/v1/clusters/:clusterId', (req, res, ctx) => {
     const {clusterId} = req.params;
     const storedChains = JSON.parse(localStorage.getItem('cluster'));
-    const chain = storedChains.find(chain => chain.clusterMeta.clusterId === clusterId);
+    const chain = storedChains.find(ch => ch.clusterMeta.clusterId === clusterId);
     if (chain) {
       return res(
         ctx.status(200),

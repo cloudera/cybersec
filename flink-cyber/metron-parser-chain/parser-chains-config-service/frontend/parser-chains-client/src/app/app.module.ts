@@ -13,7 +13,7 @@
 import {registerLocaleData} from '@angular/common';
 import {HttpClientModule} from '@angular/common/http';
 import en from '@angular/common/locales/en';
-import {NgModule} from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, NgModule, NO_ERRORS_SCHEMA} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
@@ -27,19 +27,19 @@ import {storeFreeze} from 'ngrx-store-freeze';
 
 import {environment} from '../environments/environment';
 
-import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { ChainAddParserPageModule } from './chain-add-parser-page/chain-add-parser-page.module';
-import { ChainListPageModule } from './chain-list-page/chain-list-page.module';
-import { ChainPageModule } from './chain-page/chain-page.module';
-import { CanDeactivateComponent } from './misc/can-deactivate-component';
-import { MainContainerComponent } from './misc/main/main.container';
-import { ThemeSwitchModule } from './misc/theme-switch/theme-switch.module';
-import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
-import { MonacoEditorService } from './services/monaco-editor.service';
-import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { NzIconModule } from 'ng-zorro-antd/icon';
-import { JsonEditorPopupComponent } from './components/popup/json-editor-popup/json-editor-popup.component';
+import {AppRoutingModule} from './app-routing.module';
+import {AppComponent} from './app.component';
+import {ChainAddParserPageModule} from './chain-add-parser-page/chain-add-parser-page.module';
+import {ChainListPageModule} from './chain-list-page/chain-list-page.module';
+import {ChainPageModule} from './chain-page/chain-page.module';
+import {CanDeactivateComponent} from './misc/can-deactivate-component';
+import {MainContainerComponent} from './misc/main/main.container';
+import {ThemeSwitchModule} from './misc/theme-switch/theme-switch.module';
+import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
+import {MonacoEditorService} from './services/monaco-editor.service';
+import {NzMenuModule} from 'ng-zorro-antd/menu';
+import {NzIconModule} from 'ng-zorro-antd/icon';
+import {JsonEditorPopupComponent} from './components/popup/json-editor-popup/json-editor-popup.component';
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatButtonModule} from "@angular/material/button";
 import {DragDropModule} from "@angular/cdk/drag-drop";
@@ -49,7 +49,7 @@ import {ClusterPageModule} from "./cluster/cluster-page/cluster-page.module";
 
 registerLocaleData(en);
 
-export const metaReducers: MetaReducer<{}>[] = !environment.production
+export const metaReducers: MetaReducer<unknown>[] = !environment.production
   ? [storeFreeze]
   : [];
 
@@ -80,7 +80,7 @@ export const metaReducers: MetaReducer<{}>[] = !environment.production
     MonacoEditorModule.forRoot(),
     NzMenuModule,
     NzIconModule,
-  MatDialogModule,
+    MatDialogModule,
     MatButtonModule,
     DragDropModule,
   ],
@@ -89,7 +89,8 @@ export const metaReducers: MetaReducer<{}>[] = !environment.production
     CanDeactivateComponent,
     MonacoEditorService
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 export class AppModule {
 }

@@ -1,0 +1,39 @@
+@use '@angular/material' as mat;
+
+@import "custom-palette";
+
+@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500&display=swap");
+
+// warn, error, success palettes
+$theming-material-components-primary: mat.define-palette($md-cyber-blue-primary);
+$theming-material-components-accent: mat.define-palette($md-cyber-gray-secondary);
+$theming-material-components-error: mat.define-palette(mat.$red-palette);
+$theming-material-components-warn: mat.define-palette(mat.$yellow-palette);
+$theming-material-components-success: mat.define-palette(mat.$green-palette);
+
+// Create the theme object (a Sass map containing all of the palettes).
+$theming-material-components-theme: mat.define-light-theme(
+    $theming-material-components-primary,
+    $theming-material-components-accent,
+    $theming-material-components-warn
+);
+
+// Define  a custom typography config
+$heading-font-family: "'Work Sans', sans-serif";
+$typography: mat.define-typography-config(
+  $display-4: mat.define-typography-level(112px, $font-family: $heading-font-family),
+  $display-3: mat.define-typography-level(56px, $font-family: $heading-font-family),
+  $display-2: mat.define-typography-level(45px, $font-family: $heading-font-family),
+  $display-1: mat.define-typography-level(34px, $font-family: $heading-font-family),
+  $headline: mat.define-typography-level(24px, $font-family: $heading-font-family),
+  $title: mat.define-typography-level(20px, $font-family: $heading-font-family),
+);
+
+// Theme for notifications / snackbar
+$notifications-theme: (
+  default: #fff,
+  info: mat.get-color-from-palette(mat.define-palette(mat.$blue-palette), 400),
+  success: mat.get-color-from-palette(mat.define-palette(mat.$green-palette), 400),
+  warning: mat.get-color-from-palette(mat.define-palette(mat.$yellow-palette), 400),
+  error: mat.get-color-from-palette(mat.define-palette(mat.$red-palette), 400),
+);

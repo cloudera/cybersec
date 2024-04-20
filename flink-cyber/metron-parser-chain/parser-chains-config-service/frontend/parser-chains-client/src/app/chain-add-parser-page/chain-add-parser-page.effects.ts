@@ -11,7 +11,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action} from '@ngrx/store';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {Observable, of} from 'rxjs';
@@ -23,26 +23,25 @@ import * as fromActions from './chain-add-parser-page.actions';
 
 @Injectable()
 export class AddParserEffects {
-  constructor(
-    private actions$: Actions,
-    private messageService: NzMessageService,
-    private addParserService: AddParserPageService
-  ) { }
-
-  @Effect()
-  getParserTypes$: Observable<Action> = this.actions$.pipe(
+  getParserTypes$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(fromActions.GET_PARSER_TYPES),
     switchMap(() => {
-      return this.addParserService.getParserTypes()
+      return this._addParserService.getParserTypes()
         .pipe(
           map((parserTypes: { id: string, name: string }[]) => {
             return new fromActions.GetParserTypesSuccessAction(parserTypes);
           }),
           catchError((error: { message: string }) => {
-            this.messageService.create('error', error.message);
-            return of(new fromActions.GetParserTypesFailAction(error));
+            this._messageService.create('error', error.message);
+            return of(new fromActions.GetParserTypesFailAction({message: error.message}));
           })
         );
     })
-  );
+  ));
+  constructor(
+    private _actions$: Actions,
+    private _messageService: NzMessageService,
+    private _addParserService: AddParserPageService,
+  ) {
+  }
 }

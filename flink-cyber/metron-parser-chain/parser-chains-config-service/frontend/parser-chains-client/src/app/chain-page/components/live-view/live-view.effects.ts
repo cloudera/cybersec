@@ -11,7 +11,7 @@
  */
 
 import {Injectable} from '@angular/core';
-import {Actions, Effect, ofType} from '@ngrx/effects';
+import {Actions, createEffect, ofType} from '@ngrx/effects';
 import {Action} from '@ngrx/store';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {Observable, of} from 'rxjs';
@@ -33,50 +33,41 @@ import {LiveViewService} from './services/live-view.service';
 
 @Injectable()
 export class LiveViewEffects {
-  constructor(
-    private actions$: Actions<LiveViewActionsType>,
-    private liveViewService: LiveViewService,
-    private messageService: NzMessageService
-  ) {}
 
-  @Effect()
-  execute$: Observable<Action> = this.actions$.pipe(
+  execute$: Observable<Action> = createEffect( () =>this._actions$.pipe(
     ofType(
       executionTriggered.type,
     ),
     switchMap(({ sampleData, chainConfig }) => {
-      return this.liveViewService.execute(sampleData, chainConfig).pipe(
+      return this._liveViewService.execute(sampleData, chainConfig).pipe(
         map(liveViewResult => liveViewRefreshedSuccessfully({ liveViewResult })),
         catchError(( error: { message: string }) => {
-          this.messageService.create('error', error.message);
+          this._messageService.create('error', error.message);
           return of(liveViewRefreshFailed({ error }));
         })
       );
     })
-  );
+  ));
 
-  @Effect({ dispatch: false})
-  persistingSampleData$ = this.actions$.pipe(
+  persistingSampleData$ = createEffect(() => this._actions$.pipe(
     ofType(
       sampleDataInputChanged.type,
     ),
     tap(({ sampleData }) => {
       localStorage.setItem(LiveViewConsts.SAMPLE_DATA_STORAGE_KEY, JSON.stringify(sampleData));
     })
-  );
+  ), { dispatch: false });
 
-  @Effect({ dispatch: false})
-  persistingOnOffToggle$ = this.actions$.pipe(
+  persistingOnOffToggle$ = createEffect( () => this._actions$.pipe(
     ofType(
       onOffToggleChanged.type,
     ),
     tap(({ value }) => {
       localStorage.setItem(LiveViewConsts.FEATURE_TOGGLE_STORAGE_KEY, JSON.stringify(value));
     })
-  );
+  ), { dispatch: false });
 
-  @Effect()
-  restoreSampleDataFromLocalStore: Observable<Action> = this.actions$.pipe(
+  restoreSampleDataFromLocalStore: Observable<Action> = createEffect( () => this._actions$.pipe(
     ofType(
       liveViewInitialized.type,
     ),
@@ -84,10 +75,9 @@ export class LiveViewEffects {
       const sampleData = JSON.parse(localStorage.getItem(LiveViewConsts.SAMPLE_DATA_STORAGE_KEY));
       return of(sampleDataRestored({ sampleData }));
     })
-  );
+  ));
 
-  @Effect()
-  restoreToggleFromLocalStore: Observable<Action> = this.actions$.pipe(
+  restoreToggleFromLocalStore: Observable<Action> = createEffect( () => this._actions$.pipe(
     ofType(
       liveViewInitialized.type,
     ),
@@ -95,5 +85,11 @@ export class LiveViewEffects {
       const value = JSON.parse(localStorage.getItem(LiveViewConsts.FEATURE_TOGGLE_STORAGE_KEY));
       return of(onOffToggleRestored({ value }));
     })
-  );
+  ));
+
+  constructor(
+    private _actions$: Actions<LiveViewActionsType>,
+    private _liveViewService: LiveViewService,
+    private _messageService: NzMessageService,
+  ) {}
 }

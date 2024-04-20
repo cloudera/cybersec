@@ -24,7 +24,7 @@
       <nz-tabset>
         <nz-tab nzTitle="Configuration">
           <app-custom-form
-            *ngIf="areFormsReadyToRender && configForm !== null"
+            *ngIf="configForm !== null"
             [config]="configForm"
             [selectedSource]="selectedSource"
             [indexingFieldMap]="indexingFieldMap"
@@ -44,9 +44,10 @@
   <ng-template #titleTemplate>
     <div class="parser-name-bar">
       <span *ngIf="!editName" class="parser-name"
-        nz-tooltip nzTitle="Click to edit name"
-        (click)="editName=!editName; preventCollapse($event);"
-        data-qe-id="parser-name"
+            nz-tooltip
+            nzTooltipTitle="Click to edit name"
+            (click)="editName=!editName; preventCollapse($event);"
+            data-qe-id="parser-name"
         >{{ parser.name }}</span>
       <input *ngIf="editName" class="parser-name-input"
         type="text" [ngModel]="parser.name"
@@ -64,7 +65,7 @@
     <div *ngIf="dirty" class="parser-dirty">
       <i nz-icon nzType="exclamation-circle" nzTheme="twotone" [nzTwotoneColor]="'#1890ff'"></i>
     </div>
-    <div class="parser-delete-btn-wrapper" nz-tooltip nzTitle="Remove Parser">
+    <div class="parser-delete-btn-wrapper" nz-tooltip nzTooltipTitle="Remove Parser">
       <button
         nz-popconfirm
         nzPopconfirmTitle="Are you sure delete this task?"
