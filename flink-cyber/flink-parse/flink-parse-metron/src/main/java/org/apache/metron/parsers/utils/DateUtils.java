@@ -20,7 +20,12 @@ package org.apache.metron.parsers.utils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.ZonedDateTime;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,25 +44,29 @@ public class DateUtils {
 	// Per IBM LEEF guide at https://www.ibm.com/support/knowledgecenter/SS42VS_DSM/c_LEEF_Format_Guide_intro.html
 	public static List<SimpleDateFormat> DATE_FORMATS_LEEF = new ArrayList<SimpleDateFormat>() {
 		{
-			add(new SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS zzz"));
-			add(new SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS"));
-			add(new SimpleDateFormat("MMM dd yyyy HH:mm:ss"));
+			add(new SimpleDateFormat("MMM d yyyy HH:mm:ss.SSS Z"));
+			add(new SimpleDateFormat("MMM d yyyy HH:mm:ss.SSS z"));
+			add(new SimpleDateFormat("MMM d yyyy HH:mm:ss.SSS"));
+			add(new SimpleDateFormat("MMM d yyyy HH:mm:ss"));
 		}
 	};
 
 	public static List<SimpleDateFormat> DATE_FORMATS_CEF = new ArrayList<SimpleDateFormat>() {
 		{
 			// as per CEF Spec
-			add(new SimpleDateFormat("MMM dd HH:mm:ss.SSS zzz"));
-			add(new SimpleDateFormat("MMM dd HH:mm:ss.SSS"));
-			add(new SimpleDateFormat("MMM dd HH:mm:ss zzz"));
-			add(new SimpleDateFormat("MMM dd HH:mm:ss"));
-			add(new SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS zzz"));
-			add(new SimpleDateFormat("MMM dd yyyy HH:mm:ss.SSS"));
-			add(new SimpleDateFormat("MMM dd yyyy HH:mm:ss zzz"));
-			add(new SimpleDateFormat("MMM dd yyyy HH:mm:ss"));
+			add(new SimpleDateFormat("MMM d HH:mm:ss.SSS Z"));
+			add(new SimpleDateFormat("MMM d HH:mm:ss.SSS z"));
+			add(new SimpleDateFormat("MMM d HH:mm:ss.SSS"));
+			add(new SimpleDateFormat("MMM d HH:mm:ss zzz"));
+			add(new SimpleDateFormat("MMM d HH:mm:ss"));
+			add(new SimpleDateFormat("MMM d yyyy HH:mm:ss.SSS Z"));
+			add(new SimpleDateFormat("MMM d yyyy HH:mm:ss.SSS z"));
+			add(new SimpleDateFormat("MMM d yyyy HH:mm:ss.SSS"));
+			add(new SimpleDateFormat("MMM d yyyy HH:mm:ss Z"));
+			add(new SimpleDateFormat("MMM d yyyy HH:mm:ss z"));
+			add(new SimpleDateFormat("MMM d yyyy HH:mm:ss"));
 			// found in the wild
-			add(new SimpleDateFormat("dd MMMM yyyy HH:mm:ss"));
+			add(new SimpleDateFormat("d MMMM yyyy HH:mm:ss"));
 		}
 	};
 
@@ -103,22 +112,33 @@ public class DateUtils {
 		} else {
 			for (SimpleDateFormat pattern : validPatterns) {
 				try {
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(pattern.parse(candidate));
-					Calendar current = Calendar.getInstance();
-					if (cal.get(Calendar.YEAR) == 1970) {
-						cal.set(Calendar.YEAR, current.get(Calendar.YEAR));
+					DateTimeFormatterBuilder formatterBuilder = new DateTimeFormatterBuilder()
+							.appendPattern(pattern.toPattern());
+					if (!pattern.toPattern().contains("y")) {
+						formatterBuilder
+								.parseDefaulting(ChronoField.YEAR, LocalDate.now().getYear());
 					}
-					current.add(Calendar.DAY_OF_MONTH, 4);
-					if (cal.after(current)) {
-						cal.add(Calendar.YEAR, -1);
+					DateTimeFormatter formatter = formatterBuilder.toFormatter();
+					ZonedDateTime parsedValue = parseDateTimeWithDefaultTimezone(candidate, formatter);
+					ZonedDateTime current = ZonedDateTime.now(parsedValue.getZone());
+
+					current = current.plusDays(4);
+					if (parsedValue.isAfter(current)) {
+						parsedValue = parsedValue.minusYears(1);
 					}
-					return cal.getTimeInMillis();
-				} catch (ParseException e) {
+					return parsedValue.toInstant().toEpochMilli();
+				} catch (DateTimeParseException e) {
 					continue;
 				}
 			}
 			throw new ParseException("Failed to parse any of the given date formats", 0);
 		}
+	}
+
+	private static ZonedDateTime parseDateTimeWithDefaultTimezone(String candidate, DateTimeFormatter formatter) {
+		TemporalAccessor temporalAccessor = formatter.parseBest(candidate, ZonedDateTime::from, LocalDateTime::from);
+		return temporalAccessor instanceof ZonedDateTime
+				? ((ZonedDateTime) temporalAccessor)
+				: ((LocalDateTime) temporalAccessor).atZone(ZoneId.systemDefault());
 	}
 }
