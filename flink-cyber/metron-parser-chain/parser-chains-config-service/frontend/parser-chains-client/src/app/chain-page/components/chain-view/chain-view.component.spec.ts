@@ -10,31 +10,20 @@
  * limitations governing your use of the file.
  */
 
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { Component, Input } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { NzMessageServiceModule } from 'ng-zorro-antd/message';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {FormsModule, NgControl, ReactiveFormsModule} from '@angular/forms';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {NzMessageService, NzMessageServiceModule} from 'ng-zorro-antd/message';
 
-import { ParserModel } from '../../chain-page.models';
+import {ParserModel} from '../../chain-page.models';
 
-import { ChainViewComponent } from './chain-view.component';
-
-@Component({
-  selector: 'app-parser-composer',
-  template: ''
-})
-class MockParserComposerComponent {
-  @Input() parsers: ParserModel[];
-  @Input() dirtyParsers;
-  @Input() parserId;
-  @Input() chainId;
-  @Input() dirty;
-  @Input() configForm;
-  @Input() failedParser;
-  @Input() collapsed;
-}
+import {ChainViewComponent} from './chain-view.component';
+import {NzSelectModule} from "ng-zorro-antd/select";
+import {ChainPageService} from "../../../services/chain-page.service";
+import {of} from "rxjs";
+import {ParserComposerComponent} from "../parser-composer/parser-composer.component";
+import {MockComponent} from "ng-mocks";
 
 describe('ChainViewComponent', () => {
   let component: ChainViewComponent;
@@ -48,20 +37,36 @@ describe('ChainViewComponent', () => {
     }
   ];
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
+      declarations: [
+        ChainViewComponent,
+        MockComponent(ParserComposerComponent)
+      ],
       imports: [
         NzMessageServiceModule,
         NoopAnimationsModule,
         ReactiveFormsModule,
-        HttpClientTestingModule
+        HttpClientTestingModule,
+        FormsModule,
+        NzSelectModule
       ],
-      declarations: [
-        ChainViewComponent,
-        MockParserComposerComponent,
-      ]
+      providers: [
+        {
+          provide: ChainPageService,
+          useValue: {
+            collapseAll: of(true),
+            createChainCollapseArray: jasmine.createSpy(),
+            getCollapseExpandState: () => of([true, false, true]),
+            collapseExpandAllParsers: jasmine.createSpy(),
+          },
+        },
+        NzMessageService,
+        NgControl
+      ],
+
     })
-    .compileComponents();
+      .compileComponents();
   }));
 
   beforeEach(() => {
