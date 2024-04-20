@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A {@link ParserBuilder} that uses Java's Reflection API to build and configure a {@link Parser}.
@@ -76,7 +76,7 @@ public class ReflectiveParserBuilder implements ParserBuilder {
                 for (ConfigValueSchema value : valuesSchema) {
                     invokeMethod(parser, parserSchema, annotationKey, method, value.getValues());
                 }
-            } else if (StringUtils.hasText(key.defaultValue())){
+            } else if (StringUtils.isNotBlank(key.defaultValue())) {
                 final Map<String, String> value = new HashMap<>();
                 value.put(annotationKey, key.defaultValue());
                 invokeMethod(parser, parserSchema, annotationKey, method, value);
@@ -100,7 +100,7 @@ public class ReflectiveParserBuilder implements ParserBuilder {
                 final Map<String, String> valueMap = value.getValues();
                 final String annotationKey = paramAnnotation.key();
 
-                if (StringUtils.hasText(paramAnnotation.defaultValue()) && valueMap.get(annotationKey) == null){
+                if (StringUtils.isNotBlank(paramAnnotation.defaultValue()) && valueMap.get(annotationKey) == null){
                     valueMap.put(annotationKey, paramAnnotation.defaultValue());
                 }
                 if (paramAnnotation.required() && valueMap.get(annotationKey) == null){

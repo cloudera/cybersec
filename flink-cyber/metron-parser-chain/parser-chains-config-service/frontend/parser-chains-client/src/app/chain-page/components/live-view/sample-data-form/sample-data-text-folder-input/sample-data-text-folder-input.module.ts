@@ -12,11 +12,8 @@ import {NzSelectModule} from "ng-zorro-antd/select";
 import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
 import {NzInputModule} from "ng-zorro-antd/input";
 
-
-
 @NgModule({
     declarations: [
-        SampleEditPopupComponent,
         SampleEditPopupComponent
     ],
     exports: [
