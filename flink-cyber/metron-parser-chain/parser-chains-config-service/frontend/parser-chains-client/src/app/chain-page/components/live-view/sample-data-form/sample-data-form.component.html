@@ -14,14 +14,14 @@
     <nz-tab nzTitle="Text Input">
         <app-sample-data-text-input
                 [sampleData]="sampleData"
-                (sampleDataChange)="sampleDataChange.next($event)">
+                (sampleDataChange)="sampleDataChange.emit($event)">
         </app-sample-data-text-input>
     </nz-tab>
     <nz-tab nzTitle="Text Folder">
         <app-sample-data-text-folder-input
                 [chainConfig]="chainConfig"
-                (sampleDataChange)="sampleDataChange.next($event)"
-                (sampleDataForceChange)="sampleDataForceChange.next($event)">
+                (sampleDataChange)="sampleDataChange.emit($event)"
+                (sampleDataForceChange)="sampleDataForceChange.emit($event)">
         </app-sample-data-text-folder-input>
     </nz-tab>
     <nz-tab nzTitle="Kafka Stream" nzDisabled>

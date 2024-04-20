@@ -25,14 +25,14 @@ export class AppComponent {
   isCollapsed = false;
   isOpen: Array<boolean> = [false, false];
 
-  constructor(private router: Router) {
+  constructor(private _router: Router) {
   }
 
   getTitle() {
-    if (this.router.url.startsWith('/cluster')) {
+    if (this._router.url.startsWith('/cluster')) {
       return 'Cluster Management';
     }
-    else if (this.router.url.startsWith('/parserconfig')) {
+    else if (this._router.url.startsWith('/parserconfig')) {
       return 'Parser Chaining';
     }
     return '';

@@ -1,7 +1,9 @@
 import {Component, Inject, ViewChild} from "@angular/core";
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {Subscription} from "rxjs";
+import {MAT_DIALOG_DATA} from "@angular/material/dialog";
 import {FileUploadComponent} from "../../component/file-upload/file-upload.component";
+import {DialogData} from "../cluster-page.component";
+import {DialogRef} from "@angular/cdk/dialog";
+
 
 @Component({
   selector: 'app-upload-dialog',
@@ -10,15 +12,16 @@ import {FileUploadComponent} from "../../component/file-upload/file-upload.compo
 export class UploadDialogComponent {
   @ViewChild(FileUploadComponent) uploadComponent: FileUploadComponent;
 
-  confirmButtonText: string = "Upload"
-  cancelButtonText: string = "Close"
+  confirmButtonText = "Upload"
+  cancelButtonText = "Close"
   targetUrl: string;
-  disabledUpload: boolean = true;
-  disabledClose: boolean = false
+  disabledUpload = true;
+  disabledClose = false
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) private data: UploadDialogModel,
-    private dialogRef: MatDialogRef<UploadDialogComponent>) {
+    public dialogRef: DialogRef,
+    @Inject(MAT_DIALOG_DATA) public data: DialogData
+) {
     if (data) {
       this.targetUrl = data.targetUrl;
       if (data.buttonText) {
@@ -57,10 +60,5 @@ export class UploadDialogComponent {
   }
 }
 
-export class UploadDialogModel {
-  targetUrl: string;
-  buttonText: {
-    confirmButtonText: string,
-    cancelButtonText: string
-  }
-}
+
+

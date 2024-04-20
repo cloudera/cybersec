@@ -1,11 +1,8 @@
-import {Component, OnInit, Input, Output, EventEmitter} from '@angular/core';
-import {trigger, state, style, animate, transition} from '@angular/animations';
-import {
-  HttpClient, HttpRequest,
-  HttpEventType, HttpErrorResponse
-} from '@angular/common/http';
-import {Subscription, of} from 'rxjs';
-import {catchError, last, map, tap, timeout} from 'rxjs/operators';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {animate, state, style, transition, trigger} from '@angular/animations';
+import {HttpClient, HttpEventType, HttpRequest} from '@angular/common/http';
+import {of, Subscription} from 'rxjs';
+import {catchError, last, map, timeout} from 'rxjs/operators';
 
 @Component({
   selector: 'app-file-upload',
@@ -22,22 +19,22 @@ import {catchError, last, map, tap, timeout} from 'rxjs/operators';
 })
 export class FileUploadComponent implements OnInit {
   /** Name used in form which will be sent in HTTP request. */
-  @Input() param: string = 'config';
+  @Input() param = 'config';
   /** Target URL for file uploading. */
   @Input() target: string;
   /** File extension that accepted, same as 'accept' of <input type="file" />.
    By the default, it's set to tar gz archive file */
-  @Input() accept: string = "application/gzip, .gz";
+  @Input() accept = "application/gzip, .gz";
   /** Allow you to add handler after its completion. Bubble up response text from remote. */
   @Output() preparedFiles = new EventEmitter<boolean>();
 
   @Output() inProgress = new EventEmitter<boolean>();
 
   files: FileUploadModel[] = [];
-  maxSize: number = 1000000;
+  maxSize = 1000000;
 
   constructor(
-    private http: HttpClient,
+    private _http: HttpClient,
   ) {
   }
 
@@ -67,18 +64,18 @@ export class FileUploadComponent implements OnInit {
 
   cancelFile(file: FileUploadModel, index: number) {
     file.sub?.unsubscribe();
-    this.deleteFile(index);
-    this.emitCall(this.inProgress);
+    this._deleteFile(index);
+    this._emitCall(this.inProgress);
   }
 
   retryFile(file: FileUploadModel, index: number) {
-    this.uploadFile(file, index);
+    this._uploadFile(file, index);
     file.canRetry = false;
   }
 
   uploadFiles() {
     this.files.forEach((file, index) => {
-      this.uploadFile(file, index);
+      this._uploadFile(file, index);
     });
   }
 
@@ -112,12 +109,12 @@ export class FileUploadComponent implements OnInit {
    * Delete file from files list
    * @param index (File index)
    */
-  private deleteFile(index: number) {
+  private _deleteFile(index: number) {
     this.files.splice(index, 1);
-    this.emitCall(this.preparedFiles);
+    this._emitCall(this.preparedFiles);
   }
 
-  private uploadFile(file: FileUploadModel, index?: number) {
+  private _uploadFile(file: FileUploadModel, index?: number) {
     const fd = new FormData();
     fd.append(this.param, file.data);
     this.inProgress.emit(true);
@@ -125,7 +122,7 @@ export class FileUploadComponent implements OnInit {
       reportProgress: true
     });
 
-    file.sub = this.http.request(req).pipe(
+    file.sub = this._http.request(req).pipe(
       timeout(600000),
       map(event => {
         switch (event.type) {
@@ -136,10 +133,8 @@ export class FileUploadComponent implements OnInit {
             return event;
         }
       }),
-      tap(message => {
-      }),
       last(),
-      catchError((error: HttpErrorResponse) => {
+      catchError(_ => {
         file.canRetry = true;
         this.inProgress.emit(false);
         return of(`${file.data.name} upload failed.`);
@@ -147,14 +142,14 @@ export class FileUploadComponent implements OnInit {
     ).subscribe(
       (event: any) => {
         if (typeof (event) === 'object') {
-          this.deleteFile(index);
-          this.emitCall(this.inProgress);
+          this._deleteFile(index);
+          this._emitCall(this.inProgress);
         }
       }
     );
   }
 
-  private emitCall(emitter: EventEmitter<boolean>) {
+  private _emitCall(emitter: EventEmitter<boolean>) {
     if (this.files.length > 0) {
       emitter.emit(true);
     } else {

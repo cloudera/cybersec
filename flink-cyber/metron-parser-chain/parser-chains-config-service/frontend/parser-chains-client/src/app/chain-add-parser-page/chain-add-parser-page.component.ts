@@ -39,10 +39,10 @@ export class ChainAddParserPageComponent implements OnInit, OnDestroy {
   getParserTypesSubscription: Subscription;
 
   constructor(
-    private fb: UntypedFormBuilder,
-    private store: Store<AddParserPageState>,
-    private activatedRoute: ActivatedRoute,
-    private router: Router
+    private _fb: UntypedFormBuilder,
+    private _store: Store<AddParserPageState>,
+    private _activatedRoute: ActivatedRoute,
+    private _router: Router
   ) {}
 
   get name() {
@@ -64,36 +64,36 @@ export class ChainAddParserPageComponent implements OnInit, OnDestroy {
     if (this.addParserForm.value.type === 'Router') {
       parser.routing = {};
     }
-    this.store.dispatch(new fromActions.AddParserAction({
+    this._store.dispatch(new fromActions.AddParserAction({
       chainId: this.subchainId || this.chainId,
       parser
     }));
 
-    this.router.navigateByUrl(`/parserconfig/chains/${this.chainId}`);
+    this._router.navigateByUrl(`/parserconfig/chains/${this.chainId}`);
   }
 
   ngOnInit() {
-    this.addParserForm = this.fb.group({
+    this.addParserForm = this._fb.group({
       name: new UntypedFormControl('', [Validators.required, Validators.minLength(3)]),
       type: new UntypedFormControl(null)
     });
 
-    this.activatedRoute.params.subscribe((params) => {
+    this._activatedRoute.params.subscribe((params) => {
       this.chainId = params.id;
       this.subchainId = params.subchain;
     });
 
-    this.getChainSubscription = this.store.pipe(select(getChain, { id: this.chainId })).subscribe((chain: ParserChainModel) => {
+    this.getChainSubscription = this._store.pipe(select(getChain({ id: this.chainId }))).subscribe((chain: ParserChainModel) => {
       if (!chain) {
-        this.store.dispatch(new fromParserPageAction.LoadChainDetailsAction({
+        this._store.dispatch(new fromParserPageAction.LoadChainDetailsAction({
           id: this.chainId
         }));
       }
     });
 
-    this.store.dispatch(new fromActions.GetParserTypesAction());
+    this._store.dispatch(new fromActions.GetParserTypesAction());
 
-    this.getParserTypesSubscription = this.store.pipe(select(getParserTypes)).subscribe((parserTypes) => {
+    this.getParserTypesSubscription = this._store.pipe(select(getParserTypes)).subscribe((parserTypes) => {
       if (parserTypes !== undefined) {
         this.typesList = [...parserTypes];
         this.typesList.sort((a, b) => a.name.toUpperCase() < b.name.toUpperCase() ? -1 : 1);

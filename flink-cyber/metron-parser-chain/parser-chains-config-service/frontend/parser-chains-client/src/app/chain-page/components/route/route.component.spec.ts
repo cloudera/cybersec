@@ -10,17 +10,18 @@
  * limitations governing your use of the file.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { DeleteFill, EditFill } from '@ant-design/icons-angular/icons';
-import { Store, StoreModule } from '@ngrx/store';
-import { provideMockStore } from '@ngrx/store/testing';
-import { NzModalModule } from 'ng-zorro-antd/modal';
-import { NZ_ICONS } from 'ng-zorro-antd/icon'
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {DeleteFill, EditFill} from '@ant-design/icons-angular/icons';
+import {Store, StoreModule} from '@ngrx/store';
+import {provideMockStore} from '@ngrx/store/testing';
+import {NzModalModule} from 'ng-zorro-antd/modal';
+import {NZ_ICONS} from 'ng-zorro-antd/icon';
 
 import * as fromActions from '../../chain-page.actions';
 import * as fromReducers from '../../chain-page.reducers';
 
-import { RouteComponent } from './route.component';
+import {RouteComponent} from './route.component';
+import {NzFormModule} from "ng-zorro-antd/form";
 
 describe('RouteComponent', () => {
   let component: RouteComponent;
@@ -47,10 +48,11 @@ describe('RouteComponent', () => {
       error: ''
     }
   };
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         NzModalModule,
+        NzFormModule,
         StoreModule.forRoot({
           'chain-page': fromReducers.reducer
         })

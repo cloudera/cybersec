@@ -11,94 +11,101 @@
   -->
 
 <!-- Cluster table -->
-<button mat-icon-button [disabled]="this.selection.isEmpty()" [matMenuTriggerFor]="menu" [style.float]="'right'" aria-label="Example icon-button with a menu">
-  <mat-icon>more_vert</mat-icon>
-</button>
-<mat-menu #menu="matMenu">
-  <button mat-menu-item (click)="this.changeJobStatus('start')" [disabled]="true">
-    <app-status-icon iconName="start"></app-status-icon>
-    <span>Start</span>
+<div *ngIf='vm$ | async as vm; else loading'>
+  <button mat-icon-button [disabled]="this.selection.isEmpty()" [matMenuTriggerFor]="menu" [style.float]="'right'"
+          aria-label="Example icon-button with a menu">
+    <mat-icon>more_vert</mat-icon>
   </button>
-  <button mat-menu-item (click)="this.changeJobStatus('restart')">
-    <app-status-icon iconName="restart"></app-status-icon>
-    <span>Restart</span>
-  </button>
-  <button mat-menu-item (click)="this.changeJobStatus('stop')">
-    <app-status-icon iconName="stop"></app-status-icon>
-    <span>Stop</span>
-  </button>
-  <button mat-menu-item (click)="this.openUploadDialog()" [disabled]="this.selection.isEmpty() || this.selection.selected.length > 1">
-    <app-status-icon iconName="update-config"></app-status-icon>
-    <span>Update config</span>
-  </button>
-</mat-menu>
-
-<table mat-table [dataSource]="jobs" class="mat-elevation-z8 demo-table">
-  <!-- Checkbox Column -->
-  <ng-container matColumnDef="select">
-    <th mat-header-cell *matHeaderCellDef>
-      <mat-checkbox
-        (change)="$event ? masterToggle() : null"
-        [checked]="isAllSelected()"
-        [color]="'primary'"
-        [indeterminate]="this.selection.hasValue() && !this.isAllSelected()" >
-      </mat-checkbox>
-    </th>
-    <td mat-cell *matCellDef="let element">
-      <mat-checkbox (click)="$event.stopPropagation()"
-                    [color]="'primary'"
-                    (change)="$event ? this.selection.toggle(element) : null"
-                    [checked]="this.selection.isSelected(element)">
-      </mat-checkbox>
-    </td>
-  </ng-container>
-
-  <!-- Job name Column [parser, triage, profile, indexing]-->
-  <ng-container matColumnDef="name">
-    <th mat-header-cell *matHeaderCellDef>Name</th>
-    <td mat-cell *matCellDef="let element">{{element.jobFullName}}</td>
-  </ng-container>
-
-  <!-- Job name Column [parser, triage, profile, indexing]-->
-  <ng-container matColumnDef="type">
-    <th mat-header-cell *matHeaderCellDef>Type</th>
-    <td mat-cell *matCellDef="let element">{{element.jobType}}</td>
-  </ng-container>
-
-  <!-- Branch name Column -->
-  <ng-container matColumnDef="branch">
-    <th mat-header-cell *matHeaderCellDef>Branch</th>
-    <td mat-cell *matCellDef="let element">{{element.jobBranch}}</td>
-  </ng-container>
-
-  <!-- Pipeline name Column -->
-  <ng-container matColumnDef="pipeline">
-    <th mat-header-cell *matHeaderCellDef>Pipeline</th>
-    <td mat-cell *matCellDef="let element">{{element.jobPipeline}}</td>
-  </ng-container>
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="this.changeJobStatus('start', vm.clusterId)" [disabled]="true">
+      <app-status-icon iconName="start"></app-status-icon>
+      <span>Start</span>
+    </button>
+    <button mat-menu-item (click)="this.changeJobStatus('restart', vm.clusterId)">
+      <app-status-icon iconName="restart"></app-status-icon>
+      <span>Restart</span>
+    </button>
+    <button mat-menu-item (click)="this.changeJobStatus('stop', vm.clusterId)">
+      <app-status-icon iconName="stop"></app-status-icon>
+      <span>Stop</span>
+    </button>
+    <button mat-menu-item (click)="this.openUploadDialog(vm.clusterId)"
+            [disabled]="this.selection.isEmpty() || this.selection.selected.length > 1">
+      <app-status-icon iconName="update-config"></app-status-icon>
+      <span>Update config</span>
+    </button>
+  </mat-menu>
 
 
-  <!-- Status Column [starting, stopped, failed] -->
-  <ng-container matColumnDef="status">
-    <th mat-header-cell *matHeaderCellDef>Status</th>
-    <td mat-cell *matCellDef="let element;"><span class="status-container"><app-status-icon
-      iconName="{{element.jobState}}"></app-status-icon>
-      {{element.jobState}}</span></td>
-  </ng-container>
+  <table mat-table [dataSource]="vm.cluster.jobs" class="mat-elevation-z8 demo-table">
+    <!-- Checkbox Column -->
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox
+          (change)="$event ? masterToggle(vm.cluster.jobs) : null"
+          [checked]="isAllSelected(vm.cluster.jobs)"
+          [color]="'primary'"
+          [indeterminate]="this.selection.hasValue() && !this.isAllSelected(vm.cluster.jobs)">
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let element">
+        <mat-checkbox (click)="$event.stopPropagation()"
+                      [color]="'primary'"
+                      (change)="$event ? this.selection.toggle(element) : null"
+                      [checked]="this.selection.isSelected(element)">
+        </mat-checkbox>
+      </td>
+    </ng-container>
 
-  <!-- Created Column -->
-  <ng-container matColumnDef="created">
-    <th mat-header-cell *matHeaderCellDef>Created date</th>
-    <td mat-cell *matCellDef="let element">{{element.startTime}}</td>
-  </ng-container>
+    <!-- Job name Column [parser, triage, profile, indexing]-->
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let element">{{ element.jobFullName }}</td>
+    </ng-container>
 
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-</table>
+    <!-- Job name Column [parser, triage, profile, indexing]-->
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef>Type</th>
+      <td mat-cell *matCellDef="let element">{{ element.jobType }}</td>
+    </ng-container>
 
-<mat-card *ngIf="isLoading" style="display: flex; justify-content: center; align-items: center">
-  <mat-progress-spinner
-    color="primary"
-    mode="indeterminate">
-  </mat-progress-spinner>
-</mat-card>
+    <!-- Branch name Column -->
+    <ng-container matColumnDef="branch">
+      <th mat-header-cell *matHeaderCellDef>Branch</th>
+      <td mat-cell *matCellDef="let element">{{ element.jobBranch }}</td>
+    </ng-container>
+
+    <!-- Pipeline name Column -->
+    <ng-container matColumnDef="pipeline">
+      <th mat-header-cell *matHeaderCellDef>Pipeline</th>
+      <td mat-cell *matCellDef="let element">{{ element.jobPipeline }}</td>
+    </ng-container>
+
+
+    <!-- Status Column [starting, stopped, failed] -->
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>Status</th>
+      <td mat-cell *matCellDef="let element;"><span class="status-container"><app-status-icon
+        iconName="{{element.jobState}}"></app-status-icon>
+        {{ element.jobState }}</span></td>
+    </ng-container>
+
+    <!-- Created Column -->
+    <ng-container matColumnDef="created">
+      <th mat-header-cell *matHeaderCellDef>Created date</th>
+      <td mat-cell *matCellDef="let element">{{ element.startTime }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</div>
+
+<ng-template #loading>
+  <mat-card style="display: flex; justify-content: center; align-items: center">
+    <mat-progress-spinner
+      color="primary"
+      mode="indeterminate">
+    </mat-progress-spinner>
+  </mat-card>
+</ng-template>
