@@ -15,67 +15,74 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 
 import {ChainDetailsModel} from '../chain-page/chain-page.models';
-import {getHttpParams} from "../chain-list-page/chain-list-page.utils";
+import {getHttpParams} from "../shared/service.utils";
+import {ParserDescriptor} from "../chain-page/chain-page.reducers";
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class ChainPageService {
-    private parserChainCollapseState: BehaviorSubject<boolean[]>;
-    private parserChainSize: number;
-    private readonly BASE_URL = '/api/v1/parserconfig/';
-    public collapseAll = new BehaviorSubject(false);
+  static readonly BASE_URL = '/api/v1/parserconfig/';
+  public collapseAll = new BehaviorSubject(false);
+  private _parserChainCollapseState: BehaviorSubject<boolean[]>;
+  private _parserChainSize: number;
 
-    constructor(
-      private http: HttpClient
-    ) {}
 
-    public getChain(id: string, pipeline: string = null) {
-      let httpParams: HttpParams = getHttpParams(pipeline);
+  constructor(
+    private _http: HttpClient
+  ) {
+  }
 
-      return this.http.get(this.BASE_URL + `chains/${id}`,{params: httpParams});
-    }
+  public getChain(id: string, pipeline: string = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
 
-    public getParsers(id: string, pipeline: string = null) {
-      let httpParams: HttpParams = getHttpParams(pipeline);
+    return this._http.get(ChainPageService.BASE_URL + `chains/${id}`, {params: httpParams});
+  }
 
-      return this.http.get(this.BASE_URL + `chains/${id}/parsers`,{params: httpParams});
-    }
+  public getParsers(id: string, pipeline: string = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
 
-    public saveParserConfig(chainId: string, config: ChainDetailsModel, pipeline: string = null) {
-      let httpParams: HttpParams = getHttpParams(pipeline);
+    return this._http.get(ChainPageService.BASE_URL + `chains/${id}/parsers`, {params: httpParams});
+  }
 
-      return this.http.put(this.BASE_URL + `chains/${chainId}`, config,{params: httpParams});
-    }
+  public saveParserConfig(chainId: string, config: ChainDetailsModel, pipeline: string = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
 
-    public getFormConfig(type: string) {
-      let httpParams: HttpParams = getHttpParams(null);
+    return this._http.put(ChainPageService.BASE_URL + `chains/${chainId}`, config, {params: httpParams});
+  }
 
-      return this.http.get(this.BASE_URL + `parser-form-configuration/${type}`,{params: httpParams});
-    }
+  public getFormConfig(type: string) {
+    const httpParams: HttpParams = getHttpParams(null);
 
-    public getFormConfigs() {
-      let httpParams: HttpParams = getHttpParams(null);
+    return this._http.get<ParserDescriptor>(ChainPageService.BASE_URL + `parser-form-configuration/${type}`, {params: httpParams});
+  }
 
-      return this.http.get(this.BASE_URL + `parser-form-configuration`,{params: httpParams});
-    }
+  public getFormConfigs() {
+    const httpParams: HttpParams = getHttpParams(null);
 
-    public getIndexMappings(payload?: { filePath: string }) {
-      let httpParams: HttpParams = getHttpParams(null);
+    return this._http.get<{
+      [key: string]: ParserDescriptor
+    }>(ChainPageService.BASE_URL + `parser-form-configuration`, {params: httpParams});
+  }
 
-      let finalPayload = payload ? payload : {}
-      return this.http.post(this.BASE_URL + `indexing`, finalPayload,{params: httpParams});
-    }
+  public getIndexMappings(payload: { filePath?: string } = {filePath: ''}) {
+    return this._http.post(`${ChainPageService.BASE_URL}indexing`, payload, {
+      headers: {'Content-Type': 'application/json; charset=utf-8'},
+      observe: 'response'
+    });
+  }
 
-    public createChainCollapseArray(size: number) {
-      this.parserChainSize = size;
-      this.parserChainCollapseState = new BehaviorSubject(new Array(this.parserChainSize).fill(false));
-    }
-    public getCollapseExpandState() {
-      return this.parserChainCollapseState;
-    }
-    public collapseExpandAllParsers() {
-      this.collapseAll.next(!this.collapseAll.value);
-      this.parserChainCollapseState.next(new Array(this.parserChainSize).fill(this.collapseAll.value));
-    }
+  public createChainCollapseArray(size: number) {
+    this._parserChainSize = size;
+    this._parserChainCollapseState = new BehaviorSubject(new Array(this._parserChainSize).fill(false));
+  }
+
+  public getCollapseExpandState() {
+    return this._parserChainCollapseState;
+  }
+
+  public collapseExpandAllParsers() {
+    this.collapseAll.next(!this.collapseAll.value);
+    this._parserChainCollapseState.next(new Array(this._parserChainSize).fill(this.collapseAll.value));
+  }
 }

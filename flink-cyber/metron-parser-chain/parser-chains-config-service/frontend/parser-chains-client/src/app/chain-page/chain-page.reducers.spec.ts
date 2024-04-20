@@ -1,4 +1,3 @@
-
 /*
  * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
  *
@@ -15,6 +14,7 @@ import * as fromAddParserActions from '../chain-add-parser-page/chain-add-parser
 
 import * as fromActions from './chain-page.actions';
 import * as fromReducers from './chain-page.reducers';
+
 
 describe('chain-page: reducers', () => {
 
@@ -48,6 +48,7 @@ describe('chain-page: reducers', () => {
       error: '',
       parserToBeInvestigated: '',
       failedParser: '',
+      indexMappings: {path: '', result: {}}
     };
     expect(
       fromReducers.reducer(state, new fromActions.RemoveParserAction({
@@ -76,6 +77,7 @@ describe('chain-page: reducers', () => {
       dirtyParsers: [],
       dirtyChains: ['4533'],
       path: [],
+      indexMappings: {path: '', result: {}},
       error: ''
     });
   });
@@ -96,6 +98,7 @@ describe('chain-page: reducers', () => {
       path: [],
       error: '',
       parserToBeInvestigated: '',
+      indexMappings: {path: '', result: {}},
       failedParser: '',
     };
     const newState = fromReducers.reducer(state, new fromAddParserActions.AddParserAction({
@@ -126,6 +129,7 @@ describe('chain-page: reducers', () => {
       dirtyParsers: [],
       dirtyChains: [],
       path: [],
+      indexMappings: {path: '', result: {}},
       error: ''
     };
     const chains = {};
@@ -146,7 +150,7 @@ describe('chain-page: reducers', () => {
     const state = {
       chains: null,
       parsers: {
-        456: {
+        '456': {
           id: '456',
           type: 'grok',
           name: 'some parser',
@@ -159,6 +163,7 @@ describe('chain-page: reducers', () => {
       dirtyParsers: [],
       dirtyChains: [],
       path: [],
+      indexMappings: {path: '', result: {}},
       error: ''
     };
     const newState = fromReducers.reducer(state, new fromActions.UpdateParserAction({
@@ -182,7 +187,7 @@ describe('chain-page: reducers', () => {
     const state = {
       parsers: null,
       chains: {
-        456: {
+        '456': {
           id: '456',
           name: 'old',
           parsers: []
@@ -194,6 +199,7 @@ describe('chain-page: reducers', () => {
       path: [],
       error: '',
       parserToBeInvestigated: '',
+      indexMappings: {path: '', result: {}},
       failedParser: '',
     };
     const newState = fromReducers.reducer(state, new fromActions.UpdateChainAction({
@@ -221,6 +227,7 @@ describe('chain-page: reducers', () => {
       path: [],
       error: '',
       parserToBeInvestigated: '',
+      indexMappings: {path: '', result: {}},
       failedParser: '',
     };
     const newState = fromReducers.reducer(state, new fromActions.AddChainAction({
@@ -254,7 +261,8 @@ describe('chain-page: reducers', () => {
         error: ''
       }
     };
-    const parser = fromReducers.getParser(state, { id: '456' });
+
+    const parser = fromReducers.getParser({id: '456'})(state);
     expect(parser).toBe(desiredParser);
   });
 
@@ -274,7 +282,7 @@ describe('chain-page: reducers', () => {
         error: ''
       }
     };
-    const chain = fromReducers.getChain(state, { id: '456' });
+    const chain = fromReducers.getChain({id: '456'})(state);
     expect(chain).toBe(desiredChain);
   });
 
@@ -295,7 +303,7 @@ describe('chain-page: reducers', () => {
         error: ''
       }
     };
-    const route = fromReducers.getRoute(state, { id: '456' });
+    const route = fromReducers.getRoute({id: '456'})(state);
     expect(route).toBe(desiredRoute);
   });
 
@@ -320,17 +328,18 @@ describe('chain-page: reducers', () => {
       path: [],
       error: '',
       parserToBeInvestigated: '1234',
+      indexMappings: {path: '', result: {}},
       failedParser: '',
     };
 
-    const investigatedParserReducer = fromReducers.reducer(state, new fromActions.InvestigateParserAction({ id: '1234'}));
+    const investigatedParserReducer = fromReducers.reducer(state, new fromActions.InvestigateParserAction({id: '1234'}));
     expect(investigatedParserReducer.parserToBeInvestigated).toBe('1234');
   });
 
   it('should return with the different levels the user is in represented by real chain objects', () => {
-    const chain1 = { id: '1', name: 'a', parsers: [] };
-    const chain2 = { id: '2', name: 'b', parsers: [] };
-    const chain3 = { id: '3', name: 'c', parsers: [] };
+    const chain1 = {id: '1', name: 'a', parsers: []};
+    const chain2 = {id: '2', name: 'b', parsers: []};
+    const chain3 = {id: '3', name: 'c', parsers: []};
     const state = {
       'chain-page': {
         chains: {
@@ -373,7 +382,7 @@ describe('chain-page: reducers', () => {
 
   it('should return with a form config for a certain parser type', () => {
     const formConfigs = {
-      foo: {}
+      foo: null
     };
     const state = {
       'chain-page': {
@@ -381,8 +390,8 @@ describe('chain-page: reducers', () => {
       }
     };
 
-    const config = fromReducers.getFormConfigByType(state, { type: 'foo' });
-    expect(config).toBe(formConfigs.foo);
+    const config = fromReducers.getFormConfigByType({type: 'foo'})(state);
+    expect(config).toBeNull();
   });
 
   it('should return with the dirty chains', () => {
@@ -431,6 +440,7 @@ describe('chain-page: reducers', () => {
       path: ['123', '456', '678'],
       error: '',
       parserToBeInvestigated: '',
+      indexMappings: {path: '', result: {}},
       failedParser: '',
     };
 
@@ -450,6 +460,7 @@ describe('chain-page: reducers', () => {
       path: ['123', '456', '678'],
       error: '',
       parserToBeInvestigated: '',
+      indexMappings: {path: '', result: {}},
       failedParser: '',
     };
 
@@ -491,6 +502,7 @@ describe('chain-page: reducers', () => {
       dirtyChains: [],
       path: [],
       error: '',
+      indexMappings: {path: '', result: {}},
       parserToBeInvestigated: '',
       failedParser: '',
     };
@@ -530,6 +542,7 @@ describe('chain-page: reducers', () => {
       dirtyChains: [],
       path: [],
       error: '',
+      indexMappings: {path: '', result: {}},
       parserToBeInvestigated: '',
       failedParser: '',
     };
@@ -591,6 +604,7 @@ describe('chain-page: reducers', () => {
       dirtyChains: [],
       path: [],
       error: '',
+      indexMappings: {path: '', result: {}},
       parserToBeInvestigated: '',
       failedParser: '',
     };
@@ -626,23 +640,24 @@ describe('chain-page: reducers', () => {
       path: [],
       error: '',
       parserToBeInvestigated: '',
+      indexMappings: {path: '', result: {}},
       failedParser: '',
     };
 
     const newState = fromReducers.reducer(state, new fromActions.GetFormConfigSuccessAction({
       parserType: 'foo',
-      formConfig: [{
+      formConfig: {
         id: '1',
         name: 'field',
-        type: 'text'
-      }]
+        schemaItems: null
+      }
     }));
     expect(newState.formConfigs).toEqual({
-      foo: [{
+      foo: {
         id: '1',
         name: 'field',
-        type: 'text'
-      }]
+        schemaItems: null
+      }
     });
   });
 
@@ -655,25 +670,26 @@ describe('chain-page: reducers', () => {
       dirtyChains: [],
       path: [],
       error: '',
+      indexMappings: {path: '', result: {}},
       parserToBeInvestigated: '',
       failedParser: '',
     };
 
     const newState = fromReducers.reducer(state, new fromActions.GetFormConfigsSuccessAction({
       formConfigs: {
-        foo: [{
+        foo: {
           id: '1',
           name: 'field',
-          type: 'text'
-        }]
+          schemaItems: null
+        }
       }
     }));
     expect(newState.formConfigs).toEqual({
-      foo: [{
+      foo: {
         id: '1',
         name: 'field',
-        type: 'text'
-      }]
+        schemaItems: null
+      }
     });
   });
 
@@ -687,9 +703,10 @@ describe('chain-page: reducers', () => {
       path: [],
       error: '',
       parserToBeInvestigated: '',
+      indexMappings: {path: '', result: {}},
       failedParser: '',
     };
-    const newState = fromReducers.reducer(state, new fromActions.SaveParserConfigAction({ chainId: '123' }));
+    const newState = fromReducers.reducer(state, new fromActions.SaveParserConfigAction({chainId: '123'}));
     expect(newState.dirtyChains).toEqual([]);
     expect(newState.dirtyParsers).toEqual([]);
   });
@@ -728,6 +745,7 @@ describe('chain-page: reducers', () => {
       dirtyChains: [],
       path: [],
       error: '',
+      indexMappings: {path: '', result: {}},
       parserToBeInvestigated: '',
       failedParser: '',
     };

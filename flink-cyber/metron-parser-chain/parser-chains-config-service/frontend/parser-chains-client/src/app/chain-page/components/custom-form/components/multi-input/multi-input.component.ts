@@ -10,9 +10,19 @@
  * limitations governing your use of the file.
  */
 
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {
+  AfterContentChecked,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnInit,
+  Output,
+  SimpleChanges
+} from '@angular/core';
 import {UntypedFormControl} from '@angular/forms';
-
+import {isObject} from 'src/app/shared/utils';
 import {CustomFormConfig} from '../../custom-form.component';
 
 @Component({
@@ -20,21 +30,20 @@ import {CustomFormConfig} from '../../custom-form.component';
   templateUrl: './multi-input.component.html',
   styleUrls: ['./multi-input.component.scss']
 })
-export class MultiInputComponent implements OnInit, OnChanges {
+export class MultiInputComponent implements OnInit, OnChanges, AfterContentChecked {
 
   @Input() config: CustomFormConfig;
   @Input() value: string | any[] = "";
   @Input() selectedSource: string;
-  @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
+  @Input() indexingFieldMap: {[key: string]: {[key:string]: boolean}};
   @Output() changeValue = new EventEmitter<{ [key: string]: string }[]>();
-
-  count = 0;
   controls = [];
   ignoreColumns: string[] = [];
   mappingColumns: string[] = [];
   selectSearchValue = "";
 
-  constructor() { }
+  constructor(private _changeDetector: ChangeDetectorRef) {
+  }
 
   ngOnInit() {
     if (Array.isArray(this.value)) {
@@ -50,33 +59,18 @@ export class MultiInputComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.indexingFieldMap || changes.selectedSource) {
-      this.updateDropdownLists();
+      this._updateDropdownLists();
     }
   }
 
-  private updateDropdownLists() {
-    // clear the existing lists
-    this.ignoreColumns = [];
-    this.mappingColumns = [];
-
-    // split the items into two lists based on the boolean value
-    if (this.indexingFieldMap && this.selectedSource) {
-      this.indexingFieldMap.get(this.selectedSource).forEach((value, key) => {
-        if (value) {
-          this.ignoreColumns.push(key);
-        } else {
-          this.mappingColumns.push(key);
-        }
-      });
-    }
-    this.ignoreColumns.sort()
-    this.mappingColumns.sort()
+  ngAfterContentChecked(): void {
+    this._changeDetector.detectChanges();
   }
 
   onAddClick() {
-    if (this.config.multipleValues==true) {
+    if (this.config.multipleValues ) {
       this.controls.push(
-          new UntypedFormControl('')
+        new UntypedFormControl('')
       );
     }
   }
@@ -90,7 +84,7 @@ export class MultiInputComponent implements OnInit, OnChanges {
     this.changeValue.emit(value);
   }
 
-  updateValue(selectedValue: String, control: UntypedFormControl, config: CustomFormConfig) {
+  updateValue(selectedValue: string, control: UntypedFormControl, config: CustomFormConfig) {
     control.setValue(selectedValue)
     this.onChange(config)
   }
@@ -108,6 +102,28 @@ export class MultiInputComponent implements OnInit, OnChanges {
   }
 
   selectSearch($event: string) {
-    this.selectSearchValue=$event;
+    this.selectSearchValue = $event;
+  }
+
+  private _updateDropdownLists() {
+    // clear the existing lists
+    this.ignoreColumns = [];
+    this.mappingColumns = [];
+
+    // split the items into two lists based on the boolean value
+    if (this.indexingFieldMap && this.selectedSource) {
+      const fields = this.indexingFieldMap[this.selectedSource];
+      if (isObject(fields)) {
+        Object.entries(fields).forEach(([key, value]) => {
+          if (value) {
+            this.ignoreColumns.push(key);
+          } else {
+            this.mappingColumns.push(key);
+          }
+        });
+      }
+    }
+    this.ignoreColumns.sort()
+    this.mappingColumns.sort()
   }
 }

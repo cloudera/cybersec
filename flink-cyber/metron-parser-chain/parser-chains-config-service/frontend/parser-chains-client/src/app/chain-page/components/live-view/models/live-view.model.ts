@@ -13,7 +13,7 @@
 import { SampleDataRequestModel } from './sample-data.model';
 
 export interface EntryParsingResultModel {
-  output: {};
+  output: unknown;
   log: {
     type: string;
     message: string;
@@ -31,7 +31,7 @@ export enum ParserFieldStatus {
 }
 
 export interface ParserResultsModel {
-  output: {};
+  output: any;
   log: {
     type: string;
     message: string;
@@ -43,5 +43,5 @@ export interface ParserResultsModel {
 
 export interface LiveViewRequestModel {
   sampleData: SampleDataRequestModel;
-  chainConfig: {};
+  chainConfig: unknown;
 }

@@ -13,7 +13,7 @@
 import {HttpParams} from "@angular/common/http";
 
 export function getHttpParams(pipeline: string) {
-  let httpParams: HttpParams = new HttpParams();
+  const httpParams: HttpParams = new HttpParams();
 
   if (pipeline) {
     return httpParams.set('pipelineName', pipeline);

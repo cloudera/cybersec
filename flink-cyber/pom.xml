@@ -627,15 +627,25 @@
 
     <profiles>
         <profile>
+            <id>full-build</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>cyber-jobs</module>
+                <module>cyber-csd</module>
+                <module>cyber-parcel</module>
+                <module>metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client</module>
+            </modules>
+        </profile>
+        <profile>
             <id>add-dependencies-for-IDEA</id>
-
             <activation>
                 <activeByDefault>true</activeByDefault>
                 <property>
                     <name>idea.version</name>
                 </property>
             </activation>
-
             <dependencies>
                 <dependency>
                     <groupId>org.apache.flink</groupId>
@@ -660,5 +670,4 @@
             </dependencies>
         </profile>
     </profiles>
-
 </project>

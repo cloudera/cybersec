@@ -19,7 +19,7 @@ export const chainHandlers = [
   rest.get<ChainDetailsModel, { chainId: string }>('/api/v1/parserconfig/chains/:chainId', (req, res, ctx) => {
     const {chainId} = req.params;
     const storedChains: ChainDetailsModel[] = JSON.parse(localStorage.getItem("chains"));
-    const chain = storedChains.find(chain => chain.id === chainId);
+    const chain = storedChains.find(ch => ch.id === chainId);
     if (chain) {
       return res(
         ctx.status(200),
@@ -53,13 +53,13 @@ export const chainHandlers = [
     const {chainId} = req.params;
     const reqChain: ChainDetailsModel = req.body;
     const storedChains: ChainDetailsModel[] = JSON.parse(localStorage.getItem("chains"));
-    const chain: ChainDetailsModel = storedChains.find(chain => chain.id === chainId);
+    const chain: ChainDetailsModel = storedChains.find(ch => ch.id === chainId);
     if (chain === null) {
       return res(
         ctx.status(409)
       )
     }
-    const newChains: ChainDetailsModel[] = storedChains.map(chain => chain.id === chainId ? reqChain : chain);
+    const newChains: ChainDetailsModel[] = storedChains.map(ch => ch.id === chainId ? reqChain : chain);
 
     localStorage.setItem('chains', JSON.stringify(newChains));
     return res(

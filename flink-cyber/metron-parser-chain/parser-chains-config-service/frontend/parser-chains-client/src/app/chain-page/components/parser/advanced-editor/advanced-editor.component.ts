@@ -11,10 +11,10 @@
  */
 
 import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {isEqual} from 'lodash';
+import {deepEqual} from "src/app/shared/utils";
 
 export interface ConfigChangedEvent {
-  value: {};
+  value: {[key: string]: object};
 }
 
 @Component({
@@ -24,8 +24,8 @@ export interface ConfigChangedEvent {
 })
 export class AdvancedEditorComponent implements OnChanges {
 
-  @Input() config = {};
-  @Input() isReadOnly: boolean = false;
+  @Input() config = {} as {[key:string] : object};
+  @Input() isReadOnly = false;
   @Output() configChanged = new EventEmitter<ConfigChangedEvent>();
 
   monacoOptions = {
@@ -45,20 +45,18 @@ export class AdvancedEditorComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.isReadOnly !== undefined){
-      this.monacoOptions["readOnly"]= this.isReadOnly;
+      this.monacoOptions.readOnly= this.isReadOnly;
     }
   }
 
   onChange(value: string) {
-    let json = {};
-
+    let json = {} as {[key: string]: object};
     try {
       json = JSON.parse(value);
     } catch {
       return;
     }
-
-    if (!isEqual(json, this.config)) {
+    if (!deepEqual(json, this.config)) {
       this.configChanged.emit({ value: json });
     }
   }

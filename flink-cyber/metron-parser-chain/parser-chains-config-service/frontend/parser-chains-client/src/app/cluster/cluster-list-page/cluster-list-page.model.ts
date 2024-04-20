@@ -1,5 +1,3 @@
-import {ParserChainModel} from "../../chain-page/chain-page.models";
-
 export interface ClusterModel {
   jobConfigs?: { [key: string]: string },
   errorMessage?: { [key: string]: string };
