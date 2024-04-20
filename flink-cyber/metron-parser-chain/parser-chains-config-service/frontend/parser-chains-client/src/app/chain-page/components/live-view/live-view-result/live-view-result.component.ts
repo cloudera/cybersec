@@ -27,7 +27,7 @@ export class LiveViewResultComponent {
   parserByParserViewId = null;
 
 
-  constructor(private clipboard: Clipboard) {
+  constructor(private _clipboard: Clipboard) {
   }
 
   onInvestigateParserClicked(failedParser) {
@@ -48,7 +48,7 @@ export class LiveViewResultComponent {
   }
 
   copyOutput() {
-    let output = JSON.stringify(this.results[this.results.length-1].output);
-    this.clipboard.copy(output);
+    const output = JSON.stringify(this.results[this.results.length-1].output);
+    this._clipboard.copy(output);
   }
 }

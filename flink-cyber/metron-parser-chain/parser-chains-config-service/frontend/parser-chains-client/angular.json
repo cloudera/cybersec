@@ -25,14 +25,17 @@
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
+            "baseHref": "/ui/",
             "preserveSymlinks": true,
             "allowedCommonJsDependencies": [
               "lodash",
-              "uuid"
+              "uuid",
+              "msw"
             ],
             "assets": [
               "src/favicon.ico",
               "src/assets",
+              "src/mockServiceWorker.js",
               {
                 "glob": "**/*",
                 "input": "./node_modules/@ant-design/icons-angular/src/inline-svg/",
@@ -41,14 +44,20 @@
               {
                 "glob": "**/*",
                 "input": "node_modules/monaco-editor",
-                "output": "assets/monaco-editor"
+                "output": "/assets/monaco/"
               },
               {
                 "glob": "**/*",
                 "input": "node_modules/monaco-editor/min-maps",
-                "output": "./assets/min-maps/"
+                "output": "/assets/min-maps/"
               }
             ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src"
+              ]
+            },
+
             "styles": [
               "src/theme.less",
               "src/styles.scss"
@@ -103,6 +112,32 @@
                   "with": "src/environments/environment.dev.ts"
                 }
               ]
+            },
+            "dev-mock": {
+              "optimization": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "extractLicenses": true,
+              "vendorChunk": true,
+              "buildOptimizer": false,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "6mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.mock.dev.ts"
+                }
+              ]
             }
           }
         },
@@ -115,6 +150,9 @@
           "configurations": {
             "dev": {
               "browserTarget": "parser-chaining:build:dev"
+            },
+            "dev-mock": {
+              "browserTarget": "parser-chaining:build:dev-mock"
             }
           }
         },
@@ -140,8 +178,8 @@
               "src/assets",
               {
                 "glob": "**/*",
-                "input": "node_modules/ngx-monaco-editor-v13/assets/monaco",
-                "output": "./assets/monaco/"
+                "input": "node_modules/ngx-monaco-editor-v2",
+                "output": "/assets/monaco-editor/min"
               }
             ]
           }
@@ -154,6 +192,10 @@
           },
           "configurations": {
             "dev": {
+              "builder": "@angular-eslint/builder:lint",
+              "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+            },
+            "dev-mock": {
               "builder": "@angular-eslint/builder:lint",
               "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
             }
@@ -186,6 +228,10 @@
           },
           "configurations": {
             "dev": {
+              "builder": "@angular-eslint/builder:lint",
+              "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+            },
+            "dev-mock": {
               "builder": "@angular-eslint/builder:lint",
               "lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
             }

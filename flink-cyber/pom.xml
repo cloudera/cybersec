@@ -49,6 +49,7 @@
         <module>cyber-jobs</module>
         <module>cyber-csd</module>
         <module>cyber-parcel</module>
+        <module>cyber-services</module>
     </modules>
 
     <properties>
@@ -71,6 +72,8 @@
         <flink.format.parquet.version>1.11.1</flink.format.parquet.version>
         <slf4j.version>1.7.36</slf4j.version>
         <log4j.version>2.17.2</log4j.version>
+        <spring-boot.version>2.7.6</spring-boot.version>
+        <springdoc-openapi.version>1.6.11</springdoc-openapi.version>
         <multiline-string.version>0.1.2</multiline-string.version>
         <testcontainers.version>1.15.0</testcontainers.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
@@ -84,7 +87,7 @@
         <hbase.version>2.2.3.${cdh.version}</hbase.version>
         <mockito.version>3.6.0</mockito.version>
         <datasketches.version>1.3.0-incubating</datasketches.version>
-        <assertj.version>3.13.2</assertj.version>
+        <assertj.version>3.17.2</assertj.version>
         <json.simple.version>1.1.1</json.simple.version>
         <jupiter.junit.version>5.9.3</jupiter.junit.version>
         <phoenix.version>5.1.0.${cdh.version}</phoenix.version>
@@ -601,15 +604,25 @@
 
     <profiles>
         <profile>
+            <id>full-build</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>cyber-jobs</module>
+                <module>cyber-csd</module>
+                <module>cyber-parcel</module>
+                <module>metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client</module>
+            </modules>
+        </profile>
+        <profile>
             <id>add-dependencies-for-IDEA</id>
-
             <activation>
                 <activeByDefault>true</activeByDefault>
                 <property>
                     <name>idea.version</name>
                 </property>
             </activation>
-
             <dependencies>
                 <dependency>
                     <groupId>org.apache.flink</groupId>
@@ -634,5 +647,4 @@
             </dependencies>
         </profile>
     </profiles>
-
 </project>

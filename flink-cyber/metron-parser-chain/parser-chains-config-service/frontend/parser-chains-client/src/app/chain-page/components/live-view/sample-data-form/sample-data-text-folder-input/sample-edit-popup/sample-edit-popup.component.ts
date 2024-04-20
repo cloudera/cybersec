@@ -1,76 +1,71 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators} from "@angular/forms";
 import {Store} from "@ngrx/store";
 import {SampleDataTextFolderInputState} from "../sample-data-text-folder-input.reducers";
 import {HideEditModalAction} from "../sample-data-text-folder-input.actions";
 import {SampleDataInternalModel} from "../../../models/sample-data.model";
 
 @Component({
-    selector: 'app-sample-edit-popup',
-    templateUrl: './sample-edit-popup.component.html',
-    styleUrls: ['./sample-edit-popup.component.scss']
+  selector: 'app-sample-edit-popup',
+  templateUrl: './sample-edit-popup.component.html',
+  styleUrls: ['./sample-edit-popup.component.scss']
 })
 export class SampleEditPopupComponent implements OnChanges {
 
-    @Input() modalVisible: boolean;
-    @Input() sample: SampleDataInternalModel;
+  @Input() modalVisible: boolean;
+  @Input() sample: SampleDataInternalModel;
+  @Output() sampleDataChange = new EventEmitter<SampleDataInternalModel>();
+  editSampleForm: UntypedFormGroup;
+  isOkLoading = false;
+  constructor(private _store: Store<SampleDataTextFolderInputState>,
+              private _fb: UntypedFormBuilder) {
+  }
 
-    @Output() sampleDataChange = new EventEmitter<SampleDataInternalModel>();
+  get source() {
+    return this.editSampleForm.get('source')
+  }
 
-    editSampleForm: FormGroup;
-    isOkLoading = false;
+  get name() {
+    return this.editSampleForm.get('name')
+  }
 
+  get description() {
+    return this.editSampleForm.get('description')
+  }
 
-    constructor(private store: Store<SampleDataTextFolderInputState>,
-                private fb: FormBuilder) {
+  get expectedFailure() {
+    return this.editSampleForm.get('expectedFailure')
+  }
 
+  get expectedResult() {
+    return this.editSampleForm.get('expectedResult')
+  }
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes.sample !== undefined && !changes.sample.isFirstChange()) {
+      this.editSampleForm = this._fb.group({
+        source: new UntypedFormControl(this.sample.source),
+        name: new UntypedFormControl(this.sample.name, [Validators.required, Validators.minLength(3)]),
+        description: new UntypedFormControl(this.sample.description),
+        expectedFailure: new UntypedFormControl(this.sample.expectedFailure, Validators.required),
+        expectedResult: new UntypedFormControl(this.sample.expectedResult)
+      });
     }
+  }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes.sample !== undefined && !changes.sample.isFirstChange()){
-            this.editSampleForm = this.fb.group({
-                source: new FormControl(this.sample.source),
-                name: new FormControl(this.sample.name, [Validators.required, Validators.minLength(3)]),
-                description: new FormControl(this.sample.description),
-                expectedFailure: new FormControl(this.sample.expectedFailure, Validators.required),
-                expectedResult: new FormControl(this.sample.expectedResult)
-            });
-        }
-    }
 
-    get source() {
-        return this.editSampleForm.get('source')
-    }
+  pushChain() {
+    this.sampleDataChange.emit({
+      ...this.sample,
+      source: this.source.value,
+      name: this.name.value,
+      description: this.description.value,
+      expectedFailure: this.expectedFailure.value,
+      expectedResult: this.expectedResult.value
+    })
+    this._store.dispatch(HideEditModalAction())
+  }
 
-    get name() {
-        return this.editSampleForm.get('name')
-    }
-
-    get description() {
-        return this.editSampleForm.get('description')
-    }
-
-    get expectedFailure() {
-        return this.editSampleForm.get('expectedFailure')
-    }
-
-    get expectedResult() {
-        return this.editSampleForm.get('expectedResult')
-    }
-
-    pushChain() {
-        this.sampleDataChange.emit({
-            ...this.sample,
-            source: this.source.value,
-            name: this.name.value,
-            description: this.description.value,
-            expectedFailure: this.expectedFailure.value,
-            expectedResult: this.expectedResult.value
-        })
-        this.store.dispatch(HideEditModalAction())
-    }
-
-    handleCancelChainModal() {
-        this.store.dispatch(HideEditModalAction())
-    }
+  handleCancelChainModal() {
+    this._store.dispatch(HideEditModalAction())
+  }
 }
