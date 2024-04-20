@@ -10,11 +10,11 @@
  * limitations governing your use of the file.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {forkJoin, Observable, of, throwError} from 'rxjs';
-import {catchError, switchMap} from "rxjs/operators";
-import {ClusterModel, Job} from "../cluster-list-page/cluster-list-page.model";
+import {Component} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {BehaviorSubject, combineLatest, forkJoin, Observable, of, throwError} from 'rxjs';
+import {catchError, map, switchMap} from "rxjs/operators";
+import {Job} from "../cluster-list-page/cluster-list-page.model";
 import {ClusterService} from "../../services/cluster.service";
 import {SelectionModel} from '@angular/cdk/collections';
 import {HttpErrorResponse, HttpResponse} from "@angular/common/http";
@@ -22,93 +22,100 @@ import {SnackbarService, SnackBarStatus} from "../../services/snack-bar.service"
 import {MatDialog} from "@angular/material/dialog";
 import {UploadDialogComponent} from "./dialog/upload-dialog.component";
 
+export type DialogData = {
+  targetUrl: string;
+  buttonText: {
+    confirmButtonText: string,
+    cancelButtonText: string
+  }
+}
 
 @Component({
   selector: 'app-cluster',
   templateUrl: './cluster-page.component.html',
   styleUrls: ['./cluster-page.component.scss']
 })
-export class ClusterPageComponent implements OnInit {
-  jobs: Job[];
-  cluster$!: Observable<ClusterModel>;
-  clusterId = '0';
-  isLoading = true;
+export class ClusterPageComponent {
+  clusterSubject$ = new BehaviorSubject<void>(null);
+  clusterId$: Observable<string> = this._route.paramMap.pipe(map((params) => params.get('clusterId')));
+  cluster$ = combineLatest([this.clusterId$, this.clusterSubject$]).pipe(switchMap(([clusterId]) => this._clusterService.getCluster(clusterId)));
+  vm$ = combineLatest([this.clusterId$, this.cluster$]).pipe(
+    map(([clusterId, cl]) => ({clusterId, cl}))
+  );
   displayedColumns: string[] = ['select', 'name', 'type', 'branch', 'pipeline', 'status', 'created'];
   selection = new SelectionModel<Job>(true, []);
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private clusterService: ClusterService,
-    private snackBarService: SnackbarService,
-    private dialog: MatDialog
+    private _route: ActivatedRoute,
+    private _clusterService: ClusterService,
+    private _snackBarService: SnackbarService,
+    private _dialog: MatDialog
   ) {
-    this.cluster$ = this.route.paramMap.pipe(
-      switchMap(params => {
-        this.clusterId = params.get('clusterId');
-        return this.clusterService.getCluster(this.clusterId);
-      })
-    );
-    this.cluster$.subscribe(cluster => {
-      this.jobs = cluster.jobs;
-      this.isLoading = false;
-    })
   }
 
-  ngOnInit() {
+  isAllSelected(jobs: Job[]) {
+    return this.selection.selected.length === jobs.length;
   }
 
-  isAllSelected() {
-    return this.selection.selected.length === this.jobs?.length;
-  }
-
-  masterToggle() {
-    if (this.isAllSelected()) {
+  masterToggle(jobs: Job[]) {
+    if (this.isAllSelected(jobs)) {
       this.selection.clear();
     } else {
-      this.selection.select(...this.jobs);
+      this.selection.select(...jobs);
     }
   }
 
-  changeJobStatus(action: 'start' | 'restart' | 'stop' | 'update_config') {
+  changeJobStatus(action: 'start' | 'restart' | 'stop' | 'update_config', clusterId: string) {
     forkJoin(
       this.selection.selected.reduce((acc, job) =>
           ({
             ...acc,
             [job.jobName]:
-              this.clusterService.sendJobCommand(this.clusterId, action,
+              this._clusterService.sendJobCommand(clusterId, action,
                 {
                   jobIdHex: job.jobIdString,
                   pipelineDir: job.jobPipeline,
                   branch: job.jobPipeline
                 }).pipe(catchError(err => {
-                this.snackBarService.showMessage(err.message, SnackBarStatus.Fail);
+                this._snackBarService.showMessage(err.message, SnackBarStatus.FAIL);
                 return of(null);
               }))
           }),
         {})
-    ).subscribe((value: { [jobName: string]: HttpResponse<any> }) => {
-        Object.entries(value).forEach(([jobName, res]) => {
-          this.jobs = this.jobs.map(this.updateJobStatus(jobName, res, action));
-        });
+    ).subscribe(_ => {
+        this.clusterSubject$.next();
       },
       (error) => {
         //handle your error here
-        this.snackBarService.showMessage(`Unexpected error ${error.message}`, SnackBarStatus.Fail);
+        this._snackBarService.showMessage(`Unexpected error ${error.message}`, SnackBarStatus.FAIL);
       }, () => {
         //observable completes
         this.selection.clear();
       });
   }
 
-  private updateJobStatus(jobName: string, res: HttpResponse<any>, newStatus: 'start' | 'restart' | 'stop' | 'update_config') {
+  openUploadDialog(clusterId: string) {
+    this.selection.selected.forEach(job => {
+      this._dialog.open(UploadDialogComponent, {
+        data: {
+          targetUrl: `/api/v1/clusters/${clusterId}/jobs/config/${job.jobPipeline}/${job.jobIdString}`,
+        },
+        maxWidth: '70vw',
+        maxHeight: '80vh',
+        height: '50%',
+        width: '70%',
+      })
+    });
+  }
+
+  private _updateJobStatus(jobName: string, res: HttpResponse<any>, newStatus: 'start' | 'restart' | 'stop' | 'update_config') {
     return job => {
       if (job.name === jobName && res !== null) {
         if (res.status === 204) {
-          this.snackBarService.showMessage(`Successfully updated '${jobName}' with new status '${newStatus}' `, SnackBarStatus.Success);
+          this._snackBarService.showMessage(`Successfully updated '${jobName}' with new status '${newStatus}' `, SnackBarStatus.SUCCESS);
           return {...job, status: newStatus};
         } else {
-          this.snackBarService.showMessage(`Get '${res.status}' response when updating job '${jobName} status to '${newStatus}'.`, SnackBarStatus.Warning);
+          this._snackBarService.showMessage(`Get '${res.status}' response when updating job '${jobName} status to '${newStatus}'.`, SnackBarStatus.WARNING);
           return job;
         }
       } else {
@@ -117,7 +124,7 @@ export class ClusterPageComponent implements OnInit {
     };
   }
 
-  private handleError(error: HttpErrorResponse) {
+  private _handleError(error: HttpErrorResponse) {
     if (error.status === 0) {
       // A client-side or network error occurred. Handle it accordingly.
       console.error('An error occurred:', error.error);
@@ -129,19 +136,6 @@ export class ClusterPageComponent implements OnInit {
     }
     // Return an observable with a user-facing error message.
     return throwError(() => new Error('Something bad happened; please try again later.'));
-  }
-
-  openUploadDialog() {
-    this.selection.selected.forEach(job => {
-      this.dialog.open(UploadDialogComponent, {
-        data: {
-          targetUrl: `/api/v1/clusters/${this.clusterId}/jobs/config/${job.jobPipeline}/${job.jobIdString}`,
-        },
-        maxWidth: '70vw',
-        maxHeight: '80vh',
-        height: '50%',
-        width: '70%',      });
-    });
   }
 }
 

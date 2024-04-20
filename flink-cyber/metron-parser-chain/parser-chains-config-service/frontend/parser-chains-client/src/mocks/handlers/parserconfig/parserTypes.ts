@@ -14,10 +14,10 @@ if (localStorage.getItem('parserTypes') === null) {
 
 export const parserTypesHandlers = [
   rest.get<ChainDetailsModel[]>('/api/v1/parserconfig/parser-types', (req, res, ctx) => {
-    const parserTypes: ParserTypes[] = JSON.parse(localStorage.getItem("parserTypes"));
+    const pt: ParserTypes[] = JSON.parse(localStorage.getItem("parserTypes"));
     return res(
       ctx.status(200),
-      ctx.json(parserTypes)
+      ctx.json(pt)
     );
   }),
 ];
