@@ -12,7 +12,7 @@ export const chainParsersHandlers = [
   rest.get<ParserChainModel[], { chainId: string }>('/api/v1/parserconfig/chains/:chainId/parsers', (req, res, ctx) => {
     const {chainId} = req.params;
     const storedChains: ChainDetailsModel[] = JSON.parse(localStorage.getItem("chains"));
-    const chain: ChainDetailsModel = storedChains.find(chain => chain.id === chainId);
+    const chain: ChainDetailsModel = storedChains.find(ch => ch.id === chainId);
     if (chain) {
       return res(
         ctx.status(200),
@@ -28,14 +28,14 @@ export const chainParsersHandlers = [
     const parser: ParserModel = req.body;
     const {chainId} = req.params;
     const storedChains: ChainDetailsModel[] = JSON.parse(localStorage.getItem("chains"));
-    const chain: ChainDetailsModel = storedChains.find(chain => chain.id === chainId);
+    const chain: ChainDetailsModel = storedChains.find(ch => ch.id === chainId);
     if (!chain) {
       return res(
         ctx.status(404)
       )
     }
     const newParsers: ParserModel[] = [...chain.parsers, {...parser, id: uuidv1()}];
-    const newChains: ChainDetailsModel[] = storedChains.map(chain => chain.id === chainId ? {
+    const newChains: ChainDetailsModel[] = storedChains.map(ch => ch.id === chainId ? {
       ...chain,
       parsers: newParsers
     } : chain);

@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
+import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
 import {DiffEditorModel} from "ngx-monaco-editor-v2";
 
 @Component({
@@ -25,7 +25,7 @@ export class TextDiffViewComponent implements OnChanges {
         }
     }
 
-    onChangeInline(checked) {
-        this.diffOptions = Object.assign({}, this.diffOptions, {renderSideBySide: !checked});
+    onChangeInline(checked: boolean) {
+        this.diffOptions = {...this.diffOptions, renderSideBySide: !checked};
     }
 }

@@ -57,6 +57,7 @@ describe('ChainListPageService', () => {
     const service: ChainListPageService = TestBed.get(ChainListPageService);
     expect(service).toBeTruthy();
   });
+
   describe('getChainList()', () => {
     it('should return an Observable<string[]>', () => {
       const responseMock: ChainModel[] = chainListMockResponse;

@@ -11,7 +11,7 @@
  */
 
 import {CommonModule} from '@angular/common';
-import {NgModule} from '@angular/core';
+import {CUSTOM_ELEMENTS_SCHEMA, NgModule, NO_ERRORS_SCHEMA} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
 import {EffectsModule} from '@ngrx/effects';
@@ -50,53 +50,56 @@ import {NzDropDownModule} from "ng-zorro-antd/dropdown";
 import {IndexingFormComponent} from './components/indexing-form/indexing-form.component';
 import {NzLayoutModule} from "ng-zorro-antd/layout";
 import {NzAutocompleteModule} from "ng-zorro-antd/auto-complete";
-import {MatDialogModule} from "@angular/material/dialog";
+import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
 import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 
 @NgModule({
-    declarations: [
-        ChainPageComponent,
-        ChainViewComponent,
-        ParserComponent,
-        RouterComponent,
-        CustomFormComponent,
-        ParserComposerComponent,
-        RouteComponent,
-        AdvancedEditorComponent,
-        AutofocusDirective,
-        MultiInputComponent,
-        IndexingFormComponent,
-    ],
-    imports: [
-        NzModalModule,
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        RouterModule,
-        StoreModule.forFeature('chain-page', reducer),
-        EffectsModule.forFeature([ChainPageEffects]),
-        MonacoEditorModule,
-        LiveViewModule,
-        NzTabsModule,
-        NzCollapseModule,
-        NzGridModule,
-        NzToolTipModule,
-        NzButtonModule,
-        NzInputModule,
-        NzPopoverModule,
-        NzCardModule,
-        NzBreadCrumbModule,
-        NzFormModule,
-        NzIconModule,
-        NzPopconfirmModule,
-        NzSelectModule,
-        NzDropDownModule,
-        NzLayoutModule,
-        NzAutocompleteModule,
-    ],
-    providers: [
-        NzMessageService,
-    ],
-    exports: [ChainPageComponent, ChainViewComponent, AdvancedEditorComponent]
+  declarations: [
+    ChainPageComponent,
+    ChainViewComponent,
+    ParserComponent,
+    RouterComponent,
+    CustomFormComponent,
+    ParserComposerComponent,
+    RouteComponent,
+    AdvancedEditorComponent,
+    AutofocusDirective,
+    MultiInputComponent,
+    IndexingFormComponent,
+  ],
+  entryComponents: [ ChainViewComponent ],
+  imports: [
+    NzModalModule,
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
+    StoreModule.forFeature('chain-page', reducer),
+    EffectsModule.forFeature([ChainPageEffects]),
+    MonacoEditorModule,
+    LiveViewModule,
+    NzTabsModule,
+    NzCollapseModule,
+    NzGridModule,
+    NzToolTipModule,
+    NzButtonModule,
+    NzInputModule,
+    NzPopoverModule,
+    NzCardModule,
+    NzBreadCrumbModule,
+    NzFormModule,
+    NzIconModule,
+    NzPopconfirmModule,
+    NzSelectModule,
+    NzDropDownModule,
+    NzLayoutModule,
+    NzAutocompleteModule,
+    NzCheckboxModule,
+  ],
+  providers: [
+    NzMessageService,
+  ],
+  exports: [ ChainPageComponent, ChainViewComponent, AdvancedEditorComponent ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 export class ChainPageModule { }

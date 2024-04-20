@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from "@angular/core";
+import {Component, Input} from "@angular/core";
 
 
 @Component({
@@ -6,11 +6,8 @@ import {Component, Input, OnInit} from "@angular/core";
   templateUrl: './status-icon.component.html',
   styleUrls: ['./status-icon.component.scss']
 })
-export class StatusIconComponent implements OnInit {
+export class StatusIconComponent {
   @Input() iconName: string;
-
-  ngOnInit(): void {
-  }
 
   isSpinner(): boolean {
     return this.iconName === "starting";
