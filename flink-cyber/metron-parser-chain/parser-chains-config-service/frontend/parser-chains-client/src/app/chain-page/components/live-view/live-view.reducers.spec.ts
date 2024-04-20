@@ -22,8 +22,43 @@ import {
 import { LiveViewActionsType } from './live-view.actions';
 import { initialState, reducer } from './live-view.reducers';
 import { SampleDataType } from './models/sample-data.model';
+import {TestBed, waitForAsync} from "@angular/core/testing";
+import {NzTabsModule} from "ng-zorro-antd/tabs";
+import {NzSpinModule} from "ng-zorro-antd/spin";
+import {NzSwitchModule} from "ng-zorro-antd/switch";
+import {NzFormModule} from "ng-zorro-antd/form";
+import {FormsModule} from "@angular/forms";
+import {RouterTestingModule} from "@angular/router/testing";
+import {provideMockStore} from "@ngrx/store/testing";
+import {LiveViewComponent} from "./live-view.component";
+import {MockComponent} from "ng-mocks";
+import {SampleDataFormComponent} from "./sample-data-form/sample-data-form.component";
+import {LiveViewResultComponent} from "./live-view-result/live-view-result.component";
+import {CUSTOM_ELEMENTS_SCHEMA} from "@angular/core";
 
 describe('live-view.reducers', () => {
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        NzTabsModule,
+        NzSpinModule,
+        NzSwitchModule,
+        NzFormModule,
+        FormsModule,
+        RouterTestingModule
+      ],
+      providers: [
+        provideMockStore({initialState}),
+      ],
+      declarations: [
+        LiveViewComponent,
+        MockComponent(SampleDataFormComponent),
+        MockComponent(LiveViewResultComponent),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    })
+      .compileComponents();
+  }));
 
   const testConfigState = {
     id: '123',
