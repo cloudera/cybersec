@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1111,
+    "name": "prod-cluster-1",
+    "status": "Running",
+    "node-count": 4,
+    "created": "30/01/2023 18:31"
+  },
+  {
+    "id": 222,
+    "name": "dev-cluster-1",
+    "status": "Stopped",
+    "node-count": 3,
+    "created": "31/01/2023 15:31"
+  }
+]

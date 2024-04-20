@@ -23,9 +23,6 @@ import {Observable} from "rxjs";
   styleUrls: ['./chain-view.component.scss']
 })
 export class ChainViewComponent implements OnInit {
-
-  private readonly _selectedSourceKey = "selectedIndexingSource";
-
   @Input() parsers: any [];
   @Input() dirtyParsers: string[];
   @Input() chainId: string;
@@ -37,6 +34,7 @@ export class ChainViewComponent implements OnInit {
   collapseAll: boolean;
   parserCollapseStateArray: boolean[];
   selectedSource: string;
+  private readonly _selectedSourceKey = "selectedIndexingSource";
 
   constructor(public chainPageService: ChainPageService) {
   }
@@ -66,7 +64,7 @@ export class ChainViewComponent implements OnInit {
   }
 
   trackByFn(index: number, parser: any): string {
-    return  (<ParserModel>parser).id !== undefined ? parser.id : parser;
+    return  (parser as ParserModel).id !== undefined ? parser.id : parser;
   }
 
   collapseExpandAllParsers() {

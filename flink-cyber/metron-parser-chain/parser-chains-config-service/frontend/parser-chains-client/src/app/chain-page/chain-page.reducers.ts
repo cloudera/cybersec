@@ -19,6 +19,7 @@ import * as chainPageActions from './chain-page.actions';
 import {ParserChainModel, ParserModel, RouteModel} from './chain-page.models';
 import {denormalizeParserConfig} from './chain-page.utils';
 import {CustomFormConfig} from './components/custom-form/custom-form.component';
+import * as chainListPageActions from "../chain-list-page/chain-list-page.actions";
 
 export interface ChainPageState {
   chains: { [key: string]: ParserChainModel };
@@ -27,13 +28,18 @@ export interface ChainPageState {
   error: string;
   parserToBeInvestigated: string;
   failedParser: string;
-  formConfigs?: { [key: string]: CustomFormConfig[] };
+  formConfigs?: { [key: string]: ParserDescriptor };
   dirtyParsers: string[];
   dirtyChains: string[];
   path: string[];
   indexMappings: { path: string, result: object };
 }
 
+export interface ParserDescriptor {
+  id: string;
+  name: string;
+  schemaItems: CustomFormConfig[];
+}
 export const initialState: ChainPageState = {
   chains: {},
   parsers: {},
@@ -54,9 +60,12 @@ export const uniqueAdd = (haystack: string[], needle: string): string[] => {
 
 export function reducer(
   state: ChainPageState = initialState,
-  action: chainPageActions.ChainDetailsAction | addParserActions.ParserAction | chainPageActions.IndexMappingAction
+  action: chainPageActions.ChainDetailsAction | addParserActions.ParserAction | chainListPageActions.ChainListAction | chainPageActions.IndexMappingAction
 ): ChainPageState {
   switch (action.type) {
+    case chainListPageActions.PIPELINE_CHANGED: {
+      return initialState
+    }
     case chainPageActions.LOAD_CHAIN_DETAILS_SUCCESS: {
       return {
         ...state,
@@ -298,30 +307,30 @@ export const getIndexMappings = createSelector(
   }
 );
 
-export const getChain = createSelector(
+export const getChain = (props: { id: string }) => createSelector(
   getChainPageState,
-  (state, props): ParserChainModel => {
+  (state) => {
     return state.chains[props.id];
   }
 );
 
-export const getParser = createSelector(
+export const getParser = (props: { id: string }) => createSelector(
   getChainPageState,
-  (state, props): ParserModel => {
+  (state) => {
     return state.parsers[props.id];
   }
 );
 
-export const getRoute = createSelector(
+export const getRoute = (props: { id: string }) => createSelector(
   getChainPageState,
-  (state, props): RouteModel => {
+  (state) => {
     return state.routes[props.id];
   }
 );
 
-export const getChainDetails = createSelector(
+export const getChainDetails = (props: { chainId: string }) => createSelector(
   getChainPageState,
-  (state, props) => {
+  (state) => {
     const mainChain = state.chains[props.chainId];
     return denormalizeParserConfig(mainChain, state);
   }
@@ -353,9 +362,11 @@ export const getDirtyStatus = createSelector(
   })
 );
 
-export const getFormConfigByType = createSelector(
+export const getFormConfigByType = (props: { type: string }) => createSelector(
   getChainPageState,
-  (state, props) => (state.formConfigs || {})[props.type]
+  (state) => {
+    return state?.formConfigs[props.type];
+  }
 );
 
 export const getFormConfigs = createSelector(

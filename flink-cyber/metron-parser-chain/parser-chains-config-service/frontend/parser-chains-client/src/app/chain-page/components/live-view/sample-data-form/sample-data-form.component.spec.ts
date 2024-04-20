@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -18,26 +18,36 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 
-import { SampleDataType } from '../models/sample-data.model';
+import {SampleDataModel, SampleDataType} from '../models/sample-data.model';
 
 import { SampleDataFormComponent } from './sample-data-form.component';
+import {NzTabsModule} from "ng-zorro-antd/tabs";
+import {MockComponent} from "ng-mocks";
+import {SampleDataTextInputComponent} from "./sample-data-text-input/sample-data-text-input.component";
+import {
+  SampleDataTextFolderInputComponent
+} from "./sample-data-text-folder-input/sample-data-text-folder-input.component";
 
-export class MockService {}
 
 describe('SampleDataFormComponent', () => {
   let component: SampleDataFormComponent;
   let fixture: ComponentFixture<SampleDataFormComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
+        NzTabsModule,
         FormsModule,
         NzFormModule,
         NzButtonModule,
         NzInputModule,
       ],
-      declarations: [ SampleDataFormComponent ],
-      providers: [{ provide: NzMessageService, useClass: MockService}]
+      declarations: [
+        SampleDataFormComponent,
+        MockComponent(SampleDataTextInputComponent),
+        MockComponent(SampleDataTextFolderInputComponent)
+      ],
+      providers: [ NzMessageService]
     })
     .compileComponents();
   }));
@@ -45,12 +55,6 @@ describe('SampleDataFormComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(SampleDataFormComponent);
     component = fixture.componentInstance;
-
-    component.sampleData = {
-      type: SampleDataType.MANUAL,
-      source: '',
-    };
-
     fixture.detectChanges();
   });
 
@@ -58,19 +62,32 @@ describe('SampleDataFormComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should dispatch change action', () => {
-    const sampleDataInput = fixture.debugElement.query(By.css('[data-qe-id="sample-input"]')).nativeElement;
-    const expected = {
+  it('should dispatch change action', (done) => {
+    component.sampleDataChange.subscribe(sampleData => {
+      expect(sampleData).toEqual(expected);
+      done();
+    });
+    const expected: SampleDataModel = {
       type: SampleDataType.MANUAL,
       source: 'test sample data',
     };
 
+    const sampleDataTextInput: SampleDataTextInputComponent = fixture.debugElement.query(By.directive(SampleDataTextInputComponent)).componentInstance;
+    sampleDataTextInput.sampleDataChange.emit(expected);
+  });
+
+  it('should dispatch change action from SampleDataFolder', (done) => {
+    fixture.debugElement.queryAll(By.css('.ant-tabs-tab-btn'))[1].nativeElement.click();
+    fixture.detectChanges();
     component.sampleDataChange.subscribe(sampleData => {
       expect(sampleData).toEqual(expected);
+      done();
     });
-
-    sampleDataInput.value = 'test sample data';
-    sampleDataInput.dispatchEvent(new Event('input'));
-    fixture.detectChanges();
+    const expected: SampleDataModel = {
+      type: SampleDataType.MANUAL,
+      source: 'test sample data',
+    };
+    const sampleDataFolderInput: SampleDataTextFolderInputComponent = fixture.debugElement.query(By.directive(SampleDataTextFolderInputComponent)).componentInstance;
+    sampleDataFolderInput.sampleDataChange.emit(expected);
   });
 });

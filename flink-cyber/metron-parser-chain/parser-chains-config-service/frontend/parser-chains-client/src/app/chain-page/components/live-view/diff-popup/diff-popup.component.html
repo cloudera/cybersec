@@ -3,13 +3,17 @@
         [nzVisible]="diffModalVisible$ | async"
         nzTitle="Difference"
         nzCentered="true"
-        (nzOnCancel)="handleCancelModal()"
-        (nzOnOk)="handleOkModal()"
+        [nzFooter]="modalFooter"
+        [nzContent]="modalContent"
 >
-    <ng-container *nzModalContent>
+    <ng-template #modalContent>
         <app-text-diff-view
-                [originalModel]="previousDiffValue$ | async"
-                [modifiedModel]="newDiffValue$ | async">
+                [originalModelJson]="previousDiffValue$ | async"
+                [modifiedModelJson]="newDiffValue$ | async">
         </app-text-diff-view>
-    </ng-container>
+    </ng-template>
+  <ng-template #modalFooter>
+    <button nz-button nzType="default" (click)="handleCancelModal()">Cancel</button>
+    <button nz-button nzType="primary" (click)="handleOkModal()" >Ok</button>
+  </ng-template>
 </nz-modal>
