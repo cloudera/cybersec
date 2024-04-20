@@ -12,7 +12,7 @@
 
 import { TestBed } from '@angular/core/testing';
 
-import { MonacoEditorService } from './monaco-editor.service';
+import {MonacoEditorService, MonacoWindow} from './monaco-editor.service';
 
 describe('MonacoEditorService', () => {
   let service: MonacoEditorService;
@@ -21,13 +21,13 @@ describe('MonacoEditorService', () => {
     TestBed.configureTestingModule({
       providers: [ MonacoEditorService ]
     });
-    service = TestBed.get(MonacoEditorService);
+    service = TestBed.inject(MonacoEditorService);
   });
 
   it('should register a model once with the given schema', () => {
     // mocking the monaco object in the global namespace (window)
     const modelToCreate = {};
-    (window as any).monaco = {
+    (window as MonacoWindow).monaco = {
       languages: { json: { jsonDefaults: { diagnosticsOptions: { schemas: [] } } } },
       Uri: { parse: (val) => val },
       editor: { createModel: () => modelToCreate }
