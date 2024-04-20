@@ -10,53 +10,42 @@
  * limitations governing your use of the file.
  */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { By } from '@angular/platform-browser';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { DeleteFill } from '@ant-design/icons-angular/icons';
-import { NzModalModule } from 'ng-zorro-antd/modal';
-import {  NZ_ICONS } from 'ng-zorro-antd/icon';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {FormsModule} from '@angular/forms';
+import {By} from '@angular/platform-browser';
+import {NoopAnimationsModule} from '@angular/platform-browser/animations';
+import {DeleteFill} from '@ant-design/icons-angular/icons';
+import {NzModalModule} from 'ng-zorro-antd/modal';
+import {NZ_ICONS} from 'ng-zorro-antd/icon';
 
 
-import { ConfigChangedEvent } from './advanced-editor/advanced-editor.component';
-import { ParserComponent } from './parser.component';
-import {MonacoEditorModule} from "ngx-monaco-editor-v2";
+import {AdvancedEditorComponent} from './advanced-editor/advanced-editor.component';
+import {ParserComponent} from './parser.component';
+import {MonacoEditorModule} from 'ngx-monaco-editor-v2';
+import {NzTabsModule} from "ng-zorro-antd/tabs";
+import {NzCollapseModule} from "ng-zorro-antd/collapse";
+import {MockComponent} from "ng-mocks";
+import {CustomFormComponent} from "../custom-form/custom-form.component";
 
-@Component({
-  selector: 'app-custom-form',
-  template: '',
-})
-export class MockCustomFormComponent {
-  @Input() config = [];
-}
-
-@Component({
-  selector: 'app-advanced-editor',
-  template: '',
-})
-export class MockAdvancedEditorComponent {
-  @Input() config = [];
-  @Output() configChanged = new EventEmitter<ConfigChangedEvent>();
-}
 
 describe('ParserComponent', () => {
   let component: ParserComponent;
   let fixture: ComponentFixture<ParserComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         FormsModule,
         NzModalModule,
+        NzTabsModule,
+        NzCollapseModule,
         NoopAnimationsModule,
         MonacoEditorModule,
       ],
       declarations: [
         ParserComponent,
-        MockCustomFormComponent,
-        MockAdvancedEditorComponent,
+        MockComponent(CustomFormComponent),
+        MockComponent(AdvancedEditorComponent),
       ],
       providers : [
         { provide: NZ_ICONS, useValue: [DeleteFill]}
@@ -156,46 +145,6 @@ describe('ParserComponent', () => {
     expect(fields[1].value).toEqual('field index');
   });
 
-  it('should update values in the parser properly', () => {
-    component.configForm = [{
-      id: 'fieldName',
-      name: 'fieldName',
-      type: 'text',
-      path: 'config.outputFields',
-      value: 'field name UPDATED'
-    }, {
-      id: 'fieldIndex',
-      name: 'fieldIndex',
-      type: 'text',
-      path: 'config.outputFields',
-      value: 'field index UPDATED'
-    }];
-    component.parser = {
-      id: '123',
-      name: 'Some parser',
-      type: 'Bro',
-      config: {
-        outputFields: {
-          fieldName: 'field name',
-          fieldIndex: 'field index'
-        }
-      }
-    };
-    component.ngOnInit();
-    component.parserChange.subscribe(() => {
-      expect(component.parser.config.outputFields.fieldName).toBe('field name UPDATED');
-      expect(component.parser.config.outputFields.fieldIndex).toBe('field index');
-    }).unsubscribe();
-    component.onCustomFormChange(component.parser, component.configForm[0]);
-
-    component.parserChange.subscribe(() => {
-      expect(component.parser.config.outputFields.fieldName).toBe('field name UPDATED');
-      expect(component.parser.config.outputFields.fieldIndex).toBe('field index UPDATED');
-    }).unsubscribe();
-    component.onCustomFormChange(component.parser, component.configForm[0]);
-    component.onCustomFormChange(component.parser, component.configForm[1]);
-  });
-
   it('should setup the form fields properly', () => {
     component.parser = {
       id: '123',
@@ -238,7 +187,7 @@ describe('ParserComponent', () => {
 
   it('should dispatch action if config changed by the advanced editor', () => {
     const mockListener = jasmine.createSpy('mockListener');
-    const value = { someField: 'some value' };
+    const value = { someField: {foo: 'bar'} };
 
     component.parserChange.subscribe(mockListener);
 

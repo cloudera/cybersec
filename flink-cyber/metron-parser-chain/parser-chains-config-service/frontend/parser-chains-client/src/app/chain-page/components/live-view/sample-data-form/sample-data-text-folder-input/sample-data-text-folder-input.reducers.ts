@@ -74,7 +74,7 @@ export function reducer(
             return {
                 ...state,
                 sampleData: action.sampleData,
-                chainId: action.chainConfig['id'],
+                chainId: action.chainConfig.id,
                 isTestExecuting: true,
             };
         }
@@ -157,7 +157,7 @@ function prepareResult(rawResult: Map<number, [SampleDataInternalModel, EntryPar
     raw: EntryParsingResultModel[],
     timestamp: bigint
 }> {
-    let resultMap = new Map<number, {
+    const resultMap = new Map<number, {
         status: SampleTestStatus,
         expected: string,
         result: string,
@@ -166,10 +166,10 @@ function prepareResult(rawResult: Map<number, [SampleDataInternalModel, EntryPar
         timestamp: bigint
     }>();
     rawResult.forEach((value, key) => {
-        let sample = value[0];
-        let result = value[1];
+        const sample = value[0];
+        const result = value[1];
 
-        let failedParser = result.find((result) => result.log.type === 'error');
+        const failedParser = result.find((res) => res.log.type === 'error');
 
         let status: SampleTestStatus;
         let output: string;
@@ -187,8 +187,8 @@ function prepareResult(rawResult: Map<number, [SampleDataInternalModel, EntryPar
                 status = SampleTestStatus.FAIL
             }
         } else {
-            let rawOutput = result[result.length - 1].output;
-            timestamp = rawOutput['timestamp']
+            const rawOutput = result[result.length - 1].output as { timestamp: string };
+            timestamp = rawOutput.timestamp;
 
             output = JSON.stringify(rawOutput);
             failure = false;
@@ -203,10 +203,10 @@ function prepareResult(rawResult: Map<number, [SampleDataInternalModel, EntryPar
         }
 
         resultMap.set(key, {
-            status: status,
+            status,
             expected: finalExpectedResult,
             result: output,
-            failure: failure,
+            failure,
             raw: result,
             timestamp: timestamp
         })

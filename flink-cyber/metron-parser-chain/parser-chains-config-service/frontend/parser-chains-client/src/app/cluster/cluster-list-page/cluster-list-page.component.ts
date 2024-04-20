@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {Router} from '@angular/router';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {ClusterModel, Job} from "./cluster-list-page.model";
@@ -23,25 +23,20 @@ import {tap} from "rxjs/operators";
   templateUrl: './cluster-list-page.component.html',
   styleUrls: ['./cluster-list-page.component.scss']
 })
-export class ClusterListPageComponent implements OnInit {
-  clusters$: Observable<ClusterModel[]>;
+export class ClusterListPageComponent {
+  clusters$: Observable<ClusterModel[]> =    this._clusterService.getClusters().pipe(tap(() => this.isLoading$.next(false)));
   displayedColumns: string[] = ['id', 'name', 'status', 'version', 'branches'];
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
 
   constructor(
-    private clusterService: ClusterService,
-    private router: Router,
+    private _clusterService: ClusterService,
+    private _router: Router,
   ) {
-    this.clusters$ = clusterService.getClusters().pipe(tap(() => this.isLoading$.next(false)));
-  }
-
-
-  ngOnInit() {
   }
 
   getBranches = (jobs: Job[]) => [...new Set(jobs.map(job => job.jobPipeline))].join(', ');
 
   goToDetailCluster = (clusterId: string | number) => {
-    this.router.navigate(['clusters', clusterId]);
+    this._router.navigate(['clusters', clusterId]);
   }
 }
