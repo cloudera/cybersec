@@ -3,9 +3,9 @@ import {MatSnackBar,} from '@angular/material/snack-bar';
 
 
 export enum SnackBarStatus {
-  Success,
-  Fail,
-  Warning
+  SUCCESS,
+  FAIL,
+  WARNING
 }
 
 interface SnackBarMessage {
@@ -20,56 +20,56 @@ interface SnackBarMessage {
   providedIn: 'root',
 })
 export class SnackbarService {
-  private messageQueue: SnackBarMessage[] = [];
+  private _messageQueue: SnackBarMessage[] = [];
 
-  constructor(private snackBar: MatSnackBar) {
+  constructor(private _snackBar: MatSnackBar) {
   }
 
   showMessage(
     message: string,
-    status: SnackBarStatus = SnackBarStatus.Fail,
+    status: SnackBarStatus = SnackBarStatus.FAIL,
     action: string = 'Close',
     duration: number = 3000
   ): void {
-    if (!this.snackBar._openedSnackBarRef && this.messageQueue.length === 0) {
-      this.showSnackBar(message, status, action, duration);
+    if (!this._snackBar._openedSnackBarRef && this._messageQueue.length === 0) {
+      this._showSnackBar(message, status, action, duration);
     } else {
-      this.messageQueue.push({message: message, status: status, action: action, duration: duration});
+      this._messageQueue.push({message, status, action, duration});
     }
   }
 
-  private showSnackBar(
+  getClasses(status: SnackBarStatus): string[] {
+    switch (status) {
+      case SnackBarStatus.SUCCESS:
+        return ['success-snackbar'];
+      case SnackBarStatus.FAIL:
+        return ['fail-snackbar'];
+      case SnackBarStatus.WARNING:
+        return ['warning-snackbar']
+      default:
+        return ['fail-snackbar'];
+    }
+  }
+
+  private _showSnackBar(
     message: string,
-    status: SnackBarStatus = SnackBarStatus.Fail,
+    status: SnackBarStatus = SnackBarStatus.FAIL,
     action: string = 'Close',
     duration: number = 3000
   ): void {
-    this.snackBar
+    this._snackBar
       .open(message, action, {
-        duration: duration,
+        duration,
         panelClass: this.getClasses(status),
         verticalPosition: 'top',
         horizontalPosition: 'center'
       })
       .afterDismissed()
       .subscribe(() => {
-        const mes: SnackBarMessage = this.messageQueue.shift();
-        if (!!mes && this.messageQueue.length > 0) {
-          this.showSnackBar(mes.message, mes.status, mes.action, mes.duration);
+        const mes: SnackBarMessage = this._messageQueue.shift();
+        if (!!mes && this._messageQueue.length > 0) {
+          this._showSnackBar(mes.message, mes.status, mes.action, mes.duration);
         }
       });
-  }
-
-  getClasses(status: SnackBarStatus): string[] {
-    switch (status) {
-      case SnackBarStatus.Success:
-        return ['success-snackbar'];
-      case SnackBarStatus.Fail:
-        return ['fail-snackbar'];
-      case SnackBarStatus.Warning:
-        return ['warning-snackbar']
-      default:
-        return ['fail-snackbar'];
-    }
   }
 }

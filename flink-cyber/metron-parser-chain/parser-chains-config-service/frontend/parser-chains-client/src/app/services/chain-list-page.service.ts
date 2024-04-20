@@ -14,41 +14,42 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 
 import {ChainModel, ChainOperationalModel} from '../chain-list-page/chain.model';
-import {getHttpParams} from "../chain-list-page/chain-list-page.utils";
+import {getHttpParams} from "../shared/service.utils";
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class ChainListPageService {
 
-    private readonly BASE_URL = '/api/v1/parserconfig/';
+  static readonly BASE_URL = '/api/v1/parserconfig/';
 
-    constructor(
-      private http: HttpClient
-    ) {}
+  constructor(
+    private _http: HttpClient
+  ) {
+  }
 
-    public createChain(chain: ChainOperationalModel, pipeline: string = null) {
-        let httpParams: HttpParams = getHttpParams(pipeline);
+  public createChain(chain: ChainOperationalModel, pipeline: string = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
 
-        return this.http.post<ChainModel>(this.BASE_URL + 'chains', chain,{params: httpParams});
-    }
+    return this._http.post<ChainModel>(ChainListPageService.BASE_URL + 'chains', chain, {params: httpParams});
+  }
 
-    public getChains(pipeline: string = null, params = null) {
-        let httpParams: HttpParams = getHttpParams(pipeline);
+  public getChains(pipeline: string = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
 
-        return this.http.get<ChainModel[]>(this.BASE_URL + 'chains',{params: httpParams});
-    }
+    return this._http.get<ChainModel[]>(ChainListPageService.BASE_URL + 'chains', {params: httpParams});
+  }
 
-    public deleteChain(chainId: string, pipeline: string = null) {
-        let httpParams: HttpParams = getHttpParams(pipeline);
+  public deleteChain(chainId: string, pipeline: string = null) {
+    const httpParams: HttpParams = getHttpParams(pipeline);
 
-        return this.http.delete(this.BASE_URL + 'chains/' + chainId,{params: httpParams});
-    }
+    return this._http.delete(ChainListPageService.BASE_URL + 'chains/' + chainId, {params: httpParams});
+  }
 
-    public getPipelines() {
-        let httpParams: HttpParams = getHttpParams(null);
+  public getPipelines() {
+    const httpParams: HttpParams = getHttpParams(null);
 
-        return this.http.delete(this.BASE_URL + 'pipeline', {params: httpParams});
-    }
+    return this._http.delete(ChainListPageService.BASE_URL + 'pipeline', {params: httpParams});
+  }
 
 }

@@ -10,16 +10,16 @@
  * limitations governing your use of the file.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { NzPopoverModule } from 'ng-zorro-antd/popover';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {NzPopoverModule} from 'ng-zorro-antd/popover';
 
-import { StackTraceComponent } from './stack-trace.component';
+import {StackTraceComponent} from './stack-trace.component';
 
 describe('StackTraceComponent', () => {
   let component: StackTraceComponent;
   let fixture: ComponentFixture<StackTraceComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         NzPopoverModule,

@@ -8,13 +8,15 @@ import {MatRadioModule} from "@angular/material/radio";
 import {MatCardModule} from "@angular/material/card";
 import {CommonModule} from "@angular/common";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import {ClusterPageModule} from "../cluster-page/cluster-page.module";
 
 @NgModule({
   declarations: [
-    ClusterListPageComponent
+    ClusterListPageComponent,
   ],
     imports: [
         MatTableModule,
+        ClusterPageModule,
         StatusIconModule,
         MatCheckboxModule,
         FormsModule,
@@ -23,8 +25,7 @@ import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
         CommonModule,
         MatProgressSpinnerModule,
     ],
-  providers: [
-  ],
+  providers: [],
   exports: [ClusterListPageComponent]
 })
 export class ClusterListPageModule {
