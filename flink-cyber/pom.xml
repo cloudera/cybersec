@@ -49,6 +49,7 @@
         <module>cyber-jobs</module>
         <module>cyber-csd</module>
         <module>cyber-parcel</module>
+        <module>cyber-services</module>
     </modules>
 
     <properties>
@@ -71,6 +72,9 @@
         <flink.format.parquet.version>1.11.1</flink.format.parquet.version>
         <slf4j.version>1.7.36</slf4j.version>
         <log4j.version>2.23.1</log4j.version>
+        <log4j1.version>1.2.17</log4j1.version>
+        <spring-boot.version>2.7.6</spring-boot.version>
+        <springdoc-openapi.version>1.6.11</springdoc-openapi.version>
         <multiline-string.version>0.1.2</multiline-string.version>
         <solr.version>8.4.1.${cdh.version}</solr.version>
         <maxmind.version>2.13.1</maxmind.version>
@@ -93,7 +97,6 @@
         <testng.version>7.9.0</testng.version>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
-        <commons.math3.version>3.6.1</commons.math3.version>
         <json-path.version>2.9.0</json-path.version>
         <java-grok.version>0.1.9</java-grok.version>
         <everit-json-schema.version>1.14.4</everit-json-schema.version>
@@ -116,7 +119,6 @@
         <zjsonpatch.version>0.3.4</zjsonpatch.version>
         <opencsv.version>3.7</opencsv.version>
         <javax.el.version>3.0.0</javax.el.version>
-        <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
         <spring-boot.version>2.7.18</spring-boot.version>
         <evo-inflector.version>1.2.2</evo-inflector.version>
         <springdoc-openapi.version>1.6.11</springdoc-openapi.version>
@@ -133,6 +135,7 @@
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-text.version>1.11.0</commons-text.version>
         <commons-lang3.version>3.10</commons-lang3.version>
+        <commons.math3.version>3.6.1</commons.math3.version>
         <commons-config.version>1.10</commons-config.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <commons-io.version>2.6</commons-io.version>
@@ -143,6 +146,7 @@
         <commons-compress.version>1.26.1</commons-compress.version>
         <!--Plugins-->
         <maven-shade-plugin.version>3.5.2</maven-shade-plugin.version>
+        <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
         <maven-assembly-plugin.version>3.7.0</maven-assembly-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>${maven-surefire-plugin.version}</maven-failsafe-plugin.version>
@@ -157,7 +161,7 @@
         <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
         <build-helper-maven-plugin.version>3.5.0</build-helper-maven-plugin.version>
         <frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
-        <frontend-maven-plugin.nodeVersion>v14.16.0</frontend-maven-plugin.nodeVersion>
+        <frontend-maven-plugin.nodeVersion>v16.10.0</frontend-maven-plugin.nodeVersion>
         <!--Tests-->
         <junit.version>4.13.2</junit.version>
         <junit5.version>5.7.0</junit5.version>
@@ -166,6 +170,7 @@
         <hamcrest.version>2.2</hamcrest.version>
         <testcontainers.version>1.19.7</testcontainers.version>
         <assertj.version>3.25.3</assertj.version>
+        <assertj-core.version>3.17.2</assertj-core.version>
         <kafka-junit4.version>3.2.5</kafka-junit4.version>
         <equalsverifier.version>2.5.2</equalsverifier.version>
         <mockserver.version>5.11.1</mockserver.version>
@@ -682,15 +687,25 @@
 
     <profiles>
         <profile>
+            <id>full-build</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>cyber-jobs</module>
+                <module>cyber-csd</module>
+                <module>cyber-parcel</module>
+                <module>metron-parser-chain/parser-chains-config-service/frontend/parser-chains-client</module>
+            </modules>
+        </profile>
+        <profile>
             <id>add-dependencies-for-IDEA</id>
-
             <activation>
                 <activeByDefault>true</activeByDefault>
                 <property>
                     <name>idea.version</name>
                 </property>
             </activation>
-
             <dependencies>
                 <dependency>
                     <groupId>org.apache.flink</groupId>
@@ -715,5 +730,4 @@
             </dependencies>
         </profile>
     </profiles>
-
 </project>

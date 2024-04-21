@@ -19,9 +19,12 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import java.util.concurrent.TimeUnit;
 
 public enum RuleType {
-    JS(new JavaScriptGraaljsEngineBuilder()),
+    JS_GRAAL(new JavaScriptGraaljsEngineBuilder()),
+    //JS_NASHORN is going to be removed after switch to JDK 17.
+    // It's recommended to switch to JS_GRAAL instead, or rely on the JS that will get replaced with JS_GRAAL once JS_NASHORN is removed
     @Deprecated
     JS_NASHORN(new JavaScriptNashornEngineBuilder()),
+    JS(JS_NASHORN.engineBuilder),
     PYTHON(new PythonEngineBuilder()),
     STELLAR(new StellarEngineBuilder());
 

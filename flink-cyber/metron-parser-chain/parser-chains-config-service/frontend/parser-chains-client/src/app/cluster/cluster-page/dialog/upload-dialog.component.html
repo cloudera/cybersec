@@ -1,0 +1,10 @@
+<mat-dialog-content>
+  <app-file-upload target="{{targetUrl}}" (preparedFiles)="preparedFile($event)"
+                   (inProgress)="inProgressFile($event)"></app-file-upload>
+</mat-dialog-content>
+<mat-dialog-actions align="center">
+  <button mat-raised-button color="primary" (click)="onConfirmClick()" tabindex="1"
+          [disabled]="disabledUpload">{{confirmButtonText}}</button>
+  <button mat-raised-button mat-dialog-close (click)="onCloseClick()" [disabled]="disabledClose"
+          tabindex="-1">{{cancelButtonText}}</button>
+</mat-dialog-actions>

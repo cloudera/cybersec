@@ -69,7 +69,6 @@
             <version>${log4j.version}</version>
             <scope>provided</scope>
         </dependency>
-
     </dependencies>
 
     <build>

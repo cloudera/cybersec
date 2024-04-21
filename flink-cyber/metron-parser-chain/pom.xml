@@ -33,7 +33,6 @@
         <module>parser-chains-core</module>
         <module>parser-chains-parsers</module>
         <module>parser-chains-config-service</module>
-        <module>parser-chains-config-service/frontend/parser-chains-client</module>
     </modules>
 
     <properties>
@@ -62,24 +61,9 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-hateoas</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.atteo</groupId>
                 <artifactId>evo-inflector</artifactId>
                 <version>${evo-inflector.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-actuator</artifactId>
-                <version>${spring-boot.version}</version>
             </dependency>
 
             <dependency>

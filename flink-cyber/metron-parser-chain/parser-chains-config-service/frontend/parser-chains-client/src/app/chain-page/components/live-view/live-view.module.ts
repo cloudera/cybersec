@@ -10,45 +10,47 @@
  * limitations governing your use of the file.
  */
 
-import { CommonModule } from '@angular/common';
-import { NgModule } from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {CUSTOM_ELEMENTS_SCHEMA, NgModule, NO_ERRORS_SCHEMA} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import { EffectsModule } from '@ngrx/effects';
-import { StoreModule } from '@ngrx/store';
-import { NzModalModule } from 'ng-zorro-antd/modal';
-import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzCardModule } from 'ng-zorro-antd/card';
-import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzPopoverModule } from 'ng-zorro-antd/popover';
-import { NzRadioModule } from 'ng-zorro-antd/radio';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzSwitchModule } from 'ng-zorro-antd/switch';
-import { NzTabsModule } from 'ng-zorro-antd/tabs';
+import {EffectsModule} from '@ngrx/effects';
+import {StoreModule} from '@ngrx/store';
+import {NzModalModule} from 'ng-zorro-antd/modal';
+import {NzButtonModule} from 'ng-zorro-antd/button';
+import {NzCardModule} from 'ng-zorro-antd/card';
+import {NzFormModule} from 'ng-zorro-antd/form';
+import {NzInputModule} from 'ng-zorro-antd/input';
+import {NzPopoverModule} from 'ng-zorro-antd/popover';
+import {NzRadioModule} from 'ng-zorro-antd/radio';
+import {NzSpinModule} from 'ng-zorro-antd/spin';
+import {NzSwitchModule} from 'ng-zorro-antd/switch';
+import {NzTabsModule} from 'ng-zorro-antd/tabs';
 
-import { LiveViewResultComponent } from './live-view-result/live-view-result.component';
-import { LiveViewComponent } from './live-view.component';
-import { LiveViewEffects } from './live-view.effects';
-import { reducer } from './live-view.reducers';
-import { ParserByParserComponent } from './parser-by-parser/parser-by-parser.component';
-import { SampleDataFormComponent } from './sample-data-form/sample-data-form.component';
-import { LiveViewService } from './services/live-view.service';
-import { StackTraceComponent } from './stack-trace/stack-trace.component';
-import { NzTimelineModule } from 'ng-zorro-antd/timeline';
-import { NzResultModule } from 'ng-zorro-antd/result';
+import {LiveViewResultComponent} from './live-view-result/live-view-result.component';
+import {LiveViewComponent} from './live-view.component';
+import {LiveViewEffects} from './live-view.effects';
+import {reducer} from './live-view.reducers';
+import {ParserByParserComponent} from './parser-by-parser/parser-by-parser.component';
+import {SampleDataFormComponent} from './sample-data-form/sample-data-form.component';
+import {LiveViewService} from './services/live-view.service';
+import {StackTraceComponent} from './stack-trace/stack-trace.component';
+import {NzTimelineModule} from 'ng-zorro-antd/timeline';
+import {NzResultModule} from 'ng-zorro-antd/result';
 import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
 import {NzIconModule} from "ng-zorro-antd/icon";
-import { SampleDataTextInputComponent } from './sample-data-form/sample-data-text-input/sample-data-text-input.component';
-import { SampleDataTextFolderInputComponent } from './sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.component';
+import {SampleDataTextInputComponent} from './sample-data-form/sample-data-text-input/sample-data-text-input.component';
+import {
+  SampleDataTextFolderInputComponent
+} from './sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.component';
 import {NzToolTipModule} from "ng-zorro-antd/tooltip";
 import {NzStepsModule} from "ng-zorro-antd/steps";
 import {NzTableModule} from "ng-zorro-antd/table";
 import {
-    SampleDataTextFolderInputModule
+  SampleDataTextFolderInputModule
 } from "./sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.module";
 import {NzCollapseModule} from "ng-zorro-antd/collapse";
 import { TextDiffViewComponent } from './text-diff-view/text-diff-view.component';
-import {MonacoEditorModule} from '@materia-ui/ngx-monaco-editor';
+import {MonacoEditorModule} from 'ngx-monaco-editor-v2';
 import {DiffPopupComponent} from "./diff-popup/diff-popup.component";
 import {DiffPopupModule} from "./diff-popup/diff-popup.module";
 
@@ -95,6 +97,7 @@ import {DiffPopupModule} from "./diff-popup/diff-popup.module";
   providers: [
     LiveViewService
   ],
-  exports: [ LiveViewComponent ]
+  exports: [ LiveViewComponent ],
+  schemas:[CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 export class LiveViewModule { }
