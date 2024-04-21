@@ -12,7 +12,6 @@
 
 package com.cloudera.parserchains.parsers;
 
-import static java.util.stream.Collectors.toList;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
@@ -21,6 +20,8 @@ import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.Serializable;
 import java.time.DateTimeException;
 import java.time.Instant;
@@ -32,7 +33,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
-import org.apache.commons.lang3.StringUtils;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * A parser to extract formatted timestamps and express them as epoch time, preserving the
@@ -82,7 +84,7 @@ public class TimestampFormatParser implements Parser {
             description = "The field that will contain the timestamp.",
             multipleValues = true)
     public TimestampFormatParser withOutputField(
-            @Parameter(key = "field", label = "Input Field", description = "Field to be parsed", required = true) String fieldName,
+            @Parameter(key = "field", label = "Input Field", description = "Field to be parsed", required = true, isOutputName = true) String fieldName,
             @Parameter(key = "format", label = "Time format", description = "A compatible time format", required = true) String format,
             @Parameter(key = "tz", label = "Timezone", description = "Optionally set the expected timezone", required = true) String tz
     ) {
