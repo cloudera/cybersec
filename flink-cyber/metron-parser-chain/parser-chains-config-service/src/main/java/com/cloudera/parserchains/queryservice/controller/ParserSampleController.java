@@ -18,34 +18,28 @@
 
 package com.cloudera.parserchains.queryservice.controller;
 
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_PARSER_TEST_SAMPLES;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PARSER_CONFIG_BASE_URL;
-
 import com.cloudera.parserchains.queryservice.config.AppProperties;
 import com.cloudera.parserchains.queryservice.model.describe.SampleFolderDescriptor;
 import com.cloudera.parserchains.queryservice.model.sample.ParserSample;
 import com.cloudera.parserchains.queryservice.service.ParserSampleService;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_PARSER_TEST_SAMPLES;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PARSER_CONFIG_BASE_URL;
 
 /**
  * The controller responsible for operations on parsers.
