@@ -16,6 +16,7 @@
       <nz-tabset class="left-side-tabs">
         <nz-tab class="parsers-tab" nzTitle="Parser config">
           <app-chain-view
+            *ngIf="this.parserToBeInvestigated?.length || this.breadcrumbs?.length || this.chain?.parsers?.length"
             [parsers]="parsers"
             [chainId]="(breadcrumbs.length > 0 && breadcrumbs[breadcrumbs.length - 1].id) || (chain && chain.id)"
             [dirtyParsers]="dirtyParsers"
@@ -62,7 +63,7 @@
           nz-popover
           [nzPopoverContent]="inputChainNameContent"
           nzPopoverTrigger="click"
-          [(nzVisible)]="popOverVisible"
+          [(nzPopoverVisible)]="popOverVisible"
           nzPopoverPlacement="bottom"
           nzType="default"
           >
@@ -78,7 +79,6 @@
                   formControlName="name"
                   required
                   nz-input
-                  #chainNameInput
                   type="text"
                   placeholder="Min 3 Characters"
                   data-qe-id="chain-name-field" />
@@ -114,10 +114,10 @@
   </div>
   <div nz-col nzSpan="4" class="chain-actions">
     <div nz-row nzType="flex" nzJustify="end">
-      <button nz-button nzType="default" type="button" (click)="onResetChanges($event)" [disabled]="!dirty">
+      <button nz-button nzType="default" type="button" (click)="onResetChanges()" [disabled]="!dirty">
       Reset
     </button>
-    <button nz-button nzType="primary" type="button" (click)="onSaveChanges($event)" [disabled]="!dirty">
+    <button nz-button nzType="primary" type="button" (click)="onSaveChanges()" [disabled]="!dirty">
       Save
     </button>
     </div>

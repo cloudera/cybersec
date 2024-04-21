@@ -11,11 +11,12 @@
  */
 
 import { Injectable } from '@angular/core';
+export type MonacoWindow = Window & typeof globalThis & { monaco: any };
 
 @Injectable()
 export class MonacoEditorService {
 
-  private registeredSchemas = {};
+  private _registeredSchemas = {};
 
   /**
    * Creates a model with the given schema and store it. Returns with
@@ -25,24 +26,25 @@ export class MonacoEditorService {
   public registerSchema(uri: string, schema: any, options: {
     value?: string
   } = {}) {
-    if (!this.registeredSchemas[uri]) {
+    if (!this._registeredSchemas[uri]) {
+      const { monaco } = window as MonacoWindow;
       monaco.languages.json.jsonDefaults.diagnosticsOptions.schemas.push(schema);
-      const model = this.createModel(uri, options);
-      this.registeredSchemas[uri] = model;
+      const model = this._createModel(monaco, uri, options);
+      this._registeredSchemas[uri] = model;
       return model;
     }
-    return this.registeredSchemas[uri];
+    return this._registeredSchemas[uri];
   }
 
   public getModel(uri: string) {
-    return this.registeredSchemas[uri] || null;
+    return this._registeredSchemas[uri] || null;
   }
 
   /**
    * Internal function to generate a model using the appropriate helper
    * function in the monaco object.
    */
-  private createModel(uri, options: {
+  private _createModel(monaco, uri, options: {
     value?: string
   } = {}) {
     const modelUri = monaco.Uri.parse(uri);
