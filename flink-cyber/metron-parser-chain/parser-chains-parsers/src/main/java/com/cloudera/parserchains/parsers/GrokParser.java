@@ -12,7 +12,6 @@
 
 package com.cloudera.parserchains.parsers;
 
-import static java.lang.String.format;
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
@@ -23,11 +22,14 @@ import com.cloudera.parserchains.core.catalog.Parameter;
 import com.cloudera.parserchains.core.catalog.WidgetType;
 import io.krakens.grok.api.Grok;
 import io.krakens.grok.api.GrokCompiler;
+import org.apache.commons.lang3.StringUtils;
+
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
+
+import static java.lang.String.format;
 
 @MessageParser(
         name = "Grok",
@@ -74,7 +76,8 @@ public class GrokParser implements Parser {
 
     @Configurable(key = "grokPattern",
             description = "Define a Grok pattern that can be referenced from an expression.",
-            orderPriority = 1)
+            orderPriority = 1,
+            isOutputName = true)
     public GrokParser pattern(
             @Parameter(key = "name", label = "Pattern Name") String patternName,
             @Parameter(key = "regex", label = "Pattern Regex", widgetType = WidgetType.TEXTAREA) String patternRegex) {

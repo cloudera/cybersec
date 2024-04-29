@@ -10,20 +10,22 @@
  * limitations governing your use of the file.
  */
 
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormsModule } from '@angular/forms';
-import { NzModalModule } from 'ng-zorro-antd/modal';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
+import {FormsModule} from '@angular/forms';
+import {NzModalModule} from 'ng-zorro-antd/modal';
 
-import { ThemeSwitchComponent } from './theme-switch.component';
+import {ThemeSwitchComponent} from './theme-switch.component';
+import {NzSwitchModule} from "ng-zorro-antd/switch";
 
 describe('ThemeSwitchComponent', () => {
   let component: ThemeSwitchComponent;
   let fixture: ComponentFixture<ThemeSwitchComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         NzModalModule,
+        NzSwitchModule,
         FormsModule
       ],
       declarations: [ ThemeSwitchComponent ]

@@ -1,0 +1,628 @@
+{
+  "com.cloudera.parserchains.parsers.JSONPathParser": {
+    "id": "com.cloudera.parserchains.parsers.JSONPathParser",
+    "name": "JSON Path",
+    "schemaItems": [
+      {
+        "name": "expr",
+        "type": "text",
+        "label": "Path Expression",
+        "description": "The path expression.",
+        "required": false,
+        "path": "config.expr",
+        "multiple": true
+      },
+      {
+        "name": "field",
+        "type": "text",
+        "label": "Field Name",
+        "description": "The field to create or modify.",
+        "required": false,
+        "path": "config.expr",
+        "multiple": true
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.TimestampFormatParser": {
+    "id": "com.cloudera.parserchains.parsers.TimestampFormatParser",
+    "name": "TimestampFormat",
+    "schemaItems": [
+      {
+        "name": "field",
+        "type": "text",
+        "label": "Input Field",
+        "description": "Field to be parsed",
+        "required": true,
+        "path": "config.fields",
+        "multiple": true
+      },
+      {
+        "name": "format",
+        "type": "text",
+        "label": "Time format",
+        "description": "A compatible time format",
+        "required": true,
+        "path": "config.fields",
+        "multiple": true
+      },
+      {
+        "name": "tz",
+        "type": "text",
+        "label": "Timezome",
+        "description": "Optionally set the expected timezone",
+        "required": true,
+        "path": "config.fields",
+        "multiple": true
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.XMLFlattener": {
+    "id": "com.cloudera.parserchains.parsers.XMLFlattener",
+    "name": "XML Flattener",
+    "schemaItems": [
+      {
+        "name": "inputField",
+        "type": "text",
+        "label": "Input Field",
+        "description": "The name of the input field to parse.",
+        "required": false,
+        "path": "config.inputField",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "inputField": "original_string"
+          }
+        ]
+      },
+      {
+        "name": "separator",
+        "type": "text",
+        "label": "Separator",
+        "description": "The character used to separate each nested XML element.",
+        "required": false,
+        "path": "config.separator",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "separator": "."
+          }
+        ]
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.RemoveFieldParser": {
+    "id": "com.cloudera.parserchains.parsers.RemoveFieldParser",
+    "name": "Remove Field(s)",
+    "schemaItems": [
+      {
+        "name": "fieldToRemove",
+        "type": "text",
+        "label": "Field to Remove",
+        "description": "The name of a field to remove.",
+        "required": true,
+        "path": "config.fieldToRemove",
+        "multiple": true
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.TimestampParser": {
+    "id": "com.cloudera.parserchains.parsers.TimestampParser",
+    "name": "Timestamp",
+    "schemaItems": [
+      {
+        "name": "outputField",
+        "type": "text",
+        "label": "Output Field",
+        "description": "The field that will contain the timestamp.",
+        "required": false,
+        "path": "config.outputField",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "outputField": "timestamp"
+          }
+        ]
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.CsvTextParser": {
+    "id": "com.cloudera.parserchains.parsers.CsvTextParser",
+    "name": "CSV/TSV Parser",
+    "schemaItems": [
+      {
+        "name": "delimiter",
+        "type": "text",
+        "label": "Delimiter",
+        "description": "A character used to split the text. Defaults to comma.",
+        "required": false,
+        "path": "config.delimiter",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "delimiter": ","
+          }
+        ]
+      },
+      {
+        "name": "fieldIndex",
+        "type": "text",
+        "label": "Column Index",
+        "description": "The index of the column containing the data.",
+        "required": false,
+        "path": "config.outputField",
+        "multiple": true
+      },
+      {
+        "name": "fieldName",
+        "type": "text",
+        "label": "Field Name",
+        "description": "The name of the output field.",
+        "required": false,
+        "path": "config.outputField",
+        "multiple": true
+      },
+      {
+        "name": "inputField",
+        "type": "text",
+        "label": "Input Field",
+        "description": "The name of the input field to parse.",
+        "required": false,
+        "path": "config.inputField",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "inputField": "original_string"
+          }
+        ]
+      },
+      {
+        "name": "quoteChar",
+        "type": "text",
+        "label": "Quote character",
+        "description": "A character used escape commas in text. Defaults to double-quote.",
+        "required": false,
+        "path": "config.quoteChar",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "quoteChar": "\""
+          }
+        ]
+      },
+      {
+        "name": "trim",
+        "type": "text",
+        "label": "Trim Whitespace",
+        "description": "Trim whitespace from each value. Defaults to true.",
+        "required": false,
+        "path": "config.trim",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "trim": "true"
+          }
+        ]
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.JSONParser": {
+    "id": "com.cloudera.parserchains.parsers.JSONParser",
+    "name": "Simple JSON",
+    "schemaItems": [
+      {
+        "name": "input",
+        "type": "text",
+        "label": "Input Field",
+        "description": "The input field to parse.",
+        "required": false,
+        "path": "config.input",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "input": "original_string"
+          }
+        ]
+      },
+      {
+        "name": "norm",
+        "type": "text",
+        "label": "Normalizer",
+        "description": "Defines how fields are normalized. Accepted values include: 'ALLOW_NESTED' Embed nested JSON string as the field value.  'DISALLOW_NESTED' Stop parsing and throw an error if nested JSON exists.  'DROP_NESTED' Drop and ignore any nested JSON values.  'UNFOLD_NESTED' Unfold the nested JSON by creating a nested, dot-separated field name.  ",
+        "required": false,
+        "path": "config.norm",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "norm": "UNFOLD_NESTED"
+          }
+        ]
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.StellarParser": {
+    "id": "com.cloudera.parserchains.parsers.StellarParser",
+    "name": "Metron Stellar parser",
+    "schemaItems": [
+      {
+        "name": "configurationPath",
+        "type": "text",
+        "label": "Configuration File Path",
+        "description": "Path to parser config file",
+        "required": false,
+        "path": "config.configurationPath",
+        "multiple": true
+      },
+      {
+        "name": "input",
+        "type": "text",
+        "label": "Input Field",
+        "description": "The input field to parse.",
+        "required": false,
+        "path": "config.input",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "input": "original_string"
+          }
+        ]
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.AlwaysFailParser": {
+    "id": "com.cloudera.parserchains.parsers.AlwaysFailParser",
+    "name": "Error",
+    "schemaItems": [
+      {
+        "name": "errorMessage",
+        "type": "text",
+        "label": "Error Message",
+        "description": "The error message explaining the error.",
+        "required": false,
+        "path": "config.errorMessage",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "errorMessage": "Parsing error encountered"
+          }
+        ]
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.DelimitedTextParser": {
+    "id": "com.cloudera.parserchains.parsers.DelimitedTextParser",
+    "name": "Delimited Text",
+    "schemaItems": [
+      {
+        "name": "delimiter",
+        "type": "text",
+        "label": "Delimiter",
+        "description": "A regex used to split the text. Defaults to comma.",
+        "required": false,
+        "path": "config.delimiter",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "delimiter": ","
+          }
+        ]
+      },
+      {
+        "name": "fieldIndex",
+        "type": "text",
+        "label": "Column Index",
+        "description": "The index of the column containing the data.",
+        "required": false,
+        "path": "config.outputField",
+        "multiple": true
+      },
+      {
+        "name": "fieldName",
+        "type": "text",
+        "label": "Field Name",
+        "description": "The name of the output field.",
+        "required": false,
+        "path": "config.outputField",
+        "multiple": true
+      },
+      {
+        "name": "inputField",
+        "type": "text",
+        "label": "Input Field",
+        "description": "The name of the input field to parse.",
+        "required": false,
+        "path": "config.inputField",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "inputField": "original_string"
+          }
+        ]
+      },
+      {
+        "name": "trim",
+        "type": "text",
+        "label": "Trim Whitespace",
+        "description": "Trim whitespace from each value. Defaults to true.",
+        "required": false,
+        "path": "config.trim",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "trim": "true"
+          }
+        ]
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.SyslogParser": {
+    "id": "com.cloudera.parserchains.parsers.SyslogParser",
+    "name": "Syslog",
+    "schemaItems": [
+      {
+        "name": "inputField",
+        "type": "text",
+        "label": "Input Field",
+        "description": "The name of the input field to parse.",
+        "required": false,
+        "path": "config.inputField",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "inputField": "original_string"
+          }
+        ]
+      },
+      {
+        "name": "specification",
+        "type": "text",
+        "label": "Specification",
+        "description": "The Syslog specification; 'RFC_5424' or 'RFC_3164'",
+        "required": false,
+        "path": "config.specification",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "specification": "RFC_5424"
+          }
+        ]
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.XPathParser": {
+    "id": "com.cloudera.parserchains.parsers.XPathParser",
+    "name": "XPath",
+    "schemaItems": [
+      {
+        "name": "expr",
+        "type": "text",
+        "label": "XPath",
+        "description": "The XPath expression.",
+        "required": false,
+        "path": "config.xpath",
+        "multiple": true
+      },
+      {
+        "name": "field",
+        "type": "text",
+        "label": "Field Name",
+        "description": "The field to create or modify.",
+        "required": false,
+        "path": "config.xpath",
+        "multiple": true
+      },
+      {
+        "name": "input",
+        "type": "text",
+        "label": "Input Field",
+        "description": "The input field to parse.",
+        "required": false,
+        "path": "config.input",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "input": "original_string"
+          }
+        ]
+      },
+      {
+        "name": "nsAware",
+        "type": "text",
+        "label": "Namespace Aware",
+        "description": "Should the parser support XML namespaces.",
+        "required": false,
+        "path": "config.nsAware",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "nsAware": "false"
+          }
+        ]
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.AvroParser": {
+    "id": "com.cloudera.parserchains.parsers.AvroParser",
+    "name": "Simple Avro parser",
+    "schemaItems": [
+      {
+        "name": "input",
+        "type": "text",
+        "label": "Input Field",
+        "description": "The input field to parse.",
+        "required": false,
+        "path": "config.input",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "input": "original_string"
+          }
+        ]
+      },
+      {
+        "name": "schemaPath",
+        "type": "text",
+        "label": "Schema Path",
+        "description": "Path to schema of avro file",
+        "required": false,
+        "path": "config.schemaPath",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "schemaPath": "netflow.schema"
+          }
+        ]
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.GrokParser": {
+    "id": "com.cloudera.parserchains.parsers.GrokParser",
+    "name": "Grok",
+    "schemaItems": [
+      {
+        "name": "grokExpression",
+        "type": "text",
+        "label": "Grok Expression(s)",
+        "description": "The grok expression to execute.",
+        "required": false,
+        "path": "config.grokExpression",
+        "multiple": true
+      },
+      {
+        "name": "inputField",
+        "type": "text",
+        "label": "Input Field",
+        "description": "The name of the input field to parse.",
+        "required": false,
+        "path": "config.inputField",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "inputField": "original_string"
+          }
+        ]
+      },
+      {
+        "name": "name",
+        "type": "text",
+        "label": "Pattern Name",
+        "description": "",
+        "required": false,
+        "path": "config.grokPattern",
+        "multiple": true
+      },
+      {
+        "name": "regex",
+        "type": "textarea",
+        "label": "Pattern Regex",
+        "description": "",
+        "required": false,
+        "path": "config.grokPattern",
+        "multiple": true
+      },
+      {
+        "name": "zoneOffset",
+        "type": "text",
+        "label": "Zone Offset",
+        "description": "Set the zone offset. For example \"+02:00\".",
+        "required": false,
+        "path": "config.zoneOffset",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "zoneOffset": "+00:00"
+          }
+        ]
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.DelimitedKeyValueParser": {
+    "id": "com.cloudera.parserchains.parsers.DelimitedKeyValueParser",
+    "name": "Delimited Key Values",
+    "schemaItems": [
+      {
+        "name": "delimiter",
+        "type": "text",
+        "label": "Key Value Delimiter",
+        "description": "A regex that separates different key-value pairs.",
+        "required": false,
+        "path": "config.delimiter",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "delimiter": "\\|\\|"
+          }
+        ]
+      },
+      {
+        "name": "input",
+        "type": "text",
+        "label": "Input Field",
+        "description": "The input field to parse.",
+        "required": false,
+        "path": "config.input",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "input": "original_string"
+          }
+        ]
+      },
+      {
+        "name": "separator",
+        "type": "text",
+        "label": "Key Value Separator",
+        "description": "A regex that separates a key and value within a key-value pair.",
+        "required": false,
+        "path": "config.separator",
+        "multiple": true,
+        "defaultValue": [
+          {
+            "separator": "="
+          }
+        ]
+      },
+      {
+        "name": "validKey",
+        "type": "text",
+        "label": "Valid Key Regex",
+        "description": "Any key not matching this regex will be ignored.",
+        "required": false,
+        "path": "config.validKey",
+        "multiple": true
+      },
+      {
+        "name": "validValue",
+        "type": "text",
+        "label": "Valid Value Regex",
+        "description": "Any value not matching this regex will be ignored.",
+        "required": false,
+        "path": "config.validValue",
+        "multiple": true
+      }
+    ]
+  },
+  "com.cloudera.parserchains.parsers.RenameFieldParser": {
+    "id": "com.cloudera.parserchains.parsers.RenameFieldParser",
+    "name": "Rename Field(s)",
+    "schemaItems": [
+      {
+        "name": "from",
+        "type": "text",
+        "label": "Rename From",
+        "description": "The original name of the field.",
+        "required": false,
+        "path": "config.fieldToRename",
+        "multiple": true
+      },
+      {
+        "name": "to",
+        "type": "text",
+        "label": "Rename To",
+        "description": "The new name of the field.",
+        "required": false,
+        "path": "config.fieldToRename",
+        "multiple": true
+      }
+    ]
+  }
+}

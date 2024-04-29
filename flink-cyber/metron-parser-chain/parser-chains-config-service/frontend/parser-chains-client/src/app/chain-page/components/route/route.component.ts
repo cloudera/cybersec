@@ -10,13 +10,13 @@
  * limitations governing your use of the file.
  */
 
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { select, Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
+import {select, Store} from '@ngrx/store';
+import {Subscription} from 'rxjs';
 
 import * as fromActions from '../../chain-page.actions';
-import { ParserChainModel, ParserModel, RouteModel } from '../../chain-page.models';
-import { ChainPageState, getChain, getRoute } from '../../chain-page.reducers';
+import {ParserChainModel, ParserModel, RouteModel} from '../../chain-page.models';
+import {ChainPageState, getChain, getRoute} from '../../chain-page.reducers';
 
 @Component({
   selector: 'app-route',
@@ -35,20 +35,21 @@ export class RouteComponent implements OnInit, OnDestroy {
   getChainSub: Subscription;
 
   constructor(
-    private store: Store<ChainPageState>,
-  ) { }
+    private _store: Store<ChainPageState>,
+  ) {
+  }
 
   ngOnInit() {
-    this.getRouteSub = this.store.pipe(select(getRoute, {
+    this.getRouteSub = this._store.pipe(select(getRoute({
       id: this.routeId
-    })).subscribe((route) => {
+    }))).subscribe((route) => {
       this.route = route;
       if (route && route.subchain) {
-        this.getChainSub = this.store.pipe(select(getChain, {
-          id: this.route.subchain
-        })).subscribe((subchain) => {
-          this.subchain = subchain;
-        });
+        const id = typeof route.subchain === 'string' ? route.subchain : route.subchain.id;
+        this.getChainSub = this._store.pipe(select(getChain({id})))
+          .subscribe((subchain) => {
+            this.subchain = subchain;
+          });
       }
     });
   }
@@ -60,7 +61,7 @@ export class RouteComponent implements OnInit, OnDestroy {
   onMatchingValueBlur(event: Event, route: RouteModel) {
     const matchingValue = ((event.target as HTMLInputElement).value || '').trim();
     if (matchingValue !== route.matchingValue) {
-      this.store.dispatch(
+      this._store.dispatch(
         new fromActions.UpdateChainAction({
           chain: {
             id: this.subchain.id,
@@ -68,7 +69,7 @@ export class RouteComponent implements OnInit, OnDestroy {
           }
         })
       );
-      this.store.dispatch(
+      this._store.dispatch(
         new fromActions.UpdateRouteAction({
           chainId: this.subchain.id,
           parserId: this.parser.id,
@@ -82,7 +83,7 @@ export class RouteComponent implements OnInit, OnDestroy {
   }
 
   onRouteRemoveConfirmed(event: Event, route: RouteModel) {
-    this.store.dispatch(
+    this._store.dispatch(
       new fromActions.RemoveRouteAction({
         chainId: this.subchain.id,
         parserId: this.parser.id,
@@ -92,7 +93,7 @@ export class RouteComponent implements OnInit, OnDestroy {
   }
 
   onDefaultCheckboxChange(event: Event, route: RouteModel) {
-    this.store.dispatch(
+    this._store.dispatch(
       new fromActions.SetRouteAsDefaultAction({
         chainId: this.subchain.id,
         parserId: this.parser.id,
