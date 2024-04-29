@@ -41,6 +41,7 @@ public class JavaScriptNashornEngine extends JavaScriptEngine {
 
         @Override
         protected ValidatedScriptEngine initialize() {
+            log.warn("Initializing deprecated JavaScript Nashorn engine! Consider switching to GraalJS instead.");
             return create(getFunctionName(), script);
         }
     };
