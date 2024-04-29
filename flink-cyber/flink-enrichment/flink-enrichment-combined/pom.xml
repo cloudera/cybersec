@@ -28,6 +28,10 @@
     <artifactId>flink-enrichment-combined</artifactId>
     <dependencies>
         <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-hdfs-client</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-cyber-api</artifactId>
             <version>${project.parent.version}</version>
@@ -67,7 +71,6 @@
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-enrichment-geocode</artifactId>
             <version>${project.parent.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>

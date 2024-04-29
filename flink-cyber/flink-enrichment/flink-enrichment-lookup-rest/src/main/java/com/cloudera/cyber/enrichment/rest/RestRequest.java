@@ -182,6 +182,7 @@ public abstract class RestRequest implements AsyncCacheLoader<RestRequestKey, Re
                 }
             } catch (Exception e) {
                 addErrorToResult(key, result, e.getMessage());
+                throw new RuntimeException(e);
             }
             return result;
         }, executor);
