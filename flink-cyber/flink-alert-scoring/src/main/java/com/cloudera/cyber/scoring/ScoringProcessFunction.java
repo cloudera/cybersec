@@ -63,9 +63,13 @@ public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRu
                     .map(r -> {
                         Map<String, Object> results = r.apply(message);
                         if (results != null) {
+                            Object score = results.get(RESULT_SCORE);
+                            if (!(score instanceof Double)){
+                                score = new Double(String.valueOf(score));
+                            }
                             return Scores.builder()
                                     .ruleId(r.getId())
-                                    .score((Double) results.get(RESULT_SCORE))
+                                    .score((Double) score)
                                     .reason((String) results.get(RESULT_REASON))
                                     .build();
                         } else {
