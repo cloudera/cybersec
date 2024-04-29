@@ -18,8 +18,12 @@
   margin-top: 6px;
 }
 
-.editor{
+.editor {
   resize: vertical;
   overflow: auto;
   height: 500px;
+}
+
+.update-expected-button {
+  margin: 0.5rem;
 }
