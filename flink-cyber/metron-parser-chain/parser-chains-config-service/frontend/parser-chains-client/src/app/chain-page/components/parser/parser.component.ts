@@ -37,9 +37,7 @@ export class ParserComponent implements OnInit, OnChanges {
   @Input() indexingFieldMap: Map<string,Map<string, boolean>>;
   @Output() removeParser = new EventEmitter<string>();
   @Output() parserChange = new EventEmitter<any>();
-
   editName = false;
-
   areFormsReadyToRender = false;
   parserCollapseState = [];
 
@@ -50,19 +48,11 @@ export class ParserComponent implements OnInit, OnChanges {
   ngOnInit() {
     this.configForm = this.setFormFieldValues(this.configForm);
 
-
-    setTimeout(() => {
-      this.areFormsReadyToRender = true;
-    });
   }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.configForm) {
-      this.areFormsReadyToRender = false;
       this.configForm = this.setFormFieldValues(this.configForm);
-      setTimeout(() => {
-        this.areFormsReadyToRender = true;
-      });
     }
     if (changes.parser && changes.parser.previousValue) {
       Object.keys(changes.parser.previousValue).forEach(key => {
@@ -137,20 +127,48 @@ export class ParserComponent implements OnInit, OnChanges {
     });
   }
 
-  private updateRegularParserWithFormData(parser: ParserModel, formFieldData: CustomFormConfig) {
+
+  onCustomFormChange(parser: ParserModel, formFieldData: CustomFormConfig) {
+    let partialParser;
+    if (formFieldData.multiple) {
+      partialParser = this._updateMultiValueParserWithFormData(parser, formFieldData);
+    } else {
+      partialParser = this._updateRegularParserWithFormData(parser, formFieldData);
+    }
+
+    this.dirty = true;
+    this.parserChange.emit(partialParser);
+  }
+
+  onRemoveParser(parserId: string) {
+    this.removeParser.emit(parserId);
+  }
+
+  onAdvancedEditorChanged(event: ConfigChangedEvent) {
+    this.parserChange.emit({ id: this.parser.id, config: event.value });
+  }
+
+  onParserNameChange(name: string) {
+    this.parserChange.emit({ id: this.parser.id, name });
+  }
+
+  preventCollapse(event: Event) {
+    event.stopPropagation();
+  }
+  private _updateRegularParserWithFormData(parser: ParserModel, formFieldData: CustomFormConfig) {
     return formFieldData.path
       ? produce(parser, (draftParser) => {
-          set({
-            ...draftParser
-          }, [formFieldData.path, formFieldData.name].join('.'), formFieldData.value);
-        })
+        set({
+          ...draftParser
+        }, [formFieldData.path, formFieldData.name].join('.'), formFieldData.value);
+      })
       : {
         id: parser.id,
         [formFieldData.name]: formFieldData.value
       };
   }
 
-  private updateMultiValueParserWithFormData(parser: ParserModel, formFieldData: CustomFormConfig) {
+  private _updateMultiValueParserWithFormData(parser: ParserModel, formFieldData: CustomFormConfig) {
     let current;
     if (formFieldData.path) {
       current = get(parser, formFieldData.path);
@@ -203,33 +221,4 @@ export class ParserComponent implements OnInit, OnChanges {
       });
     }
   }
-
-  onCustomFormChange(parser: ParserModel, formFieldData: CustomFormConfig) {
-    let partialParser;
-    if (formFieldData.multiple) {
-      partialParser = this.updateMultiValueParserWithFormData(parser, formFieldData);
-    } else {
-      partialParser = this.updateRegularParserWithFormData(parser, formFieldData);
-    }
-
-    this.dirty = true;
-    this.parserChange.emit(partialParser);
-  }
-
-  onRemoveParser(parserId: string) {
-    this.removeParser.emit(parserId);
-  }
-
-  onAdvancedEditorChanged(event: ConfigChangedEvent) {
-    this.parserChange.emit({ id: this.parser.id, config: event.value });
-  }
-
-  onParserNameChange(name: string) {
-    this.parserChange.emit({ id: this.parser.id, name });
-  }
-
-  preventCollapse(event: Event) {
-    event.stopPropagation();
-  }
-
 }

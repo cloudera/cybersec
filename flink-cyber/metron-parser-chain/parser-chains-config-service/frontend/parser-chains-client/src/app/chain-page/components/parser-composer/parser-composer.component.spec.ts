@@ -10,39 +10,23 @@
  * limitations governing your use of the file.
  */
 
-import { Component, Input } from '@angular/core';
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import { StoreModule } from '@ngrx/store';
 
 import * as fromReducers from '../../chain-page.reducers';
 
 import { ParserComposerComponent } from './parser-composer.component';
+import {MockComponent} from "ng-mocks";
+import {ParserComponent} from "../parser/parser.component";
+import {RouterComponent} from "../router/router.component";
 
-@Component({
-  selector: 'app-parser',
-  template: ''
-})
-class MockParserComponent {
-  @Input() dirty = false;
-  @Input() parser : any;
-  @Input() configForm : any;
-  @Input() isolatedParserView : any;
-  @Input() parserType : any;
-  @Input() failedParser : any;
-  @Input() collapsed : any;
-}
 
-@Component({
-  selector: 'app-router',
-  template: ''
-})
-class MockRouterComponent extends MockParserComponent {}
 
 describe('ParserComposerComponent', () => {
   let component: ParserComposerComponent;
   let fixture: ComponentFixture<ParserComposerComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
         StoreModule.forRoot({
@@ -51,8 +35,8 @@ describe('ParserComposerComponent', () => {
       ],
       declarations: [
         ParserComposerComponent,
-        MockParserComponent,
-        MockRouterComponent
+        MockComponent(ParserComponent),
+        MockComponent(RouterComponent)
       ]
     })
     .compileComponents();

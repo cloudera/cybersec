@@ -14,10 +14,13 @@ import {SampleDataInternalModel, SampleTestStatus} from "../../models/sample-dat
 import {
     ExecutionListFailedAction,
     ExecutionListSuccessfulAction,
-    ExecutionListTriggeredAction, FetchSampleListFailedAction, FetchSampleListSuccessfulAction,
+    ExecutionListTriggeredAction,
+    FetchSampleListFailedAction,
+    FetchSampleListSuccessfulAction,
     FetchSampleListTriggeredAction,
     HideEditModalAction,
-    SampleFolderActionsType, SampleFolderPathRestoredAction,
+    SampleFolderActionsType,
+    SampleFolderPathRestoredAction,
     SaveSampleListFailedAction,
     SaveSampleListSuccessfulAction,
     SaveSampleListTriggeredAction,
@@ -38,7 +41,8 @@ export interface SampleDataTextFolderInputState {
         expected: string,
         result: string,
         failure: boolean,
-        raw: EntryParsingResultModel[]
+        raw: EntryParsingResultModel[],
+        timestamp: bigint
     }>;
 }
 
@@ -70,7 +74,7 @@ export function reducer(
             return {
                 ...state,
                 sampleData: action.sampleData,
-                chainId: action.chainConfig['id'],
+                chainId: action.chainConfig.id,
                 isTestExecuting: true,
             };
         }
@@ -150,25 +154,28 @@ function prepareResult(rawResult: Map<number, [SampleDataInternalModel, EntryPar
     expected: string,
     result: string,
     failure: boolean,
-    raw: EntryParsingResultModel[]
+    raw: EntryParsingResultModel[],
+    timestamp: bigint
 }> {
-    let resultMap = new Map<number, {
+    const resultMap = new Map<number, {
         status: SampleTestStatus,
         expected: string,
         result: string,
         failure: boolean,
-        raw: EntryParsingResultModel[]
+        raw: EntryParsingResultModel[],
+        timestamp: bigint
     }>();
     rawResult.forEach((value, key) => {
-        let sample = value[0];
-        let result = value[1];
+        const sample = value[0];
+        const result = value[1];
 
-        let failedParser = result.find((result) => result.log.type === 'error');
+        const failedParser = result.find((res) => res.log.type === 'error');
 
         let status: SampleTestStatus;
         let output: string;
         let failure: boolean;
         let finalExpectedResult = sample.expectedResult;
+        let timestamp = null;
 
         if (failedParser) {
             output = failedParser.log.message;
@@ -180,8 +187,8 @@ function prepareResult(rawResult: Map<number, [SampleDataInternalModel, EntryPar
                 status = SampleTestStatus.FAIL
             }
         } else {
-            let rawOutput = result[result.length - 1].output;
-            let timestamp = rawOutput['timestamp']
+            const rawOutput = result[result.length - 1].output as { timestamp: string };
+            timestamp = rawOutput.timestamp;
 
             output = JSON.stringify(rawOutput);
             failure = false;
@@ -196,11 +203,12 @@ function prepareResult(rawResult: Map<number, [SampleDataInternalModel, EntryPar
         }
 
         resultMap.set(key, {
-            status: status,
+            status,
             expected: finalExpectedResult,
             result: output,
-            failure: failure,
-            raw: result
+            failure,
+            raw: result,
+            timestamp: timestamp
         })
     })
     return resultMap

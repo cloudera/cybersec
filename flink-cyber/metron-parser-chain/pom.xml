@@ -33,7 +33,6 @@
         <module>parser-chains-core</module>
         <module>parser-chains-parsers</module>
         <module>parser-chains-config-service</module>
-        <module>parser-chains-config-service/frontend/parser-chains-client</module>
     </modules>
 
     <properties>
@@ -50,7 +49,7 @@
         <maven-source-plugin.version>3.2.0</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.1.1</maven-javadoc-plugin.version>
         <frontend-maven-plugin.version>1.12.1</frontend-maven-plugin.version>
-        <frontend-maven-plugin.nodeVersion>v14.20.0</frontend-maven-plugin.nodeVersion>
+        <frontend-maven-plugin.nodeVersion>v16.10.0</frontend-maven-plugin.nodeVersion>
 
         <!-- main dependency versions -->
         <lombok.version>1.18.12</lombok.version>
@@ -92,24 +91,9 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-hateoas</artifactId>
-                <version>${spring-boot.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.atteo</groupId>
                 <artifactId>evo-inflector</artifactId>
                 <version>${evo-inflector.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-actuator</artifactId>
-                <version>${spring-boot.version}</version>
             </dependency>
 
             <dependency>

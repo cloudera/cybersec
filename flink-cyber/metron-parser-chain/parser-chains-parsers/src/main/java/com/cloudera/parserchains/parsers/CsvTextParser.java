@@ -12,9 +12,6 @@
 
 package com.cloudera.parserchains.parsers;
 
-import static com.cloudera.parserchains.core.utils.StringUtils.getFirstChar;
-import static com.cloudera.parserchains.core.utils.StringUtils.unescapeJava;
-import static java.lang.String.format;
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
@@ -29,13 +26,18 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
-import org.apache.commons.lang3.StringUtils;
+
+import static com.cloudera.parserchains.core.utils.StringUtils.getFirstChar;
+import static com.cloudera.parserchains.core.utils.StringUtils.unescapeJava;
+import static java.lang.String.format;
 
 /**
  * Parses delimited text like CSV.
@@ -95,6 +97,7 @@ public class CsvTextParser implements Parser {
     @Configurable(key = "inputField",
             label = "Input Field",
             description = "The name of the input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
+            isOutputName = true,
             defaultValue = Constants.DEFAULT_INPUT_FIELD)
     public CsvTextParser withInputField(String fieldName) {
         if (StringUtils.isNotEmpty(fieldName)) {
