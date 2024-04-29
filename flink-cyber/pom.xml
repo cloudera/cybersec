@@ -118,7 +118,6 @@
         <junit.version>4.12</junit.version>
         <junit5.version>5.7.0</junit5.version>
         <orc.version>1.5.1.${cdh.version}</orc.version>
-        <spring-boot.version>2.7.6</spring-boot.version>
         <swagger-annotations.version>1.6.0</swagger-annotations.version>
         <commons-cli.version>1.5.0</commons-cli.version>
     </properties>
