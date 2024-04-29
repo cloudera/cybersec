@@ -1,0 +1,33 @@
+@use "@angular/material" as mat;
+@use "sass:map";
+
+@mixin multi-button-component-theme($config-or-theme) {
+  // retrieve variables from theme
+  // (all possible variables, use only what you really need)
+  $config: mat.get-color-config($config-or-theme);
+  $primary: map.get($config, primary);
+
+
+  .mat-button-toggle {
+    &:not(.mat-button-toggle-checked):hover {
+      background-color: mat.get-color-from-palette($primary, 600);
+      color: mat.get-contrast-color-from-palette($primary, 600);
+    }
+    background-color: mat.get-color-from-palette($primary, 500);
+    color: mat.get-contrast-color-from-palette($primary, 500);
+  }
+
+  .mat-button-toggle-group-appearance-standard .mat-button-toggle + .mat-button-toggle {
+    border-left: solid 2px mat.get-color-from-palette($primary, 900);
+  }
+  .mat-button-toggle-group-appearance-standard {
+    border: solid 2px mat.get-color-from-palette($primary, 900);
+  }
+
+  .mat-button-toggle-checked {
+    background-color: mat.get-color-from-palette($primary, 800);
+    &.mat-button-toggle-appearance-standard {
+      color: mat.get-contrast-color-from-palette($primary, 800);
+    }
+  }
+}

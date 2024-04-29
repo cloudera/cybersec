@@ -22,13 +22,13 @@ export interface CustomFormConfig {
   value?: string | any[];
   label?: string;
   options?: { id: string, name: string }[];
-  onChange?: (config: any) => {};
+  onChange?: (config: any) => unknown;
   required?: boolean;
   multipleValues?: boolean;
   outputName?: boolean;
   description?: string;
   placeholder?: string;
-  defaultValue?: string;
+  defaultValue?: any;
 }
 
 @Component({
