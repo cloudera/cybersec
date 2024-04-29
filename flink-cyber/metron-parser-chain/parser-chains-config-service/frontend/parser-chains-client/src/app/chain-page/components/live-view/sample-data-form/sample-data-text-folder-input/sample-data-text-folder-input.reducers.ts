@@ -208,7 +208,7 @@ function prepareResult(rawResult: Map<number, [SampleDataInternalModel, EntryPar
             result: output,
             failure,
             raw: result,
-            timestamp: timestamp
+            timestamp
         })
     })
     return resultMap
