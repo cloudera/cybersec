@@ -9,18 +9,18 @@ import {EntryParsingResultModel} from "../../models/live-view.model";
 import {select, Store} from "@ngrx/store";
 import {SampleDataTextFolderInputState} from "./sample-data-text-folder-input.reducers";
 import {
-  getEditModalVisible,
-  getExecutionStatus,
-  getRunResults,
-  getSampleData,
-  getSampleFolderPath
+    getEditModalVisible,
+    getExecutionStatus,
+    getRunResults,
+    getSampleData,
+    getSampleFolderPath
 } from "./sample-data-text-folder-input.selectors";
 import {Observable, Subject} from "rxjs";
 import {
-  FetchSampleListTriggeredAction,
-  SampleFolderViewInitializedAction,
-  SaveSampleListTriggeredAction,
-  ShowEditModalAction
+    FetchSampleListTriggeredAction,
+    SampleFolderViewInitializedAction,
+    SaveSampleListTriggeredAction,
+    ShowEditModalAction
 } from "./sample-data-text-folder-input.actions";
 import {UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
 import {map, takeUntil} from "rxjs/operators";
@@ -41,7 +41,8 @@ export class SampleDataTextFolderInputComponent implements OnInit, OnDestroy {
     expected: string,
     result: string,
     failure: boolean,
-    raw: EntryParsingResultModel[]
+    raw: EntryParsingResultModel[],
+    timestamp: bigint
   }>>;
   sampleData$: Observable<SampleDataInternalModel[]>;
   sampleFolderPath$: Observable<string>;
@@ -191,6 +192,24 @@ export class SampleDataTextFolderInputComponent implements OnInit, OnDestroy {
         ? SampleTestStatus.UNKNOWN
         : dataById.status;
     }));
+  }
+
+  updateExpectedValue(failure: boolean, result: string, i: number, timestamp: bigint) {
+    const sample = this.currentSampleData[i];
+
+    this.selectedSample = [i, sample]
+
+    let finalResult = result
+
+    if (timestamp){
+      finalResult = finalResult.replace(String(timestamp), "%timestamp%")
+    }
+
+    this.updateSample({
+      ...sample,
+      expectedFailure: failure,
+      expectedResult: finalResult
+    })
   }
 
   ngOnDestroy(): void {
