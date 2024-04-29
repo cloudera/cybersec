@@ -21,9 +21,9 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class JavascriptEngineBuilder extends RuleEngineBuilder<JavaScriptEngine> {
+public class JavaScriptGraaljsEngineBuilder extends RuleEngineBuilder<JavaScriptGraaljsEngine> {
     @Override
-    public JavaScriptEngine build() {
-        return new JavaScriptEngine(getScript());
+    public JavaScriptGraaljsEngine build() {
+        return new JavaScriptGraaljsEngine(getScript());
     }
 }
