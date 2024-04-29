@@ -30,7 +30,7 @@ export class TextDiffViewComponent implements OnChanges {
         this.diffOptions = {...this.diffOptions, renderSideBySide: !checked};
     }
 
-    updateExpectedValueButtonClick($event: MouseEvent) {
+    updateExpectedValueButtonClick() {
         this.expectedValueChange.emit()
     }
 }
