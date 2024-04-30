@@ -21,6 +21,7 @@ import com.cloudera.parserchains.queryservice.service.impl.DefaultChainBuilderSe
 import com.cloudera.parserchains.queryservice.service.impl.DefaultChainExecutorService;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -115,7 +116,46 @@ public class DefaultChainExecutorServiceTest {
      * }
      */
     @Multiline
-    private String successExpected;
+    private String successExpectedJava11;
+
+    /**
+     * {
+     *   "input" : {
+     *     "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309"
+     *   },
+     *   "output" : {
+     *     "address" : "1600 Pennsylvania Ave",
+     *     "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309",
+     *     "phone" : "614-867-5309",
+     *     "name" : "Jane Doe"
+     *   },
+     *   "log" : {
+     *     "type" : "info",
+     *     "message" : "success",
+     *     "parserId" : "3b31e549-340f-47ce-8a71-d702685137f4",
+     *     "parserName" : "Delimited Text"
+     *   },
+     *   "parserResults" : [ {
+     *     "input" : {
+     *       "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309"
+     *     },
+     *     "output" : {
+     *       "address" : "1600 Pennsylvania Ave",
+     *       "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309",
+     *       "phone" : "614-867-5309",
+     *       "name" : "Jane Doe"
+     *     },
+     *     "log" : {
+     *       "type" : "info",
+     *       "message" : "success",
+     *       "parserId" : "3b31e549-340f-47ce-8a71-d702685137f4",
+     *       "parserName" : "Delimited Text"
+     *     }
+     *   } ]
+     * }
+     */
+    @Multiline
+    private String successExpectedJava8;
 
     @Test
     void success() throws Exception {
@@ -132,7 +172,9 @@ public class DefaultChainExecutorServiceTest {
 
         // validate
         String actual = JSONUtils.INSTANCE.toJSON(result, true);
-        assertThat(actual, equalToCompressingWhiteSpace(successExpected));
+        assertThat(actual, Matchers.anyOf(
+                equalToCompressingWhiteSpace(successExpectedJava11),
+                equalToCompressingWhiteSpace(successExpectedJava8)));
     }
 
     @Test
