@@ -18,7 +18,7 @@ on:
 jobs:
   build_and_test_java:
     runs-on: ubuntu-latest
-    container: maven:3-eclipse-temurin-11
+    container: maven:3-eclipse-temurin-8
     steps:
       - uses: actions/checkout@v3
       - name: Cache local Maven repository

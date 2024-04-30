@@ -54,7 +54,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>11</java.version>
+        <java.version>1.8</java.version>
         <csa.version>csa1.12.0.0</csa.version>
         <flink.version>1.18.0-${csa.version}</flink.version>
         <cloudera.registry>1.0-${csa.version}</cloudera.registry>
