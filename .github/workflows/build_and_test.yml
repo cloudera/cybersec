@@ -11,7 +11,7 @@ name: Build and Test
 on:
   push:
 #    TODO remove everything but develop
-    branches: [ "develop", "CYB-77", "CYB-77-csa-1.12.0-cdh-7.1.9" ]
+    branches: [ "develop", "CYB-77-csa-1.12.0-cdh-7.1.9" ]
   pull_request:
     branches: [ "develop" ]
 
