@@ -29,15 +29,13 @@ import com.cloudera.parserchains.queryservice.service.ChainPersistenceService;
 import com.cloudera.parserchains.queryservice.service.IndexingService;
 import com.cloudera.parserchains.queryservice.service.PipelineService;
 import com.cloudera.parserchains.queryservice.service.ResultLogBuilder;
-import io.swagger.annotations.ApiParam;
-import lombok.RequiredArgsConstructor;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.core.fs.Path;
 import org.springframework.http.ResponseEntity;
@@ -102,7 +100,7 @@ public class ChainController {
             })
     @GetMapping(value = API_CHAINS)
     public ResponseEntity<List<ParserChainSummary>> findAll(
-            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName
     ) throws IOException {
         String configPath = getConfigPath(pipelineName);
@@ -120,7 +118,7 @@ public class ChainController {
             })
     @PostMapping(value = API_CHAINS)
     public ResponseEntity<ParserChainSchema> create(
-            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
             @Parameter(name = "parserChain", description = "The parser chain to create.", required = true)
             @RequestBody ParserChainSchema chain) throws IOException {
@@ -146,7 +144,7 @@ public class ChainController {
             })
     @GetMapping(value = API_CHAINS + "/{id}")
     public ResponseEntity<ParserChainSchema> read(
-            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
             @Parameter(name = "id", description = "The ID of the parser chain to retrieve.", required = true)
             @PathVariable String id) throws IOException {
@@ -168,7 +166,7 @@ public class ChainController {
             })
     @PutMapping(value = API_CHAINS + "/{id}")
     public ResponseEntity<ParserChainSchema> update(
-            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
             @Parameter(name = "parserChain", description = "The new parser chain definition.", required = true)
             @RequestBody ParserChainSchema chain,
@@ -195,7 +193,7 @@ public class ChainController {
     })
     @DeleteMapping(value = API_CHAINS + "/{id}")
     public ResponseEntity<Void> delete(
-            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
             @Parameter(name = "id", description = "The ID of the parser chain to delete.", required = true)
             @PathVariable String id) throws IOException {
@@ -215,7 +213,7 @@ public class ChainController {
             })
     @PostMapping(value = API_INDEXING)
     public ResponseEntity<Map<String, Object>> getMappingsFromPath(
-            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
             @RequestBody IndexMappingDescriptor body) throws IOException {
         final String indexPath = getIndexingPath(body.getFilePath(), pipelineName);
