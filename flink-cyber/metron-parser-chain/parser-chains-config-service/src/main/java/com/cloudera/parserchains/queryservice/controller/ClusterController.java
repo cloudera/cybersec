@@ -5,17 +5,13 @@ import com.cloudera.parserchains.queryservice.common.exception.FailedAllClusterR
 import com.cloudera.parserchains.queryservice.common.exception.FailedClusterReponseException;
 import com.cloudera.parserchains.queryservice.service.ClusterService;
 import com.cloudera.service.common.response.ResponseBody;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,24 +27,24 @@ public class ClusterController {
 
     private final ClusterService clusterService;
 
-    @ApiOperation(value = "Retrieves information about all cluster services.")
+    @Operation(description = "Retrieves information about all cluster services.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A list of all clusters.")
+            @ApiResponse(responseCode = "200", description = "A list of all clusters.")
     })
     @GetMapping
     public List<ResponseBody> getAllServices() throws FailedAllClusterReponseException {
         return clusterService.getAllClusterInfo();
     }
 
-    @ApiOperation(value = "Retrieves information about a cluster with specified id.")
+    @Operation(description = "Retrieves information about a cluster with specified id.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A response with cluster information."),
-            @ApiResponse(code = 404, message = "The cluster does not exist.")
+            @ApiResponse(responseCode = "200", description = "A response with cluster information."),
+            @ApiResponse(responseCode = "404", description = "The cluster does not exist.")
 
     })
     @GetMapping(value = "/{id}")
     public ResponseBody getClusterService(
-            @ApiParam(name = "id", value = "The ID of the cluster to retrieve.", required = true)
+            @Parameter(name = "id", description = "The ID of the cluster to retrieve.", required = true)
             @PathVariable("id") String clusterId) throws FailedClusterReponseException {
         return clusterService.getClusterInfo(clusterId);
     }
