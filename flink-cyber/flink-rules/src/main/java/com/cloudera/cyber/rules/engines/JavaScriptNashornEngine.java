@@ -93,7 +93,7 @@ public class JavaScriptNashornEngine extends JavaScriptEngine {
     }
 
     @VisibleForTesting
-    public void eval(String script) throws ScriptException {
+    public synchronized void eval(String script) throws ScriptException {
         try {
             getScriptEngine().eval(script);
         } catch (ConcurrentException e) {
@@ -102,7 +102,7 @@ public class JavaScriptNashornEngine extends JavaScriptEngine {
     }
 
     @Override
-    public Object invokeFunction(String function, Object... args) throws ScriptException, NoSuchMethodException {
+    public synchronized Object invokeFunction(String function, Object... args) throws ScriptException, NoSuchMethodException {
         try {
             return ((Invocable) getScriptEngine()).invokeFunction(function, args);
         } catch (ConcurrentException e) {
