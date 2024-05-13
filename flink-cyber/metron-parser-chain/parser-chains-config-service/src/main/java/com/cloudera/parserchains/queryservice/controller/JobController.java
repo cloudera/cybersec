@@ -5,11 +5,11 @@ import com.cloudera.parserchains.queryservice.common.exception.FailedClusterRepo
 import com.cloudera.parserchains.queryservice.model.enums.JobActions;
 import com.cloudera.parserchains.queryservice.service.JobService;
 import com.cloudera.service.common.response.ResponseBody;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,8 +34,10 @@ public class JobController {
     @Value("${upload.file.max.size:1000000}")
     private Integer uploadFileMaxSize;
 
-    @Operation(summary = "Retrieves information about all cluster services." )
-    @ApiResponse(responseCode = "200", description = "A list of all clusters.")
+    @Operation(description = "Retrieves information about all cluster services.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "A list of all clusters.")
+    })
     @PostMapping("/{action}")
     public ResponseBody executeAction(@Parameter(name = "requestBody", description = "The new parser chain definition.", required = true)
                                       @RequestBody com.cloudera.service.common.request.RequestBody body,
@@ -70,4 +72,6 @@ public class JobController {
                         .build();
         return jobService.makeRequest(clusterId, requestBody, JobActions.Constants.UPDATE_CONFIG_VALUE);
     }
+
+
 }

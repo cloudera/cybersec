@@ -27,15 +27,20 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 public class LEEFParserTest {
   private LEEFParser parser;
@@ -107,6 +112,27 @@ public class LEEFParserTest {
     correct.setTimeInMillis(current.getTimeInMillis());
 
     runMissingYear(correct, current);
+  }
+
+  @Test
+  public void testMissingLeapYearFromDate() {
+    Calendar current = Calendar.getInstance();
+    Calendar correct = Calendar.getInstance();
+
+    current.set(Calendar.YEAR, 2024);
+    current.set(Calendar.MONTH, 1);
+    current.set(Calendar.DAY_OF_MONTH, 29);
+
+    correct.setTimeInMillis(current.getTimeInMillis());
+
+    LocalDate fakeNowDate = LocalDate.of(2024, 2, 29);
+    try (MockedStatic<LocalDate> dateContext = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
+      dateContext.when(LocalDate::now).thenReturn(fakeNowDate);
+      assertEquals(fakeNowDate, LocalDate.now());
+      assertNotNull(fakeNowDate);
+
+      runMissingYear(correct, current);
+    }
   }
 
   @Test
