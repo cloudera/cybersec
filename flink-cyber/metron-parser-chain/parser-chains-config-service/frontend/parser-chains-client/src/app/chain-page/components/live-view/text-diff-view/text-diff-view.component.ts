@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
 import {DiffEditorModel} from "ngx-monaco-editor-v2";
 
 @Component({
@@ -10,6 +10,7 @@ export class TextDiffViewComponent implements OnChanges {
 
     @Input() originalModelJson: string;
     @Input() modifiedModelJson: string;
+    @Output() expectedValueChange = new EventEmitter<void>();
 
     originalModel: DiffEditorModel;
     modifiedModel: DiffEditorModel;
@@ -27,5 +28,9 @@ export class TextDiffViewComponent implements OnChanges {
 
     onChangeInline(checked: boolean) {
         this.diffOptions = {...this.diffOptions, renderSideBySide: !checked};
+    }
+
+    updateExpectedValueButtonClick() {
+        this.expectedValueChange.emit()
     }
 }

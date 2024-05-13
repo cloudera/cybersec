@@ -78,70 +78,100 @@ public class ChainController {
      * The maximum number of sample text values that can be used to test a parser chain.
      */
     static final int MAX_SAMPLES_PER_TEST = 200;
+
     private final ChainPersistenceService chainPersistenceService;
+
     private final ChainBuilderService chainBuilderService;
+
     private final ChainExecutorService chainExecutorService;
+
     private final PipelineService pipelineService;
+
     private final IndexingService indexingService;
+
     private final AppProperties appProperties;
 
-    @Operation(summary = "Retrieves all available parser chains.")
-    @ApiResponse(responseCode = "200", description = "A list of all parser chains.", content = @Content(
-            mediaType = "application/json",
-            array = @ArraySchema(schema = @Schema(implementation = ParserChainSummary.class))))
+
+    @Operation(summary = "Retrieves all available parser chains.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "A list of all parser chains.", content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = ParserChainSummary.class))))
+            })
     @GetMapping(value = API_CHAINS)
     public ResponseEntity<List<ParserChainSummary>> findAll(
-            @Parameter(description = "The pipeline to execute request in, optional.") @RequestParam(name = "pipelineName", required = false) String pipelineName
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName
     ) throws IOException {
         String configPath = getConfigPath(pipelineName);
+
         List<ParserChainSummary> configs = chainPersistenceService.findAll(Paths.get(configPath));
         return ResponseEntity.ok(configs);
     }
 
-    @Operation(summary = "Creates a new parser chain.")
-    @ApiResponse(responseCode = "200", description = "The parser chain was created.", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ParserChainSchema.class)))
-    @ApiResponse(responseCode = "404", description = "Unable to create a new parser chain.")
+    @Operation(summary = "Creates a new parser chain.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "The parser chain was created.", content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ParserChainSchema.class))),
+                    @ApiResponse(responseCode = "404", description = "Unable to create a new parser chain.")
+            })
     @PostMapping(value = API_CHAINS)
     public ResponseEntity<ParserChainSchema> create(
-            @Parameter(description = "The pipeline to execute request in, optional.") @RequestParam(name = "pipelineName", required = false) String pipelineName,
-            @Parameter(description = "The parser chain to create.", required = true) @RequestBody ParserChainSchema chain) throws IOException {
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName,
+            @Parameter(name = "parserChain", description = "The parser chain to create.", required = true)
+            @RequestBody ParserChainSchema chain) throws IOException {
         String configPath = getConfigPath(pipelineName);
+
         ParserChainSchema createdChain = chainPersistenceService.create(chain, Paths.get(configPath));
-        if (createdChain == null) {
+        if (null == createdChain) {
             return ResponseEntity.notFound().build();
         } else {
-            return ResponseEntity.created(URI.create(API_CHAINS_READ_URL.replace("{id}", createdChain.getId()))).body(createdChain);
+            return ResponseEntity
+                    .created(URI.create(API_CHAINS_READ_URL.replace("{id}", createdChain.getId())))
+                    .body(createdChain);
         }
     }
 
-    @Operation(summary = "Retrieves an existing parser chain.")
-    @ApiResponse(responseCode = "200", description = "The parser chain with the given ID.", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ParserChainSchema.class)))
-    @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
+
+    @Operation(summary = "Retrieves an existing parser chain.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "The parser chain with the given ID.", content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ParserChainSchema.class))),
+                    @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
+            })
     @GetMapping(value = API_CHAINS + "/{id}")
     public ResponseEntity<ParserChainSchema> read(
-            @Parameter(description = "The pipeline to execute request in, optional.") @RequestParam(name = "pipelineName", required = false) String pipelineName,
-            @Parameter(description = "The ID of the parser chain to retrieve.", required = true) @PathVariable String id) throws IOException {
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName,
+            @Parameter(name = "id", description = "The ID of the parser chain to retrieve.", required = true)
+            @PathVariable String id) throws IOException {
         String configPath = getConfigPath(pipelineName);
+
         ParserChainSchema chain = chainPersistenceService.read(id, Paths.get(configPath));
-        if (chain == null) {
+        if (null == chain) {
             return ResponseEntity.notFound().build();
         } else {
             return ResponseEntity.ok(chain);
         }
     }
 
-    @Operation(summary = "Updates an existing parser chain.")
-    @ApiResponse(responseCode = "204", description = "The parser chain was updated.")
-    @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
+
+    @Operation(summary = "Updates an existing parser chain.",
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "The parser chain was updated."),
+                    @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
+            })
     @PutMapping(value = API_CHAINS + "/{id}")
     public ResponseEntity<ParserChainSchema> update(
-            @Parameter(description = "The pipeline to execute request in, optional.") @RequestParam(name = "pipelineName", required = false) String pipelineName,
-            @Parameter(description = "The new parser chain definition.", required = true) @RequestBody ParserChainSchema chain,
-            @Parameter(description = "The ID of the parser chain to update.") @PathVariable String id) throws IOException {
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName,
+            @Parameter(name = "parserChain", description = "The new parser chain definition.", required = true)
+            @RequestBody ParserChainSchema chain,
+            @Parameter(name = "id", description = "The ID of the parser chain to update.")
+            @PathVariable String id) throws IOException {
         String configPath = getConfigPath(pipelineName);
         try {
             ParserChainSchema updatedChain = chainPersistenceService.update(id, chain, Paths.get(configPath));
@@ -150,19 +180,25 @@ public class ChainController {
             } else {
                 return ResponseEntity.noContent().build();
             }
+            // TODO: fix exception handling
         } catch (IOException ioe) {
             throw new RuntimeException("Unable to update configuration with id=" + id);
         }
     }
 
-    @Operation(summary = "Deletes a parser chain.")
-    @ApiResponse(responseCode = "204", description = "The parser chain was deleted.")
-    @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
+    @Operation(summary = "Deletes a parser chain."
+            , responses = {
+            @ApiResponse(responseCode = "204", description = "The parser chain was deleted."),
+            @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
+    })
     @DeleteMapping(value = API_CHAINS + "/{id}")
     public ResponseEntity<Void> delete(
-            @Parameter(description = "The pipeline to execute request in, optional.") @RequestParam(name = "pipelineName", required = false) String pipelineName,
-            @Parameter(description = "The ID of the parser chain to delete.", required = true) @PathVariable String id) throws IOException {
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName,
+            @Parameter(name = "id", description = "The ID of the parser chain to delete.", required = true)
+            @PathVariable String id) throws IOException {
         String configPath = getConfigPath(pipelineName);
+
         if (chainPersistenceService.delete(id, Paths.get(configPath))) {
             return ResponseEntity.noContent().build();
         } else {
@@ -172,7 +208,7 @@ public class ChainController {
 
 
     @Operation(summary = "Loads table mappings for the indexing job.",
-            responses = {
+        responses = {
                     @ApiResponse(responseCode = "200", description = "The mapping file parsed successfully."),
             })
     @PostMapping(value = API_INDEXING)
@@ -199,10 +235,12 @@ public class ChainController {
     }
 
 
-    @Operation(summary = "Executes a parser chain to parse sample data.")
-    @ApiResponse(responseCode = "200", description = "The result of parsing the message.", content = @Content(
-            mediaType = "application/json",
-            schema = @Schema(implementation = ChainTestResponse.class)))
+    @Operation(summary = "Executes a parser chain to parse sample data.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "The result of parsing the message.", content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ChainTestResponse.class)))
+            })
     @PostMapping(value = API_PARSER_TEST)
     public ResponseEntity<ChainTestResponse> test(
             @Parameter(name = "testRun", description = "Describes the parser chain test to run.", required = true)
