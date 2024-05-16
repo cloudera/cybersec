@@ -59,7 +59,7 @@
         <flink.version>1.18.0-csa1.12.0.0</flink.version>
         <cloudera.registry>1.0-${csa.version}</cloudera.registry>
         <flink.hbase.version>2.4</flink.hbase.version>
-        <cdh.version>7.1.9.0-387</cdh.version>
+        <cdh.version>7.2.18.0-641</cdh.version>
         <lombok.version>1.18.22</lombok.version>
         <lombok.plugin.version>1.18.16.0</lombok.plugin.version>
         <guava.version>21.0</guava.version>
@@ -114,7 +114,7 @@
         <commons-text.version>1.10.0</commons-text.version>
         <java-grok.version>0.1.9</java-grok.version>
         <everit-json-schema.version>1.14.2</everit-json-schema.version>
-        <orc.version>1.5.1.${cdh.version}</orc.version>
+        <orc.version>1.8.3.${cdh.version}</orc.version>
         <swagger-annotations.version>1.6.0</swagger-annotations.version>
         <graalvm.version>21.3.9</graalvm.version>
         <junit.version>4.12</junit.version>
@@ -307,7 +307,7 @@
             <dependency>
                 <groupId>com.hortonworks.smm</groupId>
                 <artifactId>monitoring-interceptors</artifactId>
-                <version>[${smm.intercepter.version},)</version>
+                <version>${smm.intercepter.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.slf4j</groupId>
