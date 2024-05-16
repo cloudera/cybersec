@@ -18,6 +18,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
@@ -56,7 +57,7 @@ public class Message extends SpecificRecordBase implements SpecificRecord, Ident
     public static final Schema SCHEMA$ = AvroSchemas.createRecordBuilder(Message.class.getPackage().getName(), Message.class.getName())
             .fields()
             .requiredString("id")
-            .requiredLong("ts")
+            .name("ts").type(LogicalTypes.timestampMillis().addToSchema(Schema.create(Schema.Type.LONG))).noDefault()
             .name("originalSource").type(SignedSourceKey.SCHEMA$).noDefault()
             .requiredString("message")
             .name("threats").type().optional().type(SchemaBuilder.map().values(SchemaBuilder.array().items(ThreatIntelligence.SCHEMA$)))
