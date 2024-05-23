@@ -40,22 +40,18 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Cache local Maven repository
-        uses: actions/cache@v3
+        uses: actions/cache/restore@v3
         with:
           path: /root/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Build and Test with Maven
-        run: mvn -P '!add-dependencies-for-IDEA,full-build,include-front-end' -B package -DskipTests=true --file flink-cyber/pom.xml
+        run: mvn -P '!add-dependencies-for-IDEA,full-build,include-front-end' -B install -DskipTests=true --file flink-cyber/pom.xml
 
       - name: Get current date
         id: date
         run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-
-      - name: Print file tree
-        id: file_tree
-        run: ls -R flink-cyber | grep ":$" | sed -e 's/:$//' -e 's/[^-][^\/]*\//--/g' -e 's/^/   /' -e 's/-/|/'
 
       - name: Publish artifact
         uses: actions/upload-artifact@v4
