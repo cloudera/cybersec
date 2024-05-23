@@ -1,0 +1,61 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Nightly Release
+
+on:
+  schedule:
+    #    At 0:00am each day on the default branch
+    - cron: '0 0 * * *'
+#      FIXME remove before merging
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+#  checks if there's a commit in last 24hr
+  check_date:
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.should_run.outputs.should_run }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: print latest_commit
+        run: echo ${{ github.sha }}
+
+      - id: should_run
+        continue-on-error: true
+        name: check latest commit is less than a day
+        if: ${{ github.event_name == 'schedule' }}
+        run: test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) && echo "::set-output name=should_run::false"
+  nightly_release:
+    needs: check_date
+    if: ${{ needs.check_date.outputs.should_run != 'false' }}
+    runs-on: ubuntu-latest
+    container: maven:3-eclipse-temurin-8
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        with:
+          path: /root/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Build and Test with Maven
+        run: mvn -P '!add-dependencies-for-IDEA,full-build,include-front-end' -B package --file flink-cyber/pom.xml
+
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+
+      - name: Publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-csd-${{ steps.date.outputs.date }}
+          path: flink-cyber/cyber-csd/target/CYBERSEC-*.jar
