@@ -58,18 +58,6 @@ jobs:
       - name: Build and Test with Maven
         run: mvn -P '!add-dependencies-for-IDEA,full-build,include-front-end' -B package -DskipTests=${{ github.event_name == 'workflow_dispatch' && inputs.skip_tests || true }} --file flink-cyber/pom.xml
 
-      - name: Release
-        uses: softprops/action-gh-release@v2
-        #if: ${{ github.event_name == 'workflow_dispatch' }}
-        with:
-          tag_name: 'v1.0.0'
-          name: 'Test release 1.0.0'
-          draft: true
-          token: ${{ secrets.GITHUB_TOKEN }}
-          files: |
-            flink-cyber/cyber-csd/target/CYBERSEC-*
-            flink-cyber/cyber-parcel/target/CYBERSEC-*
-
       - name: Get current date
         id: date
         run: echo "CURRENT_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
