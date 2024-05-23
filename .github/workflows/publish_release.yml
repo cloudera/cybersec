@@ -11,19 +11,15 @@ name: Nightly Release
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Release version'
-        required: true
-        type: string
-        options:
-          - info
-          - warning
-          - debug
       skip_tests:
         description: 'Skip tests'
         required: true
         default: false
         type: boolean
+  #      FIXME remove before merging
+  pull_request:
+    branches: [ "develop" ]
+
 
 jobs:
   publish_release:
@@ -42,7 +38,7 @@ jobs:
       - name: Build and Test with Maven
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: mvn -P '!add-dependencies-for-IDEA,full-build,include-front-end' -B deploy -DskipTests=${{ inputs.skip_tests }} --file flink-cyber/pom.xml
+        run: mvn -P '!add-dependencies-for-IDEA,full-build,include-front-end' -B deploy -DskipTests=true --file flink-cyber/pom.xml
 
       - name: Get current date
         id: date
