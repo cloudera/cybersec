@@ -56,5 +56,7 @@ jobs:
       - name: Publish artifact
         uses: actions/upload-artifact@v4
         with:
-          name: nightly-csd-${{ env.CURRENT_DATE }}
-          path: flink-cyber/cyber-csd/target/CYBERSEC-*.jar
+          name: nightly-build-${{ env.CURRENT_DATE }}
+          path: |
+            flink-cyber/cyber-csd/target/CYBERSEC-*
+            flink-cyber/cyber-parcel/target/CYBERSEC-*
