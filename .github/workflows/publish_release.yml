@@ -14,15 +14,19 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
+      tag:
+        description: 'Version tag'
+        required: true
+        type: string
+      name:
+        description: 'Release name'
+        required: true
+        type: string
       skip_tests:
         description: 'Skip tests'
         required: true
         default: false
         type: boolean
-  #      FIXME remove before merging
-  pull_request:
-    branches: [ "develop" ]
-
 
 jobs:
 #  checks if there's a commit in last 24hr
@@ -57,6 +61,19 @@ jobs:
 
       - name: Build and Test with Maven
         run: mvn -P '!add-dependencies-for-IDEA,full-build,include-front-end' -B package -DskipTests=${{ github.event_name == 'workflow_dispatch' && inputs.skip_tests || true }} --file flink-cyber/pom.xml
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: ${{ inputs.name }}
+          draft: true
+          generate_release_notes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            flink-cyber/cyber-csd/target/CYBERSEC-*
+            flink-cyber/cyber-parcel/target/CYBERSEC-*
 
       - name: Get current date
         id: date
