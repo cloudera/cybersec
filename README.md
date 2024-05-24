@@ -21,7 +21,12 @@ The Cyber Toolkit is flexible and configurable so the ingestion can be changed w
 3. [Event Generation](flink-cyber/caracal-generator/README.md)
 
 ## Packaging
-The Cybersec Toolkit includes a Cloudera Manager parcel and service for easier installation. 
+The Cybersec Toolkit includes a Cloudera Manager parcel and service for easier installation.
+
+Artifacts are available for download on the [releases page](https://github.com/cloudera/cybersec/releases).
+You can also find less stable, but more up to date artifacts by selecting one of successful runs on [this page](https://github.com/cloudera/cybersec/actions/workflows/publish_release.yml).
+
+Or you can find artifacts after the build in the following directories:
 1. [Parcel](flink-cyber/cyber-parcel)
 2. [Cloudera Service](flink-cyber/cyber-csd)
 
