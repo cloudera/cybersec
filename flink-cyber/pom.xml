@@ -592,6 +592,13 @@
                     <excludes>
                         <exclude>src/main/resources/**</exclude>
                         <exclude>src/test/resources/**</exclude>
+                        <exclude>src/test/classpath-resources/**</exclude>
+                        <exclude>**/*.jj</exclude>
+                        <exclude>**/node_modules/**</exclude>
+                        <exclude>**/.angular/**</exclude>
+                        <exclude>**/node/**</exclude>
+                        <exclude>**/dist/**</exclude>
+                        <exclude>**/target/**</exclude>
                     </excludes>
                 </configuration>
             </plugin>

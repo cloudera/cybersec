@@ -40,7 +40,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
     <dependencies>
-      <dependency>
+        <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>metron-common</artifactId>
             <version>${project.parent.version}</version>
