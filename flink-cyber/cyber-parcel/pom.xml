@@ -31,26 +31,27 @@ under the License.
     <name>cyber-parcel</name>
     <packaging>pom</packaging>
 
-	<repositories>
-		<!-- Cloudera Internal -->
-		<repository>
-			<id>cloudera-internal</id>
-			<url>http://maven.jenkins.cloudera.com:8081/artifactory/libs-release-local</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
+    <repositories>
+        <!-- Cloudera Internal -->
+        <repository>
+            <id>cloudera-internal</id>
+            <url>http://maven.jenkins.cloudera.com:8081/artifactory/libs-release-local</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <properties>
-		<cybersec.basedir>${project.parent.basedir}</cybersec.basedir>
-		<parcel.basename>CYBERSEC-${cybersec.full.version}</parcel.basename>
+        <cybersec.basedir>${project.parent.basedir}</cybersec.basedir>
+        <parcel.basename>CYBERSEC-${cybersec.full.version}</parcel.basename>
         <parcel.tar.gz.filename>${parcel.basename}.tar.gz</parcel.tar.gz.filename>
         <parcel.filename>${parcel.basename}-el7.parcel</parcel.filename>
-		<flink.tar.gz.url>file://${cybersec.basedir}/cyber-jobs/target/cyber-jobs-${project.parent.version}.tar.gz</flink.tar.gz.url>
+        <flink.tar.gz.url>file://${cybersec.basedir}/cyber-jobs/target/cyber-jobs-${project.parent.version}.tar.gz
+        </flink.tar.gz.url>
     </properties>
 
     <build>
@@ -78,7 +79,7 @@ under the License.
                             <url>${flink.tar.gz.url}</url>
                             <outputFileName>cybersec.dist.tar.gz</outputFileName>
                             <outputDirectory>target/</outputDirectory>
-							<skipCache>true</skipCache>
+                            <skipCache>true</skipCache>
                         </configuration>
                     </execution>
                 </executions>
@@ -132,8 +133,10 @@ under the License.
                             <target>
                                 <move file="${project.build.directory}/${parcel.basename}.tar.gz"
                                       tofile="${project.build.directory}/${parcel.filename}"/>
-                                <checksum file="${project.build.directory}/${parcel.filename}" algorithm="SHA-1" fileext=".sha1"/>
-                                <checksum file="${project.build.directory}/${parcel.filename}" algorithm="SHA-1" fileext=".sha"/>
+                                <checksum file="${project.build.directory}/${parcel.filename}" algorithm="SHA-1"
+                                          fileext=".sha1"/>
+                                <checksum file="${project.build.directory}/${parcel.filename}" algorithm="SHA-1"
+                                          fileext=".sha"/>
                             </target>
                         </configuration>
                         <goals>
@@ -163,10 +166,10 @@ under the License.
                                     <file>${project.build.directory}/${parcel.filename}.sha1</file>
                                     <type>sha1</type>
                                 </artifact>
-								<artifact>
-									<file>${project.build.directory}/${parcel.filename}.sha</file>
-									<type>sha</type>
-								</artifact>
+                                <artifact>
+                                    <file>${project.build.directory}/${parcel.filename}.sha</file>
+                                    <type>sha</type>
+                                </artifact>
                             </artifacts>
                         </configuration>
                     </execution>

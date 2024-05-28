@@ -77,7 +77,7 @@
             <groupId>org.adrianwalker</groupId>
             <artifactId>multiline-string</artifactId>
         </dependency>
-      <dependency>
+        <dependency>
             <groupId>com.trendmicro</groupId>
             <artifactId>tlsh</artifactId>
             <version>3.7.1</version>
@@ -348,7 +348,8 @@
                     </arguments>
                     <libDirectory>${basedir}/src/main/antlr4/imports</libDirectory>
                     <sourceDirectory>${basedir}/src/main/antlr4</sourceDirectory>
-                    <outputDirectory>${basedir}/src/main/java/org/apache/metron/stellar/common/generated</outputDirectory>
+                    <outputDirectory>${basedir}/src/main/java/org/apache/metron/stellar/common/generated
+                    </outputDirectory>
                 </configuration>
                 <executions>
                     <execution>
@@ -459,7 +460,7 @@
                                     <projectName>${project.name}</projectName>
                                 </transformer-->
                                 <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                                        implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass></mainClass>
