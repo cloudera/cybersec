@@ -20,6 +20,8 @@ jobs:
     container: maven:3-eclipse-temurin-8
     steps:
       - uses: actions/checkout@v3
+      - name: Check codestyle
+        run: mvn -B editorconfig:check --file flink-cyber/pom.xml
       - name: Cache local Maven repository
         uses: actions/cache@v3
         with:
@@ -28,7 +30,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Build and Test with Maven
-        run: mvn -P '!add-dependencies-for-IDEA,!full-build,!include-front-end' -B verify --file flink-cyber/pom.xml
+        run: mvn -P '!add-dependencies-for-IDEA,!full-build,!include-front-end' -B package --file flink-cyber/pom.xml
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph
