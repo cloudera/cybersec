@@ -2,23 +2,30 @@ package com.cloudera.parserchains.queryservice.service;
 
 import com.cloudera.parserchains.queryservice.common.exception.FailedAllClusterReponseException;
 import com.cloudera.parserchains.queryservice.common.exception.FailedClusterReponseException;
+import com.cloudera.parserchains.queryservice.common.utils.Utils;
 import com.cloudera.service.common.request.RequestBody;
 import com.cloudera.service.common.request.RequestType;
+import com.cloudera.service.common.response.Job;
+import com.cloudera.service.common.response.Pipeline;
 import com.cloudera.service.common.response.ResponseBody;
 import com.cloudera.service.common.response.ResponseType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ClusterService {
-    private final KafkaService kafkaService;
+    private final KafkaServiceInterface kafkaService;
 
     public List<ResponseBody> getAllClusterInfo() throws FailedAllClusterReponseException {
         List<Pair<ResponseType, ResponseBody>> response = kafkaService.sendWithReply(RequestType.GET_ALL_CLUSTERS_SERVICE_REQUEST, RequestBody.builder().build());
@@ -32,6 +39,60 @@ public class ClusterService {
         return response.stream().map(Pair::getValue).collect(Collectors.toList());
     }
 
+    public List<Pipeline> getAllPipelines() throws FailedAllClusterReponseException {
+        return getAllClusterInfo().stream()
+                .flatMap(responseBody -> getClusterPipelines(responseBody).stream())
+                .collect(Collectors.toList());
+    }
+
+    public List<Pipeline> getClusterPipelines(ResponseBody responseBody) {
+        return responseBody.getJobs().stream().collect(ArrayList::new,
+                (acc, job) -> {
+                    Optional<Pipeline> duplicatePipeline = acc.stream().filter(pipeline -> StringUtils.equalsIgnoreCase(pipeline.getName(), job.getJobPipeline())).findFirst();
+                    if (duplicatePipeline.isPresent()) {
+                        Pipeline pipeline = duplicatePipeline.get();
+                        if (isNewJobTimeLater(job, pipeline)) {
+                            pipeline.setDate(job.getStartTime());
+                        }
+                    } else {
+                        acc.add(Pipeline.builder()
+                                .name(job.getJobPipeline())
+                                .clusterName(responseBody.getClusterMeta().getName())
+                                .date(job.getStartTime())
+                                .userName(job.getUser())
+                                .build());
+                    }
+                }, ArrayList::addAll);
+    }
+
+    public ResponseBody createEmptyPipeline(String clusterId, RequestBody body) throws FailedClusterReponseException {
+        RequestBody requestBody = RequestBody.builder()
+                .pipelineName(body.getPipelineName())
+                .branch(body.getBranch())
+                .build();
+        Pair<ResponseType, ResponseBody> response = kafkaService.sendWithReply(RequestType.CREATE_EMPTY_PIPELINE, clusterId, requestBody);
+        if (response.getKey() != ResponseType.CREATE_EMPTY_PIPELINE_RESPONSE) {
+            throw new FailedClusterReponseException(response.getValue());
+        }
+        return response.getValue();
+    }
+
+    public ResponseBody startPipelineJob(String clusterId, String pipeline, String branch, String profileName, List<String> jobs, byte[] payload) throws FailedClusterReponseException {
+        Pair<ResponseType, ResponseBody> response = kafkaService.sendWithReply(RequestType.START_ARCHIVE_PIPELINE, clusterId, RequestBody
+                .builder()
+                .payload(Base64.getEncoder().encode(payload))
+                .branch(branch)
+                .profileName(profileName)
+                .jobs(jobs)
+                .pipelineName(pipeline)
+                .build());
+        if (response.getKey() != ResponseType.CREATE_EMPTY_PIPELINE_RESPONSE) {
+            throw new FailedClusterReponseException(response.getValue());
+        }
+        return response.getValue();
+    }
+
+
     public ResponseBody getClusterInfo(String clusterId) throws FailedClusterReponseException {
         return getClusterInfo(clusterId, RequestBody.builder().build());
     }
@@ -42,5 +103,10 @@ public class ClusterService {
             throw new FailedClusterReponseException(response.getValue());
         }
         return response.getValue();
+    }
+
+    private static boolean isNewJobTimeLater(Job job, Pipeline pipeline) {
+        return Utils.compareLongs(Utils.parseData(job.getStartTime(), Utils.DATE_FORMATS),
+                (Utils.parseData(pipeline.getDate(), Utils.DATE_FORMATS))) == 1;
     }
 }

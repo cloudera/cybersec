@@ -9,77 +9,135 @@
  * either express or implied. Refer to the License for the specific permissions and
  * limitations governing your use of the file.
  */
+@use '@angular/material' as mat;
+@import "./styles.scss";
 
-@import "../../../node_modules/ng-zorro-antd/table/style/index.css";
+
+.panel-class {
+  margin-top: 30px !important;
+}
+
+.my-form-field .mat-form-field-wrapper {
+  flex: 0 0 60%;
+}
+
+::ng-deep .mat-card .mat-card-title-group {
+  div:first-child {
+    flex: 1 0 50%;
+  }
+}
+
+.mat-card {
+  .mat-card-title-group {
+    margin-bottom: 10px;
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+
+  .mat-card-header {
+    display: block;
+  }
+}
+
+table {
+  width: 100%;
+
+  .mat-header-row {
+    background: mat.get-color-from-palette($theme-primary);
+    display: flex;
+    align-items: stretch;
+  }
+
+  .mat-header-cell {
+    color: white;
+    border-right: 1px solid rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center !important;
+  }
+
+  .mat-header-cell:last-child {
+    border-right: none;
+  }
+
+  .mat-column-name {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 50%;
+  }
+
+  .mat-column-action {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 50%;
+    padding-left: 20px;
+  }
+
+  .mat-row {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
 
 .chain-delete-btn {
-    background:transparent;
-    border: 0;
-    justify-content: center;
-    padding-right: 12px;
-    width: 50px;
-    z-index: 100;
-    color: rgb(213, 46, 46);
-    opacity: 0.8;
-}
-.chain-delete-btn .anticon-delete {
-    padding:2px;
+  color: mat.get-color-from-palette(mat.define-palette(mat.$red-palette), 300);
 }
 .chain-delete-btn:hover {
-    opacity: 1;
+  color: mat.get-color-from-palette(mat.define-palette(mat.$red-palette), 600);
 }
 
 .chain-open-btn {
-    background:transparent;
-    border: 0;
-    justify-content: center;
-    padding-right: 12px;
-    width: 50px;
-    z-index: 100;
-    color: #3e508c;
+  color: mat.get-color-from-palette($theme-primary, 300);
+  .chain-open-btn-square {
+    background-color: mat.get-color-from-palette($theme-primary, 300);
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    font-size: 22px;
+    margin-right: 5px;
+    .mat-icon {
+      color: white;
+    }
+  }
 }
-.chain-open-btn .anticon-right-square {
-    opacity: 0.8;
-    padding:2px;
-}
-.chain-open-btn:hover .anticon-right-square {
-    opacity: 1;
+
+.chain-open-btn:hover {
+  color: mat.get-color-from-palette($theme-primary, 600);
+
+  .chain-open-btn-square {
+    background-color: mat.get-color-from-palette($theme-primary, 600);
+  }
 }
 
 .add-new-chain-button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 100%;
-    width: 30px;
-    height: 30px;
-    font-size: 20px;
-    i {
-        display: flex;
-    }
+  border-radius: 100%;
+  width: 56px;
+  height: 56px;
+  mat-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 36px;
+  }
 }
 
-.pipeline-select {
-    margin: 1rem;
-    width: 40rem;
-    display-model: inline-block;
+.pipeline-button {
+  border-radius: 100%;
+  width: 30px;
+  height: 30px;
+  margin-left: 5px;
+  margin-right: 5px;
+  margin-bottom: 10px;
+  mat-icon {
+    font-size: 22px;
+  }
 }
 
-.pipeline-element {
-    margin: 0 0.25rem;
-}
-
-.pipeline-select-dropdown {
-    width: 12rem;
-}
-.add-pipeline-divider {
-    margin: 4px 0;
-}
-.add-pipeline-container {
-    padding: 8px;
-}
-.add-pipeline-button {
-    flex: 0 0 auto;
-    padding: 8px;
-    display: block;
+.mat-divider-wrapper {
+  margin: 0 5px;
+  .mat-divider {
+    height: 50%;
+  }
 }

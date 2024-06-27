@@ -1,5 +1,8 @@
 package com.cloudera.parserchains.queryservice.config.kafka;
 
+import com.cloudera.parserchains.queryservice.service.KafkaService;
+import com.cloudera.parserchains.queryservice.service.KafkaServiceInterface;
+import com.cloudera.parserchains.queryservice.service.MockKafkaService;
 import com.cloudera.service.common.config.kafka.ClouderaKafkaProperties;
 import com.cloudera.service.common.request.RequestBody;
 import com.cloudera.service.common.response.ResponseBody;
@@ -8,13 +11,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.ConsumerFactory;
@@ -37,6 +44,7 @@ import java.util.Set;
 @Slf4j
 @EnableKafka
 @Configuration
+@Profile("kafka")
 @RequiredArgsConstructor
 @EnableConfigurationProperties({ClouderaKafkaProperties.class})
 public class KafkaConfig {
@@ -58,6 +66,7 @@ public class KafkaConfig {
   @Bean(name = "kafka-external-cluster-map")
   @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
   @ConfigurationProperties("spring.kafka.external-clusters")
+  @ConditionalOnProperty(name = "spring.kafka.mock", matchIfMissing = true, havingValue = "false")
   public Map<String, ClouderaKafkaProperties> replyKafkaPropertiesMap() {
     return new HashMap<>();
   }
@@ -72,6 +81,7 @@ public class KafkaConfig {
    */
   @Bean(name = "kafkaTemplatePool")
   @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+  @ConditionalOnProperty(name = "spring.kafka.mock", matchIfMissing = true, havingValue = "false")
   public Map<String, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody>> kafkaTemplatePool(
       @Qualifier("kafka-external-cluster-map") Map<String, ClouderaKafkaProperties> replyKafkaPropertiesMap) {
     final Map<String, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody>> templatePool = new HashMap<>();
@@ -94,8 +104,22 @@ public class KafkaConfig {
 
   @Bean
   @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+  @ConditionalOnProperty(name = "spring.kafka.mock", matchIfMissing = true, havingValue = "false")
   public Set<String> kafkaClustersSet(@Qualifier("kafka-external-cluster-map") Map<String, ClouderaKafkaProperties> replyKafkaPropertiesMap) {
     return Collections.unmodifiableSet(replyKafkaPropertiesMap.keySet());
+  }
+  @Bean
+  @ConditionalOnProperty(name = "spring.kafka.mock")
+  public KafkaServiceInterface mockKafkaService() {
+    return new MockKafkaService();
+  }
+
+  @Bean
+  @ConditionalOnProperty(name = "spring.kafka.mock", matchIfMissing = true, havingValue = "false")
+  public KafkaServiceInterface kafkaService(@Qualifier("kafkaTemplatePool") Map<String, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody>> kafkaTemplatePool,
+                                            @Value("${kafka.reply.future.timeout:45}") Long replyFutureTimeout,
+                                            @Value("${kafka.reply.timeout:45}") Long kafkaTemplateTimeout) {
+    return new KafkaService(kafkaTemplatePool,replyFutureTimeout,kafkaTemplateTimeout);
   }
 
 
