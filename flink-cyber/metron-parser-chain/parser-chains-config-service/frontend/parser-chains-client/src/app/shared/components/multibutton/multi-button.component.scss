@@ -1,1 +1,14 @@
+@use '@angular/material' as mat;
+@import './styles.scss';
+
+.mat-button-toggle-disabled {
+  &.mat-button-toggle-appearance-standard {
+    background-color: mat.get-color-from-palette($theme-primary,300);
+    color: mat.get-color-from-palette($theme-primary,100);
+  }
+  &.mat-button-toggle-appearance-standard:hover {
+    background-color: mat.get-color-from-palette($theme-primary,300);
+    color: mat.get-color-from-palette($theme-primary,100);
+  }
+}
 

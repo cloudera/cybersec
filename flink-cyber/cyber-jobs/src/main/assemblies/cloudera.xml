@@ -88,6 +88,13 @@
 		</file>
 
 		<file>
+			<source>../cyber-services/cyber-worker-service/target/cyber-worker-service-${project.version}.jar</source>
+			<outputDirectory>jobs/</outputDirectory>
+			<destName>cyber-worker-service-${cybersec.full.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
+
+		<file>
 			<source>../flink-commands/scoring-commands/target/scoring-commands-${project.version}.jar</source>
 			<outputDirectory>tools/</outputDirectory>
 			<destName>scoring-commands-${cybersec.full.version}.jar</destName>
