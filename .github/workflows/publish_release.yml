@@ -27,9 +27,6 @@ on:
         required: true
         default: false
         type: boolean
-  #      FIXME remove before merging
-  pull_request:
-    branches: [ "develop" ]
 
 jobs:
 #  checks if there's a commit in last 24hr
@@ -48,6 +45,7 @@ jobs:
         run: test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) && echo "SHOULD_RUN=false" >> $GITHUB_ENV
   publish_release:
     needs: check_date
+    if: ${{ github.event_name == 'workflow_dispatch' || env.SHOULD_RUN != 'false' }}
     runs-on: ubuntu-latest
     container: maven:3-eclipse-temurin-8
     steps:
@@ -62,13 +60,14 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build and Test with Maven
-        run: mvn -P '!add-dependencies-for-IDEA,full-build,include-front-end' -B package -DskipTests=true --file flink-cyber/pom.xml
+        run: mvn -P '!add-dependencies-for-IDEA,full-build,include-front-end' -B package -DskipTests=${{ github.event_name == 'workflow_dispatch' && inputs.skip_tests || true }} --file flink-cyber/pom.xml
 
       - name: Release
         uses: softprops/action-gh-release@v2
+        if: ${{ github.event_name == 'workflow_dispatch' }}
         with:
-          tag_name: 1.0.0-test
-          name: testPR
+          tag_name: ${{ inputs.tag }}
+          name: ${{ inputs.name }}
           draft: true
           generate_release_notes: true
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -83,7 +82,7 @@ jobs:
       - name: Publish artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cybersec-release-${{ env.CURRENT_DATE }}
+          name: cybersec-${{ github.event_name == 'workflow_dispatch' && 'release' || 'nightly' }}-${{ env.CURRENT_DATE }}
           path: |
             flink-cyber/cyber-csd/target/CYBERSEC-*
             flink-cyber/cyber-parcel/target/CYBERSEC-*
