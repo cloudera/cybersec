@@ -84,5 +84,6 @@ jobs:
         with:
           name: cybersec-${{ github.event_name == 'workflow_dispatch' && 'release' || 'nightly' }}-${{ env.CURRENT_DATE }}
           path: |
+            flink-cyber/cyber-csd/target/cyber-csd--*
             flink-cyber/cyber-csd/target/CYBERSEC-*
             flink-cyber/cyber-parcel/target/CYBERSEC-*
