@@ -72,6 +72,7 @@ jobs:
           generate_release_notes: true
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
+            flink-cyber/cyber-csd/target/cyber-csd--*
             flink-cyber/cyber-csd/target/CYBERSEC-*
             flink-cyber/cyber-parcel/target/CYBERSEC-*
 
