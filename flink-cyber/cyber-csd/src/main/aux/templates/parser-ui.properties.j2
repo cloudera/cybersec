@@ -1,0 +1,23 @@
+server.servlet.context-path=/
+server.tomcat.accesslog.enabled=true
+server.port={{ globals['server.port'] }}
+config.path={{ globals['config.path'] }}
+pipelines.path={{ globals['server.pipelineDir'] }}
+springdoc.api-doc.path=/api-docs
+springdoc.swagger-ui.path=/swagger-ui
+spring.profiles.active=kafka
+logging.config={{ globals['logging_config'] }}
+
+{% for obj in globals['clusters_kafka_map'] | fromjson %}
+
+spring.kafka.external-clusters.{{ obj['name'] }}.bootstrap-servers={{obj['bootstrap']}}
+spring.kafka.external-clusters.{{ obj['name'] }}.reply-topic={{ globals['spring.kafka.replyTopic'] }}
+spring.kafka.external-clusters.{{ obj['name'] }}.request-topic={{ globals['spring.kafka.requestTopic'] }}
+spring.kafka.external-clusters.{{ obj['name'] }}.consumer.group-id={{ globals['server.group.id'] }}
+spring.kafka.external-clusters.{{ obj['name'] }}.consumer.enable-auto-commit={{ globals['spring.kafka.consumer.enable-auto-commit'] }}
+spring.kafka.external-clusters.{{ obj['name'] }}.consumer.auto-offset-reset={{ globals['spring.kafka.consumer.auto-offset-reset'] }}
+spring.kafka.external-clusters.{{ obj['name'] }}.consumer.key-deserializer={{ globals['spring.kafka.consumer.key-deserializer'] }}
+spring.kafka.external-clusters.{{ obj['name'] }}.consumer.value-deserializer={{ globals['spring.kafka.consumer.value-deserializer'] }}
+spring.kafka.external-clusters.{{ obj['name'] }}.producer.key-serializer={{ globals['spring.kafka.producer.key-deserialize'] }}
+spring.kafka.external-clusters.{{ obj['name'] }}.producer.value-serializer={{ globals['spring.kafka.producer.value-serializer'] }}
+{% endfor %}
