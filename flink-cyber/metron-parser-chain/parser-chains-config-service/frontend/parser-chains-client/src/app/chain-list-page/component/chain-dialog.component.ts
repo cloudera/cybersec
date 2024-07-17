@@ -1,5 +1,5 @@
 import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
-import {Component, inject} from '@angular/core';
+import {Component, Inject} from '@angular/core';
 import {Observable} from 'rxjs';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {SnackbarService, SnackBarStatus} from 'src/app/services/snack-bar.service';
@@ -20,17 +20,15 @@ export class ChainDialogComponent {
     )
   });
 
-  private _snackBarService = inject(SnackbarService);
-  private _data = inject(MAT_DIALOG_DATA) as DialogData<any>;
-  private _dialogRef = inject(MatDialogRef);
-
+  constructor(private _snackBarService: SnackbarService, private _dialogRef: MatDialogRef<any>, @Inject(MAT_DIALOG_DATA) private _data: DialogData<any>) {
+  }
 
 
   get validator() {
     if (this._data.existValues instanceof Observable) {
       return [Validators.required, Validators.minLength(3)]
     }
-    return [Validators.required, Validators.minLength(3),  uniqueValidator(this._data.existValues, this._data.columnUniqueKey)]
+    return [Validators.required, Validators.minLength(3), uniqueValidator(this._data.existValues, this._data.columnUniqueKey)]
   }
 
   get asyncValidator() {
@@ -40,7 +38,7 @@ export class ChainDialogComponent {
     return []
   }
 
-  get type(){
+  get type() {
     return this._data.type;
   }
 
@@ -51,6 +49,7 @@ export class ChainDialogComponent {
   get currentValue() {
     return this._data.currentValue ? this._data.currentValue : '';
   }
+
   get formName() {
     return this.dialogForm.controls.name;
   }

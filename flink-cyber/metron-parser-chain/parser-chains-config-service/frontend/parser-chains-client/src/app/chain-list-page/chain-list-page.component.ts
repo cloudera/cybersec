@@ -11,8 +11,8 @@
  */
 
 import {Component, inject} from '@angular/core';
-import {BehaviorSubject, combineLatest, merge, Observable, Subject} from 'rxjs';
-import {filter, map, scan, shareReplay, startWith, switchMap} from 'rxjs/operators';
+import {BehaviorSubject, combineLatest, merge, Observable, of, Subject} from 'rxjs';
+import {catchError, filter, map, scan, shareReplay, startWith, switchMap} from 'rxjs/operators';
 import {ChainModel, ChainOperationalModel, DialogData, DialogForm} from './chain.model';
 import {PipelineService} from '../services/pipeline.service';
 import {ChainListPageService} from '../services/chain-list-page.service';
@@ -66,12 +66,21 @@ export class ChainListPageComponent {
     }),
     shareReplay(1)
   );
+  pipelines = merge(this._pipelinesSubject,
+    this._pipelineService.getPipelines()
+      .pipe(
+      catchError((err, thr) => {
+        return of([]);
+      }))
+  ).pipe(
+    shareReplay(1)
+  );
 
   // Combined data
   get vm$() {
     return combineLatest([
       this._currentPipeline$,
-      merge(this._pipelinesSubject, this._pipelineService.getPipelines()),
+      this.pipelines,
       this._currentChains$
     ]).pipe(
       map(([currentPipeline, pipelines, currentChains]) => ({currentPipeline, pipelines, currentChains}))
