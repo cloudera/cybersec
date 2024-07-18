@@ -27,9 +27,6 @@ on:
         required: true
         default: false
         type: boolean
-  #        TODO REMOVE
-  pull_request:
-    branches: [ "develop" ]
 
 jobs:
 #  checks if there's a commit in last 24hr
