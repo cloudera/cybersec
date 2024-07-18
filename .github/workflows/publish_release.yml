@@ -27,6 +27,9 @@ on:
         required: true
         default: false
         type: boolean
+  #        TODO REMOVE
+  pull_request:
+    branches: [ "develop" ]
 
 jobs:
 #  checks if there's a commit in last 24hr
@@ -42,7 +45,9 @@ jobs:
       - id: should_run
         continue-on-error: true
         name: check latest commit is less than a day
-        run: test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) && echo "::set-output name=should_run::false"
+        run: |
+          gh run cancel ${{ github.run_id }} \
+            && gh run watch ${{ github.run_id }}
   publish_release:
     needs: check_date
     if: ${{ github.event_name == 'workflow_dispatch' || needs.check_date.outputs.should_run != 'false' }}
