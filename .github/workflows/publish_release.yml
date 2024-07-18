@@ -46,8 +46,10 @@ jobs:
         continue-on-error: true
         name: check latest commit is less than a day
         run: |
-          gh run cancel ${{ github.run_id }} \
-            && gh run watch ${{ github.run_id }}
+          test -z $(git rev-list  --after="24 hours"  ${{ github.sha }}) \
+          && echo "::set-output name=should_run::false" \
+          || (gh run cancel ${{ github.run_id }} \
+            && gh run watch ${{ github.run_id }})
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   publish_release:
