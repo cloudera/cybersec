@@ -48,6 +48,8 @@ jobs:
         run: |
           gh run cancel ${{ github.run_id }} \
             && gh run watch ${{ github.run_id }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   publish_release:
     needs: check_date
     if: ${{ github.event_name == 'workflow_dispatch' || needs.check_date.outputs.should_run != 'false' }}
