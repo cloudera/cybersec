@@ -12,9 +12,9 @@ export class ClusterPipelineService {
   private _http = inject(HttpClient);
 
 
-  public createEmptyPipeline(clusterId: string, pipelineDir: string, branch: string = 'main') {
+  public createEmptyPipeline(clusterId: string, pipelineName: string, branch: string = 'main') {
     const body: RequestBody = {
-      pipelineDir,
+      pipelineName,
       branch
     }
     return this._http.post(ClusterPipelineService.BASE_URL + `/${clusterId}/pipelines`,body);
@@ -34,7 +34,7 @@ export class ClusterPipelineService {
     })
     fd.append('payload', blobFile);
     fd.append('body', blobJson);
-    const req = new HttpRequest('POST', ClusterPipelineService.BASE_URL + `/${clusterId}/pipelines/${pipelineName}/startAll`, fd);
+    const req = new HttpRequest('POST', ClusterPipelineService.BASE_URL + `/${clusterId}/pipelines/${pipelineName}/start`, fd);
    return  this._http.request(req);
   }
 
