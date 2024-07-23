@@ -69,7 +69,7 @@ export class ChainListPageComponent {
   pipelines = merge(this._pipelinesSubject,
     this._pipelineService.getPipelines()
       .pipe(
-      catchError((err, thr) => {
+      catchError(_=> {
         return of([]);
       }))
   ).pipe(
