@@ -1,6 +1,6 @@
 import {Component, inject} from '@angular/core';
 import {MultiButton} from 'src/app/shared/components/multibutton/multi-button.component';
-import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {AbstractControl, FormControl, FormGroup, Validators} from '@angular/forms';
 import {ClusterService} from 'src/app/services/cluster.service';
 import {combineLatest} from 'rxjs';
 import {map} from 'rxjs/operators';
@@ -36,7 +36,8 @@ export class PipelineCreateComponent {
 
   jobs: string[] = Object.keys(JOBS_ENUM).map(key=> JOBS_ENUM[key].value);
   mode: ButtonsLabelValues = 'Empty';
-  file: File;
+  file: File = null;
+  nextButtonDisabled = false;
 
   buttons: Readonly<MultiButton[]> = BUTTONS_CONST;
   formGroup = new FormGroup<{
@@ -45,16 +46,28 @@ export class PipelineCreateComponent {
     profileName: FormControl<string>,
     cluster: FormControl<ClusterMeta>
   }>({
-    pipelineName: new FormControl('', [Validators.minLength(3)]),
-    branchName: new FormControl('', [Validators.minLength(3)]),
-    profileName: new FormControl('', [Validators.minLength(3)]),
-    cluster: new FormControl({})
+    pipelineName: new FormControl('', [Validators.required,Validators.minLength(3)]),
+    branchName: new FormControl('', [Validators.required,Validators.minLength(3)]),
+    profileName: new FormControl('', [Validators.required,Validators.minLength(3)]),
+    cluster: new FormControl(null, [Validators.required])
   });
   clusters$ = this._clusterService.getClusters();
-  vm$ = combineLatest([this.clusters$]).pipe(map(([cluster]) => ({cluster})))
+  vm$ = combineLatest([this.clusters$]).pipe(map(([cluster]) => ({cluster})));
+
+  errorMessage(formControl: AbstractControl) {
+    if(formControl.hasError('minlength')) {
+      const minLengthError = formControl.errors.minlength;
+      return `Minimum length required is ${minLengthError.requiredLength}, but actual length is ${minLengthError.actualLength}.`;
+    }
+    if (formControl.hasError('required')) {
+      return 'Value is required.'
+    }
+    return 'Unrecognized error.';
+  }
 
   selectPipelineMode(value: ButtonsLabelValues) {
     this.mode = value;
+    this._disableNext()
   }
 
   navigateToReceiver() {
@@ -90,6 +103,7 @@ export class PipelineCreateComponent {
         this.file = file;
       }
     });
+    this._disableNext();
   }
 
   formatBytes(bytes: number): string {
@@ -111,5 +125,24 @@ export class PipelineCreateComponent {
       array.push(value);
     }
     return array;
+  }
+
+  deleteFile() {
+    this.file = null;
+    this._disableNext();
+  }
+
+  private _disableNext() {
+    switch (this.mode){
+      case 'Archive':
+        this.nextButtonDisabled = !this.file;
+        break;
+      case 'Empty':
+      case 'Git':
+      case 'Manual':
+      default:
+        this.nextButtonDisabled = false;
+        break;
+    }
   }
 }

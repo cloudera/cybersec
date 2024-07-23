@@ -73,7 +73,7 @@ export class ClusterPageComponent {
               this._clusterService.sendJobCommand(clusterId, action,
                 {
                   jobIdHex: job.jobIdString,
-                  pipelineDir: job.jobPipeline,
+                  pipelineName: job.jobPipeline,
                   branch: job.jobPipeline
                 }).pipe(catchError(err => {
                 this._snackBarService.showMessage(err.message, SnackBarStatus.FAIL);
