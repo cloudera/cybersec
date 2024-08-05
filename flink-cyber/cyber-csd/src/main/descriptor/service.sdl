@@ -67,16 +67,16 @@
       "permissions": "1755"
     }
   ],
-  "serviceInit" : {
-    "preStartSteps" : [
+  "serviceInit": {
+    "preStartSteps": [
       {
-        "commandName" : "CreateCybersecUserDirCommand"
+        "commandName": "CreateCybersecUserDirCommand"
       },
       {
-        "commandName" : "CreateCybersecDataDirCommand"
+        "commandName": "CreateCybersecDataDirCommand"
       },
       {
-        "commandName" : "CreateCybersecStellarDirCommand"
+        "commandName": "CreateCybersecStellarDirCommand"
       }
     ]
   },
@@ -91,16 +91,20 @@
       "configurableInWizard": true
     }
   ],
-  "rolesWithExternalLinks" : ["PARSER_CHAINING"],
-  "roles" : [
+  "rolesWithExternalLinks": [
+    "CYBERSEC_UI"
+  ],
+  "roles": [
     {
-      "name" : "PARSER_CHAINING",
-      "label" : "Parser Chaining",
-      "pluralLabel" : "Parser Chainings",
+      "name": "CYBERSEC_UI",
+      "label": "Cybersec UI",
+      "pluralLabel": "Cybersec UI",
       "jvmBased": true,
-      "startRunner" : {
-        "program" : "scripts/control.sh",
-        "args" : [ "start-parser-ui" ],
+      "startRunner": {
+        "program": "scripts/control.sh",
+        "args": [
+          "start-parser-ui"
+        ],
         "environmentVariables": {
           "SERVER_SSL_KEY_STORE": "${ssl_server_keystore_location}",
           "SERVER_SSL_KEY_STORE_PASSWORD": "${ssl_server_keystore_password}",
@@ -109,21 +113,19 @@
           "SERVER_SSL_ENABLED": "${ssl_enabled}"
         }
       },
-      "externalLink" : {
-        "name" : "parser_web_ui",
-        "label" : "Parser Chaining",
-        "url" : "http://${host}:${parser_ui_port}",
-        "secureUrl": "https://${host}:${parser_ui_port}"
+      "externalLink": {
+        "name": "parser_web_ui",
+        "label": "Parser Chaining",
+        "url": "http://${host}:${server_ui_port}",
+        "secureUrl": "https://${host}:${server_ui_port}"
       },
       "topology": {
-        "minInstances": 0,
-        "softMinInstances": 1,
-        "softMaxInstances": 1
+        "maxInstances": "1"
       },
       "logging": {
         "dir": "/var/log/cybersec",
         "configFilename": "cybersec-conf/logback.xml",
-        "filename": "parser-ui-${host}.log",
+        "filename": "cybersec-parser-ui-${host}.log",
         "configName": "logging.config",
         "modifiable": true,
         "loggingType": "logback",
@@ -154,22 +156,121 @@
           }
         ]
       },
-      "parameters" : [
+      "parameters": [
         {
-          "name": "parser_ui_port",
-          "label": "Parser Chaining UI port",
-          "description": "Port of the Parser Chaining web interface.",
+          "name": "server_ui_port",
+          "label": "Cybersec UI Port",
+          "description": "The port number on which the Parser Chaining web interface listens. This port is used for accessing the web interface to configure and manage cybersec jobs, running a new pipeline or create parser chaining.",
           "configName": "server.port",
-          "type": "string",
+          "type": "port",
           "default": "28922"
         },
         {
-          "name": "config_path",
-          "label": "Parser Chaining UI port",
-          "description": "Port of the Parser Chaining web interface.",
-          "configName": "config.path",
+          "name": "clusters_kafka_map",
+          "label": "Kafka Clusters and Bootstrap Addresses",
+          "description": "A map of Kafka cluster names to their corresponding bootstrap addresses. This configuration allows specifying multiple Kafka clusters with their bootstrap servers for connecting and managing Cybersec pipelines. The map value should be in the following format: [{\"name\": \"<cluster-name>\", \"bootstrap\": \"example.com:9092,example.com:9092,example.com:9092\"}, {\"name\": \"<cluster-name2>\", \"bootstrap\": \"example2.com:9092,example2.com:9092,example2.com:9092\"}, ...]",
           "type": "string",
-          "default": "/var/lib/cybersec"
+          "configurableInWizard": true
+        },
+        {
+          "name": "server_pipeline_dir",
+          "label": "Pipeline Configuration Directory Path",
+          "description": "The file system path where the pipeline configuration files are stored. This directory contains all the necessary configuration files for managing and executing data pipelines on UI.",
+          "configName": "server.pipelineDir",
+          "type": "path",
+          "pathType": "localDataDir",
+          "default": "/var/lib/cybersec/pipelines",
+          "required": "true",
+          "mode": "0740"
+        },
+        {
+          "name": "server_auto_offset",
+          "label": "Spring Kafka Consumer Auto-Offset Reset for CYBERSEC_UI.",
+          "description": "Configuration for the auto-offset-reset policy in the Spring Kafka consumer. This setting determines the behavior when there is no initial offset or if the current offset does not exist. Valid values are 'earliest' to start from the beginning of the log and 'latest' to start from the end of the log.",
+          "configName": "spring.kafka.consumer.auto-offset-reset",
+          "type": "string_enum",
+          "default": "earliest",
+          "validValues": [
+            "earliest",
+            "latest"
+          ]
+        },
+        {
+          "name": "server_enable_auto_commit",
+          "label": "Spring Kafka Consumer Enable Auto-Commit for CYBERSEC_UI.",
+          "description": "Configuration for enabling or disabling auto-commit of offsets in the Spring Kafka consumer. When set to 'true', the consumer's offset will be periodically committed in the background. When set to 'false', offset commits must be handled manually.",
+          "configName": "spring.kafka.consumer.enable-auto-commit",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "server_kafka_producer_key_serializer",
+          "label": "Kafka Producer Key Serializer for CYBERSEC_UI.",
+          "description": "The class used for serializing the keys of Kafka producer records. This serializer converts the key objects into a byte stream that can be sent to Kafka. The default value is 'org.apache.kafka.common.serialization.StringSerializer'.",
+          "configName": "spring.kafka.producer.key-serializer",
+          "type": "string",
+          "default": "org.apache.kafka.common.serialization.StringSerializer"
+        },
+        {
+          "name": "server_kafka_producer_value_deserializer",
+          "label": "Kafka Producer Value Serializer for CYBERSEC_UI.",
+          "description": "The class used for serializing the values of Kafka producer records. This serializer converts the value objects into a byte stream that can be sent to Kafka. The default value is 'org.apache.kafka.common.serialization.StringSerializer'.",
+          "configName": "spring.kafka.producer.value-serializer",
+          "type": "string",
+          "default": "org.apache.kafka.common.serialization.StringSerializer"
+        },
+        {
+          "name": "server_kafka_consumer_key_deserializer",
+          "label": "Kafka Consumer Key Deserializer for CYBERSEC_UI.",
+          "description": "The class used for deserializing the keys of Kafka consumer records. This deserializer converts the byte stream received from Kafka into key objects that can be processed by the consumer. The default value is 'org.apache.kafka.common.serialization.StringDeserializer'.",
+          "configName": "spring.kafka.consumer.key-deserializer",
+          "type": "string",
+          "default": "org.apache.kafka.common.serialization.StringDeserializer"
+        },
+        {
+          "name": "server_kafka_consumer_value_deserializer",
+          "label": "Kafka Consumer Value Deserializer",
+          "description": "The class used for deserializing the values of Kafka consumer records. This deserializer converts the byte stream received from Kafka into value objects that can be processed by the consumer. The default value is 'org.apache.kafka.common.serialization.StringDeserializer'.",
+          "configName": "spring.kafka.consumer.value-deserializer",
+          "type": "string",
+          "default": "org.apache.kafka.common.serialization.StringDeserializer"
+        },
+        {
+          "name": "server_request_topic",
+          "label": "Request Topic name for communication between UI and worker.",
+          "description": "The Kafka topic used for sending negotiation requests to communicate with workers in the Cybersec system. This topic facilitates the coordination and interaction between the server and worker nodes.",
+          "configName": "spring.kafka.requestTopic",
+          "type": "string",
+          "default": "cybersec.requestTopic",
+          "configurableInWizard": true
+        },
+        {
+          "name": "server_response_topic",
+          "label": "Response Topic name for communication between UI and worker.",
+          "description": "The Kafka topic used for sending negotiation requests to communicate with workers in the Cybersec system. This topic facilitates the coordination and interaction between the server and worker nodes.",
+          "configName": "spring.kafka.replyTopic",
+          "default": "cybersec.responseTopic",
+          "type": "string",
+          "configurableInWizard": true
+        },
+        {
+          "name": "server_group_id",
+          "label": "Cybersec Consumer Group ID",
+          "description": "The identifier for the consumer group used by the Cybersec server. This ID ensures that multiple consumers can coordinate and share load by belonging to the same group. Each consumer group is identified by a unique ID.",
+          "configName": "server.group.id",
+          "type": "string",
+          "default": "server.group.id"
+        },
+        {
+          "name": "config_path",
+          "label": "Configuration Directory Path",
+          "description": "The file system path where the Cybersec configuration files are stored. This directory contains all the necessary configuration files for the Cybersec system.",
+          "configName": "config.path",
+          "type": "path",
+          "pathType": "localDataDir",
+          "default": "/var/lib/cybersec/config",
+          "required": "true",
+          "mode": "0740"
         },
         {
           "name": "logging.org.springframework.level",
@@ -287,33 +388,401 @@
         }
       ],
       "sslServer": {
-        "keyIdentifier" : "parser_ui_chaining",
-        "enabledConfigName" : "ssl_enabled",
-        "keystoreLocationConfigName" : "ssl_server_keystore_location",
-        "keystorePasswordConfigName" : "ssl_server_keystore_password",
-        "keyPasswordOptionality" : "required",
-        "keystoreKeyPasswordConfigName" : "ssl_server_keystore_keypassword",
+        "keyIdentifier": "parser_ui_chaining",
+        "enabledConfigName": "ssl_enabled",
+        "keystoreLocationConfigName": "ssl_server_keystore_location",
+        "keystorePasswordConfigName": "ssl_server_keystore_password",
+        "keyPasswordOptionality": "required",
+        "keystoreKeyPasswordConfigName": "ssl_server_keystore_keypassword",
         "autoTlsMode": "auto"
       },
       "sslClient": {
-        "truststoreLocationConfigName" : "security.ssl.rest.truststore",
-        "truststorePasswordConfigName" : "security.ssl.rest.truststore-password"
+        "truststoreLocationConfigName": "security.ssl.rest.truststore",
+        "truststorePasswordConfigName": "security.ssl.rest.truststore-password"
       },
-      "configWriter" : {
-        "generators" : [
+      "configWriter": {
+        "generators": [
           {
             "filename": "cybersec-conf/parser-ui.properties",
+            "configFormat": "jinja",
+            "template": "aux/templates/parser-ui.properties.j2",
+            "kerberosPrincipals": [
+            ],
+            "includedParams": [
+              "server_ui_port",
+              "config_path",
+              "server_pipeline_dir",
+              "clusters_kafka_map",
+              "server_auto_offset",
+              "server_enable_auto_commit",
+              "server_kafka_producer_key_serializer",
+              "server_kafka_producer_value_deserializer",
+              "server_kafka_consumer_key_deserializer",
+              "server_kafka_consumer_value_deserializer",
+              "server_request_topic",
+              "server_response_topic",
+              "server_group_id"
+            ],
+            "additionalConfigs": [
+              {
+                "key": "logging_config",
+                "value": "cybersec-conf/logback.xml"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "CYBER_WORKER",
+      "label": "Cybersec worker",
+      "pluralLabel": "Cybersec workers",
+      "jvmBased": true,
+      "startRunner": {
+        "program": "scripts/control.sh",
+        "args": [
+          "start-worker"
+        ],
+        "environmentVariables": {
+          "SERVER_SSL_KEY_STORE": "${ssl_server_keystore_location}",
+          "SERVER_SSL_KEY_STORE_PASSWORD": "${ssl_server_keystore_password}",
+          "SERVER_SSL_KEY_PASSWORD": "${ssl_server_keystore_keypassword}",
+          "SERVER_SSL_KEY_STORE_TYPE": "jks",
+          "SERVER_SSL_ENABLED": "${ssl_enabled}"
+        }
+      },
+      "topology": {
+        "maxInstances": "1"
+      },
+      "logging": {
+        "dir": "/var/log/cybersec",
+        "configFilename": "cybersec-conf/logback.xml",
+        "filename": "cybersec-worker-${host}.log",
+        "configName": "logging.config",
+        "modifiable": true,
+        "loggingType": "logback",
+        "additionalConfigs": [
+          {
+            "key": "logger1",
+            "value": "<logger  name=\"org.springframework\" level=\"${cluster.logging.org.springframework.level}\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
+          },
+          {
+            "key": "logger2",
+            "value": "<logger name=\"com.cloudera.cyber\" level=\"${cluster.logging.com.cloudera.cyber.level}\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
+          },
+          {
+            "key": "logger3",
+            "value": "<logger name=\"com.cloudera.parserchains\" level=\"${cluster.logging.com.cloudera.parserchains.level}\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
+          },
+          {
+            "key": "logger4",
+            "value": "<logger name=\"org.apache.metron\" level=\"${cluster.logging.org.apache.metron.level}\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
+          },
+          {
+            "key": "logger5",
+            "value": "<logger name=\"org.apache.flink\" level=\"${cluster.logging.org.apache.flink.level}\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
+          },
+          {
+            "key": "logger6",
+            "value": "<logger name=\"org.apache\" level=\"INFO\" additivity=\"false\"><appender-ref ref=\"RFA\"/></logger>"
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "name": "cluster_name",
+          "label": "Cybersec worker name.",
+          "description": "The name assigned to the node within the Cybersec cluster. This name uniquely identifies the node within the cluster for coordination and management purposes.",
+          "configName": "cluster.name",
+          "type": "string"
+        },
+        {
+          "name": "cluster_id",
+          "label": "Cybersec worker ID.",
+          "description": "The unique identifier assigned to the node within the Cybersec cluster. This ID is used to identify and manage the node within the cluster.",
+          "configName": "cluster.id",
+          "type": "string"
+        },
+        {
+          "name": "cluster_status",
+          "label": "Cybersec worker status",
+          "description": "The operational status of the Cybersec cluster node. This status indicates whether the node is currently online and functioning or offline and not available.",
+          "configName": "cluster.status",
+          "default": "ONLINE",
+          "type": "string_enum",
+          "validValues": [
+            "ONLINE",
+            "OFFLINE"
+          ]
+        },
+        {
+          "name": "cluster_version",
+          "label": "Cybersec worker version",
+          "description": "The version of the Cybersec cluster. This version information helps in identifying the software version running on the cluster nodes.",
+          "configName": "cluster.version",
+          "type": "string"
+        },
+        {
+          "name": "cluster_pipeline_dir",
+          "label": "Pipeline Configuration Directory Path for worker service.",
+          "description": "The file system path where the pipeline configuration files are stored within the cluster. This directory contains all the necessary configuration files for managing and executing data pipelines in the Cybersec cluster.",
+          "configName": "cluster.pipelineDir",
+          "type": "path",
+          "pathType": "localDataDir",
+          "required": "true",
+          "mode": "0740",
+          "default": "/var/lib/cybersec/pipelines"
+        },
+        {
+          "name": "cluster_auto_offset",
+          "label": "Worker Spring Kafka Auto-Offset Reset Configuration",
+          "description": "Configuration for the auto-offset-reset policy in the Spring Kafka consumer within the cluster. This setting determines the behavior when there is no initial offset or if the current offset does not exist. Valid values are 'earliest' to start from the beginning of the log and 'latest' to start from the end of the log.",
+          "configName": "spring.kafka.consumer.auto-offset-reset",
+          "type": "string_enum",
+          "default": "earliest",
+          "validValues": [
+            "earliest",
+            "latest"
+          ]
+        },
+        {
+          "name": "cluster_enable_auto_commit",
+          "label": "Worker Spring Kafka Enable Auto-Commit Configuration",
+          "description": "Configuration for enabling or disabling auto-commit of offsets in the Spring Kafka consumer within the cluster. When set to 'true', the consumer's offset will be periodically committed in the background. When set to 'false', offset commits must be handled manually.",
+          "configName": "spring.kafka.consumer.enable-auto-commit",
+          "type": "boolean",
+          "default": "false"
+        },
+        {
+          "name": "cluster_kafka_producer_key_serializer",
+          "label": "Worker Kafka Producer Key Serializer",
+          "description": "The class used for serializing the keys of Kafka producer records within the Cybersec cluster. This serializer converts the key objects into a byte stream that can be sent to Kafka. The default value is 'org.apache.kafka.common.serialization.StringSerializer'.",
+          "configName": "spring.kafka.producer.key-serializer",
+          "type": "string",
+          "default": "org.apache.kafka.common.serialization.StringSerializer"
+        },
+        {
+          "name": "cluster_kafka_producer_value_serializer",
+          "label": "Worker kafka producer value serializer",
+          "description": "The class used for serializing the values of Kafka producer records within the Cybersec cluster. This serializer converts the value objects into a byte stream that can be sent to Kafka. The default value is 'org.apache.kafka.common.serialization.StringSerializer'.",
+          "configName": "spring.kafka.producer.value-serializer",
+          "type": "string",
+          "default": "org.apache.kafka.common.serialization.StringSerializer"
+        },
+        {
+          "name": "cluster_kafka_consumer_key_deserializer",
+          "label": "Worker kafka consumer key deserializer",
+          "description": "The class used for deserializing the keys of Kafka consumer records within the Cybersec worker. This deserializer converts the key objects into a byte stream that can be sent to Kafka. The default value is 'org.apache.kafka.common.serialization.StringDeserializer'.",
+          "configName": "spring.kafka.consumer.key-deserializer",
+          "type": "string",
+          "default": "org.apache.kafka.common.serialization.StringDeserializer"
+        },
+        {
+          "name": "cluster_kafka_consumer_value_deserializer",
+          "label": "Worker kafka consumer value deserializer",
+          "description": "The class used for deserializing the values of kafka consumer records within the Cybersec worker. This deserializer converts the value objects into a byte stream that can be sent to kafka. The default value is 'org.apache.kafka.common.serialization.StringDeserializer'.",
+          "configName": "spring.kafka.consumer.value-deserializer",
+          "type": "string",
+          "default": "org.apache.kafka.common.serialization.StringDeserializer"
+        },
+        {
+          "name": "cluster_kafka_bootstrap",
+          "label": "Kafka bootstrap servers for worker communication",
+          "description": "The list of Kafka bootstrap servers used by Cybersec worker to communicate with the CYBERSEC UI.",
+          "configName": "spring.kafka.bootstrap-servers",
+          "type": "string",
+          "configurableInWizard": true
+        },
+        {
+          "name": "cluster_request_topic",
+          "label": "Request Topic name for communication between UI and worker.",
+          "description": "The Kafka topic used for sending negotiation requests to communicate with workers in the Cybersec system. This topic facilitates the coordination and interaction between the server and worker nodes.",
+          "configName": "spring.kafka.requestTopic",
+          "type": "string",
+          "default": "cybersec.requestTopic",
+          "configurableInWizard": true
+        },
+        {
+          "name": "cluster_response_topic",
+          "label": "Response Topic name for communication between UI and worker.",
+          "description": "The Kafka topic used for sending negotiation requests to communicate with workers in the Cybersec system. This topic facilitates the coordination and interaction between the server and worker nodes.",
+          "configName": "spring.kafka.replyTopic",
+          "default": "cybersec.responseTopic",
+          "type": "string",
+          "configurableInWizard": true
+        },
+        {
+          "name": "cluster_group_id",
+          "label": "Cybersec consumer worker group ID",
+          "description": "The identifier for the consumer group used by the Cybersec worker. This ID ensures that multiple consumers can coordinate and share load by belonging to the same group. Each consumer group is identified by a unique ID.",
+          "configName": "spring.kafka.consumer.group-id",
+          "type": "string",
+          "default": "cluster.group.id"
+        },
+        {
+          "name": "cluster.logging.org.springframework.level",
+          "label": "Logger org.springframework Logging Level",
+          "description": "Logger org.springframework logging level.",
+          "required": "false",
+          "default": "INFO",
+          "type": "string_enum",
+          "validValues": [
+            "INFO",
+            "ERROR",
+            "TRACE",
+            "DEBUG",
+            "WARN",
+            "ALL",
+            "OFF"
+          ]
+        },
+        {
+          "name": "cluster.logging.com.cloudera.cyber.level",
+          "label": "Logger com.cloudera.cyber Logging Level",
+          "description": "Logger com.cloudera.cyber logging level.",
+          "required": "false",
+          "default": "INFO",
+          "type": "string_enum",
+          "validValues": [
+            "INFO",
+            "ERROR",
+            "TRACE",
+            "DEBUG",
+            "WARN",
+            "ALL",
+            "OFF"
+          ]
+        },
+        {
+          "name": "cluster.logging.com.cloudera.parserchains.level",
+          "label": "Logger com.cloudera.parserchains Logging Level",
+          "description": "Logger com.cloudera.parserchains logging level.",
+          "required": "false",
+          "default": "INFO",
+          "type": "string_enum",
+          "validValues": [
+            "INFO",
+            "ERROR",
+            "TRACE",
+            "DEBUG",
+            "WARN",
+            "ALL",
+            "OFF"
+          ]
+        },
+        {
+          "name": "cluster.logging.org.apache.metron.level",
+          "label": "Loggerorg.apache.metron Logging Level",
+          "description": "Logger org.apache.metron logging level.",
+          "required": "false",
+          "default": "INFO",
+          "type": "string_enum",
+          "validValues": [
+            "INFO",
+            "ERROR",
+            "TRACE",
+            "DEBUG",
+            "WARN",
+            "ALL",
+            "OFF"
+          ]
+        },
+        {
+          "name": "cluster.logging.smm.kafka.webservice.common.level",
+          "label": "Logger smm.kafka.webservice.common Logging Level",
+          "description": "Logger smm.kafka.webservice.common logging level.",
+          "required": "false",
+          "default": "DEBUG",
+          "type": "string_enum",
+          "validValues": [
+            "INFO",
+            "ERROR",
+            "TRACE",
+            "DEBUG",
+            "WARN",
+            "ALL",
+            "OFF"
+          ]
+        },
+        {
+          "name": "cluster.logging.org.apache.flink.level",
+          "label": "Logger org.apache.flink Logging Level",
+          "description": "Logger org.apache.flink logging level.",
+          "required": "false",
+          "default": "INFO",
+          "type": "string_enum",
+          "validValues": [
+            "INFO",
+            "ERROR",
+            "TRACE",
+            "DEBUG",
+            "WARN",
+            "ALL",
+            "OFF"
+          ]
+        }
+      ],
+      "kerberosPrincipals": [
+        {
+          "name": "cybersec_service_principal",
+          "primary": "${principal}",
+          "instance": "${host}"
+        },
+        {
+          "name": "spnego_service_principal",
+          "primary": "HTTP",
+          "instance": "${host}"
+        }
+      ],
+      "sslServer": {
+        "keyIdentifier": "parser_ui_chaining",
+        "enabledConfigName": "ssl_enabled",
+        "keystoreLocationConfigName": "ssl_server_keystore_location",
+        "keystorePasswordConfigName": "ssl_server_keystore_password",
+        "keyPasswordOptionality": "required",
+        "keystoreKeyPasswordConfigName": "ssl_server_keystore_keypassword",
+        "autoTlsMode": "auto"
+      },
+      "sslClient": {
+        "truststoreLocationConfigName": "security.ssl.rest.truststore",
+        "truststorePasswordConfigName": "security.ssl.rest.truststore-password"
+      },
+      "configWriter": {
+        "generators": [
+          {
+            "filename": "cybersec-conf/worker.properties",
             "configFormat": "properties",
             "kerberosPrincipals": [
             ],
             "includedParams": [
-              "parser_ui_port",
-              "config_path"
-             ],
+              "cluster_name",
+              "cluster_id",
+              "cluster_status",
+              "cluster_version",
+              "cluster_pipeline_dir",
+              "cluster_kafka_bootstrap",
+              "cluster_auto_offset",
+              "cluster_enable_auto_commit",
+              "cluster_kafka_producer_key_serializer",
+              "cluster_kafka_producer_value_serializer",
+              "cluster_kafka_consumer_key_deserializer",
+              "cluster_kafka_consumer_value_deserializer",
+              "cluster_request_topic",
+              "cluster_response_topic",
+              "cluster_group_id"
+            ],
             "additionalConfigs": [
               {
                 "key": "logging.config",
                 "value": "cybersec-conf/logback.xml"
+              },
+              {
+                "key": "kafka.reply.future.timeout",
+                "value": "5000"
+              },
+              {
+                "key": "kafka.reply.timeout",
+                "value": "5000"
               }
             ]
           }
@@ -580,9 +1049,12 @@
         "label": "Schema registry url",
         "description": "Schema registry server URL in the format http(s)://{schema-registry-host}:{schema-registry-port}/api/v1",
         "configName": "schema.registry.url",
-        "type" : "uri",
-        "allowedSchemes": [ "http", "https" ],
-        "default" : "",
+        "type": "uri",
+        "allowedSchemes": [
+          "http",
+          "https"
+        ],
+        "default": "",
         "configurableInWizard": true
       },
       {
@@ -899,7 +1371,10 @@
         "description": "Phoenix to the avatica url.",
         "configName": "phoenix.db.thin.url",
         "type": "uri",
-        "allowedSchemes": [ "http", "https" ],
+        "allowedSchemes": [
+          "http",
+          "https"
+        ],
         "default": "http://localhost.localhost:8765"
       },
       {
