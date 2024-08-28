@@ -1,0 +1,1 @@
+${params.domain},${utils.randomCategory()},${utils.randomEmail()},${utils.randomUser()},${utils.randomCategory()}

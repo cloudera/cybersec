@@ -12,6 +12,8 @@
 
 import {Component, inject} from '@angular/core';
 import {ClusterPipelineService} from 'src/app/services/cluster.pipeline.service';
+import {map} from 'rxjs/operators';
+import {concat, of} from 'rxjs';
 
 @Component({
   selector: 'app-chain-list-page',
@@ -21,10 +23,11 @@ import {ClusterPipelineService} from 'src/app/services/cluster.pipeline.service'
 export class PipelinesComponent {
   //Injects and services
   private _pipelineService = inject(ClusterPipelineService);
+  pipelines$ = concat(of({
+    type: 'start',
+    value: {}
+  }), this._pipelineService.getAllPipelines().pipe(map(value => ({type: 'finish', value}))));
 
-  readonly columns = ['name', 'cluster', 'date', 'user', 'action'];
-
-  pipelines$ = this._pipelineService.getAllPipelines();
-
+  readonly columns = ['name', 'cluster', 'date', 'jobs', 'user', 'action'];
 
 }

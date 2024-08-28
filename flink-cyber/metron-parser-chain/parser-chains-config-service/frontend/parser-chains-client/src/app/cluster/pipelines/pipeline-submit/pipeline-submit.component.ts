@@ -6,10 +6,14 @@ export type PipelineSubmitState = {
   clusterId: string;
   pipelineName: string;
   branch: string;
-  showStartAllJob?: boolean;
-  profileName?: string;
-  file?: any;
-  jobs?: string[]
+  profileName: string;
+  parserName: string;
+  file?: File;
+  jobs: string[]
+  gitUrl?: string,
+  userName?: string,
+  password?: string,
+  mode?: string,
 }
 
 @Component({
@@ -31,17 +35,28 @@ export class PipelineSubmitComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this._clusterPipelineService.createEmptyPipeline(this.state.clusterId, this.state.pipelineName, this.state.branch).subscribe(() => {
+    this._clusterPipelineService.createEmptyPipeline(this.state).subscribe(() => {
       this.loadingEmpty = false;
       this.loadingStartAllJob = true;
-      if (this.state.showStartAllJob) {
-        this.loadingStartAllJob = true;
-        this._clusterPipelineService.startAllPipelines(this.state.clusterId, this.state.pipelineName, this.state.jobs, this.state.branch, this.state.profileName, this.state.file).subscribe(
-          () => {
-            this.loadingStartAllJob = false;
-            this.finishedSubmitAllJob = true;
-          }
+      switch (this.state.mode) {
+        case "Archive":
+          this.loadingStartAllJob = true;
+          this._clusterPipelineService.startPipelineArchive(this.state).subscribe(
+            () => {
+              this.loadingStartAllJob = false;
+              this.finishedSubmitAllJob = true;
+            }
         )
+          break;
+        case "Git":
+          this.loadingStartAllJob = true;
+          this._clusterPipelineService.startPipelineGit(this.state).subscribe(
+            () => {
+              this.loadingStartAllJob = false;
+              this.finishedSubmitAllJob = true;
+            }
+          )
+
       }
     })
   }

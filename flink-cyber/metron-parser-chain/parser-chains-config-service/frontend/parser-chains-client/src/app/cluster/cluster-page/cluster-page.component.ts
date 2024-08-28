@@ -12,7 +12,7 @@
 
 import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {BehaviorSubject, forkJoin, of, throwError} from 'rxjs';
+import {BehaviorSubject, concat, forkJoin, of, throwError} from 'rxjs';
 import {catchError, map, switchMap} from 'rxjs/operators';
 import {Job} from '../cluster-list-page/cluster-list-page.model';
 import {ClusterService} from '../../services/cluster.service';
@@ -37,9 +37,18 @@ export type DialogData = {
 })
 export class ClusterPageComponent {
   clusterSubject$ = new BehaviorSubject<void>(null);
-  cluster$ = this._route.paramMap.pipe(
-    map((params) => params.get('clusterId')),
-    switchMap((clusterId) => this._clusterService.getCluster(clusterId)));
+  cluster$ =
+    this.clusterSubject$.pipe(
+      switchMap(() => {
+        return this._route.paramMap
+      }),
+      map((params) => params.get('clusterId')),
+      switchMap((clusterId) =>
+        concat(
+          of({type: 'start', value: {jobs: []}}),
+          this._clusterService.getCluster(clusterId)
+            .pipe(map(value => ({type: 'finish', value})))))
+    );
 
   displayedColumns: string[] = ['select', 'name', 'type', 'branch', 'pipeline', 'status', 'created'];
   selection = new SelectionModel<Job>(true, []);
@@ -52,8 +61,8 @@ export class ClusterPageComponent {
   ) {
   }
 
-  isAllSelected(jobs: Job[]) {
-    return this.selection.selected.length === jobs.length;
+  isAllSelected(jobs: Job[], loading?: boolean) {
+    return loading ? false : this.selection.selected.length === jobs.length;
   }
 
   masterToggle(jobs: Job[]) {
@@ -69,7 +78,7 @@ export class ClusterPageComponent {
       this.selection.selected.reduce((acc, job) =>
           ({
             ...acc,
-            [job.jobName]:
+            [job.jobFullName]:
               this._clusterService.sendJobCommand(clusterId, action,
                 {
                   jobIdHex: job.jobIdString,
@@ -82,7 +91,6 @@ export class ClusterPageComponent {
           }),
         {})
     ).subscribe(_ => {
-        this.clusterSubject$.next();
       },
       (error) => {
         //handle your error here
@@ -90,6 +98,7 @@ export class ClusterPageComponent {
       }, () => {
         //observable completes
         this.selection.clear();
+        this.clusterSubject$.next();
       });
   }
 

@@ -1,0 +1,46 @@
+{
+  "baseDirectory": "/Users/admin/IdeaProjects/cybersec/flink-cyber/caracal-generator/src/main/resources/config",
+  "generationSources": [
+    {
+      "file": "majestic_milion.ftl",
+      "topic": "metron_majestic_million",
+      "outputAvroSchemaFile": null,
+      "weight": 1.0,
+      "scenarioFile": "/Users/admin/IdeaProjects/cybersec/flink-cyber/caracal-generator/src/main/resources/config/good_squid.csv"
+    },
+    {
+      "file": "majestic_milion.ftl",
+      "topic": "majestic_milion.ftl",
+      "outputAvroSchemaFile": null,
+      "weight": 1.0,
+      "scenarioFile": "/Users/admin/IdeaProjects/cybersec/flink-cyber/caracal-generator/src/main/resources/config/good_squid.csv"
+    },
+    {
+      "file": "domain_category.ftl",
+      "topic": "domain_category",
+      "outputAvroSchemaFile": null,
+      "weight": 1.0,
+      "scenarioFile": "/Users/admin/IdeaProjects/cybersec/flink-cyber/caracal-generator/src/main/resources/config/good_squid.csv"
+    },
+    {
+      "file": "malicious_domain.ftl",
+      "topic": "malicious_domain",
+      "outputAvroSchemaFile": null,
+      "weight": 1.0,
+      "scenarioFile": "/Users/admin/IdeaProjects/cybersec/flink-cyber/caracal-generator/src/main/resources/config/source.csv"
+    },
+    {
+      "file": "cyb-110-scenario.ftl",
+      "topic": "cyb110",
+      "outputAvroSchemaFile": null,
+      "weight": 1.0
+    },
+    {
+      "file": "squid_scenario.txt",
+      "topic": "squid",
+      "outputAvroSchemaFile": null,
+      "weight": 1.0,
+      "scenarioFile": "/Users/admin/IdeaProjects/cybersec/flink-cyber/caracal-generator/src/main/resources/config/good_squid.csv"
+    }
+  ]
+}

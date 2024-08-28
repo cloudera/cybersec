@@ -11,17 +11,18 @@ export class ClusterService {
 
   constructor(
     private _http: HttpClient
-  ) {}
+  ) {
+  }
 
   public getClusters = () =>
     this._http.get<ClusterModel[]>(ClusterService.BASE_URL + 'clusters');
 
-  public getCluster = (clusterId : string |  number) =>
+  public getCluster = (clusterId: string | number) =>
     this._http.get<ClusterModel>(`${ClusterService.BASE_URL}clusters/${clusterId}`);
 
-  public sendJobCommand = (clusterId : string | number, action : string , requestBody: RequestBody) =>
+  public sendJobCommand = (clusterId: string | number, action: string, requestBody: RequestBody) =>
     this._http.post<HttpResponse<any>>(`${ClusterService.BASE_URL}clusters/${clusterId}/jobs/${action}`, requestBody);
 
-  public uploadFile = (clusterId : string | number, pipeline : string, jobIdHex : string , file: any) =>
+  public uploadFile = (clusterId: string | number, pipeline: string, jobIdHex: string, file: any) =>
     this._http.post<HttpResponse<any>>(`${ClusterService.BASE_URL}clusters/${clusterId}/jobs/config/${pipeline}/${jobIdHex}`, file);
 }

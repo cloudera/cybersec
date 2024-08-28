@@ -12,11 +12,6 @@
 @use '@angular/material' as mat;
 @import "./styles.scss";
 
-.demo-table {
-  width: 100%;
-  font-size: 20px;
-}
-
 .mat-cell {
   padding-left: 15px;
   border: 2px solid rgb(141 141 141 / 50%);

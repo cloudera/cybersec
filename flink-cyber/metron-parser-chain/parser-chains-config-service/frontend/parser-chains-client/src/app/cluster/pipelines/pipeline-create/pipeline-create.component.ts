@@ -5,15 +5,13 @@ import {ClusterService} from 'src/app/services/cluster.service';
 import {combineLatest} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Router} from '@angular/router';
-import {
-  PipelineSubmitState
-} from 'src/app/cluster/pipelines/pipeline-submit/pipeline-submit.component';
+import {PipelineSubmitState} from 'src/app/cluster/pipelines/pipeline-submit/pipeline-submit.component';
 import {ClusterMeta} from 'src/app/cluster/cluster-list-page/cluster-list-page.model';
 import {JOBS_ENUM} from 'src/app/app.constants';
 
 const BUTTONS_CONST = [
   {label: 'Archive', value: 'Archive', disabled: false},
-  {label: 'Git', value: 'Git', disabled: true},
+  {label: 'Git', value: 'Git', disabled: false},
   {label: 'Empty', value: 'Empty', disabled: false},
   {label: 'Manual', value: 'Manual', disabled: true}
 ] as const;
@@ -21,6 +19,7 @@ const BUTTONS_CONST = [
 const BUTTON_LABELS = BUTTONS_CONST.map(b => b.value);
 type ButtonsKeys = keyof typeof BUTTONS_CONST
 type ButtonsLabelValues = typeof BUTTON_LABELS[ButtonsKeys]
+const urlRegex = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/;
 
 
 @Component({
@@ -34,51 +33,90 @@ export class PipelineCreateComponent {
   private _router = inject(Router);
   private _clusterService = inject(ClusterService);
 
-  jobs: string[] = Object.keys(JOBS_ENUM).map(key=> JOBS_ENUM[key].value);
+  jobs: string[] = Object.keys(JOBS_ENUM).map(key => JOBS_ENUM[key].value);
   mode: ButtonsLabelValues = 'Empty';
-  file: File = null;
-  nextButtonDisabled = false;
 
   buttons: Readonly<MultiButton[]> = BUTTONS_CONST;
-  formGroup = new FormGroup<{
+  main = new FormGroup<{
     pipelineName: FormControl<string>,
     branchName: FormControl<string>,
     profileName: FormControl<string>,
+    parserName: FormControl<string>,
     cluster: FormControl<ClusterMeta>
   }>({
-    pipelineName: new FormControl('', [Validators.required,Validators.minLength(3)]),
-    branchName: new FormControl('', [Validators.required,Validators.minLength(3)]),
-    profileName: new FormControl('', [Validators.required,Validators.minLength(3)]),
+    pipelineName: new FormControl('', [Validators.required, Validators.minLength(3)]),
+    branchName: new FormControl('', [Validators.required, Validators.minLength(3)]),
+    profileName: new FormControl('', [Validators.required, Validators.minLength(3)]),
+    parserName: new FormControl('', [Validators.required, Validators.minLength(3)]),
     cluster: new FormControl(null, [Validators.required])
   });
+  git = new FormGroup<{
+    url: FormControl<string>,
+    authentication: FormControl<boolean>,
+    userName: FormControl<string>,
+    password: FormControl<string>,
+  }>({
+      url: new FormControl(''),
+      authentication: new FormControl(false),
+      userName: new FormControl(''),
+      password: new FormControl('')
+    }
+  );
+
   clusters$ = this._clusterService.getClusters();
   vm$ = combineLatest([this.clusters$]).pipe(map(([cluster]) => ({cluster})));
+  fileControl: FormControl<File> = new FormControl(null);
+  authentication = true;
 
   errorMessage(formControl: AbstractControl) {
-    if(formControl.hasError('minlength')) {
+    if (formControl.hasError('minlength')) {
       const minLengthError = formControl.errors.minlength;
       return `Minimum length required is ${minLengthError.requiredLength}, but actual length is ${minLengthError.actualLength}.`;
     }
     if (formControl.hasError('required')) {
       return 'Value is required.'
     }
+    if (formControl.hasError('pattern')) {
+      return 'Url format is incorrect.'
+    }
     return 'Unrecognized error.';
   }
 
   selectPipelineMode(value: ButtonsLabelValues) {
     this.mode = value;
-    this._disableNext()
+    switch (value) {
+      case 'Archive':
+        this.fileControl.setValidators(Validators.required);
+        this.git.controls.url.clearValidators();
+        break
+      case 'Git':
+        this.git.controls.url.setValidators([Validators.required, Validators.pattern(urlRegex)]);
+        this.fileControl.clearValidators();
+        break
+      case 'Empty':
+        this.git.clearValidators();
+        this.fileControl.clearValidators();
+        break
+      case 'Manual':
+      default:
+    }
+    this.fileControl.updateValueAndValidity();
+    this.git.controls.url.updateValueAndValidity();
   }
 
   navigateToReceiver() {
     const data: PipelineSubmitState = {
-      clusterId: this.formGroup.controls.cluster.getRawValue().clusterId,
-      pipelineName: this.formGroup.controls.pipelineName.getRawValue(),
-      branch: this.formGroup.controls.branchName.getRawValue(),
-      profileName: this.formGroup.controls.branchName.getRawValue(),
-      showStartAllJob: this.mode === "Archive",
+      clusterId: this.main.controls.cluster.value.clusterId,
+      pipelineName: this.main.controls.pipelineName.value,
+      branch: this.main.controls.branchName.value,
+      profileName: this.main.controls.profileName.value,
+      parserName: this.main.controls.parserName.value,
+      mode: this.mode.toString(),
+      gitUrl: this.git.controls.url.value,
+      userName: this.git.controls.userName.value,
+      password: this.git.controls.password.value,
+      file: this.fileControl.value,
       jobs: this.jobs,
-      file: this.file,
     }
     this._router.navigate(['clusters/pipelines/submit'], {state: {data}});
   }
@@ -100,10 +138,9 @@ export class PipelineCreateComponent {
       if (Math.ceil(file.size / 3) * 4 > this._maxSize) {
         alert(`'${file.name}' size is more than ${this.formatBytes(Math.ceil(this._maxSize / 4) * 3)}!`);
       } else {
-        this.file = file;
+        this.fileControl.setValue(file);
       }
     });
-    this._disableNext();
   }
 
   formatBytes(bytes: number): string {
@@ -128,21 +165,6 @@ export class PipelineCreateComponent {
   }
 
   deleteFile() {
-    this.file = null;
-    this._disableNext();
-  }
-
-  private _disableNext() {
-    switch (this.mode){
-      case 'Archive':
-        this.nextButtonDisabled = !this.file;
-        break;
-      case 'Empty':
-      case 'Git':
-      case 'Manual':
-      default:
-        this.nextButtonDisabled = false;
-        break;
-    }
+    this.fileControl.setValue(null);
   }
 }

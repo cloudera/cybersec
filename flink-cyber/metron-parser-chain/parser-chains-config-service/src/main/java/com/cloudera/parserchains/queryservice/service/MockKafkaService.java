@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,19 +40,19 @@ public class MockKafkaService implements KafkaServiceInterface {
 
     private final Job job1 = Job.builder()
             .jobId(JobID.fromHexString("fd72014d4c864993a2e5a9287b4a9c5d"))
-            .jobName("job1")
+            .confName("job1")
             .jobIdString("job1-id-string")
             .jobBranch("main")
             .jobState(JobStatus.RUNNING)
             .jobFullName("main-job1")
             .jobPipeline("cyb-33")
             .startTime("2024-01-11 10:33:55")
-            .jobType(Job.JobType.PARSER)
+            .jobType(Job.JobType.TRIAGE)
             .user("Cybersec")
             .build();
     private final Job job2 = Job.builder()
             .jobId(JobID.fromHexString("ad72014d4c864993a2e5a9287b4a9c5d"))
-            .jobName("job2")
+            .confName("job2")
             .jobIdString("job2-id-string")
             .jobBranch("main")
             .jobState(JobStatus.RUNNING)
@@ -65,19 +64,19 @@ public class MockKafkaService implements KafkaServiceInterface {
             .build();
     private final Job job3 = Job.builder()
             .jobId(JobID.fromHexString("cd72014d4c864993a2e5a9287b4a9c5d"))
-            .jobName("job3")
+            .confName("job3")
             .jobIdString("job3-id-string")
             .jobBranch("main")
             .jobState(JobStatus.RUNNING)
             .jobFullName("main-job3")
             .jobPipeline("cyb-43")
             .startTime("2024-01-11 11:33:55")
-            .jobType(Job.JobType.PARSER)
+            .jobType(Job.JobType.PROFILE)
             .user("Cybersec")
             .build();
     private final Job job4 = Job.builder()
             .jobId(JobID.fromHexString("bd72014d4c864993a2e5a9287b4a9c5d"))
-            .jobName("job4")
+            .confName("job4")
             .jobIdString("job1-id-string")
             .jobBranch("main")
             .jobState(JobStatus.RUNNING)
@@ -104,6 +103,17 @@ public class MockKafkaService implements KafkaServiceInterface {
 
     @Override
     public Pair<ResponseType, ResponseBody> sendWithReply(RequestType requestType, String clusterId, RequestBody body) {
+        if (requestType == RequestType.CREATE_EMPTY_PIPELINE) {
+            return Pair.of(ResponseType.CREATE_EMPTY_PIPELINE_RESPONSE, ResponseBody.builder().build());
+        }
+        if (requestType == RequestType.START_PIPELINE) {
+            return Pair.of(ResponseType.START_PIPELINE_RESPONSE, ResponseBody.builder().build());
+        }
+
+        if (requestType == RequestType.STOP_JOB_REQUEST) {
+            responseFromCluster1.getJobs().remove(0);
+            return Pair.of(ResponseType.STOP_JOB_RESPONSE,ResponseBody.builder().build());
+        }
         return responses.stream()
                 .filter(response -> StringUtils.equalsIgnoreCase(response.getClusterMeta().getName(), clusterId))
                 .map(val -> Pair.of(ResponseType.GET_CLUSTER_SERVICE_RESPONSE, val))

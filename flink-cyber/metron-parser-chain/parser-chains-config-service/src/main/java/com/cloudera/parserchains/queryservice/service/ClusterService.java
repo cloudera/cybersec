@@ -9,6 +9,7 @@ import com.cloudera.service.common.response.Job;
 import com.cloudera.service.common.response.Pipeline;
 import com.cloudera.service.common.response.ResponseBody;
 import com.cloudera.service.common.response.ResponseType;
+import com.google.common.collect.Lists;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -46,23 +47,29 @@ public class ClusterService {
     }
 
     public List<Pipeline> getClusterPipelines(ResponseBody responseBody) {
-        return responseBody.getJobs().stream().collect(ArrayList::new,
-                (acc, job) -> {
-                    Optional<Pipeline> duplicatePipeline = acc.stream().filter(pipeline -> StringUtils.equalsIgnoreCase(pipeline.getName(), job.getJobPipeline())).findFirst();
-                    if (duplicatePipeline.isPresent()) {
-                        Pipeline pipeline = duplicatePipeline.get();
-                        if (isNewJobTimeLater(job, pipeline)) {
-                            pipeline.setDate(job.getStartTime());
-                        }
-                    } else {
-                        acc.add(Pipeline.builder()
-                                .name(job.getJobPipeline())
-                                .clusterName(responseBody.getClusterMeta().getName())
-                                .date(job.getStartTime())
-                                .userName(job.getUser())
-                                .build());
-                    }
-                }, ArrayList::addAll);
+        ArrayList<Pipeline> result = new ArrayList<>();
+        for (Job job : responseBody.getJobs()) {
+            Optional<Pipeline> duplicatePipeline = result.stream().filter(pipeline -> StringUtils.equalsIgnoreCase(pipeline.getName(), job.getJobPipeline())).findFirst();
+            if (duplicatePipeline.isPresent()) {
+                Pipeline pipeline = duplicatePipeline.get();
+                List<String> pipelineJobs = pipeline.getJobs();
+                if (!pipelineJobs.contains(job.getJobType().getName())) {
+                    pipelineJobs.add(job.getJobType().getName());
+                }
+                if (isNewJobTimeLater(job, pipeline)) {
+                    pipeline.setDate(job.getStartTime());
+                }
+            } else {
+                result.add(Pipeline.builder()
+                        .name(job.getJobPipeline())
+                        .clusterName(responseBody.getClusterMeta().getName())
+                        .date(job.getStartTime())
+                        .jobs(Lists.newArrayList(job.getJobType().getName()))
+                        .userName(job.getUser())
+                        .build());
+            }
+        }
+        return result;
     }
 
     public ResponseBody createEmptyPipeline(String clusterId, RequestBody body) throws FailedClusterReponseException {
@@ -77,16 +84,17 @@ public class ClusterService {
         return response.getValue();
     }
 
-    public ResponseBody startPipelineJob(String clusterId, String pipeline, String branch, String profileName, List<String> jobs, byte[] payload) throws FailedClusterReponseException {
-        Pair<ResponseType, ResponseBody> response = kafkaService.sendWithReply(RequestType.START_ARCHIVE_PIPELINE, clusterId, RequestBody
+    public ResponseBody startPipelineJob(String clusterId, String pipeline, String branch, String profileName, String parserName, List<String> jobs, byte[] payload) throws FailedClusterReponseException {
+        Pair<ResponseType, ResponseBody> response = kafkaService.sendWithReply(RequestType.START_PIPELINE, clusterId, RequestBody
                 .builder()
                 .payload(Base64.getEncoder().encode(payload))
                 .branch(branch)
                 .profileName(profileName)
+                .parserName(parserName)
                 .jobs(jobs)
                 .pipelineName(pipeline)
                 .build());
-        if (response.getKey() != ResponseType.CREATE_EMPTY_PIPELINE_RESPONSE) {
+        if (response.getKey() != ResponseType.START_PIPELINE_RESPONSE) {
             throw new FailedClusterReponseException(response.getValue());
         }
         return response.getValue();

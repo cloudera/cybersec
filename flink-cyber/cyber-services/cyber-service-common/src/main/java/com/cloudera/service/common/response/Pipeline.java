@@ -5,14 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Pipeline {
-    String id;
-    String name;
-    String clusterName;
-    String date;
-    String userName;
+    private String id;
+    private String name;
+    private String clusterName;
+    private String date;
+    private List<String> jobs;
+    private String userName;
 }

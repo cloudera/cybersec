@@ -11,10 +11,10 @@
  */
 
 import {Component, inject} from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {ClusterModel, Job} from './cluster-list-page.model';
+import {concat, of} from 'rxjs';
+import {Job} from './cluster-list-page.model';
 import {ClusterService} from '../../services/cluster.service';
-import {tap} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 
 
 @Component({
@@ -25,8 +25,10 @@ import {tap} from 'rxjs/operators';
 export class ClusterListPageComponent {
   private readonly _clusterService = inject(ClusterService);
   displayedColumns: string[] = ['id', 'name', 'status', 'version', 'pipelines'];
-  clusters$: Observable<ClusterModel[]> = this._clusterService.getClusters().pipe(tap(() => this.isLoading$.next(false)));
-  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+  clusters$ = concat(
+    of({type: 'start'}),
+    this._clusterService.getClusters().pipe(map(value => ({type: 'finish', value})))
+  );
 
   getPipelines = (jobs: Job[]) => [...new Set(jobs.map(job => job.jobPipeline))].join(', ');
 }

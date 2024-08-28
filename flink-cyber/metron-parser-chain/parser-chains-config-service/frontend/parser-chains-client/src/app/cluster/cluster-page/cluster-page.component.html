@@ -11,41 +11,41 @@
   -->
 
 <!-- Cluster table -->
-<div *ngIf='cluster$ | async as cluster; else loading'>
+<div *ngIf="cluster$ | withLoading | async as cluster">
   <button mat-icon-button [disabled]="this.selection.isEmpty()" [matMenuTriggerFor]="menu" [style.float]="'right'"
           aria-label="Example icon-button with a menu">
     <mat-icon>more_vert</mat-icon>
   </button>
   <mat-menu #menu="matMenu">
-    <button mat-menu-item (click)="this.changeJobStatus('start', cluster.clusterMeta.clusterId)" [disabled]="true">
+    <button mat-menu-item (click)="this.changeJobStatus('start', cluster.value.clusterMeta.clusterId)" [disabled]="true">
       <app-status-icon iconName="start"></app-status-icon>
       <span>Start</span>
     </button>
-    <button mat-menu-item (click)="this.changeJobStatus('restart', cluster.clusterMeta.clusterId)">
+    <button mat-menu-item (click)="this.changeJobStatus('restart', cluster.value.clusterMeta.clusterId)">
       <app-status-icon iconName="restart"></app-status-icon>
       <span>Restart</span>
     </button>
-    <button mat-menu-item (click)="this.changeJobStatus('stop', cluster.clusterMeta.clusterId)">
+    <button mat-menu-item (click)="this.changeJobStatus('stop', cluster.value.clusterMeta.clusterId)">
       <app-status-icon iconName="stop"></app-status-icon>
       <span>Stop</span>
     </button>
-    <button mat-menu-item (click)="this.openUploadDialog(cluster.clusterMeta.clusterId)"
+    <button mat-menu-item (click)="this.openUploadDialog(cluster.value.clusterMeta.clusterId)"
             [disabled]="this.selection.isEmpty() || this.selection.selected.length > 1">
       <app-status-icon iconName="update-config"></app-status-icon>
       <span>Update config</span>
     </button>
   </mat-menu>
 
-
-  <table mat-table [dataSource]="cluster.jobs" [style.width.%]="100" class="mat-elevation-z8 demo-table">
+  <table mat-table [dataSource]="cluster.value.jobs" class="mat-elevation-z8 cyber-table">
+    <caption *ngIf="!cluster.loading">Jobs list</caption>
     <!-- Checkbox Column -->
     <ng-container matColumnDef="select">
       <th mat-header-cell *matHeaderCellDef>
         <mat-checkbox
-          (change)="$event ? masterToggle(cluster.jobs) : null"
-          [checked]="isAllSelected(cluster.jobs)"
+          (change)="$event ? masterToggle(cluster.value.jobs) : null"
+          [checked]="isAllSelected(cluster.value.jobs, cluster.loading)"
           [color]="'primary'"
-          [indeterminate]="this.selection.hasValue() && !this.isAllSelected(cluster.jobs)">
+          [indeterminate]="this.selection.hasValue() && !this.isAllSelected(cluster.value.jobs)">
         </mat-checkbox>
       </th>
       <td mat-cell *matCellDef="let element">
@@ -56,6 +56,7 @@
         </mat-checkbox>
       </td>
     </ng-container>
+
 
     <!-- Job name Column [parser, triage, profile, indexing]-->
     <ng-container matColumnDef="name">
@@ -99,13 +100,11 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
-</div>
-
-<ng-template #loading>
-  <mat-card style="display: flex; justify-content: center; align-items: center">
+  <mat-card *ngIf="cluster.loading" class="flex-row-jc-ac">
     <mat-progress-spinner
       color="primary"
       mode="indeterminate">
     </mat-progress-spinner>
   </mat-card>
-</ng-template>
+
+</div>

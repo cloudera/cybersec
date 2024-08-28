@@ -5,7 +5,7 @@
   </mat-card-header>
   <mat-card-content *ngIf="vm$ | async as vm;else loading" [style.height.vh]="70">
     <div class="flex-row-jsb-ab">
-      <form [formGroup]="formGroup" class="flex-row-jsb-ab horizontal-wrapper">
+      <form [formGroup]="main" class="flex-row-jsb-ab horizontal-wrapper">
         <mat-form-field class="input-form" color="primary" appearance="outline">
           <mat-label>Pipeline name input</mat-label>
           <input matInput
@@ -15,7 +15,7 @@
                  label="pipeline name"
                  placeholder="pipeline name"
           >
-          <mat-error>{{ errorMessage(formGroup.get('pipelineName')) }}</mat-error>
+          <mat-error>{{ errorMessage(main.get('pipelineName')) }}</mat-error>
         </mat-form-field>
         <mat-form-field class="input-form" color="primary" appearance="outline">
           <mat-label>Branch name input</mat-label>
@@ -25,7 +25,18 @@
                  formControlName="branchName"
                  label="branch name"
                  placeholder="branch name">
-          <mat-error>{{ errorMessage(formGroup.get('branchName')) }}</mat-error>
+          <mat-error>{{ errorMessage(main.get('branchName')) }}</mat-error>
+        </mat-form-field>
+        <mat-form-field class="input-form" color="primary" appearance="outline">
+          <mat-label>Parser name input</mat-label>
+          <input matInput
+                 type="text"
+                 formControlName="parserName"
+                 id="parserName"
+                 label="profile name"
+                 placeholder="parser name"
+          >
+          <mat-error>{{ errorMessage(main.get('parserName')) }}</mat-error>
         </mat-form-field>
         <mat-form-field class="input-form" color="primary" appearance="outline">
           <mat-label>Profile name input</mat-label>
@@ -36,7 +47,7 @@
                  label="profile name"
                  placeholder="profile name"
           >
-          <mat-error>{{ errorMessage(formGroup.get('profileName')) }}</mat-error>
+          <mat-error>{{ errorMessage(main.get('profileName')) }}</mat-error>
         </mat-form-field>
         <mat-form-field class="input-form" color="primary" appearance="outline">
           <mat-label>Cluster name select</mat-label>
@@ -46,7 +57,7 @@
               {{ cl.clusterMeta.name }}
             </mat-option>
           </mat-select>
-          <mat-error>{{ errorMessage(formGroup.get('cluster')) }}</mat-error>
+          <mat-error>{{ errorMessage(main.get('cluster')) }}</mat-error>
         </mat-form-field>
       </form>
     </div>
@@ -56,7 +67,7 @@
                         (valueChange)="selectPipelineMode($any($event))"></app-multi-button>
     </div>
 
-    <div *ngIf="mode === 'Archive'">
+    <div *ngIf="mode !== 'Empty'">
       <div class="flex-row-jsb-ac horizontal-wrapper" [style.min-height.px]="70">
         <mat-slide-toggle color="primary" [checked]="jobs.indexOf(jobsEnum.PARSER.value) !== -1"
                           (change)="toggleValueInArray( jobs , jobsEnum.PARSER.value)">{{ jobsEnum.PARSER.label }}
@@ -72,35 +83,84 @@
         </mat-slide-toggle>
       </div>
 
-      <div class="container" appDragDrop (fileDropped)="onFileDropped($event)">
-        <ng-container *ngIf="!file">
-          <input type="file" id="fileDropRef" accept="application/gzip, .gz" (change)="fileBrowseHandler($event)"
-                 [multiple]="false"/>
+      <div *ngIf="mode === 'Archive'" class="container" appDragDrop (fileDropped)="onFileDropped($event)">
+        <ng-container *ngIf="!fileControl.value else fileList">
+          <input
+                 type="file"
+                 id="fileDropRef"
+                 accept="application/gzip,.gz"
+                 (change)="fileBrowseHandler($event)"
+                 [multiple]="false"
+                 />
           <mat-icon>cloud_upload</mat-icon>
           <h3>Drag and drop file here</h3>
           <h3>or</h3>
           <label for="fileDropRef">Browse for file</label>
         </ng-container>
-        <div *ngIf="file" class="flex-row-jc-ac">
+        <ng-template #fileList class="flex-row-jc-ac">
           <mat-icon>file_copy</mat-icon>
-          <span [style.margin-left.px]="5">{{ file?.name }}</span>
-          <span [style.margin-left.px]="15">[size:{{ formatBytes(file?.size) }}]</span>
-          <a title="Delete" (click)="deleteFile()" *ngIf="!!file">
+          <span [style.margin-left.px]="5">{{ fileControl.value.name }}</span>
+          <span [style.margin-left.px]="15">[size:{{ formatBytes(fileControl.value.size) }}]</span>
+          <a title="Delete" (click)="deleteFile()">
             <mat-icon class="delete-icon">delete</mat-icon>
           </a>
-        </div>
+        </ng-template>
+      </div>
+      <div *ngIf="mode === 'Git'">
+        <form [formGroup]="git" class="flex-cl-jsb-ab horizontal-wrapper">
+          <mat-form-field class="input-form" color="primary" appearance="outline">
+            <mat-label>Git url</mat-label>
+            <input matInput
+                   type="text"
+                   formControlName="url"
+                   id="gitUrl"
+                   label="git remote url"
+                   placeholder="git remote url"
+                   required
+            >
+            <mat-error>{{ errorMessage(git.get('url')) }}</mat-error>
+          </mat-form-field>
+          <mat-checkbox style="margin: 15px 10px;" color="primary" formControlName="authentication">Authentication</mat-checkbox>
+          <div *ngIf="git.controls.authentication.value" class="flex-row-jfs-ac">
+            <mat-form-field class="input-form" color="primary" appearance="outline">
+              <mat-label>Git username</mat-label>
+              <input matInput
+                     type="text"
+                     formControlName="username"
+                     id="username"
+                     label="git username"
+                     placeholder="git username"
+                     required
+              >
+              <mat-error>{{ errorMessage(git.get('username')) }}</mat-error>
+            </mat-form-field>
+            <mat-form-field style="margin-left: 15px;" class="input-form" color="primary" appearance="outline">
+              <mat-label>Git password</mat-label>
+              <input matInput
+                     type="password"
+                     formControlName="password"
+                     id="password"
+                     label="git password"
+                     placeholder="git password"
+                     required
+              >
+              <mat-error>{{ errorMessage(git.get('password')) }}</mat-error>
+            </mat-form-field>
+          </div>
+        </form>
       </div>
     </div>
+
   </mat-card-content>
   <mat-card-footer class="flex-row-je">
     <button [style.margin.px]="15" mat-raised-button color="primary"
-            [disabled]="nextButtonDisabled || formGroup.invalid"
+            [disabled]="main.invalid || git.invalid || fileControl.invalid"
             (click)="navigateToReceiver()">Next
     </button>
   </mat-card-footer>
 
   <ng-template #loading>
-    <mat-card-content class="flex-row-jc-ac" >
+    <mat-card-content class="flex-row-jc-ac">
       <mat-progress-spinner
         [diameter]="150"
         color="primary"

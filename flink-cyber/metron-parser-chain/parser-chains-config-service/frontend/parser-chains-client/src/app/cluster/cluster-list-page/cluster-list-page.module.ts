@@ -10,23 +10,25 @@ import {CommonModule} from "@angular/common";
 import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
 import {ClusterPageModule} from "../cluster-page/cluster-page.module";
 import {RouterLink} from '@angular/router';
+import {SharedModule} from 'src/app/shared/share.module';
 
 @NgModule({
   declarations: [
     ClusterListPageComponent,
   ],
-  imports: [
-    MatTableModule,
-    ClusterPageModule,
-    StatusIconModule,
-    MatCheckboxModule,
-    FormsModule,
-    MatRadioModule,
-    MatCardModule,
-    CommonModule,
-    MatProgressSpinnerModule,
-    RouterLink,
-  ],
+    imports: [
+        MatTableModule,
+        ClusterPageModule,
+        StatusIconModule,
+        MatCheckboxModule,
+        FormsModule,
+        MatRadioModule,
+        MatCardModule,
+        CommonModule,
+        MatProgressSpinnerModule,
+        RouterLink,
+        SharedModule,
+    ],
   providers: [],
   exports: [ClusterListPageComponent]
 })

@@ -12,7 +12,6 @@ import com.cloudera.service.common.response.ResponseBody;
 import com.cloudera.service.common.response.ResponseType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.Message;
@@ -88,12 +87,12 @@ public class KafkaListenerController {
                 } catch (Exception e) {
                     return handleErrorResponse(e, replyTo, correlationId);
                 }
-            case START_ARCHIVE_PIPELINE:
+            case START_PIPELINE:
                 try {
                     pipelineService.extractPipeline(requestBody.getPayload(), requestBody.getPipelineName(), requestBody.getBranch());
-                    pipelineService.startPipelineJob(requestBody.getPipelineName(), requestBody.getBranch(), requestBody.getProfileName(), requestBody.getJobs());
+                    pipelineService.startPipelineJob(requestBody.getPipelineName(), requestBody.getBranch(), requestBody.getProfileName(), requestBody.getProfileName(), requestBody.getJobs());
                     final ResponseBody responseBody = ResponseBody.builder().build();
-                    return buildResponseMessage(responseBody, ResponseType.START_ARCHIVE_PIPELINE_RESPONSE, replyTo, correlationId);
+                    return buildResponseMessage(responseBody, ResponseType.START_PIPELINE_RESPONSE, replyTo, correlationId);
                 } catch (Exception e) {
                     log.error("Exception while processing the Start All request {}", e.getMessage());
                     return handleErrorResponse(e, replyTo, correlationId);

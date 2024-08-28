@@ -3,14 +3,18 @@ package com.cloudera.parserchains.queryservice.controller;
 import com.cloudera.parserchains.queryservice.common.ApplicationConstants;
 import com.cloudera.parserchains.queryservice.common.exception.FailedAllClusterReponseException;
 import com.cloudera.parserchains.queryservice.common.exception.FailedClusterReponseException;
+import com.cloudera.parserchains.queryservice.common.utils.Utils;
 import com.cloudera.parserchains.queryservice.service.ClusterService;
+import com.cloudera.service.common.request.ClusterPipelineRequest;
 import com.cloudera.service.common.response.Pipeline;
 import com.cloudera.service.common.response.ResponseBody;
+import com.cloudera.service.common.utils.ArchiveUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,6 +33,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = ApplicationConstants.API_BASE_URL + ApplicationConstants.API_CLUSTERS)
+@Slf4j
 public class ClusterController {
 
     private final ClusterService clusterService;
@@ -81,16 +86,31 @@ public class ClusterController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "A list of all pipelines.")
     })
-    @PostMapping(value = "{clusterId}/pipelines/{name}/start")
+    @PostMapping(value = "{clusterId}/pipelines/{name}/archive")
     public ResponseBody startPipeline(
             @Parameter(name = "name", description = "The pipeline name to create empty pipeline.", required = true)
             @PathVariable("name") String name,
             @Parameter(name = "clusterId", description = "The ID of the cluster to update config on.", required = true)
             @PathVariable("clusterId") String clusterId,
             @RequestPart("payload") MultipartFile payload,
-            @RequestPart("body") com.cloudera.service.common.request.RequestBody body
+            @RequestPart("body") ClusterPipelineRequest body
     ) throws IOException, FailedClusterReponseException {
-        return clusterService.startPipelineJob(clusterId, name, body.getBranch(), body.getProfileName(), body.getJobs(), payload.getBytes());
+        return clusterService.startPipelineJob(clusterId, name, body.getBranch(), body.getProfileName(), body.getParserName(), body.getJobs(), payload.getBytes());
+    }
+
+    @Operation(description = "Retrieves information about all pipelines on all services.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "A list of all pipelines.")
+    })
+    @PostMapping(value = "{clusterId}/pipelines/{name}/git")
+    public ResponseBody startPipelineGit(
+            @Parameter(name = "name", description = "The pipeline name to create empty pipeline.", required = true)
+            @PathVariable("name") String name,
+            @Parameter(name = "clusterId", description = "The ID of the cluster to update config on.", required = true)
+            @PathVariable("clusterId") String clusterId,
+            @RequestBody ClusterPipelineRequest body
+    ) throws FailedClusterReponseException {
+        return clusterService.startPipelineJob(clusterId, name, body.getBranch(), body.getProfileName(), body.getParserName(), body.getJobs(), ArchiveUtil.compressToTarGzInMemory(Utils.getRepoFiles(body.getGitUrl(), body.getBranch(), body.getUserName(), body.getPassword())));
     }
 
     @Operation(description = "Retrieves information about a pipeline on the cluster with specified id.")
