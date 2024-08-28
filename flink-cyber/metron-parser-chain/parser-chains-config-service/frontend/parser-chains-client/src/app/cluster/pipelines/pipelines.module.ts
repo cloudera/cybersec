@@ -35,37 +35,39 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {FileUploadModule} from 'src/app/cluster/component/file-upload/file-upload.module';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 
 @NgModule({
   declarations: [PipelinesComponent, PipelineStepperComponent, PipelineCreateComponent, PipelineSubmitComponent],
-  imports: [
-    ReactiveFormsModule,
-    RouterModule,
-    SharedModule,
-    MatCardModule,
-    MatDividerModule,
-    MatTooltipModule,
-    MatTableModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    NgIf,
-    NgTemplateOutlet,
-    NgComponentOutlet,
-    AsyncPipe,
-    MatSelectModule,
-    FormsModule,
-    NgForOf,
-    MatAutocompleteModule,
-    MatStepperModule,
-    MatProgressBarModule,
-    MatSlideToggleModule,
-    FileUploadModule,
-    MatProgressSpinnerModule
-  ],
+    imports: [
+        ReactiveFormsModule,
+        RouterModule,
+        SharedModule,
+        MatCardModule,
+        MatDividerModule,
+        MatTooltipModule,
+        MatTableModule,
+        MatDialogModule,
+        MatButtonModule,
+        MatIconModule,
+        MatFormFieldModule,
+        MatInputModule,
+        NgIf,
+        NgTemplateOutlet,
+        NgComponentOutlet,
+        AsyncPipe,
+        MatSelectModule,
+        FormsModule,
+        NgForOf,
+        MatAutocompleteModule,
+        MatStepperModule,
+        MatProgressBarModule,
+        MatSlideToggleModule,
+        FileUploadModule,
+        MatProgressSpinnerModule,
+        MatCheckboxModule
+    ],
   providers: [],
   exports: [PipelinesComponent]
 })

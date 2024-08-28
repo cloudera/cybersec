@@ -1,0 +1,129 @@
+{
+ "type": "record",
+ "name": "Message",
+ "namespace": "com.cloudera.cyber",
+ "fields": [
+  {
+   "name": "id",
+   "type": "string"
+  },
+  {
+   "name": "ts",
+   "type": "long"
+  },
+  {
+   "name": "originalSource",
+   "type": {
+    "type": "record",
+    "name": "SignedSourceKey",
+    "fields": [
+     {
+      "name": "topic",
+      "type": "string"
+     },
+     {
+      "name": "partition",
+      "type": "int"
+     },
+     {
+      "name": "offset",
+      "type": "long"
+     },
+     {
+      "name": "signature",
+      "type": "bytes"
+     }
+    ]
+   }
+  },
+  {
+   "name": "message",
+   "type": "string"
+  },
+  {
+   "name": "threats",
+   "type": [
+    "null",
+    {
+     "type": "map",
+     "values": {
+      "type": "array",
+      "items": {
+       "type": "record",
+       "name": "ThreatIntelligence",
+       "fields": [
+        {
+         "name": "id",
+         "type": "string"
+        },
+        {
+         "name": "ts",
+         "type": "long"
+        },
+        {
+         "name": "observable",
+         "type": "string"
+        },
+        {
+         "name": "observableType",
+         "type": "string"
+        },
+        {
+         "name": "fields",
+         "type": {
+          "type": "map",
+          "values": "string"
+         }
+        }
+       ]
+      }
+     }
+    }
+   ],
+   "default": null
+  },
+  {
+   "name": "extensions",
+   "type": {
+    "type": "map",
+    "values": "string"
+   }
+  },
+  {
+   "name": "source",
+   "type": "string"
+  },
+  {
+   "name": "dataQualityMessages",
+   "type": [
+    "null",
+    {
+     "type": "array",
+     "items": {
+      "type": "record",
+      "name": "DataQualityMessage",
+      "fields": [
+       {
+        "name": "level",
+        "type": "string"
+       },
+       {
+        "name": "feature",
+        "type": "string"
+       },
+       {
+        "name": "field",
+        "type": "string"
+       },
+       {
+        "name": "message",
+        "type": "string"
+       }
+      ]
+     }
+    }
+   ],
+   "default": null
+  }
+ ]
+}

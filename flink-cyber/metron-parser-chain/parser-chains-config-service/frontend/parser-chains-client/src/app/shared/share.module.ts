@@ -9,10 +9,11 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {MatButtonModule} from '@angular/material/button';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
+import {WithLoadingPipe} from 'src/app/shared/pipes/with-loading.pipe';
 
 @NgModule({
   imports: [CommonModule, MatButtonToggleModule, A11yModule, MatDialogModule, MatButtonModule, MatProgressSpinnerModule, MatProgressBarModule],
-  declarations: [ SortPipe, MultiButtonComponent, ConfirmDeleteDialogComponent ],
-  exports:      [ SortPipe, MultiButtonComponent, ConfirmDeleteDialogComponent ]
+  declarations: [ SortPipe, WithLoadingPipe, MultiButtonComponent, ConfirmDeleteDialogComponent ],
+  exports:      [ SortPipe,WithLoadingPipe, MultiButtonComponent, ConfirmDeleteDialogComponent ]
 })
 export class SharedModule { }
