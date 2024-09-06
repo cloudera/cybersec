@@ -25,8 +25,8 @@ import java.util.Optional;
 
 @Slf4j
 public class DefaultChainBuilder implements ChainBuilder {
-    private ParserBuilder parserBuilder;
-    private ParserCatalog parserCatalog;
+    private final ParserBuilder parserBuilder;
+    private final ParserCatalog parserCatalog;
 
     public DefaultChainBuilder(ParserBuilder parserBuilder, ParserCatalog parserCatalog) {
         this.parserBuilder = parserBuilder;
@@ -47,6 +47,7 @@ public class DefaultChainBuilder implements ChainBuilder {
         for(ParserSchema parserSchema: chainSchema.getParsers()) {
             ChainLink next;
             boolean isRouter = ParserID.router().equals(parserSchema.getId());
+            parserSchema.setBasePath(chainSchema.getBasePath());
             if(isRouter) {
                 next = buildRouter(parserSchema);
             } else {

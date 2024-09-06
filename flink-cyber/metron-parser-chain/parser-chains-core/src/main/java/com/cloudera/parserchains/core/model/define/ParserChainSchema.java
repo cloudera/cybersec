@@ -18,6 +18,7 @@
 
 package com.cloudera.parserchains.core.model.define;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -49,6 +50,12 @@ public class ParserChainSchema implements Serializable {
   private String name;
 
   /**
+   * The base path for any path-related parser configs.
+   */
+  @JsonIgnore
+  private String basePath;
+
+  /**
    * The parsers in this parser chain.
    */
   @JsonProperty("parsers")
@@ -74,6 +81,14 @@ public class ParserChainSchema implements Serializable {
   public ParserChainSchema setName(String name) {
     this.name = name;
     return this;
+  }
+
+  public String getBasePath() {
+    return basePath;
+  }
+
+  public void setBasePath(String basePath) {
+    this.basePath = basePath;
   }
 
   public List<ParserSchema> getParsers() {

@@ -10,11 +10,11 @@
  * limitations governing your use of the file.
  */
 
-import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClient, HttpParams, HttpResponse} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 
-import {ChainDetailsModel} from '../chain-page/chain-page.models';
+import {ChainDetailsModel, IndexTableMapping} from '../chain-page/chain-page.models';
 import {getHttpParams} from "../shared/service.utils";
 import {ParserDescriptor} from "../chain-page/chain-page.reducers";
 
@@ -70,6 +70,13 @@ export class ChainPageService {
       headers: {'Content-Type': 'application/json; charset=utf-8'},
       observe: 'response'
     });
+  }
+
+  public saveIndexMappings(payload: { filePath?: string, mappings: { [key: string]: IndexTableMapping } }) {
+    return this._http.post<HttpResponse<any>>(`${ChainPageService.BASE_URL}indexing/new`, payload, {
+      headers: {'Content-Type': 'application/json; charset=utf-8'},
+      observe: 'response'
+    })
   }
 
   public createChainCollapseArray(size: number) {
