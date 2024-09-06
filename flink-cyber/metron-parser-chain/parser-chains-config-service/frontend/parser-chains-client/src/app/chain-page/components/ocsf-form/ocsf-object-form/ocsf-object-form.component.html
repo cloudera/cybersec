@@ -15,14 +15,11 @@
         [nzXs]="24"
         nz-tooltip
         [nzTooltipTitle]="schema.types[attribute.value.type].description">
-        <nz-select
+        <input
+          nz-input
           [id]="currentObject.name + attribute.key"
           [formControlName]="attribute.key"
-          [nzPlaceHolder]="attribute.value.caption + ', ' + attribute.value.type_name"
-        >
-          <nz-option *ngFor="let option of liveResults[0].output | keyvalue" [nzValue]="option.key"
-                     [nzLabel]="option.key"></nz-option>
-        </nz-select>
+          [placeholder]="attribute.value.caption + ', ' + attribute.value.type_name">
       </nz-form-control>
     </nz-form-item>
   </ng-container>
