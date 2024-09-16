@@ -77,11 +77,6 @@
             <groupId>org.adrianwalker</groupId>
             <artifactId>multiline-string</artifactId>
         </dependency>
-      <dependency>
-            <groupId>com.trendmicro</groupId>
-            <artifactId>tlsh</artifactId>
-            <version>3.7.1</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
