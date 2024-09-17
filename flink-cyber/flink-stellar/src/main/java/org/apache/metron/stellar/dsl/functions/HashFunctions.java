@@ -17,10 +17,12 @@
  */
 package org.apache.metron.stellar.dsl.functions;
 
-import app.keve.ktlsh.TLSHUtil;
 import org.apache.commons.codec.EncoderException;
 import org.apache.metron.stellar.common.utils.ConversionUtils;
 import org.apache.metron.stellar.common.utils.hashing.HashStrategy;
+import org.apache.metron.stellar.common.utils.hashing.tlsh.TLSH;
+import org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHBuilder;
+import org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHScorer;
 import org.apache.metron.stellar.dsl.BaseStellarFunction;
 import org.apache.metron.stellar.dsl.Stellar;
 
@@ -146,7 +148,12 @@ public class HashFunctions {
             if (h1Obj.equals(h2Obj)) {
                 return 0;
             }
-            return TLSHUtil.score(TLSHUtil.hexToBytes(h1Obj.toString()), TLSHUtil.hexToBytes(h2Obj.toString()), includeLength.orElse(false));
+            TLSHScorer scorer = new TLSHScorer();
+            TLSHBuilder builder = new TLSHBuilder();
+            TLSH tlsh1 = builder.fromHex(h1Obj.toString());
+            builder.reset();
+            TLSH tlsh2 = builder.fromHex(h2Obj.toString());
+            return scorer.score(tlsh1, tlsh2, includeLength.orElse(false));
         }
     }
 }
