@@ -1,7 +1,6 @@
 package org.apache.metron.stellar.common.utils.hashing.tlsh;
 
 
-import java.nio.ByteBuffer;
 import java.util.function.IntUnaryOperator;
 import java.util.stream.IntStream;
 
@@ -12,14 +11,6 @@ public class SlidingWindow {
 
     SlidingWindow() {
         this.window = new byte[DEFAULT_SIZE];
-    }
-
-    public void preFill(final ByteBuffer buffer) {
-        if (byteCount == 0) {
-            for (int i = 0; i < window.length-1; i++) {
-                put(buffer.get());
-            }
-        }
     }
 
     public void put(final byte value) {

@@ -57,30 +57,6 @@ public class TLSH {
     }
 
 
-//  public String apply(byte[] data, boolean force) {
-//    try {
-//      creator.update(data);
-//      return creator.getHash(force).getEncoded();
-//    } finally {
-//      creator.reset();
-//    }
-//  }
-//
-//  public static int distance(String hash1, String hash2, Optional<Boolean> includeLength) {
-//    if (hash1 == null || hash2 == null) {
-//      return -1;
-//    }
-//
-//    if (hash1.equals(hash2)) {
-//      return 0;
-//    }
-//
-//    Tlsh t1 = Tlsh.fromTlshStr(hash1);
-//    Tlsh t2 = Tlsh.fromTlshStr(hash2);
-//    return t1.totalDiff(t2, includeLength.orElse(false));
-//  }
-
-
     public String getHash() {
         return TLSHUtil.bytesToHex(getHexBytes());
     }

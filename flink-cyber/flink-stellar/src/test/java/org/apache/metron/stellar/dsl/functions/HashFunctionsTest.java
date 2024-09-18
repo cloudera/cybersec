@@ -330,11 +330,11 @@ public class HashFunctionsTest {
         TLSHBuilder builder = new TLSHBuilder(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_1, TLSHBuilder.BUCKET_OPTION.BUCKET_128);
         TLSHScorer scorer = new TLSHScorer();
 
-        TLSH tlsh1 = builder.create("Hello world!".getBytes());
+        TLSH tlsh1 = builder.getTLSH("Hello world!".getBytes());
         builder.reset();
-        TLSH tlsh2 = builder.create("Goodbye Cruel World".getBytes());
+        TLSH tlsh2 = builder.getTLSH("Goodbye Cruel World".getBytes());
         builder.reset();
-        TLSH tlsh3 = builder.create(fileBytes);
+        TLSH tlsh3 = builder.getTLSH(fileBytes);
         final int score = scorer.score(tlsh1, tlsh2, false);
 
         assertEquals("DD6000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0", tlsh1.getHash());
