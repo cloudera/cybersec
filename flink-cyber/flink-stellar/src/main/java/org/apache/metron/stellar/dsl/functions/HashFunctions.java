@@ -151,7 +151,7 @@ public class HashFunctions {
             TLSHScorer scorer = new TLSHScorer();
             TLSHBuilder builder = new TLSHBuilder();
             TLSH tlsh1 = builder.fromHex(h1Obj.toString());
-            builder.reset();
+            builder.clean();
             TLSH tlsh2 = builder.fromHex(h2Obj.toString());
             return scorer.score(tlsh1, tlsh2, includeLength.orElse(false));
         }

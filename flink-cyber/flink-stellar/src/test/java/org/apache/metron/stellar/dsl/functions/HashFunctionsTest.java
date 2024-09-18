@@ -331,9 +331,9 @@ public class HashFunctionsTest {
         TLSHScorer scorer = new TLSHScorer();
 
         TLSH tlsh1 = builder.getTLSH("Hello world!".getBytes());
-        builder.reset();
+        builder.clean();
         TLSH tlsh2 = builder.getTLSH("Goodbye Cruel World".getBytes());
-        builder.reset();
+        builder.clean();
         TLSH tlsh3 = builder.getTLSH(fileBytes);
         final int score = scorer.score(tlsh1, tlsh2, false);
 

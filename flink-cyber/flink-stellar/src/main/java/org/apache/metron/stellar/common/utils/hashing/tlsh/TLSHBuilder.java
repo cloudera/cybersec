@@ -161,7 +161,7 @@ public class TLSHBuilder {
         }
     }
 
-    public void reset() {
+    public void clean() {
         slidingWindow = new SlidingWindow();
         Arrays.fill(checksum, 0);
         Arrays.fill(aBucket, 0);
