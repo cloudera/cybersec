@@ -21,30 +21,29 @@ public class TLSHBuilder {
     private SlidingWindow slidingWindow;
     private final CHECKSUM_OPTION checksumOption;
     private final BUCKET_OPTION bucketOption;
+    private final int[] checksum;
+    private final int[] aBucket;
+
 
     public TLSHBuilder() {
-        this.slidingWindow = new SlidingWindow();
-        this.checksumOption = CHECKSUM_OPTION.CHECKSUM_1;
-        this.bucketOption = BUCKET_OPTION.BUCKET_128;
+        this(CHECKSUM_OPTION.CHECKSUM_1, BUCKET_OPTION.BUCKET_128);
     }
 
     public TLSHBuilder(CHECKSUM_OPTION checksumOption, BUCKET_OPTION bucketOption) {
         this.slidingWindow = new SlidingWindow();
         this.checksumOption = checksumOption;
         this.bucketOption = bucketOption;
+        this.checksum = new int[checksumOption.getChecksumSize()];
+        this.aBucket = new int[256];
     }
 
-    public TLSH create(final byte[] bytes) {
-        return create(ByteBuffer.wrap(bytes));
+    public TLSH getTLSH(final byte[] bytes) {
+        return getTLSH(ByteBuffer.wrap(bytes));
     }
 
-    public TLSH create(final ByteBuffer buffer) {
-        int[] checksum = new int[checksumOption.getChecksumSize()];
-        int[] preBuckets = new int[256];
-
-        fill(buffer, checksum, preBuckets);
-
-        final int[] sortedCopy = Arrays.copyOf(preBuckets, bucketOption.getBucketSize());
+    public TLSH getTLSH(final ByteBuffer buffer) {
+        fill(buffer);
+        final int[] sortedCopy = Arrays.copyOf(aBucket, bucketOption.getBucketSize());
         Arrays.sort(sortedCopy);
 
         final int quartile = bucketOption.getBucketSize() / 4;
@@ -56,9 +55,9 @@ public class TLSHBuilder {
         final int q1ratio = (int) (q1 * 100.0f / q3) & 0x0F;
         final int q2ratio = (int) (q2 * 100.0f / q3) & 0x0F;
 
-        final int[] compressedBucket = compress(preBuckets, q3, q2, q1);
+        final int[] compressedBucket = compress(aBucket, q3, q2, q1);
 
-        return new TLSH(checksum, compressedBucket, lValue, q1ratio, q2ratio);
+        return new TLSH(checksum.clone(), compressedBucket, lValue, q1ratio, q2ratio);
     }
 
     public TLSH fromHex(String hashHex) {
@@ -105,16 +104,20 @@ public class TLSHBuilder {
         return new TLSH(checksum, codes, lValue, q1Ratio, q2Ratio);
     }
 
-    private void fill(ByteBuffer buffer, int[] checksum, int[] buckets) {
-        if (buffer.remaining() < slidingWindow.getWindowSize()) {
-            return;
+    private void fill(ByteBuffer buffer) {
+        if (slidingWindow.getByteCount() == 0) {
+            while (slidingWindow.getByteCount() < slidingWindow.getWindowSize() - 1 && buffer.hasRemaining()) {
+                slidingWindow.put(buffer.get());
+                if (!buffer.hasRemaining()) {
+                    return;
+                }
+            }
         }
-        slidingWindow.preFill(buffer);
         while (buffer.hasRemaining()) {
             slidingWindow.put(buffer.get());
             int[] window = slidingWindow.getWindow();
-            processChecksum(checksum, window);
-            processBuckets(buckets, window);
+            processChecksum(window);
+            processBuckets(window);
         }
     }
 
@@ -138,7 +141,7 @@ public class TLSHBuilder {
         return result;
     }
 
-    private static void processBuckets(int[] aBucket, int[] window) {
+    private void processBuckets(int[] window) {
         aBucket[fastBucketMapping(T2, window[0], window[1], window[2])]++;
         aBucket[fastBucketMapping(T3, window[0], window[1], window[3])]++;
         aBucket[fastBucketMapping(T5, window[0], window[2], window[3])]++;
@@ -148,7 +151,7 @@ public class TLSHBuilder {
         aBucket[fastBucketMapping(T13, window[0], window[3], window[4])]++;
     }
 
-    private void processChecksum(int[] checksum, int[] window) {
+    private void processChecksum(int[] window) {
         if (checksumOption == CHECKSUM_OPTION.CHECKSUM_1) {
             checksum[0] = fastBucketMapping(T0, window[0], window[1], checksum[0]);
         } else {
@@ -160,6 +163,8 @@ public class TLSHBuilder {
 
     public void reset() {
         slidingWindow = new SlidingWindow();
+        Arrays.fill(checksum, 0);
+        Arrays.fill(aBucket, 0);
     }
 
 

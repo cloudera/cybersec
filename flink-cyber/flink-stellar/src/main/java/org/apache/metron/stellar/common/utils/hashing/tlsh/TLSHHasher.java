@@ -82,7 +82,7 @@ public class TLSHHasher implements Hasher {
             data = SerDeUtils.toBytes(o);
         }
         try {
-            TLSH tlsh = builder.create(data);
+            TLSH tlsh = builder.getTLSH(data);
             String hash = tlsh.getHash();
             if (hashes != null && !hashes.isEmpty()) {
                 Map<String, Object> ret = new HashMap<>();
