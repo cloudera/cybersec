@@ -3,6 +3,7 @@ package org.apache.metron.stellar.common.utils.hashing.tlsh;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.HEX_ARRAY;
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.LEN_ADJ_2;
@@ -14,6 +15,7 @@ import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.LOG_1_5;
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.PEARSON_TABLE;
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.TOPVAL;
+import java.io.ByteArrayOutputStream;
 
 public final class TLSHUtil {
 
@@ -95,6 +97,4 @@ public final class TLSHUtil {
     public static int swapNibble(final int x) {
         return (x & 0x0F) << 4 | (x & 0xF0) >> 4;
     }
-
-
 }

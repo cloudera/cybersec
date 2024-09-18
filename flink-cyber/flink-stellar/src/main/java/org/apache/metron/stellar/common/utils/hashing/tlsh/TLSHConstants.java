@@ -3,15 +3,9 @@ package org.apache.metron.stellar.common.utils.hashing.tlsh;
 import java.nio.charset.StandardCharsets;
 
 public final class TLSHConstants {
+
     /**
-     * Pearson hashing is a simple algorithm that generates fixed-size hash values from input strings.
-     * It uses a lookup table of 256 random bytes and processes each byte of the input with XOR operations
-     * to produce an 8-bit or 16-bit hash. It is fast and efficient for small datasets but not suitable
-     * for cryptographic use due to collision vulnerability.
-     * For more Information {@link <a href="https://en.wikipedia.org/wiki/Pearson_hashing">wiki</a>}
-     */
-    /**
-     * Pearson's random table.
+     * Pearson's table.
      */
     public static final int[] PEARSON_TABLE = {1, 87, 49, 12, 176, 178, 102, 166, 121, 193, 6, 84, 249, 230, 44, 163, 14, 197, 213,
             181, 161, 85, 218, 80, 64, 239, 24, 226, 236, 142, 38, 200, 110, 177, 104, 103, 141, 253, 255, 50, 77, 101,
@@ -116,10 +110,6 @@ public final class TLSHConstants {
      */
     public static final int DIFF_SCALE = 12;
 
-    /**
-     * The scaling multiplier for difference scoring of bits.
-     */
-    public static final int DIFF_SCALE6 = 6;
 
     /** The length threshold for step 1. */
     public static final int LEN_STEP_1 = 656;

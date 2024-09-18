@@ -25,7 +25,6 @@ import org.apache.metron.stellar.common.utils.hashing.EnumConfigurable;
 import org.apache.metron.stellar.common.utils.hashing.Hasher;
 
 import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashMap;
@@ -68,10 +67,10 @@ public class TLSHHasher implements Hasher {
      *
      * @param o The value to hash.
      * @return A hash of {@code toHash} that has been encoded.
-     * @throws NoSuchAlgorithmException If the supplied algorithm is not known.
+     *
      */
     @Override
-    public Object getHash(Object o) throws NoSuchAlgorithmException {
+    public Object getHash(Object o) {
         TLSHBuilder builder = new TLSHBuilder(TLSHBuilder.CHECKSUM_OPTION.fromVal(checksumOption), TLSHBuilder.BUCKET_OPTION.fromVal(bucketOption));
         byte[] data;
         if (o instanceof String) {
@@ -83,6 +82,7 @@ public class TLSHHasher implements Hasher {
         }
         try {
             TLSH tlsh = builder.getTLSH(data);
+            builder.clean();
             String hash = tlsh.getHash();
             if (hashes != null && !hashes.isEmpty()) {
                 Map<String, Object> ret = new HashMap<>();
