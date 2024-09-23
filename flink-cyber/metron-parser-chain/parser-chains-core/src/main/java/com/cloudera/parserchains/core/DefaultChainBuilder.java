@@ -20,6 +20,7 @@ import com.cloudera.parserchains.core.model.define.ParserSchema;
 import com.cloudera.parserchains.core.model.define.RouteSchema;
 import lombok.extern.slf4j.Slf4j;
 
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,7 +48,7 @@ public class DefaultChainBuilder implements ChainBuilder {
         for(ParserSchema parserSchema: chainSchema.getParsers()) {
             ChainLink next;
             boolean isRouter = ParserID.router().equals(parserSchema.getId());
-            parserSchema.setBasePath(chainSchema.getBasePath());
+            parserSchema.setBasePath(Paths.get(chainSchema.getBasePath(), "..").toString());
             if(isRouter) {
                 next = buildRouter(parserSchema);
             } else {

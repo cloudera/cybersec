@@ -2,7 +2,7 @@ import {rest} from 'msw';
 import ocsfSchemaJson from '../../../test/resources/parserconfig/ocsf-schema.json';
 import {OcsfSchemaModel} from "../../../app/chain-page/components/ocsf-form/ocsf-form.model";
 
-const ocsfSchema = ocsfSchemaJson as OcsfSchemaModel;
+const ocsfSchema = ocsfSchemaJson as unknown as OcsfSchemaModel;
 if (localStorage.getItem('ocsfSchema') === null) {
     localStorage.setItem('ocsfSchema', JSON.stringify(ocsfSchema));
 }
