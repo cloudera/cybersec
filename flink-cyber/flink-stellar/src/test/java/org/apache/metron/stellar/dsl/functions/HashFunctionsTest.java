@@ -362,28 +362,28 @@ public class HashFunctionsTest {
                         "DD6000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0",
                         "F87000008008000822B80080002C82A000808002800C003020000B2830202008A83A22",
                         "45D18407A78523B35A030267671FA2C2F725402973629B25545EB43C3356679477F7FC",
-                        165
+                        165, 137
                 ),
                 Arguments.of(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_1,
                         TLSHBuilder.BUCKET_OPTION.BUCKET_256,
                         "DD6000C300F000030003003FC00000000000C003000000CC000030033000C000030000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0",
                         "F87000200B0E0880008200A2800080C00000080000220222020080AC0280A0C0A2008A008008000822B80080002C82A000808002800C003020000B2830202008A83A22",
                         "45D1A40CE601EFD21E62648F2A9554F0E199E9B01B84213B6BE0DB5E2DA71FA898DFEB07A78123B35A030227671FA2C2F725402973629B25545EB43C3312679477F3FC",
-                        331
+                        331, 206
                 ),
                 Arguments.of(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_3,
                         TLSHBuilder.BUCKET_OPTION.BUCKET_128,
                         "DDB56E6000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0",
                         "F861367000008008000822B80080002C82A000808002800C003020000B2830202008A83A22",
                         "4513E4D18407A78523B35A030267671FA2C2F725402973629B25545EB43C3356679477F7FC",
-                        165
+                        165, 137
                 ),
                 Arguments.of(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_3,
                         TLSHBuilder.BUCKET_OPTION.BUCKET_256,
                         "DDB56E6000C300F000030003003FC00000000000C003000000CC000030033000C000030000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0",
                         "F861367000200B0E0880008200A2800080C00000080000220222020080AC0280A0C0A2008A008008000822B80080002C82A000808002800C003020000B2830202008A83A22",
                         "4513E4D1A40CE601EFD21E62648F2A9554F0E199E9B01B84213B6BE0DB5E2DA71FA898DFEB07A78123B35A030227671FA2C2F725402973629B25545EB43C3312679477F3FC",
-                        331
+                        331, 206
                 )
         );
     }
@@ -391,8 +391,9 @@ public class HashFunctionsTest {
     @ParameterizedTest
     @MethodSource("tlshHashFromFileParams")
     public void testTLSHHashFromFile(TLSHBuilder.CHECKSUM_OPTION checksumOption, TLSHBuilder.BUCKET_OPTION bucketOption,
-                                     String expectedHash1, String expectedHash2, String expectedFileHash, int expectedScore) {
+                                     String expectedHash1, String expectedHash2, String expectedFileHash, int expectedScore, int expectedScoreFile) {
         byte[] fileBytes = getFileBytes(new File("src/test/resources/0Alice.txt"));
+        byte[] file2Bytes = getFileBytes(new File("src/test/resources/website_course_descriptors06-07.txt"));
         TLSHBuilder builder = new TLSHBuilder(checksumOption, bucketOption);
         TLSHScorer scorer = new TLSHScorer();
 
@@ -401,12 +402,16 @@ public class HashFunctionsTest {
         TLSH tlsh2 = builder.getTLSH("Goodbye Cruel World".getBytes());
         builder.clean();
         TLSH tlsh3 = builder.getTLSH(fileBytes);
+        builder.clean();
+        TLSH tlsh4 = builder.getTLSH(file2Bytes);
         final int score = scorer.score(tlsh1, tlsh2, false);
+        final int scoreFile = scorer.score(tlsh3, tlsh4, true);
 
         assertEquals(expectedHash1, tlsh1.getHash());
         assertEquals(expectedHash2, tlsh2.getHash());
         assertEquals(expectedFileHash, tlsh3.getHash());
         assertEquals(expectedScore, score);
+        assertEquals(expectedScoreFile, scoreFile);
     }
 
     @Test
