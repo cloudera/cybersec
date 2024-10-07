@@ -28,6 +28,9 @@ import org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHHasher;
 import org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHScorer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,16 +49,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-
 import java.util.concurrent.ForkJoinPool;
+import java.util.stream.Stream;
 
 import static org.apache.metron.stellar.common.utils.StellarProcessorUtils.run;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HashFunctionsTest {
     private static final Map<File, byte[]> fileCache = new HashMap<>();
@@ -218,14 +216,14 @@ public class HashFunctionsTest {
     }
 
     public static String TLSH_DATA = "The best documentation is the UNIX source. After all, this is what the "
-            + "system uses for documentation when it decides what to do next! The "
-            + "manuals paraphrase the source code, often having been written at "
-            + "different times and by different people than who wrote the code. "
-            + "Think of them as guidelines. Sometimes they are more like wishes... "
-            + "Nonetheless, it is all too common to turn to the source and find "
-            + "options and behaviors that are not documented in the manual. Sometimes "
-            + "you find options described in the manual that are unimplemented "
-            + "and ignored by the source.";
+                                     + "system uses for documentation when it decides what to do next! The "
+                                     + "manuals paraphrase the source code, often having been written at "
+                                     + "different times and by different people than who wrote the code. "
+                                     + "Think of them as guidelines. Sometimes they are more like wishes... "
+                                     + "Nonetheless, it is all too common to turn to the source and find "
+                                     + "options and behaviors that are not documented in the manual. Sometimes "
+                                     + "you find options described in the manual that are unimplemented "
+                                     + "and ignored by the source.";
     String TLSH_EXPECTED = "6FF02BEF718027B0160B4391212923ED7F1A463D563B1549B86CF62973B197AD2731F8";
 
     @Test
@@ -312,22 +310,89 @@ public class HashFunctionsTest {
         }
     }
 
-    @Test
-    public void testTLSHHexDistance() {
-        TLSHBuilder builder = new TLSHBuilder(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_1, TLSHBuilder.BUCKET_OPTION.BUCKET_128);
-        TLSH tlsh1 = builder.fromHex("301124198C869A5A4F0F9380A9AE92F2B9278F42089EA34272885F0FB2D34E6911444C");
-        TLSH tlsh2 = builder.fromHex("09F05A198CC69A5A4F0F9380A9EE93F2B927CF42089EA74276DC5F0BB2D34E68114448");
+
+    public static Stream<Arguments> tlshHashFromHexParams() {
+        return Stream.of(
+                Arguments.of(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_1,
+                        TLSHBuilder.BUCKET_OPTION.BUCKET_128,
+                        "DD6000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0",
+                        "F87000008008000822B80080002C82A000808002800C003020000B2830202008A83A22",
+                        166, 165
+                ),
+                Arguments.of(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_1,
+                        TLSHBuilder.BUCKET_OPTION.BUCKET_256,
+                        "DD6000C300F000030003003FC00000000000C003000000CC000030033000C000030000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0",
+                        "F87000200B0E0880008200A2800080C00000080000220222020080AC0280A0C0A2008A008008000822B80080002C82A000808002800C003020000B2830202008A83A22",
+                        332, 331
+                ),
+                Arguments.of(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_3,
+                        TLSHBuilder.BUCKET_OPTION.BUCKET_128,
+                        "DDB56E6000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0",
+                        "F861367000008008000822B80080002C82A000808002800C003020000B2830202008A83A22",
+                        166, 165
+                ),
+                Arguments.of(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_3,
+                        TLSHBuilder.BUCKET_OPTION.BUCKET_256,
+                        "DDB56E6000C300F000030003003FC00000000000C003000000CC000030033000C000030000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0",
+                        "F861367000200B0E0880008200A2800080C00000080000220222020080AC0280A0C0A2008A008008000822B80080002C82A000808002800C003020000B2830202008A83A22",
+                        332, 331
+                )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("tlshHashFromHexParams")
+    public void testTLSHHexDistance(TLSHBuilder.CHECKSUM_OPTION checksumOption, TLSHBuilder.BUCKET_OPTION bucketOption,
+                                    String hashHex1, String hashHex2, int expectedScore1, int expectedScore2) {
+        TLSHBuilder builder = new TLSHBuilder(checksumOption, bucketOption);
+        TLSH tlsh1 = builder.fromHex(hashHex1);
+        TLSH tlsh2 = builder.fromHex(hashHex2);
         TLSHScorer scorer = new TLSHScorer();
 
         Assertions.assertEquals(0, scorer.score(tlsh1, tlsh1, true));
-        Assertions.assertEquals(121, scorer.score(tlsh1, tlsh2, true));
-        Assertions.assertEquals(97, scorer.score(tlsh1, tlsh2, false));
+        Assertions.assertEquals(expectedScore1, scorer.score(tlsh1, tlsh2, true));
+        Assertions.assertEquals(expectedScore2, scorer.score(tlsh1, tlsh2, false));
     }
 
-    @Test
-    public void testTLSHHashFromFile() {
+    public static Stream<Arguments> tlshHashFromFileParams() {
+        return Stream.of(
+                Arguments.of(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_1,
+                        TLSHBuilder.BUCKET_OPTION.BUCKET_128,
+                        "DD6000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0",
+                        "F87000008008000822B80080002C82A000808002800C003020000B2830202008A83A22",
+                        "45D18407A78523B35A030267671FA2C2F725402973629B25545EB43C3356679477F7FC",
+                        165
+                ),
+                Arguments.of(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_1,
+                        TLSHBuilder.BUCKET_OPTION.BUCKET_256,
+                        "DD6000C300F000030003003FC00000000000C003000000CC000030033000C000030000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0",
+                        "F87000200B0E0880008200A2800080C00000080000220222020080AC0280A0C0A2008A008008000822B80080002C82A000808002800C003020000B2830202008A83A22",
+                        "45D1A40CE601EFD21E62648F2A9554F0E199E9B01B84213B6BE0DB5E2DA71FA898DFEB07A78123B35A030227671FA2C2F725402973629B25545EB43C3312679477F3FC",
+                        331
+                ),
+                Arguments.of(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_3,
+                        TLSHBuilder.BUCKET_OPTION.BUCKET_128,
+                        "DDB56E6000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0",
+                        "F861367000008008000822B80080002C82A000808002800C003020000B2830202008A83A22",
+                        "4513E4D18407A78523B35A030267671FA2C2F725402973629B25545EB43C3356679477F7FC",
+                        165
+                ),
+                Arguments.of(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_3,
+                        TLSHBuilder.BUCKET_OPTION.BUCKET_256,
+                        "DDB56E6000C300F000030003003FC00000000000C003000000CC000030033000C000030000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0",
+                        "F861367000200B0E0880008200A2800080C00000080000220222020080AC0280A0C0A2008A008008000822B80080002C82A000808002800C003020000B2830202008A83A22",
+                        "4513E4D1A40CE601EFD21E62648F2A9554F0E199E9B01B84213B6BE0DB5E2DA71FA898DFEB07A78123B35A030227671FA2C2F725402973629B25545EB43C3312679477F3FC",
+                        331
+                )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("tlshHashFromFileParams")
+    public void testTLSHHashFromFile(TLSHBuilder.CHECKSUM_OPTION checksumOption, TLSHBuilder.BUCKET_OPTION bucketOption,
+                                     String expectedHash1, String expectedHash2, String expectedFileHash, int expectedScore) {
         byte[] fileBytes = getFileBytes(new File("src/test/resources/0Alice.txt"));
-        TLSHBuilder builder = new TLSHBuilder(TLSHBuilder.CHECKSUM_OPTION.CHECKSUM_1, TLSHBuilder.BUCKET_OPTION.BUCKET_128);
+        TLSHBuilder builder = new TLSHBuilder(checksumOption, bucketOption);
         TLSHScorer scorer = new TLSHScorer();
 
         TLSH tlsh1 = builder.getTLSH("Hello world!".getBytes());
@@ -337,12 +402,11 @@ public class HashFunctionsTest {
         TLSH tlsh3 = builder.getTLSH(fileBytes);
         final int score = scorer.score(tlsh1, tlsh2, false);
 
-        assertEquals("DD6000030030000C000000000C300CC00000C000030000000000F00030F0C00300CCC0", tlsh1.getHash());
-        assertEquals("F87000008008000822B80080002C82A000808002800C003020000B2830202008A83A22", tlsh2.getHash());
-        assertEquals("45D18407A78523B35A030267671FA2C2F725402973629B25545EB43C3356679477F7FC", tlsh3.getHash());
-        assertEquals(165, score);
+        assertEquals(expectedHash1, tlsh1.getHash());
+        assertEquals(expectedHash2, tlsh2.getHash());
+        assertEquals(expectedFileHash, tlsh3.getHash());
+        assertEquals(expectedScore, score);
     }
-
 
     @Test
     public void tlshDist_invalidInput() {
@@ -350,6 +414,10 @@ public class HashFunctionsTest {
         variables.put("hash1", 1);
         variables.put("hash2", TLSH_EXPECTED);
         assertThrows(Exception.class, () -> run("TLSH_DIST( hash1, hash1)", variables));
+        assertThrows(Exception.class, () -> run("TLSH_DIST( hash1, hash1, { 'checksumBytes' : 1, 'bucketSize' : 128 })", variables));
+        assertThrows(Exception.class, () -> run("TLSH_DIST( hash1, hash1, { 'checksumBytes' : 1, 'bucketSize' : 256 })", variables));
+        assertThrows(Exception.class, () -> run("TLSH_DIST( hash1, hash1, { 'checksumBytes' : 3, 'bucketSize' : 128 })", variables));
+        assertThrows(Exception.class, () -> run("TLSH_DIST( hash1, hash1, { 'checksumBytes' : 3, 'bucketSize' : 256 })", variables));
     }
 
     private String expectedHexString(MessageDigest expected) {
