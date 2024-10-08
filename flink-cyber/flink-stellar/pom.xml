@@ -77,11 +77,6 @@
             <groupId>org.adrianwalker</groupId>
             <artifactId>multiline-string</artifactId>
         </dependency>
-      <dependency>
-            <groupId>com.trendmicro</groupId>
-            <artifactId>tlsh</artifactId>
-            <version>3.7.1</version>
-        </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
@@ -250,6 +245,12 @@
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
             <version>${global_hamcrest_version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${jupiter.junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
