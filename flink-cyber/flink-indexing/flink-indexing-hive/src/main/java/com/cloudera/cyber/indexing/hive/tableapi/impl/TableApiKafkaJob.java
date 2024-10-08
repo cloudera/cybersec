@@ -51,7 +51,7 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
             mappingDto.getTableName(), "indexing-job", params);
 
         //read from view and write to kafka sink
-        final Table table = tableEnv.from(mappingDto.getTableName());
+        final Table table = tableEnv.from(getTableName(topic, mappingDto));
         final String schemaString = AvroSchemaUtil.convertToAvro(tablesConfig.get(mappingDto.getTableName()))
             .toString();
 
@@ -85,6 +85,11 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
   @Override
   protected FormatDescriptor getFormatDescriptor() {
     return null;
+  }
+
+  @Override
+  protected String getTableName(String source, MappingDto mappingDto) {
+    return source.concat("_tmpview");
   }
 
   @Override
