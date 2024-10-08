@@ -17,42 +17,87 @@
  */
 package org.apache.metron.stellar.common.utils.hashing.tlsh;
 
-import com.trendmicro.tlsh.BucketOption;
-import com.trendmicro.tlsh.ChecksumOption;
-import com.trendmicro.tlsh.Tlsh;
-import com.trendmicro.tlsh.TlshCreator;
+import java.nio.ByteBuffer;
 
-import java.util.Optional;
+import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHUtil.swapNibble;
 
 /**
  * The abstraction around interacting with TLSH.
  */
 public class TLSH {
-  private TlshCreator creator;
-  public TLSH(BucketOption bucketOption, ChecksumOption checksumOption) {
-    creator = new TlshCreator(bucketOption, checksumOption);
-  }
 
-  public String apply(byte[] data, boolean force) {
-    try {
-      creator.update(data);
-      return creator.getHash(force).getEncoded();
-    } finally {
-      creator.reset();
+    /**
+     * The checksum bytes.
+     */
+    private final int[] checksum;
+    /**
+     * The buckets bytes.
+     */
+    private final int[] codes;
+    /**
+     * The encoded length value.
+     */
+    private final int lValue;
+    /**
+     * The q1 ratio.
+     */
+    private final int q1Ratio;
+    /**
+     * The q2 ratio.
+     */
+    private final int q2Ratio;
+
+
+    public TLSH(int[] checksum, int[] codes, int lValue, int q1, int q2) {
+        this.checksum = checksum;
+        this.codes = codes;
+        this.lValue = lValue;
+        this.q1Ratio = q1;
+        this.q2Ratio = q2;
     }
-  }
 
-  public static int distance(String hash1, String hash2, Optional<Boolean> includeLength) {
-    if (hash1 == null || hash2 == null) {
-      return -1;
+
+    public String getHash() {
+        return TLSHUtil.bytesToHex(getHexBytes());
     }
 
-    if (hash1.equals(hash2)) {
-      return 0;
+    public int[] getChecksum() {
+        return checksum;
     }
 
-    Tlsh t1 = Tlsh.fromTlshStr(hash1);
-    Tlsh t2 = Tlsh.fromTlshStr(hash2);
-    return t1.totalDiff(t2, includeLength.orElse(false));
-  }
+    public int[] getCodes() {
+        return codes;
+    }
+
+    public int getlValue() {
+        return lValue;
+    }
+
+    public int getQ1Ratio() {
+        return q1Ratio;
+    }
+
+    public int getQ2Ratio() {
+        return q2Ratio;
+    }
+
+    public byte[] getHexBytes() {
+        final ByteBuffer buf = ByteBuffer.allocate(checksum.length + 2 + codes.length);
+        for (final int c : checksum) {
+            buf.put((byte) swapNibble(c));
+        }
+        buf.put((byte) swapNibble(lValue));
+        buf.put((byte) (q1Ratio << 4 | q2Ratio));
+        for (int i = codes.length - 1; i >= 0; i--) {
+            buf.put((byte) codes[i]);
+        }
+        buf.flip();
+        if (buf.hasArray() && 0 == buf.arrayOffset()) {
+            return buf.array();
+        } else {
+            final byte[] hash = new byte[buf.remaining()];
+            buf.get(hash);
+            return hash;
+        }
+    }
 }
