@@ -169,10 +169,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>io.swagger.core.v3</groupId>
+            <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>
-            <version>2.2.9</version>
-            <scope>compile</scope>
+            <version>${swagger-annotations.version}</version>
         </dependency>
     </dependencies>
 
