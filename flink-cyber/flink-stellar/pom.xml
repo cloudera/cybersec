@@ -35,7 +35,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <commons.config.version>1.10</commons.config.version>
         <guava_version>${guava.version}</guava_version>
-        <curator.version>4.3.0.${cdh.version}</curator.version>
+        <curator.version>5.4.0.${cdh.version}</curator.version>
         <global_aesh_version>0.66.19</global_aesh_version>
         <global_jackson_version>2.7.4</global_jackson_version>
         <global_json_simple_version>1.1.1</global_json_simple_version>
