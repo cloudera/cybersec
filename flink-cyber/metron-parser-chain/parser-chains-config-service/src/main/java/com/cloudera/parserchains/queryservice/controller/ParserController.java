@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -57,6 +58,7 @@ public class ParserController {
                             array = @ArraySchema(schema = @Schema(implementation = ParserSummary.class))))
             })
     @GetMapping(value = API_PARSER_TYPES)
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', '*')")
     public ResponseEntity<List<ParserSummary>> findAll() throws IOException {
         List<ParserSummary> types = parserDiscoveryService.findAll();
         return ResponseEntity.ok(types);
@@ -69,6 +71,7 @@ public class ParserController {
                             mediaType = "application/json")),
                     @ApiResponse(responseCode = "404", description = "Unable to retrieve.")})
     @GetMapping(value = API_PARSER_FORM_CONFIG)
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', '*')")
     public ResponseEntity<Map<ParserID, ParserDescriptor>> describeAll() {
         Map<ParserID, ParserDescriptor> configs = parserDiscoveryService.describeAll();
 
