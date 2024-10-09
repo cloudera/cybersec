@@ -74,7 +74,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                        <artifactSet>
+                            <artifactSet>
                                 <excludes>
                                     <exclude>org.apache.flink:force-shading</exclude>
                                     <exclude>com.google.code.findbugs:jsr305</exclude>
