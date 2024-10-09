@@ -54,7 +54,7 @@ public class ScoredMessage extends SpecificRecordBase implements IdentifiedMessa
         return message.getTs();
     }
 
-    public static final Schema SCHEMA$ = AvroSchemas.createRecordBuilder(ScoredMessage.class.getPackage().getName(), ScoredMessage.class.getName())
+    public static final Schema SCHEMA$ = AvroSchemas.createRecordBuilder(ScoredMessage.class.getPackage().getName(), ScoredMessage.class.getName(), null)
             .fields()
             .name("message").type(Message.SCHEMA$).noDefault()
             .name("cyberScoresDetails").type(Schema.createArray(Scores.SCHEMA$)).noDefault()
