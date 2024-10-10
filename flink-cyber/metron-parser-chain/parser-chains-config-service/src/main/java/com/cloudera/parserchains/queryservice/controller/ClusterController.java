@@ -27,6 +27,7 @@ public class ClusterController {
 
     private final ClusterService clusterService;
 
+
     @Operation(description = "Retrieves information about all cluster services.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "A list of all clusters.")
