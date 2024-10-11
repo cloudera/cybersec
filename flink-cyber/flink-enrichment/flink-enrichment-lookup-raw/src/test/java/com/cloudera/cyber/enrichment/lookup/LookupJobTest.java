@@ -36,9 +36,9 @@ import java.util.concurrent.TimeoutException;
 
 import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
 import static com.cloudera.cyber.flink.FlinkUtils.PARAMS_PARALLELISM;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.hamcrest.collection.IsMapWithSize.aMapWithSize;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
+
 
 public class LookupJobTest extends LookupJob {
 
@@ -50,9 +50,10 @@ public class LookupJobTest extends LookupJob {
     @Test
     public void testEnrichments() throws Exception {
         JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
-                PARAMS_CONFIG_FILE, "config.json",
+                PARAMS_CONFIG_FILE, "src/test/resources/config.json",
                 PARAMS_PARALLELISM, "1"
         ))));
+        List<Message> resultMessage = new ArrayList<>();
 
         // make up some enrichments (three types, multiple fields and multiple entries in some)
         sendEnrichment("ip_whitelist", "10.0.0.1", Collections.singletonMap("whitelist", "true"), 100L);
@@ -81,17 +82,35 @@ public class LookupJobTest extends LookupJob {
 
         JobTester.stopTest();
 
-        // assert that the sink contains fully enriched entities
-
-        List<Message> results = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            Message message = sink.poll();
-            assertThat("message is not null", message, notNullValue());
-            assertThat("Message had the correct field count", message.getExtensions(), aMapWithSize(Integer.valueOf(message.getMessage())));
-            results.add(message);
+        while (!sink.isEmpty()) {
+            resultMessage.add(sink.poll());
         }
-        assertThat("All message received", results, hasSize(3));
-        assertThat("Message has been enriched", results, hasSize(3));
+        // assert that the sink contains fully enriched entities
+        assertThat(resultMessage).hasSize(3).extracting(Message::getMessage).containsExactly("2", "4", "1");
+        Message message1 = resultMessage.stream().filter(m -> m.getMessage().equals("1")).findFirst().get();
+        Message message2 = resultMessage.stream().filter(m -> m.getMessage().equals("2")).findFirst().get();
+        Message message4 = resultMessage.stream().filter(m -> m.getMessage().equals("4")).findFirst().get();
+        assertThat(message1.getExtensions()).contains(
+                entry("ip_src_addr", "10.0.0.2")
+        );
+        assertThat(message2.getExtensions()).contains(
+                entry("ip_src_addr", "10.0.0.1"),
+                entry("ip_src_addr.internal_ip.field1", "1"),
+                entry("ip_src_addr.internal_ip.field2", "2"),
+                entry("ip_src_addr.ip_whitelist.whitelist", "true"),
+                entry("ip_src_addr.asset.location", "office"),
+                entry("ip_src_addr.asset.owner", "mew")
+        );
+        assertThat(message4.getExtensions()).contains(
+                entry("ip_src_addr", "10.0.0.1"),
+                entry("ip_src_addr.internal_ip.field1", "1"),
+                entry("ip_src_addr.internal_ip.field2", "2"),
+                entry("ip_src_addr.ip_whitelist.whitelist", "true"),
+                entry("ip_src_addr.asset.location", "office"),
+                entry("ip_src_addr.asset.owner", "mew"),
+                entry("ip_dst_addr", "192.168.0.1"),
+                entry("ip_dst_addr.ip_whitelist.whitelist", "false")
+                );
     }
 
     @Override
@@ -107,7 +126,7 @@ public class LookupJobTest extends LookupJob {
     @Override
     public SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         source = JobTester.createManualSource(env, TypeInformation.of(Message.class));
-        return source.getDataStream().map(s->s);
+        return source.getDataStream().map(s -> s);
     }
 
     @Override
@@ -126,20 +145,20 @@ public class LookupJobTest extends LookupJob {
 
     private EnrichmentCommand enrichment(String type, String key, Map<String, String> entries) {
         return EnrichmentCommand.builder()
-            .type(CommandType.ADD)
+                .type(CommandType.ADD)
                 .headers(Collections.emptyMap())
-            .payload(EnrichmentEntry.builder()
-                .type(type)
-                .key(key)
-                .entries(entries)
-                .ts(0)
-                .build()).build();
+                .payload(EnrichmentEntry.builder()
+                        .type(type)
+                        .key(key)
+                        .entries(entries)
+                        .ts(0)
+                        .build()).build();
     }
 
     private void sendEnrichment(String type, String key, Map<String, String> entries, long ts) throws TimeoutException {
         enrichmentSource.sendRecord(enrichment(type, key, entries), ts);
-       // EnrichmentCommandResponse response = queryResults.poll();
-      //  assertThat("Command succeed", response.isSuccess());
+        // EnrichmentCommandResponse response = queryResults.poll();
+        //  assertThat("Command succeed", response.isSuccess());
     }
 
     private Message message(String message, Map<String, String> extensions, long ts) {
