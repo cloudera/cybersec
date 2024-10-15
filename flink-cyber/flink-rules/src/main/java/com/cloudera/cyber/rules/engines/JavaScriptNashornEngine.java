@@ -26,9 +26,9 @@ import javax.script.*;
 @Slf4j
 @Deprecated
 public class JavaScriptNashornEngine extends JavaScriptEngine {
-    private static final String ENGINE_NAME = "javascript";
 
-    private static final ScriptEngineManager mgr = new ScriptEngineManager();
+    static final String ENGINE_NAME = "javascript";
+    static final ScriptEngineManager mgr = new ScriptEngineManager();
 
     @AllArgsConstructor
     @Getter
@@ -52,6 +52,10 @@ public class JavaScriptNashornEngine extends JavaScriptEngine {
 
     private static ValidatedScriptEngine create(String functionName, String script) {
         ScriptEngine engine = mgr.getEngineByName(ENGINE_NAME);
+        if (engine == null) {
+            log.error("Wasn't able to create Nashorn JavaScript engine. It's likely related to the Java version being higher than 14.");
+            new ValidatedScriptEngine(false, null);
+        }
         boolean isValid = true;
         try {
             Bindings globalBindings = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
@@ -89,7 +93,7 @@ public class JavaScriptNashornEngine extends JavaScriptEngine {
     }
 
     @VisibleForTesting
-    public void eval(String script) throws ScriptException {
+    public synchronized void eval(String script) throws ScriptException {
         try {
             getScriptEngine().eval(script);
         } catch (ConcurrentException e) {
@@ -98,7 +102,7 @@ public class JavaScriptNashornEngine extends JavaScriptEngine {
     }
 
     @Override
-    public Object invokeFunction(String function, Object... args) throws ScriptException, NoSuchMethodException {
+    public synchronized Object invokeFunction(String function, Object... args) throws ScriptException, NoSuchMethodException {
         try {
             return ((Invocable) getScriptEngine()).invokeFunction(function, args);
         } catch (ConcurrentException e) {

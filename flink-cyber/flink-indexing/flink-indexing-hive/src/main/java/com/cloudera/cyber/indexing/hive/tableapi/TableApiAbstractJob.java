@@ -77,7 +77,7 @@ public abstract class TableApiAbstractJob {
     System.out.println("Creating tables...");
     setConnectorDialect(tableEnv);
 
-    final Map<String, ResolvedSchema> tableSchemaMap = createTables(tableEnv, rawTablesConfig, tablesConfig);
+    final Map<String, ResolvedSchema> tableSchemaMap = createTables(tableEnv, tablesConfig);
 
     System.out.println("Getting topic mapping...");
     final Map<String, MappingDto> topicMapping = getTopicMapping();
@@ -104,18 +104,17 @@ public abstract class TableApiAbstractJob {
   /**
    * Creates tables in the tableEnv based on the tablesConfig. If table already exists, its schema is fetched.
    *
-   * @param tableEnv        is the Flink environment in which the tables are going to be created.
-   * @param rawTablesConfig map that contains contents of tables config file without any modifications.
-   * @param tablesConfig    modified version of rawTablesConfig that contains default and partition columns.
+   * @param tableEnv     is the Flink environment in which the tables are going to be created.
+   * @param tablesConfig modified version of rawTablesConfig that contains default and partition columns.
    * @return Map with table name as a key and table schema as a value.
    */
   private Map<String, ResolvedSchema> createTables(StreamTableEnvironment tableEnv,
-      Map<String, List<TableColumnDto>> rawTablesConfig, Map<String, List<TableColumnDto>> tablesConfig) {
+                                                   Map<String, List<TableColumnDto>> tablesConfig) {
     final Set<String> tableList = getExistingTableList(tableEnv);
 
     return tablesConfig.entrySet().stream()
         .collect(Collectors.toMap(Entry::getKey,
-            entry -> createTableIfNotExists(tableEnv, tableList, entry.getKey(), rawTablesConfig.get(entry.getKey()), entry.getValue())));
+            entry -> createTableIfNotExists(tableEnv, tableList, entry.getKey(), entry.getValue())));
   }
 
   protected void validateMappings(Map<String, ResolvedSchema> tableSchemaMap,
@@ -223,13 +222,9 @@ public abstract class TableApiAbstractJob {
   }
 
   private ResolvedSchema createTableIfNotExists(StreamTableEnvironment tableEnv, Set<String> tableList,
-      String tableName, List<TableColumnDto> rawColumnList, List<TableColumnDto> columnList) {
+                                                String tableName, List<TableColumnDto> columnList) {
     if (tableList.contains(tableName)) {
       return handleExistingTable(tableEnv, tableName, columnList);
-    }
-
-    if (CollectionUtils.isEmpty(rawColumnList)) {
-      throw new RuntimeException(String.format("%s table [%s] config is empty. Aborting...", connectorName, tableName));
     }
 
     return createTable(tableEnv, tableName, columnList);
