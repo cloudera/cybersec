@@ -15,8 +15,10 @@ package com.cloudera.cyber.rules;
 import com.cloudera.cyber.rules.engines.*;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import lombok.Getter;
 
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 public enum RuleType {
     JS_GRAAL(new JavaScriptGraaljsEngineBuilder()),
@@ -24,10 +26,16 @@ public enum RuleType {
     // It's recommended to switch to JS_GRAAL instead, or rely on the JS that will get replaced with JS_GRAAL once JS_NASHORN is removed
     @Deprecated
     JS_NASHORN(new JavaScriptNashornEngineBuilder()),
-    JS(JS_NASHORN.engineBuilder),
+    //will use the first valid engine
+    JS(Stream.of(JS_NASHORN, JS_GRAAL)
+            .map(RuleType::getEngineBuilder)
+            .filter(RuleEngineBuilder::isValid)
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("No valid JS engine was found!"))),
     PYTHON(new PythonEngineBuilder()),
     STELLAR(new StellarEngineBuilder());
 
+    @Getter
     private final RuleEngineBuilder engineBuilder;
     private Cache<String, RuleEngine> engineCache;
 
@@ -48,4 +56,5 @@ public enum RuleType {
     public RuleEngine engine(String ruleScript) {
         return engineCache.get(ruleScript, s -> engineBuilder.script(s).build());
     }
+
 }

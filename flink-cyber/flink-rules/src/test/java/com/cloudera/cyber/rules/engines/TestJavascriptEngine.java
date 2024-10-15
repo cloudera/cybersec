@@ -14,6 +14,7 @@ package com.cloudera.cyber.rules.engines;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
+import com.cloudera.cyber.rules.RuleType;
 import com.google.common.collect.ImmutableMap;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -32,8 +33,10 @@ public class TestJavascriptEngine {
     private static final String scoreScript = "return { local: ip_local(message.local), remote: ip_local(message.remote) }";
 
     public static Stream<Arguments> jsBuilders() {
-        return Stream.of(Arguments.of(JavaScriptNashornEngine.builder()),
-                Arguments.of(JavaScriptGraaljsEngine.builder()));
+        return Stream.of(RuleType.JS, RuleType.JS_GRAAL, RuleType.JS_NASHORN)
+                .map(RuleType::getEngineBuilder)
+                .filter(RuleEngineBuilder::isValid)
+                .map(Arguments::of);
     }
 
     @ParameterizedTest
