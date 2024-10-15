@@ -56,7 +56,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <csa.version>csa1.12.0.0</csa.version>
-        <flink.version>1.18.0-${csa.version}</flink.version>
+        <flink.version>1.18.0-csa1.12.0.0</flink.version>
         <cloudera.registry>1.0-${csa.version}</cloudera.registry>
         <flink.hbase.version>2.4</flink.hbase.version>
         <cdh.version>7.1.9.0-387</cdh.version>
