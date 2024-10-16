@@ -10,12 +10,11 @@
  * limitations governing your use of the file.
  */
 
-import {Component} from '@angular/core';
-import {Router} from '@angular/router';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {ClusterModel, Job} from "./cluster-list-page.model";
-import {ClusterService} from "../../services/cluster.service";
-import {tap} from "rxjs/operators";
+import {Component, inject} from '@angular/core';
+import {concat, of} from 'rxjs';
+import {Job} from './cluster-list-page.model';
+import {ClusterService} from '../../services/cluster.service';
+import {map} from 'rxjs/operators';
 
 
 @Component({
@@ -24,19 +23,12 @@ import {tap} from "rxjs/operators";
   styleUrls: ['./cluster-list-page.component.scss']
 })
 export class ClusterListPageComponent {
-  clusters$: Observable<ClusterModel[]> =    this._clusterService.getClusters().pipe(tap(() => this.isLoading$.next(false)));
-  displayedColumns: string[] = ['id', 'name', 'status', 'version', 'branches'];
-  isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+  private readonly _clusterService = inject(ClusterService);
+  displayedColumns: string[] = ['id', 'name', 'status', 'version', 'pipelines'];
+  clusters$ = concat(
+    of({type: 'start'}),
+    this._clusterService.getClusters().pipe(map(value => ({type: 'finish', value})))
+  );
 
-  constructor(
-    private _clusterService: ClusterService,
-    private _router: Router,
-  ) {
-  }
-
-  getBranches = (jobs: Job[]) => [...new Set(jobs.map(job => job.jobPipeline))].join(', ');
-
-  goToDetailCluster = (clusterId: string | number) => {
-    this._router.navigate(['clusters', clusterId]);
-  }
+  getPipelines = (jobs: Job[]) => [...new Set(jobs.map(job => job.jobPipeline))].join(', ');
 }

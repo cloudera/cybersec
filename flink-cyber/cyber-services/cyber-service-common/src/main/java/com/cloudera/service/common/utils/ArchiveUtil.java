@@ -8,6 +8,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.flink.core.fs.FileStatus;
 
 import java.io.BufferedInputStream;
@@ -37,7 +38,7 @@ public class ArchiveUtil {
 
     public static byte[] compressToTarGzInMemory(String inputPath, boolean base64) throws IOException {
         final byte[] bytes = compressToTarGzInMemory(inputPath);
-        if (base64){
+        if (base64) {
             return Base64.getEncoder().encode(bytes);
         } else {
             return bytes;
@@ -48,6 +49,35 @@ public class ArchiveUtil {
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
             compressToTarGz(inputPath, bos);
             return bos.toByteArray();
+        }
+    }
+
+    public static byte[] compressToTarGzInMemory(List<Pair<String, byte[]>> files) {
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+            if (files == null || files.isEmpty()) {
+                log.info("There are no files.");
+                return bos.toByteArray();
+            }
+            try (BufferedOutputStream buffOut = new BufferedOutputStream(bos);
+                 GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(buffOut);
+                 TarArchiveOutputStream tOut = new TarArchiveOutputStream(gzOut)) {
+                try {
+                    for (Pair<String, byte[]> file : files) {
+                        TarArchiveEntry tarEntry = new TarArchiveEntry(
+                                file.getLeft());
+                        tarEntry.setSize(file.getRight().length);
+                        tOut.putArchiveEntry(tarEntry);
+                        tOut.write(file.getRight());
+                        tOut.closeArchiveEntry();
+                    }
+                } finally {
+                    tOut.finish();
+                }
+            }
+            return bos.toByteArray();
+        } catch (IOException e) {
+            log.error("IOException occurs while processing  {}", e.getMessage());
+            return new byte[0];
         }
     }
 
@@ -111,7 +141,7 @@ public class ArchiveUtil {
             throw new IOException("Provided null as .tar.gz data which is not allowed!");
         }
         final byte[] data;
-        if (base64){
+        if (base64) {
             data = Base64.getDecoder().decode(rawData);
         } else {
             data = rawData;

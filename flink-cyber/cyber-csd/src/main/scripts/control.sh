@@ -25,6 +25,11 @@ case $CMD in
     get_generic_java_opts
     exec ${CYBERSEC_BIN}/cs-start-parser-ui start
     ;;
+  (start-worker)
+      echo "Worker echo $CYBERSEC_BIN/cs-start-worker"
+      get_generic_java_opts
+      exec ${CYBERSEC_BIN}/cs-start-worker start
+      ;;
   (*)
     echo "Don't understand [$CMD]"
     ;;

@@ -173,6 +173,11 @@
             <artifactId>swagger-annotations</artifactId>
             <version>${swagger-annotations.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>5.13.1.202206130422-r</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -222,9 +227,8 @@
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <version>${spring-boot.version}</version>
                         <configuration>
-                            <!-- This is specified so that we can specify a directory for loading third party jar dependencies -->
-                            <!-- https://docs.spring.io/spring-boot/docs/current/maven-plugin/usage.html -->
-                            <layout>ZIP</layout> <!-- to use PropertiesLauncher -->
+                            <mainClass>com.cloudera.parserchains.queryservice.Application</mainClass>
+                            <layout>JAR</layout>
                         </configuration>
                         <executions>
                             <execution>

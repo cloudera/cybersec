@@ -35,6 +35,7 @@ export class ChainAddParserPageComponent implements OnInit, OnDestroy {
   parsersList: ParserModel[] = [];
   chainId: string;
   subchainId: string;
+  currentPipeline: string;
   getChainSubscription: Subscription;
   getParserTypesSubscription: Subscription;
 
@@ -81,15 +82,18 @@ export class ChainAddParserPageComponent implements OnInit, OnDestroy {
     this._activatedRoute.params.subscribe((params) => {
       this.chainId = params.id;
       this.subchainId = params.subchain;
+      this.currentPipeline = params.pipeline;
+      this.getChainSubscription = this._store.pipe(select(getChain({ id: this.chainId }))).subscribe((chain: ParserChainModel) => {
+        if (!chain) {
+          this._store.dispatch(new fromParserPageAction.LoadChainDetailsAction({
+            id: this.chainId,
+            currentPipeline: this.currentPipeline
+          }));
+        }
+      });
     });
 
-    this.getChainSubscription = this._store.pipe(select(getChain({ id: this.chainId }))).subscribe((chain: ParserChainModel) => {
-      if (!chain) {
-        this._store.dispatch(new fromParserPageAction.LoadChainDetailsAction({
-          id: this.chainId
-        }));
-      }
-    });
+
 
     this._store.dispatch(new fromActions.GetParserTypesAction());
 

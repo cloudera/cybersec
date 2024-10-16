@@ -21,6 +21,9 @@ import {MainContainerComponent} from './misc/main/main.container';
 import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
 import {ClusterListPageComponent} from "./cluster/cluster-list-page/cluster-list-page.component";
 import {ClusterPageComponent} from "./cluster/cluster-page/cluster-page.component";
+import {PipelinesComponent} from 'src/app/cluster/pipelines/pipelines.component';
+import {PipelineCreateComponent} from 'src/app/cluster/pipelines/pipeline-create/pipeline-create.component';
+import {PipelineSubmitComponent} from 'src/app/cluster/pipelines/pipeline-submit/pipeline-submit.component';
 
 export const routes: Routes = [
   { path: '404', component: PageNotFoundComponent },
@@ -32,6 +35,9 @@ export const routes: Routes = [
     canDeactivate: [ CanDeactivateComponent ]
   },
   { path: 'clusters', component: ClusterListPageComponent },
+  { path: 'clusters/pipelines', component: PipelinesComponent },
+  { path: 'clusters/pipelines/create', component: PipelineCreateComponent },
+  { path: 'clusters/pipelines/submit', component: PipelineSubmitComponent },
   { path: 'clusters/:clusterId', component: ClusterPageComponent},
 
   { path: 'parserconfig/chains/:id/new', component: ChainAddParserPageComponent },

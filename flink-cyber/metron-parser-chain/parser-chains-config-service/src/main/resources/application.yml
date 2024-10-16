@@ -6,6 +6,7 @@ server:
   tomcat:
     accesslog:
       enabled: true
+  port: 3000
 
 # Enable/disable and expose/hide web enpoints for Actuator admin services
 management.endpoints.web:
@@ -19,7 +20,8 @@ logging:
       apache:
         tomcat: INFO
         catalina: INFO
-
+pipelines:
+  path: "../pipelines"
 
 # Swagger
 springdoc:
@@ -27,11 +29,12 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui
-
-
 # Kafka
 spring:
+  profiles:
+    active: "kafka"
   kafka:
+    mock: true
     bootstrap-servers: localhost:9092
     reply-topic: reply-topic
     request-topic: request-topic

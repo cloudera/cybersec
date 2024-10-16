@@ -1,14 +1,15 @@
 package com.cloudera.cyber.restcli.service;
 
+import com.cloudera.cyber.restcli.configuration.AppWorkerConfig;
 import com.cloudera.service.common.Utils;
 import com.cloudera.service.common.response.Job;
 import com.cloudera.service.common.utils.ArchiveUtil;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.api.common.JobStatus;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -27,11 +28,12 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class JobService {
-    @Value("${cluster.pipeline.dir}")
-    private String pipelineDir;
     public static final String LOG_CLI_JOB_INFO = "Successfully read jobs from cli with exit code {}. job count '{}' jobs data '[{}]'";
     private final Pattern pattern = Pattern.compile("^(?<date>[\\d.:\\s]+)\\s:\\s(?<jobId>[a-fA-F0-9]+)\\s:\\s(?<jobFullName>[\\w.-]+)\\s\\((?<jobStatus>\\w+)\\)$");
+
+    private final AppWorkerConfig config;
 
 
     public List<Job> getJobs() throws IOException {
@@ -56,8 +58,8 @@ public class JobService {
             log.info("Script command = '{}'", Arrays.toString(job.getJobType().getScript(job)));
             try {
                 ProcessBuilder processBuilder = new ProcessBuilder(job.getJobType().getScript(job));
-                if (pipelineDir != null) {
-                    processBuilder.directory(new File(pipelineDir));
+                if (config.getPipelineDir() != null) {
+                    processBuilder.directory(new File(config.getPipelineDir()));
                 }
                 Process process = processBuilder.start();
                 log.debug("Command input stream '{}' \n Command error stream '{}'", IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8), IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8));
@@ -155,12 +157,12 @@ public class JobService {
         String[] jobParameters = fullJobName.split("\\.");
         job.setJobBranch(jobParameters[0]);
         job.setJobPipeline(jobParameters[1]);
-        if (job.getJobType() == Job.JobType.PROFILE || job.getJobType() == Job.JobType.GENERATOR || job.getJobType() == Job.JobType.PARSER) {
-            job.setJobName(jobParameters[jobParameters.length - 1]);
+        if (job.getJobType() == Job.JobType.PROFILE || job.getJobType() == Job.JobType.PARSER) {
+            job.setConfName(jobParameters[jobParameters.length - 1]);
         }
     }
 
     public void updateConfig(byte[] payload) throws IOException {
-        ArchiveUtil.decompressFromTarGzInMemory(payload, pipelineDir, true);
+        ArchiveUtil.decompressFromTarGzInMemory(payload, config.getPipelineDir(), true);
     }
 }
