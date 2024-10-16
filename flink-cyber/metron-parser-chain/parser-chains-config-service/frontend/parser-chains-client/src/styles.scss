@@ -32,7 +32,8 @@ $parser-chaining-theme: mat.define-light-theme((
     primary: $parser-chaining-primary,
     accent: $parser-chaining-accent,
     warn: $parser-chaining-warn,
-  )
+  ),
+  typography: $typography
 ));
 
 // Include theme styles for core and each component used in your app.
@@ -53,6 +54,7 @@ $theme-warn: mat.define-palette(mat.$yellow-palette);
 .ant-card-body {
   padding: 16px;
 }
+
 .ant-card-head {
   background: var(--card-head-bg);
 }
@@ -71,9 +73,11 @@ $theme-warn: mat.define-palette(mat.$yellow-palette);
 .ant-table-tbody > tr:hover:not(.ant-table-expanded-row) > td {
   background: var(--background);
 }
+
 .ant-table-thead > tr > th {
   border-bottom: 1px solid var(--light-border);
 }
+
 .ant-table-tbody > tr > td {
   border-bottom: 1px solid var(--light-separator);
 }
@@ -112,6 +116,7 @@ $theme-warn: mat.define-palette(mat.$yellow-palette);
 .ant-pagination-disabled:focus .ant-pagination-item-link {
   border-color: var(--light-border);
 }
+
 // Menu
 
 .ant-menu-item > a:hover {
@@ -150,7 +155,7 @@ $theme-warn: mat.define-palette(mat.$yellow-palette);
 }
 
 .ant-select-selection {
-  border:1px solid var(--input-border-color);
+  border: 1px solid var(--input-border-color);
 }
 
 .parser-chain .ant-card-head-title {
@@ -160,40 +165,41 @@ $theme-warn: mat.define-palette(mat.$yellow-palette);
 }
 
 .success-snackbar {
-  background: rgb(0, 110, 37);
-  color: white;
+  background: mat.get-color-from-palette($theming-material-components-success, 600);
+  color: mat.get-contrast-color-from-palette($theming-material-components-success, 600);
   font-weight: bold;
   margin-bottom: 5px;
-  letter-spacing: .05em
+  letter-spacing: .05em;
+
+  .mat-simple-snackbar-action {
+    color: mat.get-contrast-color-from-palette($theming-material-components-success, 600);
+  }
 }
 
 .fail-snackbar {
-  background: #850900;
-  color: white;
+  background: mat.get-color-from-palette($theming-material-components-error, 600);
+  color: mat.get-contrast-color-from-palette($theming-material-components-error, 600);
   font-weight: bold;
   margin-bottom: 5px;
-  letter-spacing: .05em
+  letter-spacing: .05em;
+
+  .mat-simple-snackbar-action {
+    color: mat.get-contrast-color-from-palette($theming-material-components-error, 600);
+  }
 }
 
 .warning-snackbar {
-  background: rgb(255, 166, 0);
-  color: white;
-}
+  background: mat.get-color-from-palette($theming-material-components-warn, 600);
+  color: mat.get-contrast-color-from-palette($theming-material-components-warn, 600);
 
-.success-snackbar .mat-simple-snackbar-action {
-  color: black;
-}
-
-.warning-snackbar .mat-simple-snackbar-action {
-  color: black;
-}
-
-.fail-snackbar .mat-simple-snackbar-action {
-  color: black;
+  .mat-simple-snackbar-action {
+    color: mat.get-contrast-color-from-palette($theming-material-components-success, 600);
+  }
 }
 
 .chain-item {
   background-color: var(--card-head-bg);
+
   .ant-tabs-content {
     min-height: 150px;
   }
@@ -217,5 +223,106 @@ $theme-warn: mat.define-palette(mat.$yellow-palette);
   justify-content: space-between;
 }
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+.custom-class-tooltip {
+  transform: translateY(25px) !important;
+  background-color: black;
+  font-size: 12px;
+}
+
+mat-form-field {
+  &.flex-50 {
+    .mat-form-field-wrapper {
+      flex-basis: 50%;
+    }
+  }
+
+  &.flex-60 {
+    .mat-form-field-wrapper {
+      display: flex;
+      flex-basis: 60%;
+    }
+  }
+}
+
+table {
+  th.mat-header-cell {
+    color: mat.get-contrast-color-from-palette($theme-primary, 500);
+  }
+  .mat-row:hover {
+    background: mat.get-color-from-palette($theme-primary, 50);
+  }
+  .mat-header-row {
+    background: mat.get-color-from-palette($theme-primary);
+  }
+  .mat-header-cell:last-child {
+    border-right: none;
+  }
+}
+
+.flex-row-jc-ac {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-row-jfs-ac {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.flex-row-je {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
+.flex-row-jsb-ab {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.flex-row-jsb-ac {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-row-jsb-ab-w {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.flex-cl-jsb-ab {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.panel-class {
+  margin-top: 29px !important;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-outline{
+  color: mat.get-color-from-palette($theme-primary);
+}

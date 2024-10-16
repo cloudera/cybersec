@@ -113,7 +113,12 @@
     "priority": 10,
     "isDirectory": false
   },
-
+  "cs-start-worker": {
+    "destination": "/usr/bin/cs-start-worker",
+    "source": "bin/cs-start-worker",
+    "priority": 10,
+    "isDirectory": false
+  },
   "cs-stop-job": {
     "destination": "/usr/bin/cs-stop-job",
     "source": "bin/cs-stop-job",

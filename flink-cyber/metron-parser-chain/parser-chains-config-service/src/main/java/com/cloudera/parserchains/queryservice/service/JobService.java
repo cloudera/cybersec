@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class JobService {
-    private final KafkaService kafkaService;
+    private final KafkaServiceInterface kafkaService;
     private final ClusterService clusterService;
 
     public ResponseBody makeRequest(String clusterId, RequestBody body, String actionString) throws FailedClusterReponseException {

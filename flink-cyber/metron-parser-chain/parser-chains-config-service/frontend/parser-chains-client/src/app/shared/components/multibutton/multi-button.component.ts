@@ -1,9 +1,10 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {MatButtonToggleGroup} from "@angular/material/button-toggle";
 
-type MultiButton = {
+export type MultiButton = {
   label: string,
   value: string,
+  disabled: boolean
 }
 
 @Component({
@@ -15,10 +16,11 @@ type MultiButton = {
 })
 export class MultiButtonComponent  {
   @Input() buttons: MultiButton[]      = [
-    {label: 'Archive', value: 'Archive'},
-    {label: 'Git', value: 'Git'},
-    {label: 'Manual', value: 'Manual'},
+    {label: 'Archive', value: 'Archive', disabled: false},
+    {label: 'Git', value: 'Git', disabled: false},
+    {label: 'Manual', value: 'Manual', disabled: false},
   ];
+  @Input() defaultValue: string;
 
   @Output() valueChange = new EventEmitter<string>();
 
@@ -27,7 +29,6 @@ export class MultiButtonComponent  {
   onValueChange() {
     this.valueChange.emit(this.group.value);
   }
-
 }
 
 

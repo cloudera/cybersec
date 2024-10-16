@@ -31,21 +31,11 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
-public class KafkaService {
+@RequiredArgsConstructor
+public class KafkaService implements KafkaServiceInterface {
     private final Map<String, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody>> kafkaTemplatePool;
     private final Long replyFutureTimeout;
     private final Long kafkaTemplateTimeout;
-
-
-    public KafkaService(@Qualifier("kafkaTemplatePool") Map<String, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody>> kafkaTemplatePool,
-                        @Value("${kafka.reply.future.timeout:45}") Long replyFutureTimeout,
-                        @Value("${kafka.reply.timeout:45}") Long kafkaTemplateTimeout) {
-        this.kafkaTemplatePool = kafkaTemplatePool;
-        this.replyFutureTimeout = replyFutureTimeout;
-        this.kafkaTemplateTimeout = kafkaTemplateTimeout;
-    }
-
 
     public Pair<ResponseType, ResponseBody> sendWithReply(RequestType requestType, String clusterId, RequestBody body) {
         final ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody> kafkaTemplate = kafkaTemplatePool.get(clusterId);
