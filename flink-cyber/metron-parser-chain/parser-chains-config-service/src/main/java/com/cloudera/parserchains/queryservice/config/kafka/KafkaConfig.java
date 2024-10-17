@@ -9,7 +9,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -27,10 +27,8 @@ import org.springframework.kafka.listener.GenericMessageListenerContainer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,6 +36,7 @@ import java.util.Set;
 @EnableKafka
 @Configuration
 @RequiredArgsConstructor
+@ConditionalOnProperty(value = "kafka.enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties({ClouderaKafkaProperties.class})
 public class KafkaConfig {
 

@@ -19,7 +19,6 @@ import com.cloudera.parserchains.queryservice.model.exec.ChainTestResponse;
 import com.cloudera.parserchains.queryservice.model.summary.ParserChainSummary;
 import com.cloudera.parserchains.queryservice.service.ChainPersistenceService;
 import org.adrianwalker.multilinestring.Multiline;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,19 +30,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_CREATE_URL;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_DELETE_URL;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_READ_URL;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_UPDATE_URL;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_URL;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_PARSER_TEST_URL;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.*;
 import static com.cloudera.parserchains.queryservice.controller.ChainController.MAX_SAMPLES_PER_TEST;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -64,19 +57,9 @@ public class ChainControllerTest {
     private MockMvc mvc;
     @MockBean
     private ChainPersistenceService chainPersistenceService;
-    private static int numFields = 0;
+    private static final int numFields = 3;
     private final String chainIdOne = "1";
     private final String chainNameOne = "chain1";
-
-    @BeforeAll
-    public static void beforeAll() {
-        Method[] method = ParserChainSchema.class.getMethods();
-        for (Method m : method) {
-            if (m.getName().startsWith("set")) {
-                numFields++;
-            }
-        }
-    }
 
     @Test
     public void returns_list_of_all_chains() throws Exception {

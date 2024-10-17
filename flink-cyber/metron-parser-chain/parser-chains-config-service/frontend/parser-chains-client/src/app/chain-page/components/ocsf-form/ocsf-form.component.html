@@ -1,0 +1,110 @@
+<div *ngIf="schema$ | async as schema">
+  <form [formGroup]="filtersForm" nz-form>
+    <nz-form-item>
+      <nz-form-label nzFor="dataClassFilters">Class filters</nz-form-label>
+      <nz-form-control>
+        <nz-select
+          nzMode="tags"
+          nzShowSearch
+          nzAllowClear
+          nzPlaceHolder="Class filters"
+          formControlName="dataClassFilters"
+          data-qe-id="dataClassFilters">
+          <nz-option nzLabel="{{ obj }}" nzValue="{{ obj }}"
+                     *ngFor="let obj of profileList$ | async"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label nzFor="dataClasses">Select data classes</nz-form-label>
+      <nz-form-control>
+        <nz-select
+          nzMode="tags"
+          nzShowSearch
+          nzAllowClear
+          nzPlaceHolder="Data Classes"
+          formControlName="dataClasses"
+          data-qe-id="dataClasses">
+          <nz-option
+            *ngFor="let obj of filterClasses(schema.classes) | keyvalue"
+            nzLabel="{{ obj.key }}"
+            nzValue="{{ obj.key }}"></nz-option>
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label>Required only</nz-form-label>
+      <nz-form-control>
+        <nz-switch
+          (click)="clickSwitch()"
+          nzCheckedChildren="On"
+          nzUnCheckedChildren="Off"
+        ></nz-switch>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+
+  <form [formGroup]="ocsfForm" (ngSubmit)="onOcsfSubmit()" nz-form>
+    <div *ngFor="let objectName of selectedClassFields">
+      <nz-divider
+        nz-tooltip
+        [nzText]="objectName"
+        nzOrientation="center">
+      </nz-divider>
+      <app-ocsf-object-form [schema]="schema"
+                            [currentObject]="schema.classes[objectName]"
+                            [liveResults]="results$ | async"
+                            [requiredOnly]="requiredOnly"
+                            [formRequired]="true"
+                            [parentFormGroup]="ocsfForm"
+                            [importedData]="importedData.get(objectName)"></app-ocsf-object-form>
+    </div>
+    <nz-divider
+      nzText="Import/Export"
+      nzOrientation="center">
+    </nz-divider>
+    <nz-form-item>
+      <nz-form-label>Mapping path</nz-form-label>
+      <nz-form-control>
+        <nz-input-group nzPrefixIcon="file">
+          <input formControlName="_filePath"
+                 nz-input
+                 placeholder="/path/to/file.json"/>
+        </nz-input-group>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label>Source name</nz-form-label>
+      <nz-form-control>
+        <nz-input-group>
+          <input formControlName="_sourceName"
+                 nz-input
+                 placeholder="squid"/>
+        </nz-input-group>
+      </nz-form-control>
+    </nz-form-item>
+    <div nz-col nzSpan="16" class="chain-actions">
+      <button nz-button
+              type="button"
+              class="ocsf-button"
+              (click)="onOcsfImport()">
+        Import
+      </button>
+      <button nz-button
+              nzType="primary"
+              type="submit"
+              class="ocsf-button"
+              [disabled]="selectedClassFields.length <= 0 || !ocsfForm.valid">
+        Save
+      </button>
+    </div>
+  </form>
+  <p>OCSF version: {{ schema.version }}</p>
+</div>
+
+<mat-card *ngIf="isLoading$ | async" style="display: flex; justify-content: center; align-items: center">
+  <mat-progress-spinner
+    color="primary"
+    mode="indeterminate">
+  </mat-progress-spinner>
+</mat-card>
