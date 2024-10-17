@@ -10,10 +10,24 @@
  * limitations governing your use of the file.
  */
 
-export interface ChainModel {
+import {Observable} from 'rxjs';
+
+export type ChainModel = {
   id: string;
   name: string;
 }
-export interface ChainOperationalModel {
+
+export type DialogForm = {
   name: string;
 }
+
+export type DialogData<T> = {
+  currentValue?: string;
+  name: string;
+  type: 'create' | 'edit';
+  action: (form: DialogForm) => Observable<any>;
+  existValues: T[] | Observable<T[]>;
+  columnUniqueKey?: keyof T;
+}
+
+export type ChainOperationalModel = Omit<ChainModel, 'id'>

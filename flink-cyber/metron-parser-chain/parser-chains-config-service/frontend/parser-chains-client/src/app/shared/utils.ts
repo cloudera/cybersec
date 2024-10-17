@@ -1,3 +1,7 @@
+import {Observable, of} from 'rxjs';
+import {catchError, switchMap, take} from 'rxjs/operators';
+import {AsyncValidatorFn, FormArray, FormControl, FormGroup, ValidationErrors, ValidatorFn} from '@angular/forms';
+
 /**
  * Convert a string or ArrayBuffer to a string.
  * If the input is null, return an empty string.
@@ -92,3 +96,70 @@ export function findValues<T>(obj: object, searchKey: string): T[] {
     return values;
   }, []);
 }
+
+export function sortBy<T>(arr: T[], field: keyof T, order: SortOrder = 'asc'): T[] {
+  return arr.slice().sort((a: T, b: T) => {
+    const valueA = a[field];
+    const valueB = b[field];
+
+    if (typeof valueA === 'string' || typeof valueA === 'number') {
+      const comparisonValue = valueA > valueB ? 1 : -1;
+      const sortMultiplier = order === 'asc' ? 1 : -1;
+      return comparisonValue * sortMultiplier;
+    }
+    throw new Error(`Unsupported data type for field '${String(field)}'.`);
+  });
+}
+
+export const uniqueAsyncValidator: UniqueAsyncValidatorType = (existValues, column?) => (control) => existValues.pipe(
+  switchMap(values => unique(control.value, column)(values) ? of({uniqueValue: true}) : of(null)),
+  catchError(() => of({httpError: true})),
+  take(1)
+);
+
+export const uniqueValidator: UniqueValidatorType = (existValues, column?) => (control): ValidationErrors | null => {
+  for (const existValue of existValues) {
+    if (!!column && existValue[column] === control.value) {
+      return {uniqueValue: true};
+    } else if (existValue === control.value) {
+      return {uniqueValue: true};
+    }
+  }
+  return null
+}
+
+export function isExist<T>(items: T[], value: string, column: keyof T) {
+  return items.some(item => {
+    const itemValue = column ? String(item[column]).toLowerCase() : String(item).toLowerCase();
+    return itemValue === value.toLowerCase();
+  });
+}
+
+
+export const changeStateFn = <T>(value: any, key?: keyof T, newValue?: any) =>
+  (state: T[]): T[] => state.map(mapState(key, value, newValue)).filter(item => item !== null);
+
+function mapState<T>(key: keyof T, value: any, newValue?: any) {
+  return (item: T) => {
+    const condition = key ? item[key] === value : item === value;
+    if (condition) {
+      return newValue ? newValue : null;
+    }
+    return item;
+  };
+}
+
+export const unique: UniqueFunction = (value, column) => (items) => isExist(items, value, column);
+
+export type UniqueAsyncValidatorType = <T>(existingValues: Observable<T[]>, column?: keyof T) => AsyncValidatorFn;
+export type UniqueValidatorType = <T>(existingValues: T[], column?: keyof T) => ValidatorFn;
+export type UniqueFunction = <T>(value: string, column?: keyof T) => (items: T[]) => boolean;
+export type SortOrder = 'asc' | 'desc';
+
+export type TypedFormControls<T extends Record<string, any>> = {
+  [K in keyof T]-?: T[K] extends (infer R)[]
+    ? FormArray<R extends Record<any, any> ? FormGroup<TypedFormControls<R>> : FormControl<R>>
+    : T[K] extends Record<any, any>
+      ? FormGroup<TypedFormControls<T[K]>>
+      : FormControl<T[K]>;
+};

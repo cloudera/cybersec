@@ -24,7 +24,7 @@ describe('chain-page: reducers', () => {
         4533: {
           id: '4533',
           name: 'test chain a',
-          parsers: ['123', '456']
+          parsers: ['123', '456'],
         }
       },
       parsers: {
@@ -48,7 +48,8 @@ describe('chain-page: reducers', () => {
       error: '',
       parserToBeInvestigated: '',
       failedParser: '',
-      indexMappings: {path: '', result: {}}
+      indexMappings: {path: '', result: {}},
+      selectedPipeline: "test-pipeline"
     };
     expect(
       fromReducers.reducer(state, new fromActions.RemoveParserAction({
@@ -78,7 +79,8 @@ describe('chain-page: reducers', () => {
       dirtyChains: ['4533'],
       path: [],
       indexMappings: {path: '', result: {}},
-      error: ''
+      error: '',
+      selectedPipeline: "test-pipeline"
     });
   });
 
@@ -100,6 +102,7 @@ describe('chain-page: reducers', () => {
       parserToBeInvestigated: '',
       indexMappings: {path: '', result: {}},
       failedParser: '',
+      selectedPipeline: "test-pipeline"
     };
     const newState = fromReducers.reducer(state, new fromAddParserActions.AddParserAction({
       chainId: '456',
@@ -130,7 +133,8 @@ describe('chain-page: reducers', () => {
       dirtyChains: [],
       path: [],
       indexMappings: {path: '', result: {}},
-      error: ''
+      error: '',
+      selectedPipeline: "test-pipeline"
     };
     const chains = {};
     const parsers = {};
@@ -164,7 +168,8 @@ describe('chain-page: reducers', () => {
       dirtyChains: [],
       path: [],
       indexMappings: {path: '', result: {}},
-      error: ''
+      error: '',
+      selectedPipeline: "test-pipeline"
     };
     const newState = fromReducers.reducer(state, new fromActions.UpdateParserAction({
       chainId: '123',
@@ -201,6 +206,7 @@ describe('chain-page: reducers', () => {
       parserToBeInvestigated: '',
       indexMappings: {path: '', result: {}},
       failedParser: '',
+      selectedPipeline: "test-pipeline"
     };
     const newState = fromReducers.reducer(state, new fromActions.UpdateChainAction({
       chain: {
@@ -229,6 +235,7 @@ describe('chain-page: reducers', () => {
       parserToBeInvestigated: '',
       indexMappings: {path: '', result: {}},
       failedParser: '',
+      selectedPipeline: "test-pipeline",
     };
     const newState = fromReducers.reducer(state, new fromActions.AddChainAction({
       chain: {
@@ -258,7 +265,8 @@ describe('chain-page: reducers', () => {
           456: desiredParser
         },
         routes: null,
-        error: ''
+        error: '',
+        selectedPipeline: "test-pipeline"
       }
     };
 
@@ -330,6 +338,7 @@ describe('chain-page: reducers', () => {
       parserToBeInvestigated: '1234',
       indexMappings: {path: '', result: {}},
       failedParser: '',
+      selectedPipeline: "test-pipeline"
     };
 
     const investigatedParserReducer = fromReducers.reducer(state, new fromActions.InvestigateParserAction({id: '1234'}));
@@ -442,6 +451,7 @@ describe('chain-page: reducers', () => {
       parserToBeInvestigated: '',
       indexMappings: {path: '', result: {}},
       failedParser: '',
+      selectedPipeline: "test-pipeline"
     };
 
     const newState = fromReducers.reducer(state, new fromActions.RemoveFromPathAction({
@@ -462,6 +472,7 @@ describe('chain-page: reducers', () => {
       parserToBeInvestigated: '',
       indexMappings: {path: '', result: {}},
       failedParser: '',
+      selectedPipeline: "test-pipeline"
     };
 
     const newState = fromReducers.reducer(state, new fromActions.AddToPathAction({
@@ -505,6 +516,7 @@ describe('chain-page: reducers', () => {
       indexMappings: {path: '', result: {}},
       parserToBeInvestigated: '',
       failedParser: '',
+      selectedPipeline: "test-pipeline"
     };
 
     const newState = fromReducers.reducer(state, new fromActions.RemoveRouteAction({
@@ -545,6 +557,7 @@ describe('chain-page: reducers', () => {
       indexMappings: {path: '', result: {}},
       parserToBeInvestigated: '',
       failedParser: '',
+      selectedPipeline: "test-pipeline"
     };
 
     const newState = fromReducers.reducer(state, new fromActions.AddRouteAction({
@@ -607,6 +620,7 @@ describe('chain-page: reducers', () => {
       indexMappings: {path: '', result: {}},
       parserToBeInvestigated: '',
       failedParser: '',
+      selectedPipeline: "test-pipeline"
     };
 
     const newState = fromReducers.reducer(state, new fromActions.UpdateRouteAction({
@@ -642,6 +656,7 @@ describe('chain-page: reducers', () => {
       parserToBeInvestigated: '',
       indexMappings: {path: '', result: {}},
       failedParser: '',
+      selectedPipeline: "test-pipeline"
     };
 
     const newState = fromReducers.reducer(state, new fromActions.GetFormConfigSuccessAction({
@@ -673,6 +688,7 @@ describe('chain-page: reducers', () => {
       indexMappings: {path: '', result: {}},
       parserToBeInvestigated: '',
       failedParser: '',
+      selectedPipeline: "test-pipeline"
     };
 
     const newState = fromReducers.reducer(state, new fromActions.GetFormConfigsSuccessAction({
@@ -705,6 +721,7 @@ describe('chain-page: reducers', () => {
       parserToBeInvestigated: '',
       indexMappings: {path: '', result: {}},
       failedParser: '',
+      selectedPipeline: "test-pipeline"
     };
     const newState = fromReducers.reducer(state, new fromActions.SaveParserConfigAction({chainId: '123'}));
     expect(newState.dirtyChains).toEqual([]);
@@ -748,6 +765,7 @@ describe('chain-page: reducers', () => {
       indexMappings: {path: '', result: {}},
       parserToBeInvestigated: '',
       failedParser: '',
+      selectedPipeline: "test-pipeline"
     };
     const newState = fromReducers.reducer(state,
       new fromActions.SetRouteAsDefaultAction({

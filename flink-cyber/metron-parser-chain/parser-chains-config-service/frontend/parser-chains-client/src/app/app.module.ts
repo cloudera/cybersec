@@ -46,6 +46,7 @@ import {DragDropModule} from "@angular/cdk/drag-drop";
 import {MonacoEditorModule} from "ngx-monaco-editor-v2";
 import {ClusterListPageModule} from "./cluster/cluster-list-page/cluster-list-page.module";
 import {ClusterPageModule} from "./cluster/cluster-page/cluster-page.module";
+import {PipelinesModule} from 'src/app/cluster/pipelines/pipelines.module';
 
 registerLocaleData(en);
 
@@ -75,6 +76,7 @@ export const metaReducers: MetaReducer<unknown>[] = !environment.production
     ChainListPageModule,
     ChainPageModule,
     ClusterListPageModule,
+    PipelinesModule,
     ClusterPageModule,
     ChainAddParserPageModule,
     MonacoEditorModule.forRoot(),
