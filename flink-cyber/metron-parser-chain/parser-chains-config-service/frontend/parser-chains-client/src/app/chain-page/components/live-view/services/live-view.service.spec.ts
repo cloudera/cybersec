@@ -10,13 +10,13 @@
  * limitations governing your use of the file.
  */
 
-import { HttpClient } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {TestBed} from '@angular/core/testing';
 
-import { SampleDataType } from '../models/sample-data.model';
+import {SampleDataType} from '../models/sample-data.model';
 
-import { LiveViewService } from './live-view.service';
+import {LiveViewService} from './live-view.service';
 
 describe('LiveViewService', () => {
   let service: LiveViewService;
@@ -40,16 +40,17 @@ describe('LiveViewService', () => {
     spyOn(http, 'post');
 
     service.execute(
-      { type: SampleDataType.MANUAL, source: 'test sample input' },
-      { id: '456', name: 'gdf', parsers: [] }
+      {type: SampleDataType.MANUAL, source: 'test sample input'},
+      {id: '456', name: 'gdf', parsers: []}
     );
 
     expect(http.post).toHaveBeenCalledWith(
       LiveViewService.BASE_URL,
       {
-        sampleData: { type: SampleDataType.MANUAL, source: ['test sample input'] },
-        chainConfig: { id: '456', name: 'gdf', parsers: [] }
-      }
+        sampleData: {type: SampleDataType.MANUAL, source: ['test sample input']},
+        chainConfig: {id: '456', name: 'gdf', parsers: []}
+      },
+      {params: new HttpParams()}
     );
   });
 });

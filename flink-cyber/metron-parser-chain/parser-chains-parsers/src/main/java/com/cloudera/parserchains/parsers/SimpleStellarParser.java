@@ -4,15 +4,8 @@ import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
+import com.cloudera.parserchains.core.catalog.Parameter;
 import com.cloudera.parserchains.core.utils.StringUtils;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.flink.core.fs.FSDataInputStream;
@@ -25,15 +18,24 @@ import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.MapVariableResolver;
 import org.json.simple.JSONObject;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @MessageParser(
         name = "Simple Stellar parser",
         description = "Metron compatibility parser.")
 @Slf4j
 public class SimpleStellarParser implements Parser {
 
+    private final StellarProcessor processor;
+    private final Context stellarContext;
     private ConfigHandler configHandler;
-    private StellarProcessor processor;
-    private Context stellarContext;
 
 
     public SimpleStellarParser() {
@@ -47,7 +49,7 @@ public class SimpleStellarParser implements Parser {
             label = "Stellar File Path",
             description = "Path to stellar file",
             required = true)
-    public SimpleStellarParser stellarPath(String pathToStellar) throws IOException {
+    public SimpleStellarParser stellarPath(@Parameter(key = "stellarPath", isPath = true) String pathToStellar) throws IOException {
         FileSystem fileSystem = new Path(pathToStellar).getFileSystem();
         loadExpressions(pathToStellar, fileSystem);
         return this;

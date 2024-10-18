@@ -1,5 +1,6 @@
 package com.cloudera.cyber.indexing;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class MappingColumnDto {
     @JsonProperty("is_map")
     private Boolean isMap;
 
+    @JsonIgnore
     public String getKafkaName() {
         final String properName = kafkaName == null ? name : kafkaName;
         if (getIsMap()) {
@@ -38,6 +40,7 @@ public class MappingColumnDto {
         }
     }
 
+    @JsonIgnore
     public String getRawKafkaName(){
         return kafkaName;
     }

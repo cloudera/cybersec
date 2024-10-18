@@ -14,9 +14,13 @@ import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.types.Row;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-public class AvroSchemaUtil {
+public final class AvroSchemaUtil {
 
     //method that converts from flink Schema to avro Schema
     public static Schema convertToAvro(List<TableColumnDto> tableColumnList) {
