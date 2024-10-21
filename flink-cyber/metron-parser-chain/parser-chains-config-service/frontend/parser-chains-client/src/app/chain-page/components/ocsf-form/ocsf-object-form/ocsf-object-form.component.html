@@ -1,0 +1,43 @@
+<h4>{{ currentObject.description }}</h4>
+<div [formGroup]="childForm">
+  <ng-container *ngFor="let attribute of currentObject.attributes | keyvalue">
+    <nz-form-item *ngIf="!attribute.value.object_type && (!requiredOnly || attribute.value.requirement == 'required')">
+      <nz-form-label
+        [nzSm]="8"
+        [nzXs]="24"
+        [nzTooltipTitle]="attribute.value.description"
+        [nzFor]="currentObject.name + '.' + attribute.key"
+        [nzRequired]="attribute.value.requirement == 'required'">
+        {{ attribute.key }}
+      </nz-form-label>
+      <nz-form-control
+        [nzSm]="14"
+        [nzXs]="24"
+        nz-tooltip
+        [nzTooltipTitle]="schema.types[attribute.value.type].description">
+        <input
+          nz-input
+          [id]="currentObject.name + attribute.key"
+          [formControlName]="attribute.key"
+          [placeholder]="attribute.value.caption + ', ' + attribute.value.type_name">
+      </nz-form-control>
+    </nz-form-item>
+  </ng-container>
+  <ng-container *ngFor="let attribute of currentObject.attributes | keyvalue">
+    <nz-collapse *ngIf="attribute.value.object_type && (!requiredOnly || attribute.value.requirement == 'required')">
+      <nz-collapse-panel [nzHeader]="attribute.value.caption + ', ' + attribute.value.requirement"
+                         (nzActiveChange)="onCollapseChange(attribute, attribute.key)">
+        <app-ocsf-object-form
+          *ngIf="attribute.value.requirement == 'required' || openedChildObjects[attribute.key]"
+          [schema]="schema"
+          [currentObject]="schema.objects[attribute.value.object_type]"
+          [liveResults]="liveResults"
+          [requiredOnly]="requiredOnly"
+          [formRequired]="formRequired && attribute.value.requirement == 'required'"
+          [parentFormGroup]="childForm"
+          [importedData]="importedData == null ? null : importedData.get(attribute.key)"
+        ></app-ocsf-object-form>
+      </nz-collapse-panel>
+    </nz-collapse>
+  </ng-container>
+</div>

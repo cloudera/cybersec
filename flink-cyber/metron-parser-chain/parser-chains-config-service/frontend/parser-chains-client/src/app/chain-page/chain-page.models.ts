@@ -59,3 +59,17 @@ export interface ChainDetailsModel {
   name: string;
   parsers: ParserModel[];
 }
+
+export interface IndexTableMapping {
+  table_name: string;
+  ignore_fields?: string[]
+  column_mapping: IndexingColumnMapping[]
+}
+
+export interface IndexingColumnMapping {
+  name: string;
+  kafka_name?: string;
+  path?: string;
+  transformation?: string;
+  is_map?: boolean;
+}

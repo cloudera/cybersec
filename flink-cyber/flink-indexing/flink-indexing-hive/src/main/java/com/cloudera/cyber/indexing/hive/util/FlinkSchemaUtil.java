@@ -1,17 +1,18 @@
 package com.cloudera.cyber.indexing.hive.util;
 
 import com.cloudera.cyber.indexing.TableColumnDto;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.catalog.Column;
 import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.table.types.DataType;
 
-public class FlinkSchemaUtil {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+public final class FlinkSchemaUtil {
 
     public static Schema buildSchema(ResolvedSchema resolvedSchema) {
         return Schema.newBuilder()
