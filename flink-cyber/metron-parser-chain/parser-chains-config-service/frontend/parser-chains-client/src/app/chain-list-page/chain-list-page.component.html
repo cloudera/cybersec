@@ -9,137 +9,110 @@
   ~ either express or implied. Refer to the License for the specific permissions and
   ~ limitations governing your use of the file.
   -->
+<mat-card *ngIf="vm$ | async as vm">
+  <mat-card-header>
+    <mat-card-title-group class="flex-row-jsb-ab-w">
+      <mat-card-title>Parser Chains</mat-card-title>
+      <div style="display: flex; flex: 1 0 50%; justify-content: flex-end">
+        <button
+          mat-fab
+          color="primary"
+          class="flex-row-jc-ac add-new-chain-button"
+          data-qe-id="add-chain-btn"
+          matTooltip="Add New Chain"
+          matTooltipPosition="left"
+          (click)="openCreateDialog(vm.currentPipeline)"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
 
-<ng-template #AddButton>
-  <button
-    class="add-new-chain-button"
-    nz-tooltip="Add New Chain ToolTip"
-    nzTooltipTitle="Add New Chain"
-    nzTooltipPlacement="left"
-    nz-button
-    data-qe-id="add-chain-btn"
-    nzType="primary"
-    (click)="showAddChainModal()"
-  >
-    <i nz-icon nzType="plus" nzTheme="outline"></i>
-  </button>
-</ng-template>
-<nz-modal
-  [nzVisible]="isChainCreateModalVisible$ | async"
-  nzTitle="Add Chain Name"
-  (nzOnCancel)="handleCancelChainModal()"
-  (nzOnOk)="pushChain()"
-  [nzOkDisabled]="!newChainForm.valid"
-  [nzOkLoading]="isOkLoading$ | async"
->
-  <form nz-form *nzModalContent [formGroup]="newChainForm" (ngSubmit)='pushChain()' [nzLayout]="'vertical'">
-    <nz-form-item>
-      <nz-form-label>Chain name:</nz-form-label>
-      <nz-form-control nzErrorTip="Chain Name is Required with at least 3 characters" nzSpan="14">
-        <input nz-input data-qe-id="chain-name" formControlName="chainName" type="text" id="chainName"
-               placeholder="Parser Chain Name">
-      </nz-form-control>
-    </nz-form-item>
-  </form>
-</nz-modal>
-<nz-modal
-  [nzVisible]="isPipelineRenameModalVisible$ | async"
-  nzTitle="Rename Pipeline"
-  (nzOnCancel)="handlePipelineRenameModalCancel()"
-  (nzOnOk)="renamePipeline()"
-  [nzOkDisabled]="!newPipelineName.valid"
-  [nzOkLoading]="isOkLoading$ | async"
->
-  <form nz-form *nzModalContent [formGroup]="renamePipelineForm" (ngSubmit)='renamePipeline()' [nzLayout]="'vertical'">
-    <nz-form-item>
-      <nz-form-label>Pipeline name:</nz-form-label>
-      <nz-form-control nzErrorTip="Pipeline Name is Required with at least 3 characters" nzSpan="14">
-        <input nz-input data-qe-id="pipeline-name" formControlName="pipelineName" type="text" id="pipelineName"
-               placeholder="{{selectedPipeline$ | async}}">
-      </nz-form-control>
-    </nz-form-item>
-  </form>
-</nz-modal>
-<nz-modal
-  *ngIf="deleteChainItem$ | async as deleteChainItem"
-  [nzVisible]="isChainDeleteModalVisible$ | async"
-  [nzTitle]="modalTitle"
-  [nzContent]="modalContent"
-  [nzFooter]="modalFooter"
-  (nzOnCancel)="handleCancelDeleteModal()">
-  <ng-template #modalTitle>Delete Chain Name</ng-template>
-  <ng-template #modalContent>
-    <p>Are you sure you want to delete the chain <b>{{deleteChainItem.name}}</b>?</p>
-  </ng-template>
-  <ng-template #modalFooter>
-    <button nz-button nzType="default" (click)="handleCancelDeleteModal()">Cancel</button>
-    <button nz-button nzType="primary" (click)="deleteChain(deleteChainItem.id, deleteChainItem.name)" [nzLoading]="isOkLoading$ | async">Delete</button>
-  </ng-template>
-</nz-modal>
+      <div style="display: flex; flex-direction: row; justify-content: center; align-items: center">
+        <mat-form-field appearance="fill">
+          <mat-label>Current pipeline</mat-label>
+          <mat-select (selectionChange)="onPipelineSelected($event.value)" disableOptionCentering
+                      panelClass="panel-class">
+            <mat-option></mat-option>
+            <mat-option *ngFor="let pipeline of vm.pipelines" [value]="pipeline">
+              {{ pipeline }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button
+          mat-fab
+          color="primary"
+          class="flex-row-jc-ac pipeline-button"
+          data-qe-id="add-pipeline-btn"
+          matTooltip="Add New Chain"
+          matTooltipPosition="below"
+          (click)="addPipeline(vm.pipelines)"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+        <button
+          *ngIf="vm.currentPipeline"
+          mat-fab
+          color="primary"
+          class="flex-row-jc-ac pipeline-button"
+          data-qe-id="edit-pipeline-btn"
+          matTooltip="Edit pipeline"
+          matTooltipPosition="below"
+          (click)="updatePipeline(vm.pipelines,vm.currentPipeline)"
+        >
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button
+          *ngIf="vm.currentPipeline"
+          mat-fab
+          color="accent"
+          class="flex-row-jc-ac pipeline-button"
+          data-qe-id="delete-pipeline-btn"
+          matTooltip="Delete pipeline"
+          matTooltipPosition="below"
+          (click)="deletePipeline(vm.currentPipeline)"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </mat-card-title-group>
+  </mat-card-header>
 
-<div class="pipeline-select">
-  <span>Select pipeline:</span>
-  <nz-select
-          nzShowSearch
-          nzAllowClear
-          [nzDropdownRender]="newPipelineRenderTemplate"
-          nzPlaceHolder="Select a pipeline"
-          class="pipeline-select-dropdown pipeline-element"
-          [nzDisabled]="(pipelineList$ | async) && (pipelineList$ | async).length < 1"
-          [ngModel]="selectedPipeline$ | async"
-          (ngModelChange)="pipelineChanged($event)">
-    <nz-option *ngFor="let item of (pipelineList$ | async)" [nzLabel]="item" [nzValue]="item"></nz-option>
-  </nz-select>
-  <ng-template #newPipelineRenderTemplate>
-    <nz-divider class="add-pipeline-divider"></nz-divider>
-    <div class="add-pipeline-container">
-      <input type="text" nz-input #inputElement />
-      <a class="add-pipeline-button" (click)="createPipeline(inputElement)">
-        <span nz-icon nzType="plus"></span>
-        Add pipeline
-      </a>
-    </div>
-  </ng-template>
-  <button *ngIf="selectedPipeline$ | async"
-          class="pipeline-element"
-          nz-tooltip="Delete selected pipeline"
-          nz-button
-          nzType="default"
-          (click)="deletePipeline()">Delete</button>
-  <button *ngIf="selectedPipeline$ | async"
-          class="pipeline-element"
-          nz-tooltip="Rename selected pipeline"
-          nz-button
-          nzType="default"
-          (click)="showPipelineRenameModal()">Rename</button>
-</div>
+  <mat-card-content>
+    <table mat-table [dataSource]="vm.currentChains" class="mat-elevation-z8">
+      <caption>Chains list</caption>
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef>Name</th>
+        <td class="flex-row-jfs-ac" mat-cell *matCellDef="let chain">{{ chain.name }}</td>
+      </ng-container>
 
-<nz-card nzTitle="Parser Chains" [nzExtra]="AddButton">
-  <nz-table #basicTable [nzData]="$any(chainDataSorted$ | async)" [nzShowPagination]="false">
-    <thead>
-    <tr>
-      <th nzShowSort nzSortKey="name">Name</th>
-      <th>Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let data of basicTable.data">
-      <td>{{ data.name }}</td>
-      <td>
-        <a routerLink="{{ 'chains/' + data.id }}" class="chain-open-btn"><i nz-icon nzType="right-square"
-                                                                            nzTheme="fill"></i>Open</a>
-        <nz-divider nzType="vertical"></nz-divider>
-        <span nz-tooltip="Remove">
-            <a
-              class="chain-delete-btn"
-              title="Are you Sure to Delete?"
-              (click)="showDeleteModal(data.id)"
-            >
-              <i nz-icon nzType="delete" nzTheme="fill"></i> <span>Delete</span>
+      <!-- Action Column -->
+      <ng-container matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef>Action</th>
+        <td mat-cell *matCellDef="let chain">
+          <a class="flex-row-jc-ac chain-open-btn"
+             [routerLink]="['chains', chain.id]"
+             [queryParams]="{pipeline: vm.currentPipeline}"
+             matTooltip="Open chain"
+          >
+                <span class="flex-row-jc-ac chain-open-btn-square">
+                  <mat-icon>chevron_right</mat-icon>
+                </span> Open
           </a>
-        </span>
-      </td>
-    </tr>
-    </tbody>
-  </nz-table>
-</nz-card>
+          <span class="flex-row-jc-ac mat-divider-wrapper">
+            <mat-divider vertical="true"></mat-divider>
+          </span>
+          <a matTooltip="Remove chain" class="flex-row-jc-ac chain-delete-btn"
+             (click)="openChainDeleteDialog(chain,vm.currentPipeline)">
+            <mat-icon>delete_forever</mat-icon>
+            Delete
+          </a>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['name', 'action']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['name', 'action'];"></tr>
+    </table>
+  </mat-card-content>
+
+</mat-card>

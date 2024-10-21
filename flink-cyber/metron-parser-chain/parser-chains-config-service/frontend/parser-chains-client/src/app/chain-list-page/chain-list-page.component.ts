@@ -10,165 +10,186 @@
  * limitations governing your use of the file.
  */
 
-import {Component, OnInit} from '@angular/core';
-import {UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
-import {select, Store} from '@ngrx/store';
-import {BehaviorSubject, combineLatest, Observable, of} from 'rxjs';
-import {switchMap, take} from 'rxjs/operators';
-
-import * as fromActions from './chain-list-page.actions';
-import {LoadPipelinesAction} from './chain-list-page.actions';
+import {Component, inject} from '@angular/core';
+import {BehaviorSubject, combineLatest, merge, Observable, of, Subject} from 'rxjs';
+import {catchError, filter, map, scan, shareReplay, startWith, switchMap} from 'rxjs/operators';
+import {ChainModel, ChainOperationalModel, DialogData, DialogForm} from './chain.model';
+import {PipelineService} from '../services/pipeline.service';
+import {ChainListPageService} from '../services/chain-list-page.service';
+import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
+import {ChainDialogComponent} from 'src/app/chain-list-page/component/chain-dialog.component';
 import {
-  ChainListPageState,
-  getChains,
-  getCreateModalVisible,
-  getDeleteChain,
-  getDeleteModalVisible,
-  getLoading,
-  getPipelineRenameModalVisible,
-  getPipelines,
-  getSelectedPipeline,
-} from './chain-list-page.reducers';
-import {ChainModel, ChainOperationalModel} from './chain.model';
-import {NzMessageService} from "ng-zorro-antd/message";
+  ConfirmDeleteDialogComponent,
+  DeleteDialogData
+} from 'src/app/shared/components/confirm-delete-dialog/confirm-delete-dialog.component';
+import {changeStateFn} from 'src/app/shared/utils';
 
 @Component({
   selector: 'app-chain-list-page',
   templateUrl: './chain-list-page.component.html',
-  styleUrls: ['./chain-list-page.component.scss']
+  styleUrls: ['./chain-list-page.component.scss'],
 })
-export class ChainListPageComponent implements OnInit {
-  isChainCreateModalVisible$: Observable<boolean>;
-  isPipelineRenameModalVisible$: Observable<boolean>;
-  isOkLoading$: Observable<boolean>;
-  chains$: Observable<ChainModel[]>;
-  isChainDeleteModalVisible$: Observable<boolean>;
-  deleteChainItem$: Observable<ChainModel>;
-  pipelineList$: Observable<string[]>;
-  totalRecords = 200;
-  chainDataSorted$: Observable<ChainModel[]>;
-  sortDescription$: BehaviorSubject<{ key: string, value: string }> = new BehaviorSubject({key: 'name', value: ''});
-  newChainForm: UntypedFormGroup;
-  renamePipelineForm: UntypedFormGroup;
-  selectedPipeline$: Observable<string>;
+export class ChainListPageComponent {
+  //Injects and services
+  private _pipelineService = inject(PipelineService);
+  private _chainService = inject(ChainListPageService);
+  private _dialog = inject(MatDialog);
 
+  // Pipelines
+  private _currentPipelineSubject = new BehaviorSubject<string>('');
+  private _currentPipeline$ = this._currentPipelineSubject.asObservable();
+  private _pipelinesSubject = new Subject<string[]>();
 
-  constructor(
-    private _store: Store<ChainListPageState>,
-    private _fb: UntypedFormBuilder,
-    private _messageService: NzMessageService,
-  ) {
-    _store.dispatch(new LoadPipelinesAction());
-    this.chains$ = _store.pipe(select(getChains));
-    this.isOkLoading$ = _store.pipe(select(getLoading));
-    this.isChainCreateModalVisible$ = _store.pipe(select(getCreateModalVisible));
-    this.isChainDeleteModalVisible$ = _store.pipe(select(getDeleteModalVisible));
-    this.isPipelineRenameModalVisible$ = _store.pipe(select(getPipelineRenameModalVisible));
-    this.deleteChainItem$ = this._store.pipe(select(getDeleteChain));
-    this.pipelineList$ = this._store.pipe(select(getPipelines));
-    this.selectedPipeline$ = this._store.pipe(select(getSelectedPipeline));
+  // Chains Event triggers
+  private _addChainSubject = new BehaviorSubject<ChainModel>(null);
+  private _deleteChainSubject = new BehaviorSubject<string>(null);
 
-    this.chainDataSorted$ = combineLatest([
-      this.chains$,
-      this.sortDescription$
+  // Chains Event
+  private _addChainEvent$ = this._addChainSubject.pipe(
+    filter(value => value !== null), // Filter out initial null emission
+    map(chain => (state: ChainModel[]) => [...state, chain]));
+  private _deleteChainEvent$ = this._deleteChainSubject.pipe(
+    filter(value => value !== null), // Filter out initial null emission
+    map(id => changeStateFn<ChainModel>(id, 'id')));
+
+  // fetched Chains of currentPipeline
+  private _currentChains$ = this._currentPipeline$.pipe(
+    switchMap(pipeline => this._chainService.getChains(pipeline)),
+    switchMap(chains => {
+      return merge(
+        this._addChainEvent$,
+        this._deleteChainEvent$
+      ).pipe(
+        startWith(lab => lab),
+        scan((state, reducer) => reducer(state), chains),
+      )
+    }),
+    shareReplay(1)
+  );
+  pipelines = merge(this._pipelinesSubject,
+    this._pipelineService.getPipelines()
+      .pipe(
+      catchError(_=> {
+        return of([]);
+      }))
+  ).pipe(
+    shareReplay(1)
+  );
+
+  // Combined data
+  get vm$() {
+    return combineLatest([
+      this._currentPipeline$,
+      this.pipelines,
+      this._currentChains$
     ]).pipe(
-      switchMap(([chains, sortDescription]) => this.sortTable(chains, sortDescription))
+      map(([currentPipeline, pipelines, currentChains]) => ({currentPipeline, pipelines, currentChains}))
     );
   }
 
-  get chainName() {
-    return this.newChainForm.get('chainName') as UntypedFormControl;
-  }
-
-  get newPipelineName() {
-    return this.renamePipelineForm.get('pipelineName') as UntypedFormControl;
-  }
-
-  pipelineChanged($event: string) {
-    this._store.dispatch(new fromActions.PipelineChangedAction($event))
-  }
-
-  showAddChainModal(): void {
-    this._store.dispatch(new fromActions.ShowCreateModalAction());
-  }
-
-  showDeleteModal(id): void {
-    this._store.dispatch(new fromActions.SelectDeleteChainAction(id));
-  }
-
-  pushChain(): void {
-    const chainName = this.chainName.value;
-    this.chains$.pipe(take(1)).subscribe(chainArr => {
-      const duplicate = chainArr.some(value => {
-        return value.name === chainName;
-      });
-      if (!duplicate) {
-        const chainData: ChainOperationalModel = {name: chainName};
-        this.newChainForm.reset();
-        this._store.dispatch(new fromActions.CreateChainAction(chainData));
-      } else {
-        this._messageService.create('Error', "Duplicate chain names aren't allowed!");
-      }
-    })
-  }
-
-  deleteChain(chainId: string, chainName): void {
-    this._store.dispatch(new fromActions.DeleteChainAction(chainId, chainName));
-  }
-
-  handleCancelChainModal(): void {
-    this._store.dispatch(new fromActions.HideCreateModalAction());
-  }
-
-  handleCancelDeleteModal(): void {
-    this._store.dispatch(new fromActions.HideDeleteModalAction());
-  }
-
-  sortTable(data: ChainModel[], sortDescription: any): Observable<ChainModel[]> {
-    const sortValue = sortDescription.value;
-    const newData = (data || []).slice().sort((a, b) => {
-      const first = a.name.toLowerCase();
-      const second = b.name.toLowerCase();
-      if (sortValue === 'ascend') {
-        return (first < second) ? -1 : 1;
-      } else if (sortValue === 'descend') {
-        return (first < second) ? 1 : -1;
-      } else {
-        return 0;
+  openCreateDialog(currentPipeline: string) {
+    const createChainPipeline = (form: DialogForm): Observable<ChainModel> => this._chainService.createChain(form as ChainOperationalModel, currentPipeline);
+    const config: MatDialogConfig<DialogData<ChainModel>> = {
+      ...dialogSize,
+      data: {
+        type: 'create',
+        name: 'Chain',
+        currentValue: '',
+        action: createChainPipeline.bind(this._chainService),
+        existValues: this._currentChains$,
+        columnUniqueKey: 'name'
+      },
+    };
+    this._dialog.open(ChainDialogComponent, config).afterClosed().subscribe((result: {
+      response: ChainModel,
+      form: DialogForm
+    }) => {
+      if (result) {
+        this._addChainSubject.next(result.response);
       }
     });
-    return of(newData);
   }
 
-  ngOnInit() {
-    this.newChainForm = this._fb.group({
-      chainName: new UntypedFormControl('', [Validators.required, Validators.minLength(3)]),
+  openChainDeleteDialog(chainDelete: ChainModel, currentPipeline: string) {
+    const deleteChain = () => this._chainService.deleteChain(chainDelete.id, currentPipeline);
+    const config: MatDialogConfig<DeleteDialogData> = {
+      ...dialogSize,
+      data: {
+        action: deleteChain.bind(this._chainService)
+      },
+    };
+    this._dialog.open(ConfirmDeleteDialogComponent, config).afterClosed().subscribe(_ => {
+      this._deleteChainSubject.next(chainDelete.id);
     });
-    this.renamePipelineForm = this._fb.group({
-      pipelineName: new UntypedFormControl('', [Validators.required, Validators.minLength(3)]),
+  }
+
+  addPipeline(pipelines: string[]) {
+    const addPipeline = (form: DialogForm) => this._pipelineService.createPipeline(form.name);
+    const config: MatDialogConfig<DialogData<string>> = {
+      ...dialogSize,
+      data: {
+        type: 'create',
+        name: 'Pipeline',
+        action: addPipeline.bind(this._pipelineService),
+        existValues: pipelines
+      },
+    };
+    this._dialog.open(ChainDialogComponent, config).afterClosed().subscribe((result: {
+      response: string[],
+      form: DialogForm
+    }) => {
+      if (result) {
+        this._pipelinesSubject.next(result.response);
+      }
     });
   }
 
-  showPipelineRenameModal() {
-    this._store.dispatch(new fromActions.ShowRenameSelectedPipelineModalAction());
+  updatePipeline(pipelines: string[], currentPipeline: string) {
+    const renamePipeline = (form: DialogForm) => this._pipelineService.renamePipeline(form.name, currentPipeline);
+    const config: MatDialogConfig<DialogData<string>> = {
+      ...dialogSize,
+      data: {
+        type: 'edit',
+        name: 'Pipeline',
+        currentValue: currentPipeline,
+        action: renamePipeline.bind(this._pipelineService),
+        existValues: pipelines
+      },
+    };
+    this._dialog.open(ChainDialogComponent, config).afterClosed().subscribe((result: {
+      response: string[],
+      form: DialogForm
+    }) => {
+      if (result) {
+        this._pipelinesSubject.next(result.response);
+        this._currentPipelineSubject.next(result.form.name);
+      }
+    });
+
   }
 
-  handlePipelineRenameModalCancel() {
-    this._store.dispatch(new fromActions.HideRenamePipelineModalAction());
+  deletePipeline(currentPipeline: string) {
+    const deletePipeline = () => this._pipelineService.deletePipeline(currentPipeline);
+    const config: MatDialogConfig<DeleteDialogData> = {
+      ...dialogSize,
+      data: {
+        action: deletePipeline.bind(this._pipelineService)
+      },
+    };
+    this._dialog.open(ConfirmDeleteDialogComponent, config).afterClosed().subscribe((result) => {
+      this._pipelinesSubject.next(result);
+      this._currentPipelineSubject.next('');
+
+    });
   }
 
-  createPipeline(inputElement: HTMLInputElement) {
-    const pipelineName = inputElement.value;
-    this._store.dispatch(new fromActions.CreatePipelineAction(pipelineName));
-  }
-
-  deletePipeline() {
-    this._store.dispatch(new fromActions.DeleteSelectedPipelineAction());
-  }
-
-  renamePipeline() {
-    const newPipelineName = this.newPipelineName.value;
-    this.renamePipelineForm.reset();
-    this._store.dispatch(new fromActions.RenameSelectedPipelineAction(newPipelineName));
+  onPipelineSelected(value: string) {
+    this._currentPipelineSubject.next(value);
   }
 }
+
+const dialogSize = {
+  width: '30vw',
+  minWidth: '350px',
+  maxWidth: '80vw'
+};

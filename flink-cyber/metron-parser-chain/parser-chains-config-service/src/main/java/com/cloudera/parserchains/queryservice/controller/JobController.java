@@ -72,6 +72,4 @@ public class JobController {
                         .build();
         return jobService.makeRequest(clusterId, requestBody, JobActions.Constants.UPDATE_CONFIG_VALUE);
     }
-
-
 }

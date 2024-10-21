@@ -1,6 +1,8 @@
 package com.cloudera.cyber.restcli.controller;
 
+import com.cloudera.cyber.restcli.configuration.AppWorkerConfig;
 import com.cloudera.cyber.restcli.service.JobService;
+import com.cloudera.cyber.restcli.service.FilePipelineService;
 import com.cloudera.service.common.Utils;
 import com.cloudera.service.common.request.RequestBody;
 import com.cloudera.service.common.request.RequestType;
@@ -29,18 +31,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class KafkaListenerController {
-
-    @Value("${cluster.name}")
-    private String clusterName;
-    @Value("${cluster.id}")
-    private String clusterId;
-    @Value("${cluster.status}")
-    private String clusterStatus;
-    @Value("${cluster.version}")
-    private String clusterVersion;
-
     private final JobService jobService;
+    private final FilePipelineService pipelineService;
+    private final AppWorkerConfig config;
 
+    //TODO:  Rewrite to Spring events. Probably split the events into separate types, such as cluster event, job event, pipeline event, etc.
     @KafkaListener(topics = "#{kafkaProperties.getRequestTopic()}", containerFactory = "kafkaListenerContainerFactory")
     @SendTo({"#{kafkaProperties.getReplyTopic()}"})
     public Message<ResponseBody> handleMessage(RequestBody requestBody, @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String key, @Header(KafkaHeaders.REPLY_TOPIC) byte[] replyTo,
@@ -85,6 +80,26 @@ public class KafkaListenerController {
                 } catch (IOException e) {
                     return handleErrorResponse(e, replyTo, correlationId);
                 }
+            case CREATE_EMPTY_PIPELINE:
+                try {
+                    pipelineService.createEmptyPipeline(requestBody.getPipelineName(), requestBody.getBranch());
+                    final ResponseBody responseBody = ResponseBody.builder().build();
+                    return buildResponseMessage(responseBody, ResponseType.CREATE_EMPTY_PIPELINE_RESPONSE, replyTo, correlationId);
+                } catch (Exception e) {
+                    return handleErrorResponse(e, replyTo, correlationId);
+                }
+            case START_ARCHIVE_PIPELINE:
+                try {
+                    pipelineService.extractPipeline(requestBody.getPayload(), requestBody.getPipelineName(), requestBody.getBranch());
+                    pipelineService.startPipelineJob(requestBody.getPipelineName(), requestBody.getBranch(), requestBody.getProfileName(), requestBody.getJobs());
+                    final ResponseBody responseBody = ResponseBody.builder().build();
+                    return buildResponseMessage(responseBody, ResponseType.START_ARCHIVE_PIPELINE_RESPONSE, replyTo, correlationId);
+                } catch (Exception e) {
+                    log.error("Exception while processing the Start All request {}", e.getMessage());
+                    return handleErrorResponse(e, replyTo, correlationId);
+
+                }
+
         }
         return null;
     }
@@ -95,10 +110,10 @@ public class KafkaListenerController {
             ResponseBody responseBody = ResponseBody.builder()
                     .jobs(jobs)
                     .clusterMeta(ClusterMeta.builder()
-                            .name(clusterName)
-                            .clusterId(clusterId)
-                            .clusterStatus(clusterStatus)
-                            .version(clusterVersion)
+                            .name(config.getName())
+                            .clusterId(config.getId())
+                            .clusterStatus(config.getStatus())
+                            .version(config.getVersion())
                             .build())
                     .build();
             return buildResponseMessage(responseBody, responseType, replyTo, correlationId);

@@ -1,0 +1,27 @@
+<h2 matDialogTitle *ngIf="type === 'create'">Create a new {{name}}</h2>
+<h2 matDialogTitle *ngIf="type === 'edit'">Update a {{name}}</h2>
+<form class="flex-cl-jsb-ab" [formGroup]="dialogForm" (ngSubmit)="submit()">
+
+  <mat-dialog-content [style.width.%]="100">
+    <mat-form-field appearance="standard" [style.width.%]="100">
+      <input matInput
+             data-qe-id="chain-name"
+             formControlName="name"
+             type="text"
+             id="chainName"
+             placeholder="Parser Chain Name"
+      >
+      <mat-error *ngIf="dialogForm.invalid">
+        {{ errorMessage }}
+      </mat-error>
+    </mat-form-field>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end" [style.width.%]="100">
+    <button type="submit" mat-flat-button [disabled]="disabled()"
+            color="primary">{{ type === 'create' ? 'Create' : 'Save' }}
+    </button>
+    <button type="reset" mat-stroked-button [mat-dialog-close]="false" color="accent">Cancel</button>
+  </mat-dialog-actions>
+</form>
+
+
