@@ -39,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.core.fs.Path;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -99,6 +100,7 @@ public class ChainController {
                             array = @ArraySchema(schema = @Schema(implementation = ParserChainSummary.class))))
             })
     @GetMapping(value = API_CHAINS)
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', #pipelineName)")
     public ResponseEntity<List<ParserChainSummary>> findAll(
             @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName
@@ -117,6 +119,7 @@ public class ChainController {
                     @ApiResponse(responseCode = "404", description = "Unable to create a new parser chain.")
             })
     @PostMapping(value = API_CHAINS)
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('post', #pipelineName)")
     public ResponseEntity<ParserChainSchema> create(
             @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
@@ -143,6 +146,7 @@ public class ChainController {
                     @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
             })
     @GetMapping(value = API_CHAINS + "/{id}")
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', #pipelineName)")
     public ResponseEntity<ParserChainSchema> read(
             @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
@@ -165,6 +169,7 @@ public class ChainController {
                     @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
             })
     @PutMapping(value = API_CHAINS + "/{id}")
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('put', #pipelineName)")
     public ResponseEntity<ParserChainSchema> update(
             @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
@@ -192,6 +197,7 @@ public class ChainController {
             @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
     })
     @DeleteMapping(value = API_CHAINS + "/{id}")
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('delete', #pipelineName)")
     public ResponseEntity<Void> delete(
             @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
@@ -212,6 +218,7 @@ public class ChainController {
                     @ApiResponse(responseCode = "200", description = "The mapping file parsed successfully."),
             })
     @PostMapping(value = API_INDEXING)
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', #pipelineName)")
     public ResponseEntity<Map<String, Object>> getMappingsFromPath(
             @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
@@ -242,6 +249,7 @@ public class ChainController {
                             schema = @Schema(implementation = ChainTestResponse.class)))
             })
     @PostMapping(value = API_PARSER_TEST)
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', '*')")
     public ResponseEntity<ChainTestResponse> test(
             @Parameter(name = "testRun", description = "Describes the parser chain test to run.", required = true)
             @RequestBody ChainTestRequest testRun) throws IOException {

@@ -59,4 +59,7 @@ public class ApplicationConstants {
   public static final String BODY_PARAM = "body";
   public static final String HEADERS_PARAM = "headers";
   public static final String STATUS_PARAM = "status";
+
+  //Security
+  public static final String DEFAULT_ROLE = "ROLE_USER";
 }

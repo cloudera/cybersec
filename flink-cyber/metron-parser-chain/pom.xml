@@ -46,6 +46,7 @@
 
         <!-- main dependency versions -->
         <lombok.version>1.18.12</lombok.version>
+        <kerberos.extension.version>1.0.1.RELEASE</kerberos.extension.version>
         <evo-inflector.version>1.2.2</evo-inflector.version>
         <slf4j.version>1.7.15</slf4j.version>
 
@@ -62,6 +63,7 @@
         <hamcrest.version>2.2</hamcrest.version>
         <json-flattener.version>0.14.2</json-flattener.version>
         <assertj-core.version>3.17.2</assertj-core.version>
+        <ranger-plugins-common.version>2.1.0</ranger-plugins-common.version>
     </properties>
 
     <repositories>
@@ -82,6 +84,44 @@
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-web</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+
+            <!--Security-->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-security</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security.kerberos</groupId>
+                <artifactId>spring-security-kerberos-web</artifactId>
+                <version>${kerberos.extension.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.security.kerberos</groupId>
+                <artifactId>spring-security-kerberos-client</artifactId>
+                <version>${kerberos.extension.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.ranger</groupId>
+                <artifactId>ranger-plugins-common</artifactId>
+                <version>${ranger-plugins-common.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-hateoas</artifactId>
+                <version>${spring-boot.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.atteo</groupId>
