@@ -12,15 +12,15 @@
 
 import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {BehaviorSubject, combineLatest, forkJoin, Observable, of, throwError} from 'rxjs';
-import {catchError, map, switchMap} from "rxjs/operators";
-import {Job} from "../cluster-list-page/cluster-list-page.model";
-import {ClusterService} from "../../services/cluster.service";
+import {BehaviorSubject, concat, forkJoin, of, throwError} from 'rxjs';
+import {catchError, map, switchMap} from 'rxjs/operators';
+import {Job} from '../cluster-list-page/cluster-list-page.model';
+import {ClusterService} from '../../services/cluster.service';
 import {SelectionModel} from '@angular/cdk/collections';
-import {HttpErrorResponse, HttpResponse} from "@angular/common/http";
-import {SnackbarService, SnackBarStatus} from "../../services/snack-bar.service";
-import {MatDialog} from "@angular/material/dialog";
-import {UploadDialogComponent} from "./dialog/upload-dialog.component";
+import {HttpErrorResponse, HttpResponse} from '@angular/common/http';
+import {SnackbarService, SnackBarStatus} from '../../services/snack-bar.service';
+import {MatDialog} from '@angular/material/dialog';
+import {UploadDialogComponent} from './dialog/upload-dialog.component';
 
 export type DialogData = {
   targetUrl: string;
@@ -37,11 +37,19 @@ export type DialogData = {
 })
 export class ClusterPageComponent {
   clusterSubject$ = new BehaviorSubject<void>(null);
-  clusterId$: Observable<string> = this._route.paramMap.pipe(map((params) => params.get('clusterId')));
-  cluster$ = combineLatest([this.clusterId$, this.clusterSubject$]).pipe(switchMap(([clusterId]) => this._clusterService.getCluster(clusterId)));
-  vm$ = combineLatest([this.clusterId$, this.cluster$]).pipe(
-    map(([clusterId, cl]) => ({clusterId, cl}))
-  );
+  cluster$ =
+    this.clusterSubject$.pipe(
+      switchMap(() => {
+        return this._route.paramMap
+      }),
+      map((params) => params.get('clusterId')),
+      switchMap((clusterId) =>
+        concat(
+          of({type: 'start', value: {jobs: []}}),
+          this._clusterService.getCluster(clusterId)
+            .pipe(map(value => ({type: 'finish', value})))))
+    );
+
   displayedColumns: string[] = ['select', 'name', 'type', 'branch', 'pipeline', 'status', 'created'];
   selection = new SelectionModel<Job>(true, []);
 
@@ -53,8 +61,8 @@ export class ClusterPageComponent {
   ) {
   }
 
-  isAllSelected(jobs: Job[]) {
-    return this.selection.selected.length === jobs.length;
+  isAllSelected(jobs: Job[], loading?: boolean) {
+    return loading ? false : this.selection.selected.length === jobs.length;
   }
 
   masterToggle(jobs: Job[]) {
@@ -70,11 +78,11 @@ export class ClusterPageComponent {
       this.selection.selected.reduce((acc, job) =>
           ({
             ...acc,
-            [job.jobName]:
+            [job.jobFullName]:
               this._clusterService.sendJobCommand(clusterId, action,
                 {
                   jobIdHex: job.jobIdString,
-                  pipelineDir: job.jobPipeline,
+                  pipelineName: job.jobPipeline,
                   branch: job.jobPipeline
                 }).pipe(catchError(err => {
                 this._snackBarService.showMessage(err.message, SnackBarStatus.FAIL);
@@ -83,7 +91,6 @@ export class ClusterPageComponent {
           }),
         {})
     ).subscribe(_ => {
-        this.clusterSubject$.next();
       },
       (error) => {
         //handle your error here
@@ -91,6 +98,7 @@ export class ClusterPageComponent {
       }, () => {
         //observable completes
         this.selection.clear();
+        this.clusterSubject$.next();
       });
   }
 

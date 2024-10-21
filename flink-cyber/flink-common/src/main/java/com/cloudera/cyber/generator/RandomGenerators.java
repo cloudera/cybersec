@@ -12,6 +12,7 @@
 
 package com.cloudera.cyber.generator;
 
+import com.github.javafaker.Book;
 import com.github.javafaker.Faker;
 import org.apache.commons.net.util.SubnetUtils;
 
@@ -65,5 +66,19 @@ public class RandomGenerators implements Serializable {
 
     public static String randomSubject() {
         return faker.lorem().sentence();
+    }
+    public static Book randomBook() {
+        return faker.book();
+    }
+    public static String randomDomainName() {
+        return faker.internet().domainName();
+    }
+
+    public static String randomMac() {
+        return faker.internet().macAddress();
+    }
+
+    public static String randomCategory() {
+        return faker.company().industry();
     }
 }

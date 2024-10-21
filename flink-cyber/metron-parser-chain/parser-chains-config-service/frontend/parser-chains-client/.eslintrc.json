@@ -67,6 +67,11 @@
         "simple-import-sort/imports": "off",
         "array-bracket-spacing": "off",
         "no-underscore-dangle": "off",
+        "@typescript-eslint/member-ordering": [
+          "warn",
+          {
+            "default": ["static-field", "instance-field", "static-method", "instance-method"]
+          }],
         "@typescript-eslint/no-unused-vars": [
           "warn",
           {

@@ -9,11 +9,8 @@
  * either express or implied. Refer to the License for the specific permissions and
  * limitations governing your use of the file.
  */
-
-.demo-table {
-  width: 100%;
-  font-size: 20px;
-}
+@use '@angular/material' as mat;
+@import "./styles.scss";
 
 .mat-cell {
   padding-left: 15px;
@@ -21,21 +18,26 @@
   -webkit-background-clip: padding-box;
   background-clip: padding-box;
 }
-
-.mat-header-row {
-  background-color: #333;
-  color: white;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: normal;
+th.mat-header-cell {
+  color: mat.get-contrast-color-from-palette($theme-primary,500);
 }
+table {
+  width: 100%;
+
+
+  .mat-header-row {
+    background: mat.get-color-from-palette($theme-primary);
+    text-transform: uppercase;
+    letter-spacing: normal;
+  }
+  .mat-header-cell:last-child {
+    border-right: none;
+  }
+}
+
 .mat-header-cell {
   padding-left: 15px;
   color: white;
-}
-
-.mat-row:hover {
-  background: linear-gradient(10deg, #f1f2f3, #dce2ff);
 }
 
 .demo-row-is-clicked {

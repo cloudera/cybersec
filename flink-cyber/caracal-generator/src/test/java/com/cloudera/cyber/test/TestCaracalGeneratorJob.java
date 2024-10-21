@@ -65,7 +65,7 @@ public class TestCaracalGeneratorJob extends CaracalGeneratorFlinkJob {
         int count = 100;
         JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
                 PARAMS_RECORDS_LIMIT, String.valueOf(count),
-                PARAMS_GENERATOR_CONFIG, Objects.requireNonNull(getClass().getClassLoader().getResource("config/generator_config.json")).toExternalForm()
+                PARAMS_GENERATOR_CONFIG, Objects.requireNonNull(getClass().getClassLoader().getResource("config/generator_config_test.json")).toExternalForm()
         ))));
 
         JobTester.stopTest();
