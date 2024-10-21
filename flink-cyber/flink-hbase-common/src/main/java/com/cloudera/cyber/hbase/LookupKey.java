@@ -17,13 +17,14 @@ import lombok.experimental.SuperBuilder;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 
+import java.io.Serializable;
 import java.util.Map;
 
 @Getter
 @SuperBuilder
 @EqualsAndHashCode
 @ToString
-public abstract class LookupKey {
+public abstract class LookupKey implements Serializable {
     private String cf;
     private String tableName;
     private String key;
