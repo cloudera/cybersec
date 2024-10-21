@@ -17,15 +17,7 @@
  */
 package org.apache.metron.stellar.common.utils;
 
-import java.io.File;
-import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
-import java.util.Optional;
-import org.apache.commons.vfs2.CacheStrategy;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileSystemManager;
-import org.apache.commons.vfs2.FileType;
+import org.apache.commons.vfs2.*;
 import org.apache.commons.vfs2.cache.SoftRefFilesCache;
 import org.apache.commons.vfs2.impl.DefaultFileSystemManager;
 import org.apache.commons.vfs2.impl.FileContentInfoFilenameFactory;
@@ -33,6 +25,11 @@ import org.apache.commons.vfs2.impl.VFSClassLoader;
 import org.apache.commons.vfs2.provider.hdfs.HdfsFileProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
+import java.util.Optional;
 
 public class VFSClassloaderUtil {
   private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
@@ -86,6 +83,7 @@ public class VFSClassloaderUtil {
     vfs.addMimeTypeMap("application/x-tar", "tar");
     vfs.addMimeTypeMap("application/x-gzip", "gz");
     vfs.addMimeTypeMap("application/zip", "zip");
+    vfs.addMimeTypeMap("application/java-archive", "jar");
     vfs.setFileContentInfoFactory(new FileContentInfoFilenameFactory());
     vfs.setFilesCache(new SoftRefFilesCache());
     vfs.setReplicator(new UniqueFileReplicator(new File(System.getProperty("java.io.tmpdir"))));
