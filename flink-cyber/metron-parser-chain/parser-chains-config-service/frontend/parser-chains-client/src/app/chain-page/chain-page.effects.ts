@@ -20,18 +20,17 @@ import {catchError, map, switchMap, withLatestFrom} from 'rxjs/operators';
 import {ChainPageService} from '../services/chain-page.service';
 import * as fromActions from './chain-page.actions';
 import {ChainDetailsModel} from './chain-page.models';
-import {getChainPageState, ParserDescriptor} from './chain-page.reducers';
+import {getChainPageState, getSelectedPipeline, ParserDescriptor} from './chain-page.reducers';
 import {denormalizeParserConfig, normalizeParserConfig} from './chain-page.utils';
-import {getSelectedPipeline} from "../chain-list-page/chain-list-page.reducers";
 
 @Injectable()
 export class ChainPageEffects {
   loadChainDetails$: Observable<Action> = createEffect(() => this._actions$.pipe(
     ofType(fromActions.LOAD_CHAIN_DETAILS),
     withLatestFrom(this._store$.select(getSelectedPipeline)),
-    switchMap(([action, selectedPipeline]) => {
+    switchMap(([action]) => {
         const finalAction = action as fromActions.LoadChainDetailsAction;
-        return this._chainPageService.getChain(finalAction.payload.id, selectedPipeline).pipe(
+        return this._chainPageService.getChain(finalAction.payload.id, finalAction.payload.currentPipeline).pipe(
         map((chain: ChainDetailsModel) => {
           const normalizedParserConfig = normalizeParserConfig(chain);
           return new fromActions.LoadChainDetailsSuccessAction(

@@ -3,7 +3,7 @@ import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {JsonEditorPopupComponent} from './json-editor-popup.component';
 import {MAT_DIALOG_DATA, MatDialogModule, MatDialogRef} from "@angular/material/dialog";
 import {MockComponent} from "ng-mocks";
-import {AdvancedEditorComponent} from "../../../chain-page/components/parser/advanced-editor/advanced-editor.component";
+import {AdvancedEditorComponent} from 'src/app/chain-page/components/parser/advanced-editor/advanced-editor.component';
 
 describe('JsonEditorPopupComponent', () => {
   let component: JsonEditorPopupComponent;

@@ -73,7 +73,7 @@ const chainListPageInitialState = {
   error: '',
   pipelines: null,
   pipelineRenameModalVisible: false,
-  selectedPipeline: selectedPipeline
+  selectedPipeline
 };
 
 describe('chain parser page: effects', () => {
@@ -96,7 +96,8 @@ describe('chain parser page: effects', () => {
             'chain-page': {
               chains: initialChains,
               parsers: initialParsers,
-              routes: initialRoutes
+              routes: initialRoutes,
+              selectedPipeline
             },
             'chain-list-page': chainListPageInitialState
           },
@@ -182,8 +183,8 @@ describe('chain parser page: effects', () => {
 
     actions = new ReplaySubject(1);
     actions.next(new fromActions.LoadChainDetailsAction({
-      id: '123'
-    }));
+      id: '123',
+      currentPipeline: selectedPipeline    }));
 
     effects.loadChainDetails$.subscribe(result => {
       expect(result).toEqual(new fromActions.LoadChainDetailsSuccessAction(normalizedChain));

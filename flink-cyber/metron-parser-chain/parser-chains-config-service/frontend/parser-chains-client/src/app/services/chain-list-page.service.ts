@@ -14,7 +14,8 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 
 import {ChainModel, ChainOperationalModel} from '../chain-list-page/chain.model';
-import {getHttpParams} from "../shared/service.utils";
+import {getHttpParams} from '../shared/service.utils';
+import {delay} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -30,26 +31,21 @@ export class ChainListPageService {
 
   public createChain(chain: ChainOperationalModel, pipeline: string = null) {
     const httpParams: HttpParams = getHttpParams(pipeline);
-
     return this._http.post<ChainModel>(ChainListPageService.BASE_URL + 'chains', chain, {params: httpParams});
   }
 
   public getChains(pipeline: string = null) {
     const httpParams: HttpParams = getHttpParams(pipeline);
-
     return this._http.get<ChainModel[]>(ChainListPageService.BASE_URL + 'chains', {params: httpParams});
   }
 
   public deleteChain(chainId: string, pipeline: string = null) {
     const httpParams: HttpParams = getHttpParams(pipeline);
-
-    return this._http.delete(ChainListPageService.BASE_URL + 'chains/' + chainId, {params: httpParams});
+    return this._http.delete(ChainListPageService.BASE_URL + 'chains/' + chainId, {params: httpParams}).pipe(delay(3000));
   }
 
   public getPipelines() {
     const httpParams: HttpParams = getHttpParams(null);
-
     return this._http.delete(ChainListPageService.BASE_URL + 'pipeline', {params: httpParams});
   }
-
 }

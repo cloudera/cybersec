@@ -12,15 +12,15 @@
 
 import {Component} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {BehaviorSubject, combineLatest, forkJoin, Observable, of, throwError} from 'rxjs';
-import {catchError, map, switchMap} from "rxjs/operators";
-import {Job} from "../cluster-list-page/cluster-list-page.model";
-import {ClusterService} from "../../services/cluster.service";
+import {BehaviorSubject, forkJoin, of, throwError} from 'rxjs';
+import {catchError, map, switchMap} from 'rxjs/operators';
+import {Job} from '../cluster-list-page/cluster-list-page.model';
+import {ClusterService} from '../../services/cluster.service';
 import {SelectionModel} from '@angular/cdk/collections';
-import {HttpErrorResponse, HttpResponse} from "@angular/common/http";
-import {SnackbarService, SnackBarStatus} from "../../services/snack-bar.service";
-import {MatDialog} from "@angular/material/dialog";
-import {UploadDialogComponent} from "./dialog/upload-dialog.component";
+import {HttpErrorResponse, HttpResponse} from '@angular/common/http';
+import {SnackbarService, SnackBarStatus} from '../../services/snack-bar.service';
+import {MatDialog} from '@angular/material/dialog';
+import {UploadDialogComponent} from './dialog/upload-dialog.component';
 
 export type DialogData = {
   targetUrl: string;
@@ -37,11 +37,10 @@ export type DialogData = {
 })
 export class ClusterPageComponent {
   clusterSubject$ = new BehaviorSubject<void>(null);
-  clusterId$: Observable<string> = this._route.paramMap.pipe(map((params) => params.get('clusterId')));
-  cluster$ = combineLatest([this.clusterId$, this.clusterSubject$]).pipe(switchMap(([clusterId]) => this._clusterService.getCluster(clusterId)));
-  vm$ = combineLatest([this.clusterId$, this.cluster$]).pipe(
-    map(([clusterId, cl]) => ({clusterId, cl}))
-  );
+  cluster$ = this._route.paramMap.pipe(
+    map((params) => params.get('clusterId')),
+    switchMap((clusterId) => this._clusterService.getCluster(clusterId)));
+
   displayedColumns: string[] = ['select', 'name', 'type', 'branch', 'pipeline', 'status', 'created'];
   selection = new SelectionModel<Job>(true, []);
 
