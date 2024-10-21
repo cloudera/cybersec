@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {BehaviorSubject, Observable} from "rxjs";
-import {tap} from "rxjs/operators";
+import {BehaviorSubject, Observable, of} from "rxjs";
+import {catchError, take, tap} from "rxjs/operators";
 import {OcsfService} from "../../../services/ocsf.service";
 import {BaseOcsfSchemaModel, OcsfSchemaModel} from "./ocsf-form.model";
 import {UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
@@ -60,20 +60,12 @@ export class OcsfFormComponent implements OnInit {
     })
 
     this.filtersForm.get('dataClassFilters')!.valueChanges.subscribe(selectedObject => {
-      this.onDataClassFiltersChange(selectedObject);
+      this.selectedClassFilters = selectedObject
     });
 
     this.filtersForm.get('dataClasses')!.valueChanges.subscribe(selectedObject => {
-      this.onDataClassesChange(selectedObject);
+      this.selectedClassFields = selectedObject
     });
-  }
-
-  onDataClassFiltersChange(selectedObjectList: string[]): void {
-    this.selectedClassFilters = selectedObjectList
-  }
-
-  onDataClassesChange(selectedObjectList: string[]): void {
-    this.selectedClassFields = selectedObjectList
   }
 
   clickSwitch() {
@@ -99,12 +91,21 @@ export class OcsfFormComponent implements OnInit {
     this._chainPageService.saveIndexMappings({
       filePath: this.ocsfForm.value._filePath,
       mappings: result
-    }).subscribe(() =>
-      this._messageService.create('success', 'Successfully saved the OCSF schema'))
+    })
+      .pipe(take(1))
+      .subscribe(() =>
+        this._messageService.create('success', 'Successfully saved the OCSF schema'))
   }
 
   onOcsfImport() {
     this._chainPageService.getIndexMappings({filePath: this.ocsfForm.value._filePath})
+      .pipe(
+        catchError(err => {
+          this._messageService.create('error', `Couldn't fetch indexing fields for the given path '${this.ocsfForm.value._filePath}'`)
+          return of(null)
+        }),
+        take(1)
+      )
       .subscribe((response: HttpResponse<{ path: string, result: { [key: string]: any } }>) => {
         if (response.status === 200) {
           let sourceName = this.ocsfForm.value._sourceName;
@@ -123,7 +124,7 @@ export class OcsfFormComponent implements OnInit {
           }
           this.fillFormsValuesFromIndexMappings(null, mappings)
           this._messageService.create('success', `Imported the OCSF schema from '${filePath}', source: '${sourceName}'`);
-        } else if (response.status === 204 || response.status === 404) {
+        } else if (response.status === 204) {
           this._messageService.create('warning', `No indexing fields found for the given path '${this.ocsfForm.value._filePath}'`);
         }
         return {
