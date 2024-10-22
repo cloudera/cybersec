@@ -24,5 +24,15 @@ public abstract class RuleEngineBuilder<T extends RuleEngine> {
         return this;
     }
 
+    /**
+     * This method identifies if the underlying rule engine is supported by the current environment.
+     * It should be overridden in case some logic is need, otherwise it returns true.
+     *
+     * @return true if this builder is valid for the environment
+     */
+    public boolean isValid() {
+        return true;
+    }
+
     public abstract T build();
 }
