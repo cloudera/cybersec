@@ -20,41 +20,47 @@
 
 package org.apache.metron.stellar.common.shell.specials;
 
-import org.apache.metron.stellar.common.shell.StellarShellExecutor;
-import org.apache.metron.stellar.common.shell.StellarResult;
-
 import java.util.function.Function;
+import org.apache.metron.stellar.common.shell.StellarResult;
+import org.apache.metron.stellar.common.shell.StellarShellExecutor;
 
 /**
  * A special command that can be run within a Stellar execution
  * environment.
  *
+ * <p>
  * Most functionality expected of running Stellar in a shell-like
  * environment, that is not directly implemented in the Stellar
  * language itself, is implemented as a SpecialCommand. This
  * includes magics, doc strings, comments and quit.
  *
+ * <p>
  * This is typically an action performed on the execution
  * environment, not something that could be executed within Stellar.
  */
 public interface SpecialCommand {
 
-  /**
-   * @return A function that when applied to the input buffer returns
-   * true, if this special command should be applied.
-   */
-  Function<String, Boolean> getMatcher();
+    /**
+     * Matcher getter.
+     *
+     * @return A function that when applied to the input buffer returns
+     *       true, if this special command should be applied.
+     */
+    Function<String, Boolean> getMatcher();
 
-  /**
-   * @return The name of the command, used for auto-completion.
-   */
-  String getCommand();
+    /**
+     * Command getter.
+     *
+     * @return The name of the command, used for auto-completion.
+     */
+    String getCommand();
 
-  /**
-   * Execute the magic command.
-   * @param expression The expression to execute.
-   * @param executor A stellar execution environment.
-   * @return The result of executing the magic command.
-   */
-  StellarResult execute(String expression, StellarShellExecutor executor);
+    /**
+     * Execute the magic command.
+     *
+     * @param expression The expression to execute.
+     * @param executor   A stellar execution environment.
+     * @return The result of executing the magic command.
+     */
+    StellarResult execute(String expression, StellarShellExecutor executor);
 }

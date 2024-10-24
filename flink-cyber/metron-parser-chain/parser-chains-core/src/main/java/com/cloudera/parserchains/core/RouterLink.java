@@ -40,7 +40,7 @@ public class RouterLink implements ChainLink {
      * The name of the field whose value is used for routing.
      */
     private FieldName inputField;
-    private List<Route> routes;
+    private final List<Route> routes;
     private Optional<ChainLink> defaultRoute;
     private Optional<ChainLink> nextLink;
 
@@ -78,17 +78,17 @@ public class RouterLink implements ChainLink {
     }
 
     private Optional<ChainLink> findRoute(Message input) {
-        if(inputField == null) {
+        if (inputField == null) {
             throw new IllegalStateException("The routing field was not defined.");
         }
 
         Optional<FieldValue> valueOpt = input.getField(inputField);
-        if(valueOpt.isPresent()) {
+        if (valueOpt.isPresent()) {
             FieldValue fieldValue = valueOpt.get();
 
-            for(Route route: routes) {
+            for (Route route : routes) {
                 Regex regex = route.regex;
-                if(regex.matches(fieldValue)) {
+                if (regex.matches(fieldValue)) {
                     return Optional.of(route.next);
                 }
             }
@@ -110,13 +110,13 @@ public class RouterLink implements ChainLink {
 
         // retrieve the last output from the route taken;
         Message output = input;
-        if(results.size() > 0) {
+        if (results.size() > 0) {
             output = results.get(results.size() - 1);
         }
 
         // if no errors, allow the next link in the chain to process the message
         boolean noError = !output.getError().isPresent();
-        if(noError && nextLink.isPresent()) {
+        if (noError && nextLink.isPresent()) {
             List<Message> nextResults = nextLink.get().process(output);
             results.addAll(nextResults);
         }

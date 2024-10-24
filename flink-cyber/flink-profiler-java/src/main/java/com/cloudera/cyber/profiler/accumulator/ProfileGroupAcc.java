@@ -14,16 +14,15 @@ package com.cloudera.cyber.profiler.accumulator;
 
 import com.cloudera.cyber.profiler.ProfileGroupConfig;
 import com.cloudera.cyber.profiler.ProfileMessage;
-import org.apache.flink.api.common.accumulators.Accumulator;
-import org.apache.flink.api.common.accumulators.LongMaximum;
-import org.apache.flink.api.common.accumulators.LongMinimum;
-
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.apache.flink.api.common.accumulators.Accumulator;
+import org.apache.flink.api.common.accumulators.LongMaximum;
+import org.apache.flink.api.common.accumulators.LongMinimum;
 
 public abstract class ProfileGroupAcc {
     public static final String START_PERIOD_EXTENSION = "start_period";
@@ -39,7 +38,8 @@ public abstract class ProfileGroupAcc {
 
     protected abstract void updateAccumulators(ProfileMessage message, ProfileGroupConfig profileGroupConfig);
 
-    protected abstract void addExtensions(ProfileGroupConfig profileGroupConfig, Map<String, String> extensions, Map<String, DecimalFormat> measurementFormats);
+    protected abstract void addExtensions(ProfileGroupConfig profileGroupConfig, Map<String, String> extensions,
+                                          Map<String, DecimalFormat> measurementFormats);
 
     protected static Double getFieldValueAsDouble(ProfileMessage message, String fieldName) {
         String extensionValue = message.getExtensions().get(fieldName);
@@ -59,7 +59,8 @@ public abstract class ProfileGroupAcc {
         updateAccumulators(message, profileGroupConfig);
     }
 
-    public Map<String, String> getProfileExtensions(ProfileGroupConfig profileGroupConfig, Map<String, DecimalFormat> measurementFormats) {
+    public Map<String, String> getProfileExtensions(ProfileGroupConfig profileGroupConfig,
+                                                    Map<String, DecimalFormat> measurementFormats) {
         Map<String, String> extensions = new HashMap<>();
         extensions.put(START_PERIOD_EXTENSION, Long.toString(startPeriodTimestamp.getLocalValuePrimitive()));
         extensions.put(END_PERIOD_EXTENSION, Long.toString(endPeriodTimestamp.getLocalValuePrimitive()));

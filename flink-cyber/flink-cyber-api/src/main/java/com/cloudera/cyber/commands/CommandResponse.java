@@ -12,18 +12,17 @@
 
 package com.cloudera.cyber.commands;
 
+import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
+
 import com.cloudera.cyber.flink.HasHeaders;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.apache.avro.Schema;
 import org.apache.avro.specific.SpecificRecordBase;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
 
 @EqualsAndHashCode(callSuper = false)
 @Data
@@ -32,7 +31,7 @@ public abstract class CommandResponse<T> extends SpecificRecordBase implements H
     private boolean success;
     private String message;
     private List<T> content;
-    private Map<String,String> headers;
+    private Map<String, String> headers;
 
     protected CommandResponse(CommandResponseBuilder<T, ?, ?> b) {
         this.success = b.success;
@@ -46,28 +45,42 @@ public abstract class CommandResponse<T> extends SpecificRecordBase implements H
 
     public java.lang.Object get(int field$) {
         switch (field$) {
-            case 0: return success;
-            case 1: return message;
-            case 2: return content;
-            case 3: return headers;
-            default: throw new org.apache.avro.AvroRuntimeException("Bad index");
+            case 0:
+                return success;
+            case 1:
+                return message;
+            case 2:
+                return content;
+            case 3:
+                return headers;
+            default:
+                throw new org.apache.avro.AvroRuntimeException("Bad index");
         }
     }
 
     // Used by DatumReader.  Applications should not call.
     public void put(int field$, java.lang.Object value$) {
         switch (field$) {
-            case 0: success = (boolean) value$; break;
-            case 1: message = value$ == null ? "" : value$.toString(); break;
-            case 2: content = putContent(value$); break;
-            case 3: headers = utf8toStringMap(value$); break;
-            default: throw new org.apache.avro.AvroRuntimeException("Bad index");
+            case 0:
+                success = (boolean) value$;
+                break;
+            case 1:
+                message = value$ == null ? "" : value$.toString();
+                break;
+            case 2:
+                content = putContent(value$);
+                break;
+            case 3:
+                headers = utf8toStringMap(value$);
+                break;
+            default:
+                throw new org.apache.avro.AvroRuntimeException("Bad index");
         }
     }
 
     abstract List<T> putContent(Object value$);
 
-    public static abstract class CommandResponseBuilder<T, C extends CommandResponse<T>, B extends CommandResponseBuilder<T, C, B>> {
+    public abstract static class CommandResponseBuilder<T, C extends CommandResponse<T>, B extends CommandResponseBuilder<T, C, B>> {
         private boolean success;
         private String message;
         private List<T> content;
@@ -100,7 +113,8 @@ public abstract class CommandResponse<T> extends SpecificRecordBase implements H
         public abstract C build();
 
         public String toString() {
-            return "CommandResponse.CommandResponseBuilder(super=" + super.toString() + ", success=" + this.success + ", message=" + this.message + ", content=" + this.content + ", headers=" + this.headers + ")";
+            return "CommandResponse.CommandResponseBuilder(super=" + super.toString() + ", success=" + this.success
+                   + ", message=" + this.message + ", content=" + this.content + ", headers=" + this.headers + ")";
         }
     }
 }

@@ -41,13 +41,15 @@ public class ProfileDto implements Serializable {
     public static ProfileDto of(ProfileGroupConfig profileGroup) {
         ArrayList<String> keyFieldNames = new ArrayList<>(profileGroup.getKeyFieldNames());
         return ProfileDto.builder()
-                .profileGroupName(profileGroup.getProfileGroupName())
-                .keyFieldNames(keyFieldNames.stream().sorted().collect(Collectors.joining(",")))
-                .measurementDtos(new ArrayList<>(profileGroup.getMeasurements().stream().map(MeasurementDto::of).collect(Collectors.toList())))
-                .periodDuration(profileGroup.getPeriodDuration())
-                .periodDurationUnit(profileGroup.getPeriodDurationUnit())
-                .statsSlide(profileGroup.getStatsSlide())
-                .statsSlideUnit(profileGroup.getStatsSlideUnit())
-                .build();
+                         .profileGroupName(profileGroup.getProfileGroupName())
+                         .keyFieldNames(keyFieldNames.stream().sorted().collect(Collectors.joining(",")))
+                         .measurementDtos(new ArrayList<>(
+                               profileGroup.getMeasurements().stream().map(MeasurementDto::of)
+                                           .collect(Collectors.toList())))
+                         .periodDuration(profileGroup.getPeriodDuration())
+                         .periodDurationUnit(profileGroup.getPeriodDurationUnit())
+                         .statsSlide(profileGroup.getStatsSlide())
+                         .statsSlideUnit(profileGroup.getStatsSlideUnit())
+                         .build();
     }
 }

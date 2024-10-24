@@ -12,9 +12,17 @@
 
 package com.cloudera.cyber.scoring;
 
+import static com.cloudera.cyber.scoring.ScoringRule.RESULT_REASON;
+import static com.cloudera.cyber.scoring.ScoringRule.RESULT_SCORE;
+
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.rules.DynamicRuleProcessFunction;
 import com.cloudera.cyber.rules.RulesForm;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.state.MapStateDescriptor;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -23,28 +31,26 @@ import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import org.apache.flink.util.Preconditions;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import static com.cloudera.cyber.scoring.ScoringRule.RESULT_REASON;
-import static com.cloudera.cyber.scoring.ScoringRule.RESULT_SCORE;
-
 @Slf4j
-public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRule, ScoringRuleCommand, ScoringRuleCommandResult, ScoredMessage> {
+public class ScoringProcessFunction
+      extends DynamicRuleProcessFunction<ScoringRule, ScoringRuleCommand, ScoringRuleCommandResult, ScoredMessage> {
 
     private final String scoringSummarizationModeName;
     private transient ScoringSummarizationMode scoringSummarizationMode;
-    public static final String ILLEGAL_SUMMARIZATION_METHOD_ERROR_MESSAGE = "Summarization method '%s' is not a legal value '%s'";
+    public static final String ILLEGAL_SUMMARIZATION_METHOD_ERROR_MESSAGE =
+          "Summarization method '%s' is not a legal value '%s'";
 
-    public ScoringProcessFunction(OutputTag<ScoringRuleCommandResult> rulesResultSink, MapStateDescriptor<RulesForm, List<ScoringRule>> rulesDescriptor, ParameterTool params) {
+    public ScoringProcessFunction(OutputTag<ScoringRuleCommandResult> rulesResultSink,
+                                  MapStateDescriptor<RulesForm, List<ScoringRule>> rulesDescriptor,
+                                  ParameterTool params) {
         super(rulesResultSink, rulesDescriptor);
-        this.scoringSummarizationModeName = params.get(ScoringJobKafka.SCORING_SUMMATION_NAME(), ScoringSummarizationMode.DEFAULT().name());
+        this.scoringSummarizationModeName =
+              params.get(ScoringJobKafka.scoringSummationName(), ScoringSummarizationMode.defaultValue().name());
 
-        Preconditions.checkArgument(ScoringSummarizationMode.isLegalSummarizationMode(this.scoringSummarizationModeName),
-                String.format(ILLEGAL_SUMMARIZATION_METHOD_ERROR_MESSAGE, this.scoringSummarizationModeName, ScoringSummarizationMode.legalSummarizationModes()));
+        Preconditions.checkArgument(
+              ScoringSummarizationMode.isLegalSummarizationMode(this.scoringSummarizationModeName),
+              String.format(ILLEGAL_SUMMARIZATION_METHOD_ERROR_MESSAGE, this.scoringSummarizationModeName,
+                    ScoringSummarizationMode.legalSummarizationModes()));
 
     }
 
@@ -60,24 +66,24 @@ public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRu
         List<Scores> scores = Collections.emptyList();
         if (rules != null && !rules.isEmpty()) {
             scores = rules.stream()
-                    .map(r -> {
-                        Map<String, Object> results = r.apply(message);
-                        if (results != null) {
-                            Object score = results.get(RESULT_SCORE);
-                            if (!(score instanceof Double)){
-                                score = new Double(String.valueOf(score));
-                            }
-                            return Scores.builder()
-                                    .ruleId(r.getId())
-                                    .score((Double) score)
-                                    .reason((String) results.get(RESULT_REASON))
-                                    .build();
-                        } else {
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                  .map(r -> {
+                      Map<String, Object> results = r.apply(message);
+                      if (results != null) {
+                          Object score = results.get(RESULT_SCORE);
+                          if (!(score instanceof Double)) {
+                              score = new Double(String.valueOf(score));
+                          }
+                          return Scores.builder()
+                                .ruleId(r.getId())
+                                .score((Double) score)
+                                .reason((String) results.get(RESULT_REASON))
+                                .build();
+                      } else {
+                          return null;
+                      }
+                  })
+                  .filter(Objects::nonNull)
+                  .collect(Collectors.toList());
 
             //TODO remove if not needed. Was unused, which resulted to additional calculations for each message
             //DoubleSummaryStatistics scoreSummary = scores.stream().collect(Collectors.summarizingDouble(s -> s.getScore()));
@@ -89,13 +95,14 @@ public class ScoringProcessFunction extends DynamicRuleProcessFunction<ScoringRu
         collector.collect(scoreMessage(message, scores, scoringSummarizationMode));
     }
 
-    public static ScoredMessage scoreMessage(Message message, List<Scores> scores, ScoringSummarizationMode summarizationMode) {
+    public static ScoredMessage scoreMessage(Message message, List<Scores> scores,
+                                             ScoringSummarizationMode summarizationMode) {
         final List<Double> scoreValues = scores.stream().map(Scores::getScore).collect(Collectors.toList());
         return ScoredMessage.builder()
-                .message(message)
-                .cyberScoresDetails(scores)
-                .cyberScore(summarizationMode.calculateScore(scoreValues))
-                .build();
+              .message(message)
+              .cyberScoresDetails(scores)
+              .cyberScore(summarizationMode.calculateScore(scoreValues))
+              .build();
     }
 
 }

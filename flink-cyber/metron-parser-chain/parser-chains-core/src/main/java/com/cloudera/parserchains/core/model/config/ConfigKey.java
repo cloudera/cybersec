@@ -13,12 +13,10 @@
 package com.cloudera.parserchains.core.model.config;
 
 import com.cloudera.parserchains.core.Regex;
+import java.io.Serializable;
+import java.util.Optional;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Optional;
 
 /**
  * A {@link ConfigName} is associated with one or more key/value pairs representing
@@ -31,7 +29,7 @@ import java.util.Optional;
  *
  * <p>Effectively, a {@link ConfigName} is associated with a Map<{@link ConfigKey}, {@link ConfigValue}>
  * of values. This relationship can be seen in the parser's primary configuration method;
- * {@link com.cloudera.parserchains.core.Parser#configure(ConfigName, Map<ConfigKey, ConfigValue>)}.
+ * {@code com.cloudera.parserchains.core.Parser#configure(ConfigName, Map(ConfigKey, ConfigValue))}.
  */
 public class ConfigKey implements Serializable {
 
@@ -67,7 +65,7 @@ public class ConfigKey implements Serializable {
      * Private constructor.  See {@link #builder()}.
      */
     private ConfigKey(Builder builder) {
-        if(!isValidRegex.matches(builder.key)) {
+        if (!isValidRegex.matches(builder.key)) {
             throw new IllegalArgumentException(String.format("Invalid config key: '%s'", builder.key));
         }
         this.key = builder.key;
@@ -102,22 +100,22 @@ public class ConfigKey implements Serializable {
         }
         ConfigKey that = (ConfigKey) o;
         return new EqualsBuilder()
-                .append(key, that.key)
-                .isEquals();
+              .append(key, that.key)
+              .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(key)
-                .toHashCode();
+              .append(key)
+              .toHashCode();
     }
 
     @Override
     public String toString() {
-        return "ConfigKey{" +
-                "key='" + key + '\'' +
-                '}';
+        return "ConfigKey{"
+               + "key='" + key + '\''
+               + '}';
     }
 
     public static class Builder {
@@ -131,6 +129,8 @@ public class ConfigKey implements Serializable {
         }
 
         /**
+         * key setter.
+         *
          * @param key A unique key used to identify the configuration element.
          */
         public Builder key(String key) {
@@ -139,6 +139,8 @@ public class ConfigKey implements Serializable {
         }
 
         /**
+         * label setter.
+         *
          * @param label A brief label that can be shown to the user.
          */
         public Builder label(String label) {
@@ -148,6 +150,8 @@ public class ConfigKey implements Serializable {
         }
 
         /**
+         * description setter.
+         *
          * @param description A description of the configuration element.
          */
         public Builder description(String description) {

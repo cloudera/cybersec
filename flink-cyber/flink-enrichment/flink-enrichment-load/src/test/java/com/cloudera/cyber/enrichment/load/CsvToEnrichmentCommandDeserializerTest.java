@@ -7,16 +7,19 @@ import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentConfig;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentFieldsConfig;
 import com.google.common.collect.ImmutableMap;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import org.apache.flink.api.common.io.InputStreamFSInputWrapper;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.file.src.reader.StreamFormat;
 import org.apache.flink.formats.csv.CsvReaderFormat;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.*;
 
 public class CsvToEnrichmentCommandDeserializerTest {
 
@@ -43,13 +46,13 @@ public class CsvToEnrichmentCommandDeserializerTest {
 
         String columns = "rank,TldRank,domain,TLD,RefSubNets,RefIPs,IDN_Domain,IDN_TLD,PrevGlobalRank,PrevTldRank,PrevRefSubNets,PrevRefIPs";
 
-        List<EnrichmentCommand> expectedCommands = Collections.singletonList(EnrichmentCommand.builder().
-                type(CommandType.ADD).
-                payload(EnrichmentEntry.builder().
-                        type(TEST_ENRICHMENT_NAME).
-                        key("facebook.com").
-                        entries(ImmutableMap.of(MM_VALUE_FIELD, "1")).ts(MessageUtils.getCurrentTimestamp()).build()).
-                build());
+        List<EnrichmentCommand> expectedCommands = Collections.singletonList(EnrichmentCommand.builder()
+                .type(CommandType.ADD)
+                .payload(EnrichmentEntry.builder()
+                        .type(TEST_ENRICHMENT_NAME)
+                        .key("facebook.com")
+                        .entries(ImmutableMap.of(MM_VALUE_FIELD, "1")).ts(MessageUtils.getCurrentTimestamp()).build())
+                .build());
         testCSVFormat(false, columns, MAJESTIC_MILLION_ENRICHMENT_CONFIG, "1,1,facebook.com,com,494155,2890130,facebook.com,com,1,1,493314,2868293\n", expectedCommands );
 
     }
@@ -59,14 +62,14 @@ public class CsvToEnrichmentCommandDeserializerTest {
 
         String columns = "rank,TldRank,domain,TLD,RefSubNets,RefIPs,IDN_Domain,IDN_TLD,PrevGlobalRank,PrevTldRank,PrevRefSubNets,PrevRefIPs";
 
-        String csv = "1,1,facebook.com,com,494155,2890130,facebook.com,com,1,1,493314,2868293\n" +
-                     "5,5,instagram.com,com,354772,1748958,instagram.com,com,5,5,353741,1732258\n";
+        String csv = "1,1,facebook.com,com,494155,2890130,facebook.com,com,1,1,493314,2868293\n"
+                     + "5,5,instagram.com,com,354772,1748958,instagram.com,com,5,5,353741,1732258\n";
 
         List<EnrichmentCommand>  expectedCommands = new ArrayList<>();
-        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder().
-                type(TEST_ENRICHMENT_NAME).key("facebook.com").entries(ImmutableMap.of(MM_VALUE_FIELD, "1")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
-        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder().
-                type(TEST_ENRICHMENT_NAME).key("instagram.com").entries(ImmutableMap.of(MM_VALUE_FIELD, "5")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
+        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder()
+                .type(TEST_ENRICHMENT_NAME).key("facebook.com").entries(ImmutableMap.of(MM_VALUE_FIELD, "1")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
+        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder()
+                .type(TEST_ENRICHMENT_NAME).key("instagram.com").entries(ImmutableMap.of(MM_VALUE_FIELD, "5")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
         testCSVFormat(false, columns, MAJESTIC_MILLION_ENRICHMENT_CONFIG, csv, expectedCommands );
     }
 
@@ -75,14 +78,14 @@ public class CsvToEnrichmentCommandDeserializerTest {
 
         String columns = "rank,,domain,,,,,,,,,";
 
-        String csv = "1,1,facebook.com,com,494155,2890130,facebook.com,com,1,1,493314,2868293\n" +
-                "5,5,instagram.com,com,354772,1748958,instagram.com,com,5,5,353741,1732258\n";
+        String csv = "1,1,facebook.com,com,494155,2890130,facebook.com,com,1,1,493314,2868293\n"
+                + "5,5,instagram.com,com,354772,1748958,instagram.com,com,5,5,353741,1732258\n";
 
         List<EnrichmentCommand>  expectedCommands = new ArrayList<>();
-        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder().
-                type(TEST_ENRICHMENT_NAME).key("facebook.com").entries(ImmutableMap.of(MM_VALUE_FIELD, "1")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
-        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder().
-                type(TEST_ENRICHMENT_NAME).key("instagram.com").entries(ImmutableMap.of(MM_VALUE_FIELD, "5")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
+        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder()
+                .type(TEST_ENRICHMENT_NAME).key("facebook.com").entries(ImmutableMap.of(MM_VALUE_FIELD, "1")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
+        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder()
+                .type(TEST_ENRICHMENT_NAME).key("instagram.com").entries(ImmutableMap.of(MM_VALUE_FIELD, "5")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
         testCSVFormat(false, columns, MAJESTIC_MILLION_ENRICHMENT_CONFIG, csv, expectedCommands );
     }
 
@@ -91,15 +94,15 @@ public class CsvToEnrichmentCommandDeserializerTest {
 
         String columns = "rank,,domain,,,,,,,,,";
 
-        String csv = columns + "\n" +
-                "1,1,facebook.com,com,494155,2890130,facebook.com,com,1,1,493314,2868293\n" +
-                "5,5,instagram.com,com,354772,1748958,instagram.com,com,5,5,353741,1732258\n";
+        String csv = columns + "\n"
+                + "1,1,facebook.com,com,494155,2890130,facebook.com,com,1,1,493314,2868293\n"
+                + "5,5,instagram.com,com,354772,1748958,instagram.com,com,5,5,353741,1732258\n";
 
         List<EnrichmentCommand>  expectedCommands = new ArrayList<>();
-        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder().
-                type(TEST_ENRICHMENT_NAME).key("facebook.com").entries(ImmutableMap.of(MM_VALUE_FIELD, "1")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
-        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder().
-                type(TEST_ENRICHMENT_NAME).key("instagram.com").entries(ImmutableMap.of(MM_VALUE_FIELD, "5")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
+        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder()
+                .type(TEST_ENRICHMENT_NAME).key("facebook.com").entries(ImmutableMap.of(MM_VALUE_FIELD, "1")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
+        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder()
+                .type(TEST_ENRICHMENT_NAME).key("instagram.com").entries(ImmutableMap.of(MM_VALUE_FIELD, "5")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
         testCSVFormat(true, columns, MAJESTIC_MILLION_ENRICHMENT_CONFIG, csv, expectedCommands );
     }
 
@@ -108,15 +111,15 @@ public class CsvToEnrichmentCommandDeserializerTest {
 
         String columns = "source,indicator_type,indicator,score";
 
-        String csv = columns + "\n" +
-                "abuse,IPADDRESS,1.1.1.1,45.0\n" +
-                "vendor,DOMAIN,this.is.a.bad.one.xxx,99.0\n";
+        String csv = columns + "\n"
+                + "abuse,IPADDRESS,1.1.1.1,45.0\n"
+                + "vendor,DOMAIN,this.is.a.bad.one.xxx,99.0\n";
 
         List<EnrichmentCommand>  expectedCommands = new ArrayList<>();
-        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder().
-                type(TEST_ENRICHMENT_NAME).key("1.1.1.1:IPADDRESS").entries(ImmutableMap.of(TI_SOURCE_FIELD, "abuse", TI_SCORE_FIELD, "45.0")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
-        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder().
-                type(TEST_ENRICHMENT_NAME).key("this.is.a.bad.one.xxx:DOMAIN").entries(ImmutableMap.of(TI_SOURCE_FIELD, "vendor", TI_SCORE_FIELD, "99.0")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
+        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder()
+                .type(TEST_ENRICHMENT_NAME).key("1.1.1.1:IPADDRESS").entries(ImmutableMap.of(TI_SOURCE_FIELD, "abuse", TI_SCORE_FIELD, "45.0")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
+        expectedCommands.add(EnrichmentCommand.builder().type(CommandType.ADD).payload(EnrichmentEntry.builder()
+                .type(TEST_ENRICHMENT_NAME).key("this.is.a.bad.one.xxx:DOMAIN").entries(ImmutableMap.of(TI_SOURCE_FIELD, "vendor", TI_SCORE_FIELD, "99.0")).ts(MessageUtils.getCurrentTimestamp()).build()).build());
         testCSVFormat(true, columns, TI_ENRICHMENT_CONFIG, csv, expectedCommands );
     }
 

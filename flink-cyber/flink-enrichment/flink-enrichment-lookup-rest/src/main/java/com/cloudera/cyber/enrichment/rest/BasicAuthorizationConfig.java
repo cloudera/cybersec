@@ -12,13 +12,17 @@
 
 package com.cloudera.cyber.enrichment.rest;
 
-import lombok.*;
+import java.nio.charset.StandardCharsets;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.flink.util.Preconditions;
 import org.apache.http.client.config.AuthSchemes;
-
-import java.nio.charset.StandardCharsets;
 
 /**
  * Credentials required for HTTP basic authorization.
@@ -29,10 +33,14 @@ import java.nio.charset.StandardCharsets;
 @Builder
 @Data
 public class BasicAuthorizationConfig extends EndpointAuthorizationConfig {
-    /** template resulting in the user name of the rest service basic auth credential. */
+    /**
+     * template resulting in the user name of the rest service basic auth credential.
+     */
     private String userNameTemplate;
 
-    /** template resulting in the password of the rest service basic auth credential. */
+    /**
+     * template resulting in the password of the rest service basic auth credential.
+     */
     private String passwordTemplate;
 
 
@@ -41,7 +49,7 @@ public class BasicAuthorizationConfig extends EndpointAuthorizationConfig {
         Preconditions.checkNotNull(userNameTemplate);
         Preconditions.checkNotNull(passwordTemplate);
         byte[] credentials = Base64.encodeBase64(String.join(":", stringSubstitutor.replace(userNameTemplate),
-                stringSubstitutor.replace(passwordTemplate)).getBytes(StandardCharsets.ISO_8859_1));
+              stringSubstitutor.replace(passwordTemplate)).getBytes(StandardCharsets.ISO_8859_1));
         return String.join(" ", AuthSchemes.BASIC, new String(credentials));
     }
 }

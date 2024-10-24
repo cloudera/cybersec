@@ -1,9 +1,6 @@
 package org.apache.metron.stellar.common.utils.hashing.tlsh;
 
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.T0;
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.T11;
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.T13;
@@ -17,11 +14,15 @@ import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHUtil.hexTo
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHUtil.lCapturing;
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHUtil.swapNibble;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
 public class TLSHBuilder {
     private SlidingWindow slidingWindow;
     private final CHECKSUM_OPTION checksumOption;
     private final BUCKET_OPTION bucketOption;
     private final int[] checksum;
+    @SuppressWarnings("checkstyle:MemberName")
     private final int[] aBucket;
 
 
@@ -86,7 +87,7 @@ public class TLSHBuilder {
                 break;
             default:
                 throw new IllegalArgumentException(
-                        String.format("Illegal hash buffer length: %d, must be one of 35,37,67,69", hash.length));
+                      String.format("Illegal hash buffer length: %d, must be one of 35,37,67,69", hash.length));
         }
         final ByteBuffer buf = ByteBuffer.wrap(hash);
         final int[] checksum = new int[checksumLength];
@@ -168,6 +169,7 @@ public class TLSHBuilder {
     }
 
 
+    @SuppressWarnings("checkstyle:TypeName")
     public enum CHECKSUM_OPTION {
         CHECKSUM_1(1), CHECKSUM_3(3);
 
@@ -186,6 +188,7 @@ public class TLSHBuilder {
         }
     }
 
+    @SuppressWarnings("checkstyle:TypeName")
     public enum BUCKET_OPTION {
         BUCKET_128(128), BUCKET_256(256);
 

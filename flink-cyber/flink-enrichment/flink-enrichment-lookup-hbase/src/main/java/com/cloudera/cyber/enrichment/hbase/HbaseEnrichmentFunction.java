@@ -12,19 +12,23 @@
 
 package com.cloudera.cyber.enrichment.hbase;
 
-import org.apache.flink.table.functions.ScalarFunction;
-import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.*;
-import org.apache.hadoop.hbase.util.Bytes;
+import static java.util.stream.Collectors.toMap;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-
-import static java.util.stream.Collectors.toMap;
+import org.apache.flink.table.functions.ScalarFunction;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.util.Bytes;
 
 /**
- * Return a lookup for a given Hbase enrichment at a given time
+ * Return a lookup for a given Hbase enrichment at a given time.
+ *
  * <p>
  * This function also performs local positive result caching
  *
@@ -44,16 +48,16 @@ public class HbaseEnrichmentFunction extends ScalarFunction {
             Table table = connection.getTable(hbaseTable);
             Result result = table.get(get);
 
-            if (!result.getExists())
+            if (!result.getExists()) {
                 return Collections.emptyMap();
+            }
 
             return result.getFamilyMap(cf).entrySet().stream()
-                    .collect(toMap(
-                            k -> new String(k.getKey()),
-                            v -> new String(v.getValue())
-                    ));
-        } catch (
-                IOException e) {
+                         .collect(toMap(
+                               k -> new String(k.getKey()),
+                               v -> new String(v.getValue())
+                         ));
+        } catch (IOException e) {
             return Collections.emptyMap();
         }
     }

@@ -7,8 +7,10 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -39,43 +41,43 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class MainConfiguration {
 
-  @Bean
-  public com.fasterxml.jackson.databind.ObjectMapper objectMapper() {
-    return JSONUtils.INSTANCE.getMapper();
-  }
+    @Bean
+    public com.fasterxml.jackson.databind.ObjectMapper objectMapper() {
+        return JSONUtils.INSTANCE.getMapper();
+    }
 
-  @Bean
-  public AppProperties appProperties() {
-    return new AppProperties();
-  }
+    @Bean
+    public AppProperties appProperties() {
+        return new AppProperties();
+    }
 
-  @Bean
-  public IDGenerator<?> idGenerator() {
-    return new UUIDGenerator();
-  }
+    @Bean
+    public IDGenerator<?> idGenerator() {
+        return new UUIDGenerator();
+    }
 
-  @Bean
-  public ParserCatalog parserCatalog() {
-    return new ClassIndexParserCatalog();
-  }
+    @Bean
+    public ParserCatalog parserCatalog() {
+        return new ClassIndexParserCatalog();
+    }
 
-  @Bean
-  public ParserBuilder parserBuilder() {
-    return new ReflectiveParserBuilder();
-  }
+    @Bean
+    public ParserBuilder parserBuilder() {
+        return new ReflectiveParserBuilder();
+    }
 
-  @Bean
-  public ObjectMapper<ParserSummary, ParserInfo> mapper() {
-    return new ParserSummaryMapper();
-  }
+    @Bean
+    public ObjectMapper<ParserSummary, ParserInfo> mapper() {
+        return new ParserSummaryMapper();
+    }
 
-  @Bean
-  public ChainRunner chainRunner() {
-    return new DefaultChainRunner();
-  }
+    @Bean
+    public ChainRunner chainRunner() {
+        return new DefaultChainRunner();
+    }
 
-  @Bean
-  public ChainBuilder chainBuilder() {
-    return new DefaultChainBuilder(parserBuilder(), parserCatalog());
-  }
+    @Bean
+    public ChainBuilder chainBuilder() {
+        return new DefaultChainBuilder(parserBuilder(), parserCatalog());
+    }
 }

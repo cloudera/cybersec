@@ -20,6 +20,13 @@ import com.cloudera.cyber.generator.ThreatGeneratorMap;
 import com.cloudera.cyber.libs.networking.IPLocal;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -29,21 +36,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Preconditions;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 public abstract class CaracalGeneratorFlinkJob {
 
@@ -61,7 +53,9 @@ public abstract class CaracalGeneratorFlinkJob {
     protected static final String DPI_SMTP_TOPIC = "dpi_smtp";
     protected static final String GENERATOR_AVRO_TOPIC = "generator.avro";
     protected static final String THREAT_TOPIC_NAME = "threats";
-    protected static final String AVRO_WITH_CUSTOM_CONFIG_ERROR = String.format("'%s' should not be specified when '%s' is true.  Select either a custom generation config file or generate the default avro.", PARAMS_GENERATOR_CONFIG, PARAMS_SCHEMA);
+    protected static final String AVRO_WITH_CUSTOM_CONFIG_ERROR = String.format(
+          "'%s' should not be specified when '%s' is true.  Select either a custom generation config file or generate the default avro.",
+          PARAMS_GENERATOR_CONFIG, PARAMS_SCHEMA);
 
     public StreamExecutionEnvironment createPipeline(ParameterTool params) throws IOException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -84,9 +78,10 @@ public abstract class CaracalGeneratorFlinkJob {
         GeneratorConfig generatorConfig = new GeneratorConfig();
 
         if (avroGeneratorFlag && generatorConfigFile == null) {
-           generatorConfig.setGenerationSources(Collections
-                    .singletonList(
-                            new GenerationSource("Netflow/netflow_avro_sample1.json", GENERATOR_AVRO_TOPIC, SCHEMA_PATH, 1.0)));
+            generatorConfig.setGenerationSources(Collections
+                  .singletonList(
+                        new GenerationSource("Netflow/netflow_avro_sample1.json", GENERATOR_AVRO_TOPIC, SCHEMA_PATH,
+                              1.0)));
         } else if (generatorConfigFile == null) {
             generatorConfig.setGenerationSources(getNetflowSampleMap());
         } else {
@@ -94,9 +89,9 @@ public abstract class CaracalGeneratorFlinkJob {
             Path configPath = new Path(generatorConfigFile);
             try (InputStream configStream = configPath.getFileSystem().open(configPath)) {
                 generatorConfig = new ObjectMapper().readValue(
-                        configStream,
-                        new TypeReference<GeneratorConfig>() {
-                        });
+                      configStream,
+                      new TypeReference<GeneratorConfig>() {
+                      });
             }
         }
         generatorConfig.open();
@@ -105,33 +100,36 @@ public abstract class CaracalGeneratorFlinkJob {
     }
 
     private SingleOutputStreamOperator<Tuple2<String, Integer>> generateMetrics(
-            SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput) {
+          SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput) {
         return generatedInput
-                .map(new MapFunction<Tuple2<String, byte[]>, Tuple2<String,Integer>>() {
-                    @Override
-                    public Tuple2<String, Integer> map(Tuple2<String, byte[]> stringStringTuple2) {
-                        return Tuple2.of(stringStringTuple2.f0, 1);
-                    }
-                })
-                .keyBy(value -> value.f0)
-                .window(TumblingProcessingTimeWindows.of(Time.seconds(30)))
-                .sum(1);
+              .map(new MapFunction<Tuple2<String, byte[]>, Tuple2<String, Integer>>() {
+                  @Override
+                  public Tuple2<String, Integer> map(Tuple2<String, byte[]> stringStringTuple2) {
+                      return Tuple2.of(stringStringTuple2.f0, 1);
+                  }
+              })
+              .keyBy(value -> value.f0)
+              .window(TumblingProcessingTimeWindows.of(Time.seconds(30)))
+              .sum(1);
     }
 
     private void generateRandomThreatResults(ParameterTool params,
-            SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput, GeneratorConfig generatorConfig) {
+                                             SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput,
+                                             GeneratorConfig generatorConfig) {
 
         if (params.get(PARAMS_GENERATOR_CONFIG) == null) {
             // add random threat intelligence for a sample of the generated IPs
             IPLocal localIp = new IPLocal();
 
-            List<String> characterTopics = generatorConfig.getGenerationSources().stream().filter(gs -> Objects.isNull(gs.getOutputAvroSchema())).
-                    map(GenerationSource::getTopic).collect(Collectors.toList());
-            SingleOutputStreamOperator<Tuple2<String, byte[]>> threats = generatedInput.filter(t -> characterTopics.contains(t.f0))
-                    .map(new GetIpMap())
-                    .filter(f -> f != null && !localIp.eval(f))
-                    .filter(new RandomSampler<>(THREAT_PROBABILITY))
-                    .map(new ThreatGeneratorMap(THREAT_TOPIC_NAME));
+            List<String> characterTopics = generatorConfig.getGenerationSources().stream()
+                                                          .filter(gs -> Objects.isNull(gs.getOutputAvroSchema()))
+                                                          .map(GenerationSource::getTopic).collect(Collectors.toList());
+            SingleOutputStreamOperator<Tuple2<String, byte[]>> threats =
+                  generatedInput.filter(t -> characterTopics.contains(t.f0))
+                                .map(new GetIpMap())
+                                .filter(f -> f != null && !localIp.eval(f))
+                                .filter(new RandomSampler<>(THREAT_PROBABILITY))
+                                .map(new ThreatGeneratorMap(THREAT_TOPIC_NAME));
             writeResults(params, threats);
         }
     }
@@ -145,30 +143,36 @@ public abstract class CaracalGeneratorFlinkJob {
         outputs.add(new GenerationSource("Netflow/netflow_sample_b.json", NETFLOW_B_TOPIC, null, 1.0));
         outputs.add(new GenerationSource("Netflow/netflow_sample_b_error.json", NETFLOW_B_TOPIC, null, 1.0));
 
-        outputs.add(new GenerationSource("DPI_Logs/Metadata_Module/http/http_sample_1.json", DPI_HTTP_TOPIC, null, 1.5));
-        outputs.add(new GenerationSource("DPI_Logs/Metadata_Module/http/http_sample_2.json", DPI_HTTP_TOPIC, null, 1.0));
-        outputs.add(new GenerationSource("DPI_Logs/Metadata_Module/http/http_sample_3.json", DPI_HTTP_TOPIC, null, 1.0));
-        outputs.add(new GenerationSource("DPI_Logs/Metadata_Module/http/http_sample_4.json", DPI_HTTP_TOPIC, null, 1.0));
+        outputs.add(
+              new GenerationSource("DPI_Logs/Metadata_Module/http/http_sample_1.json", DPI_HTTP_TOPIC, null, 1.5));
+        outputs.add(
+              new GenerationSource("DPI_Logs/Metadata_Module/http/http_sample_2.json", DPI_HTTP_TOPIC, null, 1.0));
+        outputs.add(
+              new GenerationSource("DPI_Logs/Metadata_Module/http/http_sample_3.json", DPI_HTTP_TOPIC, null, 1.0));
+        outputs.add(
+              new GenerationSource("DPI_Logs/Metadata_Module/http/http_sample_4.json", DPI_HTTP_TOPIC, null, 1.0));
 
         outputs.add(new GenerationSource("DPI_Logs/Metadata_Module/DNS/dns_sample_1.json", DPI_DNS_TOPIC, null, 1.0));
         outputs.add(new GenerationSource("DPI_Logs/Metadata_Module/DNS/dns_sample_2.json", DPI_DNS_TOPIC, null, 1.0));
         outputs.add(new GenerationSource("DPI_Logs/Metadata_Module/DNS/dns_sample_3.json", DPI_DNS_TOPIC, null, 1.0));
 
-        outputs.add(new GenerationSource("DPI_Logs/Metadata_Module/SMTP/smtp_sample_1.json", DPI_SMTP_TOPIC, null, 1.0));
+        outputs.add(
+              new GenerationSource("DPI_Logs/Metadata_Module/SMTP/smtp_sample_1.json", DPI_SMTP_TOPIC, null, 1.0));
         return outputs;
     }
 
     private SingleOutputStreamOperator<Tuple2<String, byte[]>> createSourceFromTemplateSource(ParameterTool params,
-            StreamExecutionEnvironment env, GeneratorConfig outputs) {
+                                                                                              StreamExecutionEnvironment env,
+                                                                                              GeneratorConfig outputs) {
         return env.addSource(new FreemarkerTemplateSource(
-                outputs, params.getLong(PARAMS_RECORDS_LIMIT, -1), params.getInt(PARAMS_EPS, DEFAULT_EPS)))
-                .name("Weighted Data Source");
+                        outputs, params.getLong(PARAMS_RECORDS_LIMIT, -1), params.getInt(PARAMS_EPS, DEFAULT_EPS)))
+                  .name("Weighted Data Source");
     }
 
     protected abstract void writeMetrics(ParameterTool params,
-            SingleOutputStreamOperator<Tuple2<String, Integer>> metrics);
+                                         SingleOutputStreamOperator<Tuple2<String, Integer>> metrics);
 
     protected abstract void writeResults(ParameterTool params,
-            SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput);
+                                         SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput);
 
 }

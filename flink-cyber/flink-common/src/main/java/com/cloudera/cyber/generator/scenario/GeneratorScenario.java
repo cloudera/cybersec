@@ -3,6 +3,11 @@ package com.cloudera.cyber.generator.scenario;
 import com.cloudera.cyber.generator.RandomGenerators;
 import com.cloudera.cyber.generator.Utils;
 import com.google.common.base.Preconditions;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.MappingIterator;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectReader;
@@ -10,15 +15,10 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.dataformat.csv.Csv
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.dataformat.csv.CsvParser;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.Map;
-
 
 public class GeneratorScenario {
-    protected final static String NOT_ENOUGH_LINES_ERROR = "Scenario CSV file must contain a header and at least one value line";
+    protected static final String NOT_ENOUGH_LINES_ERROR =
+          "Scenario CSV file must contain a header and at least one value line";
     private final List<String> lines;
     private final ObjectReader csvReader;
 
@@ -29,7 +29,7 @@ public class GeneratorScenario {
             List<String> lines = IOUtils.readLines(csvStream, Charset.defaultCharset());
             Preconditions.checkState(lines.size() >= 2, NOT_ENOUGH_LINES_ERROR);
             scenario = new GeneratorScenario(lines);
-         }
+        }
 
         return scenario;
     }
@@ -41,7 +41,7 @@ public class GeneratorScenario {
     }
 
     public Map<String, String> randomParameters() throws IOException {
-        int randomIndex = RandomGenerators.randomInt(1,lines.size() - 1);
+        int randomIndex = RandomGenerators.randomInt(1, lines.size() - 1);
         return csvReader.readValue(lines.get(randomIndex));
     }
 
@@ -50,16 +50,16 @@ public class GeneratorScenario {
         header.forEach(builder::addColumn);
         final CsvMapper mapper = new CsvMapper();
         return mapper
-                .readerForMapOf(String.class)
-                .with(builder.build());
+              .readerForMapOf(String.class)
+              .with(builder.build());
     }
 
     private List<String> readCsvHeader(String header) throws IOException {
         final CsvMapper mapper = new CsvMapper();
         MappingIterator<List<String>> it = mapper
-                .readerForListOf(String.class)
-                .with(CsvParser.Feature.WRAP_AS_ARRAY)
-                .readValues(header);
+              .readerForListOf(String.class)
+              .with(CsvParser.Feature.WRAP_AS_ARRAY)
+              .readValues(header);
 
         return it.nextValue();
     }

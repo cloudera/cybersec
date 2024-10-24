@@ -16,9 +16,8 @@ import com.maxmind.geoip2.model.CityResponse;
 import com.maxmind.geoip2.record.Country;
 import com.maxmind.geoip2.record.Location;
 import com.maxmind.geoip2.record.Subdivision;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.function.Function;
+import org.apache.commons.lang3.StringUtils;
 
 
 public interface GeoFields {
@@ -59,7 +58,7 @@ public interface GeoFields {
     static Object getState(CityResponse cityResponse) {
         Subdivision subdivision = cityResponse.getMostSpecificSubdivision();
         String stateName = null;
-        if (subdivision != null ) {
+        if (subdivision != null) {
             stateName = convertEmptyToNull(subdivision.getName());
         }
 
@@ -85,7 +84,8 @@ public interface GeoFields {
     }
 
     /**
-     * Converts null to empty string
+     * Converts null to empty string.
+     *
      * @param raw The raw object
      * @return Empty string if null, or the String value if not
      */

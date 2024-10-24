@@ -7,40 +7,43 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.metron.common.typosquat;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class TranspositionStrategy implements TyposquattingStrategy {
-  @Override
-  public Set<String> generateCandidates(String domain) {
+    @Override
+    public Set<String> generateCandidates(String domain) {
 
-    Set<String> ret = new HashSet<>();
-    for(int i = 0; i < domain.length()-1;++i) {
-      char nextC = domain.charAt(i+1);
-      char c = domain.charAt(i);
-      if(nextC != c) {
-        ret.add( domain.substring(0, i)
-               + nextC
-               + c
-               + domain.substring(i+2)
-               );
-      }
+        Set<String> ret = new HashSet<>();
+        for (int i = 0; i < domain.length() - 1; ++i) {
+            char nextC = domain.charAt(i + 1);
+            char c = domain.charAt(i);
+            if (nextC != c) {
+                ret.add(domain.substring(0, i)
+                        + nextC
+                        + c
+                        + domain.substring(i + 2)
+                );
+            }
+        }
+        return ret;
     }
-    return ret;
-  }
 
-  @Override
-  public String name() {
-    return "Transposition";
-  }
+    @Override
+    public String name() {
+        return "Transposition";
+    }
 }

@@ -25,7 +25,7 @@ class DateFileFilter extends AbstractDateFilter {
 
     @Override
     protected boolean accept(FileStatus status) {
-        return !status.isDirectory() &&
-                status.getModificationTime() < earliestAllowed;
+        return !status.isDirectory()
+               && status.getModificationTime() < earliestAllowed;
     }
 }

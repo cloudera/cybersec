@@ -13,10 +13,9 @@
 package com.cloudera.parserchains.core.catalog;
 
 import com.cloudera.parserchains.core.Parser;
+import java.util.Objects;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import java.util.Objects;
 
 /**
  * Describes a {@link Parser} that was discovered using a {@link ParserCatalog}.
@@ -70,19 +69,19 @@ public class ParserInfo {
         }
         ParserInfo that = (ParserInfo) o;
         return new EqualsBuilder()
-                .append(name, that.name)
-                .append(description, that.description)
-                .append(parserClass, that.parserClass)
-                .isEquals();
+              .append(name, that.name)
+              .append(description, that.description)
+              .append(parserClass, that.parserClass)
+              .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(name)
-                .append(description)
-                .append(parserClass)
-                .toHashCode();
+              .append(name)
+              .append(description)
+              .append(parserClass)
+              .toHashCode();
     }
 
     public static class Builder {

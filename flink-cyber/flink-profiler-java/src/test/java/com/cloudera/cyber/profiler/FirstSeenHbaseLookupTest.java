@@ -24,14 +24,18 @@ import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.apache.flink.metrics.SimpleCounter;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.*;
 
 public class FirstSeenHbaseLookupTest extends FirstSeenHbaseLookup {
 
@@ -135,11 +139,11 @@ public class FirstSeenHbaseLookupTest extends FirstSeenHbaseLookup {
     }
 
     private static ProfileGroupConfig createProfileGroupConfig() {
-        ArrayList<ProfileMeasurementConfig> measurements = Lists.newArrayList(ProfileMeasurementConfig.builder().aggregationMethod(ProfileAggregationMethod.FIRST_SEEN).resultExtensionName(FIRST_SEEN_RESULT_NAME).
-                firstSeenExpirationDuration(5L).firstSeenExpirationDurationUnit("SECONDS").build());
-        return ProfileGroupConfig.builder().profileGroupName(PROFILE_GROUP_NAME).
-                keyFieldNames(Lists.newArrayList(KEY_1, KEY_2)).periodDuration(1L).
-                periodDurationUnit("SECONDS").sources(Lists.newArrayList("ANY")).measurements(measurements).build();
+        ArrayList<ProfileMeasurementConfig> measurements = Lists.newArrayList(ProfileMeasurementConfig.builder().aggregationMethod(ProfileAggregationMethod.FIRST_SEEN).resultExtensionName(FIRST_SEEN_RESULT_NAME)
+                .firstSeenExpirationDuration(5L).firstSeenExpirationDurationUnit("SECONDS").build());
+        return ProfileGroupConfig.builder().profileGroupName(PROFILE_GROUP_NAME)
+                .keyFieldNames(Lists.newArrayList(KEY_1, KEY_2)).periodDuration(1L)
+                .periodDurationUnit("SECONDS").sources(Lists.newArrayList("ANY")).measurements(measurements).build();
     }
 
     protected void connectHbase() {

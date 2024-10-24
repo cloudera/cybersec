@@ -17,6 +17,7 @@
  *  limitations under the License.
  *
  */
+
 package org.apache.metron.stellar.common.shell;
 
 import java.util.Optional;
@@ -26,170 +27,185 @@ import java.util.Optional;
  */
 public class StellarResult {
 
-  /**
-   * Indicates that a Stellar expression resulted in either
-   * success or an error.
-   */
-  enum Status {
-    SUCCESS,
-    ERROR,
-    TERMINATE
-  }
+    /**
+     * Indicates that a Stellar expression resulted in either
+     * success or an error.
+     */
+    enum Status {
+        SUCCESS,
+        ERROR,
+        TERMINATE
+    }
 
-  /**
-   * Indicates either success or failure of executing the expression.
-   */
-  private Status status;
+    /**
+     * Indicates either success or failure of executing the expression.
+     */
+    private final Status status;
 
-  /**
-   * The result of executing the expression.  Only valid when execution is successful.
-   */
-  private Optional<Object> value;
+    /**
+     * The result of executing the expression.  Only valid when execution is successful.
+     */
+    private final Optional<Object> value;
 
-  /**
-   * The error that occurred when executing the expression.  Only valid when execution results in an error.
-   */
-  private Optional<Throwable> exception;
+    /**
+     * The error that occurred when executing the expression.  Only valid when execution results in an error.
+     */
+    private final Optional<Throwable> exception;
 
-  /**
-   * Indicates if the value is null;
-   *
-   * A null is a valid result, but cannot be unwrapped from an Optional.  Because of this
-   * a boolean is used to indicate if the result is a success and the value is null.
-   */
-  private boolean isValueNull;
+    /**
+     * Indicates if the value is null;
+     *
+     * <p>
+     * A null is a valid result, but cannot be unwrapped from an Optional.  Because of this
+     * a boolean is used to indicate if the result is a success and the value is null.
+     */
+    private final boolean isValueNull;
 
-  /**
-   * Private constructor to construct a result indicate success. Use the static methods; success.
-   *
-   * @param status Indicates success or failure.
-   * @param value The value of executing the expression.
-   */
-  private StellarResult(Status status, Object value) {
-    this.status = status;
-    this.value = Optional.ofNullable(value);
-    this.exception = Optional.empty();
-    this.isValueNull = (value == null) && (status == Status.SUCCESS);
-  }
+    /**
+     * Private constructor to construct a result indicate success. Use the static methods; success.
+     *
+     * @param status Indicates success or failure.
+     * @param value  The value of executing the expression.
+     */
+    private StellarResult(Status status, Object value) {
+        this.status = status;
+        this.value = Optional.ofNullable(value);
+        this.exception = Optional.empty();
+        this.isValueNull = (value == null) && (status == Status.SUCCESS);
+    }
 
-  /**
-   * Private constructor to construct a result indicating an error occurred. Use the static method; error.
-   *
-   * @param status Indicates success or failure.
-   * @param exception The exception that occurred when executing the expression.
-   */
-  private StellarResult(Status status, Throwable exception) {
-    this.status = status;
-    this.value = Optional.empty();
-    this.exception = Optional.of(exception);
-    this.isValueNull = false;
-  }
+    /**
+     * Private constructor to construct a result indicating an error occurred. Use the static method; error.
+     *
+     * @param status    Indicates success or failure.
+     * @param exception The exception that occurred when executing the expression.
+     */
+    private StellarResult(Status status, Throwable exception) {
+        this.status = status;
+        this.value = Optional.empty();
+        this.exception = Optional.of(exception);
+        this.isValueNull = false;
+    }
 
-  /**
-   * Create a result indicating the execution of an expression was successful.
-   *
-   * @param value The result of executing the expression.
-   * @return A Result indicating success.
-   */
-  public static StellarResult success(Object value) {
-    return new StellarResult(Status.SUCCESS, value);
-  }
+    /**
+     * Create a result indicating the execution of an expression was successful.
+     *
+     * @param value The result of executing the expression.
+     * @return A Result indicating success.
+     */
+    public static StellarResult success(Object value) {
+        return new StellarResult(Status.SUCCESS, value);
+    }
 
-  /**
-   * Create a result indicating that the execution of an expression was not successful.
-   *
-   * @param exception The exception that occurred while executing the expression.
-   * @return A Result indicating that an error occurred.
-   */
-  public static StellarResult error(Throwable exception) {
-    return new StellarResult(Status.ERROR, exception);
-  }
+    /**
+     * Create a result indicating that the execution of an expression was not successful.
+     *
+     * @param exception The exception that occurred while executing the expression.
+     * @return A Result indicating that an error occurred.
+     */
+    public static StellarResult error(Throwable exception) {
+        return new StellarResult(Status.ERROR, exception);
+    }
 
-  /**
-   * Create a result indicating that the execution of an expression was not successful.
-   *
-   * @param errorMessage An error message.
-   * @return A Result indicating that an error occurred.
-   */
-  public static StellarResult error(String errorMessage) {
-    return new StellarResult(Status.ERROR, new IllegalArgumentException(errorMessage));
-  }
+    /**
+     * Create a result indicating that the execution of an expression was not successful.
+     *
+     * @param errorMessage An error message.
+     * @return A Result indicating that an error occurred.
+     */
+    public static StellarResult error(String errorMessage) {
+        return new StellarResult(Status.ERROR, new IllegalArgumentException(errorMessage));
+    }
 
-  /**
-   * Indicates an empty result; one that is successful yet has no result.  For example,
-   * executing a comment.
-   *
-   * @return An empty result.
-   */
-  public static StellarResult noop() {
-    return new StellarResult(Status.SUCCESS, "");
-  }
+    /**
+     * Indicates an empty result; one that is successful yet has no result.  For example,
+     * executing a comment.
+     *
+     * @return An empty result.
+     */
+    public static StellarResult noop() {
+        return new StellarResult(Status.SUCCESS, "");
+    }
 
-  /**
-   * Indicates that the user would like to terminate the session.
-   *
-   * @return A result indicating that the session should be terminated.
-   */
-  public static StellarResult terminate() {
-    return new StellarResult(Status.TERMINATE, "");
-  }
+    /**
+     * Indicates that the user would like to terminate the session.
+     *
+     * @return A result indicating that the session should be terminated.
+     */
+    public static StellarResult terminate() {
+        return new StellarResult(Status.TERMINATE, "");
+    }
 
-  /**
-   * @return True, if the result indicates success.  Otherwise, false.
-   */
-  public boolean isSuccess() {
-    return status == Status.SUCCESS;
-  }
+    /**
+     * Success status getter.
+     *
+     * @return True, if the result indicates success.  Otherwise, false.
+     */
+    public boolean isSuccess() {
+        return status == Status.SUCCESS;
+    }
 
-  /**
-   * @return True, if the result indicates an error.  Otherwise, false.
-   */
-  public boolean isError() {
-    return status == Status.ERROR;
-  }
+    /**
+     * Error status getter.
+     *
+     * @return True, if the result indicates an error.  Otherwise, false.
+     */
+    public boolean isError() {
+        return status == Status.ERROR;
+    }
 
-  /**
-   * @return True, if status indicates terminate was requested.  Otherwise, false.
-   */
-  public boolean isTerminate() {
-    return status == Status.TERMINATE;
-  }
+    /**
+     * Terminate status getter.
+     *
+     * @return True, if status indicates terminate was requested.  Otherwise, false.
+     */
+    public boolean isTerminate() {
+        return status == Status.TERMINATE;
+    }
 
-  /**
-   * @return True, if the value is null.  Otherwise, false.
-   */
-  public boolean isValueNull() {
-    return isValueNull;
-  }
+    /**
+     * isValueNull getter.
+     *
+     * @return True, if the value is null.  Otherwise, false.
+     */
+    public boolean isValueNull() {
+        return isValueNull;
+    }
 
-  /**
-   * @return The status which indicates success or failure.
-   */
-  public Status getStatus() {
-    return status;
-  }
+    /**
+     * Status getter.
+     *
+     * @return The status which indicates success or failure.
+     */
+    public Status getStatus() {
+        return status;
+    }
 
-  /**
-   * @return An optional value that only applies when status is success.
-   */
-  public Optional<Object> getValue() {
-    return value;
-  }
+    /**
+     * Value getter.
+     *
+     * @return An optional value that only applies when status is success.
+     */
+    public Optional<Object> getValue() {
+        return value;
+    }
 
-  /**
-   * @return An optional exception that only applies when status is error.
-   */
-  public Optional<Throwable> getException() {
-    return exception;
-  }
+    /**
+     * Exception getter.
+     *
+     * @return An optional exception that only applies when status is error.
+     */
+    public Optional<Throwable> getException() {
+        return exception;
+    }
 
-  @Override
-  public String toString() {
-    return "StellarResult{" +
-            "status=" + status +
-            ", value=" + value +
-            ", exception=" + exception +
-            ", isValueNull=" + isValueNull +
-            '}';
-  }
+    @Override
+    public String toString() {
+        return "StellarResult{"
+               + "status=" + status
+               + ", value=" + value
+               + ", exception=" + exception
+               + ", isValueNull=" + isValueNull
+               + '}';
+    }
 }

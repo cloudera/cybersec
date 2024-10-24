@@ -18,7 +18,29 @@
 
 package org.apache.metron.stellar.dsl.functions;
 
+import static org.apache.metron.stellar.common.utils.StellarProcessorUtils.run;
+import static org.apache.metron.stellar.dsl.functions.RestConfig.EMPTY_CONTENT_OVERRIDE;
+import static org.apache.metron.stellar.dsl.functions.RestConfig.PROXY_HOST;
+import static org.apache.metron.stellar.dsl.functions.RestConfig.PROXY_PORT;
+import static org.apache.metron.stellar.dsl.functions.RestConfig.RESPONSE_CODES_ALLOWED;
+import static org.apache.metron.stellar.dsl.functions.RestConfig.STELLAR_REST_GET_SETTINGS;
+import static org.apache.metron.stellar.dsl.functions.RestConfig.STELLAR_REST_POST_SETTINGS;
+import static org.apache.metron.stellar.dsl.functions.RestConfig.STELLAR_REST_SETTINGS;
+import static org.apache.metron.stellar.dsl.functions.RestConfig.TIMEOUT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+
 import com.google.common.collect.ImmutableMap;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.io.FileUtils;
 import org.apache.metron.stellar.dsl.Context;
@@ -30,20 +52,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.rules.TemporaryFolder;
 import org.mockserver.integration.ClientAndServer;
-
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import static org.apache.metron.stellar.common.utils.StellarProcessorUtils.run;
-import static org.apache.metron.stellar.dsl.functions.RestConfig.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
 
 
 @EnableRuleMigrationSupport
@@ -429,9 +437,9 @@ public class RestFunctionsIntegrationTest {
     ParseException e = assertThrows(ParseException.class, () -> run(String.format("REST_POST('%s', 'malformed json')", postUri), context));
     assertEquals(
         String.format(
-            "Unable to parse REST_POST('http://localhost:1080/post', 'malformed json'): " +
-                    "Unable to parse: REST_POST('%s', 'malformed json') due to: POST data 'malformed json' must be properly formatted JSON.  " +
-                    "Set the 'enforce.json' property to false to disable this check.",
+            "Unable to parse REST_POST('http://localhost:1080/post', 'malformed json'): "
+                    + "Unable to parse: REST_POST('%s', 'malformed json') due to: POST data 'malformed json' must be properly formatted JSON.  "
+                    + "Set the 'enforce.json' property to false to disable this check.",
             postUri),
         e.getMessage());
   }

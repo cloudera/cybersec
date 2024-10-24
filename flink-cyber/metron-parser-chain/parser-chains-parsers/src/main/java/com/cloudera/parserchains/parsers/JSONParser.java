@@ -12,6 +12,9 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
+import static java.lang.String.format;
+
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
@@ -21,8 +24,6 @@ import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,18 +32,16 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
-import static java.lang.String.format;
+import org.apache.commons.lang3.StringUtils;
 
 @MessageParser(
-        name="Simple JSON",
-        description="Parses JSON data by creating a field for each JSON element.")
+      name = "Simple JSON",
+      description = "Parses JSON data by creating a field for each JSON element.")
 public class JSONParser implements Parser {
     private static final String DEFAULT_NORMALIZER = "UNFOLD_NESTED";
     private FieldName inputField;
-    private ObjectReader reader;
-    private List<Normalizer> normalizers;
+    private final ObjectReader reader;
+    private final List<Normalizer> normalizers;
 
     public JSONParser() {
         inputField = FieldName.of(DEFAULT_INPUT_FIELD);
@@ -51,44 +50,44 @@ public class JSONParser implements Parser {
     }
 
     @Configurable(
-            key="input",
-            label="Input Field",
-            description= "The input field to parse. Default value: '" + DEFAULT_INPUT_FIELD + "'",
-            defaultValue=DEFAULT_INPUT_FIELD,
-            isOutputName = true)
+          key = "input",
+          label = "Input Field",
+          description = "The input field to parse. Default value: '" + DEFAULT_INPUT_FIELD + "'",
+          defaultValue = DEFAULT_INPUT_FIELD,
+          isOutputName = true)
     public JSONParser inputField(String fieldName) {
-        if(StringUtils.isNotBlank(fieldName)) {
+        if (StringUtils.isNotBlank(fieldName)) {
             this.inputField = FieldName.of(fieldName);
         }
         return this;
     }
 
     @Configurable(
-            key="norm",
-            label="Normalizer",
-            description="Defines how fields are normalized. Accepted values include: " +
-                    "'ALLOW_NESTED' Embed nested JSON string as the field value.  " +
-                    "'DISALLOW_NESTED' Stop parsing and throw an error if nested JSON exists.  " +
-                    "'DROP_NESTED' Drop and ignore any nested JSON values.  " +
-                    "'UNFOLD_NESTED' Unfold the nested JSON by creating a nested, dot-separated field name.  " +
-                    "Default value: '" + DEFAULT_NORMALIZER + "'",
-            defaultValue=DEFAULT_NORMALIZER,
-            multipleValues = true)
+          key = "norm",
+          label = "Normalizer",
+          description = "Defines how fields are normalized. Accepted values include: "
+                        + "'ALLOW_NESTED' Embed nested JSON string as the field value.  "
+                        + "'DISALLOW_NESTED' Stop parsing and throw an error if nested JSON exists.  "
+                        + "'DROP_NESTED' Drop and ignore any nested JSON values.  "
+                        + "'UNFOLD_NESTED' Unfold the nested JSON by creating a nested, dot-separated field name.  "
+                        + "Default value: '" + DEFAULT_NORMALIZER + "'",
+          defaultValue = DEFAULT_NORMALIZER,
+          multipleValues = true)
     public JSONParser normalizer(String normalizer) {
-        if(StringUtils.isNotBlank(normalizer)) {
+        if (StringUtils.isNotBlank(normalizer)) {
             addNormalizer(Normalizers.valueOf(normalizer));
         }
         return this;
     }
 
-    void addNormalizer (Normalizers normalizer) {
+    void addNormalizer(Normalizers normalizer) {
         normalizers.add(Objects.requireNonNull(normalizer, "A normalizer is required."));
     }
 
     @Override
     public Message parse(Message input) {
         Message.Builder output = Message.builder().withFields(input);
-        if(!input.getField(inputField).isPresent()) {
+        if (!input.getField(inputField).isPresent()) {
             output.withError(format("Message missing expected input field '%s'", inputField.toString()));
         } else {
             input.getField(inputField).ifPresent(val -> doParse(val.toString(), output));
@@ -109,14 +108,14 @@ public class JSONParser implements Parser {
 
     private Map<String, Object> normalize(Map<String, Object> valueToNormalize, Message.Builder output) {
         // use the default normalizer, if none other specified
-        if(normalizers.size() == 0) {
+        if (normalizers.size() == 0) {
             normalizer(DEFAULT_NORMALIZER);
         }
         try {
             for (Normalizer normalizer : normalizers) {
                 valueToNormalize = normalizer.normalize(valueToNormalize);
             }
-        } catch(IOException e) {
+        } catch (IOException e) {
             output.withError("Failed to normalize.", e);
         }
         return valueToNormalize;
@@ -131,7 +130,7 @@ public class JSONParser implements Parser {
         DROP_NESTED(new DropNestedObjects()),
         UNFOLD_NESTED(new UnfoldNestedObjects());
 
-        private Normalizer normalizer;
+        private final Normalizer normalizer;
 
         Normalizers(Normalizer normalizer) {
             this.normalizer = normalizer;
@@ -157,7 +156,7 @@ public class JSONParser implements Parser {
         @Override
         public Map<String, Object> normalize(Map<String, Object> input) throws JsonProcessingException {
             Map<String, Object> output = new HashMap<>();
-            for(Map.Entry<String, Object> entry: input.entrySet()) {
+            for (Map.Entry<String, Object> entry : input.entrySet()) {
                 String key = entry.getKey();
                 Object value = entry.getValue();
                 serializeNested(key, value, output);
@@ -165,7 +164,8 @@ public class JSONParser implements Parser {
             return output;
         }
 
-        private void serializeNested(String rootKey, Object valueToUnfold, Map<String, Object> output) throws JsonProcessingException {
+        private void serializeNested(String rootKey, Object valueToUnfold, Map<String, Object> output)
+              throws JsonProcessingException {
             if (valueToUnfold instanceof Map) {
                 // handle nested JSON objects
                 String serialized = JSONUtils.INSTANCE.toJSON(valueToUnfold, false);
@@ -190,10 +190,10 @@ public class JSONParser implements Parser {
         public Map<String, Object> normalize(Map<String, Object> input) throws IOException {
             // throw an exception if any nested objects exist
             Optional<Object> nestedObject = input.values()
-                    .stream()
-                    .filter(v -> v instanceof Map || v instanceof List)
-                    .findFirst();
-            if(nestedObject.isPresent()) {
+                                                 .stream()
+                                                 .filter(v -> v instanceof Map || v instanceof List)
+                                                 .findFirst();
+            if (nestedObject.isPresent()) {
                 throw new IOException("Nested objects are not allowed.");
             }
             return input;
@@ -208,9 +208,9 @@ public class JSONParser implements Parser {
         public Map<String, Object> normalize(Map<String, Object> input) {
             // drop any that is a JSON object (aka Map)
             return input.entrySet()
-                    .stream()
-                    .filter(e -> !(e.getValue() instanceof Map) && !(e.getValue() instanceof List))
-                    .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                        .stream()
+                        .filter(e -> !(e.getValue() instanceof Map) && !(e.getValue() instanceof List))
+                        .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
         }
     }
 
@@ -237,7 +237,7 @@ public class JSONParser implements Parser {
             } else if (valueToUnfold instanceof List) {
                 // handle JSON arrays
                 List<Object> listValue = (List) valueToUnfold;
-                for(int i=0; i<listValue.size(); i++) {
+                for (int i = 0; i < listValue.size(); i++) {
                     Object value = listValue.get(i);
                     String newKey = rootKey + "[" + i + "]";
                     unfold(newKey, value, output);

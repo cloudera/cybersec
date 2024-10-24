@@ -40,7 +40,10 @@ public abstract class ParquetJob {
 
         return env;
     }
+
     protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
+
     protected abstract void writeResults(DataStream<Message> results, ParameterTool params);
+
     protected abstract void writeTabularResults(DataStream<Message> results, String path, ParameterTool params);
 }

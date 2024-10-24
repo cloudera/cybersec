@@ -18,10 +18,10 @@ import org.apache.flink.metrics.Counter;
 import org.apache.flink.metrics.MetricGroup;
 
 public class CacheMetrics implements StatsCounter {
-    private transient final MetricGroup hbaseCache;
-    private transient final Counter hits;
-    private transient final Counter miss;
-    private transient final Counter evict;
+    private final transient MetricGroup hbaseCache;
+    private final transient Counter hits;
+    private final transient Counter miss;
+    private final transient Counter evict;
 
     public CacheMetrics(MetricGroup hbaseCache) {
         this.hbaseCache = hbaseCache;

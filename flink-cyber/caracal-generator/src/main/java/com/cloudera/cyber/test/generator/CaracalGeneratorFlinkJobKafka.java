@@ -12,7 +12,10 @@
 
 package com.cloudera.cyber.test.generator;
 
+import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
+
 import com.cloudera.cyber.flink.FlinkUtils;
+import java.nio.charset.StandardCharsets;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.base.DeliveryGuarantee;
@@ -21,11 +24,6 @@ import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
-
-import java.nio.charset.StandardCharsets;
-
-import java.nio.charset.StandardCharsets;
 
 public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
 
@@ -35,34 +33,42 @@ public class CaracalGeneratorFlinkJobKafka extends CaracalGeneratorFlinkJob {
         Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         ParameterTool params = com.cloudera.cyber.flink.Utils.getParamToolsFromProperties(args);
         FlinkUtils.executeEnv(new CaracalGeneratorFlinkJobKafka()
-                .createPipeline(params), "Caracal Data generator", params);
+              .createPipeline(params), "Caracal Data generator", params);
     }
 
     @Override
     protected void writeMetrics(ParameterTool params, SingleOutputStreamOperator<Tuple2<String, Integer>> metrics) {
-        KafkaSink<Tuple2<String, Integer>> metricsSink =  KafkaSink.<Tuple2<String, Integer>>builder().setRecordSerializer(
-                (KafkaRecordSerializationSchema<Tuple2<String, Integer>>) (stringIntegerTuple2, kafkaSinkContext, timestamp) -> new ProducerRecord<>(
-                        params.get("generator.metrics", "generator.metrics"),
-                        null,
-                        timestamp,
-                        stringIntegerTuple2.f0.getBytes(StandardCharsets.UTF_8),
-                        stringIntegerTuple2.f1.toString().getBytes(StandardCharsets.UTF_8)
-                )).setKafkaProducerConfig(
-                readKafkaProperties(params, PRODUCER_ID_PREFIX.concat("generator.metrics"), false)).setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE).build();
+        KafkaSink<Tuple2<String, Integer>> metricsSink =
+              KafkaSink.<Tuple2<String, Integer>>builder().setRecordSerializer(
+                             (KafkaRecordSerializationSchema<Tuple2<String, Integer>>)
+                                   (stringIntegerTuple2, kafkaSinkContext, timestamp) -> new ProducerRecord<>(
+                                         params.get("generator.metrics", "generator.metrics"),
+                                         null,
+                                         timestamp,
+                                         stringIntegerTuple2.f0.getBytes(StandardCharsets.UTF_8),
+                                         stringIntegerTuple2.f1.toString().getBytes(StandardCharsets.UTF_8)
+                                   )).setKafkaProducerConfig(
+                             readKafkaProperties(params, PRODUCER_ID_PREFIX.concat("generator.metrics"), false))
+                       .setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE).build();
         metrics.sinkTo(metricsSink).name("Metrics Sink");
     }
 
     @Override
     protected void writeResults(ParameterTool params,
-            SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput) {
-        KafkaSink<Tuple2<String, byte[]>> kafkaSink = KafkaSink.<Tuple2<String, byte[]>>builder().setRecordSerializer(
-                (KafkaRecordSerializationSchema<Tuple2<String, byte[]>>) (stringStringTuple2, kafkaSinkContext, aLong) -> new ProducerRecord<>(
-                        stringStringTuple2.f0,
-                        stringStringTuple2.f1
-                )).
-                setKafkaProducerConfig(readKafkaProperties(params, PRODUCER_ID_PREFIX.concat("generator.output"), false)).
-                setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE).
-                build();
+                                SingleOutputStreamOperator<Tuple2<String, byte[]>> generatedInput) {
+        KafkaSink<Tuple2<String, byte[]>> kafkaSink =
+              KafkaSink.<Tuple2<String, byte[]>>builder()
+                       .setRecordSerializer(
+                             (KafkaRecordSerializationSchema<Tuple2<String, byte[]>>)
+                                   (stringStringTuple2, kafkaSinkContext, longValue) -> new ProducerRecord<>(
+                                         stringStringTuple2.f0,
+                                         stringStringTuple2.f1
+                                   ))
+                       .setKafkaProducerConfig(readKafkaProperties(params,
+                             PRODUCER_ID_PREFIX.concat("generator.output"),
+                             false))
+                       .setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+                       .build();
 
         generatedInput.sinkTo(kafkaSink).name("Text Generator Sink");
     }

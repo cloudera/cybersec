@@ -12,16 +12,15 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
+import java.time.ZoneOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.time.ZoneOffset;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
 public class GrokParserTest {
     private GrokParser grokParser;
@@ -144,10 +143,10 @@ public class GrokParserTest {
 
     @Test
     void defaultPatterns() {
-        final String apacheLog = "112.169.19.192 - - [06/Mar/2013:01:36:30 +0900] " +
-                "\"GET / HTTP/1.1\" 200 44346 \"-\" " +
-                "\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) " +
-                "AppleWebKit/537.22 (KHTML, like Gecko) Chrome/25.0.1364.152 Safari/537.22\"";
+        final String apacheLog = "112.169.19.192 - - [06/Mar/2013:01:36:30 +0900] "
+                + "\"GET / HTTP/1.1\" 200 44346 \"-\" "
+                + "\"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) "
+                + "AppleWebKit/537.22 (KHTML, like Gecko) Chrome/25.0.1364.152 Safari/537.22\"";
         Message input = Message.builder()
                 .addField(Constants.DEFAULT_INPUT_FIELD, apacheLog)
                 .build();

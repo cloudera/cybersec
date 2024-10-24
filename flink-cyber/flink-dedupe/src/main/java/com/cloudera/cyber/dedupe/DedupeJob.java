@@ -12,8 +12,12 @@
 
 package com.cloudera.cyber.dedupe;
 
+import static com.cloudera.cyber.dedupe.Dedupe.dedupe;
+
 import com.cloudera.cyber.DedupeMessage;
 import com.cloudera.cyber.Message;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -22,20 +26,18 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.OutputTag;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static com.cloudera.cyber.dedupe.Dedupe.dedupe;
-
 /**
  * Deduplication Job
  *
+ * <p>
  * Provide a set of fields to group on, a limit for the time window and the count of duplicates
  * before emitting, and receive a message with the values of the deduped fields, a count and the
  * maximum and minimum timestamp for the message rolled into the duplicate.
- *
+ * 
+ * <p>
  * This will need to be output to a separate kafka topic for each de-dupe
  *
+ * <p>
  * TODO - maybe. Add a salt to the key for keys that are likely to be high duplicate
  * this will avoid all the messages from the same key being shunted to one task
  * Note that to do this really smartly, we could auto watch the count metrics and
@@ -58,9 +60,11 @@ public abstract class DedupeJob {
         Long maxCount = params.getLong(PARAM_DEDUPE_MAX_COUNT, 0);
 
         DataStream<Message> source = createSource(env, params, key, maxTime);
-        final OutputTag<DedupeMessage> lateData = new OutputTag<DedupeMessage>("late-data"){};
-        Time allowedLateness  = Time.milliseconds(params.getLong(PARAM_DEDUPE_LATENESS, 0L));
-        SingleOutputStreamOperator<DedupeMessage> results = dedupe(source, key, maxTime, maxCount, lateData, allowedLateness);
+        final OutputTag<DedupeMessage> lateData = new OutputTag<DedupeMessage>("late-data") {
+        };
+        Time allowedLateness = Time.milliseconds(params.getLong(PARAM_DEDUPE_LATENESS, 0L));
+        SingleOutputStreamOperator<DedupeMessage> results =
+              dedupe(source, key, maxTime, maxCount, lateData, allowedLateness);
         writeResults(params, results);
         //printResults(results);
 
@@ -75,5 +79,7 @@ public abstract class DedupeJob {
     }
 
     protected abstract void writeResults(ParameterTool params, DataStream<DedupeMessage> results);
-    protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> sessionKey, Long sessionTimeout);
+
+    protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params,
+                                                        List<String> sessionKey, Long sessionTimeout);
 }

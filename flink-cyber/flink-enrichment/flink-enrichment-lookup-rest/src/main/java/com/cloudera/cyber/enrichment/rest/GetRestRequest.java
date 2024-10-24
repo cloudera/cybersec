@@ -12,12 +12,11 @@
 
 package com.cloudera.cyber.enrichment.rest;
 
-import org.apache.http.client.methods.HttpGet;
-
-import javax.annotation.Nonnull;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import javax.annotation.Nonnull;
+import org.apache.http.client.methods.HttpGet;
 
 public class GetRestRequest extends RestRequest {
 

@@ -7,8 +7,10 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,58 +20,56 @@
 
 package org.apache.metron.common.field.validation;
 
+import java.util.Map;
+import org.apache.metron.stellar.common.StellarPredicateProcessor;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.MapVariableResolver;
 import org.apache.metron.stellar.dsl.StellarFunctions;
-import org.apache.metron.stellar.common.StellarPredicateProcessor;
-
-import java.util.Map;
 
 public class QueryValidation implements FieldValidation {
 
-  private enum Config {
-    CONDITION("condition")
-    ;
-    String key;
-    Config(String key) {
-      this.key = key;
-    }
-    public <T> T get(Map<String, Object> config, Class<T> clazz) {
-      Object o = config.get(key);
-      if(o == null) {
-        return null;
-      }
-      return clazz.cast(o);
-    }
-  }
+    private enum Config {
+        CONDITION("condition");
+        String key;
 
-  @Override
-  public boolean isValid( Map<String, Object> input
-                        , Map<String, Object> validationConfig
-                        , Map<String, Object> globalConfig
-                        , Context context
-                        ) {
-    String condition = Config.CONDITION.get(validationConfig, String.class);
-    if(condition == null) {
-      return true;
-    }
-    else {
-      StellarPredicateProcessor processor = new StellarPredicateProcessor();
-      return processor.parse(condition, new MapVariableResolver(input, validationConfig, globalConfig), StellarFunctions.FUNCTION_RESOLVER(), context);
-    }
-  }
+        Config(String key) {
+            this.key = key;
+        }
 
-  @Override
-  public void initialize(Map<String, Object> validationConfig, Map<String, Object> globalConfig) {
-    String condition = Config.CONDITION.get(validationConfig, String.class);
-    if(condition == null) {
-      throw new IllegalStateException("You must specify a condition.");
+        public <T> T get(Map<String, Object> config, Class<T> clazz) {
+            Object o = config.get(key);
+            if (o == null) {
+                return null;
+            }
+            return clazz.cast(o);
+        }
     }
-    try {
-      new StellarPredicateProcessor().validate(condition);
+
+    @Override
+    public boolean isValid(Map<String, Object> input,
+                           Map<String, Object> validationConfig,
+                           Map<String, Object> globalConfig,
+                           Context context) {
+        String condition = Config.CONDITION.get(validationConfig, String.class);
+        if (condition == null) {
+            return true;
+        } else {
+            StellarPredicateProcessor processor = new StellarPredicateProcessor();
+            return processor.parse(condition, new MapVariableResolver(input, validationConfig, globalConfig),
+                  StellarFunctions.FUNCTION_RESOLVER(), context);
+        }
     }
-    catch(Exception e) {
-      throw new IllegalStateException("Invalid condition: " + condition, e);
+
+    @Override
+    public void initialize(Map<String, Object> validationConfig, Map<String, Object> globalConfig) {
+        String condition = Config.CONDITION.get(validationConfig, String.class);
+        if (condition == null) {
+            throw new IllegalStateException("You must specify a condition.");
+        }
+        try {
+            new StellarPredicateProcessor().validate(condition);
+        } catch (Exception e) {
+            throw new IllegalStateException("Invalid condition: " + condition, e);
+        }
     }
-  }
 }

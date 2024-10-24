@@ -17,6 +17,7 @@
  *  limitations under the License.
  *
  */
+
 package org.apache.metron.stellar.common.shell;
 
 import org.apache.metron.stellar.common.shell.specials.SpecialCommand;
@@ -28,24 +29,24 @@ import org.apache.metron.stellar.dsl.StellarFunctionInfo;
  */
 public class StellarExecutionListeners {
 
-  /**
-   * A listener that is notified when a function is defined.
-   */
-  public interface FunctionDefinedListener {
-    void whenFunctionDefined(StellarFunctionInfo functionInfo);
-  }
+    /**
+     * A listener that is notified when a function is defined.
+     */
+    public interface FunctionDefinedListener {
+        void whenFunctionDefined(StellarFunctionInfo functionInfo);
+    }
 
-  /**
-   * A listener that is notified when a variable is defined or redefined.
-   */
-  public interface VariableDefinedListener {
-    void whenVariableDefined(String variableName, VariableResult result);
-  }
+    /**
+     * A listener that is notified when a variable is defined or redefined.
+     */
+    public interface VariableDefinedListener {
+        void whenVariableDefined(String variableName, VariableResult result);
+    }
 
-  /**
-   * A listener that is notified when a special command is defined.
-   */
-  public interface SpecialDefinedListener {
-    void whenSpecialDefined(SpecialCommand magic);
-  }
+    /**
+     * A listener that is notified when a special command is defined.
+     */
+    public interface SpecialDefinedListener {
+        void whenSpecialDefined(SpecialCommand magic);
+    }
 }

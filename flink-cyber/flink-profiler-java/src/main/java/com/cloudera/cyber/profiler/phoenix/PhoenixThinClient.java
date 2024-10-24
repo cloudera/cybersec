@@ -13,9 +13,6 @@
 package com.cloudera.cyber.profiler.phoenix;
 
 import com.cloudera.cyber.flink.Utils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.java.utils.ParameterTool;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -27,6 +24,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.java.utils.ParameterTool;
 
 @Slf4j
 public class PhoenixThinClient {
@@ -49,16 +48,22 @@ public class PhoenixThinClient {
     public PhoenixThinClient(ParameterTool params) {
         this.userName = params.get(PHOENIX_THIN_PROPERTY_AVATICA_USER);
         this.password = params.get(PHOENIX_THIN_PROPERTY_AVATICA_PASSWORD);
-        dbUrl = "jdbc:phoenix:thin:url=" +
-            params.get(PHOENIX_THIN_PROPERTY_URL) + ";" +
-            Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_SERIALIZATION)).map(str -> String.format("serialization=%s;", str)).orElse("serialization=PROTOBUF;") +
-            Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_AUTHENTICATION)).map(str -> String.format("authentication=%s;", str)).orElse("authentication=BASIC;") +
-            Optional.ofNullable(userName).map(str -> String.format("avatica_user=%s;", str)).orElse("") +
-            Optional.ofNullable(password).map(str -> String.format("avatica_password=%s;", str)).orElse("") +
-            Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_PRINCIPAL)).map(str -> String.format("principal=%s;", str)).orElse("") +
-            Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_KEYTAB)).map(str -> String.format("keytab=%s;", str)).orElse("") +
-            Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE)).map(str -> String.format("truststore=%s;", str)).orElse("") +
-            Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE_PASSWORD)).map(str -> String.format("truststore_password=%s;", str)).orElse("");
+        dbUrl = "jdbc:phoenix:thin:url="
+                + params.get(PHOENIX_THIN_PROPERTY_URL) + ";"
+                + Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_SERIALIZATION))
+                        .map(str -> String.format("serialization=%s;", str)).orElse("serialization=PROTOBUF;")
+                + Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_AUTHENTICATION))
+                        .map(str -> String.format("authentication=%s;", str)).orElse("authentication=BASIC;")
+                + Optional.ofNullable(userName).map(str -> String.format("avatica_user=%s;", str)).orElse("")
+                + Optional.ofNullable(password).map(str -> String.format("avatica_password=%s;", str)).orElse("")
+                + Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_PRINCIPAL))
+                        .map(str -> String.format("principal=%s;", str)).orElse("")
+                + Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_KEYTAB))
+                        .map(str -> String.format("keytab=%s;", str)).orElse("")
+                + Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE))
+                        .map(str -> String.format("truststore=%s;", str)).orElse("")
+                + Optional.ofNullable(params.get(PHOENIX_THIN_PROPERTY_TRUSTSTORE_PASSWORD))
+                        .map(str -> String.format("truststore_password=%s;", str)).orElse("");
     }
 
     private Object connectionResultMetaData(Function<Connection, Object> function) {
@@ -118,7 +123,8 @@ public class PhoenixThinClient {
         return selectListResult(sql, mapper, null);
     }
 
-    public <T> List<T> selectListResult(String sql, Function<ResultSet, T> mapper, Consumer<PreparedStatement> consumer) throws SQLException {
+    public <T> List<T> selectListResult(String sql, Function<ResultSet, T> mapper, Consumer<PreparedStatement> consumer)
+          throws SQLException {
         List<T> results = new ArrayList<>();
         Optional<Consumer<PreparedStatement>> optionalConsumer = Optional.ofNullable(consumer);
         try (Connection conn = DriverManager.getConnection(dbUrl)) {
@@ -141,7 +147,8 @@ public class PhoenixThinClient {
         return selectResult(sql, mapper, null);
     }
 
-    public <T> T selectResult(String sql, Function<ResultSet, T> mapper, Consumer<PreparedStatement> consumer) throws SQLException {
+    public <T> T selectResult(String sql, Function<ResultSet, T> mapper, Consumer<PreparedStatement> consumer)
+          throws SQLException {
         Optional<Consumer<PreparedStatement>> optionalConsumer = Optional.ofNullable(consumer);
         try (Connection conn = DriverManager.getConnection(dbUrl)) {
             try (PreparedStatement ps = conn.prepareStatement(sql)) {

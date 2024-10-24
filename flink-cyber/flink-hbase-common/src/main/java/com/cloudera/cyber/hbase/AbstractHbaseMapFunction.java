@@ -12,9 +12,16 @@
 
 package com.cloudera.cyber.hbase;
 
+import static java.util.stream.Collectors.toMap;
+
 import com.cloudera.cyber.flink.CacheMetrics;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.hbase.util.HBaseConfigurationUtil;
@@ -22,15 +29,11 @@ import org.apache.flink.metrics.Counter;
 import org.apache.flink.metrics.MetricGroup;
 import org.apache.flink.streaming.api.functions.ProcessFunction;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.*;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-
-import static java.util.stream.Collectors.toMap;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.Table;
 
 @Slf4j
 public abstract class AbstractHbaseMapFunction<IN, OUT> extends ProcessFunction<IN, OUT> {
@@ -65,7 +68,7 @@ public abstract class AbstractHbaseMapFunction<IN, OUT> extends ProcessFunction<
         }
     }
 
-   public AbstractHbaseMapFunction() {
+    public AbstractHbaseMapFunction() {
         serializedHbaseConfig = HBaseConfigurationUtil.serializeConfiguration(HbaseConfiguration.configureHbase());
     }
 
@@ -81,18 +84,20 @@ public abstract class AbstractHbaseMapFunction<IN, OUT> extends ProcessFunction<
         connectHbase();
 
         cache = Caffeine.newBuilder()
-                .expireAfterAccess(60, TimeUnit.SECONDS)
-                .maximumSize(1000)
-                .recordStats(() -> new CacheMetrics(metricsGroup))
-                .build();
+                        .expireAfterAccess(60, TimeUnit.SECONDS)
+                        .maximumSize(1000)
+                        .recordStats(() -> new CacheMetrics(metricsGroup))
+                        .build();
 
     }
 
     protected void connectHbase() throws Exception {
-        org.apache.hadoop.conf.Configuration hbaseConfig = HBaseConfigurationUtil.deserializeConfiguration(serializedHbaseConfig, HbaseConfiguration.configureHbase());
-        log.info("Start connection to hbase zookeeper quorum: {}",hbaseConfig.get("hbase.zookeeper.quorum"));
+        org.apache.hadoop.conf.Configuration hbaseConfig =
+              HBaseConfigurationUtil.deserializeConfiguration(serializedHbaseConfig,
+                    HbaseConfiguration.configureHbase());
+        log.info("Start connection to hbase zookeeper quorum: {}", hbaseConfig.get("hbase.zookeeper.quorum"));
         connection = ConnectionFactory.createConnection(hbaseConfig);
-        log.info("Connected to hbase zookeeper quorum: {}",hbaseConfig.get("hbase.zookeeper.quorum"));
+        log.info("Connected to hbase zookeeper quorum: {}", hbaseConfig.get("hbase.zookeeper.quorum"));
     }
 
     protected final Map<String, String> notFound() {
@@ -105,10 +110,10 @@ public abstract class AbstractHbaseMapFunction<IN, OUT> extends ProcessFunction<
 
     public final Map<String, String> hbaseLookup(long ts, LookupKey key, String prefix) {
         return Objects.requireNonNull(cache.get(key, this::fetch)).entrySet().stream()
-                .collect(toMap(
-                        k -> prefix + "." + k.getKey(),
-                        v -> objectToString(v.getValue()))
-                );
+                      .collect(toMap(
+                            k -> prefix + "." + k.getKey(),
+                            v -> objectToString(v.getValue()))
+                      );
     }
 
 }

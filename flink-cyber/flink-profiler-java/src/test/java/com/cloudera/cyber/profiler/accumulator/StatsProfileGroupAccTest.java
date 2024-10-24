@@ -12,6 +12,11 @@
 
 package com.cloudera.cyber.profiler.accumulator;
 
+import static com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.KEY_1;
+import static com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.KEY_2;
+import static com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.TEST_PROFILE_GROUP;
+import static com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.createMeasurement;
+
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.profiler.ProfileAggregationMethod;
 import com.cloudera.cyber.profiler.ProfileGroupConfig;
@@ -19,16 +24,13 @@ import com.cloudera.cyber.profiler.ProfileMeasurementConfig;
 import com.cloudera.cyber.profiler.ProfileMessage;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.*;
+import org.junit.Assert;
+import org.junit.Test;
 
 
 public class StatsProfileGroupAccTest {
@@ -38,8 +40,8 @@ public class StatsProfileGroupAccTest {
     private static final DecimalFormat DEFAULT_FORMAT = new DecimalFormat("0.00");
 
     private Map<String, DecimalFormat> getMeasurementFormats(ProfileGroupConfig profileGroupConfig) {
-        return profileGroupConfig.getMeasurements().stream().filter(ProfileMeasurementConfig::hasStats).
-                collect(Collectors.toMap(ProfileMeasurementConfig::getResultExtensionName, v -> DEFAULT_FORMAT));
+        return profileGroupConfig.getMeasurements().stream().filter(ProfileMeasurementConfig::hasStats)
+                .collect(Collectors.toMap(ProfileMeasurementConfig::getResultExtensionName, v -> DEFAULT_FORMAT));
     }
 
     @Test
@@ -79,10 +81,10 @@ public class StatsProfileGroupAccTest {
                 createMeasurement(ProfileAggregationMethod.COUNT, NO_STATS_RESULT_NAME, null, "0.00", false),
                 createMeasurement(ProfileAggregationMethod.SUM, STATS_RESULT_NAME, STATS_FIELD_NAME, "0.00", true));
 
-        return ProfileGroupConfig.builder().
-                profileGroupName(TEST_PROFILE_GROUP).keyFieldNames(Lists.newArrayList(KEY_1, KEY_2)).
-                periodDuration(5L).periodDurationUnit("MINUTES").
-                sources(Lists.newArrayList("ANY")).measurements(measurements).build();
+        return ProfileGroupConfig.builder()
+                .profileGroupName(TEST_PROFILE_GROUP).keyFieldNames(Lists.newArrayList(KEY_1, KEY_2))
+                .periodDuration(5L).periodDurationUnit("MINUTES")
+                .sources(Lists.newArrayList("ANY")).measurements(measurements).build();
 
     }
 

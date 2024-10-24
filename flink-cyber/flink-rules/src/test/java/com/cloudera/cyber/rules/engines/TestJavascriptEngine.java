@@ -12,31 +12,31 @@
 
 package com.cloudera.cyber.rules.engines;
 
-import com.cloudera.cyber.Message;
-import com.cloudera.cyber.TestUtils;
-import com.cloudera.cyber.rules.RuleType;
-import com.google.common.collect.ImmutableMap;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import javax.script.ScriptException;
-import java.time.Instant;
-import java.util.Map;
-import java.util.stream.Stream;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasKey;
 
+import com.cloudera.cyber.Message;
+import com.cloudera.cyber.TestUtils;
+import com.cloudera.cyber.rules.RuleType;
+import com.google.common.collect.ImmutableMap;
+import java.time.Instant;
+import java.util.Map;
+import java.util.stream.Stream;
+import javax.script.ScriptException;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
 public class TestJavascriptEngine {
-    private static final String scoreScript = "return { local: ip_local(message.local), remote: ip_local(message.remote) }";
+    private static final String scoreScript =
+          "return { local: ip_local(message.local), remote: ip_local(message.remote) }";
 
     public static Stream<Arguments> jsBuilders() {
         return Stream.of(RuleType.JS, RuleType.JS_GRAAL, RuleType.JS_NASHORN)
-                .map(RuleType::getEngineBuilder)
-                .filter(RuleEngineBuilder::isValid)
-                .map(Arguments::of);
+              .map(RuleType::getEngineBuilder)
+              .filter(RuleEngineBuilder::isValid)
+              .map(Arguments::of);
     }
 
     @ParameterizedTest
@@ -46,12 +46,12 @@ public class TestJavascriptEngine {
         engine.open();
 
         Map<String, Object> results = engine.feed(
-                createMessage(Message.builder()
-                        .ts(Instant.now().toEpochMilli())
-                        .extensions(ImmutableMap.of(
-                            "a", "1.0",
-                            "b", "2.0"
-                        )))
+              createMessage(Message.builder()
+                    .ts(Instant.now().toEpochMilli())
+                    .extensions(ImmutableMap.of(
+                          "a", "1.0",
+                          "b", "2.0"
+                    )))
         );
 
         assertThat("Results are produced", results, hasKey("score"));
@@ -70,16 +70,17 @@ public class TestJavascriptEngine {
     @ParameterizedTest
     @MethodSource("jsBuilders")
     public void testExtractHostname(RuleEngineBuilder<? extends JavaScriptEngine> jsBuilder) {
-        String extractHostnameScript = "return { tld: extract_hostname(message.domain, Java.type(\"com.cloudera.cyber.libs.hostnames.ExtractHostname.HostnameFeature\").TLD) }";
+        String extractHostnameScript =
+              "return { tld: extract_hostname(message.domain, Java.type(\"com.cloudera.cyber.libs.hostnames.ExtractHostname.HostnameFeature\").TLD) }";
         RuleEngine engine = jsBuilder.script(extractHostnameScript).build();
         engine.open();
 
         Map<String, Object> results = engine.feed(
-                createMessage(Message.builder()
-                        .ts(Instant.now().toEpochMilli())
-                        .extensions(ImmutableMap.of(
-                            "domain", "google.com"
-                        )))
+              createMessage(Message.builder()
+                    .ts(Instant.now().toEpochMilli())
+                    .extensions(ImmutableMap.of(
+                          "domain", "google.com"
+                    )))
         );
 
         assertThat("top level domain correct", results.get("tld"), equalTo("com"));
@@ -92,12 +93,12 @@ public class TestJavascriptEngine {
         engine.open();
 
         Map<String, Object> results = engine.feed(
-                createMessage(Message.builder()
-                        .ts(Instant.now().toEpochMilli())
-                        .extensions(ImmutableMap.of(
-                            "local", "192.168.0.1",
-                            "remote", "8.8.8.8"
-                        )))
+              createMessage(Message.builder()
+                    .ts(Instant.now().toEpochMilli())
+                    .extensions(ImmutableMap.of(
+                          "local", "192.168.0.1",
+                          "remote", "8.8.8.8"
+                    )))
         );
 
         assertThat("Results are produced", results, hasKey("local"));
@@ -112,12 +113,12 @@ public class TestJavascriptEngine {
         engine.open();
 
         Map<String, Object> results = engine.feed(
-                createMessage(Message.builder()
-                        .ts(Instant.now().toEpochMilli())
-                        .extensions(ImmutableMap.of(
-                            "local", "192.168.0.1",
-                            "remote", "8.8.8.8"
-                        )))
+              createMessage(Message.builder()
+                    .ts(Instant.now().toEpochMilli())
+                    .extensions(ImmutableMap.of(
+                          "local", "192.168.0.1",
+                          "remote", "8.8.8.8"
+                    )))
         );
 
         assertThat("Results are produced", results, hasKey("local"));
@@ -132,11 +133,11 @@ public class TestJavascriptEngine {
 
         for (int i = 0; i < 3; i++) {
             Map<String, Object> results = engine.feed(
-                    createMessage(Message.builder()
-                            .ts(Instant.now().toEpochMilli())
-                            .extensions(ImmutableMap.of(
-                                "local", "192.168.0.1"
-                     )))
+                  createMessage(Message.builder()
+                        .ts(Instant.now().toEpochMilli())
+                        .extensions(ImmutableMap.of(
+                              "local", "192.168.0.1"
+                        )))
             );
             assertThat(results.get("local"), equalTo(true));
         }
@@ -145,18 +146,20 @@ public class TestJavascriptEngine {
     @ParameterizedTest
     @MethodSource("jsBuilders")
     public void testJavascriptWithErrors(RuleEngineBuilder<? extends JavaScriptEngine> jsBuilder) {
-        RuleEngine invalidEngine = jsBuilder.script("111return { local: in_subnet(message.local, '192.168.0.1/24') }").build();
+        RuleEngine invalidEngine =
+              jsBuilder.script("111return { local: in_subnet(message.local, '192.168.0.1/24') }").build();
         assertThat(invalidEngine.validate(), equalTo(false));
 
-        RuleEngine validEngine = jsBuilder.script("return { local: in_subnet(message.local, '192.168.0.1/24') }").build();
+        RuleEngine validEngine =
+              jsBuilder.script("return { local: in_subnet(message.local, '192.168.0.1/24') }").build();
         assertThat(validEngine.validate(), equalTo(true));
     }
 
     private Message createMessage(Message.MessageBuilder builder) {
         return builder
-                .message("")
-                .source("test")
-                .originalSource(TestUtils.source())
-                .build();
+              .message("")
+              .source("test")
+              .originalSource(TestUtils.source())
+              .build();
     }
 }

@@ -12,13 +12,12 @@
 
 package com.cloudera.cyber.libs.hostnames;
 
-import org.junit.Test;
-
-import java.util.List;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
+
+import java.util.List;
+import org.junit.Test;
 
 public class TestNsLookup {
 

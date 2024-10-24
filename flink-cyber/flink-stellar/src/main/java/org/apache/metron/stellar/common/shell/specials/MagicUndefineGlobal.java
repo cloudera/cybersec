@@ -16,55 +16,56 @@
  *  limitations under the License.
  *
  */
+
 package org.apache.metron.stellar.common.shell.specials;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.metron.stellar.common.shell.StellarShellExecutor;
-import org.apache.metron.stellar.common.shell.StellarResult;
-
-import java.util.Map;
-import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
-import static org.apache.metron.stellar.common.shell.StellarResult.noop;
 import static org.apache.metron.stellar.common.shell.StellarResult.error;
+import static org.apache.metron.stellar.common.shell.StellarResult.noop;
+
+import java.util.Map;
+import java.util.function.Function;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.metron.stellar.common.shell.StellarResult;
+import org.apache.metron.stellar.common.shell.StellarShellExecutor;
 
 /**
  * Allows a variable to be removed from the global configuration.
  *
- *    %undefine varName
+ * <p>
+ * %undefine varName
  */
 public class MagicUndefineGlobal implements SpecialCommand {
 
-  public static final String MAGIC_UNDEFINE = "%undefine";
+    public static final String MAGIC_UNDEFINE = "%undefine";
 
-  @Override
-  public String getCommand() {
-    return MAGIC_UNDEFINE;
-  }
-
-  @Override
-  public Function<String, Boolean> getMatcher() {
-    return (input) -> startsWith(trimToEmpty(input), MAGIC_UNDEFINE);
-  }
-
-  @Override
-  public StellarResult execute(String command, StellarShellExecutor executor) {
-    StellarResult result;
-
-    String variable = StringUtils.trimToEmpty(command.substring(MAGIC_UNDEFINE.length()));
-    if(StringUtils.isNotBlank(variable)) {
-
-      // remove the variable from the globals
-      Map<String, Object> globals = executor.getGlobalConfig();
-      globals.remove(variable);
-      result = noop();
-
-    } else {
-      result = error(String.format("%s expected name of global, got '%s'", MAGIC_UNDEFINE, variable));
+    @Override
+    public String getCommand() {
+        return MAGIC_UNDEFINE;
     }
 
-    return result;
-  }
+    @Override
+    public Function<String, Boolean> getMatcher() {
+        return (input) -> startsWith(trimToEmpty(input), MAGIC_UNDEFINE);
+    }
+
+    @Override
+    public StellarResult execute(String command, StellarShellExecutor executor) {
+        StellarResult result;
+
+        String variable = StringUtils.trimToEmpty(command.substring(MAGIC_UNDEFINE.length()));
+        if (StringUtils.isNotBlank(variable)) {
+
+            // remove the variable from the globals
+            Map<String, Object> globals = executor.getGlobalConfig();
+            globals.remove(variable);
+            result = noop();
+
+        } else {
+            result = error(String.format("%s expected name of global, got '%s'", MAGIC_UNDEFINE, variable));
+        }
+
+        return result;
+    }
 }

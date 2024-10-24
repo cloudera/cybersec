@@ -13,16 +13,13 @@
 package com.cloudera.cyber.enrichment.geocode.impl.types;
 
 import com.maxmind.geoip2.model.CityResponse;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-import java.awt.*;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
@@ -30,7 +27,8 @@ public enum MetronGeoEnrichmentFields implements GeoFields {
     LOC_ID(cityResponse -> cityResponse.getCity().getGeoNameId(), "locID", "locID"),
     CITY(GeoFields::getCity, "city", "city"),
     COUNTRY(GeoFields::getCountry, "country", "country"),
-    POSTAL_CODE(cityResponse -> GeoFields.convertEmptyToNull(cityResponse.getPostal().getCode()), "postalCode", "postalCode"),
+    POSTAL_CODE(cityResponse -> GeoFields.convertEmptyToNull(cityResponse.getPostal().getCode()), "postalCode",
+          "postalCode"),
     DMA_CODE(cityResponse -> cityResponse.getLocation().getMetroCode(), "dmaCode", "dmaCode"),
     LATITUDE(GeoFields::getLatitude, "latitude", "latitudes"),
     LONGITUDE(GeoFields::getLongitude, "longitude", "longitudes"),
@@ -57,7 +55,8 @@ public enum MetronGeoEnrichmentFields implements GeoFields {
         if (latitudeRaw == null || longitudeRaw == null) {
             return null;
         } else {
-            return GeoFields.convertNullToEmptyString(latitudeRaw) + "," + GeoFields.convertNullToEmptyString(longitudeRaw);
+            return GeoFields.convertNullToEmptyString(latitudeRaw) + ","
+                   + GeoFields.convertNullToEmptyString(longitudeRaw);
         }
     }
 
@@ -65,9 +64,9 @@ public enum MetronGeoEnrichmentFields implements GeoFields {
 
     static {
         singularNameMap = Arrays.stream(MetronGeoEnrichmentFields.values()).collect(
-                        Collectors.collectingAndThen(
-                                Collectors.toMap(MetronGeoEnrichmentFields::getSingularName, Function.identity()),
-                                Collections::unmodifiableMap));
+              Collectors.collectingAndThen(
+                    Collectors.toMap(MetronGeoEnrichmentFields::getSingularName, Function.identity()),
+                    Collections::unmodifiableMap));
     }
 
     public static MetronGeoEnrichmentFields fromSingularName(String singularName) {

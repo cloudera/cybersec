@@ -37,13 +37,13 @@ public class MeasurementDto implements Serializable {
 
     public static MeasurementDto of(ProfileMeasurementConfig config) {
         return MeasurementDto.builder()
-                .fieldName(config.getFieldName())
-                .resultExtensionName(config.getResultExtensionName())
-                .aggregationMethod(config.getAggregationMethod().toString())
-                .calculateStats(config.getCalculateStats())
-                .format(config.getFormat())
-                .firstSeenExpirationDuration(config.getFirstSeenExpirationDuration())
-                .firstSeenExpirationDurationUnit(config.getFirstSeenExpirationDurationUnit())
-                .build();
+                             .fieldName(config.getFieldName())
+                             .resultExtensionName(config.getResultExtensionName())
+                             .aggregationMethod(config.getAggregationMethod().toString())
+                             .calculateStats(config.getCalculateStats())
+                             .format(config.getFormat())
+                             .firstSeenExpirationDuration(config.getFirstSeenExpirationDuration())
+                             .firstSeenExpirationDurationUnit(config.getFirstSeenExpirationDurationUnit())
+                             .build();
     }
 }

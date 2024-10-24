@@ -18,6 +18,12 @@
 
 package org.apache.metron.parsers.cef;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -26,6 +32,16 @@ import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.github.fge.jsonschema.main.JsonValidator;
 import com.google.common.io.Resources;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.metron.common.Constants.Fields;
 import org.apache.metron.parsers.interfaces.MessageParser;
 import org.json.simple.JSONObject;
@@ -34,20 +50,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.temporal.TemporalAccessor;
-import java.util.*;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 public class CEFParserTest {
 	private CEFParser parser;
@@ -251,20 +253,20 @@ public class CEFParserTest {
 	 * -standard-bundle/nifi-standard-processors/src/test/java/org/apache/nifi/
 	 * processors/standard/TestParseCEF.java)
 	 */
-	private final static String sample = "CEF:0|TestVendor|TestProduct|TestVersion|TestEventClassID|TestName|Low|" +
-			// TimeStamp, String and Long
-			"rt=Feb 09 2015 00:27:43 UTC cn3Label=Test Long cn3=9223372036854775807 " +
-			// FloatPoint and MacAddress
-			"cfp1=1.234 cfp1Label=Test FP Number smac=00:00:0c:07:ac:00 " +
-			// IPv6 and String
-			"c6a3=2001:cdba::3257:9652 c6a3Label=Test IPv6 cs1Label=Test String cs1=test test test chocolate " +
-			// IPv4
-			"destinationTranslatedAddress=123.123.123.123 " +
-			// Date without TZ
-			"deviceCustomDate1=Feb 06 2015 13:27:43 " +
-			// Integer and IP Address (from v4)
-			"dpt=1234 agt=123.123.0.124 dlat=40.366633 " +
-			// A JSON object inside one of CEF's custom Strings
+	private static final String sample = "CEF:0|TestVendor|TestProduct|TestVersion|TestEventClassID|TestName|Low|"
+			+ // TimeStamp, String and Long
+			"rt=Feb 09 2015 00:27:43 UTC cn3Label=Test Long cn3=9223372036854775807 "
+			+ // FloatPoint and MacAddress
+			"cfp1=1.234 cfp1Label=Test FP Number smac=00:00:0c:07:ac:00 "
+			+ // IPv6 and String
+			"c6a3=2001:cdba::3257:9652 c6a3Label=Test IPv6 cs1Label=Test String cs1=test test test chocolate "
+			+ // IPv4
+			"destinationTranslatedAddress=123.123.123.123 "
+			+ // Date without TZ
+			"deviceCustomDate1=Feb 06 2015 13:27:43 "
+			+ // Integer and IP Address (from v4)
+			"dpt=1234 agt=123.123.0.124 dlat=40.366633 "
+			+ // A JSON object inside one of CEF's custom Strings
 			"cs2Label=JSON payload "
 			+ "cs2={\"test_test_test\": \"chocolate!\", \"what?!?\": \"Simple! test test test chocolate!\"}";
 

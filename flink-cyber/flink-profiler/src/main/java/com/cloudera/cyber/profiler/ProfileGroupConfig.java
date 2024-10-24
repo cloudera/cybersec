@@ -12,14 +12,21 @@
 
 package com.cloudera.cyber.profiler;
 
-import lombok.*;
-import org.apache.flink.util.Preconditions;
-
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.flink.util.Preconditions;
 
 @Data
 @NoArgsConstructor(force = true, access = AccessLevel.PUBLIC)
@@ -30,16 +37,23 @@ public class ProfileGroupConfig implements Serializable {
 
     static final String NULL_PROFILE_GROUP_NAME_ERROR = "profileGroupName is null";
     static final String EMPTY_PROFILE_GROUP_NAME_ERROR = "profileGroupName cannot be empty";
-    public static final String EMPTY_SOURCES_ERROR = "Profile group '%s': %s sources list -  specify a list of source names or ANY matching any source";
-    public static final String EMPTY_KEY_FIELDS_ERROR = "Profile group '%s': %s key field list - specify the name of one or more key fields for the profile";
+    public static final String EMPTY_SOURCES_ERROR =
+          "Profile group '%s': %s sources list -  specify a list of source names or ANY matching any source";
+    public static final String EMPTY_KEY_FIELDS_ERROR =
+          "Profile group '%s': %s key field list - specify the name of one or more key fields for the profile";
     public static final String PROFILE_TIME_ERROR = "Profile group '%s': %s is %s";
-    public static final String NULL_EMPTY_MEASUREMENTS_ERROR = "Profile group '%s': %s measurements list - specify at least on measurement for the profile group";
-    public static final String MISSING_STATS_SLIDE = "Profile group '%s' has calculateStats enabled but does not specify statsSlide";
-    public static final String UNNECESSARY_STATS_SLIDE_ERROR = "Profile group '%s' does not have calculateStats enabled but specifies statsSlide";
-    public static final String MISSING_STATS_SLIDE_UNIT = "Profile group '%s' has calculateStates enabled but does not specify statsSlideUnit";
+    public static final String NULL_EMPTY_MEASUREMENTS_ERROR =
+          "Profile group '%s': %s measurements list - specify at least on measurement for the profile group";
+    public static final String MISSING_STATS_SLIDE =
+          "Profile group '%s' has calculateStats enabled but does not specify statsSlide";
+    public static final String UNNECESSARY_STATS_SLIDE_ERROR =
+          "Profile group '%s' does not have calculateStats enabled but specifies statsSlide";
+    public static final String MISSING_STATS_SLIDE_UNIT =
+          "Profile group '%s' has calculateStates enabled but does not specify statsSlideUnit";
     public static final String ILLEGAL_TIME_UNIT_ERROR = "Profile group '%s' %s has an undefined time unit.";
     public static final String DUPLICATE_PROFILE_GROUP_NAMES_ERROR = "Duplicate profile group names '%s'.";
-    public static final String DUPLICATE_RESULT_EXTENSIONS_NAMES = "Profile group '%s' has duplicate result extension names '%s'.";
+    public static final String DUPLICATE_RESULT_EXTENSIONS_NAMES =
+          "Profile group '%s' has duplicate result extension names '%s'.";
 
     private String profileGroupName;
     private ArrayList<String> sources;
@@ -56,15 +70,17 @@ public class ProfileGroupConfig implements Serializable {
     }
 
     public boolean needsSourceFilter() {
-         return !sources.contains(ANY_SOURCE);
+        return !sources.contains(ANY_SOURCE);
     }
 
     public List<String> getMeasurementFieldNames() {
-        return measurements.stream().map(ProfileMeasurementConfig::getFieldName).filter(Objects::nonNull).collect(Collectors.toList());
+        return measurements.stream().map(ProfileMeasurementConfig::getFieldName).filter(Objects::nonNull)
+                           .collect(Collectors.toList());
     }
 
     public boolean hasFirstSeen() {
-        return measurements.stream().anyMatch(m -> m.getAggregationMethod().equals(ProfileAggregationMethod.FIRST_SEEN));
+        return measurements.stream()
+                           .anyMatch(m -> m.getAggregationMethod().equals(ProfileAggregationMethod.FIRST_SEEN));
     }
 
     public void verify() {
@@ -77,45 +93,54 @@ public class ProfileGroupConfig implements Serializable {
         if (hasStats()) {
             verifyTime("statsSlide", statsSlide, statsSlideUnit);
         } else {
-            Preconditions.checkState(statsSlide == null && statsSlideUnit == null, String.format(UNNECESSARY_STATS_SLIDE_ERROR, getProfileGroupName()));
+            Preconditions.checkState(statsSlide == null && statsSlideUnit == null,
+                  String.format(UNNECESSARY_STATS_SLIDE_ERROR, getProfileGroupName()));
         }
 
         int offset = 1;
         Set<String> uniqueMeasurementResults = new HashSet<>();
 
         Set<String> duplicateMeasurementResults = new HashSet<>();
-        for(ProfileMeasurementConfig measurement : measurements) {
+        for (ProfileMeasurementConfig measurement : measurements) {
             measurement.verify(this, offset++);
             String resultExtensionName = measurement.getResultExtensionName();
             if (!uniqueMeasurementResults.add(resultExtensionName)) {
                 duplicateMeasurementResults.add(resultExtensionName);
             }
         }
-        Preconditions.checkState(duplicateMeasurementResults.isEmpty(), String.format(DUPLICATE_RESULT_EXTENSIONS_NAMES, getProfileGroupName(), String.join(", ", duplicateMeasurementResults)));
+        Preconditions.checkState(duplicateMeasurementResults.isEmpty(),
+              String.format(DUPLICATE_RESULT_EXTENSIONS_NAMES, getProfileGroupName(),
+                    String.join(", ", duplicateMeasurementResults)));
     }
 
     public static void verify(List<ProfileGroupConfig> profileGroupConfigs) {
         profileGroupConfigs.forEach(ProfileGroupConfig::verify);
         Set<String> uniqueProfileGroupNames = new HashSet<>();
-        Set<String> duplicateProfileGroupNames = profileGroupConfigs.stream().map(ProfileGroupConfig::getProfileGroupName)
-                .filter(n -> !uniqueProfileGroupNames.add(n))
-                .collect(Collectors.toSet());
-        Preconditions.checkState(duplicateProfileGroupNames.isEmpty(), String.format(DUPLICATE_PROFILE_GROUP_NAMES_ERROR, String.join(", ", duplicateProfileGroupNames)));
+        Set<String> duplicateProfileGroupNames =
+              profileGroupConfigs.stream().map(ProfileGroupConfig::getProfileGroupName)
+                                 .filter(n -> !uniqueProfileGroupNames.add(n))
+                                 .collect(Collectors.toSet());
+        Preconditions.checkState(duplicateProfileGroupNames.isEmpty(),
+              String.format(DUPLICATE_PROFILE_GROUP_NAMES_ERROR, String.join(", ", duplicateProfileGroupNames)));
     }
 
     private void verifyList(List<?> listToVerify, String messageFormat) {
         Preconditions.checkNotNull(listToVerify, String.format(messageFormat, getProfileGroupName(), "null"));
-        Preconditions.checkArgument(!listToVerify.isEmpty(), String.format(messageFormat, getProfileGroupName(), "empty"));
+        Preconditions.checkArgument(!listToVerify.isEmpty(),
+              String.format(messageFormat, getProfileGroupName(), "empty"));
     }
 
     public void verifyTime(String baseTimeFieldName, Long profileTimeDuration, String profileTimeUnit) {
         final String timeUnitFieldName = baseTimeFieldName.concat("Unit");
         // check missing duration and unit
-        Preconditions.checkNotNull(profileTimeDuration, String.format(PROFILE_TIME_ERROR, getProfileGroupName(), baseTimeFieldName, "null"));
-        Preconditions.checkNotNull(profileTimeUnit, String.format(PROFILE_TIME_ERROR, getProfileGroupName(), timeUnitFieldName, "null"));
+        Preconditions.checkNotNull(profileTimeDuration,
+              String.format(PROFILE_TIME_ERROR, getProfileGroupName(), baseTimeFieldName, "null"));
+        Preconditions.checkNotNull(profileTimeUnit,
+              String.format(PROFILE_TIME_ERROR, getProfileGroupName(), timeUnitFieldName, "null"));
         // time unit must match one of the define java time units
         Preconditions.checkState(Stream.of(TimeUnit.values()).anyMatch(unit -> unit.name().equals(profileTimeUnit)),
-                String.format(PROFILE_TIME_ERROR, getProfileGroupName(), timeUnitFieldName, "not a legal time unit"));
-        Preconditions.checkState(profileTimeDuration > 0, String.format(PROFILE_TIME_ERROR, getProfileGroupName(), baseTimeFieldName, "0 or negative"));
+              String.format(PROFILE_TIME_ERROR, getProfileGroupName(), timeUnitFieldName, "not a legal time unit"));
+        Preconditions.checkState(profileTimeDuration > 0,
+              String.format(PROFILE_TIME_ERROR, getProfileGroupName(), baseTimeFieldName, "0 or negative"));
     }
 }

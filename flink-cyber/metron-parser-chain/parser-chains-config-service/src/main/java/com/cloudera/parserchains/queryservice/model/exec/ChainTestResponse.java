@@ -12,11 +12,10 @@
 
 package com.cloudera.parserchains.queryservice.model.exec;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Defines the data model for the response to a parser chain
@@ -74,21 +73,21 @@ public class ChainTestResponse {
         }
         ChainTestResponse that = (ChainTestResponse) o;
         return new EqualsBuilder()
-                .append(results, that.results)
-                .isEquals();
+              .append(results, that.results)
+              .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(results)
-                .toHashCode();
+              .append(results)
+              .toHashCode();
     }
 
     @Override
     public String toString() {
-        return "ParserResults{" +
-                "results=" + results +
-                '}';
+        return "ParserResults{"
+               + "results=" + results
+               + '}';
     }
 }

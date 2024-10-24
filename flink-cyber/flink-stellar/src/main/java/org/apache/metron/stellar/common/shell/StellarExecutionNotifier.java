@@ -17,6 +17,7 @@
  *  limitations under the License.
  *
  */
+
 package org.apache.metron.stellar.common.shell;
 
 /**
@@ -24,21 +25,24 @@ package org.apache.metron.stellar.common.shell;
  */
 public interface StellarExecutionNotifier {
 
-  /**
-   * Add a listener that will be notified when a magic command is defined.
-   * @param listener The listener to notify.
-   */
-  void addSpecialListener(StellarExecutionListeners.SpecialDefinedListener listener);
+    /**
+     * Add a listener that will be notified when a magic command is defined.
+     *
+     * @param listener The listener to notify.
+     */
+    void addSpecialListener(StellarExecutionListeners.SpecialDefinedListener listener);
 
-  /**
-   * Add a listener that will be notified when a function is defined.
-   * @param listener The listener to notify.
-   */
-  void addFunctionListener(StellarExecutionListeners.FunctionDefinedListener listener);
+    /**
+     * Add a listener that will be notified when a function is defined.
+     *
+     * @param listener The listener to notify.
+     */
+    void addFunctionListener(StellarExecutionListeners.FunctionDefinedListener listener);
 
-  /**
-   * Add a listener that will be notified when a variable is defined.
-   * @param listener The listener to notify.
-   */
-  void addVariableListener(StellarExecutionListeners.VariableDefinedListener listener);
+    /**
+     * Add a listener that will be notified when a variable is defined.
+     *
+     * @param listener The listener to notify.
+     */
+    void addVariableListener(StellarExecutionListeners.VariableDefinedListener listener);
 }

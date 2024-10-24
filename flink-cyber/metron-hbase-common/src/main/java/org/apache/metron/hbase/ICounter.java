@@ -24,11 +24,14 @@ package org.apache.metron.hbase;
  * Interface definition for classes that support being written to HBase as
  * a counter column.
  *
+ * <p>
  * Original code based on the Apache Storm project. See
  * https://github.com/apache/storm/tree/master/external/storm-hbase.
  */
 public interface ICounter {
-  byte[] family();
-  byte[] qualifier();
-  long increment();
+    byte[] family();
+
+    byte[] qualifier();
+
+    long increment();
 }

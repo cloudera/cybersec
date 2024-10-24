@@ -14,11 +14,10 @@ package com.cloudera.parserchains.core;
 
 import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.parserchains.core.model.define.ParserName;
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Parses a {@link Message} using a parser chain.
@@ -33,6 +32,8 @@ public class DefaultChainRunner implements ChainRunner {
     }
 
     /**
+     * inputField setter.
+     *
      * @param inputField The name of the field that is initialized with the raw input.
      */
     public DefaultChainRunner withInputField(FieldName inputField) {
@@ -55,14 +56,20 @@ public class DefaultChainRunner implements ChainRunner {
         try {
             List<Message> chainResults = chain.process(original);
             results.addAll(chainResults);
-        } catch(Throwable t) {
-            String msg = "An unexpected error occurred while running a parser chain. " +
-                    "Ensure that no parser is throwing an unchecked exception. Parsers should " +
-                    "instead be reporting the error in the output message.";
+        } catch (Throwable t) {
+            String msg = "An unexpected error occurred while running a parser chain. "
+                         + "Ensure that no parser is throwing an unchecked exception. Parsers should "
+                         + "instead be reporting the error in the output message.";
             results = getErrorResult(original, msg);
             log.warn(msg, t);
         }
         return results;
+    }
+
+    @Override
+    public List<Message> run(MessageToParse toParse, ChainLink chain) {
+        Message original = originalMessage(toParse);
+        return parseMessage(original, chain);
     }
 
     private List<Message> parseMessage(Message original, ChainLink chain) {
@@ -77,32 +84,26 @@ public class DefaultChainRunner implements ChainRunner {
     }
 
     @Override
-    public List<Message> run(MessageToParse toParse, ChainLink chain) {
-        Message original = originalMessage(toParse);
-        return parseMessage(original, chain);
-    }
-
-    @Override
     public Message originalMessage(String toParse) {
         return Message.builder()
-                .addField(inputField, StringFieldValue.of(toParse))
-                .createdBy(ORIGINAL_MESSAGE_NAME)
-                .build();
+                      .addField(inputField, StringFieldValue.of(toParse))
+                      .createdBy(ORIGINAL_MESSAGE_NAME)
+                      .build();
     }
 
     @Override
     public Message originalMessage(MessageToParse toParse) {
         return Message.builder()
-                .addField(inputField, MessageToParseFieldValue.of(toParse))
-                .createdBy(ORIGINAL_MESSAGE_NAME)
-                .build();
+                      .addField(inputField, MessageToParseFieldValue.of(toParse))
+                      .createdBy(ORIGINAL_MESSAGE_NAME)
+                      .build();
     }
 
     private List<Message> getErrorResult(Message original, String errorMessage) {
         Message error = Message.builder()
-                .clone(original)
-                .withError(errorMessage)
-                .build();
+                               .clone(original)
+                               .withError(errorMessage)
+                               .build();
         return Collections.singletonList(error);
     }
 }

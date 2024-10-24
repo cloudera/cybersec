@@ -6,9 +6,11 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,52 +21,50 @@
 package org.apache.metron.stellar.common.configuration;
 
 import com.google.common.base.Function;
+import java.io.IOException;
 import org.apache.metron.stellar.common.Constants;
 import org.apache.metron.stellar.common.utils.JSONUtils;
 
-import java.io.IOException;
-import java.util.Map;
-
 public enum ConfigurationType implements Function<String, Object> {
 
-  GLOBAL("global",".", s -> {
-    try {
-      return JSONUtils.INSTANCE.load(s, JSONUtils.MAP_SUPPLIER);
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to load " + s, e);
+    GLOBAL("global", ".", s -> {
+        try {
+            return JSONUtils.INSTANCE.load(s, JSONUtils.MAP_SUPPLIER);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to load " + s, e);
+        }
+    });
+
+    String name;
+    String directory;
+    String zookeeperRoot;
+    Function<String, ?> deserializer;
+
+    ConfigurationType(String name, String directory, Function<String, ?> deserializer) {
+        this.name = name;
+        this.directory = directory;
+        this.zookeeperRoot = Constants.ZOOKEEPER_TOPOLOGY_ROOT + "/" + name;
+        this.deserializer = deserializer;
     }
-  });
 
-  String name;
-  String directory;
-  String zookeeperRoot;
-  Function<String,?> deserializer;
+    public String getName() {
+        return name;
+    }
 
-  ConfigurationType(String name, String directory, Function<String, ?> deserializer) {
-    this.name = name;
-    this.directory = directory;
-    this.zookeeperRoot = Constants.ZOOKEEPER_TOPOLOGY_ROOT + "/" + name;
-    this.deserializer = deserializer;
-  }
+    public String getDirectory() {
+        return directory;
+    }
 
-  public String getName() {
-    return name;
-  }
+    public Object deserialize(String s) {
+        return deserializer.apply(s);
+    }
 
-  public String getDirectory() {
-    return directory;
-  }
+    @Override
+    public Object apply(String s) {
+        return deserialize(s);
+    }
 
-  public Object deserialize(String s) {
-    return deserializer.apply(s);
-  }
-
-  @Override
-  public Object apply(String s) {
-    return deserialize(s);
-  }
-
-  public String getZookeeperRoot() {
-    return zookeeperRoot;
-  }
+    public String getZookeeperRoot() {
+        return zookeeperRoot;
+    }
 }

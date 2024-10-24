@@ -16,57 +16,59 @@
  *  limitations under the License.
  *
  */
+
 package org.apache.metron.stellar.common.shell.specials;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.metron.stellar.common.shell.StellarShellExecutor;
-import org.apache.metron.stellar.common.shell.StellarResult;
+import static org.apache.commons.lang3.StringUtils.startsWith;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import static org.apache.commons.lang3.StringUtils.*;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.metron.stellar.common.shell.StellarResult;
+import org.apache.metron.stellar.common.shell.StellarShellExecutor;
 
 /**
  * A MagicCommand that lists the functions available within
  * a Stellar execution environment.
  *
- *    %functions
+ * <p>
+ * %functions
  */
 public class MagicListFunctions implements SpecialCommand {
 
-  public static final String MAGIC_FUNCTIONS = "%functions";
+    public static final String MAGIC_FUNCTIONS = "%functions";
 
-  @Override
-  public String getCommand() {
-    return MAGIC_FUNCTIONS;
-  }
-
-  @Override
-  public Function<String, Boolean> getMatcher() {
-    return (input) -> startsWith(trimToEmpty(input), MAGIC_FUNCTIONS);
-  }
-
-  @Override
-  public StellarResult execute(String command, StellarShellExecutor executor) {
-
-    // if '%functions FOO' then show only functions that contain 'FOO'
-    String startsWith = StringUtils.trimToEmpty(command.substring(MAGIC_FUNCTIONS.length()));
-    Predicate<String> nameFilter = (name -> true);
-    if (StringUtils.isNotBlank(startsWith)) {
-      nameFilter = (name -> name.contains(startsWith));
+    @Override
+    public String getCommand() {
+        return MAGIC_FUNCTIONS;
     }
 
-    // '%functions' -> list all functions in scope
-    String functions = StreamSupport
-            .stream(executor.getFunctionResolver().getFunctionInfo().spliterator(), false)
-            .map(info -> String.format("%s", info.getName()))
-            .filter(nameFilter)
-            .sorted()
-            .collect(Collectors.joining(", "));
+    @Override
+    public Function<String, Boolean> getMatcher() {
+        return (input) -> startsWith(trimToEmpty(input), MAGIC_FUNCTIONS);
+    }
 
-    return StellarResult.success(functions);
-  }
+    @Override
+    public StellarResult execute(String command, StellarShellExecutor executor) {
+
+        // if '%functions FOO' then show only functions that contain 'FOO'
+        String startsWith = StringUtils.trimToEmpty(command.substring(MAGIC_FUNCTIONS.length()));
+        Predicate<String> nameFilter = (name -> true);
+        if (StringUtils.isNotBlank(startsWith)) {
+            nameFilter = (name -> name.contains(startsWith));
+        }
+
+        // '%functions' -> list all functions in scope
+        String functions = StreamSupport
+              .stream(executor.getFunctionResolver().getFunctionInfo().spliterator(), false)
+              .map(info -> String.format("%s", info.getName()))
+              .filter(nameFilter)
+              .sorted()
+              .collect(Collectors.joining(", "));
+
+        return StellarResult.success(functions);
+    }
 }

@@ -28,11 +28,12 @@ public abstract class SolrJob extends SearchIndexJob {
     private static final long DEFAULT_MAX_EVENTS = 10000;
 
     protected void writeResults(DataStream<IndexEntry> results, ParameterTool params) {
-        results.keyBy(IndexEntry::getIndex).timeWindow(Time.milliseconds(params.getLong(PARAMS_INDEX_WINDOW_MAX_MS, DEFAULT_INDEX_WINDOW_MAX_MS)))
-                .trigger(EventTimeAndCountTrigger.of(DEFAULT_MAX_EVENTS))
-                .apply(new SolrIndexer(params))
-                .name("Solr Indexer")
-                .uid("Solr Indexer");
+        results.keyBy(IndexEntry::getIndex)
+              .timeWindow(Time.milliseconds(params.getLong(PARAMS_INDEX_WINDOW_MAX_MS, DEFAULT_INDEX_WINDOW_MAX_MS)))
+              .trigger(EventTimeAndCountTrigger.of(DEFAULT_MAX_EVENTS))
+              .apply(new SolrIndexer(params))
+              .name("Solr Indexer")
+              .uid("Solr Indexer");
     }
 
     protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);

@@ -30,7 +30,7 @@ public class FieldName {
      * Use {@link FieldName#of(String)}.
      */
     private FieldName(String fieldName) {
-        if(!validFieldName.matches(fieldName)) {
+        if (!validFieldName.matches(fieldName)) {
             throw new IllegalArgumentException(String.format("Invalid field name: '%s'", fieldName));
         }
         this.fieldName = fieldName;
@@ -46,15 +46,15 @@ public class FieldName {
         }
         FieldName that = (FieldName) o;
         return new EqualsBuilder()
-                .append(fieldName, that.fieldName)
-                .isEquals();
+              .append(fieldName, that.fieldName)
+              .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(fieldName)
-                .toHashCode();
+              .append(fieldName)
+              .toHashCode();
     }
 
     public String get() {

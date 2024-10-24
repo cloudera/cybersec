@@ -13,6 +13,7 @@
 package com.cloudera.parserchains.parsers;
 
 import static java.lang.String.format;
+
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
@@ -34,8 +35,8 @@ import org.apache.commons.lang3.StringUtils;
  * Parses delimited text like CSV.
  */
 @MessageParser(
-        name = "Delimited Text",
-        description = "Parses delimited text like CSV or TSV.")
+      name = "Delimited Text",
+      description = "Parses delimited text like CSV or TSV.")
 public class DelimitedTextParser implements Parser {
     private static final String DEFAULT_DELIMITER = ",";
     private static final String DEFAULT_TRIM = "true";
@@ -55,7 +56,7 @@ public class DelimitedTextParser implements Parser {
 
     private FieldName inputField;
     private Regex delimiter;
-    private List<OutputField> outputFields;
+    private final List<OutputField> outputFields;
     private boolean trimWhitespace;
 
     public DelimitedTextParser() {
@@ -66,6 +67,8 @@ public class DelimitedTextParser implements Parser {
     }
 
     /**
+     * inputField setter.
+     *
      * @param inputField The name of the field containing the text to parse.
      */
     public DelimitedTextParser withInputField(FieldName inputField) {
@@ -74,9 +77,9 @@ public class DelimitedTextParser implements Parser {
     }
 
     @Configurable(key = "inputField",
-            label = "Input Field",
-            description = "The name of the input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
-            defaultValue = Constants.DEFAULT_INPUT_FIELD)
+          label = "Input Field",
+          description = "The name of the input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
+          defaultValue = Constants.DEFAULT_INPUT_FIELD)
     public DelimitedTextParser withInputField(String fieldName) {
         if (StringUtils.isNotEmpty(fieldName)) {
             withInputField(FieldName.of(fieldName));
@@ -89,6 +92,8 @@ public class DelimitedTextParser implements Parser {
     }
 
     /**
+     * delimiter setter..
+     *
      * @param delimiter A character or regular expression defining the delimiter used to split the text.
      */
     public DelimitedTextParser withDelimiter(Regex delimiter) {
@@ -97,9 +102,9 @@ public class DelimitedTextParser implements Parser {
     }
 
     @Configurable(key = "delimiter",
-            label = "Delimiter",
-            description = "A regex used to split the text. Default value: '" + DEFAULT_DELIMITER + "'",
-            defaultValue = DEFAULT_DELIMITER)
+          label = "Delimiter",
+          description = "A regex used to split the text. Default value: '" + DEFAULT_DELIMITER + "'",
+          defaultValue = DEFAULT_DELIMITER)
     public void withDelimiter(String delimiter) {
         if (StringUtils.isNotEmpty(delimiter)) {
             withDelimiter(Regex.of(delimiter));
@@ -111,6 +116,8 @@ public class DelimitedTextParser implements Parser {
     }
 
     /**
+     * outputFields setter.
+     *
      * @param fieldName The name of a field to create.
      * @param index     The 0-based index defining which delimited element is added to the field.
      */
@@ -119,20 +126,20 @@ public class DelimitedTextParser implements Parser {
         return this;
     }
 
-    @Configurable(key = "outputField", label = "Output Field",multipleValues = true)
+    @Configurable(key = "outputField", label = "Output Field", multipleValues = true)
     public void withOutputField(
-            @Parameter(
+          @Parameter(
                 key = "fieldName",
                 label = "Field Name",
                 description = "The name of the output field.",
                 isOutputName = true,
                 required = true)
-            String fieldName,
-            @Parameter(key = "fieldIndex",
+          String fieldName,
+          @Parameter(key = "fieldIndex",
                 label = "Column Index",
                 description = "The index of the column containing the data.",
                 required = true)
-            String index) {
+          String index) {
         if (StringUtils.isNoneBlank(fieldName, index)) {
             withOutputField(FieldName.of(fieldName), Integer.parseInt(index));
         }
@@ -143,6 +150,8 @@ public class DelimitedTextParser implements Parser {
     }
 
     /**
+     * trimWhitespace setter.
+     *
      * @param trimWhitespace True, if whitespace should be trimmed from each value. Otherwise, false.
      */
     public DelimitedTextParser trimWhitespace(boolean trimWhitespace) {
@@ -151,9 +160,9 @@ public class DelimitedTextParser implements Parser {
     }
 
     @Configurable(key = "trim",
-            label = "Trim Whitespace",
-            description = "Trim whitespace from each value. Default value: '" + DEFAULT_TRIM + "'",
-            defaultValue = DEFAULT_TRIM)
+          label = "Trim Whitespace",
+          description = "Trim whitespace from each value. Default value: '" + DEFAULT_TRIM + "'",
+          defaultValue = DEFAULT_TRIM)
     public void trimWhitespace(String trimWhitespace) {
         if (StringUtils.isNotBlank(trimWhitespace)) {
             trimWhitespace(Boolean.valueOf(trimWhitespace));

@@ -22,10 +22,10 @@ public class SumAndMaxTs implements AggregateFunction<DedupeMessage, SumAndMax, 
     @Override
     public SumAndMax createAccumulator() {
         return SumAndMax.builder()
-                .sum(0L)
-                .maxTs(Long.MIN_VALUE)
-                .minTs(Long.MAX_VALUE)
-                .build();
+                        .sum(0L)
+                        .maxTs(Long.MIN_VALUE)
+                        .minTs(Long.MAX_VALUE)
+                        .build();
     }
 
     @Override
@@ -34,21 +34,21 @@ public class SumAndMaxTs implements AggregateFunction<DedupeMessage, SumAndMax, 
             throw new IllegalStateException("Unmatched key in accumulator");
         }
         return SumAndMax.builder()
-                .fields(dedupeMessage.getFields())
-                .maxTs(Math.max(dedupeMessage.getTs(), sumAndMax.getMaxTs()))
-                .minTs(Math.min(dedupeMessage.getTs(), sumAndMax.getMinTs()))
-                .sum(dedupeMessage.getCount() + sumAndMax.getSum())
-                .build();
+                        .fields(dedupeMessage.getFields())
+                        .maxTs(Math.max(dedupeMessage.getTs(), sumAndMax.getMaxTs()))
+                        .minTs(Math.min(dedupeMessage.getTs(), sumAndMax.getMinTs()))
+                        .sum(dedupeMessage.getCount() + sumAndMax.getSum())
+                        .build();
     }
 
     @Override
     public DedupeMessage getResult(SumAndMax sumAndMax) {
         DedupeMessage result = DedupeMessage.builder()
-                .fields(sumAndMax.getFields())
-                .ts(sumAndMax.getMaxTs())
-                .startTs(sumAndMax.getMinTs())
-                .count(sumAndMax.getSum())
-                .build();
+                                            .fields(sumAndMax.getFields())
+                                            .ts(sumAndMax.getMaxTs())
+                                            .startTs(sumAndMax.getMinTs())
+                                            .count(sumAndMax.getSum())
+                                            .build();
         return result;
     }
 

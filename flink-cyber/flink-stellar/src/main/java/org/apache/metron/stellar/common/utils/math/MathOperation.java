@@ -17,29 +17,31 @@
  *  limitations under the License.
  *
  */
+
 package org.apache.metron.stellar.common.utils.math;
 
 import java.util.function.Function;
 
 public class MathOperation {
-  private int maxArgs;
-  private int minArgs;
-  private Function<Number[], Number> operation;
-  public MathOperation(Function<Number[], Number> operation, int minArgs, int maxArgs) {
-    this.operation = operation;
-    this.maxArgs = maxArgs;
-    this.minArgs = minArgs;
-  }
+    private final int maxArgs;
+    private final int minArgs;
+    private final Function<Number[], Number> operation;
 
-  public int getMaxArgs() {
-    return maxArgs;
-  }
+    public MathOperation(Function<Number[], Number> operation, int minArgs, int maxArgs) {
+        this.operation = operation;
+        this.maxArgs = maxArgs;
+        this.minArgs = minArgs;
+    }
 
-  public int getMinArgs() {
-    return minArgs;
-  }
+    public int getMaxArgs() {
+        return maxArgs;
+    }
 
-  public Function<Number[], Number> getOperation() {
-    return operation;
-  }
+    public int getMinArgs() {
+        return minArgs;
+    }
+
+    public Function<Number[], Number> getOperation() {
+        return operation;
+    }
 }

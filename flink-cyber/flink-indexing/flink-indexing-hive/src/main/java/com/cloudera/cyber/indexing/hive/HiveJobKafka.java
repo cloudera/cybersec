@@ -12,6 +12,8 @@
 
 package com.cloudera.cyber.indexing.hive;
 
+import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
+
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.scoring.ScoredMessage;
@@ -21,8 +23,6 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
-
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
 
 @Slf4j
 public class HiveJobKafka extends HiveJob {
@@ -40,10 +40,12 @@ public class HiveJobKafka extends HiveJob {
     }
 
     @Override
-    protected SingleOutputStreamOperator<ScoredMessage> createSource(StreamExecutionEnvironment env, ParameterTool params) {
+    protected SingleOutputStreamOperator<ScoredMessage> createSource(StreamExecutionEnvironment env,
+                                                                     ParameterTool params) {
         return env.fromSource(
-                new FlinkUtils<>(ScoredMessage.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_INPUT), params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID)),
-                WatermarkStrategy.noWatermarks(), "Kafka Source").
-                uid("kafka-source");
+                        new FlinkUtils<>(ScoredMessage.class).createKafkaGenericSource(params.getRequired(PARAMS_TOPIC_INPUT),
+                              params, params.get(PARAMS_GROUP_ID, DEFAULT_GROUP_ID)),
+                        WatermarkStrategy.noWatermarks(), "Kafka Source")
+                  .uid("kafka-source");
     }
 }

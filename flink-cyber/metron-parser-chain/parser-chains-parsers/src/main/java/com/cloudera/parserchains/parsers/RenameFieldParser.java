@@ -27,10 +27,10 @@ import org.apache.commons.lang3.StringUtils;
  * A parser that can rename message fields.
  */
 @MessageParser(
-    name="Rename Field(s)", 
-    description="Renames message field(s).")
+      name = "Rename Field(s)",
+      description = "Renames message field(s).")
 public class RenameFieldParser implements Parser {
-    private Map<FieldName, FieldName> fieldsToRename;
+    private final Map<FieldName, FieldName> fieldsToRename;
 
     public RenameFieldParser() {
         this.fieldsToRename = new HashMap<>();
@@ -38,12 +38,33 @@ public class RenameFieldParser implements Parser {
 
     /**
      * Configure the parser to rename a field.
+     *
      * @param from The original field name.
-     * @param to The new field name.
+     * @param to   The new field name.
      */
     public RenameFieldParser renameField(FieldName from, FieldName to) {
         fieldsToRename.put(from, to);
         return this;
+    }
+
+    @Configurable(
+          key = "fieldToRename",
+          multipleValues = true)
+    public void renameField(
+          @Parameter(key = "from",
+                label = "Rename From",
+                description = "The original name of the field.",
+                required = true)
+          String from,
+          @Parameter(key = "to",
+                label = "Rename To",
+                description = "The new name of the field.",
+                isOutputName = true,
+                required = true)
+          String to) {
+        if (StringUtils.isNoneBlank(from, to)) {
+            renameField(FieldName.of(from), FieldName.of(to));
+        }
     }
 
     Map<FieldName, FieldName> getFieldsToRename() {
@@ -53,28 +74,8 @@ public class RenameFieldParser implements Parser {
     @Override
     public Message parse(Message input) {
         Message.Builder output = Message.builder()
-                .withFields(input);
+                                        .withFields(input);
         fieldsToRename.forEach((from, to) -> output.renameField(from, to));
         return output.build();
-    }
-
-    @Configurable(
-            key="fieldToRename",
-            multipleValues=true)
-    public void renameField(
-            @Parameter(key="from",
-                label="Rename From",
-                description="The original name of the field.",
-                required = true)
-            String from,
-            @Parameter(key="to",
-                label="Rename To",
-                description="The new name of the field.",
-                isOutputName = true,
-                required = true)
-            String to) {
-        if(StringUtils.isNoneBlank(from, to)) {
-            renameField(FieldName.of(from), FieldName.of(to));
-        }
     }
 }

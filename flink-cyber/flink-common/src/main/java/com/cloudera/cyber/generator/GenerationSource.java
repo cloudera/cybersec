@@ -13,11 +13,6 @@
 package com.cloudera.cyber.generator;
 
 import com.cloudera.cyber.generator.scenario.GeneratorScenario;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.commons.io.IOUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -25,6 +20,10 @@ import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.commons.io.IOUtils;
 
 @Data
 @AllArgsConstructor
@@ -52,7 +51,7 @@ public class GenerationSource implements Serializable {
             try (InputStream resourceStream = getClass().getClassLoader().getResourceAsStream(outputAvroSchemaFile)) {
                 if (resourceStream != null) {
                     outputAvroSchema = IOUtils.toString(
-                            Objects.requireNonNull(resourceStream), Charset.defaultCharset());
+                          Objects.requireNonNull(resourceStream), Charset.defaultCharset());
                 }
             }
 
@@ -60,7 +59,7 @@ public class GenerationSource implements Serializable {
             if (outputAvroSchema == null) {
                 try (InputStream schemaStream = Utils.openFileStream(baseDir, outputAvroSchemaFile)) {
                     outputAvroSchema = IOUtils.toString(
-                            Objects.requireNonNull(schemaStream), Charset.defaultCharset());
+                          Objects.requireNonNull(schemaStream), Charset.defaultCharset());
                 }
             }
         }

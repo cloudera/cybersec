@@ -31,7 +31,7 @@ public class LinkName {
      * Private constructor. Use {@link LinkName#of(String, ParserName)} instead.
      */
     private LinkName(String linkName, ParserName parserName) {
-        if(!validLinkName.matches(linkName)) {
+        if (!validLinkName.matches(linkName)) {
             throw new IllegalArgumentException(String.format("Invalid link name: '%s'", linkName));
         }
         this.linkName = linkName;
@@ -48,17 +48,17 @@ public class LinkName {
         }
         LinkName that = (LinkName) o;
         return new EqualsBuilder()
-                .append(linkName, that.linkName)
-                .append(parserName, that.parserName)
-                .isEquals();
+              .append(linkName, that.linkName)
+              .append(parserName, that.parserName)
+              .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(linkName)
-                .append(parserName)
-                .toHashCode();
+              .append(linkName)
+              .append(parserName)
+              .toHashCode();
     }
 
     public String getLinkName() {

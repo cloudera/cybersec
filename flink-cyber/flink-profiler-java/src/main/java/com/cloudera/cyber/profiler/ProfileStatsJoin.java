@@ -13,11 +13,10 @@
 package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc;
-import org.apache.flink.api.common.functions.JoinFunction;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.flink.api.common.functions.JoinFunction;
 
 public class ProfileStatsJoin implements JoinFunction<ProfileMessage, ProfileMessage, ProfileMessage> {
 
@@ -31,8 +30,9 @@ public class ProfileStatsJoin implements JoinFunction<ProfileMessage, ProfileMes
 
     @Override
     public ProfileMessage join(ProfileMessage profileMessage, ProfileMessage statsMessage) {
-        Map<String, String> statsExtensions = statsMessage.getExtensions().entrySet().stream().filter(e -> isStatsExtension(e.getKey())).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, String> statsExtensions =
+              statsMessage.getExtensions().entrySet().stream().filter(e -> isStatsExtension(e.getKey()))
+                          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         Map<String, String> extensionsWithStats = new HashMap<>(profileMessage.getExtensions());
         extensionsWithStats.putAll(statsExtensions);
         return new ProfileMessage(profileMessage.getTs(), extensionsWithStats);

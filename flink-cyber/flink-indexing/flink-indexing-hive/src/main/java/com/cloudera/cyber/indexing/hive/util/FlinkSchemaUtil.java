@@ -15,14 +15,14 @@ public class FlinkSchemaUtil {
 
     public static Schema buildSchema(ResolvedSchema resolvedSchema) {
         return Schema.newBuilder()
-            .fromResolvedSchema(resolvedSchema)
-            .build();
+              .fromResolvedSchema(resolvedSchema)
+              .build();
     }
 
     public static ResolvedSchema getResolvedSchema(List<TableColumnDto> columnList) {
         final List<Column> flinkColumnList = columnList.stream()
-                .map(col -> Column.physical(col.getName(), getFlinkType(col.getType(), col.getNullable())))
-                .collect(Collectors.toList());
+              .map(col -> Column.physical(col.getName(), getFlinkType(col.getType(), col.getNullable())))
+              .collect(Collectors.toList());
         return ResolvedSchema.of(flinkColumnList);
     }
 
@@ -35,8 +35,8 @@ public class FlinkSchemaUtil {
      *
      * @param colType  config column type.
      *                 Possible config column type values are:
-     *                 string, timestamp, date, int, bigint, float, double, boolean, bytes, null,
-     *                 array<type>, map<key,value>, struct<field:type, field2:type2>
+     *                 {@code string, timestamp, date, int, bigint, float, double, boolean, bytes, null,
+     *                 array<type>, map<key,value>, struct<field:type, field2:type2>}
      * @param nullable whether column is nullable or not
      * @return Flink DataType that describes provided column type
      */
@@ -81,7 +81,7 @@ public class FlinkSchemaUtil {
     /**
      * Parses Array type from the config column type.
      *
-     * @param type config column type. Supported format is: array<type>
+     * @param type config column type. Supported format is: {@code array<type>}
      * @return Flink DataType that describes provided array type
      */
     private static DataType parseArrayType(String type) {
@@ -92,7 +92,7 @@ public class FlinkSchemaUtil {
     /**
      * Parses Map type from the config column type.
      *
-     * @param type config column type. Supported format is: map<key,value>
+     * @param type config column type. Supported format is: {@code map<key,value>}
      * @return Flink DataType that describes provided map type
      */
     private static DataType parseMapType(String type) {
@@ -107,7 +107,8 @@ public class FlinkSchemaUtil {
     /**
      * Parses Struct type from the config column type.
      *
-     * @param type config column type. Supported format is: struct<name:type, name2:type2>. The name can contain only alphanumeric characters and underscores.
+     * @param type config column type. Supported format is: {@code struct<name:type, name2:type2>}.
+     *             The name can contain only alphanumeric characters and underscores.
      * @return Flink DataType that describes provided struct type
      */
     private static DataType parseStructType(String type) {

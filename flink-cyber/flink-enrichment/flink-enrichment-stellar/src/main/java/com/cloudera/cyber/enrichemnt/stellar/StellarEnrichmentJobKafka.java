@@ -12,6 +12,9 @@
 
 package com.cloudera.cyber.enrichemnt.stellar;
 
+import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
+import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_OUTPUT;
+
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
@@ -20,9 +23,6 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
-
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_OUTPUT;
 
 public class StellarEnrichmentJobKafka extends StellarEnrichmentJob {
 
@@ -35,15 +35,16 @@ public class StellarEnrichmentJobKafka extends StellarEnrichmentJob {
 
     @Override
     protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> reduction) {
-        reduction.sinkTo(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), STELLAR_ENRICHMENT_GROUP_ID, params))
-                .name("Kafka Sink").uid("kafka-sink");
+        reduction.sinkTo(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT),
+                       STELLAR_ENRICHMENT_GROUP_ID, params))
+                 .name("Kafka Sink").uid("kafka-sink");
     }
 
     @Override
     public DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.fromSource(
-                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, STELLAR_ENRICHMENT_GROUP_ID),
-                WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
+              FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, STELLAR_ENRICHMENT_GROUP_ID),
+              WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
     }
 
 }

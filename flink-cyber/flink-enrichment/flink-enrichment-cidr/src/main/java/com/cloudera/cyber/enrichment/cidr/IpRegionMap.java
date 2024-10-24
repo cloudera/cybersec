@@ -3,8 +3,8 @@ package com.cloudera.cyber.enrichment.cidr;
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.enrichment.cidr.impl.types.RegionCidrEnrichmentConfiguration;
 import com.cloudera.cyber.enrichment.cidr.impl.IpRegionCidrEnrichment;
+import com.cloudera.cyber.enrichment.cidr.impl.types.RegionCidrEnrichmentConfiguration;
 import inet.ipaddr.IPAddressString;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +39,8 @@ public class IpRegionMap extends RichMapFunction<Message, Message> {
             Map<String, String> extensions = new HashMap<>();
             for (String ipFieldName : ipFieldNames) {
                 Optional.ofNullable(messageFields.get(ipFieldName))
-                    .ifPresent(ipFieldValue -> regionCidrEnrichment.lookup(ipFieldName, ipFieldValue, extensions, qualityMessages ));
+                        .ifPresent(ipFieldValue -> regionCidrEnrichment.lookup(ipFieldName, ipFieldValue, extensions,
+                              qualityMessages));
             }
             newMessage = MessageUtils.enrich(message, extensions, qualityMessages);
         }
@@ -49,7 +50,7 @@ public class IpRegionMap extends RichMapFunction<Message, Message> {
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        Map<IPAddressString,String> regionCidrMap = new HashMap<>();
+        Map<IPAddressString, String> regionCidrMap = new HashMap<>();
         for (Map<String, List<String>> regionCidrs : cidrEnrichmentMap.values()) {
             for (Entry<String, List<String>> regionCidrEntry : regionCidrs.entrySet()) {
                 for (String cidr : regionCidrEntry.getValue()) {

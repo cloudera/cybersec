@@ -22,6 +22,7 @@ public interface ChainBuilder {
     /**
      * Builds a parser chain from a {@link ParserChainSchema} which defines
      * what a parser chain looks like.
+     *
      * @param chainSchema The blueprint for building the parser chain.
      * @return The first link in the parser chain.
      * @throws InvalidParserException If the user has defined an invalid parser chain.

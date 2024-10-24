@@ -12,13 +12,17 @@
 
 package com.cloudera.cyber.rules;
 
-import com.cloudera.cyber.rules.engines.*;
+import com.cloudera.cyber.rules.engines.JavaScriptGraaljsEngineBuilder;
+import com.cloudera.cyber.rules.engines.JavaScriptNashornEngineBuilder;
+import com.cloudera.cyber.rules.engines.PythonEngineBuilder;
+import com.cloudera.cyber.rules.engines.RuleEngine;
+import com.cloudera.cyber.rules.engines.RuleEngineBuilder;
+import com.cloudera.cyber.rules.engines.StellarEngineBuilder;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.Getter;
-
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
+import lombok.Getter;
 
 public enum RuleType {
     JS_GRAAL(new JavaScriptGraaljsEngineBuilder()),
@@ -28,10 +32,10 @@ public enum RuleType {
     JS_NASHORN(new JavaScriptNashornEngineBuilder()),
     //will use the first valid engine
     JS(Stream.of(JS_NASHORN, JS_GRAAL)
-            .map(RuleType::getEngineBuilder)
-            .filter(RuleEngineBuilder::isValid)
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("No valid JS engine was found!"))),
+          .map(RuleType::getEngineBuilder)
+          .filter(RuleEngineBuilder::isValid)
+          .findFirst()
+          .orElseThrow(() -> new RuntimeException("No valid JS engine was found!"))),
     PYTHON(new PythonEngineBuilder()),
     STELLAR(new StellarEngineBuilder());
 
@@ -42,16 +46,13 @@ public enum RuleType {
     private RuleType(RuleEngineBuilder engineBuilder) {
         this.engineBuilder = engineBuilder;
         engineCache = Caffeine.newBuilder()
-                .expireAfterWrite(60, TimeUnit.MINUTES)
-                .maximumSize(100)
-                .build();
+              .expireAfterWrite(60, TimeUnit.MINUTES)
+              .maximumSize(100)
+              .build();
     }
 
     /**
-     * Create a cached rule engine based on the script
-     *
-     * @param ruleScript
-     * @return
+     * Create a cached rule engine based on the script.
      */
     public RuleEngine engine(String ruleScript) {
         return engineCache.get(ruleScript, s -> engineBuilder.script(s).build());

@@ -12,17 +12,17 @@
 
 package com.cloudera.cyber;
 
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.isA;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertThat;
+
 import com.cloudera.cyber.commands.EnrichmentCommand;
+import java.util.Map;
 import org.apache.flink.api.common.typeinfo.TypeHint;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.formats.avro.typeutils.AvroTypeInfo;
 import org.junit.Test;
-
-import java.util.Map;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
 
 public class TypeTests {
 

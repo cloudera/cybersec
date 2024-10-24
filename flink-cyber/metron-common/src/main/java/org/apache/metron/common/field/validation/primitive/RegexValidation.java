@@ -6,9 +6,11 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,53 +20,53 @@
 
 package org.apache.metron.common.field.validation.primitive;
 
-import org.apache.metron.stellar.dsl.Context;
-import org.apache.metron.common.field.validation.FieldValidation;
-
 import java.util.Map;
+import org.apache.metron.common.field.validation.FieldValidation;
+import org.apache.metron.stellar.dsl.Context;
 
 public class RegexValidation implements FieldValidation {
 
-  private enum Config {
-    REGEX("pattern")
-    ;
-    String key;
-    Config(String key) {
-      this.key = key;
-    }
-    public <T> T get(Map<String, Object> config, Class<T> clazz) {
-      Object o = config.get(key);
-      if(o == null) {
-        return null;
-      }
-      return clazz.cast(o);
-    }
-  }
+    private enum Config {
+        REGEX("pattern");
+        String key;
 
-  @Override
-  public boolean isValid( Map<String, Object> input
-                        , Map<String, Object> validationConfig
-                        , Map<String, Object> globalConfig
-                        , Context context
-                        ) {
+        Config(String key) {
+            this.key = key;
+        }
 
-    String regex = Config.REGEX.get(validationConfig, String.class);
-    if(regex == null) {
-      return false;
+        public <T> T get(Map<String, Object> config, Class<T> clazz) {
+            Object o = config.get(key);
+            if (o == null) {
+                return null;
+            }
+            return clazz.cast(o);
+        }
     }
-    for(Object o : input.values()) {
-      if(o != null && !o.toString().matches(regex)) {
-        return false;
-      }
-    }
-    return true;
-  }
 
-  @Override
-  public void initialize(Map<String, Object> validationConfig, Map<String, Object> globalConfig) {
-    String regex = Config.REGEX.get(validationConfig, String.class);
-    if(regex == null) {
-      throw new IllegalStateException("You must specify '" + Config.REGEX.key + "' in the config");
+    @Override
+    public boolean isValid(Map<String, Object> input,
+                           Map<String, Object> validationConfig,
+                           Map<String, Object> globalConfig,
+                           Context context
+    ) {
+
+        String regex = Config.REGEX.get(validationConfig, String.class);
+        if (regex == null) {
+            return false;
+        }
+        for (Object o : input.values()) {
+            if (o != null && !o.toString().matches(regex)) {
+                return false;
+            }
+        }
+        return true;
     }
-  }
+
+    @Override
+    public void initialize(Map<String, Object> validationConfig, Map<String, Object> globalConfig) {
+        String regex = Config.REGEX.get(validationConfig, String.class);
+        if (regex == null) {
+            throw new IllegalStateException("You must specify '" + Config.REGEX.key + "' in the config");
+        }
+    }
 }

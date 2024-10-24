@@ -17,17 +17,15 @@ import com.cloudera.cyber.enrichment.MetronGeoEnrichment;
 import com.cloudera.cyber.enrichment.geocode.IpGeoJob;
 import com.cloudera.cyber.enrichment.geocode.impl.IpGeoEnrichment;
 import com.cloudera.cyber.enrichment.geocode.impl.types.MetronGeoEnrichmentFields;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.metron.enrichment.adapters.maxmind.geo.GeoLiteCityDatabase;
-import org.apache.metron.enrichment.cache.CacheKey;
-import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
-import org.json.simple.JSONObject;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.metron.enrichment.cache.CacheKey;
+import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
+import org.json.simple.JSONObject;
 
 @Slf4j
 public class MetronGeoEnrichmentAdapter implements EnrichmentAdapter<CacheKey>, Serializable {
@@ -39,7 +37,8 @@ public class MetronGeoEnrichmentAdapter implements EnrichmentAdapter<CacheKey>, 
         JSONObject enriched;
         HashMap<String, String> result = new HashMap<>();
         List<DataQualityMessage> qualityMessages = new ArrayList<>();
-        ipGeoEnrichment.lookup(MetronGeoEnrichment::new, value.getField(), value.getValue(), MetronGeoEnrichmentFields.values(), result, qualityMessages);
+        ipGeoEnrichment.lookup(MetronGeoEnrichment::new, value.getField(), value.getValue(),
+              MetronGeoEnrichmentFields.values(), result, qualityMessages);
         if (result.isEmpty()) {
             return new JSONObject();
         }

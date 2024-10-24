@@ -32,7 +32,8 @@ public class KafkaConfig {
 
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, RequestBody> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, RequestBody> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        ConcurrentKafkaListenerContainerFactory<String, RequestBody> factory =
+              new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(kafkaConsumerFactory());
         factory.setReplyTemplate(kafkaTemplate());
         return factory;
@@ -44,10 +45,12 @@ public class KafkaConfig {
     }
 
     private ProducerFactory<String, ResponseBody> kafkaProducerFactory() {
-        return new DefaultKafkaProducerFactory<>(kafkaProperties().buildConsumerProperties(), new StringSerializer(), new JsonSerializer<>());
+        return new DefaultKafkaProducerFactory<>(kafkaProperties().buildConsumerProperties(), new StringSerializer(),
+              new JsonSerializer<>());
     }
 
     private ConsumerFactory<String, RequestBody> kafkaConsumerFactory() {
-        return new DefaultKafkaConsumerFactory<>(kafkaProperties().buildConsumerProperties(), new StringDeserializer(), new JsonDeserializer<>(RequestBody.class));
+        return new DefaultKafkaConsumerFactory<>(kafkaProperties().buildConsumerProperties(), new StringDeserializer(),
+              new JsonDeserializer<>(RequestBody.class));
     }
 }

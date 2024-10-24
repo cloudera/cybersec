@@ -19,6 +19,14 @@ import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.flink.ConfigConstants;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
@@ -38,15 +46,6 @@ import org.apache.flink.util.Preconditions;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.springframework.util.DigestUtils;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 @Slf4j
 public class ParserJobKafka extends ParserJob {
 
@@ -60,17 +59,17 @@ public class ParserJobKafka extends ParserJob {
         Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         ParameterTool params = Utils.getParamToolsFromProperties(args);
         FlinkUtils.executeEnv(new ParserJobKafka()
-                .createPipeline(params), "Flink Parser", params);
+              .createPipeline(params), "Flink Parser", params);
 
     }
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<Message> results) {
         KafkaSink<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
-                params.getRequired(ConfigConstants.PARAMS_TOPIC_OUTPUT), "cyber-parser",
-                params);
+              params.getRequired(ConfigConstants.PARAMS_TOPIC_OUTPUT), "cyber-parser",
+              params);
         results.sinkTo(sink).name("Kafka Parser Results ")
-                .uid("kafka.results." + results.getTransformation().getUid());
+               .uid("kafka.results." + results.getTransformation().getUid());
     }
 
     @Override
@@ -89,66 +88,77 @@ public class ParserJobKafka extends ParserJob {
         // TODO - add filtering (might not care about all raws)
         // TODO - change the factory to support compression
         StreamingFileSink<MessageToParse> sink = StreamingFileSink
-                .forBulkFormat(path, ParquetAvroWriters.forReflectRecord(MessageToParse.class))
-                .withRollingPolicy(OnCheckpointRollingPolicy.build())
-                .withOutputFileConfig(OutputFileConfig
-                        .builder()
-                        .withPartPrefix("logs")
-                        .withPartSuffix(".parquet")
-                        .build())
-                .build();
+              .forBulkFormat(path, ParquetAvroWriters.forReflectRecord(MessageToParse.class))
+              .withRollingPolicy(OnCheckpointRollingPolicy.build())
+              .withOutputFileConfig(OutputFileConfig
+                    .builder()
+                    .withPartPrefix("logs")
+                    .withPartSuffix(".parquet")
+                    .build())
+              .build();
 
         results.addSink(sink).name("Original Archiver ")
-                .uid("original.archiver." + results.getTransformation().getUid());
+               .uid("original.archiver." + results.getTransformation().getUid());
     }
 
     @Override
-    protected void writeEnrichments(ParameterTool params, DataStream<EnrichmentCommand> streamingEnrichmentResults, List<String> streamingEnrichmentSources, EnrichmentsConfig streamingEnrichmentConfig) {
-        List<String> tables = streamingEnrichmentSources.stream().map(streamingEnrichmentConfig::getReferencedTablesForSource).flatMap(Collection::stream).
-                distinct().collect(Collectors.toList());
-        HbaseJobRawKafka.enrichmentCommandsToHbase(params, streamingEnrichmentResults, streamingEnrichmentConfig, tables);
+    protected void writeEnrichments(ParameterTool params, DataStream<EnrichmentCommand> streamingEnrichmentResults,
+                                    List<String> streamingEnrichmentSources,
+                                    EnrichmentsConfig streamingEnrichmentConfig) {
+        List<String> tables =
+              streamingEnrichmentSources.stream().map(streamingEnrichmentConfig::getReferencedTablesForSource)
+                                        .flatMap(Collection::stream)
+                                        .distinct().collect(Collectors.toList());
+        HbaseJobRawKafka.enrichmentCommandsToHbase(params, streamingEnrichmentResults, streamingEnrichmentConfig,
+              tables);
     }
 
     @Override
     protected void writeErrors(ParameterTool params, DataStream<Message> errors) {
         KafkaSink<Message> sink = new FlinkUtils<>(Message.class).createKafkaSink(
-                params.getRequired(ConfigConstants.PARAMS_TOPIC_ERROR), "cyber-parser",
-                params);
+              params.getRequired(ConfigConstants.PARAMS_TOPIC_ERROR), "cyber-parser",
+              params);
         errors.sinkTo(sink).name("Kafka Error Results " + atomicInteger.get())
-                .uid("kafka.error.results." + atomicInteger.getAndIncrement());
+              .uid("kafka.error.results." + atomicInteger.getAndIncrement());
     }
 
     @Override
     protected DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params,
-            TopicPatternToChainMap topicPatternToChainMap) {
+                                                      TopicPatternToChainMap topicPatternToChainMap) {
         return createDataStreamFromMultipleKafkaBrokers(env, params, createGroupId(
-                params.get(ConfigConstants.PARAMS_TOPIC_INPUT, "") + params
-                        .get(ConfigConstants.PARAMS_TOPIC_PATTERN, "")), topicPatternToChainMap);
+              params.get(ConfigConstants.PARAMS_TOPIC_INPUT, "") + params
+                    .get(ConfigConstants.PARAMS_TOPIC_PATTERN, "")), topicPatternToChainMap);
     }
 
     public DataStream<MessageToParse> createDataStreamFromMultipleKafkaBrokers(StreamExecutionEnvironment env,
-            ParameterTool params, String groupId, TopicPatternToChainMap topicPatternToChainMap) {
+                                                                               ParameterTool params, String groupId,
+                                                                               TopicPatternToChainMap topicPatternToChainMap) {
         DataStream<MessageToParse> firstSource = null;
         Map<String, Pattern> brokerTopicPatternMap = topicPatternToChainMap.getBrokerPrefixTopicPatternMap();
-        for(Map.Entry<String, Pattern> kafkaPrefixToTopicPattern : brokerTopicPatternMap.entrySet()) {
+        for (Map.Entry<String, Pattern> kafkaPrefixToTopicPattern : brokerTopicPatternMap.entrySet()) {
             String kafkaPrefixConf = kafkaPrefixToTopicPattern.getKey();
             Pattern topicNamePattern = kafkaPrefixToTopicPattern.getValue();
             log.info(String.format("createRawKafkaSource  pattern: '%s', good: %b", topicNamePattern,
-                    StringUtils.isNotEmpty(kafkaPrefixConf)));
+                  StringUtils.isNotEmpty(kafkaPrefixConf)));
             Preconditions.checkArgument(StringUtils.isNotEmpty(topicNamePattern.toString()),
-                    "Topic name must be specified in chain.topic.map property variable");
+                  "Topic name must be specified in chain.topic.map property variable");
             Properties kafkaProperties = Utils.readKafkaProperties(params, groupId, true);
             if (!StringUtils.equals(kafkaPrefixConf, TopicPatternToChainMap.DEFAULT_PREFIX)) {
                 Properties brokerSpecificProperties = Utils
-                        .readProperties(params.getProperties(), kafkaPrefixConf + '.' + Utils.KAFKA_PREFIX);
+                      .readProperties(params.getProperties(), kafkaPrefixConf + '.' + Utils.KAFKA_PREFIX);
                 kafkaProperties.putAll(brokerSpecificProperties);
             }
             KafkaSource<MessageToParse> rawMessages = KafkaSource.<MessageToParse>builder()
-                    .setTopicPattern(topicNamePattern).setBootstrapServers(kafkaProperties.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG)).setDeserializer(new MessageToParseDeserializer()).setProperties(kafkaProperties).build();
-            DataStreamSource<MessageToParse> streamSource = env.fromSource(rawMessages, WatermarkStrategy.noWatermarks(), "Kafka Raw Messages");
+                                                                 .setTopicPattern(topicNamePattern).setBootstrapServers(
+                        kafkaProperties.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG))
+                                                                 .setDeserializer(new MessageToParseDeserializer())
+                                                                 .setProperties(kafkaProperties).build();
+            DataStreamSource<MessageToParse> streamSource =
+                  env.fromSource(rawMessages, WatermarkStrategy.noWatermarks(), "Kafka Raw Messages");
             SingleOutputStreamOperator<MessageToParse> newSource = streamSource
-                    .name(String.format("Kafka Source topic='%s' kafka prefix configuration='%s'", topicNamePattern.toString(), kafkaPrefixConf))
-                    .uid("kafka.input." + kafkaPrefixConf);
+                  .name(String.format("Kafka Source topic='%s' kafka prefix configuration='%s'",
+                        topicNamePattern, kafkaPrefixConf))
+                  .uid("kafka.input." + kafkaPrefixConf);
 
             if (firstSource == null) {
                 firstSource = newSource;

@@ -12,12 +12,11 @@
 
 package com.cloudera.cyber;
 
+import java.lang.reflect.Type;
+import java.util.Map;
 import org.apache.flink.api.common.typeinfo.TypeInfoFactory;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.formats.avro.typeutils.AvroTypeInfo;
-
-import java.lang.reflect.Type;
-import java.util.Map;
 
 public class DataQualityMessageTypeInfo extends TypeInfoFactory<DataQualityMessage> {
     @Override

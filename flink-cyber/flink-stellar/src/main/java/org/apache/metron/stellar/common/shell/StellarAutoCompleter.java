@@ -17,6 +17,7 @@
  *  limitations under the License.
  *
  */
+
 package org.apache.metron.stellar.common.shell;
 
 /**
@@ -24,22 +25,25 @@ package org.apache.metron.stellar.common.shell;
  */
 public interface StellarAutoCompleter {
 
-  /**
-   * Auto-completes based on the given buffer.
-   * @param buffer The partial buffer that needs auto-completed.
-   * @return Viable candidates for auto-completion.
-   */
-  Iterable<String> autoComplete(String buffer);
+    /**
+     * Auto-completes based on the given buffer.
+     *
+     * @param buffer The partial buffer that needs auto-completed.
+     * @return Viable candidates for auto-completion.
+     */
+    Iterable<String> autoComplete(String buffer);
 
-  /**
-   * Adds a candidate for auto-completing function names.
-   * @param name The name of the function candidate.
-   */
-  void addCandidateFunction(String name);
+    /**
+     * Adds a candidate for auto-completing function names.
+     *
+     * @param name The name of the function candidate.
+     */
+    void addCandidateFunction(String name);
 
-  /**
-   * Adds a candidate for auto-completing variable names.
-   * @param name The name of the function candidate.
-   */
-  void addCandidateVariable(String name);
+    /**
+     * Adds a candidate for auto-completing variable names.
+     *
+     * @param name The name of the function candidate.
+     */
+    void addCandidateVariable(String name);
 }

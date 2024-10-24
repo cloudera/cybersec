@@ -13,33 +13,40 @@
 package com.cloudera.cyber.enrichment.hbase.config;
 
 import com.google.common.base.Preconditions;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.commons.collections.CollectionUtils;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class EnrichmentFieldsConfig implements Serializable {
-    public static final String FIELD_CONFIG_INVALID_KEY_FIELD = "EnrichmentFieldsConfig %s: EnrichmentConfig.keyFields is null or empty.  Must contain at least one field name";
-    public static final String RESERVED_ENRICH_DEFINES_KEY_FIELD = "EnrichmentFieldsConfig %s: EnrichmentConfig.keyFields for reserved enrichment type should be empty or null";
-    public static final String RESERVED_ENRICH_DEFINES_VALUE_FIELD = "EnrichmentFieldsConfig %s: EnrichmentConfig.valueFields for reserved enrichment type should be empty or null";
-    public static final String RESERVED_ENRICH_DEFINES_DELIMITER = "EnrichmentFieldsConfig %s: EnrichmentConfig.delimiter for reserved enrichment type should be null";
-    public static final String FIELD_CONFIG_DUPLICATE_KEY_FIELD = "EnrichmentFieldsConfig %s: EnrichmentConfig.keyFields has duplicate values.  All key field names must be unique.";
-    public static final String FIELD_CONFIG_INVALID_VALUE_FIELD = "EnrichmentFieldsConfig %s:EnrichmentConfig.valueFields is empty.  Must be null or list of fields";
-    public static final String FIELD_CONFIG_DUPLICATE_VALUE_FIELD = "EnrichmentFieldsConfig %s: EnrichmentConfig.valueFields has duplicate values.  All value field names must be unique.";
+    public static final String FIELD_CONFIG_INVALID_KEY_FIELD =
+          "EnrichmentFieldsConfig %s: EnrichmentConfig.keyFields is null or empty.  Must contain at least one field name";
+    public static final String RESERVED_ENRICH_DEFINES_KEY_FIELD =
+          "EnrichmentFieldsConfig %s: EnrichmentConfig.keyFields for reserved enrichment type should be empty or null";
+    public static final String RESERVED_ENRICH_DEFINES_VALUE_FIELD =
+          "EnrichmentFieldsConfig %s: EnrichmentConfig.valueFields for reserved enrichment type should be empty or null";
+    public static final String RESERVED_ENRICH_DEFINES_DELIMITER =
+          "EnrichmentFieldsConfig %s: EnrichmentConfig.delimiter for reserved enrichment type should be null";
+    public static final String FIELD_CONFIG_DUPLICATE_KEY_FIELD =
+          "EnrichmentFieldsConfig %s: EnrichmentConfig.keyFields has duplicate values.  All key field names must be unique.";
+    public static final String FIELD_CONFIG_INVALID_VALUE_FIELD =
+          "EnrichmentFieldsConfig %s:EnrichmentConfig.valueFields is empty.  Must be null or list of fields";
+    public static final String FIELD_CONFIG_DUPLICATE_VALUE_FIELD =
+          "EnrichmentFieldsConfig %s: EnrichmentConfig.valueFields has duplicate values.  All value field names must be unique.";
     public static final String DEFAULT_KEY_DELIMITER = ":";
     public static final String THREATQ_ENRICHMENT_NAME = "threatq";
     public static final String FIRST_SEEN_ENRICHMENT_NAME = "first_seen";
-    private static final Set<String> RESERVED_ENRICHMENT_NAMES = Stream.of(THREATQ_ENRICHMENT_NAME, FIRST_SEEN_ENRICHMENT_NAME).collect(Collectors.toSet());
+    private static final Set<String> RESERVED_ENRICHMENT_NAMES =
+          Stream.of(THREATQ_ENRICHMENT_NAME, FIRST_SEEN_ENRICHMENT_NAME).collect(Collectors.toSet());
     private static final ArrayList<String> EMPTY_LIST = new ArrayList<>();
 
     /**
@@ -82,14 +89,21 @@ public class EnrichmentFieldsConfig implements Serializable {
 
     public void validate(String enrichmentType) {
         if (RESERVED_ENRICHMENT_NAMES.contains(enrichmentType)) {
-            Preconditions.checkState(CollectionUtils.isEmpty(keyFields), String.format(RESERVED_ENRICH_DEFINES_KEY_FIELD, enrichmentType) );
-            Preconditions.checkState(CollectionUtils.isEmpty(valueFields), String.format(RESERVED_ENRICH_DEFINES_VALUE_FIELD, enrichmentType));
-            Preconditions.checkState(keyDelimiter == null, String.format(RESERVED_ENRICH_DEFINES_DELIMITER, enrichmentType));
+            Preconditions.checkState(CollectionUtils.isEmpty(keyFields),
+                  String.format(RESERVED_ENRICH_DEFINES_KEY_FIELD, enrichmentType));
+            Preconditions.checkState(CollectionUtils.isEmpty(valueFields),
+                  String.format(RESERVED_ENRICH_DEFINES_VALUE_FIELD, enrichmentType));
+            Preconditions.checkState(keyDelimiter == null,
+                  String.format(RESERVED_ENRICH_DEFINES_DELIMITER, enrichmentType));
         } else {
-            Preconditions.checkState(CollectionUtils.isNotEmpty(keyFields), String.format(FIELD_CONFIG_INVALID_KEY_FIELD, enrichmentType));
-            Preconditions.checkState(isUnique(keyFields), String.format(FIELD_CONFIG_DUPLICATE_KEY_FIELD, enrichmentType));
-            Preconditions.checkState(valueFields == null || !valueFields.isEmpty(), String.format(FIELD_CONFIG_INVALID_VALUE_FIELD, enrichmentType));
-            Preconditions.checkState(valueFields == null || isUnique(valueFields), String.format(FIELD_CONFIG_DUPLICATE_VALUE_FIELD, enrichmentType));
+            Preconditions.checkState(CollectionUtils.isNotEmpty(keyFields),
+                  String.format(FIELD_CONFIG_INVALID_KEY_FIELD, enrichmentType));
+            Preconditions.checkState(isUnique(keyFields),
+                  String.format(FIELD_CONFIG_DUPLICATE_KEY_FIELD, enrichmentType));
+            Preconditions.checkState(valueFields == null || !valueFields.isEmpty(),
+                  String.format(FIELD_CONFIG_INVALID_VALUE_FIELD, enrichmentType));
+            Preconditions.checkState(valueFields == null || isUnique(valueFields),
+                  String.format(FIELD_CONFIG_DUPLICATE_VALUE_FIELD, enrichmentType));
         }
     }
 

@@ -12,13 +12,12 @@
 
 package com.cloudera.parserchains.core.model.config;
 
+import static com.cloudera.parserchains.core.Validator.mustMatch;
+
 import com.cloudera.parserchains.core.Regex;
+import java.io.Serializable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import java.io.Serializable;
-
-import static com.cloudera.parserchains.core.Validator.mustMatch;
 
 /**
  * The value associated with a {@link ConfigName}.
@@ -35,10 +34,11 @@ public class ConfigValue implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private static final Regex validValue = Regex.of("^.{1,200}$");
-    private String value;
+    private final String value;
 
     /**
      * Creates a {@link ConfigValue} with a key and value.
+     *
      * @param value The value.
      */
     public static ConfigValue of(String value) {
@@ -59,9 +59,9 @@ public class ConfigValue implements Serializable {
 
     @Override
     public String toString() {
-        return "ConfigValue{" +
-                "value='" + value + '\'' +
-                '}';
+        return "ConfigValue{"
+               + "value='" + value + '\''
+               + '}';
     }
 
     @Override
@@ -74,14 +74,14 @@ public class ConfigValue implements Serializable {
         }
         ConfigValue that = (ConfigValue) o;
         return new EqualsBuilder()
-                .append(value, that.value)
-                .isEquals();
+              .append(value, that.value)
+              .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(value)
-                .toHashCode();
+              .append(value)
+              .toHashCode();
     }
 }

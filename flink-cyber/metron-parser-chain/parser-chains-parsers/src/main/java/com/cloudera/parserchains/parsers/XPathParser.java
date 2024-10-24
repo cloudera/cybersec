@@ -14,6 +14,7 @@ package com.cloudera.parserchains.parsers;
 
 import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
 import static java.lang.String.format;
+
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
@@ -38,16 +39,16 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 @MessageParser(
-        name="XPath",
-        description="Parse XML using XPath expressions."
+      name = "XPath",
+      description = "Parse XML using XPath expressions."
 )
 @Slf4j
 public class XPathParser implements Parser {
     private static final String DEFAULT_NAMESPACE_AWARE = "false";
-    private LinkedHashMap<FieldName, XPathExpression> compiledExpressions;
-    private LinkedHashMap<FieldName, String> expressions;
+    private final LinkedHashMap<FieldName, XPathExpression> compiledExpressions;
+    private final LinkedHashMap<FieldName, String> expressions;
     private FieldName inputField;
-    private XPath xpath;
+    private final XPath xpath;
     private boolean namespaceAware;
 
     public XPathParser() {
@@ -59,32 +60,32 @@ public class XPathParser implements Parser {
     }
 
     @Configurable(
-            key="input",
-            label="Input Field",
-            description= "The input field to parse. Default value: '" + DEFAULT_INPUT_FIELD + "'",
-            defaultValue=DEFAULT_INPUT_FIELD)
+          key = "input",
+          label = "Input Field",
+          description = "The input field to parse. Default value: '" + DEFAULT_INPUT_FIELD + "'",
+          defaultValue = DEFAULT_INPUT_FIELD)
     public XPathParser inputField(String inputField) {
-        if(StringUtils.isNotBlank(inputField)) {
+        if (StringUtils.isNotBlank(inputField)) {
             this.inputField = FieldName.of(inputField);
         }
         return this;
     }
 
-    @Configurable(key="xpath",
-            multipleValues = true)
+    @Configurable(key = "xpath",
+          multipleValues = true)
     public XPathParser expression(
-            @Parameter(key="field",
-                label="Field Name",
-                description="The field to create or modify.",
+          @Parameter(key = "field",
+                label = "Field Name",
+                description = "The field to create or modify.",
                 isOutputName = true,
                 required = true)
-            String fieldName,
-            @Parameter(key="expr",
-                label="XPath",
-                description="The XPath expression.",
+          String fieldName,
+          @Parameter(key = "expr",
+                label = "XPath",
+                description = "The XPath expression.",
                 required = true)
-            String expression) {
-        if(StringUtils.isNoneBlank(fieldName, expression)) {
+          String expression) {
+        if (StringUtils.isNoneBlank(fieldName, expression)) {
             FieldName field = FieldName.of(fieldName);
             this.compiledExpressions.put(field, compile(expression));
             // save the text of the expression so that it can be reported when an error occurs
@@ -104,12 +105,12 @@ public class XPathParser implements Parser {
     }
 
     @Configurable(
-            key="nsAware",
-            label="Namespace Aware",
-            description="Should the parser support XML namespaces. Default value: '" + DEFAULT_NAMESPACE_AWARE + "'",
-            defaultValue=DEFAULT_NAMESPACE_AWARE)
+          key = "nsAware",
+          label = "Namespace Aware",
+          description = "Should the parser support XML namespaces. Default value: '" + DEFAULT_NAMESPACE_AWARE + "'",
+          defaultValue = DEFAULT_NAMESPACE_AWARE)
     public XPathParser namespaceAware(String namespaceAware) {
-        if(StringUtils.isNotBlank(namespaceAware)) {
+        if (StringUtils.isNotBlank(namespaceAware)) {
             this.namespaceAware = Boolean.valueOf(namespaceAware);
         }
         return this;
@@ -118,7 +119,7 @@ public class XPathParser implements Parser {
     @Override
     public Message parse(Message input) {
         Message.Builder output = Message.builder().withFields(input);
-        if(!input.getField(inputField).isPresent()) {
+        if (!input.getField(inputField).isPresent()) {
             output.withError(format("Message missing expected input field '%s'", inputField.toString()));
         } else {
             input.getField(inputField).ifPresent(val -> doParse(val.toString(), output));
@@ -128,16 +129,16 @@ public class XPathParser implements Parser {
 
     private void doParse(String valueToParse, Message.Builder output) {
         Document document = buildDocument(valueToParse, output);
-        if(document != null) {
+        if (document != null) {
             compiledExpressions.forEach(((field, expr) -> execute(document, field, expr, output)));
         }
     }
 
     /**
      * Builds the XML document.
+     *
      * @param valueToParse The raw XML to parse.
-     * @param output The output message.
-     * @return
+     * @param output       The output message.
      */
     private Document buildDocument(String valueToParse, Message.Builder output) {
         Document document = null;
@@ -145,9 +146,9 @@ public class XPathParser implements Parser {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             factory.setNamespaceAware(namespaceAware);
             document = factory.newDocumentBuilder()
-                    .parse(IOUtils.toInputStream(valueToParse, Charset.defaultCharset()));
+                              .parse(IOUtils.toInputStream(valueToParse, Charset.defaultCharset()));
 
-        } catch(ParserConfigurationException | SAXException | IOException e) {
+        } catch (ParserConfigurationException | SAXException | IOException e) {
             log.debug("Unable to parse XML document.", e);
             output.withError("Unable to parse XML document.", e);
         }
@@ -156,10 +157,11 @@ public class XPathParser implements Parser {
 
     /**
      * Execute the XPath expression and add the value to the message.
-     * @param document The XML document.
-     * @param fieldName The name of the field to create or modify.
+     *
+     * @param document   The XML document.
+     * @param fieldName  The name of the field to create or modify.
      * @param expression The XPath expression.
-     * @param output The output message.
+     * @param output     The output message.
      */
     private void execute(Document document, FieldName fieldName, XPathExpression expression, Message.Builder output) {
         try {

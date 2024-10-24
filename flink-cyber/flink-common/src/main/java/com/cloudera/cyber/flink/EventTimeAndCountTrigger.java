@@ -28,15 +28,19 @@ public class EventTimeAndCountTrigger extends Trigger<Object, TimeWindow> {
     private final ReducingStateDescriptor<Long> stateDesc;
 
     private EventTimeAndCountTrigger(long maxCount) {
-        this.stateDesc = new ReducingStateDescriptor("count", new EventTimeAndCountTrigger.Sum(), LongSerializer.INSTANCE);
+        this.stateDesc =
+              new ReducingStateDescriptor("count", new EventTimeAndCountTrigger.Sum(), LongSerializer.INSTANCE);
         this.maxCount = maxCount;
     }
 
-    public TriggerResult onElement(Object element, long timestamp, TimeWindow window, TriggerContext ctx) throws Exception {
-        ReducingState<Long> count = (ReducingState)ctx.getPartitionedState(this.stateDesc);
+    public TriggerResult onElement(Object element, long timestamp, TimeWindow window, TriggerContext ctx)
+          throws Exception {
+        ReducingState<Long> count = (ReducingState) ctx.getPartitionedState(this.stateDesc);
         count.add(1L);
-        log.finest(String.format("onElement: %s count: %d, timestamp %s, maxTime: %s, watermark: %d", element, count.get(), timestamp, window.maxTimestamp(), ctx.getCurrentWatermark()));
-        if ((Long)count.get() >= this.maxCount || window.maxTimestamp() <= ctx.getCurrentWatermark()) {
+        log.finest(
+              String.format("onElement: %s count: %d, timestamp %s, maxTime: %s, watermark: %d", element, count.get(),
+                    timestamp, window.maxTimestamp(), ctx.getCurrentWatermark()));
+        if ((Long) count.get() >= this.maxCount || window.maxTimestamp() <= ctx.getCurrentWatermark()) {
             count.clear();
             //ctx.registerEventTimeTimer(window.maxTimestamp());
             return TriggerResult.FIRE_AND_PURGE;
@@ -46,14 +50,17 @@ public class EventTimeAndCountTrigger extends Trigger<Object, TimeWindow> {
         }
     }
 
+    @SuppressWarnings("checkstyle:EmptyCatchBlock")
     public TriggerResult onEventTime(long timestamp, TimeWindow window, TriggerContext ctx) {
         try {
-            log.finest(String.format("onEventTime: count: %d, timestamp %d, maxTime: %d, watermark: %d", ctx.getPartitionedState(this.stateDesc).get(), timestamp, window.maxTimestamp(), ctx.getCurrentWatermark()));
-        } catch (Exception e) {
+            log.finest(String.format("onEventTime: count: %d, timestamp %d, maxTime: %d, watermark: %d",
+                  ctx.getPartitionedState(this.stateDesc).get(), timestamp, window.maxTimestamp(),
+                  ctx.getCurrentWatermark()));
+        } catch (Exception ignored) {
         }
 
         if (timestamp == window.maxTimestamp()) {
-            ReducingState<Long> count = (ReducingState)ctx.getPartitionedState(this.stateDesc);
+            ReducingState<Long> count = (ReducingState) ctx.getPartitionedState(this.stateDesc);
             count.clear();
             return TriggerResult.FIRE_AND_PURGE;
         } else {
@@ -67,7 +74,7 @@ public class EventTimeAndCountTrigger extends Trigger<Object, TimeWindow> {
 
     public void clear(TimeWindow window, TriggerContext ctx) throws Exception {
         ctx.deleteEventTimeTimer(window.maxTimestamp());
-        ((ReducingState)ctx.getPartitionedState(this.stateDesc)).clear();
+        ((ReducingState) ctx.getPartitionedState(this.stateDesc)).clear();
     }
 
     public boolean canMerge() {

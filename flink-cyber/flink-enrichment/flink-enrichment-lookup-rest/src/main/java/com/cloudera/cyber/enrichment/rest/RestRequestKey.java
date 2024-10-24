@@ -13,16 +13,19 @@
 package com.cloudera.cyber.enrichment.rest;
 
 import com.google.common.base.Joiner;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.commons.text.lookup.StringLookup;
 import org.apache.commons.text.lookup.StringLookupFactory;
-
-import java.net.URI;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Data
 @EqualsAndHashCode
@@ -59,9 +62,9 @@ public class RestRequestKey {
             undefinedVariables.clear();
             String replacedString = substitutor.replace(template);
             // filter out any variables where the template provided a default value
-            undefinedVariables = undefinedVariables.stream().
-                    filter((var_name) -> replacedString.contains("${".concat(var_name))).
-                    collect(Collectors.toSet());
+            undefinedVariables = undefinedVariables.stream()
+                                                   .filter((varName) -> replacedString.contains("${".concat(varName)))
+                                                   .collect(Collectors.toSet());
 
             return replacedString;
         }

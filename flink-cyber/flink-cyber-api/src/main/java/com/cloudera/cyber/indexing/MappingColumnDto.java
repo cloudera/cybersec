@@ -38,7 +38,7 @@ public class MappingColumnDto {
         }
     }
 
-    public String getRawKafkaName(){
+    public String getRawKafkaName() {
         return kafkaName;
     }
 

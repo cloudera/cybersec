@@ -1,15 +1,14 @@
 package com.cloudera.cyber.generator;
 
-import com.nimbusds.jose.util.IOUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.nimbusds.jose.util.IOUtils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class GeneratorUtilsTest {
 
@@ -21,7 +20,8 @@ public class GeneratorUtilsTest {
         String file = "test_file.txt";
         verifyStreamFile(dir, file, EXPECTED_FILE_CONTENTS);
         verifyStreamFile("", dir.concat("/").concat(file), EXPECTED_FILE_CONTENTS);
-        assertThatThrownBy(() -> verifyStreamFile("/doesnt_exist", file, null)).isInstanceOf(FileNotFoundException.class).hasMessage("Basedir: '/doesnt_exist' File: 'test_file.txt'");
+        assertThatThrownBy(() -> verifyStreamFile("/doesnt_exist", file, null)).isInstanceOf(
+              FileNotFoundException.class).hasMessage("Basedir: '/doesnt_exist' File: 'test_file.txt'");
     }
 
     private void verifyStreamFile(String baseDir, String file, String expectedResult) throws IOException {

@@ -18,11 +18,6 @@
 package com.cloudera.cyber.jdbc.connector.jdbc.internal.connection;
 
 import com.cloudera.cyber.jdbc.connector.jdbc.JdbcConnectionOptions;
-import org.apache.flink.util.Preconditions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.concurrent.NotThreadSafe;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.Driver;
@@ -30,6 +25,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.Properties;
+import javax.annotation.concurrent.NotThreadSafe;
+import org.apache.flink.util.Preconditions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @NotThreadSafe
 public class PhoenixJdbcConnectionProvider implements JdbcConnectionProvider, Serializable {
@@ -74,7 +73,7 @@ public class PhoenixJdbcConnectionProvider implements JdbcConnectionProvider, Se
     }
 
     private static Driver loadDriver(String driverName)
-            throws SQLException, ClassNotFoundException {
+          throws SQLException, ClassNotFoundException {
         Preconditions.checkNotNull(driverName);
         Enumeration<Driver> drivers = DriverManager.getDrivers();
         while (drivers.hasMoreElements()) {
@@ -87,7 +86,7 @@ public class PhoenixJdbcConnectionProvider implements JdbcConnectionProvider, Se
         // * Class loader hell of DriverManager(see JDK-8146872).
         // * driver is not installed as a service provider.
         Class<?> clazz =
-                Class.forName(driverName, true, Thread.currentThread().getContextClassLoader());
+              Class.forName(driverName, true, Thread.currentThread().getContextClassLoader());
         try {
             return (Driver) clazz.newInstance();
         } catch (Exception ex) {

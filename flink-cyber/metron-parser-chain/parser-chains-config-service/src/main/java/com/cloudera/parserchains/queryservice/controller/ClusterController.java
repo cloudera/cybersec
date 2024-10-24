@@ -9,13 +9,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 /**
  * The controller responsible for operations with cluster to run and stop cyber jobs on the clusters.
@@ -30,7 +29,7 @@ public class ClusterController {
 
     @Operation(description = "Retrieves information about all cluster services.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "A list of all clusters.")
+          @ApiResponse(responseCode = "200", description = "A list of all clusters.")
     })
     @GetMapping
     public List<ResponseBody> getAllServices() throws FailedAllClusterReponseException {
@@ -39,14 +38,14 @@ public class ClusterController {
 
     @Operation(description = "Retrieves information about a cluster with specified id.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "A response with cluster information."),
-            @ApiResponse(responseCode = "404", description = "The cluster does not exist.")
+          @ApiResponse(responseCode = "200", description = "A response with cluster information."),
+          @ApiResponse(responseCode = "404", description = "The cluster does not exist.")
 
     })
     @GetMapping(value = "/{id}")
     public ResponseBody getClusterService(
-            @Parameter(name = "id", description = "The ID of the cluster to retrieve.", required = true)
-            @PathVariable("id") String clusterId) throws FailedClusterReponseException {
+          @Parameter(name = "id", description = "The ID of the cluster to retrieve.", required = true)
+          @PathVariable("id") String clusterId) throws FailedClusterReponseException {
         return clusterService.getClusterInfo(clusterId);
     }
 }

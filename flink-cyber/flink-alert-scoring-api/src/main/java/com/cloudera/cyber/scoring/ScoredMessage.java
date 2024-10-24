@@ -12,9 +12,12 @@
 
 package com.cloudera.cyber.scoring;
 
+import static com.cloudera.cyber.AvroTypes.toListOf;
+
 import com.cloudera.cyber.IdentifiedMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.avro.AvroSchemas;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,10 +31,6 @@ import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.types.Row;
-
-import java.util.List;
-
-import static com.cloudera.cyber.AvroTypes.toListOf;
 
 @Data
 @EqualsAndHashCode
@@ -54,23 +53,25 @@ public class ScoredMessage extends SpecificRecordBase implements IdentifiedMessa
         return message.getTs();
     }
 
-    public static final Schema SCHEMA$ = AvroSchemas.createRecordBuilder(ScoredMessage.class.getPackage().getName(), ScoredMessage.class.getName(), null)
-            .fields()
-            .name("message").type(Message.SCHEMA$).noDefault()
-            .name("cyberScoresDetails").type(Schema.createArray(Scores.SCHEMA$)).noDefault()
-            .optionalDouble("cyberScore")
-            .endRecord();
+    public static final Schema SCHEMA$ =
+          AvroSchemas.createRecordBuilder(ScoredMessage.class.getPackage().getName(), ScoredMessage.class.getName(),
+                      null)
+                .fields()
+                .name("message").type(Message.SCHEMA$).noDefault()
+                .name("cyberScoresDetails").type(Schema.createArray(Scores.SCHEMA$)).noDefault()
+                .optionalDouble("cyberScore")
+                .endRecord();
 
     public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
-            new String[]{"message", "cyberScoresDetails", "cyberScore"},
-            Message.FLINK_TYPE_INFO, Types.OBJECT_ARRAY(Scores.FLINK_TYPE_INFO), Types.DOUBLE);
+          new String[] {"message", "cyberScoresDetails", "cyberScore"},
+          Message.FLINK_TYPE_INFO, Types.OBJECT_ARRAY(Scores.FLINK_TYPE_INFO), Types.DOUBLE);
 
     public Row toRow() {
         return Row.of(message == null ? null : message.toRow(),
-                cyberScoresDetails == null ? null : cyberScoresDetails.stream()
-                        .map(Scores::toRow)
-                        .toArray(Row[]::new),
-                cyberScore);
+              cyberScoresDetails == null ? null : cyberScoresDetails.stream()
+                    .map(Scores::toRow)
+                    .toArray(Row[]::new),
+              cyberScore);
     }
 
     @Override

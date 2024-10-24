@@ -14,6 +14,11 @@ package com.cloudera.cyber.caracal;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.parser.MessageToParse;
+import java.io.Serializable;
+import java.security.PrivateKey;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.configuration.Configuration;
@@ -21,18 +26,15 @@ import org.apache.flink.streaming.api.functions.co.KeyedBroadcastProcessFunction
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.Preconditions;
 
-import java.io.Serializable;
-import java.security.PrivateKey;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Slf4j
-public class SplitBroadcastProcessFunction extends KeyedBroadcastProcessFunction<String, MessageToParse, SplitConfig, Message> implements Serializable {
+public class SplitBroadcastProcessFunction
+      extends KeyedBroadcastProcessFunction<String, MessageToParse, SplitConfig, Message> implements Serializable {
 
-    @NonNull private final Map<String, SplitConfig> configs;
+    @NonNull
+    private final Map<String, SplitConfig> configs;
     private Map<String, SplittingFlatMapFunction> splitters = new HashMap<>();
-    @NonNull private final PrivateKey signKey;
+    @NonNull
+    private final PrivateKey signKey;
 
     public SplitBroadcastProcessFunction(Map<String, SplitConfig> configs, PrivateKey signKey) {
         super();
@@ -43,11 +45,11 @@ public class SplitBroadcastProcessFunction extends KeyedBroadcastProcessFunction
         this.configs = configs;
         this.signKey = signKey;
 
-        splitters = configs.entrySet().stream().
-                collect(Collectors.toMap(
-                        k -> k.getKey(),
-                        v -> new SplittingFlatMapFunction(v.getValue(), signKey)
-                ));
+        splitters = configs.entrySet().stream()
+                           .collect(Collectors.toMap(
+                                 k -> k.getKey(),
+                                 v -> new SplittingFlatMapFunction(v.getValue(), signKey)
+                           ));
     }
 
     @Override
@@ -63,7 +65,8 @@ public class SplitBroadcastProcessFunction extends KeyedBroadcastProcessFunction
     }
 
     @Override
-    public void processElement(MessageToParse messageToParse, ReadOnlyContext readOnlyContext, Collector<Message> collector) throws Exception {
+    public void processElement(MessageToParse messageToParse, ReadOnlyContext readOnlyContext,
+                               Collector<Message> collector) throws Exception {
         SplittingFlatMapFunction splitter = splitters.get(messageToParse.getTopic());
         if (splitter == null) {
             throw new RuntimeException(String.format("Splitter not found for topic %s", messageToParse.getTopic()));
@@ -72,7 +75,8 @@ public class SplitBroadcastProcessFunction extends KeyedBroadcastProcessFunction
     }
 
     @Override
-    public void processBroadcastElement(SplitConfig splitConfig, Context context, Collector<Message> collector) throws Exception {
+    public void processBroadcastElement(SplitConfig splitConfig, Context context, Collector<Message> collector)
+          throws Exception {
         log.info(String.format("Adding splitter %s on thread %d ", splitConfig, Thread.currentThread().getId()));
         context.getBroadcastState(SplitJob.Descriptors.broadcastState).put(splitConfig.getTopic(), splitConfig);
         SplittingFlatMapFunction f = new SplittingFlatMapFunction(splitConfig, signKey);
