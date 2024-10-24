@@ -28,7 +28,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
       - name: Check codestyle
-        run: mvn -B compile --file flink-cyber/pom.xml
+        run: mvn -B validate --file flink-cyber/pom.xml
       - name: Build and Test with Maven
         run: mvn -P '!add-dependencies-for-IDEA,!full-build,!include-front-end' -B verify --file flink-cyber/pom.xml
 
