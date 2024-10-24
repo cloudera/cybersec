@@ -15,23 +15,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.metron.stellar.common.utils;
 
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
 public enum PatternCache {
-  INSTANCE;
+    INSTANCE;
 
-  private static final ThreadLocal<HashMap<String,Pattern>> _cache = ThreadLocal.withInitial(() ->
+    private static final ThreadLocal<HashMap<String, Pattern>> _cache = ThreadLocal.withInitial(() ->
           new HashMap<>());
 
-  public Pattern getPattern(String patternString){
-    Pattern pattern = _cache.get().get(patternString);
-    if(pattern == null){
-      pattern = Pattern.compile(patternString);
-      _cache.get().put(patternString,pattern);
+    public Pattern getPattern(String patternString) {
+        Pattern pattern = _cache.get().get(patternString);
+        if (pattern == null) {
+            pattern = Pattern.compile(patternString);
+            _cache.get().put(patternString, pattern);
+        }
+        return pattern;
     }
-    return pattern;
-  }
 }

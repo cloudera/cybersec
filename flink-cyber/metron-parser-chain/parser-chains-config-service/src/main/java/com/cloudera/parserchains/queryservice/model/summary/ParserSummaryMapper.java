@@ -21,9 +21,9 @@ public class ParserSummaryMapper implements ObjectMapper<ParserSummary, ParserIn
     @Override
     public ParserSummary reform(ParserInfo source) {
         return new ParserSummary()
-                .setId(ParserID.of(source.getParserClass()))
-                .setName(source.getName())
-                .setDescription(source.getDescription());
+              .setId(ParserID.of(source.getParserClass()))
+              .setName(source.getName())
+              .setDescription(source.getDescription());
     }
 
     @Override
@@ -32,20 +32,20 @@ public class ParserSummaryMapper implements ObjectMapper<ParserSummary, ParserIn
         Class<?> clazz;
         try {
             clazz = Class.forName(clazzName);
-        } catch(ClassNotFoundException e) {
+        } catch (ClassNotFoundException e) {
             String msg = String.format("Parser class not found; class=%s", clazzName);
             throw new IllegalArgumentException(msg, e);
         }
 
-        if(Parser.class.isAssignableFrom(clazz)) {
+        if (Parser.class.isAssignableFrom(clazz)) {
             // the cast is guaranteed to be safe because of the 'if' condition above
             @SuppressWarnings("unchecked")
             Class<com.cloudera.parserchains.core.Parser> parserClass = (Class<Parser>) clazz;
             return ParserInfo.builder()
-                    .parserClass(parserClass)
-                    .name(source.getName().getName())
-                    .description(source.getDescription())
-                    .build();
+                             .parserClass(parserClass)
+                             .name(source.getName().getName())
+                             .description(source.getDescription())
+                             .build();
 
         } else {
             String msg = String.format("Parser class is not a valid parser; class=%s", clazzName);

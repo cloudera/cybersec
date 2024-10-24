@@ -7,8 +7,10 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,42 +29,42 @@ import java.util.List;
 
 public class UniqueIDGenerator implements IDGenerator<Long> {
 
-  public static final String ID_FILENAME = "idgenerator";
-  private final long seed;
-  private final Path idFile;
-  private final Path idGenSourceDir;
+    public static final String ID_FILENAME = "idgenerator";
+    private final long seed;
+    private final Path idFile;
+    private final Path idGenSourceDir;
 
-  public UniqueIDGenerator(Path idGenSourceDir) {
-    this(idGenSourceDir, 0L);
-  }
-
-  public UniqueIDGenerator(Path idGenSourceDir, long seed) {
-    this.idGenSourceDir = idGenSourceDir;
-    this.idFile = idGenSourceDir.resolve(Paths.get(ID_FILENAME));
-    this.seed = seed;
-  }
-
-  @Override
-  public Long incrementAndGet() {
-    synchronized (UniqueIDGenerator.class) {
-      if (Files.exists(idFile)) {
-        try {
-          List<String> lines = Files.readAllLines(idFile);
-          long id = Long.parseLong(lines.get(0));
-          Files.write(idFile, Long.toString(++id).getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
-          return id;
-        } catch (IOException e) {
-          throw new RuntimeException("Unable to find and increment id", e);
-        }
-      } else {
-        try {
-          long id = seed;
-          Files.write(idFile, Long.toString(++id).getBytes());
-          return id;
-        } catch (IOException e) {
-          throw new RuntimeException("Unable to find and increment id", e);
-        }
-      }
+    public UniqueIDGenerator(Path idGenSourceDir) {
+        this(idGenSourceDir, 0L);
     }
-  }
+
+    public UniqueIDGenerator(Path idGenSourceDir, long seed) {
+        this.idGenSourceDir = idGenSourceDir;
+        this.idFile = idGenSourceDir.resolve(Paths.get(ID_FILENAME));
+        this.seed = seed;
+    }
+
+    @Override
+    public Long incrementAndGet() {
+        synchronized (UniqueIDGenerator.class) {
+            if (Files.exists(idFile)) {
+                try {
+                    List<String> lines = Files.readAllLines(idFile);
+                    long id = Long.parseLong(lines.get(0));
+                    Files.write(idFile, Long.toString(++id).getBytes(), StandardOpenOption.TRUNCATE_EXISTING);
+                    return id;
+                } catch (IOException e) {
+                    throw new RuntimeException("Unable to find and increment id", e);
+                }
+            } else {
+                try {
+                    long id = seed;
+                    Files.write(idFile, Long.toString(++id).getBytes());
+                    return id;
+                } catch (IOException e) {
+                    throw new RuntimeException("Unable to find and increment id", e);
+                }
+            }
+        }
+    }
 }

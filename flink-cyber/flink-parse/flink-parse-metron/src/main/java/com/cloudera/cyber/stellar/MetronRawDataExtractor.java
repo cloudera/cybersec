@@ -7,17 +7,25 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.cloudera.cyber.stellar;
 
 import com.cloudera.cyber.parser.MessageToParse;
+import java.io.IOException;
+import java.lang.invoke.MethodHandles;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.metron.common.message.metadata.MetadataUtil;
 import org.apache.metron.common.message.metadata.RawMessage;
@@ -25,12 +33,6 @@ import org.apache.metron.common.message.metadata.RawMessageStrategy;
 import org.apache.metron.common.utils.JSONUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.lang.invoke.MethodHandles;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 
 public enum MetronRawDataExtractor {
 
@@ -41,15 +43,17 @@ public enum MetronRawDataExtractor {
 
     /**
      * Extract the raw message given the strategy, the tuple and the metadata configs.
-     * @param strategy The {@link RawMessageStrategy} to use for extraction
+     *
+     * @param strategy       The {@link RawMessageStrategy} to use for extraction
      * @param messageToParse The original message and its topic metadata
-     * @param readMetadata True if read metadata, false otherwise
-     * @param config The config to use during extraction
+     * @param readMetadata   True if read metadata, false otherwise
+     * @param config         The config to use during extraction
      * @return The resulting {@link RawMessage}
      */
-    public RawMessage getRawMessage(RawMessageStrategy strategy, MessageToParse messageToParse, boolean readMetadata, Map<String, Object> config) {
+    public RawMessage getRawMessage(RawMessageStrategy strategy, MessageToParse messageToParse, boolean readMetadata,
+                                    Map<String, Object> config) {
         Map<String, Object> metadata = new HashMap<>();
-        if(readMetadata) {
+        if (readMetadata) {
             String prefix = MetadataUtil.INSTANCE.getMetadataPrefix(config);
             metadata = extractMetadata(prefix, messageToParse);
         }
@@ -63,8 +67,10 @@ public enum MetronRawDataExtractor {
      *   <li>The tuple fields outside of the value (e.g. the topic)</li>
      * </ul>
      *
-     * <p>In addition to extracting the metadata into a map, it applies the appropriate prefix (as configured in the rawMessageStrategyConfig).
-     * @param prefix The prefix of the metadata keys
+     * <p>In addition to extracting the metadata into a map,
+     * it applies the appropriate prefix (as configured in the rawMessageStrategyConfig).
+     *
+     * @param prefix         The prefix of the metadata keys
      * @param messageToParse The message read from kafka and the topic information
      * @return A map containing the metadata
      */
@@ -91,7 +97,8 @@ public enum MetronRawDataExtractor {
         return metadata;
     }
 
-    private void addMetaData(String prefix, Map<String, Object> metadata, String envMetadataFieldName, Object envMetadataFieldValue) {
+    private void addMetaData(String prefix, Map<String, Object> metadata, String envMetadataFieldName,
+                             Object envMetadataFieldValue) {
         if (!StringUtils.isEmpty(envMetadataFieldName) && envMetadataFieldValue != null) {
             metadata.put(MetadataUtil.INSTANCE.prefixKey(prefix, envMetadataFieldName), envMetadataFieldValue);
         }

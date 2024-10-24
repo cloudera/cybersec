@@ -7,8 +7,10 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,7 +27,6 @@ import java.io.Serializable;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.hadoop.hbase.client.Connection;
 import org.apache.metron.common.utils.LazyLogger;
 import org.apache.metron.common.utils.LazyLoggerFactory;
@@ -39,100 +40,98 @@ import org.apache.metron.enrichment.lookup.accesstracker.NoopAccessTracker;
 import org.apache.metron.enrichment.utils.EnrichmentUtils;
 import org.json.simple.JSONObject;
 
-public class SimpleHBaseAdapter implements EnrichmentAdapter<CacheKey>,Serializable {
-  protected static final LazyLogger LOG = LazyLoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  protected SimpleHBaseConfig config;
-  protected EnrichmentLookup lookup;
-  protected Connection connection;
+public class SimpleHBaseAdapter implements EnrichmentAdapter<CacheKey>, Serializable {
+    protected static final LazyLogger LOG = LazyLoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    protected SimpleHBaseConfig config;
+    protected EnrichmentLookup lookup;
+    protected Connection connection;
 
-  public SimpleHBaseAdapter() {
-  }
-  public SimpleHBaseAdapter(SimpleHBaseConfig config) {
-    withConfig(config);
-  }
-
-  public SimpleHBaseAdapter withConfig(SimpleHBaseConfig config) {
-    this.config = config;
-    return this;
-  }
-
-  @Override
-  public void logAccess(CacheKey value) {
-  }
-
-
-  public boolean isInitialized() {
-    return lookup != null && lookup.getTable() != null;
-  }
-  @Override
-  public JSONObject enrich(CacheKey value) {
-    JSONObject enriched = new JSONObject();
-    if(!isInitialized()) {
-      initializeAdapter(null);
+    public SimpleHBaseAdapter() {
     }
-    List<String> enrichmentTypes = value.getConfig()
-                                        .getEnrichment().getFieldToTypeMap()
-                                        .get(EnrichmentUtils.toTopLevelField(value.getField()));
-    if(isInitialized() && enrichmentTypes != null && value.getValue() != null) {
-      try {
-        for (LookupKV<EnrichmentKey, EnrichmentValue> kv :
-                lookup.get(Iterables.transform(enrichmentTypes
-                                              , new EnrichmentUtils.TypeToKey( value.coerceValue(String.class)
-                                                                             , lookup.getTable()
-                                                                             , value.getConfig().getEnrichment()
-                                                                             )
-                                              )
-                          , false
-                          )
-            )
-        {
-          if (kv != null && kv.getValue() != null && kv.getValue().getMetadata() != null) {
-            for (Map.Entry<String, Object> values : kv.getValue().getMetadata().entrySet()) {
-              enriched.put(kv.getKey().type + "." + values.getKey(), values.getValue());
-            }
-            LOG.trace("Enriched type {} => {}", () -> kv.getKey().type, ()->enriched);
-          }
+
+    public SimpleHBaseAdapter(SimpleHBaseConfig config) {
+        withConfig(config);
+    }
+
+    public SimpleHBaseAdapter withConfig(SimpleHBaseConfig config) {
+        this.config = config;
+        return this;
+    }
+
+    @Override
+    public void logAccess(CacheKey value) {
+    }
+
+
+    public boolean isInitialized() {
+        return lookup != null && lookup.getTable() != null;
+    }
+
+    @Override
+    public JSONObject enrich(CacheKey value) {
+        JSONObject enriched = new JSONObject();
+        if (!isInitialized()) {
+            initializeAdapter(null);
         }
-      }
-      catch (IOException e) {
-        LOG.error("Unable to retrieve value: {}", e.getMessage(), e);
-        initializeAdapter(null);
-        throw new RuntimeException("Unable to retrieve value: " + e.getMessage(), e);
-      }
+        List<String> enrichmentTypes = value.getConfig()
+                                            .getEnrichment().getFieldToTypeMap()
+                                            .get(EnrichmentUtils.toTopLevelField(value.getField()));
+        if (isInitialized() && enrichmentTypes != null && value.getValue() != null) {
+            try {
+                for (LookupKV<EnrichmentKey, EnrichmentValue> kv :
+                      lookup.get(Iterables.transform(enrichmentTypes,
+                                  new EnrichmentUtils.TypeToKey(value.coerceValue(String.class),
+                                        lookup.getTable(),
+                                        value.getConfig().getEnrichment())
+                            ),
+                            false)
+                ) {
+                    if (kv != null && kv.getValue() != null && kv.getValue().getMetadata() != null) {
+                        for (Map.Entry<String, Object> values : kv.getValue().getMetadata().entrySet()) {
+                            enriched.put(kv.getKey().type + "." + values.getKey(), values.getValue());
+                        }
+                        LOG.trace("Enriched type {} => {}", () -> kv.getKey().type, () -> enriched);
+                    }
+                }
+            } catch (IOException e) {
+                LOG.error("Unable to retrieve value: {}", e.getMessage(), e);
+                initializeAdapter(null);
+                throw new RuntimeException("Unable to retrieve value: " + e.getMessage(), e);
+            }
+        }
+        LOG.trace("SimpleHBaseAdapter succeeded: {}", enriched);
+        return enriched;
     }
-    LOG.trace("SimpleHBaseAdapter succeeded: {}", enriched);
-    return enriched;
-  }
 
-  @Override
-  public boolean initializeAdapter(Map<String, Object> configuration) {
-    String hbaseTable = config.getHBaseTable();
-    try {
-      lookup = new EnrichmentLookup(config.getProvider().getTable(config.getHbaseConfig(), hbaseTable),
-              config.getHBaseCF(),
-              new NoopAccessTracker());
-    } catch (IOException e) {
-      LOG.error("Unable to initialize adapter: {}", e.getMessage(), e);
-      return false;
+    @Override
+    public boolean initializeAdapter(Map<String, Object> configuration) {
+        String hbaseTable = config.getHBaseTable();
+        try {
+            lookup = new EnrichmentLookup(config.getProvider().getTable(config.getHbaseConfig(), hbaseTable),
+                  config.getHBaseCF(),
+                  new NoopAccessTracker());
+        } catch (IOException e) {
+            LOG.error("Unable to initialize adapter: {}", e.getMessage(), e);
+            return false;
+        }
+        return true;
     }
-    return true;
-  }
 
-  @Override
-  public void updateAdapter(Map<String, Object> config) {
-  }
-
-  @Override
-  public void cleanup() {
-    try {
-      lookup.close();
-    } catch (Exception e) {
-      LOG.error("Unable to cleanup access tracker", e);
+    @Override
+    public void updateAdapter(Map<String, Object> config) {
     }
-  }
 
-  @Override
-  public String getOutputPrefix(CacheKey value) {
-    return value.getField();
-  }
+    @Override
+    public void cleanup() {
+        try {
+            lookup.close();
+        } catch (Exception e) {
+            LOG.error("Unable to cleanup access tracker", e);
+        }
+    }
+
+    @Override
+    public String getOutputPrefix(CacheKey value) {
+        return value.getField();
+    }
 }

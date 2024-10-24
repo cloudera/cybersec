@@ -6,24 +6,34 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.metron.enrichment.lookup.accesstracker;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
-import org.apache.hadoop.hbase.client.*;
-import org.apache.hadoop.hbase.util.Bytes;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import javax.annotation.Nullable;
-import java.io.*;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.util.Bytes;
 
 public enum AccessTrackerUtil {
     INSTANCE;
@@ -34,6 +44,7 @@ public enum AccessTrackerUtil {
         ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
         return (AccessTracker) ois.readObject();
     }
+
     public byte[] serializeTracker(AccessTracker tracker) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
@@ -44,13 +55,16 @@ public enum AccessTrackerUtil {
     }
 
 
-    public void persistTracker(Table accessTrackerTable, String columnFamily, PersistentAccessTracker.AccessTrackerKey key, AccessTracker underlyingTracker) throws IOException {
+    public void persistTracker(Table accessTrackerTable, String columnFamily,
+                               PersistentAccessTracker.AccessTrackerKey key, AccessTracker underlyingTracker)
+          throws IOException {
         Put put = new Put(key.toRowKey());
         put.addColumn(Bytes.toBytes(columnFamily), COLUMN, serializeTracker(underlyingTracker));
         accessTrackerTable.put(put);
     }
 
-    public Iterable<AccessTracker> loadAll(Table accessTrackerTable, final String columnFamily, final String name, final long earliest) throws IOException {
+    public Iterable<AccessTracker> loadAll(Table accessTrackerTable, final String columnFamily, final String name,
+                                           final long earliest) throws IOException {
         Scan scan = new Scan(PersistentAccessTracker.AccessTrackerKey.getTimestampScanKey(name, earliest));
         ResultScanner scanner = accessTrackerTable.getScanner(scan);
         return Iterables.transform(scanner, new Function<Result, AccessTracker>() {
@@ -70,11 +84,10 @@ public enum AccessTrackerUtil {
 
     public AccessTracker loadAll(Iterable<AccessTracker> trackers) throws IOException, ClassNotFoundException {
         AccessTracker tracker = null;
-        for(AccessTracker t : trackers) {
-            if(tracker == null) {
+        for (AccessTracker t : trackers) {
+            if (tracker == null) {
                 tracker = t;
-            }
-            else {
+            } else {
                 tracker = tracker.union(t);
             }
         }

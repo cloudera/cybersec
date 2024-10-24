@@ -12,6 +12,10 @@
 
 package com.cloudera.cyber.profiler;
 
+import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_SIMPLE;
+import static com.cloudera.cyber.profiler.FirstSeenHbaseLookup.FIRST_SEEN_ENRICHMENT_TYPE;
+import static com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.createMeasurement;
+
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageConfig;
 import com.cloudera.cyber.hbase.LookupKey;
@@ -19,15 +23,10 @@ import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.Map;
-
-import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_SIMPLE;
-import static com.cloudera.cyber.profiler.FirstSeenHbaseLookup.FIRST_SEEN_ENRICHMENT_TYPE;
-import static com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.createMeasurement;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class FirstSeenHbaseTest {
 
@@ -70,9 +69,9 @@ public class FirstSeenHbaseTest {
     private static ProfileGroupConfig createProfileGroupConfig() {
         ArrayList<ProfileMeasurementConfig> measurements = Lists.newArrayList(createMeasurement(ProfileAggregationMethod.FIRST_SEEN, FIRST_SEEN_RESULT_NAME, null));
 
-        return ProfileGroupConfig.builder().
-                profileGroupName(TEST_PROFILE_GROUP).keyFieldNames(Lists.newArrayList(KEY_1, KEY_2)).
-                periodDuration(5L).periodDurationUnit("MINUTES").
-                sources(Lists.newArrayList("ANY")).measurements(measurements).build();
+        return ProfileGroupConfig.builder()
+                .profileGroupName(TEST_PROFILE_GROUP).keyFieldNames(Lists.newArrayList(KEY_1, KEY_2))
+                .periodDuration(5L).periodDurationUnit("MINUTES")
+                .sources(Lists.newArrayList("ANY")).measurements(measurements).build();
     }
 }

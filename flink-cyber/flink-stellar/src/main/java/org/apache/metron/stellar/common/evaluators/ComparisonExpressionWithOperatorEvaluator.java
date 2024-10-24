@@ -18,10 +18,10 @@
 
 package org.apache.metron.stellar.common.evaluators;
 
-import org.apache.metron.stellar.dsl.ParseException;
-import org.apache.metron.stellar.dsl.Token;
 import org.apache.metron.stellar.common.FrameContext;
 import org.apache.metron.stellar.common.generated.StellarParser;
+import org.apache.metron.stellar.dsl.ParseException;
+import org.apache.metron.stellar.dsl.Token;
 
 /**
  * This is the evaluator used when evaluating Stellar comparison operators.
@@ -30,67 +30,76 @@ import org.apache.metron.stellar.common.generated.StellarParser;
  * @see ComparisonOperatorsEvaluator
  */
 public enum ComparisonExpressionWithOperatorEvaluator {
-  /**
-   * The instance of {@link ComparisonExpressionWithOperatorEvaluator} used in
-   * order to evaluate Stellar comparison expressions.
-   */
-  INSTANCE;
-
-  /**
-   * The different strategies used to evaluate a Stellar comparison operator. They are broken into
-   * two categories: equality operator comparisons and comparison operator comparisons.
-   */
-  enum Strategy {
     /**
-     * The evaluator used to evaluate comparison operator expressions.
+     * The instance of {@link ComparisonExpressionWithOperatorEvaluator} used in
+     * order to evaluate Stellar comparison expressions.
      */
-    COMPARISON_OPERATORS(new ComparisonOperatorsEvaluator()),
-    /**
-     * The evaluator used to evaluate equality operator expressions.
-     */
-    EQUALITY_OPERATORS(new EqualityOperatorsEvaluator()),
-    ;
+    INSTANCE;
 
     /**
-     * The evaluator to be used when evaluating Stellar expressions.
+     * The different strategies used to evaluate a Stellar comparison operator. They are broken into
+     * two categories: equality operator comparisons and comparison operator comparisons.
      */
-    private ComparisonExpressionEvaluator evaluator;
+    enum Strategy {
+        /**
+         * The evaluator used to evaluate comparison operator expressions.
+         */
+        COMPARISON_OPERATORS(new ComparisonOperatorsEvaluator()),
+        /**
+         * The evaluator used to evaluate equality operator expressions.
+         */
+        EQUALITY_OPERATORS(new EqualityOperatorsEvaluator()),
+        ;
 
-    Strategy(final ComparisonExpressionEvaluator evaluator) {
-      this.evaluator = evaluator;
+        /**
+         * The evaluator to be used when evaluating Stellar expressions.
+         */
+        private final ComparisonExpressionEvaluator evaluator;
+
+        Strategy(final ComparisonExpressionEvaluator evaluator) {
+            this.evaluator = evaluator;
+        }
+
+        /**
+         * evaluator getter.
+         *
+         * @return The evaluator needed to evaluate Stellar comparison expressions.
+         */
+        public ComparisonExpressionEvaluator evaluator() {
+            return evaluator;
+        }
     }
 
     /**
+     * When evaluating comparison expressions with operators, they are broken into four cases:
      *
-     * @return The evaluator needed to evaluate Stellar comparison expressions.
+     * <p>
+     * 1. Testing equality, see {@link EqualityOperatorsEvaluator}
+     * 2. Testing not equal, see {@link EqualityOperatorsEvaluator}.
+     * This will be the negation of {@link EqualityOperatorsEvaluator#evaluate(Token, Token, StellarParser.ComparisonOpContext)}.
+     * 3. Testing less than, less than or equal, greater than, and greater than or equal {@link ComparisonOperatorsEvaluator}
+     * 4. Otherwise thrown {@link ParseException}.
+     *
+     * @param left  The value of the left side of the Stellar expression.
+     * @param right The value of the right side of the Stellar expression.
+     * @param op    The operator in the Stellar expression.
+     * @return A token with type boolean. This is based on the comparison of the {@code right} and {@code left} values.
      */
-    public ComparisonExpressionEvaluator evaluator() {
-      return evaluator;
-    }
-  }
+    public Token<Boolean> evaluate(final Token<?> left, final Token<?> right,
+                                   final StellarParser.ComparisonOpContext op, FrameContext.Context context) {
+        if (op.EQ() != null) {
+            return new Token<>(Strategy.EQUALITY_OPERATORS.evaluator().evaluate(left, right, op), Boolean.class,
+                  context);
+        } else if (op.NEQ() != null) {
+            return new Token<>(!Strategy.EQUALITY_OPERATORS.evaluator().evaluate(left, right, op), Boolean.class,
+                  context);
+        } else if (op.LT() != null || op.GT() != null || op.LTE() != null || op.GTE() != null) {
+            return new Token<>(Strategy.COMPARISON_OPERATORS.evaluator().evaluate(left, right, op), Boolean.class,
+                  context);
+        }
 
-  /**
-   * When evaluating comparison expressions with operators, they are broken into four cases:
-   *
-   * 1. Testing equality, see {@link EqualityOperatorsEvaluator}
-   * 2. Testing not equal, see {@link EqualityOperatorsEvaluator}. This will be the negation of {@link EqualityOperatorsEvaluator#evaluate(Token, Token, StellarParser.ComparisonOpContext)}.
-   * 3. Testing less than, less than or equal, greater than, and greater than or equal {@link ComparisonOperatorsEvaluator}
-   * 4. Otherwise thrown {@link ParseException}.
-   *
-   * @param left The value of the left side of the Stellar expression.
-   * @param right The value of the right side of the Stellar expression.
-   * @param op The operator in the Stellar expression.
-   * @return A token with type boolean. This is based on the comparison of the {@code right} and {@code left} values.
-   */
-  public Token<Boolean> evaluate(final Token<?> left, final Token<?> right, final StellarParser.ComparisonOpContext op, FrameContext.Context context) {
-    if (op.EQ() != null) {
-      return new Token<>(Strategy.EQUALITY_OPERATORS.evaluator().evaluate(left, right, op), Boolean.class, context);
-    } else if (op.NEQ() != null) {
-      return new Token<>(!Strategy.EQUALITY_OPERATORS.evaluator().evaluate(left, right, op), Boolean.class, context);
-    } else if (op.LT() != null || op.GT() != null || op.LTE() != null || op.GTE() != null) {
-      return new Token<>(Strategy.COMPARISON_OPERATORS.evaluator().evaluate(left, right, op), Boolean.class, context);
+        throw new ParseException(
+              "Unsupported operations. The following expression is invalid: " + left.getValue() + op.getText()
+              + right.getValue());
     }
-
-    throw new ParseException("Unsupported operations. The following expression is invalid: " + left.getValue() + op.getText() + right.getValue());
-  }
 }

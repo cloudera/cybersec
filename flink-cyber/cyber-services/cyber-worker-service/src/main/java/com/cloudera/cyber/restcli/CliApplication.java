@@ -7,8 +7,8 @@ import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 @SpringBootApplication(exclude = KafkaAutoConfiguration.class)
 public class CliApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(CliApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(CliApplication.class, args);
+    }
 
 }

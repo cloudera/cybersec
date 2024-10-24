@@ -12,9 +12,8 @@
 
 package com.cloudera.cyber.profiler;
 
-import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.cloudera.cyber.profiler.accumulator.FieldValueProfileGroupAcc;
-
+import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import java.text.DecimalFormat;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,8 +31,8 @@ public class FieldValueProfileAggregateFunction extends ProfileAggregateFunction
 
     @Override
     protected Map<String, DecimalFormat> getMeasurementFormats() {
-        return profileGroupConfig.getMeasurements().stream().
-                collect(Collectors.toMap(ProfileMeasurementConfig::getResultExtensionName,
-                        ProfileMeasurementConfig::getDecimalFormat));
+        return profileGroupConfig.getMeasurements().stream()
+                                 .llect(Collectors.toMap(ProfileMeasurementConfig::getResultExtensionName,
+                                       ProfileMeasurementConfig::getDecimalFormat));
     }
 }

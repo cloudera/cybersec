@@ -13,9 +13,6 @@
 package com.cloudera.cyber.profiler.phoenix;
 
 import com.cloudera.cyber.flink.Utils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -25,9 +22,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class PhoenixThickClient {
@@ -79,7 +76,8 @@ public class PhoenixThickClient {
 
     }
 
-    public <T> List<T> selectListResultWithParams(String sql, Function<ResultSet, T> mapper, Consumer<PreparedStatement> consumer) throws SQLException {
+    public <T> List<T> selectListResultWithParams(String sql, Function<ResultSet, T> mapper,
+                                                  Consumer<PreparedStatement> consumer) throws SQLException {
         List<T> results = new ArrayList<>();
         try (Connection conn = DriverManager.getConnection(dbUrl, userName, password)) {
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -98,11 +96,12 @@ public class PhoenixThickClient {
         }
     }
 
-    public <T> T selectResultWithParams(String sql, Function<ResultSet, T> mapper, Consumer<PreparedStatement> consumer) throws SQLException {
+    public <T> T selectResultWithParams(String sql, Function<ResultSet, T> mapper, Consumer<PreparedStatement> consumer)
+          throws SQLException {
         try (Connection conn = DriverManager.getConnection(dbUrl, userName, password)) {
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 consumer.accept(ps);
-                try(ResultSet resultSet = ps.executeQuery(sql)) {
+                try (ResultSet resultSet = ps.executeQuery(sql)) {
                     if (resultSet.next()) {
                         return mapper.apply(resultSet);
                     }

@@ -8,8 +8,9 @@ public class SimpleLookupKeyBuilder implements EnrichmentLookupBuilder {
 
     @Override
     public LookupKey build(EnrichmentStorageConfig storageConfig, String enrichmentType, String fieldValue) {
-        String columnFamily = StringUtils.isEmpty(storageConfig.getColumnFamily()) ? enrichmentType : storageConfig.getColumnFamily();
-        return SimpleLookupKey.builder().tableName(storageConfig.getHbaseTableName()).
-                cf(columnFamily).key(fieldValue).build();
+        String columnFamily =
+              StringUtils.isEmpty(storageConfig.getColumnFamily()) ? enrichmentType : storageConfig.getColumnFamily();
+        return SimpleLookupKey.builder().tableName(storageConfig.getHbaseTableName())
+                              .cf(columnFamily).key(fieldValue).build();
     }
 }

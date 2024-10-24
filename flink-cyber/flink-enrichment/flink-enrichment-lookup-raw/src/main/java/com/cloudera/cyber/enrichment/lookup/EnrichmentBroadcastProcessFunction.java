@@ -18,6 +18,13 @@ import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.google.common.base.Joiner;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +36,6 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.metrics.Counter;
 import org.apache.flink.streaming.api.functions.co.BroadcastProcessFunction;
 import org.apache.flink.util.Collector;
-
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @NoArgsConstructor
 @RequiredArgsConstructor
@@ -59,8 +61,10 @@ public class EnrichmentBroadcastProcessFunction extends BroadcastProcessFunction
 
 
     @Override
-    public void processElement(Message message, ReadOnlyContext readOnlyContext, Collector<Message> collector) throws Exception {
-        ReadOnlyBroadcastState<String, Map<String, String>> bc = readOnlyContext.getBroadcastState(broadcastDescriptors.get(type));
+    public void processElement(Message message, ReadOnlyContext readOnlyContext, Collector<Message> collector)
+          throws Exception {
+        ReadOnlyBroadcastState<String, Map<String, String>> bc =
+              readOnlyContext.getBroadcastState(broadcastDescriptors.get(type));
         log.debug("Process Message: {}", message);
 
         if (bc != null) {
@@ -70,8 +74,8 @@ public class EnrichmentBroadcastProcessFunction extends BroadcastProcessFunction
                 if (value != null && bc.contains(value.toString())) {
                     hits.inc();
                     hm.putAll(bc.get(value.toString()).entrySet().stream().collect(Collectors.toMap(
-                            k -> fieldJoiner.join(field, type, k.getKey()),
-                            Map.Entry::getValue
+                          k -> fieldJoiner.join(field, type, k.getKey()),
+                          Map.Entry::getValue
                     )));
                 }
             }
@@ -83,60 +87,81 @@ public class EnrichmentBroadcastProcessFunction extends BroadcastProcessFunction
     }
 
     @Override
-    public void processBroadcastElement(EnrichmentCommand enrichmentCommand, Context context, Collector<Message> collector) throws Exception {
+    public void processBroadcastElement(EnrichmentCommand enrichmentCommand, Context context,
+                                        Collector<Message> collector) throws Exception {
         // add to the state
         EnrichmentEntry enrichmentEntry = enrichmentCommand.getPayload();
-        BroadcastState<String, Map<String, String>> broadcastState = context.getBroadcastState(broadcastDescriptors.get(enrichmentEntry.getType()));
+        BroadcastState<String, Map<String, String>> broadcastState =
+              context.getBroadcastState(broadcastDescriptors.get(enrichmentEntry.getType()));
         log.info("Process Command: {}", enrichmentCommand);
         switch (enrichmentCommand.getType()) {
             case ADD:
                 enrichments.inc();
                 broadcastState.put(enrichmentEntry.getKey(), enrichmentEntry.getEntries());
                 context.output(LookupJob.QUERY_RESULT, EnrichmentCommandResponse.builder()
-                        .success(true)
-                        .message("Added LOCAL enrichment")
-                        .content(Collections.singletonList(enrichmentEntry))
-                        .headers(enrichmentCommand.getHeaders())
-                        .build());
+                                                                                .success(true)
+                                                                                .message("Added LOCAL enrichment")
+                                                                                .content(Collections.singletonList(
+                                                                                      enrichmentEntry))
+                                                                                .headers(enrichmentCommand.getHeaders())
+                                                                                .build());
                 break;
             case DELETE:
                 broadcastState.remove(enrichmentEntry.getKey());
                 context.output(LookupJob.QUERY_RESULT, EnrichmentCommandResponse.builder()
-                        .success(true)
-                        .message("Deleted LOCAL enrichment")
-                        .content(Collections.singletonList(enrichmentEntry))
-                        .headers(enrichmentCommand.getHeaders())
-                        .build());
+                                                                                .success(true)
+                                                                                .message("Deleted LOCAL enrichment")
+                                                                                .content(Collections.singletonList(
+                                                                                      enrichmentEntry))
+                                                                                .headers(enrichmentCommand.getHeaders())
+                                                                                .build());
                 break;
             case LIST:
-                context.output(LookupJob.QUERY_RESULT, EnrichmentCommandResponse.builder()
-                        .success(true)
-                        .message("Current enrichments of type "+ type)
-                        .content(StreamSupport.stream(broadcastState.immutableEntries().spliterator(), true)
-                                .map(e ->
-                                        EnrichmentEntry.builder()
-                                                .type(type)
-                                                .key(e.getKey())
-                                                .entries(e.getValue())
-                                                .ts(Instant.now().getEpochSecond())
-                                                .build()).collect(Collectors.toList()))
-                        .message("")
-                        .headers(enrichmentCommand.getHeaders())
-                        .build());
+                context.output(LookupJob.QUERY_RESULT,
+                      EnrichmentCommandResponse.builder()
+                                               .success(true)
+                                               .message(
+                                                     "Current enrichments of type "
+                                                     + type)
+                                               .content(StreamSupport.stream(
+                                                                           broadcastState.immutableEntries()
+                                                                                         .spliterator(),
+                                                                           true)
+                                                                     .map(e ->
+                                                                           EnrichmentEntry.builder()
+                                                                                          .type(type)
+                                                                                          .key(e.getKey())
+                                                                                          .entries(
+                                                                                                e.getValue())
+                                                                                          .ts(Instant.now()
+                                                                                                     .getEpochSecond())
+                                                                                          .build())
+                                                                     .collect(
+                                                                           Collectors.toList()))
+                                               .message("")
+                                               .headers(enrichmentCommand.getHeaders())
+                                               .build());
                 break;
             case FIND:
-                context.output(LookupJob.QUERY_RESULT, EnrichmentCommandResponse.builder()
-                        .success(true)
-                        .content(Collections.singletonList(EnrichmentEntry.builder()
-                                .type(type)
-                                .key(enrichmentEntry.getKey())
-                                .entries(broadcastState.get(enrichmentCommand.getPayload().getKey()))
-                                .ts(Instant.now().getEpochSecond())
-                                .build()))
-                        .headers(enrichmentCommand.getHeaders())
-                        .message("Query enrichment")
-                        .build());
+                context.output(LookupJob.QUERY_RESULT,
+                      EnrichmentCommandResponse.builder()
+                                               .success(true)
+                                               .content(Collections.singletonList(
+                                                     EnrichmentEntry.builder()
+                                                                    .type(type)
+                                                                    .key(enrichmentEntry.getKey())
+                                                                    .entries(
+                                                                          broadcastState.get(
+                                                                                enrichmentCommand.getPayload()
+                                                                                                 .getKey()))
+                                                                    .ts(Instant.now()
+                                                                               .getEpochSecond())
+                                                                    .build()))
+                                               .headers(enrichmentCommand.getHeaders())
+                                               .message("Query enrichment")
+                                               .build());
                 break;
+            default: log.warn("Unknown enrichment command type: {}", enrichmentCommand.getType());
         }
     }
 

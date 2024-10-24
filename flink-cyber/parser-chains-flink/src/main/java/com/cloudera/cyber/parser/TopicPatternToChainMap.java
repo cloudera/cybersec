@@ -26,15 +26,16 @@ public class TopicPatternToChainMap extends HashMap<String, TopicParserConfig> {
 
     public Map<String, String> getBrokerPrefixTopicNameMap() {
         return this.entrySet().stream()
-                .collect(Collectors.groupingBy(
-                        mapEntry -> StringUtils.defaultIfEmpty(mapEntry.getValue().getBroker(), DEFAULT_PREFIX),
-                        Collectors.mapping(
-                                Entry::getKey, Collectors.joining("|"))));
+                   .collect(Collectors.groupingBy(
+                         mapEntry -> StringUtils.defaultIfEmpty(mapEntry.getValue().getBroker(), DEFAULT_PREFIX),
+                         Collectors.mapping(
+                               Entry::getKey, Collectors.joining("|"))));
     }
 
     public Map<String, Pattern> getBrokerPrefixTopicPatternMap() {
         return getBrokerPrefixTopicNameMap().entrySet().stream()
-                .collect(Collectors.toMap(Entry::getKey, entry -> Pattern.compile(entry.getValue())));
+                                            .collect(Collectors.toMap(Entry::getKey,
+                                                  entry -> Pattern.compile(entry.getValue())));
     }
 
     public List<String> getSourcesProduced() {

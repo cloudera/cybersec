@@ -12,9 +12,24 @@
 
 package com.cloudera.cyber.enrichment.rest.impl;
 
+import static org.mockserver.integration.ClientAndServer.startClientAndServer;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.model.JsonBody.json;
+
+import com.cloudera.cyber.enrichment.rest.BasicAuthorizationConfig;
+import com.cloudera.cyber.enrichment.rest.BearerTokenAuthorizationConfig;
+import com.cloudera.cyber.enrichment.rest.RestEnrichmentConfig;
+import com.cloudera.cyber.enrichment.rest.RestEnrichmentMethod;
+import com.cloudera.cyber.enrichment.rest.TlsConfig;
 import com.google.common.base.Joiner;
-import com.cloudera.cyber.enrichment.rest.*;
 import com.google.common.collect.Lists;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.net.ssl.HttpsURLConnection;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.commons.codec.binary.Base64;
@@ -27,15 +42,6 @@ import org.mockserver.matchers.MatchType;
 import org.mockserver.model.MediaType;
 import org.mockserver.socket.PortFactory;
 import org.mockserver.socket.tls.KeyStoreFactory;
-
-import javax.net.ssl.HttpsURLConnection;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
-import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.model.HttpRequest.request;
-import static org.mockserver.model.HttpResponse.response;
-import static org.mockserver.model.JsonBody.json;
 
 @Data
 public class MockRestServer {
@@ -102,8 +108,8 @@ public class MockRestServer {
     }
 
     public RestEnrichmentConfig.RestEnrichmentConfigBuilder getBuilder(HashMap<String, String> properties) {
-        RestEnrichmentConfig.RestEnrichmentConfigBuilder builder = RestEnrichmentConfig.builder().
-                capacity(3);
+        RestEnrichmentConfig.RestEnrichmentConfigBuilder builder = RestEnrichmentConfig.builder()
+                .capacity(3);
         boolean mutualTlsAuth = mockServer.isSecure();
         if (mutualTlsAuth) {
             configureTLS(builder, null);
@@ -118,13 +124,13 @@ public class MockRestServer {
     }
 
     public RestEnrichmentConfig.RestEnrichmentConfigBuilder configureTLS(RestEnrichmentConfig.RestEnrichmentConfigBuilder configBuilder, String keyAlias) {
-        return configBuilder.
-                tls(TlsConfig.builder().
-                trustStorePath(TRUST_STORE_PATH).
-                trustStorePassword(TRUST_STORE_PASSWORD).
-                keyStorePath(KEY_STORE_PATH).
-                keyStorePassword(KEY_STORE_PASSWORD).
-                keyPassword(KEY_PASSWORD).keyAlias(keyAlias).build());
+        return configBuilder
+                .tls(TlsConfig.builder()
+                .trustStorePath(TRUST_STORE_PATH)
+                .trustStorePassword(TRUST_STORE_PASSWORD)
+                .keyStorePath(KEY_STORE_PATH)
+                .keyStorePassword(KEY_STORE_PASSWORD)
+                .keyPassword(KEY_PASSWORD).keyAlias(keyAlias).build());
     }
 
     public RestEnrichmentConfig.RestEnrichmentConfigBuilder configureModelPostRequest() {
@@ -132,26 +138,26 @@ public class MockRestServer {
             put("bearer_token", BEARER_TOKEN);
             put("access_key", ACCESS_KEY);
         }};
-        return getBuilder(authTokenProperties).
-                sources(Lists.newArrayList(DNS_SOURCE)).
-                prefix(DGA_MODEL_PREFIX).
-                endpointTemplate("${protocol}://${server}/model").
-                method(RestEnrichmentMethod.POST).
-                headers(new HashMap<String, String>() {{
+        return getBuilder(authTokenProperties)
+                .sources(Lists.newArrayList(DNS_SOURCE))
+                .prefix(DGA_MODEL_PREFIX)
+                .endpointTemplate("${protocol}://${server}/model")
+                .method(RestEnrichmentMethod.POST)
+                .headers(new HashMap<String, String>() {{
                     put(HttpHeaders.CONTENT_TYPE, "application/json");
-                }}).
-                authorization(BearerTokenAuthorizationConfig.builder().bearerTokenTemplate("${bearer_token}").build()).
-                entityTemplate("{\"accessKey\":\"${access_key}\",\"request\":{\"domain\":\"${domain}\"}}").
-                successJsonPath("$['success']").
-                resultsJsonPath("$['response']");
+                }})
+                .authorization(BearerTokenAuthorizationConfig.builder().bearerTokenTemplate("${bearer_token}").build())
+                .entityTemplate("{\"accessKey\":\"${access_key}\",\"request\":{\"domain\":\"${domain}\"}}")
+                .successJsonPath("$['success']")
+                .resultsJsonPath("$['response']");
 
     }
 
     public RestEnrichmentConfig.RestEnrichmentConfigBuilder configureGetUserRequest() {
-        return getBuilder(new HashMap<>()).
-                sources(Lists.newArrayList(USER_SOURCE)).
-                prefix(USER_PREFIX).
-                endpointTemplate("${protocol}://${server}/user?name=${name}");
+        return getBuilder(new HashMap<>())
+                .sources(Lists.newArrayList(USER_SOURCE))
+                .prefix(USER_PREFIX)
+                .endpointTemplate("${protocol}://${server}/user?name=${name}");
     }
 
     public RestEnrichmentConfig.RestEnrichmentConfigBuilder configureGetAssetRequest() {
@@ -160,22 +166,22 @@ public class MockRestServer {
             put("password", BASIC_PASSWORD);
         }};
 
-        return getBuilder(properties).
-                sources(Lists.newArrayList(ASSET_SOURCE)).
-                prefix(ASSET_PREFIX).
-                endpointTemplate("${protocol}://${server}/asset?id=${id}").
-                authorization(BasicAuthorizationConfig.builder().
-                        userNameTemplate("${user}").
-                        passwordTemplate("${password}")
+        return getBuilder(properties)
+                .sources(Lists.newArrayList(ASSET_SOURCE))
+                .prefix(ASSET_PREFIX)
+                .endpointTemplate("${protocol}://${server}/asset?id=${id}")
+                .authorization(BasicAuthorizationConfig.builder()
+                        .userNameTemplate("${user}")
+                        .passwordTemplate("${password}")
                         .build());
     }
 
     private void initializeGetExpectations() {
         mockServer.when(
-                request().
-                        withMethod("GET").
-                        withPath("/user").
-                        withQueryStringParameter(USER_NAME_PROPERTY, USER_NAME)
+                request()
+                        .withMethod("GET")
+                        .withPath("/user")
+                        .withQueryStringParameter(USER_NAME_PROPERTY, USER_NAME)
         )
                 .respond(
                         response()
@@ -184,10 +190,10 @@ public class MockRestServer {
                 );
 
         mockServer.when(
-                request().
-                        withMethod("GET").
-                        withPath("/asset").
-                        withHeader(HttpHeaders.AUTHORIZATION, createBasicAuth())
+                request()
+                        .withMethod("GET")
+                        .withPath("/asset")
+                        .withHeader(HttpHeaders.AUTHORIZATION, createBasicAuth())
                         .withQueryStringParameter("id", ASSET_ID)
         )
                 .respond(
@@ -196,10 +202,10 @@ public class MockRestServer {
                                 .withBody(String.format("{%s: '%s'}", ASSET_LOCATION_PROPERTY, ASSET_LOCATION))
                 );
         mockServer.when(
-                request().
-                        withMethod("GET").
-                        withPath("/asset").
-                        withHeader(HttpHeaders.AUTHORIZATION, createBasicAuth())
+                request()
+                        .withMethod("GET")
+                        .withPath("/asset")
+                        .withHeader(HttpHeaders.AUTHORIZATION, createBasicAuth())
                         .withQueryStringParameter("id", SERVER_ERROR_ASSET_ID)
         )
                 .respond(
@@ -223,12 +229,12 @@ public class MockRestServer {
 
     private void addModelResultExpectation(boolean success, String domain, boolean legit) {
         mockServer.when(
-                request().
-                        withMethod("POST").
-                        withPath("/model").
-                        withContentType(MediaType.APPLICATION_JSON).
-                        withHeader(HttpHeaders.AUTHORIZATION, "Bearer ".concat(BEARER_TOKEN)).
-                        withBody(json(String.format("{\"accessKey\":\"%s\",\"request\":{\"domain\":\"%s\"}}", ACCESS_KEY, domain), MatchType.STRICT))
+                request()
+                        .withMethod("POST")
+                        .withPath("/model")
+                        .withContentType(MediaType.APPLICATION_JSON)
+                        .withHeader(HttpHeaders.AUTHORIZATION, "Bearer ".concat(BEARER_TOKEN))
+                        .withBody(json(String.format("{\"accessKey\":\"%s\",\"request\":{\"domain\":\"%s\"}}", ACCESS_KEY, domain), MatchType.STRICT))
         )
                 .respond(
                         response()
@@ -239,12 +245,12 @@ public class MockRestServer {
 
     private void addModelResultClientErrorExpectation(String domain, int statusCode) {
         mockServer.when(
-                request().
-                        withMethod("POST").
-                        withPath("/model").
-                        withContentType(MediaType.APPLICATION_JSON).
-                        withHeader(HttpHeaders.AUTHORIZATION, "Bearer ".concat(BEARER_TOKEN)).
-                        withBody(json(String.format("{\"accessKey\":\"%s\",\"request\":{\"domain\":\"%s\"}}", ACCESS_KEY, domain), MatchType.STRICT))
+                request()
+                        .withMethod("POST")
+                        .withPath("/model")
+                        .withContentType(MediaType.APPLICATION_JSON)
+                        .withHeader(HttpHeaders.AUTHORIZATION, "Bearer ".concat(BEARER_TOKEN))
+                        .withBody(json(String.format("{\"accessKey\":\"%s\",\"request\":{\"domain\":\"%s\"}}", ACCESS_KEY, domain), MatchType.STRICT))
         )
                 .respond(
                         response()

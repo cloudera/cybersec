@@ -12,9 +12,17 @@
 
 package com.cloudera.cyber.stellar;
 
+import static org.apache.metron.stellar.dsl.functions.resolver.ClasspathFunctionResolver.Config.STELLAR_SEARCH_INCLUDES_KEY;
+
 import com.cloudera.cyber.parser.MessageToParse;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.google.common.collect.ImmutableMap;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -35,25 +43,16 @@ import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.StellarFunctions;
 import org.json.simple.JSONObject;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.apache.metron.stellar.dsl.functions.resolver.ClasspathFunctionResolver.Config.STELLAR_SEARCH_INCLUDES_KEY;
-
 @Slf4j
 @RequiredArgsConstructor
 public class MetronCompatibilityParser {
     private static final Map<String, Object> cacheConfig = ImmutableMap.of(
-            CachingStellarProcessor.MAX_CACHE_SIZE_PARAM, 3000,
-            CachingStellarProcessor.MAX_TIME_RETAIN_PARAM, 10,
-            CachingStellarProcessor.RECORD_STATS, true
+          CachingStellarProcessor.MAX_CACHE_SIZE_PARAM, 3000,
+          CachingStellarProcessor.MAX_TIME_RETAIN_PARAM, 10,
+          CachingStellarProcessor.RECORD_STATS, true
     );
     private static final Map<String, Object> stellarConfig = ImmutableMap.of(
-            STELLAR_SEARCH_INCLUDES_KEY.param(), "org.apache.metron.*"
+          STELLAR_SEARCH_INCLUDES_KEY.param(), "org.apache.metron.*"
     );
     private final SensorParserConfig parserConfig;
     private final MessageFilter<JSONObject> filter;
@@ -68,8 +67,8 @@ public class MetronCompatibilityParser {
         MessageFilter<JSONObject> filter = null;
         if (!StringUtils.isEmpty(parserConfig.getFilterClassName())) {
             filter = Filters.get(
-                    parserConfig.getFilterClassName(),
-                    parserConfig.getParserConfig()
+                  parserConfig.getFilterClassName(),
+                  parserConfig.getParserConfig()
             );
         }
         log.info("Loading parser class {}", parserClassName);
@@ -82,16 +81,18 @@ public class MetronCompatibilityParser {
 
         Cache<CachingStellarProcessor.Key, Object> cache = CachingStellarProcessor.createCache(cacheConfig);
         Context stellarContext = new Context.Builder()
-                .with(Context.Capabilities.CACHE, () -> cache)
-                .with(Context.Capabilities.STELLAR_CONFIG, () -> stellarConfig)
-                .build();
+              .with(Context.Capabilities.CACHE, () -> cache)
+              .with(Context.Capabilities.STELLAR_CONFIG, () -> stellarConfig)
+              .build();
         StellarFunctions.FUNCTION_RESOLVER().initialize(stellarContext);
         return new MetronCompatibilityParser(parserConfig, filter, parser, stellarContext, sensorType);
     }
 
     public Optional<MessageParserResult<JSONObject>> parse(MessageToParse messageToParse) {
-        RawMessage metronRawMessage = MetronRawDataExtractor.INSTANCE.getRawMessage(parserConfig.getRawMessageStrategy(), messageToParse, parserConfig.getReadMetadata(),
-                parserConfig.getRawMessageStrategyConfig());
+        RawMessage metronRawMessage =
+              MetronRawDataExtractor.INSTANCE.getRawMessage(parserConfig.getRawMessageStrategy(), messageToParse,
+                    parserConfig.getReadMetadata(),
+                    parserConfig.getRawMessageStrategyConfig());
 
         Optional<MessageParserResult<JSONObject>> result = parser.parseOptionalResult(metronRawMessage.getMessage());
         if (result.isPresent()) {
@@ -100,15 +101,15 @@ public class MetronCompatibilityParser {
             if (CollectionUtils.isNotEmpty(parsedMessages)) {
                 JSONObject parsedMessage = parsedMessages.get(0);
                 parserConfig.getRawMessageStrategy().mergeMetadata(
-                        parsedMessage,
-                        metronRawMessage.getMetadata(),
-                        parserConfig.getMergeMetadata(),
-                        parserConfig.getRawMessageStrategyConfig()
+                      parsedMessage,
+                      metronRawMessage.getMetadata(),
+                      parserConfig.getMergeMetadata(),
+                      parserConfig.getRawMessageStrategyConfig()
                 );
                 parsedMessage.put(Constants.SENSOR_TYPE, sensorType);
 
                 parsedMessage.putIfAbsent(Constants.Fields.ORIGINAL.getName(),
-                        new String(metronRawMessage.getMessage(), parser.getReadCharset()));
+                      new String(metronRawMessage.getMessage(), parser.getReadCharset()));
                 applyFieldTransformations(parsedMessage, metronRawMessage);
 
                 // return empty message - message should be filtered
@@ -126,8 +127,8 @@ public class MetronCompatibilityParser {
     /**
      * Applies Stellar field transformations defined in the sensor parser config.
      *
-     * @param message            Message parsed by the MessageParser
-     * @param rawMessage         Raw message including metadata
+     * @param message    Message parsed by the MessageParser
+     * @param rawMessage Raw message including metadata
      */
     private void applyFieldTransformations(JSONObject message, RawMessage rawMessage) {
         for (FieldTransformer handler : parserConfig.getFieldTransformations()) {
@@ -135,20 +136,20 @@ public class MetronCompatibilityParser {
                 if (!parserConfig.getMergeMetadata()) {
                     //if we haven't merged metadata, then we need to pass them along as configuration params.
                     handler.transformAndUpdate(
-                            message,
-                            stellarContext,
-                            parserConfig.getParserConfig(),
-                            rawMessage.getMetadata()
+                          message,
+                          stellarContext,
+                          parserConfig.getParserConfig(),
+                          rawMessage.getMetadata()
                     );
                 } else {
                     handler.transformAndUpdate(
-                            message,
-                            stellarContext,
-                            parserConfig.getParserConfig()
+                          message,
+                          stellarContext,
+                          parserConfig.getParserConfig()
                     );
                 }
             }
         }
     }
 
-    }
+}

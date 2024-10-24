@@ -12,9 +12,12 @@
 
 package com.cloudera.cyber.enrichment.rest;
 
-import lombok.*;
-
 import java.io.Serializable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -22,7 +25,8 @@ import java.io.Serializable;
 @NoArgsConstructor(force = true, access = AccessLevel.PUBLIC)
 public class TlsConfig implements Serializable {
 
-    /** When useTLS=true, the path to the .jks file containing the trusted certificate authorities.
+    /**
+     * When useTLS=true, the path to the .jks file containing the trusted certificate authorities.
      */
     private String trustStorePath;
 

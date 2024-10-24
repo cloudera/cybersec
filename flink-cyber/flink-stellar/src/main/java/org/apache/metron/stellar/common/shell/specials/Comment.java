@@ -16,38 +16,39 @@
  *  limitations under the License.
  *
  */
+
 package org.apache.metron.stellar.common.shell.specials;
-
-import org.apache.metron.stellar.common.shell.StellarShellExecutor;
-import org.apache.metron.stellar.common.shell.StellarResult;
-
-import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 import static org.apache.metron.stellar.common.shell.StellarResult.noop;
 
+import java.util.function.Function;
+import org.apache.metron.stellar.common.shell.StellarResult;
+import org.apache.metron.stellar.common.shell.StellarShellExecutor;
+
 /**
  * A special command that handles comments.
  *
- *    # this is a comment
+ * <p>
+ * # this is a comment
  */
 public class Comment implements SpecialCommand {
 
-  public static final String COMMENT_PREFIX = "#";
+    public static final String COMMENT_PREFIX = "#";
 
-  @Override
-  public String getCommand() {
-    return "#";
-  }
+    @Override
+    public String getCommand() {
+        return "#";
+    }
 
-  @Override
-  public Function<String, Boolean> getMatcher() {
-    return (input) -> startsWith(trimToEmpty(input), COMMENT_PREFIX);
-  }
+    @Override
+    public Function<String, Boolean> getMatcher() {
+        return (input) -> startsWith(trimToEmpty(input), COMMENT_PREFIX);
+    }
 
-  @Override
-  public StellarResult execute(String expression, StellarShellExecutor executor) {
-    return noop();
-  }
+    @Override
+    public StellarResult execute(String expression, StellarShellExecutor executor) {
+        return noop();
+    }
 }

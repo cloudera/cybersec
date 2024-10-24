@@ -20,6 +20,17 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.Preconditions;
 import com.hortonworks.registries.schemaregistry.serdes.avro.kafka.KafkaAvroDeserializer;
 import com.hortonworks.registries.schemaregistry.serdes.avro.kafka.KafkaAvroSerializer;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.UUID;
+import javax.script.ScriptException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -33,18 +44,6 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.errors.TimeoutException;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-
-import javax.script.ScriptException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.Duration;
-import java.time.Instant;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.UUID;
 
 @Slf4j
 public class UpsertScoringRule {
@@ -79,19 +78,20 @@ public class UpsertScoringRule {
             String ruleOutputTopic = applicationProperties.getRequired("query.output.topic");
 
             String commandId = UUID.randomUUID().toString();
-            final DynamicRuleCommandType dynamicRuleCommandType = Optional.ofNullable(applicationProperties.get("rule.command.type"))
-                    .map(Object::toString)
-                    .map(DynamicRuleCommandType::valueOf)
-                    .orElse(DynamicRuleCommandType.UPSERT);
+            final DynamicRuleCommandType dynamicRuleCommandType =
+                  Optional.ofNullable(applicationProperties.get("rule.command.type"))
+                          .map(Object::toString)
+                          .map(DynamicRuleCommandType::valueOf)
+                          .orElse(DynamicRuleCommandType.UPSERT);
 
-            ScoringRuleCommand command = ScoringRuleCommand.builder().
-                    id(commandId).
-                    type(dynamicRuleCommandType).
-                    ts(Instant.now().toEpochMilli()).
-                    ruleId(ruleToUpsert.getId()).
-                    rule(ruleToUpsert).
-                    headers(Collections.emptyMap()).
-                    build();
+            ScoringRuleCommand command = ScoringRuleCommand.builder()
+                                                           .id(commandId)
+                                                           .type(dynamicRuleCommandType)
+                                                           .ts(Instant.now().toEpochMilli())
+                                                           .ruleId(ruleToUpsert.getId())
+                                                           .rule(ruleToUpsert)
+                                                           .headers(Collections.emptyMap())
+                                                           .build();
 
             produce(command, applicationProperties, ruleInputTopic);
             consume(commandId, applicationProperties, ruleOutputTopic);
@@ -121,7 +121,8 @@ public class UpsertScoringRule {
         Properties consumerProperties = Utils.readKafkaProperties(applicationProperties, "rule-config-console", true);
         consumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         consumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
-        consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG, "flink_cyber_command_line".concat(UUID.randomUUID().toString()));
+        consumerProperties.put(ConsumerConfig.GROUP_ID_CONFIG,
+              "flink_cyber_command_line".concat(UUID.randomUUID().toString()));
         consumerProperties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         consumerProperties.put("specific.avro.reader", true);
         consumerProperties.putAll(Utils.readSchemaRegistryProperties(applicationProperties));
@@ -135,7 +136,8 @@ public class UpsertScoringRule {
             boolean gotResponse = false;
             while (!gotResponse && retries <= maxRetries) {
                 consumer.subscribe(Collections.singletonList(topic));
-                ConsumerRecords<String, ScoringRuleCommandResult> records = consumer.poll(Duration.ofSeconds(retryDuration));
+                ConsumerRecords<String, ScoringRuleCommandResult> records =
+                      consumer.poll(Duration.ofSeconds(retryDuration));
                 for (ConsumerRecord<String, ScoringRuleCommandResult> rec : records) {
                     boolean responseMatches = commandId.equals(rec.value().getCmdId());
                     gotResponse = gotResponse || responseMatches;
@@ -143,7 +145,7 @@ public class UpsertScoringRule {
                 }
                 retries++;
             }
-            if (!gotResponse){
+            if (!gotResponse) {
                 fail(String.format("Kafka read timed out after %s attempts", retries), new TimeoutException());
             }
         } catch (Exception e) {
@@ -174,7 +176,8 @@ public class UpsertScoringRule {
             fail("Rule script cannot be null." + ruleToUpsert);
         }
 
-        ruleToUpsert.getType().engine(ruleToUpsert.getRuleScript()).eval("function test(message) { " + ruleToUpsert.getRuleScript() + " } ");
+        ruleToUpsert.getType().engine(ruleToUpsert.getRuleScript())
+                    .eval("function test(message) { " + ruleToUpsert.getRuleScript() + " } ");
     }
 }
 

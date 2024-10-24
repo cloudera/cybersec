@@ -12,6 +12,8 @@
 
 package com.cloudera.cyber.indexing;
 
+import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
+
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
@@ -23,8 +25,6 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink;
 import org.apache.flink.util.Preconditions;
-
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
 
 public class ParquetJobKafka extends ParquetJob {
 
@@ -38,16 +38,17 @@ public class ParquetJobKafka extends ParquetJob {
     @Override
     public DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.fromSource(
-                new FlinkUtils(Message.class).createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, "indexer-parquet"),
-                WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
+              FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params,
+                    "indexer-parquet"),
+              WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
     }
 
     @Override
     protected void writeResults(DataStream<Message> results, ParameterTool params) {
         final StreamingFileSink<Message> sink = StreamingFileSink
-                .forBulkFormat(new Path(params.getRequired(PARAMS_OUTPUT_BASEPATH)),
-                        ParquetAvroWriters.forSpecificRecord(Message.class))
-                .build();
+              .forBulkFormat(new Path(params.getRequired(PARAMS_OUTPUT_BASEPATH)),
+                    ParquetAvroWriters.forSpecificRecord(Message.class))
+              .build();
         results.addSink(sink).name("Parquet Sink").uid("parquet-sink");
     }
 

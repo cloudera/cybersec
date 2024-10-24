@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.metron.stellar.common.utils.hashing;
 
 import java.util.Map;
@@ -22,10 +23,10 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public interface EnumConfigurable {
-  String getKey();
+    String getKey();
 
-  default <T> Optional<T> get(Map<String, Object> config, Function<Object, T> converter) {
-    Object o = config.get(getKey());
-    return o == null?Optional.empty():Optional.ofNullable(converter.apply(o));
-  }
+    default <T> Optional<T> get(Map<String, Object> config, Function<Object, T> converter) {
+        Object o = config.get(getKey());
+        return o == null ? Optional.empty() : Optional.ofNullable(converter.apply(o));
+    }
 }

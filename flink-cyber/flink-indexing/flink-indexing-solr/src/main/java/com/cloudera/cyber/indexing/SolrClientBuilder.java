@@ -12,6 +12,7 @@
 
 package com.cloudera.cyber.indexing;
 
+import java.util.List;
 import lombok.Builder;
 import lombok.Data;
 import org.apache.solr.client.solrj.SolrClient;
@@ -19,8 +20,6 @@ import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.HttpClientUtil;
 import org.apache.solr.client.solrj.impl.Krb5HttpClientBuilder;
 import org.apache.solr.client.solrj.impl.SolrHttpClientBuilder;
-
-import java.util.List;
 
 @Data
 @Builder

@@ -1,12 +1,11 @@
 package com.cloudera.cyber.scoring;
 
-import org.apache.commons.collections.CollectionUtils;
-
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.commons.collections.CollectionUtils;
 
 public enum ScoringSummarizationMode {
     SUM(ScoringSummarizationMode::sum),
@@ -20,7 +19,7 @@ public enum ScoringSummarizationMode {
         this.scoreFunction = scoreFunction;
     }
 
-    public static ScoringSummarizationMode DEFAULT() {
+    public static ScoringSummarizationMode defaultValue() {
         return POSITIVE_MEAN;
     }
 

@@ -6,57 +6,60 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.metron.enrichment.configuration;
 
-import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
+package org.apache.metron.enrichment.configuration;
 
 import java.io.Serializable;
 import java.util.List;
+import org.apache.metron.enrichment.interfaces.EnrichmentAdapter;
 
 public class Enrichment<T extends EnrichmentAdapter> implements Serializable {
 
-  private String type;
-  private List<String> fields;
-  private T adapter;
+    private String type;
+    private List<String> fields;
+    private T adapter;
 
-  public Enrichment() {}
+    public Enrichment() {
+    }
 
-  public Enrichment(String type, T adapter) {
-    this.type = type;
-    this.adapter = adapter;
-  }
+    public Enrichment(String type, T adapter) {
+        this.type = type;
+        this.adapter = adapter;
+    }
 
 
-  public List<String> getFields() {
-    return fields;
-  }
+    public List<String> getFields() {
+        return fields;
+    }
 
-  public void setFields(List<String> fields) {
-    this.fields = fields;
-  }
+    public void setFields(List<String> fields) {
+        this.fields = fields;
+    }
 
-  public String getType() {
-    return type;
-  }
+    public String getType() {
+        return type;
+    }
 
-  public void setType(String type) {
-    this.type = type;
-  }
+    public void setType(String type) {
+        this.type = type;
+    }
 
-  public T getAdapter() {
-    return adapter;
-  }
+    public T getAdapter() {
+        return adapter;
+    }
 
-  public void setAdapter(T adapter) {
-    this.adapter = adapter;
-  }
+    public void setAdapter(T adapter) {
+        this.adapter = adapter;
+    }
 }

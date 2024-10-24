@@ -17,9 +17,9 @@
 
 package com.cloudera.cyber.jdbc.connector.jdbc.internal.connection;
 
-import javax.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.SQLException;
+import javax.annotation.Nullable;
 
 public interface JdbcConnectionProvider {
 

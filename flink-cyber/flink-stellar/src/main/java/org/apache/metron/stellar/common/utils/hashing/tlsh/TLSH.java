@@ -15,11 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.metron.stellar.common.utils.hashing.tlsh;
 
-import java.nio.ByteBuffer;
-
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHUtil.swapNibble;
+
+import java.nio.ByteBuffer;
 
 /**
  * The abstraction around interacting with TLSH.
@@ -37,6 +38,7 @@ public class TLSH {
     /**
      * The encoded length value.
      */
+    @SuppressWarnings("checkstyle:MemberName")
     private final int lValue;
     /**
      * The q1 ratio.
@@ -48,6 +50,7 @@ public class TLSH {
     private final int q2Ratio;
 
 
+    @SuppressWarnings("checkstyle:ParameterName")
     public TLSH(int[] checksum, int[] codes, int lValue, int q1, int q2) {
         this.checksum = checksum;
         this.codes = codes;

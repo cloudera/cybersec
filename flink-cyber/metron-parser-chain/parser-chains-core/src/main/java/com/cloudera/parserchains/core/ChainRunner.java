@@ -13,7 +13,6 @@
 package com.cloudera.parserchains.core;
 
 import com.cloudera.cyber.parser.MessageToParse;
-
 import java.util.List;
 
 /**
@@ -23,18 +22,23 @@ public interface ChainRunner {
 
     /**
      * Parses text input using a parser chain.
+     *
      * @param toParse The input to parse.
-     * @param chain The parser chain that parses each message.
+     * @param chain   The parser chain that parses each message.
      */
     List<Message> run(String toParse, ChainLink chain);
+
     List<Message> run(Message toParse, ChainLink chain, List<Message> results);
+
     List<Message> run(MessageToParse toParse, ChainLink chain);
 
 
     /**
      * The original message that is constructed for the parser chain.
+     *
      * @param toParse The text to parse.
      */
     Message originalMessage(String toParse);
+
     Message originalMessage(MessageToParse toParse);
 }

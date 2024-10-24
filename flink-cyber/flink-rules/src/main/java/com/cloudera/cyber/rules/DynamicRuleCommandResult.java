@@ -105,7 +105,8 @@ public abstract class DynamicRuleCommandResult<R extends DynamicRule> extends Sp
         public abstract RESULT build();
 
         public String toString() {
-            return "DynamicRuleCommandResult.DynamicRuleCommandResultBuilder(super=" + super.toString() + ", cmdId=" + this.cmdId + ", success=" + this.success + ", rule=" + this.rule + ")";
+            return "DynamicRuleCommandResult.DynamicRuleCommandResultBuilder(super=" + super.toString() + ", cmdId="
+                   + this.cmdId + ", success=" + this.success + ", rule=" + this.rule + ")";
         }
     }
 }

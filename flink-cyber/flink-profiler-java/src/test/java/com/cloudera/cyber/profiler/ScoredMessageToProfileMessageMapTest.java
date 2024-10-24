@@ -12,6 +12,8 @@
 
 package com.cloudera.cyber.profiler;
 
+import static com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.createMeasurement;
+
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.scoring.ScoredMessage;
@@ -19,14 +21,15 @@ import com.cloudera.cyber.scoring.Scores;
 import com.cloudera.cyber.scoring.ScoringProcessFunction;
 import com.cloudera.cyber.scoring.ScoringSummarizationMode;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.createMeasurement;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ScoredMessageToProfileMessageMapTest {
     private static final String TEST_PROFILE_GROUP = "test_profile";
@@ -36,9 +39,9 @@ public class ScoredMessageToProfileMessageMapTest {
     public void testScoredToProfileMessageConversion() {
         double expectedScore = 55.0;
         ProfileGroupConfig profileGroupConfig = createAllAggregationMethodProfileGroupConfig();
-        Map<String, String> inputExtensions = Stream.concat(profileGroupConfig.getKeyFieldNames().stream(), profileGroupConfig.getMeasurementFieldNames().stream()).
-                filter(fieldName -> !fieldName.equals(ScoredMessageToProfileMessageMap.CYBER_SCORE_FIELD)).
-                collect(Collectors.toMap(k -> k, v -> v.concat("_value")));
+        Map<String, String> inputExtensions = Stream.concat(profileGroupConfig.getKeyFieldNames().stream(), profileGroupConfig.getMeasurementFieldNames().stream())
+                .filter(fieldName -> !fieldName.equals(ScoredMessageToProfileMessageMap.CYBER_SCORE_FIELD))
+                .collect(Collectors.toMap(k -> k, v -> v.concat("_value")));
 
         String notRequiredFieldName = "not required";
         inputExtensions.put(notRequiredFieldName, "should be removed");
@@ -46,7 +49,7 @@ public class ScoredMessageToProfileMessageMapTest {
         Message inputMessage = TestUtils.createMessage(inputExtensions);
 
         List<Scores> scoreDetails = Collections.singletonList(Scores.builder().reason("because").score(expectedScore).build());
-        ScoredMessage inputScoredMessage = ScoringProcessFunction.scoreMessage(inputMessage, scoreDetails, ScoringSummarizationMode.DEFAULT());
+        ScoredMessage inputScoredMessage = ScoringProcessFunction.scoreMessage(inputMessage, scoreDetails, ScoringSummarizationMode.defaultValue());
 
         ScoredMessageToProfileMessageMap map = new ScoredMessageToProfileMessageMap(profileGroupConfig);
         ProfileMessage outputProfileMessage = map.map(inputScoredMessage);
@@ -71,10 +74,10 @@ public class ScoredMessageToProfileMessageMapTest {
 
         measurements.add(createMeasurement(ProfileAggregationMethod.MAX, "max_score", ScoredMessageToProfileMessageMap.CYBER_SCORE_FIELD, null));
 
-        return ProfileGroupConfig.builder().
-                profileGroupName(TEST_PROFILE_GROUP).keyFieldNames(Lists.newArrayList(KEY_1)).
-                periodDuration(5L).periodDurationUnit("MINUTES").
-                sources(Lists.newArrayList("ANY")).measurements(measurements).build();
+        return ProfileGroupConfig.builder()
+                .profileGroupName(TEST_PROFILE_GROUP).keyFieldNames(Lists.newArrayList(KEY_1))
+                .periodDuration(5L).periodDurationUnit("MINUTES")
+                .sources(Lists.newArrayList("ANY")).measurements(measurements).build();
 
     }
 }

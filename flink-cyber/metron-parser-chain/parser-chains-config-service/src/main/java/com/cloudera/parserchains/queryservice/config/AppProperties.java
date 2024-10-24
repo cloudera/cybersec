@@ -6,9 +6,11 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,58 +24,58 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
 /**
- * Application properties should be in lowercase!
+ * Application properties should be in lowercase!.
  */
 public class AppProperties {
 
-  private enum Options implements ConfigOption<String, Environment> {
-    CONFIG_PATH("."),
-    PIPELINES_PATH("../../.."),
-    SAMPLE_FOLDER_PATH("../samples/"),
-    INDEX_PATH("../../index/conf/mapping-config.json");
+    private enum Options implements ConfigOption<String, Environment> {
+        CONFIG_PATH("."),
+        PIPELINES_PATH("../../.."),
+        SAMPLE_FOLDER_PATH("../samples/"),
+        INDEX_PATH("../../index/conf/mapping-config.json");
 
-    @Override
-    public String get(Environment source) {
-      return source.getProperty(optionKey, defaultValue);
+        @Override
+        public String get(Environment source) {
+            return source.getProperty(optionKey, defaultValue);
+        }
+
+        private final String optionKey;
+        private final String defaultValue;
+
+        Options(String defaultValue) {
+            this.optionKey = normalizeProperty(name());
+            this.defaultValue = defaultValue;
+        }
+
+        private String normalizeProperty(String name) {
+            return name.replace('_', '.').toLowerCase();
+        }
     }
 
-    private String optionKey;
-    private String defaultValue;
+    @Autowired
+    private Environment environment;
 
-    Options(String defaultValue) {
-      this.optionKey = normalizeProperty(name());
-      this.defaultValue = defaultValue;
+    public AppProperties() {
     }
 
-    private String normalizeProperty(String name) {
-      return name.replace('_', '.').toLowerCase();
+    @Autowired
+    AppProperties(Environment environment) {
+        this.environment = environment;
     }
-  }
 
-  @Autowired
-  private Environment environment;
+    public String getConfigPath() {
+        return Options.CONFIG_PATH.get(environment);
+    }
 
-  public AppProperties() {
-  }
+    public String getPipelinesPath() {
+        return Options.PIPELINES_PATH.get(environment);
+    }
 
-  @Autowired
-  AppProperties(Environment environment) {
-    this.environment = environment;
-  }
+    public String getIndexPath() {
+        return Options.INDEX_PATH.get(environment);
+    }
 
-  public String getConfigPath() {
-    return Options.CONFIG_PATH.get(environment);
-  }
-
-  public String getPipelinesPath() {
-    return Options.PIPELINES_PATH.get(environment);
-  }
-
-  public String getIndexPath() {
-    return Options.INDEX_PATH.get(environment);
-  }
-
-  public String getSampleFolderPath() {
-    return Options.SAMPLE_FOLDER_PATH.get(environment);
-  }
+    public String getSampleFolderPath() {
+        return Options.SAMPLE_FOLDER_PATH.get(environment);
+    }
 }

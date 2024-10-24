@@ -12,16 +12,19 @@
 
 package com.cloudera.cyber;
 
+import static java.util.stream.Collectors.toList;
+
 import com.google.common.collect.ImmutableMap;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Stream;
-
-import static java.util.stream.Collectors.toList;
 
 public class MessageUtilsTest {
 
@@ -38,10 +41,14 @@ public class MessageUtilsTest {
     private final HashMap<String, String> SECOND_FIELD_MAP = new HashMap<>();
     private final HashMap<String, String> ALL_FIELDS_MAP = new HashMap<>();
 
-    private final List<DataQualityMessage> DATA_QUALITY_MESSAGES_1 = Collections.singletonList(new DataQualityMessage(DataQualityMessageLevel.INFO.name(), TEST_FEATURE, TEST_FIELD_1, TEST_MESSAGE_1));
-    private final List<DataQualityMessage> DATA_QUALITY_MESSAGES_1_DEEP_COPY = DATA_QUALITY_MESSAGES_1.stream().map(m -> m.toBuilder().build()).collect(toList());
-    private final List<DataQualityMessage> DATA_QUALITY_MESSAGES_2 = Collections.singletonList(new DataQualityMessage(DataQualityMessageLevel.ERROR.name(), TEST_FEATURE, TEST_FIELD_2, TEST_MESSAGE_2));
-    private final List<DataQualityMessage> ALL_DATA_QUALITY_MESSAGES = Stream.concat(DATA_QUALITY_MESSAGES_1.stream(), DATA_QUALITY_MESSAGES_2.stream()).collect(toList());
+    private final List<DataQualityMessage> DATA_QUALITY_MESSAGES_1 = Collections.singletonList(
+          new DataQualityMessage(DataQualityMessageLevel.INFO.name(), TEST_FEATURE, TEST_FIELD_1, TEST_MESSAGE_1));
+    private final List<DataQualityMessage> DATA_QUALITY_MESSAGES_1_DEEP_COPY =
+          DATA_QUALITY_MESSAGES_1.stream().map(m -> m.toBuilder().build()).collect(toList());
+    private final List<DataQualityMessage> DATA_QUALITY_MESSAGES_2 = Collections.singletonList(
+          new DataQualityMessage(DataQualityMessageLevel.ERROR.name(), TEST_FEATURE, TEST_FIELD_2, TEST_MESSAGE_2));
+    private final List<DataQualityMessage> ALL_DATA_QUALITY_MESSAGES =
+          Stream.concat(DATA_QUALITY_MESSAGES_1.stream(), DATA_QUALITY_MESSAGES_2.stream()).collect(toList());
 
     @Before
     public void initTestExtensionMaps() {
@@ -72,13 +79,13 @@ public class MessageUtilsTest {
     }
 
 
-   @Test
+    @Test
     public void testEnrichExtensions() {
         Message input = TestUtils.createMessage();
 
         List<DataQualityMessage> expectedDataQualityMessages = new ArrayList<>();
         Message output1 = MessageUtils.enrich(input, FIRST_FIELD_MAP, expectedDataQualityMessages);
-       Assert.assertNotSame(input, output1);
+        Assert.assertNotSame(input, output1);
         Assert.assertEquals(FIRST_FIELD_MAP, output1.getExtensions());
         Assert.assertEquals(Collections.emptyList(), output1.getDataQualityMessages());
 
@@ -124,10 +131,11 @@ public class MessageUtilsTest {
         String extensionsToChangeOriginalValue = "old_value";
         String extensionsToChangeNewValue = "new_value";
         Message input = TestUtils.createMessage(ImmutableMap.of(extensionStaysSame, extensionStaysSameValue,
-                                                                extensionToChange, extensionsToChangeOriginalValue));
-        Message output = MessageUtils.replaceFields(input, ImmutableMap.of(extensionToChange, extensionsToChangeNewValue));
+              extensionToChange, extensionsToChangeOriginalValue));
+        Message output =
+              MessageUtils.replaceFields(input, ImmutableMap.of(extensionToChange, extensionsToChangeNewValue));
         Assert.assertEquals(ImmutableMap.of(extensionStaysSame, extensionStaysSameValue,
-                extensionToChange, extensionsToChangeNewValue), output.getExtensions());
+              extensionToChange, extensionsToChangeNewValue), output.getExtensions());
     }
 
     @Test
@@ -144,7 +152,8 @@ public class MessageUtilsTest {
         String extensionToChange = "change_me";
         String extensionsToChangeNewValue = "new_value";
         Message input = TestUtils.createMessage(originalEventExtensions);
-        Message output = MessageUtils.replaceFields(input, ImmutableMap.of(extensionToChange, extensionsToChangeNewValue));
+        Message output =
+              MessageUtils.replaceFields(input, ImmutableMap.of(extensionToChange, extensionsToChangeNewValue));
         Assert.assertEquals(ImmutableMap.of(extensionToChange, extensionsToChangeNewValue), output.getExtensions());
     }
 
@@ -160,7 +169,7 @@ public class MessageUtilsTest {
 
     void testNoReplaceValues(Map<String, String> noReplaceValues) {
         Map<String, String> originalExtensions = ImmutableMap.of("field_1", "value_1",
-                "field_2", "value_2");
+              "field_2", "value_2");
         Message input = TestUtils.createMessage(originalExtensions);
         Message output = MessageUtils.replaceFields(input, noReplaceValues);
         Assert.assertEquals(originalExtensions, output.getExtensions());

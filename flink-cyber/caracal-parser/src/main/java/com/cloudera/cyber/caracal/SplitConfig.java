@@ -13,9 +13,12 @@
 package com.cloudera.cyber.caracal;
 
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
-import lombok.*;
-
 import java.io.Serializable;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Builder
@@ -27,10 +30,11 @@ public class SplitConfig implements Serializable {
     private String splitPath;
     private String headerPath;
     private String timestampField;
-    @Builder.Default private ParserChainSchema chainSchema = new ParserChainSchema();
+    @Builder.Default
+    private ParserChainSchema chainSchema = new ParserChainSchema();
 
     /**
-     * An optional function (javascript to apply to the timestamp)
+     * An optional function (javascript to apply to the timestamp).
      */
     @Builder.Default
     private String timestampFunction = "";

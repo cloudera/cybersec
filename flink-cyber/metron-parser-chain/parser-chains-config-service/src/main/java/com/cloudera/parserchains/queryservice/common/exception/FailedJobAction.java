@@ -6,18 +6,21 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
 public class FailedJobAction extends RuntimeException {
     public FailedJobAction() {
-        this(null,null);
+        this(null, null);
     }
+
     public FailedJobAction(String message) {
-        this(message,null);
+        this(message, null);
     }
+
     public FailedJobAction(Throwable cause) {
-        this(null,cause);
+        this(null, cause);
     }
+
     public FailedJobAction(String message, Throwable cause) {
-       super(message);
-       if (cause != null) {
-           this.initCause(cause);
-       }
+        super(message);
+        if (cause != null) {
+            this.initCause(cause);
+        }
     }
 }

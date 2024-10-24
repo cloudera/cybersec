@@ -64,6 +64,7 @@ public @interface Configurable {
 
     /**
      * The default value of this configurable parameter.
+     *
      * <p>This value is optional.
      */
     String defaultValue() default "";
@@ -71,6 +72,7 @@ public @interface Configurable {
     /**
      * Specifies if the parameter specifies the output field name.
      * If true, the selection will be provided with possible field names.
+     *
      * <p>This value is optional.
      */
     boolean isOutputName() default false;
@@ -78,6 +80,7 @@ public @interface Configurable {
     /**
      * Defines the type of widget presented to the user when
      * configuring the parameter.
+     *
      * <p>Accepts either "text" or "textarea".
      */
     WidgetType widgetType() default WidgetType.TEXT;

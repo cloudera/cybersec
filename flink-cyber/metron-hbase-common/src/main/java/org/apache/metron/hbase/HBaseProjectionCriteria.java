@@ -21,7 +21,6 @@
 package org.apache.metron.hbase;
 
 import com.google.common.collect.Lists;
-
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -31,63 +30,64 @@ import java.util.List;
  * If only columnFamily is specified all columns from that family will be returned.
  * If a column is specified only that column from that family will be returned.
  *
+ * <p>
  * Original code based on the Apache Storm project. See
  * https://github.com/apache/storm/tree/master/external/storm-hbase.
  */
 public class HBaseProjectionCriteria implements Serializable {
 
-  private List<byte[]> columnFamilies;
-  private List<ColumnMetaData> columns;
+    private final List<byte[]> columnFamilies;
+    private final List<ColumnMetaData> columns;
 
-  public static class ColumnMetaData implements Serializable {
+    public static class ColumnMetaData implements Serializable {
 
-    private byte[]  columnFamily;
-    private byte[] qualifier;
+        private final byte[] columnFamily;
+        private final byte[] qualifier;
 
-    public ColumnMetaData(String columnFamily, String qualifier) {
-      this.columnFamily = columnFamily.getBytes(StandardCharsets.UTF_8);
-      this.qualifier = qualifier.getBytes(StandardCharsets.UTF_8);
+        public ColumnMetaData(String columnFamily, String qualifier) {
+            this.columnFamily = columnFamily.getBytes(StandardCharsets.UTF_8);
+            this.qualifier = qualifier.getBytes(StandardCharsets.UTF_8);
+        }
+
+        public byte[] getColumnFamily() {
+            return columnFamily;
+        }
+
+        public byte[] getQualifier() {
+            return qualifier;
+        }
     }
 
-    public byte[] getColumnFamily() {
-      return columnFamily;
+    public HBaseProjectionCriteria() {
+        columnFamilies = Lists.newArrayList();
+        columns = Lists.newArrayList();
     }
 
-    public byte[] getQualifier() {
-      return qualifier;
+    /**
+     * all columns from this family will be included as result of HBase lookup.
+     *
+     * @return column family along with all of its columns from an HBase lookup
+     */
+    public HBaseProjectionCriteria addColumnFamily(String columnFamily) {
+        this.columnFamilies.add(columnFamily.getBytes(StandardCharsets.UTF_8));
+        return this;
     }
-  }
 
-  public HBaseProjectionCriteria() {
-    columnFamilies = Lists.newArrayList();
-    columns = Lists.newArrayList();
-  }
+    /**
+     * Only this column from the the columnFamily will be included as result of HBase lookup.
+     *
+     * @return a particular column from a column family as part of an HBase lookup
+     */
+    public HBaseProjectionCriteria addColumn(ColumnMetaData column) {
+        this.columns.add(column);
+        return this;
+    }
 
-  /**
-   * all columns from this family will be included as result of HBase lookup.
-   * @param columnFamily
-   * @return column family along with all of its columns from an HBase lookup
-   */
-  public HBaseProjectionCriteria addColumnFamily(String columnFamily) {
-    this.columnFamilies.add(columnFamily.getBytes(StandardCharsets.UTF_8));
-    return this;
-  }
+    public List<ColumnMetaData> getColumns() {
+        return columns;
+    }
 
-  /**
-   * Only this column from the the columnFamily will be included as result of HBase lookup.
-   * @param column
-   * @return a particular column from a column family as part of an HBase lookup
-   */
-  public HBaseProjectionCriteria addColumn(ColumnMetaData column) {
-    this.columns.add(column);
-    return this;
-  }
-
-  public List<ColumnMetaData> getColumns() {
-    return columns;
-  }
-
-  public List<byte[]> getColumnFamilies() {
-    return columnFamilies;
-  }
+    public List<byte[]> getColumnFamilies() {
+        return columnFamilies;
+    }
 }

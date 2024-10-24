@@ -2,6 +2,12 @@ package com.cloudera.cyber.indexing.hive.util;
 
 import com.cloudera.cyber.avro.AvroSchemas;
 import com.cloudera.cyber.indexing.TableColumnDto;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -13,9 +19,6 @@ import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.types.Row;
 
-import java.time.Instant;
-import java.util.*;
-
 public class AvroSchemaUtil {
 
     //method that converts from flink Schema to avro Schema
@@ -25,11 +28,13 @@ public class AvroSchemaUtil {
 
     //method that converts from flink Schema to avro Schema
     public static Schema convertToAvro(ResolvedSchema schema) {
-        SchemaBuilder.FieldAssembler<Schema> fieldAssembler = AvroSchemas.createRecordBuilder("com.cloudera.cyber","base")
-                .fields();
+        SchemaBuilder.FieldAssembler<Schema> fieldAssembler =
+              AvroSchemas.createRecordBuilder("com.cloudera.cyber", "base")
+                    .fields();
 
         for (Column col : schema.getColumns()) {
-            fieldAssembler = fieldAssembler.name(col.getName()).type().optional().type(AvroSchemaUtil.convertTypeToAvro(col.getName(), col.getDataType().getLogicalType()));
+            fieldAssembler = fieldAssembler.name(col.getName()).type().optional()
+                  .type(AvroSchemaUtil.convertTypeToAvro(col.getName(), col.getDataType().getLogicalType()));
         }
         return fieldAssembler.endRecord();
     }
@@ -42,7 +47,8 @@ public class AvroSchemaUtil {
             value = null;
         } else {
             try {
-            value = convertToAvroObject(record.getSchema().getField(avroFieldName).schema(), row.getField(fieldName));
+                value =
+                      convertToAvroObject(record.getSchema().getField(avroFieldName).schema(), row.getField(fieldName));
             } catch (Exception e) {
                 throw new RuntimeException(String.format("Error converting avro field %s", avroFieldName), e);
             }
@@ -62,7 +68,8 @@ public class AvroSchemaUtil {
             if (nestedFieldNames != null) {
                 for (String nestedFieldName : nestedFieldNames) {
                     final String avroFieldName = nestedFieldName.toLowerCase();
-                    final Object nestedValue = convertToAvroObject(fieldSchema.getField(avroFieldName).schema(), nestedRow.getField(nestedFieldName));
+                    final Object nestedValue = convertToAvroObject(fieldSchema.getField(avroFieldName).schema(),
+                          nestedRow.getField(nestedFieldName));
                     nestedRecord.put(avroFieldName, nestedValue);
                 }
             }
@@ -128,7 +135,8 @@ public class AvroSchemaUtil {
                 final List<RowType.RowField> fieldList = ((RowType) dataType).getFields();
                 final SchemaBuilder.FieldAssembler<Schema> fieldAssembler = SchemaBuilder.record(name).fields();
                 for (RowType.RowField field : fieldList) {
-                    fieldAssembler.name(field.getName()).type().optional().type(convertTypeToAvro(name + "_" + field.getName(), field.getType()));
+                    fieldAssembler.name(field.getName()).type().optional()
+                          .type(convertTypeToAvro(name + "_" + field.getName(), field.getType()));
                 }
                 return fieldAssembler.endRecord();
             default:

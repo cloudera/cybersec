@@ -14,6 +14,7 @@ package com.cloudera.parserchains.core;
 
 import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedMethodsInOrder;
 import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedParameters;
+
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.Parameter;
 import com.cloudera.parserchains.core.catalog.ParserInfo;
@@ -82,50 +83,51 @@ public class ReflectiveParserBuilder implements ParserBuilder {
                 invokeMethod(parser, parserSchema, annotationKey, method, value);
             } else if (key.required()) {
                 throw new InvalidParserException(parserSchema,
-                        String.format("Required field isn't provided: %s", annotationKey));
+                      String.format("Required field isn't provided: %s", annotationKey));
             }
         }
     }
 
     private void configureParams(ParserSchema parserSchema, List<ConfigValueSchema> valuesSchema, Method method)
-        throws InvalidParserException {
+          throws InvalidParserException {
         final List<Parameter> paramsAnnotations = Arrays.stream(method.getParameterAnnotations())
-            .flatMap(Arrays::stream)
-            .filter(annotation -> annotation instanceof Parameter)
-            .map(annotation -> (Parameter) annotation)
-            .collect(Collectors.toList());
+                                                        .flatMap(Arrays::stream)
+                                                        .filter(annotation -> annotation instanceof Parameter)
+                                                        .map(annotation -> (Parameter) annotation)
+                                                        .collect(Collectors.toList());
 
         for (Parameter paramAnnotation : paramsAnnotations) {
             for (ConfigValueSchema value : valuesSchema) {
                 final Map<String, String> valueMap = value.getValues();
                 final String annotationKey = paramAnnotation.key();
 
-                if (StringUtils.isNotBlank(paramAnnotation.defaultValue()) && valueMap.get(annotationKey) == null){
+                if (StringUtils.isNotBlank(paramAnnotation.defaultValue()) && valueMap.get(annotationKey) == null) {
                     valueMap.put(annotationKey, paramAnnotation.defaultValue());
                 }
-                if (paramAnnotation.required() && valueMap.get(annotationKey) == null){
+                if (paramAnnotation.required() && valueMap.get(annotationKey) == null) {
                     throw new InvalidParserException(parserSchema,
-                        String.format("Required parameter isn't provided: %s", annotationKey));
+                          String.format("Required parameter isn't provided: %s", annotationKey));
                 }
             }
         }
     }
 
-  private void invokeMethod(Parser parser,
+    private void invokeMethod(Parser parser,
                               ParserSchema parserSchema,
                               String configKey,
                               Method method,
                               Map<String, String> configValues) throws InvalidParserException {
         List<Parameter> annotatedParams = getAnnotatedParameters(method);
         List<String> methodArgs = buildMethodArgs(annotatedParams, configValues);
-        log.info(String.format("Invoking method %s(%s); key=%s, parser=%s", method.getName(), methodArgs, configKey, parser.getClass().getName()));
+        log.info(String.format("Invoking method %s(%s); key=%s, parser=%s", method.getName(), methodArgs, configKey,
+              parser.getClass().getName()));
 
         try {
             method.invoke(parser, methodArgs.toArray());
 
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             String message = String.format("Failed to invoke method %s(%s); key=%s, parser=%s",
-                    method.getName(), methodArgs, configKey, parser.getClass().getName());
+                  method.getName(), methodArgs, configKey, parser.getClass().getName());
             throw new InvalidParserException(parserSchema, message, e);
         }
     }

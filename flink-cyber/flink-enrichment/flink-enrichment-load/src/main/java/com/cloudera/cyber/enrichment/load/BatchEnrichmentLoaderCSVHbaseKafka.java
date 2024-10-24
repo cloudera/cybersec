@@ -32,18 +32,22 @@ public class BatchEnrichmentLoaderCSVHbaseKafka extends BatchEnrichmentLoaderCSV
         Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         ParameterTool params = Utils.getParamToolsFromProperties(args);
         FlinkUtils.executeEnv(new BatchEnrichmentLoaderCSVHbaseKafka().runPipeline(params),
-                String.format("Enrichment %s - batch load", params.get(ENRICHMENT_TYPE, "unspecified")),
-                params);
+              String.format("Enrichment %s - batch load", params.get(ENRICHMENT_TYPE, "unspecified")),
+              params);
     }
 
     @Override
-    protected void writeResults(ParameterTool params, EnrichmentsConfig enrichmentsConfig, String enrichmentType, DataStream<EnrichmentCommand> enrichmentSource, StreamExecutionEnvironment env) {
+    protected void writeResults(ParameterTool params, EnrichmentsConfig enrichmentsConfig, String enrichmentType,
+                                DataStream<EnrichmentCommand> enrichmentSource, StreamExecutionEnvironment env) {
         String topic = params.get(PARAMS_TOPIC_ENRICHMENT_INPUT);
         if (topic != null) {
-            enrichmentSource.sinkTo(new FlinkUtils<>(EnrichmentCommand.class).createKafkaSink(topic, "enrichment_loader", params)).name("Kafka Enrichment Command Sink");
+            enrichmentSource.sinkTo(
+                                  new FlinkUtils<>(EnrichmentCommand.class).createKafkaSink(topic, "enrichment_loader", params))
+                            .name("Kafka Enrichment Command Sink");
         } else {
             String hbaseTable = enrichmentsConfig.getStorageForEnrichmentType(enrichmentType).getHbaseTableName();
-            HBaseSinkFunction<EnrichmentCommand> hbaseSink = new HbaseEnrichmentCommandSink(hbaseTable, enrichmentsConfig, params);
+            HBaseSinkFunction<EnrichmentCommand> hbaseSink =
+                  new HbaseEnrichmentCommandSink(hbaseTable, enrichmentsConfig, params);
             enrichmentSource.addSink(hbaseSink);
         }
     }

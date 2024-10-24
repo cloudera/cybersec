@@ -7,8 +7,10 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,27 +21,24 @@
 package org.apache.metron.common.field.transformation;
 
 import com.google.common.collect.Iterables;
-import org.apache.metron.stellar.dsl.Context;
-
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.metron.stellar.dsl.Context;
 
 public abstract class SimpleFieldTransformation implements FieldTransformation {
-  @Override
-  public Map<String, Object> map (Map<String, Object> input
-                                , List<String> outputField
-                                , LinkedHashMap<String, Object> fieldMappingConfig
-                                , Context context
-                                , Map<String, Object>... sensorConfig
-                                )
-  {
-    Object value = (input == null)
-                 ? null
-                 : Iterables.getFirst(input.values(), null)
-                 ;
-    return map(value, outputField.get(0));
-  }
+    @Override
+    public Map<String, Object> map(Map<String, Object> input,
+                                   List<String> outputField,
+                                   LinkedHashMap<String, Object> fieldMappingConfig,
+                                   Context context,
+                                   Map<String, Object>... sensorConfig
+    ) {
+        Object value = (input == null)
+              ? null
+              : Iterables.getFirst(input.values(), null);
+        return map(value, outputField.get(0));
+    }
 
-  public abstract Map<String, Object> map(Object input, String outputField);
+    public abstract Map<String, Object> map(Object input, String outputField);
 }

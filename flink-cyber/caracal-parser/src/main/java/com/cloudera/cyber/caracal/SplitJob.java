@@ -12,10 +12,23 @@
 
 package com.cloudera.cyber.caracal;
 
+import static com.cloudera.cyber.parser.ParserJob.PARAM_PRIVATE_KEY;
+import static com.cloudera.cyber.parser.ParserJob.PARAM_PRIVATE_KEY_FILE;
+
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Base64;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.state.MapStateDescriptor;
@@ -27,20 +40,6 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.time.Time;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static com.cloudera.cyber.parser.ParserJob.PARAM_PRIVATE_KEY;
-import static com.cloudera.cyber.parser.ParserJob.PARAM_PRIVATE_KEY_FILE;
 
 @Slf4j
 public abstract class SplitJob {
@@ -60,36 +59,34 @@ public abstract class SplitJob {
         DataStream<MessageToParse> source = createSource(env, params, configMap.keySet());
 
         BroadcastStream<SplitConfig> configStream = createConfigSource(env, params)
-                .broadcast(Descriptors.broadcastState);
+              .broadcast(Descriptors.broadcastState);
 
-        byte[] privKeyBytes = params.has(PARAM_PRIVATE_KEY_FILE) ?
-                Files.readAllBytes(Paths.get(params.get(PARAM_PRIVATE_KEY_FILE))) :
-                Base64.getDecoder().decode(params.getRequired(PARAM_PRIVATE_KEY));
+        byte[] privKeyBytes = params.has(PARAM_PRIVATE_KEY_FILE)
+              ? Files.readAllBytes(Paths.get(params.get(PARAM_PRIVATE_KEY_FILE)))
+              : Base64.getDecoder().decode(params.getRequired(PARAM_PRIVATE_KEY));
 
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privKeyBytes);
         PrivateKey signKey = keyFactory.generatePrivate(privSpec);
 
         SingleOutputStreamOperator<Message> results = source
-                .keyBy(k -> k.getTopic())
-                .connect(configStream)
-                .process(new SplitBroadcastProcessFunction(configMap, signKey));
+              .keyBy(k -> k.getTopic())
+              .connect(configStream)
+              .process(new SplitBroadcastProcessFunction(configMap, signKey));
 
         writeOriginalsResults(params, source);
 
         SingleOutputStreamOperator<Message> parsed = results.map(new ParserChainMapFunction(configMap));
 
 
-        DataStream<Tuple2<String, Long>> counts = parsed.map(new MapFunction<Message, Tuple2<String, Long>>() {
-            @Override
-            public Tuple2<String, Long> map(Message message) throws Exception {
-                return Tuple2.of(message.getSource(), 1L);
-            }
-        })
-                .keyBy(0)
-                .timeWindow(Time.milliseconds(params.getLong(PARAM_COUNT_INTERVAL, DEFAULT_COUNT_INTERVAL)))
-                .allowedLateness(Time.milliseconds(0))
-                .sum(1);
+        DataStream<Tuple2<String, Long>> counts = parsed
+              .map((MapFunction<Message, Tuple2<String, Long>>) message -> Tuple2.of(message.getSource(), 1L))
+              .keyBy(0)
+              .timeWindow(Time.milliseconds(
+                    params.getLong(PARAM_COUNT_INTERVAL,
+                          DEFAULT_COUNT_INTERVAL)))
+              .allowedLateness(Time.milliseconds(0))
+              .sum(1);
         writeCounts(params, counts);
 
 
@@ -99,7 +96,8 @@ public abstract class SplitJob {
     }
 
     protected static class Descriptors {
-        public static MapStateDescriptor<String, SplitConfig> broadcastState = new MapStateDescriptor<String, SplitConfig>("configs", String.class, SplitConfig.class);
+        public static MapStateDescriptor<String, SplitConfig> broadcastState =
+              new MapStateDescriptor<String, SplitConfig>("configs", String.class, SplitConfig.class);
     }
 
     protected List<SplitConfig> parseConfig() throws IllegalArgumentException, IOException {
@@ -120,5 +118,6 @@ public abstract class SplitJob {
 
     protected abstract void writeCounts(ParameterTool params, DataStream<Tuple2<String, Long>> sums);
 
-    protected abstract DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params, Iterable<String> topics);
+    protected abstract DataStream<MessageToParse> createSource(StreamExecutionEnvironment env, ParameterTool params,
+                                                               Iterable<String> topics);
 }

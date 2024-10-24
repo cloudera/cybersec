@@ -1,5 +1,8 @@
 package com.cloudera.cyber.rules.engines;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import javax.script.ScriptException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -9,10 +12,6 @@ import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.HostAccess;
 import org.graalvm.polyglot.Value;
-
-import javax.script.ScriptException;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 @Slf4j
 public class JavaScriptGraaljsEngine extends JavaScriptEngine {
@@ -39,10 +38,10 @@ public class JavaScriptGraaljsEngine extends JavaScriptEngine {
     public void open() {
         if (!isOpen.get()) {
             Context context = Context.newBuilder()
-                    .engine(ENGINE)
-                    .allowHostAccess(HostAccess.ALL)
-                    .allowHostClassLookup(className -> true)
-                    .build();
+                  .engine(ENGINE)
+                  .allowHostAccess(HostAccess.ALL)
+                  .allowHostClassLookup(className -> true)
+                  .build();
 
             Value bindings = context.getBindings(LANGUAGE_ID);
             initBindings(bindings::putMember);
@@ -61,7 +60,7 @@ public class JavaScriptGraaljsEngine extends JavaScriptEngine {
                 isValid = false;
             }
 
-            if (isValid){
+            if (isValid) {
                 context.initialize(LANGUAGE_ID);
             }
 

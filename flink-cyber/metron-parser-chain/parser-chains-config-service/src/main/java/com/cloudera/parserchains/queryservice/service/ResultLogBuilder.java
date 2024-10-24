@@ -13,11 +13,10 @@
 package com.cloudera.parserchains.queryservice.service;
 
 import com.cloudera.parserchains.queryservice.model.exec.ResultLog;
+import java.util.List;
 import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-
-import java.util.List;
 
 public class ResultLogBuilder {
     public static final String DEFAULT_SUCCESS_MESSAGE = "success";
@@ -25,6 +24,8 @@ public class ResultLogBuilder {
     public static final String ERROR_TYPE = "error";
 
     /**
+     * Returns new SuccessResultBuilder.
+     *
      * @return A builder that creates a result when a message is successfully parsed.
      */
     public static SuccessResultBuilder success() {
@@ -32,6 +33,8 @@ public class ResultLogBuilder {
     }
 
     /**
+     * Returns new ErrorResultBuilder.
+     *
      * @return A builder that creates a result that indicates an error has occurred.
      */
     public static ErrorResultBuilder error() {
@@ -49,7 +52,7 @@ public class ResultLogBuilder {
         private String parserId;
         private String parserName;
         private String message;
-        private String type;
+        private final String type;
         private Throwable exception;
 
         public ErrorResultBuilder() {
@@ -57,8 +60,8 @@ public class ResultLogBuilder {
         }
 
         public ErrorResultBuilder parserId(String parserId) {
-          this.parserId = parserId;
-          return this;
+            this.parserId = parserId;
+            return this;
         }
 
         public ErrorResultBuilder parserName(String parserName) {
@@ -78,14 +81,14 @@ public class ResultLogBuilder {
 
         public ResultLog build() {
             ResultLog resultLog = new ResultLog()
-                .setParserId(parserId)
-                .setParserName(parserName)
-                .setType(type);
-            if(exception != null) {
+                  .setParserId(parserId)
+                  .setParserName(parserName)
+                  .setType(type);
+            if (exception != null) {
                 resultLog.setMessage(getUsefulMessage(exception))
                          .setStackTrace(ExceptionUtils.getStackTrace(exception));
             } else {
-              resultLog.setMessage(message);
+                resultLog.setMessage(message);
             }
             return resultLog;
         }
@@ -95,7 +98,7 @@ public class ResultLogBuilder {
         private String parserId;
         private String parserName;
         private String message;
-        private String type;
+        private final String type;
 
         public SuccessResultBuilder() {
             this.message = DEFAULT_SUCCESS_MESSAGE;
@@ -119,10 +122,10 @@ public class ResultLogBuilder {
 
         public ResultLog build() {
             return new ResultLog()
-                    .setParserId(parserId)
-                    .setParserName(parserName)
-                    .setMessage(message)
-                    .setType(type);
+                  .setParserId(parserId)
+                  .setParserName(parserName)
+                  .setMessage(message)
+                  .setType(type);
         }
     }
 
@@ -132,21 +135,21 @@ public class ResultLogBuilder {
      * <p>The root cause exception does not always contain
      * a useful message. This traces backwards from the root
      * exception until it finds a useful error message.
+     *
      * @param t The exception.
-     * @return
      */
     private static String getUsefulMessage(Throwable t) {
         List<Throwable> throwables = ExceptionUtils.getThrowableList(t);
-        for(int i=throwables.size()-1; i>=0; i--) {
+        for (int i = throwables.size() - 1; i >= 0; i--) {
             Throwable cause = throwables.get(i);
             String message = removeClassName(cause.getMessage());
-            if(StringUtils.isNotBlank(message)) {
+            if (StringUtils.isNotBlank(message)) {
                 return message;
             }
         }
 
         String message = t.getMessage();
-        if(StringUtils.isNotBlank(message)) {
+        if (StringUtils.isNotBlank(message)) {
             return message;
         } else {
             return t.getClass().getCanonicalName();
@@ -160,12 +163,12 @@ public class ResultLogBuilder {
      * is prepended to the error message. When returning the results to the user,
      * only the original error message, not the class name should be shown.
      *
-     *  <pre>
+     * <pre>
      * removeClassName("IllegalArgumentException: Field name is required.") = "Field name is required."
      * removeClassName("Field name is required.") = "Field name is required."
      * </pre>
+     *
      * @param message The message to remove the class name from.
-     * @return
      */
     private static String removeClassName(String message) {
         return RegExUtils.replaceFirst(message, "^\\w+:\\s*", "");

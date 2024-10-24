@@ -12,17 +12,20 @@
 
 package com.cloudera.cyber.enrichment.geocode;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
+import java.io.File;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.flink.configuration.Configuration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.util.*;
-import static org.assertj.core.api.Assertions.*;
 
 public class IpAsnMapTest {
     private static final String IP_FIELD_NAME = "ip_dst_addr";
@@ -85,9 +88,9 @@ public class IpAsnMapTest {
         File databaseFile = new File(doesntExistPath);
         Assert.assertFalse(databaseFile.exists());
         IpAsnMap map = new IpAsnMap(doesntExistPath, ENRICH_FIELD_NAMES, null);
-        assertThatThrownBy(() -> map.open(new Configuration())).
-                isInstanceOfAny(IllegalStateException.class).
-                hasMessage("Could not read asn database %s", doesntExistPath);
+        assertThatThrownBy(() -> map.open(new Configuration()))
+                .isInstanceOfAny(IllegalStateException.class)
+                .hasMessage("Could not read asn database %s", doesntExistPath);
     }
 
     @Test
@@ -97,16 +100,16 @@ public class IpAsnMapTest {
         Assert.assertTrue(databaseFile.exists());
         Assert.assertTrue(databaseFile.length() > 0);
         IpAsnMap map = new IpAsnMap(emptyFilePath, ENRICH_FIELD_NAMES, null);
-        assertThatThrownBy(() ->map.open(new Configuration())).isInstanceOfAny(IllegalStateException.class).
-                hasMessage("Could not read asn database %s", emptyFilePath);
+        assertThatThrownBy(() ->map.open(new Configuration())).isInstanceOfAny(IllegalStateException.class)
+                .hasMessage("Could not read asn database %s", emptyFilePath);
     }
 
     @Test
     public void testThrowsBadFilesystem() {
         String badFilesystemPath = "bad:/src/test/resources/geolite/invalid_maxmind_db";
         IpAsnMap map = new IpAsnMap(badFilesystemPath, ENRICH_FIELD_NAMES, null);
-        assertThatThrownBy(() ->map.open(new Configuration())).isInstanceOfAny(IllegalStateException.class).
-                hasMessage("Could not read asn database %s", badFilesystemPath);
+        assertThatThrownBy(() ->map.open(new Configuration())).isInstanceOfAny(IllegalStateException.class)
+                .hasMessage("Could not read asn database %s", badFilesystemPath);
     }
 
     private Message testAsnMap(Map<String, String> inputFields) {

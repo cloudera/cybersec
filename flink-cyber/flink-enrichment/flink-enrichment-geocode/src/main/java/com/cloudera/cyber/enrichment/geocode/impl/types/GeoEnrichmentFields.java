@@ -13,10 +13,9 @@
 package com.cloudera.cyber.enrichment.geocode.impl.types;
 
 import com.maxmind.geoip2.model.CityResponse;
+import java.util.function.Function;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.util.function.Function;
 
 /**
  * All geocode enrichments that could be returned for an IP.

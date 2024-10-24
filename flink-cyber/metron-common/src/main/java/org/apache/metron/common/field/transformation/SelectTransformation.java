@@ -7,8 +7,10 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,34 +26,34 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import org.apache.metron.stellar.dsl.Context;
 
 public class SelectTransformation implements FieldTransformation {
 
-	private static final List<String> systemFields = Arrays.asList("timestamp", "original_string", "source.type");
+    private static final List<String> systemFields = Arrays.asList("timestamp", "original_string", "source.type");
 
-	@Override
-	public Map<String, Object> map(Map<String, Object> input, List<String> outputField,
-			LinkedHashMap<String, Object> fieldMappingConfig, Context context, Map<String, Object>... sensorConfig) {
-		// note that we have to set the value to null for any field not in the output
-		// list, since FieldTransformer will otherwise put them back again from the
-		// original output.
+    @Override
+    public Map<String, Object> map(Map<String, Object> input, List<String> outputField,
+                                   LinkedHashMap<String, Object> fieldMappingConfig, Context context,
+                                   Map<String, Object>... sensorConfig) {
+        // note that we have to set the value to null for any field not in the output
+        // list, since FieldTransformer will otherwise put them back again from the
+        // original output.
 
-		// note, this cannot be implemented with streams because HashMap merge guards
-		// against null values
+        // note, this cannot be implemented with streams because HashMap merge guards
+        // against null values
 
-		HashMap<String, Object> output = new HashMap<String, Object>();
-		for (Entry<String, Object> e : input.entrySet()) {
-			if (outputField.contains(e.getKey())) {
-				output.put(e.getKey(), e.getValue());
-			} else {
-				if (!systemFields.contains(e.getKey())) {
-					output.put(e.getKey(), null);
-				}
-			}
-		}
-		return output;
-	}
+        HashMap<String, Object> output = new HashMap<String, Object>();
+        for (Entry<String, Object> e : input.entrySet()) {
+            if (outputField.contains(e.getKey())) {
+                output.put(e.getKey(), e.getValue());
+            } else {
+                if (!systemFields.contains(e.getKey())) {
+                    output.put(e.getKey(), null);
+                }
+            }
+        }
+        return output;
+    }
 
 }

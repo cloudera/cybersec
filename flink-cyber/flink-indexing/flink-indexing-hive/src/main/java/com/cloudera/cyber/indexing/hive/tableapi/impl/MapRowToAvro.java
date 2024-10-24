@@ -1,6 +1,7 @@
 package com.cloudera.cyber.indexing.hive.tableapi.impl;
 
 import com.cloudera.cyber.indexing.hive.util.AvroSchemaUtil;
+import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -9,8 +10,6 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.formats.avro.typeutils.GenericRecordAvroTypeInfo;
 import org.apache.flink.types.Row;
-
-import java.util.Set;
 
 public class MapRowToAvro implements ResultTypeQueryable<GenericRecord>, MapFunction<Row, GenericRecord> {
     private final GenericRecordAvroTypeInfo producedType;

@@ -19,7 +19,6 @@ import com.cloudera.cyber.enrichment.SingleValueEnrichment;
 import com.cloudera.cyber.enrichment.geocode.impl.types.GeoFields;
 import com.maxmind.geoip2.DatabaseProvider;
 import com.maxmind.geoip2.model.CityResponse;
-
 import java.net.InetAddress;
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -53,33 +52,44 @@ public class IpGeoEnrichment extends MaxMindBase {
      *
      * @param ipFieldValue A valid IPv4 or IPv6 address represented in a string.
      * @param geoFieldSet  Only Geocoding fields specified are returned.
-     *                     For example if the IP has a city in the database but city is not included in this set, the city will not be returned.
+     *                     For example if the IP has a city in the database but city is not included in this set,
+     *                     the city will not be returned.
      */
-    private void lookup(Enrichment enrichment, Function<GeoFields, String> nameFunction, Object ipFieldValue, GeoFields[] geoFieldSet, Map<String, String> geoEnrichments, List<DataQualityMessage> qualityMessages) {
+    private void lookup(Enrichment enrichment, Function<GeoFields, String> nameFunction, Object ipFieldValue,
+                        GeoFields[] geoFieldSet, Map<String, String> geoEnrichments,
+                        List<DataQualityMessage> qualityMessages) {
         InetAddress ipAddress = convertToIpAddress(enrichment, ipFieldValue, qualityMessages);
         if (ipAddress != null) {
             try {
                 Optional<CityResponse> response = database.tryCity(ipAddress);
-                response.ifPresent(cityResponse -> Stream.of(geoFieldSet).map(field -> new AbstractMap.SimpleEntry<>(nameFunction.apply(field), field.getFunction().apply(cityResponse))).
-                        filter(entry -> Objects.nonNull(entry.getValue())).
-                        forEach(entry -> enrichment.enrich(geoEnrichments, entry.getKey(), entry.getValue())));
+                response.ifPresent(cityResponse -> Stream.of(geoFieldSet).map(field -> new AbstractMap.SimpleEntry<>(
+                                                               nameFunction.apply(field), field.getFunction().apply(cityResponse)))
+                                                         .filter(entry -> Objects.nonNull(entry.getValue()))
+                                                         .forEach(entry -> enrichment.enrich(geoEnrichments,
+                                                               entry.getKey(), entry.getValue())));
             } catch (Exception e) {
-                enrichment.addQualityMessage(qualityMessages, DataQualityMessageLevel.ERROR, String.format(GEOCODE_FAILED_MESSAGE, e.getMessage()));
+                enrichment.addQualityMessage(qualityMessages, DataQualityMessageLevel.ERROR,
+                      String.format(GEOCODE_FAILED_MESSAGE, e.getMessage()));
             }
         }
     }
 
-    public void lookup(String fieldName, Object ipFieldValue, GeoFields[] geoFieldSet, Map<String, String> geoEnrichments, List<DataQualityMessage> qualityMessages) {
+    public void lookup(String fieldName, Object ipFieldValue, GeoFields[] geoFieldSet,
+                       Map<String, String> geoEnrichments, List<DataQualityMessage> qualityMessages) {
         lookup(SingleValueEnrichment::new, fieldName, ipFieldValue, geoFieldSet, geoEnrichments, qualityMessages);
     }
 
-    public void lookup(BiFunction<String, String, Enrichment> enrichmentBiFunction, String fieldName, Object ipFieldValue, GeoFields[] geoFieldSet, Map<String, String> geoEnrichments, List<DataQualityMessage> qualityMessages) {
+    public void lookup(BiFunction<String, String, Enrichment> enrichmentBiFunction, String fieldName,
+                       Object ipFieldValue, GeoFields[] geoFieldSet, Map<String, String> geoEnrichments,
+                       List<DataQualityMessage> qualityMessages) {
         if (ipFieldValue instanceof Collection) {
             Enrichment enrichment = enrichmentBiFunction.apply(fieldName, GEOCODE_FEATURE);
             //noinspection unchecked
-            ((Collection<Object>) ipFieldValue).forEach(ip -> lookup(enrichment, GeoFields::getPluralName, ip, geoFieldSet, geoEnrichments, qualityMessages));
+            ((Collection<Object>) ipFieldValue).forEach(
+                  ip -> lookup(enrichment, GeoFields::getPluralName, ip, geoFieldSet, geoEnrichments, qualityMessages));
         } else if (ipFieldValue != null) {
-            lookup(enrichmentBiFunction.apply(fieldName, GEOCODE_FEATURE), GeoFields::getSingularName, ipFieldValue, geoFieldSet, geoEnrichments, qualityMessages);
+            lookup(enrichmentBiFunction.apply(fieldName, GEOCODE_FEATURE), GeoFields::getSingularName, ipFieldValue,
+                  geoFieldSet, geoEnrichments, qualityMessages);
         }
     }
 

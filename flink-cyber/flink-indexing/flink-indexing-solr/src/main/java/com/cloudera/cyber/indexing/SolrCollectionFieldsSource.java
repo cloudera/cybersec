@@ -12,6 +12,14 @@
 
 package com.cloudera.cyber.indexing;
 
+import static java.util.stream.Collectors.toList;
+
+import java.io.IOException;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Consumer;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,18 +33,10 @@ import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.request.schema.SchemaRequest;
 import org.apache.solr.client.solrj.response.schema.SchemaResponse;
 
-import java.io.IOException;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.Consumer;
-
-import static java.util.stream.Collectors.toList;
-
 @Slf4j
 @RequiredArgsConstructor
-public class SolrCollectionFieldsSource extends RichParallelSourceFunction<CollectionField> implements ResultTypeQueryable<CollectionField> {
+public class SolrCollectionFieldsSource extends RichParallelSourceFunction<CollectionField>
+      implements ResultTypeQueryable<CollectionField> {
     @NonNull
     private List<String> solrUrls;
     @NonNull
@@ -78,19 +78,19 @@ public class SolrCollectionFieldsSource extends RichParallelSourceFunction<Colle
 
     protected Collection<CollectionField> loadFieldsFromIndex() throws IOException {
         SolrClient solrClient = SolrClientBuilder.builder()
-                .solrUrls(solrUrls)
-                .build().build();
+              .solrUrls(solrUrls)
+              .build().build();
         try {
             List<String> collections = CollectionAdminRequest.listCollections(solrClient);
             return collections.stream()
-                    .map(
-                            collection ->
-                                    CollectionField.builder()
-                                            .key(collection)
-                                            .values(fieldsForCollection(solrClient, collection))
-                                            .build()
-                    )
-                    .collect(toList());
+                  .map(
+                        collection ->
+                              CollectionField.builder()
+                                    .key(collection)
+                                    .values(fieldsForCollection(solrClient, collection))
+                                    .build()
+                  )
+                  .collect(toList());
         } catch (SolrServerException e) {
             log.error("Problem with Solr Schema inspection", e);
             throw new IOException(e);

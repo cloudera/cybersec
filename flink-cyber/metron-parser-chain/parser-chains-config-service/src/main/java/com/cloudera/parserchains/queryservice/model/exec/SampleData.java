@@ -19,8 +19,8 @@ import java.util.List;
  * Defines the sample data that is received by the front-end
  * when a test execution of a parser chain is requested.
  *
- *  <p>See also {@link ChainTestRequest} which is the top-level class for the
- *  data model used for the "Live View" feature.
+ * <p>See also {@link ChainTestRequest} which is the top-level class for the
+ * data model used for the "Live View" feature.
  */
 public class SampleData {
 

@@ -14,12 +14,11 @@ package com.cloudera.parserchains.core.model.define;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Defines the structure of a router contained within a parser chain.
@@ -81,24 +80,24 @@ public class RoutingSchema implements Serializable {
         }
         RoutingSchema that = (RoutingSchema) o;
         return new EqualsBuilder()
-                .append(matchingField, that.matchingField)
-                .append(routes, that.routes)
-                .isEquals();
+              .append(matchingField, that.matchingField)
+              .append(routes, that.routes)
+              .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(matchingField)
-                .append(routes)
-                .toHashCode();
+              .append(matchingField)
+              .append(routes)
+              .toHashCode();
     }
 
     @Override
     public String toString() {
-        return "RoutingSchema{" +
-                "matchingField='" + matchingField + '\'' +
-                ", routes=" + routes +
-                '}';
+        return "RoutingSchema{"
+               + "matchingField='" + matchingField + '\''
+               + ", routes=" + routes
+               + '}';
     }
 }

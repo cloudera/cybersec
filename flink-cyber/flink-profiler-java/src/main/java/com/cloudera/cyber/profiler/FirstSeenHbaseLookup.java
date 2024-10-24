@@ -18,18 +18,17 @@ import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageConfig;
 import com.cloudera.cyber.hbase.AbstractHbaseMapFunction;
 import com.cloudera.cyber.hbase.LookupKey;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.util.Collector;
-import org.apache.flink.util.OutputTag;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.util.Collector;
+import org.apache.flink.util.OutputTag;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -42,16 +41,23 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction<ProfileMessag
     private FirstSeenHBase firstSeenHBaseInfo;
     private Duration firstSeenExpireDuration;
     private EnrichmentStorageConfig enrichmentStorageConfig;
-    protected final OutputTag<EnrichmentCommand> firstSeenUpdateOutput = new OutputTag<EnrichmentCommand>(ProfileJob.FIRST_SEEN_ENRICHMENT_UPDATE){};
+    protected final OutputTag<EnrichmentCommand> firstSeenUpdateOutput =
+          new OutputTag<EnrichmentCommand>(ProfileJob.FIRST_SEEN_ENRICHMENT_UPDATE) {
+          };
 
 
-    public FirstSeenHbaseLookup(EnrichmentStorageConfig enrichmentStorageConfig, ProfileGroupConfig profileGroupConfig) throws IllegalStateException {
+    public FirstSeenHbaseLookup(EnrichmentStorageConfig enrichmentStorageConfig, ProfileGroupConfig profileGroupConfig)
+          throws IllegalStateException {
         this.firstSeenHBaseInfo = new FirstSeenHBase(enrichmentStorageConfig, profileGroupConfig);
-        ProfileMeasurementConfig measurementConfig = profileGroupConfig.getMeasurements().stream().filter(m -> m.getAggregationMethod().equals(ProfileAggregationMethod.FIRST_SEEN)).
-                findFirst().orElseThrow(() -> new NullPointerException("Expected at least one first seen measurement but none was found."));
+        ProfileMeasurementConfig measurementConfig =
+              profileGroupConfig.getMeasurements().stream()
+                                .filter(m -> m.getAggregationMethod().equals(ProfileAggregationMethod.FIRST_SEEN))
+                                .findFirst().orElseThrow(
+                                      () -> new NullPointerException("Expected at least one first seen measurement but none was found."));
 
 
-        this.firstSeenExpireDuration = Duration.of(measurementConfig.getFirstSeenExpirationDuration(), ChronoUnit.valueOf(measurementConfig.getFirstSeenExpirationDurationUnit()));
+        this.firstSeenExpireDuration = Duration.of(measurementConfig.getFirstSeenExpirationDuration(),
+              ChronoUnit.valueOf(measurementConfig.getFirstSeenExpirationDurationUnit()));
         this.enrichmentStorageConfig = enrichmentStorageConfig;
     }
 
@@ -64,11 +70,14 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction<ProfileMessag
         Map<String, String> firstSeenExtensions = new HashMap<>();
         String firstSeen = firstSeenHBaseInfo.getFirstSeen(message);
         if (!first) {
-            String previousFirstTimestamp = mergeFirstLastSeen((String)previousFirstLastSeen.get(FIRST_SEEN_PROPERTY_NAME),
-                    (String)previousFirstLastSeen.get(LAST_SEEN_PROPERTY_NAME), firstSeenHBaseInfo.getFirstSeen(message));
+            String previousFirstTimestamp =
+                  mergeFirstLastSeen((String) previousFirstLastSeen.get(FIRST_SEEN_PROPERTY_NAME),
+                        (String) previousFirstLastSeen.get(LAST_SEEN_PROPERTY_NAME),
+                        firstSeenHBaseInfo.getFirstSeen(message));
             if (previousFirstTimestamp != null) {
                 // there was a previous observation - send the first timestamp
-                firstSeenExtensions.put(firstSeenHBaseInfo.getFirstSeenResultName().concat(FIRST_SEEN_TIME_SUFFIX), previousFirstTimestamp);
+                firstSeenExtensions.put(firstSeenHBaseInfo.getFirstSeenResultName().concat(FIRST_SEEN_TIME_SUFFIX),
+                      previousFirstTimestamp);
                 firstSeen = previousFirstTimestamp;
             } else {
                 // previous observation was too old, treat this like a new observation
@@ -80,7 +89,8 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction<ProfileMessag
         message.getExtensions().forEach(firstSeenExtensions::putIfAbsent);
 
         collector.collect(new ProfileMessage(message.getTs(), firstSeenExtensions));
-        EnrichmentCommand enrichmentCommand = createFirstSeenUpdate(message.getTs(), lookupKey, firstSeen, firstSeenHBaseInfo.getLastSeen(message));
+        EnrichmentCommand enrichmentCommand =
+              createFirstSeenUpdate(message.getTs(), lookupKey, firstSeen, firstSeenHBaseInfo.getLastSeen(message));
         context.output(firstSeenUpdateOutput, enrichmentCommand);
     }
 
@@ -89,13 +99,13 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction<ProfileMessag
         firstSeenMap.put(FirstSeenHbaseLookup.FIRST_SEEN_PROPERTY_NAME, firstSeen);
         firstSeenMap.put(FirstSeenHbaseLookup.LAST_SEEN_PROPERTY_NAME, lastSeen);
 
-        EnrichmentEntry enrichmentEntry = EnrichmentEntry.builder().ts(ts).
-                type(FIRST_SEEN_ENRICHMENT_TYPE).
-                key(key.getKey()).entries(firstSeenMap).build();
+        EnrichmentEntry enrichmentEntry = EnrichmentEntry.builder().ts(ts)
+                                                         .type(FIRST_SEEN_ENRICHMENT_TYPE)
+                                                         .key(key.getKey()).entries(firstSeenMap).build();
 
-        return EnrichmentCommand.builder().type(CommandType.ADD).
-                headers(Collections.emptyMap()).
-                payload(enrichmentEntry).build();
+        return EnrichmentCommand.builder().type(CommandType.ADD)
+                                .headers(Collections.emptyMap())
+                                .payload(enrichmentEntry).build();
     }
 
     protected String mergeFirstLastSeen(String previousFirstString, String previousLastString, String newFirstString) {
@@ -104,11 +114,11 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction<ProfileMessag
             Instant previousLast = parseEpochMilliTimestamp(previousLastString);
             Instant newFirst = parseEpochMilliTimestamp(newFirstString);
             if (previousFirst != null && previousLast != null && newFirst != null) {
-               Duration durationSinceLastObs = Duration.between(previousLast, newFirst);
-               if (durationSinceLastObs.compareTo(firstSeenExpireDuration) < 0) {
-                   // previous first seen is not too old so return the minimum
-                   return previousFirstString;
-               }
+                Duration durationSinceLastObs = Duration.between(previousLast, newFirst);
+                if (durationSinceLastObs.compareTo(firstSeenExpireDuration) < 0) {
+                    // previous first seen is not too old so return the minimum
+                    return previousFirstString;
+                }
             }
         }
         // this is the first observation or the previous observation was too old
@@ -122,7 +132,7 @@ public class FirstSeenHbaseLookup extends AbstractHbaseMapFunction<ProfileMessag
                 return Instant.ofEpochMilli(epochMillis);
             }
         } catch (NumberFormatException e) {
-           log.error(String.format("Unable to parse Epoch millis string %s", epochMillisString), e);
+            log.error(String.format("Unable to parse Epoch millis string %s", epochMillisString), e);
         }
         return null;
     }

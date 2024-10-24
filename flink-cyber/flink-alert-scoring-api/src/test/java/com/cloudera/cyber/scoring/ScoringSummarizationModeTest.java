@@ -1,22 +1,21 @@
 package com.cloudera.cyber.scoring;
 
-import org.junit.Test;
+import static org.hamcrest.Matchers.equalTo;
+import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import org.junit.Test;
 
 public class ScoringSummarizationModeTest {
 
     @Test
-    public void testDefault(){
-        assertThat(ScoringSummarizationMode.DEFAULT(), equalTo(ScoringSummarizationMode.POSITIVE_MEAN));
+    public void testDefault() {
+        assertThat(ScoringSummarizationMode.defaultValue(), equalTo(ScoringSummarizationMode.POSITIVE_MEAN));
     }
 
     @Test
-    public void testSum(){
+    public void testSum() {
         List<Double> scoreList = Arrays.asList(-1.0, 1.0, 2.0, 6.0);
         final ScoringSummarizationMode summarizationMode = ScoringSummarizationMode.SUM;
 
@@ -24,7 +23,7 @@ public class ScoringSummarizationModeTest {
     }
 
     @Test
-    public void testMax(){
+    public void testMax() {
         List<Double> scoreList = Arrays.asList(-1.0, 1.0, 2.0, 6.0);
         final ScoringSummarizationMode summarizationMode = ScoringSummarizationMode.MAX;
 
@@ -32,7 +31,7 @@ public class ScoringSummarizationModeTest {
     }
 
     @Test
-    public void testMean(){
+    public void testMean() {
         List<Double> scoreList = Arrays.asList(-1.0, 1.0, 2.0, 6.0);
         final ScoringSummarizationMode summarizationMode = ScoringSummarizationMode.MEAN;
 
@@ -40,7 +39,7 @@ public class ScoringSummarizationModeTest {
     }
 
     @Test
-    public void testPositiveMean(){
+    public void testPositiveMean() {
         List<Double> scoreList = Arrays.asList(-1.0, 1.0, 2.0, 6.0);
         final ScoringSummarizationMode summarizationMode = ScoringSummarizationMode.POSITIVE_MEAN;
 

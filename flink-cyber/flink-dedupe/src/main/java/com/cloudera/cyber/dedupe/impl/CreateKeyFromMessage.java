@@ -14,10 +14,9 @@ package com.cloudera.cyber.dedupe.impl;
 
 import com.cloudera.cyber.DedupeMessage;
 import com.cloudera.cyber.Message;
-import org.apache.flink.api.common.functions.RichMapFunction;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import org.apache.flink.api.common.functions.RichMapFunction;
 
 public class CreateKeyFromMessage extends RichMapFunction<Message, DedupeMessage> {
     List<String> key;
@@ -29,13 +28,13 @@ public class CreateKeyFromMessage extends RichMapFunction<Message, DedupeMessage
     @Override
     public DedupeMessage map(Message message) {
         return DedupeMessage.builder()
-                .count(1L)
-                .fields(key.stream()
-                        .collect(Collectors.toMap(
-                                f -> f,
-                                f->message.get(f).toString()))
-                )
-                .ts(message.getTs())
-                .build();
+                            .count(1L)
+                            .fields(key.stream()
+                                       .collect(Collectors.toMap(
+                                             f -> f,
+                                             f -> message.get(f).toString()))
+                            )
+                            .ts(message.getTs())
+                            .build();
     }
 }

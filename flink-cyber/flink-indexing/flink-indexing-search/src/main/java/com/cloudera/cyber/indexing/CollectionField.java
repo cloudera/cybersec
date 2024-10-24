@@ -12,13 +12,16 @@
 
 package com.cloudera.cyber.indexing;
 
-import lombok.*;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
-
-import java.util.List;
 
 @Data
 @EqualsAndHashCode
@@ -30,13 +33,13 @@ public class CollectionField extends SpecificRecordBase implements SpecificRecor
     private List<String> values;
 
     private static final Schema SCHEMA$ = SchemaBuilder
-            .record(CollectionField.class.getName())
-            .namespace(CollectionField.class.getPackage().getName())
-            .fields()
-            .requiredString("key")
-            .name("values")
-            .type(SchemaBuilder.array().items().stringType()).noDefault()
-            .endRecord();
+          .record(CollectionField.class.getName())
+          .namespace(CollectionField.class.getPackage().getName())
+          .fields()
+          .requiredString("key")
+          .name("values")
+          .type(SchemaBuilder.array().items().stringType()).noDefault()
+          .endRecord();
 
     @Override
     public Schema getSchema() {

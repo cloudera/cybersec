@@ -18,6 +18,8 @@
 
 package com.cloudera.cyber.jdbc.connector.jdbc.internal;
 
+import java.io.IOException;
+import javax.annotation.Nonnull;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -29,11 +31,8 @@ import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.util.Preconditions;
 
-import javax.annotation.Nonnull;
-import java.io.IOException;
-
 public class GenericJdbcSinkFunction<T> extends RichSinkFunction<T>
-        implements CheckpointedFunction, InputTypeConfigurable {
+      implements CheckpointedFunction, InputTypeConfigurable {
     private final JdbcOutputFormat<T, ?, ?> outputFormat;
 
     public GenericJdbcSinkFunction(@Nonnull JdbcOutputFormat<T, ?, ?> outputFormat) {

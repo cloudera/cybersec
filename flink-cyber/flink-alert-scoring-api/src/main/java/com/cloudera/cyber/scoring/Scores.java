@@ -36,16 +36,16 @@ public class Scores extends SpecificRecordBase implements SpecificRecord {
     private String reason;
 
     public static final Schema SCHEMA$ = SchemaBuilder.record(Scores.class.getName())
-            .namespace(Scores.class.getPackage().getName())
-            .fields()
-            .name("ruleId").type(AvroTypes.uuidType).noDefault()
-            .requiredDouble("score")
-            .requiredString("reason")
-            .endRecord();
+          .namespace(Scores.class.getPackage().getName())
+          .fields()
+          .name("ruleId").type(AvroTypes.uuidType).noDefault()
+          .requiredDouble("score")
+          .requiredString("reason")
+          .endRecord();
 
     public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
-            new String[]{"ruleId", "score", "reason"},
-            Types.STRING, Types.DOUBLE, Types.STRING);
+          new String[] {"ruleId", "score", "reason"},
+          Types.STRING, Types.DOUBLE, Types.STRING);
 
     public Row toRow() {
         return Row.of(ruleId, score, reason);

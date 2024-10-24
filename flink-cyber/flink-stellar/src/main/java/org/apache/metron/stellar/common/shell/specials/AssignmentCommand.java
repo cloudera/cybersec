@@ -16,70 +16,66 @@
  *  limitations under the License.
  *
  */
-package org.apache.metron.stellar.common.shell.specials;
 
-import org.apache.metron.stellar.common.StellarAssignment;
-import org.apache.metron.stellar.common.shell.StellarShellExecutor;
-import org.apache.metron.stellar.common.shell.StellarResult;
+package org.apache.metron.stellar.common.shell.specials;
 
 import java.util.Optional;
 import java.util.function.Function;
-
-import static org.apache.metron.stellar.common.shell.StellarResult.error;
+import org.apache.metron.stellar.common.StellarAssignment;
+import org.apache.metron.stellar.common.shell.StellarResult;
+import org.apache.metron.stellar.common.shell.StellarShellExecutor;
 
 /**
  * A special command that allows for variable assignment.  Variable
  * assignment is not implemented directly within Stellar.
  *
- *    x := 2 + 2
+ * <p>
+ * x := 2 + 2
  */
 public class AssignmentCommand implements SpecialCommand {
 
-  public static final String ASSIGNMENT_OP = ":=";
+    public static final String ASSIGNMENT_OP = ":=";
 
-  @Override
-  public Function<String, Boolean> getMatcher() {
-    return (input) -> StellarAssignment.isAssignment(input);
-  }
-
-  @Override
-  public String getCommand() {
-    return ASSIGNMENT_OP;
-  }
-
-  /**
-   * Handles variable assignment.
-   * @param input The assignment expression to execute.
-   * @param executor A stellar execution environment.
-   * @return
-   */
-  @Override
-  public StellarResult execute(String input, StellarShellExecutor executor) {
-    assert StellarAssignment.isAssignment(input);
-
-    // extract the variable and assignment expression
-    StellarAssignment assignment = StellarAssignment.from(input);
-    String varName = assignment.getVariable();
-    String varExpr = assignment.getStatement();
-
-    // execute the stellar expression
-    StellarResult result = executor.execute(varExpr);
-    if(result.isSuccess()) {
-
-      Object value = null;
-      if(result.getValue().isPresent()) {
-        value = result.getValue().get();
-
-      } else if(result.isValueNull()) {
-        value = null;
-      }
-
-      // variable assignment
-      executor.assign(varName, value, Optional.of(varExpr));
-      return result;
-
-    } else {
-      return result;
+    @Override
+    public Function<String, Boolean> getMatcher() {
+        return (input) -> StellarAssignment.isAssignment(input);
     }
-  }
+
+    @Override
+    public String getCommand() {
+        return ASSIGNMENT_OP;
+    }
+
+    /**
+     * Handles variable assignment.
+     *
+     * @param input    The assignment expression to execute.
+     * @param executor A stellar execution environment.
+     */
+    @Override
+    public StellarResult execute(String input, StellarShellExecutor executor) {
+        assert StellarAssignment.isAssignment(input);
+
+        // extract the variable and assignment expression
+        StellarAssignment assignment = StellarAssignment.from(input);
+        String varName = assignment.getVariable();
+        String varExpr = assignment.getStatement();
+
+        // execute the stellar expression
+        StellarResult result = executor.execute(varExpr);
+        if (result.isSuccess()) {
+
+            Object value = null;
+            if (result.getValue().isPresent()) {
+                value = result.getValue().get();
+            }
+
+            // variable assignment
+            executor.assign(varName, value, Optional.of(varExpr));
+            return result;
+
+        } else {
+            return result;
+        }
+    }
 }

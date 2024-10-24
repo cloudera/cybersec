@@ -15,6 +15,7 @@ package com.cloudera.cyber.scoring;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.rules.RulesForm;
+import java.util.List;
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.state.ListStateDescriptor;
 import org.apache.flink.api.common.state.MapStateDescriptor;
@@ -29,16 +30,15 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.OutputTag;
 
-import java.util.List;
-
 /**
- * A job that will score alerts based on a set of dynamic rules stored in the state engine
+ * A job that will score alerts based on a set of dynamic rules stored in the state engine.
  */
 public abstract class ScoringJob {
 
     private static final String RULE_STATE_TAG = "rules";
     private static final String RULE_COMMANDS_TAG = "rules-sink";
-    public static final OutputTag<ScoringRuleCommandResult> COMMAND_RESULT_OUTPUT_TAG = new OutputTag<>(RULE_COMMANDS_TAG, TypeInformation.of(ScoringRuleCommandResult.class));
+    public static final OutputTag<ScoringRuleCommandResult> COMMAND_RESULT_OUTPUT_TAG =
+          new OutputTag<>(RULE_COMMANDS_TAG, TypeInformation.of(ScoringRuleCommandResult.class));
 
     protected StreamExecutionEnvironment createPipeline(final ParameterTool params) {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -48,9 +48,10 @@ public abstract class ScoringJob {
         final DataStream<ScoringRuleCommand> ruleCommands = createRulesSource(env, params);
         final DataStream<Message> data = createSource(env, params);
 
-        final SingleOutputStreamOperator<ScoredMessage> results = score(data, ruleCommands, Descriptors.rulesResultSink, Descriptors.rulesState, params)
-                .name("Process Rules")
-                .uid("process-rules");
+        final SingleOutputStreamOperator<ScoredMessage> results =
+              score(data, ruleCommands, Descriptors.rulesResultSink, Descriptors.rulesState, params)
+                    .name("Process Rules")
+                    .uid("process-rules");
 
         writeResults(params, results);
         // output the results of the rules commands
@@ -59,20 +60,24 @@ public abstract class ScoringJob {
         return env;
     }
 
-    public static SingleOutputStreamOperator<ScoredMessage> enrich(DataStream<Message> source, DataStream<ScoringRuleCommand> ruleCommands, ParameterTool params) {
-        return score(source, ruleCommands, Descriptors.rulesResultSink, Descriptors.rulesState, params).name("Process Rules")
-                .uid("process-rules");
+    public static SingleOutputStreamOperator<ScoredMessage> enrich(DataStream<Message> source,
+                                                                   DataStream<ScoringRuleCommand> ruleCommands,
+                                                                   ParameterTool params) {
+        return score(source, ruleCommands, Descriptors.rulesResultSink, Descriptors.rulesState, params).name(
+                    "Process Rules")
+              .uid("process-rules");
     }
 
     @VisibleForTesting
     static class Descriptors {
         public static final MapStateDescriptor<RulesForm, List<ScoringRule>> rulesState =
-                new MapStateDescriptor<>(
-                        RULE_STATE_TAG, TypeInformation.of(RulesForm.class), Types.LIST(new AvroTypeInfo<>(ScoringRule.class)));
+              new MapStateDescriptor<>(
+                    RULE_STATE_TAG, TypeInformation.of(RulesForm.class),
+                    Types.LIST(new AvroTypeInfo<>(ScoringRule.class)));
 
         public static final OutputTag<ScoringRuleCommandResult> rulesResultSink =
-                new OutputTag<ScoringRuleCommandResult>(RULE_COMMANDS_TAG) {
-                };
+              new OutputTag<ScoringRuleCommandResult>(RULE_COMMANDS_TAG) {
+              };
         public static ListStateDescriptor<ScoringRule> activeOrderedRules;
     }
 
@@ -82,14 +87,15 @@ public abstract class ScoringJob {
                                                                   MapStateDescriptor<RulesForm, List<ScoringRule>> rulesState,
                                                                   ParameterTool params) {
         BroadcastStream<ScoringRuleCommand> rulesStream = ruleCommands.broadcast(rulesState);
-        return data.connect(rulesStream).process(new ScoringProcessFunction(rulesResultSink, rulesState,params));
+        return data.connect(rulesStream).process(new ScoringProcessFunction(rulesResultSink, rulesState, params));
     }
 
     protected abstract void writeResults(ParameterTool params, DataStream<ScoredMessage> results);
 
     protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
 
-    protected abstract DataStream<ScoringRuleCommand> createRulesSource(StreamExecutionEnvironment env, ParameterTool params);
+    protected abstract DataStream<ScoringRuleCommand> createRulesSource(StreamExecutionEnvironment env,
+                                                                        ParameterTool params);
 
     protected abstract void writeQueryResult(ParameterTool params, DataStream<ScoringRuleCommandResult> results);
 }

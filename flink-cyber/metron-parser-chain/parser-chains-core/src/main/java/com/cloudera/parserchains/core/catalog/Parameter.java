@@ -32,12 +32,14 @@ public @interface Parameter {
 
     /**
      * A unique key for this configurable parameter.
+     *
      * <p>This value is required.
      */
     String key();
 
     /**
      * A label for this configurable parameter that is displayed to the user.
+     *
      * <p>This value is optional.
      */
     String label() default "";
@@ -45,19 +47,23 @@ public @interface Parameter {
     /**
      * A description of this configurable parameter that is displayed to
      * the user.
+     *
      * <p>This value is optional.
      */
     String description() default "";
 
     /**
      * Whether the user is required to provide a value for this configurable parameter.
+     *
      * <p>If true, the user must provide a value. Otherwise, false.
+     *
      * <p>This value is optional.
      */
     boolean required() default false;
 
     /**
      * The default value of this configurable parameter.
+     *
      * <p>This value is optional.
      */
     String defaultValue() default "";
@@ -65,6 +71,7 @@ public @interface Parameter {
     /**
      * Specifies if the parameter specifies the output field name.
      * If true, the selection will be provided with possible field names.
+     *
      * <p>This value is optional.
      */
     boolean isOutputName() default false;
@@ -72,6 +79,7 @@ public @interface Parameter {
     /**
      * Defines the type of widget presented to the user when
      * configuring the parameter.
+     *
      * <p>This value is optional and defaults to a simple text box.
      */
     WidgetType widgetType() default WidgetType.TEXT;

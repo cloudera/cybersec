@@ -16,10 +16,8 @@ import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.enrichment.Enrichment;
 import com.cloudera.cyber.enrichment.SingleValueEnrichment;
-import com.cloudera.cyber.enrichment.geocode.impl.types.GeoFields;
 import com.maxmind.geoip2.DatabaseProvider;
 import com.maxmind.geoip2.model.AsnResponse;
-
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.List;
@@ -42,7 +40,8 @@ public class IpAsnEnrichment extends MaxMindBase {
         super(path);
     }
 
-    public void lookup(Enrichment enrichment, Object ipFieldValue, Map<String, String> extensions, List<DataQualityMessage> qualityMessages) {
+    public void lookup(Enrichment enrichment, Object ipFieldValue, Map<String, String> extensions,
+                       List<DataQualityMessage> qualityMessages) {
         InetAddress ipAddress = convertToIpAddress(enrichment, ipFieldValue, qualityMessages);
         if (ipAddress != null) {
             try {
@@ -53,17 +52,20 @@ public class IpAsnEnrichment extends MaxMindBase {
                     enrichment.enrich(extensions, ASN_MASK_PREFIX, r.getNetwork().toString());
                 });
             } catch (Exception e) {
-                enrichment.addQualityMessage(qualityMessages, DataQualityMessageLevel.ERROR, String.format(ASN_FAILED_MESSAGE, e.getMessage()));
+                enrichment.addQualityMessage(qualityMessages, DataQualityMessageLevel.ERROR,
+                      String.format(ASN_FAILED_MESSAGE, e.getMessage()));
             }
         }
     }
 
-    public void lookup(String fieldName, Object ipFieldValue, Map<String, String> extensions, List<DataQualityMessage> qualityMessages) {
+    public void lookup(String fieldName, Object ipFieldValue, Map<String, String> extensions,
+                       List<DataQualityMessage> qualityMessages) {
         lookup(SingleValueEnrichment::new, fieldName, ipFieldValue, extensions, qualityMessages);
 
     }
 
-    public void lookup(BiFunction<String, String, Enrichment> enrichmentBiFunction, String fieldName, Object ipFieldValue, Map<String, String> extensions, List<DataQualityMessage> qualityMessages) {
+    public void lookup(BiFunction<String, String, Enrichment> enrichmentBiFunction, String fieldName,
+                       Object ipFieldValue, Map<String, String> extensions, List<DataQualityMessage> qualityMessages) {
         if (ipFieldValue instanceof Collection) {
             Enrichment enrichment = enrichmentBiFunction.apply(fieldName, ASN_FEATURE);
             //noinspection unchecked

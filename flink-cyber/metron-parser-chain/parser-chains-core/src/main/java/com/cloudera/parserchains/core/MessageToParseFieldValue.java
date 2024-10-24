@@ -13,9 +13,8 @@
 package com.cloudera.parserchains.core;
 
 import com.cloudera.cyber.parser.MessageToParse;
-import lombok.EqualsAndHashCode;
-
 import java.nio.charset.StandardCharsets;
+import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode
 public class MessageToParseFieldValue implements FieldValue {

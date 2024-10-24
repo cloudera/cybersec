@@ -6,8 +6,10 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
+ * 
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,14 +19,13 @@
  */
 package org.apache.metron.common.utils;
 
-import org.json.simple.JSONObject;
-import org.junit.jupiter.api.Test;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collection;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.json.simple.JSONObject;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"unchecked"})
 public class HashUtilsTest {

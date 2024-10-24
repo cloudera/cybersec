@@ -12,11 +12,10 @@
 
 package com.cloudera.cyber.indexing;
 
+import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Map;
 
 @Data
 @Slf4j

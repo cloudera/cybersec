@@ -1,13 +1,12 @@
 package com.cloudera.service.common.utils;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.experimental.UtilityClass;
 import org.apache.flink.core.fs.FileStatus;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 @UtilityClass
 public class FileUtil {
@@ -31,7 +30,7 @@ public class FileUtil {
         for (FileStatus fileStatus : statusList) {
             if (fileStatus.isDir() && recursive) {
                 final List<FileStatus> recursiveStatusList = listFiles(fileStatus.getPath(), recursive);
-                if (recursiveStatusList != null){
+                if (recursiveStatusList != null) {
                     result.addAll(recursiveStatusList);
                 }
             } else {

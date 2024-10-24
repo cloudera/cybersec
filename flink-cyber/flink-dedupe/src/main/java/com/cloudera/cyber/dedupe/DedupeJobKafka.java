@@ -12,10 +12,15 @@
 
 package com.cloudera.cyber.dedupe;
 
+import static com.cloudera.cyber.flink.FlinkUtils.createKafkaSource;
+
 import com.cloudera.cyber.DedupeMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
@@ -23,23 +28,17 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
 
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
-
-import static com.cloudera.cyber.flink.FlinkUtils.createKafkaSource;
-
 public class DedupeJobKafka extends DedupeJob {
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         ParameterTool params = Utils.getParamToolsFromProperties(args);
         new DedupeJobKafka()
-            .createPipeline(params)
-            .execute("Flink Deduplicator");
+              .createPipeline(params)
+              .execute("Flink Deduplicator");
     }
 
     /**
-     * Returns a consumer group id for the deduper ensuring that each topic is only processed once with the same keys
+     * Returns a consumer group id for the deduper ensuring that each topic is only processed once with the same keys.
      *
      * @param inputTopic topic to read from
      * @param sessionKey the keys being used to sessionise
@@ -47,31 +46,34 @@ public class DedupeJobKafka extends DedupeJob {
      */
     private String createGroupId(String inputTopic, List<String> sessionKey, long sessionTimeout) {
         List<String> parts = Arrays.asList("dedupe",
-                inputTopic,
-                String.valueOf(sessionKey.hashCode()),
-                String.valueOf(sessionTimeout));
+              inputTopic,
+              String.valueOf(sessionKey.hashCode()),
+              String.valueOf(sessionTimeout));
         return String.join(".", parts);
     }
 
     @Override
     protected void writeResults(ParameterTool params, DataStream<DedupeMessage> results) {
         KafkaSink<DedupeMessage> sink = new FlinkUtils<>(DedupeMessage.class).createKafkaSink(
-                params.getRequired("topic.enrichment"),
-                "dedup",
-                params);
+              params.getRequired("topic.enrichment"),
+              "dedup",
+              params);
         results.sinkTo(sink).name("Kafka Results").uid("kafka.results");
     }
 
     @Override
-    protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> sessionKey, Long sessionTimeout) {
+    protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params,
+                                               List<String> sessionKey, Long sessionTimeout) {
         String inputTopic = params.getRequired("topic.input");
         String groupId = createGroupId(inputTopic, sessionKey, sessionTimeout);
 
-        WatermarkStrategy<Message> watermarkStrategy = WatermarkStrategy.<Message>forBoundedOutOfOrderness(Duration.ofMillis(params.getLong(PARAM_DEDUPE_LATENESS, 0L))).
-                withTimestampAssigner((event, timestamp) -> event.getTs());
+        WatermarkStrategy<Message> watermarkStrategy = WatermarkStrategy.<Message>forBoundedOutOfOrderness(
+                                                                              Duration.ofMillis(params.getLong(PARAM_DEDUPE_LATENESS, 0L)))
+                                                                        .thTimestampAssigner(
+                                                                              (event, timestamp) -> event.getTs());
         return env.fromSource(createKafkaSource(inputTopic,
                         params,
                         groupId), watermarkStrategy, "Kafka Source")
-                        .uid("kafka.input");
+                  .uid("kafka.input");
     }
 }

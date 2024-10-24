@@ -12,16 +12,6 @@
 
 package com.cloudera.cyber.pruner;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.cli.*;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-import org.codehaus.jackson.map.ObjectMapper;
-
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -29,9 +19,25 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  * Prune data from the cloudera cyber reference implementation
+ *
  * <p>
  * Heavily inspired by https://github.com/apache/metron/blob/master/metron-platform/metron-data-management/src/main/java/org/apache/metron/dataloads/bulk/HDFSDataPruner.java
  */
@@ -50,6 +56,7 @@ public class Pruner {
     @NonNull
     private PrunerConfig config;
 
+    @SuppressWarnings("checkstyle:MemberName")
     transient FileSystem _fileSystem;
 
     public FileSystem getFileSystem() throws IOException {
@@ -73,14 +80,18 @@ public class Pruner {
         pruneDirs(config.getLogsLocation() + "/**", config.getLogsMaxMs());
 
         // prune hive tables
-        if (!hiveUri.isEmpty()) deleteFromHive(hiveUri, hiveUser, hivePassword, config.getEventsTable());
+        if (!hiveUri.isEmpty()) {
+            deleteFromHive(hiveUri, hiveUser, hivePassword, config.getEventsTable());
+        }
 
         return filesPruned;
     }
 
-    private int deleteFromHive(String hiveUri, String hiveUser, String hivePassword, String eventsTable) throws SQLException {
+    private int deleteFromHive(String hiveUri, String hiveUser, String hivePassword, String eventsTable)
+          throws SQLException {
         int rows;
-        String sql = String.format("DELETE FROM %s WHERE ts > %d", eventsTable, new Date().getTime() - config.getEventsMaxMs());
+        String sql = String.format("DELETE FROM %s WHERE ts > %d", eventsTable,
+              new Date().getTime() - config.getEventsMaxMs());
         try (Connection connection = DriverManager.getConnection(hiveUri, hiveUser, hivePassword)) {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             rows = preparedStatement.executeUpdate();
@@ -90,10 +101,13 @@ public class Pruner {
 
     private void pruneDirs(String globPath, long maxAge) throws IOException {
         // object store filesystems don't need to remove paths
-        if (globPath.startsWith("s3") || globPath.startsWith("adls:")) return;
+        if (globPath.startsWith("s3") || globPath.startsWith("adls:")) {
+            return;
+        }
 
         // remove directories within the date range which are empty
-        FileStatus[] filesToDelete = getFileSystem().globStatus(new Path(globPath), new DateDirectoryFilter(getFileSystem(), maxAge, config.getDateFormatter()));
+        FileStatus[] filesToDelete = getFileSystem().globStatus(new Path(globPath),
+              new DateDirectoryFilter(getFileSystem(), maxAge, config.getDateFormatter()));
         for (FileStatus fileStatus : filesToDelete) {
             log.debug("Deleting File: {}", fileStatus.getPath());
             getFileSystem().delete(fileStatus.getPath(), false);
@@ -102,7 +116,8 @@ public class Pruner {
 
     private long pruneFiles(String globPath, long maxAge) throws IOException {
         long filesPruned = 0;
-        FileStatus[] filesToDelete = getFileSystem().globStatus(new Path(globPath), new DateFileFilter(getFileSystem(), maxAge));
+        FileStatus[] filesToDelete =
+              getFileSystem().globStatus(new Path(globPath), new DateFileFilter(getFileSystem(), maxAge));
         for (FileStatus fileStatus : filesToDelete) {
             log.info("Deleting File: {}", fileStatus.getPath());
             getFileSystem().delete(fileStatus.getPath(), false);
@@ -172,11 +187,11 @@ public class Pruner {
             PrunerConfig config = new ObjectMapper().readValue(new File(cmd.getOptionValue("c")), PrunerConfig.class);
 
             Pruner pruner = new Pruner(
-                    cmd.getOptionValue("f", new Configuration().get("fs.defaultFS")),
-                    cmd.getOptionValue("i", ""),
-                    cmd.getOptionValue("u", ""),
-                    cmd.getOptionValue("p", ""),
-                    config);
+                  cmd.getOptionValue("f", new Configuration().get("fs.defaultFS")),
+                  cmd.getOptionValue("i", ""),
+                  cmd.getOptionValue("u", ""),
+                  cmd.getOptionValue("p", ""),
+                  config);
             Long pruned = pruner.prune();
 
             log.info("Pruned {} files using {}", pruned, config);

@@ -7,8 +7,10 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,51 +29,53 @@ import org.apache.curator.framework.CuratorFramework;
  */
 public enum ConfigurationType implements Function<String, Object>, ConfigurationOperations {
 
-  GLOBAL(new GlobalConfigurationOperations()),
-  PARSER(new ParserConfigurationOperations()),
-  ENRICHMENT(new EnrichmentConfigurationOperations()),
-  INDEXING(new IndexingConfigurationOperations());
+    GLOBAL(new GlobalConfigurationOperations()),
+    PARSER(new ParserConfigurationOperations()),
+    ENRICHMENT(new EnrichmentConfigurationOperations()),
+    INDEXING(new IndexingConfigurationOperations());
 
-  ConfigurationOperations ops;
+    ConfigurationOperations ops;
 
-  ConfigurationType(ConfigurationOperations ops) {
-    this.ops = ops;
-  }
-
-  public String getTypeName() {
-    return ops.getTypeName();
-  }
-
-  public String getDirectory() {
-    return ops.getDirectory();
-  }
-
-  /**
-   * Deserializes a string according for the config type.
-   *
-   * @param s The string to be deserialized
-   * @return The deserialized string
-   * @throws RuntimeException If the string cannot be deserialized
-   */
-  public Object deserialize(String s) {
-    try {
-      return ops.deserialize(s);
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to load " + s, e);
+    ConfigurationType(ConfigurationOperations ops) {
+        this.ops = ops;
     }
-  }
 
-  @Override
-  public Object apply(String s) {
-    return deserialize(s);
-  }
+    public String getTypeName() {
+        return ops.getTypeName();
+    }
 
-  @Override
-  public void writeSensorConfigToZookeeper(String sensorType, byte[] configData,
-      CuratorFramework client) throws Exception {
+    public String getDirectory() {
+        return ops.getDirectory();
+    }
 
-  }
+    /**
+     * Deserializes a string according for the config type.
+     *
+     * @param s The string to be deserialized
+     * @return The deserialized string
+     * @throws RuntimeException If the string cannot be deserialized
+     */
+    public Object deserialize(String s) {
+        try {
+            return ops.deserialize(s);
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to load " + s, e);
+        }
+    }
 
-  public String getZookeeperRoot() {return null;}
+    @Override
+    public Object apply(String s) {
+        return deserialize(s);
+    }
+
+    @Override
+    public void writeSensorConfigToZookeeper(String sensorType, byte[] configData,
+                                             CuratorFramework client) throws Exception {
+
+    }
+
+    public String getZookeeperRoot() {
+        return null;
+    }
 
 }

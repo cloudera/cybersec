@@ -12,6 +12,10 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static com.cloudera.parserchains.core.utils.StringUtils.getFirstChar;
+import static com.cloudera.parserchains.core.utils.StringUtils.unescapeJava;
+import static java.lang.String.format;
+
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
@@ -26,25 +30,20 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import static com.cloudera.parserchains.core.utils.StringUtils.getFirstChar;
-import static com.cloudera.parserchains.core.utils.StringUtils.unescapeJava;
-import static java.lang.String.format;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Parses delimited text like CSV.
  */
 @MessageParser(
-        name = "CSV/TSV Parser",
-        description = "Parses delimited text like CSV or TSV.")
+      name = "CSV/TSV Parser",
+      description = "Parses delimited text like CSV or TSV.")
 public class CsvTextParser implements Parser {
 
     private static final String DEFAULT_DELIMITER = ",";
@@ -78,15 +77,17 @@ public class CsvTextParser implements Parser {
         trimWhitespace = Boolean.parseBoolean(DEFAULT_TRIM);
         mapper = new CsvMapper();
         updateSchema(() -> mapper
-                .schemaFor(new TypeReference<List<String>>() {
-                })
-                .withoutHeader()
-                .withLineSeparator("\n")
-                .withColumnSeparator(getFirstChar(DEFAULT_DELIMITER))
-                .withQuoteChar(getFirstChar(DEFAULT_QUOTE_CHAR)));
+              .schemaFor(new TypeReference<List<String>>() {
+              })
+              .withoutHeader()
+              .withLineSeparator("\n")
+              .withColumnSeparator(getFirstChar(DEFAULT_DELIMITER))
+              .withQuoteChar(getFirstChar(DEFAULT_QUOTE_CHAR)));
     }
 
     /**
+     * inputField setter.
+     *
      * @param inputField The name of the field containing the text to parse.
      */
     public CsvTextParser withInputField(FieldName inputField) {
@@ -95,10 +96,10 @@ public class CsvTextParser implements Parser {
     }
 
     @Configurable(key = "inputField",
-            label = "Input Field",
-            description = "The name of the input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
-            isOutputName = true,
-            defaultValue = Constants.DEFAULT_INPUT_FIELD)
+          label = "Input Field",
+          description = "The name of the input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
+          isOutputName = true,
+          defaultValue = Constants.DEFAULT_INPUT_FIELD)
     public CsvTextParser withInputField(String fieldName) {
         if (StringUtils.isNotEmpty(fieldName)) {
             withInputField(FieldName.of(fieldName));
@@ -111,6 +112,8 @@ public class CsvTextParser implements Parser {
     }
 
     /**
+     * quoteChar setter.
+     *
      * @param quoteChar A character replacing the quote character used for escaping when parsing CSV.
      */
     public CsvTextParser withQuoteChar(char quoteChar) {
@@ -119,9 +122,9 @@ public class CsvTextParser implements Parser {
     }
 
     @Configurable(key = "quoteChar",
-            label = "Quote character",
-            description = "A character used escape commas in text. Default value: '" + DEFAULT_QUOTE_CHAR + "'",
-            defaultValue = DEFAULT_QUOTE_CHAR)
+          label = "Quote character",
+          description = "A character used escape commas in text. Default value: '" + DEFAULT_QUOTE_CHAR + "'",
+          defaultValue = DEFAULT_QUOTE_CHAR)
     public void withQuoteChar(String quoteChar) {
         if (StringUtils.isNotEmpty(quoteChar)) {
             withQuoteChar(getFirstChar(quoteChar));
@@ -133,6 +136,8 @@ public class CsvTextParser implements Parser {
     }
 
     /**
+     * Delimiter setter.
+     *
      * @param delimiter A character defining the delimiter used to split the text.
      */
     public CsvTextParser withDelimiter(char delimiter) {
@@ -141,9 +146,9 @@ public class CsvTextParser implements Parser {
     }
 
     @Configurable(key = "delimiter",
-            label = "Delimiter",
-            description = "A character used to split the text. Default value: '" + DEFAULT_DELIMITER + "'",
-            defaultValue = DEFAULT_DELIMITER)
+          label = "Delimiter",
+          description = "A character used to split the text. Default value: '" + DEFAULT_DELIMITER + "'",
+          defaultValue = DEFAULT_DELIMITER)
     public void withDelimiter(String delimiter) {
         if (StringUtils.isNotEmpty(delimiter)) {
             withDelimiter(getFirstChar(delimiter));
@@ -155,6 +160,8 @@ public class CsvTextParser implements Parser {
     }
 
     /**
+     * outputFields setter.
+     *
      * @param fieldName The name of a field to create.
      * @param index     The 0-based index defining which delimited element is added to the field.
      */
@@ -165,17 +172,17 @@ public class CsvTextParser implements Parser {
 
     @Configurable(key = "outputField", label = "Output Field", multipleValues = true)
     public void withOutputField(
-            @Parameter(key = "fieldName",
+          @Parameter(key = "fieldName",
                 label = "Field Name",
                 description = "The name of the output field.",
                 isOutputName = true,
                 required = true)
-            String fieldName,
-            @Parameter(key = "fieldIndex",
+          String fieldName,
+          @Parameter(key = "fieldIndex",
                 label = "Column Index",
                 description = "The index of the column containing the data.",
                 required = true)
-            String index) {
+          String index) {
         if (StringUtils.isNoneBlank(fieldName, index)) {
             withOutputField(FieldName.of(fieldName), Integer.parseInt(index));
         }
@@ -186,6 +193,8 @@ public class CsvTextParser implements Parser {
     }
 
     /**
+     * trimWhitespace setter.
+     *
      * @param trimWhitespace True, if whitespace should be trimmed from each value. Otherwise, false.
      */
     public CsvTextParser trimWhitespace(boolean trimWhitespace) {
@@ -194,9 +203,9 @@ public class CsvTextParser implements Parser {
     }
 
     @Configurable(key = "trim",
-            label = "Trim Whitespace",
-            description = "Trim whitespace from each value. Default value: '" + DEFAULT_TRIM + "'",
-            defaultValue = DEFAULT_TRIM)
+          label = "Trim Whitespace",
+          description = "Trim whitespace from each value. Default value: '" + DEFAULT_TRIM + "'",
+          defaultValue = DEFAULT_TRIM)
     public void trimWhitespace(String trimWhitespace) {
         if (StringUtils.isNotBlank(trimWhitespace)) {
             trimWhitespace(Boolean.parseBoolean(trimWhitespace));
@@ -222,7 +231,7 @@ public class CsvTextParser implements Parser {
     private void doParse(String valueToParse, Message.Builder output) {
         try {
             final List<String> valueList = reader
-                    .readValue(valueToParse);
+                  .readValue(valueToParse);
 
             for (OutputField outputField : outputFields) {
                 final int index = outputField.index;
@@ -245,8 +254,8 @@ public class CsvTextParser implements Parser {
     private void updateSchema(Supplier<CsvSchema> csvSchemaConsumer) {
         this.schema = csvSchemaConsumer.get();
         this.reader = mapper
-                .readerFor(new TypeReference<List<String>>() {
-                })
-                .with(schema);
+              .readerFor(new TypeReference<List<String>>() {
+              })
+              .with(schema);
     }
 }
