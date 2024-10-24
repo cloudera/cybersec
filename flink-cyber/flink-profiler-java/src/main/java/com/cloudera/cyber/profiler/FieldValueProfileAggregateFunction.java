@@ -32,7 +32,7 @@ public class FieldValueProfileAggregateFunction extends ProfileAggregateFunction
     @Override
     protected Map<String, DecimalFormat> getMeasurementFormats() {
         return profileGroupConfig.getMeasurements().stream()
-                                 .llect(Collectors.toMap(ProfileMeasurementConfig::getResultExtensionName,
+                                 .collect(Collectors.toMap(ProfileMeasurementConfig::getResultExtensionName,
                                        ProfileMeasurementConfig::getDecimalFormat));
     }
 }
