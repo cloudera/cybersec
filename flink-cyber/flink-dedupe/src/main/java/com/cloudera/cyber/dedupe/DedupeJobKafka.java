@@ -69,7 +69,7 @@ public class DedupeJobKafka extends DedupeJob {
 
         WatermarkStrategy<Message> watermarkStrategy = WatermarkStrategy.<Message>forBoundedOutOfOrderness(
                                                                               Duration.ofMillis(params.getLong(PARAM_DEDUPE_LATENESS, 0L)))
-                                                                        .thTimestampAssigner(
+                                                                        .withTimestampAssigner(
                                                                               (event, timestamp) -> event.getTs());
         return env.fromSource(createKafkaSource(inputTopic,
                         params,
