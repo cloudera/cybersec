@@ -15,14 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.metron.stellar.common.utils.hashing.tlsh;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
-import org.apache.metron.stellar.common.utils.ConversionUtils;
-import org.apache.metron.stellar.common.utils.SerDeUtils;
-import org.apache.metron.stellar.common.utils.hashing.EnumConfigurable;
-import org.apache.metron.stellar.common.utils.hashing.Hasher;
+package org.apache.metron.stellar.common.utils.hashing.tlsh;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -34,6 +28,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.metron.stellar.common.utils.ConversionUtils;
+import org.apache.metron.stellar.common.utils.SerDeUtils;
+import org.apache.metron.stellar.common.utils.hashing.EnumConfigurable;
+import org.apache.metron.stellar.common.utils.hashing.Hasher;
 
 public class TLSHHasher implements Hasher {
     public static final String TLSH_KEY = "tlsh";
@@ -44,7 +44,7 @@ public class TLSHHasher implements Hasher {
         CHECKSUM("checksumBytes"),
         HASHES("hashes"),
         FORCE("force");
-        final public String key;
+        public final String key;
 
         Config(String key) {
             this.key = key;
@@ -67,11 +67,11 @@ public class TLSHHasher implements Hasher {
      *
      * @param o The value to hash.
      * @return A hash of {@code toHash} that has been encoded.
-     *
      */
     @Override
     public Object getHash(Object o) {
-        TLSHBuilder builder = new TLSHBuilder(TLSHBuilder.CHECKSUM_OPTION.fromVal(checksumOption), TLSHBuilder.BUCKET_OPTION.fromVal(bucketOption));
+        TLSHBuilder builder = new TLSHBuilder(TLSHBuilder.CHECKSUM_OPTION.fromVal(checksumOption),
+              TLSHBuilder.BUCKET_OPTION.fromVal(bucketOption));
         byte[] data;
         if (o instanceof String) {
             data = ((String) o).getBytes(StandardCharsets.UTF_8);
@@ -120,48 +120,51 @@ public class TLSHHasher implements Hasher {
         return ret;
     }
 
+    @SuppressWarnings("checkstyle:LocalVariableName")
     @Override
     public void configure(Optional<Map<String, Object>> config) {
         if (config.isPresent() && !config.get().isEmpty()) {
-            bucketOption = Config.BUCKET_SIZE.get(config.get()
-                    , o -> {
-                        Integer bucketSize = ConversionUtils.convert(o, Integer.class);
-                        return bucketSize.equals(256) ? 256 : 128;
-                    }
+            bucketOption = Config.BUCKET_SIZE.get(config.get(),
+                  o -> {
+                      Integer bucketSize = ConversionUtils.convert(o, Integer.class);
+                      return bucketSize.equals(256) ? 256 : 128;
+                  }
             ).orElse(bucketOption);
 
-            checksumOption = Config.CHECKSUM.get(config.get()
-                    , o -> {
-                        Integer checksumBytes = ConversionUtils.convert(o, Integer.class);
-                        return checksumBytes.equals(3) ? 3 : 1;
-                    }
+            checksumOption = Config.CHECKSUM.get(config.get(),
+                  o -> {
+                      Integer checksumBytes = ConversionUtils.convert(o, Integer.class);
+                      return checksumBytes.equals(3) ? 3 : 1;
+                  }
             ).orElse(checksumOption);
 
-            force = Config.FORCE.get(config.get()
-                    , o -> ConversionUtils.convert(o, Boolean.class)
+            force = Config.FORCE.get(config.get(),
+                  o -> ConversionUtils.convert(o, Boolean.class)
             ).orElse(force);
 
-            hashes = Config.HASHES.get(config.get()
-                    , o -> {
-                        List<Integer> ret = new ArrayList<>();
-                        if (o instanceof List) {
-                            List<?> vals = (List<?>) o;
-                            for (Object oVal : vals) {
-                                ret.add(ConversionUtils.convert(oVal, Integer.class));
-                            }
-                        } else {
-                            ret.add(ConversionUtils.convert(o, Integer.class));
-                        }
-                        return ret;
-                    }
+            hashes = Config.HASHES.get(config.get(),
+                  o -> {
+                      List<Integer> ret = new ArrayList<>();
+                      if (o instanceof List) {
+                          List<?> vals = (List<?>) o;
+                          for (Object oVal : vals) {
+                              ret.add(ConversionUtils.convert(oVal, Integer.class));
+                          }
+                      } else {
+                          ret.add(ConversionUtils.convert(o, Integer.class));
+                      }
+                      return ret;
+                  }
             ).orElse(hashes);
         }
     }
 
     public static Set<String> supportedHashes() {
-        return new HashSet<String>() {{
-            add("TLSH");
-        }};
+        return new HashSet<String>() {
+            {
+                add("TLSH");
+            }
+        };
     }
 
 }

@@ -12,11 +12,10 @@
 
 package com.cloudera.parserchains.core.model.config;
 
-import com.cloudera.parserchains.core.Regex;
-
-import java.io.Serializable;
-
 import static com.cloudera.parserchains.core.Validator.mustMatch;
+
+import com.cloudera.parserchains.core.Regex;
+import java.io.Serializable;
 
 /**
  * Describes a parser's configuration parameter for a user.
@@ -30,6 +29,7 @@ public class ConfigDescription implements Serializable {
 
     /**
      * Creates a {@link ConfigDescription}.
+     *
      * @param desc The description.
      */
     public static ConfigDescription of(String desc) {

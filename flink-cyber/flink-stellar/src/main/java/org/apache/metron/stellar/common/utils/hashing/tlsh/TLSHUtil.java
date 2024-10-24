@@ -1,10 +1,6 @@
 package org.apache.metron.stellar.common.utils.hashing.tlsh;
 
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.stream.IntStream;
-
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.HEX_ARRAY;
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.LEN_ADJ_2;
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.LEN_ADJ_3;
@@ -15,7 +11,9 @@ import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.LOG_1_5;
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.PEARSON_TABLE;
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.TOPVAL;
-import java.io.ByteArrayOutputStream;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public final class TLSHUtil {
 
@@ -36,6 +34,7 @@ public final class TLSHUtil {
         return PEARSON_TABLE[PEARSON_TABLE[PEARSON_TABLE[PEARSON_TABLE[salt] ^ i] ^ j] ^ k];
     }
 
+    @SuppressWarnings("checkstyle:ParameterName")
     public static int fastBucketMapping(final int mod_salt, final int i, final int j, final int k) {
         return PEARSON_TABLE[PEARSON_TABLE[PEARSON_TABLE[mod_salt ^ i] ^ j] ^ k];
     }
@@ -46,6 +45,7 @@ public final class TLSHUtil {
      * @param len the length
      * @return the byte value
      */
+    @SuppressWarnings("checkstyle:MethodName")
     public static int lCapturing(final int len) {
         final int x = Arrays.binarySearch(TOPVAL, len);
         return x >= 0 ? x : -x - 1;
@@ -60,6 +60,7 @@ public final class TLSHUtil {
      * @param len the length
      * @return the byte value
      */
+    @SuppressWarnings("checkstyle:MethodName")
     public static int lCapturingLog(final int len) {
         if (len <= 0) {
             return 0;

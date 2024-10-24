@@ -13,14 +13,13 @@
 package com.cloudera.cyber.rules;
 
 import com.cloudera.cyber.Message;
+import java.time.Instant;
+import java.util.Map;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.apache.avro.specific.SpecificRecordBase;
-
-import java.time.Instant;
-import java.util.Map;
 
 
 @Getter
@@ -59,7 +58,7 @@ public abstract class BaseDynamicRule<R> extends SpecificRecordBase implements D
         return getType().engine(ruleScript).feed(message);
     }
 
-    public static abstract class BaseDynamicRuleBuilder<C extends BaseDynamicRule, B extends BaseDynamicRuleBuilder<C, B>> {
+    public abstract static class BaseDynamicRuleBuilder<C extends BaseDynamicRule, B extends BaseDynamicRuleBuilder<C, B>> {
         private String name;
         private int order;
         private Instant tsStart;
@@ -68,7 +67,8 @@ public abstract class BaseDynamicRule<R> extends SpecificRecordBase implements D
         private String ruleScript;
         private int version;
 
-        private static void $fillValuesFromInstanceIntoBuilder(BaseDynamicRule instance, BaseDynamicRuleBuilder<?, ?> b) {
+        private static void $fillValuesFromInstanceIntoBuilder(BaseDynamicRule instance,
+                                                               BaseDynamicRuleBuilder<?, ?> b) {
             b.name(instance.name);
             b.order(instance.order);
             b.tsStart(instance.tsStart);
@@ -118,7 +118,9 @@ public abstract class BaseDynamicRule<R> extends SpecificRecordBase implements D
         public abstract C build();
 
         public String toString() {
-            return "BaseDynamicRule.BaseDynamicRuleBuilder(super=" + super.toString() + ", name=" + this.name + ", order=" + this.order + ", tsStart=" + this.tsStart + ", tsEnd=" + this.tsEnd + ", type=" + this.type + ", ruleScript=" + this.ruleScript + ", version=" + this.version + ")";
+            return "BaseDynamicRule.BaseDynamicRuleBuilder(super=" + super.toString() + ", name=" + this.name
+                   + ", order=" + this.order + ", tsStart=" + this.tsStart + ", tsEnd=" + this.tsEnd + ", type="
+                   + this.type + ", ruleScript=" + this.ruleScript + ", version=" + this.version + ")";
         }
 
         protected B $fillValuesFrom(C instance) {

@@ -12,24 +12,24 @@
 
 package com.cloudera.cyber.parser;
 
+import java.io.IOException;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.util.Collector;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import java.io.IOException;
-
 public class MessageToParseDeserializer implements KafkaRecordDeserializationSchema<MessageToParse> {
 
     @Override
-    public void deserialize(ConsumerRecord<byte[], byte[]> consumerRecord, Collector<MessageToParse> collector) throws IOException {
+    public void deserialize(ConsumerRecord<byte[], byte[]> consumerRecord, Collector<MessageToParse> collector)
+          throws IOException {
         collector.collect(MessageToParse.builder()
-                .originalBytes(consumerRecord.value())
-                .topic(consumerRecord.topic())
-                .offset(consumerRecord.offset())
-                .partition(consumerRecord.partition())
-                .key(consumerRecord.key())
-                .build());
+              .originalBytes(consumerRecord.value())
+              .topic(consumerRecord.topic())
+              .offset(consumerRecord.offset())
+              .partition(consumerRecord.partition())
+              .key(consumerRecord.key())
+              .build());
     }
 
     @Override

@@ -18,12 +18,11 @@
 
 package com.cloudera.cyber.jdbc.connector.jdbc.internal.options;
 
-import com.cloudera.cyber.jdbc.connector.jdbc.JdbcConnectionOptions;
-
-import javax.annotation.Nullable;
-import java.util.Objects;
-
 import static org.apache.flink.util.Preconditions.checkNotNull;
+
+import com.cloudera.cyber.jdbc.connector.jdbc.JdbcConnectionOptions;
+import java.util.Objects;
+import javax.annotation.Nullable;
 
 
 public class JdbcConnectorOptions extends JdbcConnectionOptions {
@@ -34,13 +33,13 @@ public class JdbcConnectorOptions extends JdbcConnectionOptions {
     private final @Nullable Integer parallelism;
 
     private JdbcConnectorOptions(
-            String dbURL,
-            String tableName,
-            @Nullable String driverName,
-            @Nullable String username,
-            @Nullable String password,
-            @Nullable Integer parallelism,
-            int connectionCheckTimeoutSeconds) {
+          String dbURL,
+          String tableName,
+          @Nullable String driverName,
+          @Nullable String username,
+          @Nullable String password,
+          @Nullable Integer parallelism,
+          int connectionCheckTimeoutSeconds) {
         super(dbURL, driverName, username, password, connectionCheckTimeoutSeconds);
         this.tableName = tableName;
         this.parallelism = parallelism;
@@ -64,13 +63,13 @@ public class JdbcConnectorOptions extends JdbcConnectionOptions {
         if (o instanceof JdbcConnectorOptions) {
             JdbcConnectorOptions options = (JdbcConnectorOptions) o;
             return Objects.equals(url, options.url)
-                    && Objects.equals(tableName, options.tableName)
-                    && Objects.equals(driverName, options.driverName)
-                    && Objects.equals(username, options.username)
-                    && Objects.equals(password, options.password)
-                    && Objects.equals(parallelism, options.parallelism)
-                    && Objects.equals(
-                    connectionCheckTimeoutSeconds, options.connectionCheckTimeoutSeconds);
+                   && Objects.equals(tableName, options.tableName)
+                   && Objects.equals(driverName, options.driverName)
+                   && Objects.equals(username, options.username)
+                   && Objects.equals(password, options.password)
+                   && Objects.equals(parallelism, options.parallelism)
+                   && Objects.equals(
+                  connectionCheckTimeoutSeconds, options.connectionCheckTimeoutSeconds);
         } else {
             return false;
         }
@@ -79,13 +78,13 @@ public class JdbcConnectorOptions extends JdbcConnectionOptions {
     @Override
     public int hashCode() {
         return Objects.hash(
-                url,
-                tableName,
-                driverName,
-                username,
-                password,
-                parallelism,
-                connectionCheckTimeoutSeconds);
+              url,
+              tableName,
+              driverName,
+              username,
+              password,
+              parallelism,
+              connectionCheckTimeoutSeconds);
     }
 
     public static class Builder {
@@ -146,13 +145,13 @@ public class JdbcConnectorOptions extends JdbcConnectionOptions {
             }
 
             return new JdbcConnectorOptions(
-                    dbURL,
-                    tableName,
-                    driverName,
-                    username,
-                    password,
-                    parallelism,
-                    connectionCheckTimeoutSeconds);
+                  dbURL,
+                  tableName,
+                  driverName,
+                  username,
+                  password,
+                  parallelism,
+                  connectionCheckTimeoutSeconds);
         }
     }
 }

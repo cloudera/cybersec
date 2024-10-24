@@ -18,6 +18,16 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.enrichment.rest.impl.MockRestServer;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import lombok.Data;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.async.ResultFuture;
@@ -25,10 +35,6 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 public class AsyncHttpRequestTest extends RestRequestTest {
 
@@ -135,12 +141,12 @@ public class AsyncHttpRequestTest extends RestRequestTest {
         String mockHostAndPort = mockRestServer.getMockHostAndPort();
         String url = String.format("http://%s/asset?id=56", mockHostAndPort);
         String exceptionMessage = String.format(RestRequest.REST_REQUEST_HTTP_FAILURE, "HTTP/1.1 503 Service Unavailable");
-        List<DataQualityMessage> expectedQualityMessages = Collections.singletonList(DataQualityMessage.builder().
-                feature(AsyncHttpRequest.REST_ENRICHMENT_FEATURE).
-                field(MockRestServer.ASSET_PREFIX).
-                level(DataQualityMessageLevel.ERROR.name()).
-                message(String.format(AsyncHttpRequest.REST_REQUEST_FAILED_QUALITY_MESSAGE, url, "null", exceptionMessage)).
-                build());
+        List<DataQualityMessage> expectedQualityMessages = Collections.singletonList(DataQualityMessage.builder()
+                .feature(AsyncHttpRequest.REST_ENRICHMENT_FEATURE)
+                .field(MockRestServer.ASSET_PREFIX)
+                .level(DataQualityMessageLevel.ERROR.name())
+                .message(String.format(AsyncHttpRequest.REST_REQUEST_FAILED_QUALITY_MESSAGE, url, "null", exceptionMessage))
+                .build());
 
         testGetAsset(MockRestServer.ASSET_ID_FIELD_NAME, MockRestServer.SERVER_ERROR_ASSET_ID, expectedExtensions, expectedQualityMessages);
     }
@@ -153,12 +159,12 @@ public class AsyncHttpRequestTest extends RestRequestTest {
         }};
 
         String messageText = String.format(RestRequestKey.UNDEFINED_VARIABLE_MESSAGE, MockRestServer.ASSET_ID_FIELD_NAME, RestRequestKey.URL_SOURCE);
-        List<DataQualityMessage> expectedQualityMessages = Collections.singletonList(DataQualityMessage.builder().
-                feature(AsyncHttpRequest.REST_ENRICHMENT_FEATURE).
-                field(MockRestServer.ASSET_PREFIX).
-                level(DataQualityMessageLevel.ERROR.name()).
-                message(messageText).
-                build());
+        List<DataQualityMessage> expectedQualityMessages = Collections.singletonList(DataQualityMessage.builder()
+                .feature(AsyncHttpRequest.REST_ENRICHMENT_FEATURE)
+                .field(MockRestServer.ASSET_PREFIX)
+                .level(DataQualityMessageLevel.ERROR.name())
+                .message(messageText)
+                .build());
 
         testGetAsset(badFieldName, MockRestServer.ASSET_ID, expectedExtensions, expectedQualityMessages);
     }

@@ -12,19 +12,20 @@
 
 package com.cloudera.cyber.parser;
 
+import static com.cloudera.cyber.parser.ChainParserMapFunction.CHAIN_PARSER_FEATURE;
+import static com.cloudera.cyber.parser.ChainParserMapFunction.EMPTY_SIGNATURE;
+import static com.cloudera.cyber.parser.ChainParserMapFunction.NO_TIMESTAMP_FIELD_MESSAGE;
+import static com.cloudera.cyber.parser.ChainParserMapFunction.TIMESTAMP_NOT_EPOCH;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.Message;
 import com.cloudera.parserchains.core.InvalidParserException;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.google.common.io.Resources;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
-import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
-import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
-import org.apache.flink.util.OutputTag;
-import org.junit.Test;
-
 import java.io.IOException;
 import java.net.URL;
 import java.security.InvalidKeyException;
@@ -38,14 +39,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import static com.cloudera.cyber.parser.ChainParserMapFunction.CHAIN_PARSER_FEATURE;
-import static com.cloudera.cyber.parser.ChainParserMapFunction.EMPTY_SIGNATURE;
-import static com.cloudera.cyber.parser.ChainParserMapFunction.NO_TIMESTAMP_FIELD_MESSAGE;
-import static com.cloudera.cyber.parser.ChainParserMapFunction.TIMESTAMP_NOT_EPOCH;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
+import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
+import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
+import org.apache.flink.util.OutputTag;
+import org.junit.Test;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ChainParserMapFunctionTest {
@@ -107,8 +106,8 @@ public class ChainParserMapFunctionTest {
 
     @Test
     public void testInvalidParser() {
-        assertThatThrownBy(() ->createTestHarness("ErrorParserChain.json", null)).
-                isInstanceOf(InvalidParserException.class).hasMessageContaining("Unable to find parser in catalog");
+        assertThatThrownBy(() ->createTestHarness("ErrorParserChain.json", null))
+                .isInstanceOf(InvalidParserException.class).hasMessageContaining("Unable to find parser in catalog");
     }
 
     @Test

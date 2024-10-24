@@ -12,18 +12,17 @@
 
 package com.cloudera.cyber.libs.hostnames;
 
-import com.cloudera.cyber.libs.AbstractMapScalarFunction;
-import com.google.common.net.InternetDomainName;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import static com.cloudera.cyber.libs.hostnames.ExtractHostname.REVERSE_IP_SUFFIX;
 import static com.cloudera.cyber.libs.hostnames.ExtractHostname.reverseResult;
 
+import com.cloudera.cyber.libs.AbstractMapScalarFunction;
+import com.google.common.net.InternetDomainName;
+import java.util.HashMap;
+import java.util.Map;
+
 public class ExtractHostnameFeatures extends AbstractMapScalarFunction {
 
-    public Map<String,String> eval(String hostname) {
+    public Map<String, String> eval(String hostname) {
         HashMap<String, String> results = new HashMap<String, String>(ExtractHostname.HostnameFeature.values().length);
         if (hostname.endsWith(REVERSE_IP_SUFFIX) || hostname.endsWith(REVERSE_IP_SUFFIX + ".")) {
             // optimisation, all the features except TLD are the same, the duplication is for consistency for users

@@ -17,19 +17,18 @@ import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A parser which can remove fields from a message.
  */
 @MessageParser(
-    name="Remove Field(s)",
-    description="Removes unwanted message field(s).")
+      name = "Remove Field(s)",
+      description = "Removes unwanted message field(s).")
 public class RemoveFieldParser implements Parser {
-    private List<FieldName> fieldsToRemove;
+    private final List<FieldName> fieldsToRemove;
 
     public RemoveFieldParser() {
         fieldsToRemove = new ArrayList<>();
@@ -40,27 +39,27 @@ public class RemoveFieldParser implements Parser {
         return this;
     }
 
+    @Configurable(
+          key = "fieldToRemove",
+          label = "Field to Remove",
+          description = "The name of a field to remove.",
+          multipleValues = true,
+          required = true)
+    public void removeField(String fieldName) {
+        if (StringUtils.isNotBlank(fieldName)) {
+            removeField(FieldName.of(fieldName));
+        }
+    }
+
     @Override
     public Message parse(Message message) {
         return Message.builder()
-                .withFields(message)
-                .removeFields(fieldsToRemove)
-                .build();
+                      .withFields(message)
+                      .removeFields(fieldsToRemove)
+                      .build();
     }
 
     List<FieldName> getFieldsToRemove() {
         return fieldsToRemove;
-    }
-
-    @Configurable(
-            key="fieldToRemove",
-            label="Field to Remove",
-            description="The name of a field to remove.",
-            multipleValues=true,
-            required=true)
-    public void removeField(String fieldName) {
-        if(StringUtils.isNotBlank(fieldName)) {
-            removeField(FieldName.of(fieldName));
-        }
     }
 }

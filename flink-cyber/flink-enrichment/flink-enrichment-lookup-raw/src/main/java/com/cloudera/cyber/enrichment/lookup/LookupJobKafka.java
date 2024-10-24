@@ -12,6 +12,9 @@
 
 package com.cloudera.cyber.enrichment.lookup;
 
+import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
+import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_OUTPUT;
+
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
@@ -26,9 +29,6 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
 
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_OUTPUT;
-
 public class LookupJobKafka extends LookupJob {
 
     private static final String PARAMS_TOPIC_ENRICHMENT_INPUT = "enrichment.topic.input";
@@ -36,32 +36,40 @@ public class LookupJobKafka extends LookupJob {
 
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
-        new LookupJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Enrichments - Local Lookup");
+        new LookupJobKafka().createPipeline(Utils.getParamToolsFromProperties(args))
+                            .execute("Enrichments - Local Lookup");
     }
 
     @Override
-    protected void writeQueryResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<EnrichmentCommandResponse> sideOutput) {
-        sideOutput.sinkTo(new FlinkUtils<>(EnrichmentCommandResponse.class).createKafkaSink(params.getRequired(PARAMS_QUERY_OUTPUT), "enrichments-lookup-command", params))
-                .name("Kafka Sink").uid("kafka-sink");
+    protected void writeQueryResults(StreamExecutionEnvironment env, ParameterTool params,
+                                     DataStream<EnrichmentCommandResponse> sideOutput) {
+        sideOutput.sinkTo(
+                        new FlinkUtils<>(EnrichmentCommandResponse.class).createKafkaSink(params.getRequired(PARAMS_QUERY_OUTPUT),
+                              "enrichments-lookup-command", params))
+                  .name("Kafka Sink").uid("kafka-sink");
     }
 
     @Override
     protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> reduction) {
-        reduction.sinkTo(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), "enrichents-lookup", params))
-        .name("Kafka Sink").uid("kafka-sink");
+        reduction.sinkTo(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT),
+                       "enrichents-lookup", params))
+                 .name("Kafka Sink").uid("kafka-sink");
     }
 
     @Override
     public SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.fromSource(
-                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, "enrichment-lookups-local"),
-                WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
+              FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, "enrichment-lookups-local"),
+              WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
     }
 
     @Override
-    protected DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params) {
-        KafkaSource<EnrichmentCommand> enrichmentCommands = new SourcesWithHeaders<>(EnrichmentCommand.class).
-                createSourceWithHeaders(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params, "enrichment-lookups-local");
-        return env.fromSource(enrichmentCommands, WatermarkStrategy.noWatermarks(),"Kafka Enrichments").uid("kafka-enrichment-source");
+    protected DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env,
+                                                                   ParameterTool params) {
+        KafkaSource<EnrichmentCommand> enrichmentCommands = new SourcesWithHeaders<>(EnrichmentCommand.class)
+              .createSourceWithHeaders(params.getRequired(PARAMS_TOPIC_ENRICHMENT_INPUT), params,
+                    "enrichment-lookups-local");
+        return env.fromSource(enrichmentCommands, WatermarkStrategy.noWatermarks(), "Kafka Enrichments")
+                  .uid("kafka-enrichment-source");
     }
 }

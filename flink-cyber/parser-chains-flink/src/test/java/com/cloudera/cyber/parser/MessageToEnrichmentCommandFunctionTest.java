@@ -12,7 +12,17 @@
 
 package com.cloudera.cyber.parser;
 
-import com.cloudera.cyber.*;
+import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentFieldsConfig.DEFAULT_KEY_DELIMITER;
+import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_METRON;
+import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig.DEFAULT_ENRICHMENT_STORAGE_NAME;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.cloudera.cyber.DataQualityMessage;
+import com.cloudera.cyber.DataQualityMessageLevel;
+import com.cloudera.cyber.EnrichmentEntry;
+import com.cloudera.cyber.Message;
+import com.cloudera.cyber.MessageUtils;
+import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.commands.CommandType;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentConfig;
@@ -21,19 +31,18 @@ import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageConfig;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
 import org.apache.flink.util.OutputTag;
 import org.junit.Test;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_METRON;
-import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig.DEFAULT_ENRICHMENT_STORAGE_NAME;
-import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentFieldsConfig.DEFAULT_KEY_DELIMITER;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public class MessageToEnrichmentCommandFunctionTest {
 
@@ -84,8 +93,8 @@ public class MessageToEnrichmentCommandFunctionTest {
         Map<String, String> messageExtensions = ImmutableMap.of(KEY_1, KEY_VALUE_1,
                 VALUE_1, VALUE_1_VALUE,
                 "extra", "include");
-        Map<String, String> enrichmentValues = messageExtensions.entrySet().stream().filter(e -> e.getKey().equals(KEY_1)).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, String> enrichmentValues = messageExtensions.entrySet().stream().filter(e -> e.getKey().equals(KEY_1))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         testSuccessful(messageExtensions, KEY_FIELDS, null, null,
                 KEY_FIELD_VALUES, VALUE_FIELD_VALUES);
         testSuccessful(messageExtensions, KEY_FIELDS, ".", null,
@@ -107,18 +116,18 @@ public class MessageToEnrichmentCommandFunctionTest {
 
     @Test
     public void testNullExtensions() throws Exception {
-        DataQualityMessage expectedMessageKey1 = DataQualityMessage.builder().
-                level(DataQualityMessageLevel.ERROR.name()).
-                feature(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_FEATURE).
-                field(KEY_1).
-                message(String.format(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_KEY_FIELD_NOT_SET, TEST_ENRICHMENT_TYPE)).
-                build();
-        DataQualityMessage expectedMessageKey2 = DataQualityMessage.builder().
-                level(DataQualityMessageLevel.ERROR.name()).
-                feature(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_FEATURE).
-                field(KEY_2).
-                message(String.format(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_KEY_FIELD_NOT_SET, TEST_ENRICHMENT_TYPE)).
-                build();
+        DataQualityMessage expectedMessageKey1 = DataQualityMessage.builder()
+                .level(DataQualityMessageLevel.ERROR.name())
+                .feature(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_FEATURE)
+                .field(KEY_1)
+                .message(String.format(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_KEY_FIELD_NOT_SET, TEST_ENRICHMENT_TYPE))
+                .build();
+        DataQualityMessage expectedMessageKey2 = DataQualityMessage.builder()
+                .level(DataQualityMessageLevel.ERROR.name())
+                .feature(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_FEATURE)
+                .field(KEY_2)
+                .message(String.format(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_KEY_FIELD_NOT_SET, TEST_ENRICHMENT_TYPE))
+                .build();
         testError(null,
                 Lists.newArrayList(expectedMessageKey1, expectedMessageKey2));
     }
@@ -131,12 +140,12 @@ public class MessageToEnrichmentCommandFunctionTest {
                 VALUE_2, VALUE_2_VALUE,
                 "extra", "ignore");
 
-        DataQualityMessage expectedMessage = DataQualityMessage.builder().
-                level(DataQualityMessageLevel.ERROR.name()).
-                feature(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_FEATURE).
-                field(KEY_2).
-                message(String.format(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_KEY_FIELD_NOT_SET, TEST_ENRICHMENT_TYPE)).
-                build();
+        DataQualityMessage expectedMessage = DataQualityMessage.builder()
+                .level(DataQualityMessageLevel.ERROR.name())
+                .feature(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_FEATURE)
+                .field(KEY_2)
+                .message(String.format(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_KEY_FIELD_NOT_SET, TEST_ENRICHMENT_TYPE))
+                .build();
         testError(messageExtensions,
                 Collections.singletonList(expectedMessage));
     }
@@ -148,12 +157,12 @@ public class MessageToEnrichmentCommandFunctionTest {
                 KEY_2, KEY_VALUE_2,
                 "extra", "ignore");
 
-        DataQualityMessage expectedMessage = DataQualityMessage.builder().
-                level(DataQualityMessageLevel.ERROR.name()).
-                feature(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_FEATURE).
-                field(MessageToEnrichmentCommandFunction.VALUE_FIELDS).
-                message(String.format(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_VALUE_FIELD_NOT_SET, TEST_ENRICHMENT_TYPE)).
-                build();
+        DataQualityMessage expectedMessage = DataQualityMessage.builder()
+                .level(DataQualityMessageLevel.ERROR.name())
+                .feature(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_FEATURE)
+                .field(MessageToEnrichmentCommandFunction.VALUE_FIELDS)
+                .message(String.format(MessageToEnrichmentCommandFunction.STREAMING_ENRICHMENT_VALUE_FIELD_NOT_SET, TEST_ENRICHMENT_TYPE))
+                .build();
         testError(messageExtensions,
                 Collections.singletonList(expectedMessage));
     }
@@ -204,12 +213,12 @@ public class MessageToEnrichmentCommandFunctionTest {
     private EnrichmentCommand createEnrichmentCommand(List<String> keyValues, String delimiter, Map<String, String> values) {
         String joiningDelimiter = delimiter != null ? delimiter : DEFAULT_KEY_DELIMITER;
         String enrichmentKey = String.join(joiningDelimiter, keyValues);
-        EnrichmentEntry enrichmentEntry = EnrichmentEntry.builder().ts(MessageUtils.getCurrentTimestamp()).
-                type(MessageToEnrichmentCommandFunctionTest.TEST_ENRICHMENT_TYPE).
-                key(enrichmentKey).entries(values).build();
-        return EnrichmentCommand.builder().
-                headers(Collections.emptyMap()).
-                type(CommandType.ADD).payload(enrichmentEntry).build();
+        EnrichmentEntry enrichmentEntry = EnrichmentEntry.builder().ts(MessageUtils.getCurrentTimestamp())
+                .type(MessageToEnrichmentCommandFunctionTest.TEST_ENRICHMENT_TYPE)
+                .key(enrichmentKey).entries(values).build();
+        return EnrichmentCommand.builder()
+                .headers(Collections.emptyMap())
+                .type(CommandType.ADD).payload(enrichmentEntry).build();
     }
 
     private OneInputStreamOperatorTestHarness<Message, EnrichmentCommand> createTestHarness(List<String> streamingEnrichmentSources, EnrichmentsConfig streamingEnrichmentConfig) throws Exception {

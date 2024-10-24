@@ -6,8 +6,10 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
+ *
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +20,17 @@
 
 package org.apache.metron.enrichment.converter;
 
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.NavigableMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Put;
@@ -27,28 +40,25 @@ import org.apache.metron.enrichment.lookup.LookupKV;
 import org.apache.metron.enrichment.lookup.LookupKey;
 import org.apache.metron.enrichment.lookup.LookupValue;
 
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
+public abstract class AbstractConverter<KEY_T extends LookupKey, VALUE_T extends LookupValue>
+      implements HbaseConverter<KEY_T, VALUE_T>, Serializable {
+    public static final Function<Cell, Map.Entry<byte[], byte[]>> CELL_TO_ENTRY =
+          new Function<Cell, Map.Entry<byte[], byte[]>>() {
 
-public abstract class AbstractConverter<KEY_T extends LookupKey, VALUE_T extends LookupValue> implements HbaseConverter<KEY_T, VALUE_T>, Serializable {
-    public static final Function<Cell, Map.Entry<byte[], byte[]>> CELL_TO_ENTRY = new Function<Cell, Map.Entry<byte[], byte[]>>() {
-
-        @Override
-        public Map.Entry<byte[], byte[]> apply(@Nullable Cell cell) {
-            if (cell != null) {
-                byte[] qualifier = Arrays.copyOfRange(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierOffset() + cell.getQualifierLength());
-                byte[] value = Arrays.copyOfRange(cell.getValueArray(), cell.getValueOffset(), cell.getValueOffset() + cell.getValueLength());
-                return new AbstractMap.SimpleEntry<>(qualifier, value);
-            } else {
-                return new AbstractMap.SimpleEntry<>(null, null);
-            }
-        }
-    };
+              @Override
+              public Map.Entry<byte[], byte[]> apply(@Nullable Cell cell) {
+                  if (cell != null) {
+                      byte[] qualifier = Arrays.copyOfRange(cell.getQualifierArray(), cell.getQualifierOffset(),
+                            cell.getQualifierOffset() + cell.getQualifierLength());
+                      byte[] value = Arrays.copyOfRange(cell.getValueArray(), cell.getValueOffset(),
+                            cell.getValueOffset() + cell.getValueLength());
+                      return new AbstractMap.SimpleEntry<>(qualifier, value);
+                  } else {
+                      return new AbstractMap.SimpleEntry<>(null, null);
+                  }
+              }
+          };
 
     @Override
     public Put toPut(String columnFamily, KEY_T key, VALUE_T values) {
@@ -73,7 +83,8 @@ public abstract class AbstractConverter<KEY_T extends LookupKey, VALUE_T extends
         return Result.create(put.getFamilyCellMap().get(Bytes.toBytes(columnFamily)));
     }
 
-    public LookupKV<KEY_T, VALUE_T> fromResult(Result result, String columnFamily, KEY_T key, VALUE_T value) throws IOException {
+    public LookupKV<KEY_T, VALUE_T> fromResult(Result result, String columnFamily, KEY_T key, VALUE_T value)
+          throws IOException {
         if (result == null || result.getRow() == null) {
             return null;
         }

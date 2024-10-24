@@ -12,23 +12,22 @@
 
 package com.cloudera.cyber.enrichment.hbase.config;
 
+import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentFieldsConfigTest.KEY_FIELDS;
+import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_METRON;
+import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_SIMPLE;
+import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig.DEFAULT_ENRICHMENT_STORAGE_NAME;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentFieldsConfigTest.KEY_FIELDS;
-import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_METRON;
-import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_SIMPLE;
-import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig.DEFAULT_ENRICHMENT_STORAGE_NAME;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.Assert;
+import org.junit.Test;
 
 
 public class EnrichmentsConfigTest {
@@ -108,8 +107,8 @@ public class EnrichmentsConfigTest {
     @Test
     public void testLoadFileDoesNotExist() {
         String doesNotExistFile = "file_does_not_exist.json";
-        assertThatThrownBy(() -> testLoadJson(doesNotExistFile)).isInstanceOf(RuntimeException.class).
-                hasMessage(EnrichmentsConfig.ENRICHMENT_CONFIG_FILE_DESERIALIZATION_ERROR, doesNotExistFile)
+        assertThatThrownBy(() -> testLoadJson(doesNotExistFile)).isInstanceOf(RuntimeException.class)
+                .hasMessage(EnrichmentsConfig.ENRICHMENT_CONFIG_FILE_DESERIALIZATION_ERROR, doesNotExistFile)
                 .hasCauseInstanceOf(IOException.class);
     }
 

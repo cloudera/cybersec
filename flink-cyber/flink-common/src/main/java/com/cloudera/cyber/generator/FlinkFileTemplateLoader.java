@@ -1,13 +1,12 @@
 package com.cloudera.cyber.generator;
 
 import freemarker.cache.TemplateLoader;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.core.fs.FileSystem;
-import org.apache.flink.core.fs.Path;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.core.fs.FileSystem;
+import org.apache.flink.core.fs.Path;
 
 @Slf4j
 public class FlinkFileTemplateLoader implements TemplateLoader {
@@ -34,10 +33,11 @@ public class FlinkFileTemplateLoader implements TemplateLoader {
     @Override
     public long getLastModified(Object templatePathObject) {
         if (!(templatePathObject instanceof Path)) {
-            throw new IllegalArgumentException("templatePathObject wasn't a flink Path, but a: " + templatePathObject.getClass().getName());
+            throw new IllegalArgumentException(
+                  "templatePathObject wasn't a flink Path, but a: " + templatePathObject.getClass().getName());
         }
 
-        Path templatePath = (Path)templatePathObject;
+        Path templatePath = (Path) templatePathObject;
 
         try {
             return templatePath.getFileSystem().getFileStatus(templatePath).getModificationTime();
@@ -64,7 +64,8 @@ public class FlinkFileTemplateLoader implements TemplateLoader {
         if (pathObject instanceof Path) {
             return (Path) pathObject;
         } else {
-            throw new IllegalArgumentException(String.format("templatePathObject expected %s, but got %s ", Path.class, pathObject.getClass().getName()));
+            throw new IllegalArgumentException(String.format("templatePathObject expected %s, but got %s ", Path.class,
+                  pathObject.getClass().getName()));
         }
 
     }

@@ -19,11 +19,13 @@ import com.cloudera.parserchains.core.model.define.ParserSchema;
  * and is impossible to construct.
  */
 public class InvalidParserException extends Exception {
-    private ParserSchema badParser;
+    private final ParserSchema badParser;
 
     /**
+     * InvalidParserException constructor.
+     *
      * @param badParser The parser that caused this error.
-     * @param cause The root cause exception.
+     * @param cause     The root cause exception.
      */
     public InvalidParserException(ParserSchema badParser, Throwable cause) {
         super(cause);
@@ -31,8 +33,10 @@ public class InvalidParserException extends Exception {
     }
 
     /**
+     * InvalidParserException constructor.
+     *
      * @param badParser The parser that caused this error.
-     * @param message The error message.
+     * @param message   The error message.
      */
     public InvalidParserException(ParserSchema badParser, String message) {
         super(message);
@@ -40,9 +44,11 @@ public class InvalidParserException extends Exception {
     }
 
     /**
+     * InvalidParserException constructor.
+     *
      * @param badParser The parser that caused this error.
-     * @param message The error message.
-     * @param cause The root cause exception.
+     * @param message   The error message.
+     * @param cause     The root cause exception.
      */
     public InvalidParserException(ParserSchema badParser, String message, Throwable cause) {
         super(message, cause);

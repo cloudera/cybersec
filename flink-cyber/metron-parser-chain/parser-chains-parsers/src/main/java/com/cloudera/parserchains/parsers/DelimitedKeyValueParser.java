@@ -12,6 +12,8 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static java.lang.String.format;
+
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
@@ -21,22 +23,20 @@ import com.cloudera.parserchains.core.Regex;
 import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Optional;
-
-import static java.lang.String.format;
-
 @MessageParser(
-        name="Delimited Key Values",
-        description="Parses delimited key-value pairs."
+      name = "Delimited Key Values",
+      description = "Parses delimited key-value pairs."
 )
 @Slf4j
 public class DelimitedKeyValueParser implements Parser {
 
     /**
      * The default key-value delimiter are double pipes; ||.
+     *
      * <p>Each pipe must be escaped.
      */
     private static final String DEFAULT_DELIMITER = "\\|\\|";
@@ -56,13 +56,13 @@ public class DelimitedKeyValueParser implements Parser {
     }
 
     @Configurable(
-            key="input",
-            label="Input Field",
-            description="The input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
-            defaultValue=Constants.DEFAULT_INPUT_FIELD,
-            isOutputName = true)
+          key = "input",
+          label = "Input Field",
+          description = "The input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
+          defaultValue = Constants.DEFAULT_INPUT_FIELD,
+          isOutputName = true)
     public DelimitedKeyValueParser inputField(String inputField) {
-        if(StringUtils.isNotBlank(inputField)) {
+        if (StringUtils.isNotBlank(inputField)) {
             this.inputField = FieldName.of(inputField);
         }
         return this;
@@ -73,13 +73,13 @@ public class DelimitedKeyValueParser implements Parser {
     }
 
     @Configurable(
-            key="delimiter",
-            label="Key Value Delimiter",
-            description="A regex that separates different key-value pairs. Default value: '" + DEFAULT_DELIMITER + "'",
-            defaultValue=DEFAULT_DELIMITER
+          key = "delimiter",
+          label = "Key Value Delimiter",
+          description = "A regex that separates different key-value pairs. Default value: '" + DEFAULT_DELIMITER + "'",
+          defaultValue = DEFAULT_DELIMITER
     )
     public DelimitedKeyValueParser keyValueDelimiter(String keyValueDelimiter) {
-        if(StringUtils.isNotBlank(keyValueDelimiter)) {
+        if (StringUtils.isNotBlank(keyValueDelimiter)) {
             this.keyValueDelimiter = Regex.of(keyValueDelimiter);
         }
         return this;
@@ -90,13 +90,14 @@ public class DelimitedKeyValueParser implements Parser {
     }
 
     @Configurable(
-            key="separator",
-            label="Key Value Separator",
-            description="A regex that separates a key and value within a key-value pair. Default value: '" + DEFAULT_SEPARATOR + "'",
-            defaultValue=DEFAULT_SEPARATOR
+          key = "separator",
+          label = "Key Value Separator",
+          description = "A regex that separates a key and value within a key-value pair. Default value: '"
+                        + DEFAULT_SEPARATOR + "'",
+          defaultValue = DEFAULT_SEPARATOR
     )
     public DelimitedKeyValueParser keyValueSeparator(String keyValueSeparator) {
-        if(StringUtils.isNotBlank(keyValueSeparator)) {
+        if (StringUtils.isNotBlank(keyValueSeparator)) {
             this.keyValueSeparator = Regex.of(keyValueSeparator);
         }
         return this;
@@ -107,12 +108,12 @@ public class DelimitedKeyValueParser implements Parser {
     }
 
     @Configurable(
-            key="validKey",
-            label="Valid Key Regex",
-            description="Any key not matching this regex will be ignored."
+          key = "validKey",
+          label = "Valid Key Regex",
+          description = "Any key not matching this regex will be ignored."
     )
     public DelimitedKeyValueParser validKeyRegex(String validKeyRegex) {
-        if(StringUtils.isNotBlank(validKeyRegex)) {
+        if (StringUtils.isNotBlank(validKeyRegex)) {
             this.validKeyRegex = Optional.ofNullable(Regex.of(validKeyRegex));
         } else {
             // a blank string should 'turn off' regex matching
@@ -126,12 +127,12 @@ public class DelimitedKeyValueParser implements Parser {
     }
 
     @Configurable(
-            key="validValue",
-            label="Valid Value Regex",
-            description="Any value not matching this regex will be ignored."
+          key = "validValue",
+          label = "Valid Value Regex",
+          description = "Any value not matching this regex will be ignored."
     )
     public DelimitedKeyValueParser validValueRegex(String validValueRegex) {
-        if(StringUtils.isNotBlank(validValueRegex)) {
+        if (StringUtils.isNotBlank(validValueRegex)) {
             this.validValueRegex = Optional.ofNullable(Regex.of(validValueRegex));
         } else {
             // a blank string should 'turn off' regex matching
@@ -147,7 +148,7 @@ public class DelimitedKeyValueParser implements Parser {
     @Override
     public Message parse(Message input) {
         Message.Builder output = Message.builder().withFields(input);
-        if(!input.getField(inputField).isPresent()) {
+        if (!input.getField(inputField).isPresent()) {
             output.withError(format("Message missing expected input field '%s'", inputField.toString()));
         } else {
             input.getField(inputField).ifPresent(val -> doParse(val.toString(), output));
@@ -159,22 +160,22 @@ public class DelimitedKeyValueParser implements Parser {
         String[] keyValuePairs = valueToParse.split(keyValueDelimiter.toString());
         log.debug("Found {} key-value pairs.", keyValuePairs.length);
 
-        for(String keyValuePair: keyValuePairs) {
+        for (String keyValuePair : keyValuePairs) {
 
-            String [] keyValue = keyValuePair.split(keyValueSeparator.toString(), 2);
-            if(keyValue.length == 2) {
+            String[] keyValue = keyValuePair.split(keyValueSeparator.toString(), 2);
+            if (keyValue.length == 2) {
                 final String key = keyValue[0];
                 final String value = keyValue[1];
 
                 boolean validKey = validKeyRegex.map(regex -> regex.matches(key)).orElse(true);
                 boolean validValue = validValueRegex.map(regex -> regex.matches(value)).orElse(true);
-                if(validKey && validValue) {
+                if (validKey && validValue) {
                     try {
                         FieldName fieldName = FieldName.of(key);
                         FieldValue fieldValue = StringFieldValue.of(value);
                         output.addField(fieldName, fieldValue);
 
-                    } catch(IllegalArgumentException e) {
+                    } catch (IllegalArgumentException e) {
                         log.debug("Ignoring an invalid key-value pair; '{}'", keyValuePair);
                     }
                 } else {

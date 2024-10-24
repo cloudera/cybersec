@@ -12,13 +12,13 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
 public class DelimitedKeyValueParserTest {
     private DelimitedKeyValueParser parser;
@@ -261,17 +261,17 @@ public class DelimitedKeyValueParserTest {
 
     @Test
     void complex() {
-        final String textToParse = "2020-03-04 13:05:21.322- AuditOperation - HostName=PRDPWSLNX0067" +
-                "||Operation=getUserInfo" +
-                "||Is_Operation_Success=SUCCESS" +
-                "||AuditMessage; Interaction_Id=" +
-                "||PayType=DEFAULT" +
-                "||Operation_Type=Tibco_Service_Call" +
-                "||Service_Name=getUserInfo" +
-                "||Message=Invoking:#UserInfoService.getUserInfo tibco call with request:#Invoke of Streamline.Tibco.Services.GetUserInfoService.UserInfoService.getUserInfo started at 03/04/2020 13:05:21.322 with parameters: parameter 0 (serialized .NET Object): <?xml version=\"1.0\" encoding=\"utf-16\"?> <UserInfoRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"> <header xmlns=\"http://retail.tmobile.com/sdo\"> <partnerId>STL</partnerId> <partnerTransactionId>87c9-d8c7-4e3f-aafd-8f4b8c2fafe1</partnerTransactionId> <partnerTimestamp>2020-03-04T13:05:21.3222285-08:00</partnerTimestamp> <application>STL</application> <channel>STL</channel> <dealerCode>0000002</dealerCode> </header> <userId xmlns=\"http://retail.tmobile.com/sdo\">CAcuna6</userId> <systemIdsToRetrieve xmlns=\"http://retail.tmobile.com/sdo\">Streamline</systemIdsToRetrieve> <returnAccountInfo xmlns=\"http://retail.tmobile.com/sdo\">true</returnAccountInfo> </UserInfoRequest> URL = https://rspservices.t-mobile.com/rsp/UserInfoService Timeout = 10000 " +
-                "||LogType=Call" +
-                "||Method_Name=Invoke" +
-                "||Reason=";
+        final String textToParse = "2020-03-04 13:05:21.322- AuditOperation - HostName=PRDPWSLNX0067"
+                + "||Operation=getUserInfo"
+                + "||Is_Operation_Success=SUCCESS"
+                + "||AuditMessage; Interaction_Id="
+                + "||PayType=DEFAULT"
+                + "||Operation_Type=Tibco_Service_Call"
+                + "||Service_Name=getUserInfo"
+                + "||Message=Invoking:#UserInfoService.getUserInfo tibco call with request:#Invoke of Streamline.Tibco.Services.GetUserInfoService.UserInfoService.getUserInfo started at 03/04/2020 13:05:21.322 with parameters: parameter 0 (serialized .NET Object): <?xml version=\"1.0\" encoding=\"utf-16\"?> <UserInfoRequest xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"> <header xmlns=\"http://retail.tmobile.com/sdo\"> <partnerId>STL</partnerId> <partnerTransactionId>87c9-d8c7-4e3f-aafd-8f4b8c2fafe1</partnerTransactionId> <partnerTimestamp>2020-03-04T13:05:21.3222285-08:00</partnerTimestamp> <application>STL</application> <channel>STL</channel> <dealerCode>0000002</dealerCode> </header> <userId xmlns=\"http://retail.tmobile.com/sdo\">CAcuna6</userId> <systemIdsToRetrieve xmlns=\"http://retail.tmobile.com/sdo\">Streamline</systemIdsToRetrieve> <returnAccountInfo xmlns=\"http://retail.tmobile.com/sdo\">true</returnAccountInfo> </UserInfoRequest> URL = https://rspservices.t-mobile.com/rsp/UserInfoService Timeout = 10000 "
+                + "||LogType=Call"
+                + "||Method_Name=Invoke"
+                + "||Reason=";
         Message input = Message.builder()
                 .addField(Constants.DEFAULT_INPUT_FIELD, textToParse)
                 .build();

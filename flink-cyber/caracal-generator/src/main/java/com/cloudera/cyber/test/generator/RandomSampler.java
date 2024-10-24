@@ -12,12 +12,12 @@
 
 package com.cloudera.cyber.test.generator;
 
+import java.util.concurrent.ThreadLocalRandom;
 import org.apache.flink.api.common.functions.FilterFunction;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 public class RandomSampler<T> implements FilterFunction<T> {
-    private double threatProbability;
+    private final double threatProbability;
+
     public RandomSampler(double threatProbability) {
         this.threatProbability = threatProbability;
     }

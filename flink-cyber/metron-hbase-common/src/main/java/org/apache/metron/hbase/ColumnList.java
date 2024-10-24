@@ -26,153 +26,160 @@ import java.util.List;
 /**
  * Represents a list of HBase columns.
  *
+ * <p>
  * There are two types of columns, <i>standard</i> and <i>counter</i>.
  *
+ * <p>
  * Standard columns have <i>column family</i> (required), <i>qualifier</i> (optional),
  * <i>timestamp</i> (optional), and a <i>value</i> (optional) values.
  *
+ * <p>
  * Counter columns have <i>column family</i> (required), <i>qualifier</i> (optional),
  * and an <i>increment</i> (optional, but recommended) values.
  *
+ * <p>
  * Inserts/Updates can be added via the <code>addColumn()</code> and <code>addCounter()</code>
  * methods.
  *
+ * <p>
  * Original code based on the Apache Storm project. See
  * https://github.com/apache/storm/tree/master/external/storm-hbase.
  */
 public class ColumnList {
 
-  public static abstract class AbstractColumn {
-    byte[] family, qualifier;
+    public abstract static class AbstractColumn {
+        byte[] family;
+        byte[] qualifier;
 
-    AbstractColumn(byte[] family, byte[] qualifier){
-      this.family = family;
-      this.qualifier = qualifier;
+        AbstractColumn(byte[] family, byte[] qualifier) {
+            this.family = family;
+            this.qualifier = qualifier;
+        }
+
+        public byte[] getFamily() {
+            return family;
+        }
+
+        public byte[] getQualifier() {
+            return qualifier;
+        }
     }
 
-    public byte[] getFamily() {
-      return family;
+    public static class Column extends AbstractColumn {
+        byte[] value;
+        long ts = -1;
+
+        Column(byte[] family, byte[] qualifier, long ts, byte[] value) {
+            super(family, qualifier);
+            this.value = value;
+            this.ts = ts;
+        }
+
+        public byte[] getValue() {
+            return value;
+        }
+
+        public long getTs() {
+            return ts;
+        }
     }
 
-    public byte[] getQualifier() {
-      return qualifier;
-    }
-  }
+    public static class Counter extends AbstractColumn {
+        long incr = 0;
 
-  public static class Column extends AbstractColumn {
-    byte[] value;
-    long ts = -1;
+        Counter(byte[] family, byte[] qualifier, long incr) {
+            super(family, qualifier);
+            this.incr = incr;
+        }
 
-    Column(byte[] family, byte[] qualifier, long ts, byte[] value){
-      super(family, qualifier);
-      this.value = value;
-      this.ts = ts;
+        public long getIncrement() {
+            return incr;
+        }
     }
 
-    public byte[] getValue() {
-      return value;
+    private ArrayList<ColumnList.Column> columns;
+    private ArrayList<ColumnList.Counter> counters;
+
+    private ArrayList<Column> columns() {
+        if (this.columns == null) {
+            this.columns = new ArrayList<>();
+        }
+        return this.columns;
     }
 
-    public long getTs() {
-      return ts;
-    }
-  }
-
-  public static class Counter extends AbstractColumn {
-    long incr = 0;
-    Counter(byte[] family, byte[] qualifier, long incr){
-      super(family, qualifier);
-      this.incr = incr;
+    private ArrayList<Counter> counters() {
+        if (this.counters == null) {
+            this.counters = new ArrayList<>();
+        }
+        return this.counters;
     }
 
-    public long getIncrement() {
-      return incr;
+    /**
+     * Add a standard HBase column.
+     */
+    public ColumnList addColumn(byte[] family, byte[] qualifier, long ts, byte[] value) {
+        columns().add(new Column(family, qualifier, ts, value));
+        return this;
     }
-  }
 
-  private ArrayList<ColumnList.Column> columns;
-  private ArrayList<ColumnList.Counter> counters;
-
-  private ArrayList<Column> columns(){
-    if(this.columns == null){
-      this.columns = new ArrayList<>();
+    /**
+     * Add a standard HBase column.
+     */
+    public ColumnList addColumn(byte[] family, byte[] qualifier, byte[] value) {
+        columns().add(new Column(family, qualifier, -1, value));
+        return this;
     }
-    return this.columns;
-  }
 
-  private ArrayList<Counter> counters(){
-    if(this.counters == null){
-      this.counters = new ArrayList<>();
+    /**
+     * Add a standard HBase column given an instance of a class that implements
+     * the <code>IColumn</code> interface.
+     */
+    public ColumnList addColumn(IColumn column) {
+        return this.addColumn(column.family(), column.qualifier(), column.timestamp(), column.value());
     }
-    return this.counters;
-  }
 
-  /**
-   * Add a standard HBase column.
-   */
-  public ColumnList addColumn(byte[] family, byte[] qualifier, long ts, byte[] value){
-    columns().add(new Column(family, qualifier, ts, value));
-    return this;
-  }
+    /**
+     * Add an HBase counter column.
+     */
+    public ColumnList addCounter(byte[] family, byte[] qualifier, long incr) {
+        counters().add(new Counter(family, qualifier, incr));
+        return this;
+    }
 
-  /**
-   * Add a standard HBase column
-   */
-  public ColumnList addColumn(byte[] family, byte[] qualifier, byte[] value){
-    columns().add(new Column(family, qualifier, -1, value));
-    return this;
-  }
-
-  /**
-   * Add a standard HBase column given an instance of a class that implements
-   * the <code>IColumn</code> interface.
-   */
-  public ColumnList addColumn(IColumn column){
-    return this.addColumn(column.family(), column.qualifier(), column.timestamp(), column.value());
-  }
-
-  /**
-   * Add an HBase counter column.
-   */
-  public ColumnList addCounter(byte[] family, byte[] qualifier, long incr){
-    counters().add(new Counter(family, qualifier, incr));
-    return this;
-  }
-
-  /**
-   * Add an HBase counter column given an instance of a class that implements the
-   * <code>ICounter</code> interface.
-   */
-  public ColumnList addCounter(ICounter counter){
-    return this.addCounter(counter.family(), counter.qualifier(), counter.increment());
-  }
+    /**
+     * Add an HBase counter column given an instance of a class that implements the
+     * <code>ICounter</code> interface.
+     */
+    public ColumnList addCounter(ICounter counter) {
+        return this.addCounter(counter.family(), counter.qualifier(), counter.increment());
+    }
 
 
-  /**
-   * Query to determine if we have column definitions.
-   */
-  public boolean hasColumns(){
-    return this.columns != null;
-  }
+    /**
+     * Query to determine if we have column definitions.
+     */
+    public boolean hasColumns() {
+        return this.columns != null;
+    }
 
-  /**
-   * Query to determine if we have counter definitions.
-   */
-  public boolean hasCounters(){
-    return this.counters != null;
-  }
+    /**
+     * Query to determine if we have counter definitions.
+     */
+    public boolean hasCounters() {
+        return this.counters != null;
+    }
 
-  /**
-   * Get the list of column definitions.
-   */
-  public List<Column> getColumns(){
-    return this.columns;
-  }
+    /**
+     * Get the list of column definitions.
+     */
+    public List<Column> getColumns() {
+        return this.columns;
+    }
 
-  /**
-   * Get the list of counter definitions.
-   */
-  public List<Counter> getCounters(){
-    return this.counters;
-  }
+    /**
+     * Get the list of counter definitions.
+     */
+    public List<Counter> getCounters() {
+        return this.counters;
+    }
 }

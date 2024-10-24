@@ -2,6 +2,9 @@ package com.cloudera.parserchains.queryservice.service;
 
 import com.cloudera.cyber.indexing.MappingDto;
 import com.cloudera.parserchains.core.utils.JSONUtils;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -9,10 +12,6 @@ import org.apache.flink.core.fs.FSDataInputStream;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
 import org.springframework.stereotype.Service;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -27,8 +26,9 @@ public class IndexingService {
         }
         try (FSDataInputStream fsDataInputStream = fileSystem.open(indexingPath)) {
             final String chainString = IOUtils.toString(fsDataInputStream, StandardCharsets.UTF_8);
-            final JSONUtils.ReferenceSupplier<Map<String, MappingDto>> ref = new JSONUtils.ReferenceSupplier<Map<String, MappingDto>>() {
-            };
+            final JSONUtils.ReferenceSupplier<Map<String, MappingDto>> ref =
+                  new JSONUtils.ReferenceSupplier<Map<String, MappingDto>>() {
+                  };
             //validate the json value is the valid mapping json
             JSONUtils.INSTANCE.load(chainString, ref);
             //Converting to map so that we ignore all the overwritten getters

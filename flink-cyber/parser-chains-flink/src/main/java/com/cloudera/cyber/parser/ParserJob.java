@@ -19,20 +19,6 @@ import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.core.utils.JSONUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.core.fs.FSDataInputStream;
-import org.apache.flink.core.fs.FileStatus;
-import org.apache.flink.core.fs.FileSystem;
-import org.apache.flink.core.fs.Path;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.util.OutputTag;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -48,9 +34,22 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.core.fs.FSDataInputStream;
+import org.apache.flink.core.fs.FileStatus;
+import org.apache.flink.core.fs.FileSystem;
+import org.apache.flink.core.fs.Path;
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.util.OutputTag;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 /**
- * Host for the chain parser jobs
+ * Host for the chain parser jobs.
  */
 @Slf4j
 public abstract class ParserJob {
@@ -59,7 +58,7 @@ public abstract class ParserJob {
     protected static final String PARAM_CHAIN_CONFIG_FILE = "chain.file";
     protected static final String PARAM_CHAIN_CONFIG_DIRECTORY = "chain.dir";
     protected static final List<String> PARAM_CHAIN_CONFIG_EXCLUSIVE_LIST = Arrays.asList(
-            PARAM_CHAIN_CONFIG, PARAM_CHAIN_CONFIG_FILE, PARAM_CHAIN_CONFIG_DIRECTORY);
+          PARAM_CHAIN_CONFIG, PARAM_CHAIN_CONFIG_FILE, PARAM_CHAIN_CONFIG_DIRECTORY);
 
     protected static final String PARAM_TOPIC_MAP_CONFIG = "chain.topic.map";
     protected static final String PARAM_TOPIC_MAP_CONFIG_FILE = "chain.topic.map.file";
@@ -70,12 +69,14 @@ public abstract class ParserJob {
     public static final String PARAM_STREAMING_ENRICHMENTS_CONFIG = "chain.enrichments.file";
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params)
-            throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+          throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         FlinkUtils.setupEnv(env, params);
         validateParams(params);
 
-        String chainConfig = readConfigChainMap(PARAM_CHAIN_CONFIG_FILE, PARAM_CHAIN_CONFIG, PARAM_CHAIN_CONFIG_DIRECTORY, params, null);
+        String chainConfig =
+              readConfigChainMap(PARAM_CHAIN_CONFIG_FILE, PARAM_CHAIN_CONFIG, PARAM_CHAIN_CONFIG_DIRECTORY, params,
+                    null);
         String topicConfig = readConfigMap(PARAM_TOPIC_MAP_CONFIG_FILE, PARAM_TOPIC_MAP_CONFIG, params, "{}");
 
 
@@ -91,8 +92,9 @@ public abstract class ParserJob {
             streamingEnrichmentsConfig = EnrichmentsConfig.load(enrichmentsConfigFile);
 
             List<String> sourcesProduced = topicMap.getSourcesProduced();
-            streamingSourcesProduced = streamingEnrichmentsConfig.getStreamingEnrichmentSources().stream().
-                    filter(sourcesProduced::contains).collect(Collectors.toList());
+            streamingSourcesProduced = streamingEnrichmentsConfig.getStreamingEnrichmentSources().stream()
+                                                                 .filter(sourcesProduced::contains)
+                                                                 .collect(Collectors.toList());
             if (!streamingSourcesProduced.isEmpty()) {
                 streamingEnrichFilter = new StreamingEnrichmentsSourceFilter(streamingSourcesProduced);
             }
@@ -102,9 +104,9 @@ public abstract class ParserJob {
 
         PrivateKey privateKey = null;
         if (params.getBoolean(SIGNATURE_ENABLED, true)) {
-            byte[] privKeyBytes = params.has(PARAM_PRIVATE_KEY_FILE) ?
-                    Files.readAllBytes(Paths.get(params.get(PARAM_PRIVATE_KEY_FILE))) :
-                    Base64.getDecoder().decode(params.getRequired(PARAM_PRIVATE_KEY));
+            byte[] privKeyBytes = params.has(PARAM_PRIVATE_KEY_FILE)
+                  ? Files.readAllBytes(Paths.get(params.get(PARAM_PRIVATE_KEY_FILE)))
+                  : Base64.getDecoder().decode(params.getRequired(PARAM_PRIVATE_KEY));
 
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             PKCS8EncodedKeySpec privSpec = new PKCS8EncodedKeySpec(privKeyBytes);
@@ -112,8 +114,9 @@ public abstract class ParserJob {
         }
 
         SingleOutputStreamOperator<Message> results =
-                source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey, defaultKafkaBootstrap))
-                        .name("Parser " + source.getTransformation().getName()).uid("parser" + source.getTransformation().getUid());
+              source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey, defaultKafkaBootstrap))
+                    .name("Parser " + source.getTransformation().getName())
+                    .uid("parser" + source.getTransformation().getUid());
         final OutputTag<Message> errorMessageSideOutput = new OutputTag<Message>(ERROR_MESSAGE_SIDE_OUTPUT) {
         };
         DataStream<Message> errorMessages = results.getSideOutput(errorMessageSideOutput);
@@ -122,8 +125,13 @@ public abstract class ParserJob {
         writeOriginalsResults(params, source);
 
         if (streamingEnrichFilter != null) {
-            DataStream<Message> streamingEnrichmentMessages = results.filter(streamingEnrichFilter).name("Streaming Enrichment Sources Filter");
-            SingleOutputStreamOperator<EnrichmentCommand> enrichmentCommands = streamingEnrichmentMessages.process(new MessageToEnrichmentCommandFunction(streamingSourcesProduced, streamingEnrichmentsConfig)).name("Message to EnrichmentCommand");
+            DataStream<Message> streamingEnrichmentMessages =
+                  results.filter(streamingEnrichFilter).name("Streaming Enrichment Sources Filter");
+            SingleOutputStreamOperator<EnrichmentCommand> enrichmentCommands =
+                  streamingEnrichmentMessages.process(
+                                                   new MessageToEnrichmentCommandFunction(
+                                                         streamingSourcesProduced, streamingEnrichmentsConfig))
+                                             .name("Message to EnrichmentCommand");
             errorMessages = errorMessages.union(enrichmentCommands.getSideOutput(errorMessageSideOutput));
             writeEnrichments(params, enrichmentCommands, streamingSourcesProduced, streamingEnrichmentsConfig);
         }
@@ -136,11 +144,11 @@ public abstract class ParserJob {
     private void validateParams(ParameterTool params) {
         //Check for mutually exclusive chain params
         final long chainParamAmount = PARAM_CHAIN_CONFIG_EXCLUSIVE_LIST.stream()
-                .filter(params::has)
-                .count();
+                                                                       .filter(params::has)
+                                                                       .count();
         if (chainParamAmount > 1) {
-            throw new RuntimeException("It's not allowed to provide more than one chain param! " +
-                    "Select one of the following: " + PARAM_CHAIN_CONFIG_EXCLUSIVE_LIST);
+            throw new RuntimeException("It's not allowed to provide more than one chain param! "
+                                       + "Select one of the following: " + PARAM_CHAIN_CONFIG_EXCLUSIVE_LIST);
         }
     }
 
@@ -153,12 +161,13 @@ public abstract class ParserJob {
             final FileSystem fileSystem = path.getFileSystem();
 
             final FileStatus[] fileStatusList = fileSystem.listStatus(path);
-            if (ArrayUtils.isEmpty(fileStatusList)){
-                throw new RuntimeException(String.format("Provided config directory doesn't exist or empty [%s]!", path));
+            if (ArrayUtils.isEmpty(fileStatusList)) {
+                throw new RuntimeException(
+                      String.format("Provided config directory doesn't exist or empty [%s]!", path));
             }
             final FileStatus[] sortedFileList = Arrays.stream(fileStatusList)
-                    .sorted(Comparator.comparing(fs -> fs.getPath().getName()))
-                    .toArray(FileStatus[]::new);
+                                                      .sorted(Comparator.comparing(fs -> fs.getPath().getName()))
+                                                      .toArray(FileStatus[]::new);
             for (FileStatus fileStatus : sortedFileList) {
                 final Path filePath = fileStatus.getPath();
                 if (filePath.getName().endsWith(".json")) {
@@ -173,7 +182,9 @@ public abstract class ParserJob {
 
                     final String schemaName = chainSchema.getName();
                     if (result.containsKey(schemaName)) {
-                        throw new RuntimeException(String.format("Found a duplicate schema named [%s] in the [%s] file, which isn't allowed!", schemaName, filePath));
+                        throw new RuntimeException(String.format(
+                              "Found a duplicate schema named [%s] in the [%s] file, which isn't allowed!", schemaName,
+                              filePath));
                     }
                     result.put(schemaName, chainSchema);
                 }
@@ -189,7 +200,7 @@ public abstract class ParserJob {
             return new String(Files.readAllBytes(Paths.get(params.getRequired(fileParamKey))), StandardCharsets.UTF_8);
         }
         return defaultConfig == null ? params.getRequired(inlineConfigKey)
-                : params.get(inlineConfigKey, defaultConfig);
+              : params.get(inlineConfigKey, defaultConfig);
 
     }
 
@@ -197,7 +208,10 @@ public abstract class ParserJob {
 
     protected abstract void writeOriginalsResults(ParameterTool params, DataStream<MessageToParse> results);
 
-    protected abstract void writeEnrichments(ParameterTool params, DataStream<EnrichmentCommand> streamingEnrichmentResults, List<String> streamingEnrichmentSources, EnrichmentsConfig streamingEnrichmentConfig);
+    protected abstract void writeEnrichments(ParameterTool params,
+                                             DataStream<EnrichmentCommand> streamingEnrichmentResults,
+                                             List<String> streamingEnrichmentSources,
+                                             EnrichmentsConfig streamingEnrichmentConfig);
 
     protected abstract void writeErrors(ParameterTool params, DataStream<Message> errors);
 

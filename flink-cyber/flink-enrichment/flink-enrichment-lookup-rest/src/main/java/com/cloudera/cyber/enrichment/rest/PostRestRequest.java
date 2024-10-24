@@ -12,15 +12,14 @@
 
 package com.cloudera.cyber.enrichment.rest;
 
-import org.apache.flink.util.Preconditions;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-
-import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import javax.annotation.Nonnull;
+import org.apache.flink.util.Preconditions;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 
 public class PostRestRequest extends RestRequest {
     private final String entityTemplate;
@@ -51,7 +50,8 @@ public class PostRestRequest extends RestRequest {
         return new RestRequestKey(variables, urlTemplate, entityTemplate);
     }
 
-    protected void addEntityToRequest(@Nonnull HttpPost postRequest, @Nonnull String entityTemplate) throws UnsupportedEncodingException {
+    protected void addEntityToRequest(@Nonnull HttpPost postRequest, @Nonnull String entityTemplate)
+          throws UnsupportedEncodingException {
         postRequest.setEntity(new StringEntity(entityTemplate));
     }
 }

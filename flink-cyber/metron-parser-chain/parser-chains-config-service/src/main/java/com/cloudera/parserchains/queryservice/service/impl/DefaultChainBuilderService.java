@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DefaultChainBuilderService implements ChainBuilderService {
-    private ChainBuilder chainBuilder;
+    private final ChainBuilder chainBuilder;
 
     public DefaultChainBuilderService(ChainBuilder chainBuilder) {
         this.chainBuilder = chainBuilder;

@@ -12,10 +12,9 @@
 
 package com.cloudera.cyber.dedupe.impl;
 
+import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.Map;
 
 @Data
 @Builder
@@ -30,10 +29,10 @@ public class SumAndMax {
             throw new IllegalStateException("Unmatched SumAndMax");
         }
         return SumAndMax.builder()
-                .fields(this.getFields())
-                .maxTs(Math.max(this.getMaxTs(), other.getMaxTs()))
-                .minTs(Math.min(this.getMinTs(), other.getMinTs()))
-                .sum(this.getSum() + other.getSum())
-                .build();
+                        .fields(this.getFields())
+                        .maxTs(Math.max(this.getMaxTs(), other.getMaxTs()))
+                        .minTs(Math.min(this.getMinTs(), other.getMinTs()))
+                        .sum(this.getSum() + other.getSum())
+                        .build();
     }
 }

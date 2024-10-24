@@ -23,7 +23,8 @@ public class JobService {
     private final KafkaService kafkaService;
     private final ClusterService clusterService;
 
-    public ResponseBody makeRequest(String clusterId, RequestBody body, String actionString) throws FailedClusterReponseException {
+    public ResponseBody makeRequest(String clusterId, RequestBody body, String actionString)
+          throws FailedClusterReponseException {
         JobActions action = Utils.getEnumFromString(actionString, JobActions.class, JobActions::getAction);
         switch (action) {
             case START:
@@ -36,10 +37,12 @@ public class JobService {
                 return sendAction(clusterId, body, RequestType.RESTART_JOB_REQUEST, ResponseType.RESTART_JOB_RESPONSE);
             case UPDATE_CONFIG:
                 validateJobId(body, action.getAction());
-                return sendAction(clusterId, body, RequestType.UPDATE_JOB_CONFIG_REQUEST, ResponseType.UPDATE_JOB_CONFIG_RESPONSE);
+                return sendAction(clusterId, body, RequestType.UPDATE_JOB_CONFIG_REQUEST,
+                      ResponseType.UPDATE_JOB_CONFIG_RESPONSE);
             case GET_CONFIG:
                 validateJobId(body, action.getAction());
-                return sendAction(clusterId, body, RequestType.GET_JOB_CONFIG_REQUEST, ResponseType.GET_JOB_CONFIG_RESPONSE);
+                return sendAction(clusterId, body, RequestType.GET_JOB_CONFIG_REQUEST,
+                      ResponseType.GET_JOB_CONFIG_RESPONSE);
             case STATUS:
                 validateJobId(body, action.getAction());
                 return clusterService.getClusterInfo(clusterId, body);
@@ -48,10 +51,11 @@ public class JobService {
         }
     }
 
-    private ResponseBody sendAction(String clusterId, RequestBody body, RequestType requestType, ResponseType responseType) {
+    private ResponseBody sendAction(String clusterId, RequestBody body, RequestType requestType,
+                                    ResponseType responseType) {
         Pair<ResponseType, ResponseBody> response = kafkaService.sendWithReply(requestType, clusterId, body);
         if (response.getKey() != responseType) {
-            throw new FailedJobAction("Failed to " + requestType.name() +" a job: " + response.getValue());
+            throw new FailedJobAction("Failed to " + requestType.name() + " a job: " + response.getValue());
         }
         return response.getValue();
     }

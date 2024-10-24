@@ -12,6 +12,14 @@
 
 package com.cloudera.cyber.flink;
 
+import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
+import static com.cloudera.cyber.flink.Utils.readSchemaRegistryProperties;
+import static java.util.stream.Collectors.toList;
+
+import java.util.List;
+import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -30,19 +38,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
 
-import java.util.List;
-import java.util.Properties;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import static com.cloudera.cyber.flink.Utils.readKafkaProperties;
-import static com.cloudera.cyber.flink.Utils.readSchemaRegistryProperties;
-import static java.util.stream.Collectors.toList;
-
 /**
  * TODO - all the request and response stuff should be in wrapper objects instead of using the HasHeader interface.
- *
- * @param <T>
  */
 @Slf4j
 public class SourcesWithHeaders<T extends HasHeaders> {
@@ -60,14 +57,14 @@ public class SourcesWithHeaders<T extends HasHeaders> {
 
         Properties kafkaProperties = readKafkaProperties(params, groupId, true);
         KafkaDeserializationSchema<T> delegate = ClouderaRegistryAvroKafkaDeserializationSchema
-                .builder(type)
-                .setConfig(readSchemaRegistryProperties(params))
-                .build();
+              .builder(type)
+              .setConfig(readSchemaRegistryProperties(params))
+              .build();
 
         KafkaRecordDeserializationSchema<T> schema = new HeaderDeserializer(delegate);
 
-        return KafkaSource.<T>builder().setTopics(topic).setDeserializer(schema).
-                setProperties(kafkaProperties).build();
+        return KafkaSource.<T>builder().setTopics(topic).setDeserializer(schema)
+              .setProperties(kafkaProperties).build();
     }
 
     public KafkaSink<T> createKafkaSink(final String topic, String groupId, final ParameterTool params) {
@@ -77,16 +74,16 @@ public class SourcesWithHeaders<T extends HasHeaders> {
         log.info("Creating Kafka Sink for {}, using {}", topic, kafkaProperties);
 
         KafkaRecordSerializationSchema<T> delegate = ClouderaRegistryAvroKafkaRecordSerializationSchema
-                .<T>builder(topic)
-                .setConfig(readSchemaRegistryProperties(params))
-                .build();
+              .<T>builder(topic)
+              .setConfig(readSchemaRegistryProperties(params))
+              .build();
 
         HeaderSerializer schema = new HeaderSerializer(delegate);
-        return KafkaSink.<T>builder().
-                setKafkaProducerConfig(kafkaProperties).
-                setRecordSerializer(schema).
-                setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE).
-                build();
+        return KafkaSink.<T>builder()
+              .setKafkaProducerConfig(kafkaProperties)
+              .setRecordSerializer(schema)
+              .setDeliverGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
+              .build();
     }
 
     private class HeaderDeserializer implements KafkaRecordDeserializationSchema<T> {
@@ -105,7 +102,8 @@ public class SourcesWithHeaders<T extends HasHeaders> {
         public void deserialize(ConsumerRecord<byte[], byte[]> consumerRecord, Collector<T> collector) {
             try {
                 T deserialize = delegate.deserialize(consumerRecord);
-                deserialize.setHeaders(StreamSupport.stream(consumerRecord.headers().spliterator(), false).collect(Collectors.toMap(Header::key, v -> new String(v.value()))));
+                deserialize.setHeaders(StreamSupport.stream(consumerRecord.headers().spliterator(), false)
+                      .collect(Collectors.toMap(Header::key, v -> new String(v.value()))));
                 collector.collect(deserialize);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -123,8 +121,11 @@ public class SourcesWithHeaders<T extends HasHeaders> {
         @Override
         public ProducerRecord<byte[], byte[]> serialize(T t, KafkaSinkContext kafkaSinkContext, Long ts) {
             ProducerRecord<byte[], byte[]> serialize = delegate.serialize(t, kafkaSinkContext, ts);
-            List<Header> headers = t.getHeaders().entrySet().stream().map(h -> new RecordHeader(h.getKey(), h.getValue().getBytes())).collect(toList());
-            return new ProducerRecord<>(serialize.topic(), serialize.partition(), serialize.key(), serialize.value(), headers);
+            List<Header> headers =
+                  t.getHeaders().entrySet().stream().map(h -> new RecordHeader(h.getKey(), h.getValue().getBytes()))
+                        .collect(toList());
+            return new ProducerRecord<>(serialize.topic(), serialize.partition(), serialize.key(), serialize.value(),
+                  headers);
 
         }
     }

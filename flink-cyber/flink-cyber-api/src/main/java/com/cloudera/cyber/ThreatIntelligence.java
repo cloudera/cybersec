@@ -12,6 +12,10 @@
 
 package com.cloudera.cyber;
 
+import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
+
+import java.util.Map;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,36 +30,30 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.types.Row;
 
-import java.util.Map;
-import java.util.UUID;
-
-import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @TypeInfo(ThreatIntelligenceTypeFactory.class)
 public class ThreatIntelligence extends SpecificRecordBase implements SpecificRecord, IdentifiedMessage, Timestamped {
+    public static final Schema SCHEMA$ = SchemaBuilder.record(ThreatIntelligence.class.getName())
+          .namespace(ThreatIntelligence.class.getPackage().getName())
+          .fields()
+          .requiredString("id")
+          .requiredLong("ts")
+          .requiredString("observable")
+          .requiredString("observableType")
+          .name("fields").type(Schema.createMap(SchemaBuilder.builder().stringType())).noDefault()
+          .endRecord();
+    public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
+          new String[] {"id", "ts", "observable", "observableType", "fields"},
+          Types.STRING, Types.LONG, Types.STRING, Types.STRING, Types.MAP(Types.STRING, Types.STRING));
     @Builder.Default
     private String id = UUID.randomUUID().toString();
     private long ts;
     private String observable;
     private String observableType;
     private Map<String, String> fields;
-
-    public static final Schema SCHEMA$ = SchemaBuilder.record(ThreatIntelligence.class.getName()).namespace(ThreatIntelligence.class.getPackage().getName())
-            .fields()
-            .requiredString("id")
-            .requiredLong("ts")
-            .requiredString("observable")
-            .requiredString("observableType")
-            .name("fields").type(Schema.createMap(SchemaBuilder.builder().stringType())).noDefault()
-            .endRecord();
-
-    public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
-            new String[]{"id", "ts", "observable", "observableType", "fields"},
-            Types.STRING, Types.LONG, Types.STRING, Types.STRING, Types.MAP(Types.STRING, Types.STRING));
 
     public Row toRow() {
         return Row.of(id, ts, observable, observableType, fields);
@@ -69,26 +67,43 @@ public class ThreatIntelligence extends SpecificRecordBase implements SpecificRe
     @Override
     public Object get(int field$) {
         switch (field$) {
-            case 0: return id;
-            case 1: return ts;
-            case 2: return observable;
-            case 3: return observableType;
-            case 4: return fields;
-            default: throw new AvroRuntimeException("Bad index");
+            case 0:
+                return id;
+            case 1:
+                return ts;
+            case 2:
+                return observable;
+            case 3:
+                return observableType;
+            case 4:
+                return fields;
+            default:
+                throw new AvroRuntimeException("Bad index");
         }
     }
 
     // Used by DatumReader.  Applications should not call.
-    @SuppressWarnings(value="unchecked")
+    @SuppressWarnings(value = "unchecked")
     @Override
     public void put(int field$, Object value$) {
         switch (field$) {
-            case 0: id = value$.toString(); break;
-            case 1: ts = (Long)value$; break;
-            case 2: observable = value$.toString(); break;
-            case 3: observableType = value$.toString(); break;
-            case 4: fields = utf8toStringMap(value$); break;
-            default: throw new AvroRuntimeException("Bad index");
+            case 0:
+                id = value$.toString();
+                break;
+            case 1:
+                ts = (Long) value$;
+                break;
+            case 2:
+                observable = value$.toString();
+                break;
+            case 3:
+                observableType = value$.toString();
+                break;
+            case 4:
+                fields = utf8toStringMap(value$);
+                break;
+            default:
+                throw new AvroRuntimeException("Bad index");
         }
     }
 }

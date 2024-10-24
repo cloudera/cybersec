@@ -1,15 +1,5 @@
 package com.cloudera.service.common.utils;
 
-import lombok.experimental.UtilityClass;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.archivers.ArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
-import org.apache.flink.core.fs.FileStatus;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -24,6 +14,15 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Base64;
 import java.util.List;
+import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.flink.core.fs.FileStatus;
 
 @Slf4j
 @UtilityClass
@@ -37,7 +36,7 @@ public class ArchiveUtil {
 
     public static byte[] compressToTarGzInMemory(String inputPath, boolean base64) throws IOException {
         final byte[] bytes = compressToTarGzInMemory(inputPath);
-        if (base64){
+        if (base64) {
             return Base64.getEncoder().encode(bytes);
         } else {
             return bytes;
@@ -58,8 +57,8 @@ public class ArchiveUtil {
         }
 
         try (BufferedOutputStream buffOut = new BufferedOutputStream(outputStream);
-             GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(buffOut);
-             TarArchiveOutputStream tOut = new TarArchiveOutputStream(gzOut)) {
+              GzipCompressorOutputStream gzOut = new GzipCompressorOutputStream(buffOut);
+              TarArchiveOutputStream tOut = new TarArchiveOutputStream(gzOut)) {
 
             try {
                 for (FileStatus file : fileList) {
@@ -71,7 +70,7 @@ public class ArchiveUtil {
         }
     }
 
-    private static void addFileToTar(TarArchiveOutputStream tOut, FileStatus file, String rootPath) throws IOException {
+    private static void addFileToTar(TarArchiveOutputStream tarOut, FileStatus file, String rootPath) throws IOException {
         final Path filePath = Paths.get(file.getPath().getPath());
         String pathInsideTar;
         if (filePath.startsWith(rootPath)) {
@@ -84,12 +83,12 @@ public class ArchiveUtil {
         }
 
         TarArchiveEntry tarEntry = new TarArchiveEntry(
-                filePath.toFile(),
-                pathInsideTar);
+              filePath.toFile(),
+              pathInsideTar);
 
-        tOut.putArchiveEntry(tarEntry);
-        Files.copy(filePath, tOut);
-        tOut.closeArchiveEntry();
+        tarOut.putArchiveEntry(tarEntry);
+        Files.copy(filePath, tarOut);
+        tarOut.closeArchiveEntry();
     }
 
     public static void decompressFromTarGzFile(String pathToTar, String outputPath) throws IOException {
@@ -106,12 +105,13 @@ public class ArchiveUtil {
         decompressFromTarGzInMemory(rawData, outputPath, false);
     }
 
-    public static void decompressFromTarGzInMemory(byte[] rawData, String outputPath, boolean base64) throws IOException {
+    public static void decompressFromTarGzInMemory(byte[] rawData, String outputPath, boolean base64)
+          throws IOException {
         if (rawData == null) {
             throw new IOException("Provided null as .tar.gz data which is not allowed!");
         }
         final byte[] data;
-        if (base64){
+        if (base64) {
             data = Base64.getDecoder().decode(rawData);
         } else {
             data = rawData;
@@ -124,8 +124,8 @@ public class ArchiveUtil {
 
     private static void decompressFromTarGz(InputStream inputStream, String outputPath) throws IOException {
         try (BufferedInputStream bi = new BufferedInputStream(inputStream);
-             GzipCompressorInputStream gzi = new GzipCompressorInputStream(bi);
-             TarArchiveInputStream ti = new TarArchiveInputStream(gzi)) {
+              GzipCompressorInputStream gzi = new GzipCompressorInputStream(bi);
+              TarArchiveInputStream ti = new TarArchiveInputStream(gzi)) {
 
             ArchiveEntry entry;
             while ((entry = ti.getNextEntry()) != null) {

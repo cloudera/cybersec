@@ -14,7 +14,6 @@ package com.cloudera.cyber.libs.networking;
 
 import com.cloudera.cyber.CyberFunction;
 import com.cloudera.cyber.libs.AbstractBooleanScalarFunction;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 

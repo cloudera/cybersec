@@ -28,8 +28,8 @@ import org.apache.commons.lang3.StringUtils;
  * to flag when unexpected conditions are encountered in the data.
  */
 @MessageParser(
-    name="Error",
-    description = "Always results in an error. Can be used with a router to flag unexpected data.")
+      name = "Error",
+      description = "Always results in an error. Can be used with a router to flag unexpected data.")
 public class AlwaysFailParser implements Parser {
     private static final String DEFAULT_ERROR_MESSAGE = "Parsing error encountered";
     private Throwable error;
@@ -41,18 +41,18 @@ public class AlwaysFailParser implements Parser {
     @Override
     public Message parse(Message message) {
         return Message.builder()
-                .withFields(message)
-                .withError(error)
-                .build();
+                      .withFields(message)
+                      .withError(error)
+                      .build();
     }
 
-    @Configurable(key="errorMessage")
+    @Configurable(key = "errorMessage")
     public AlwaysFailParser withError(
-            @Parameter(key="errorMessage",
-                    label="Error Message",
-                    description="The error message explaining the error. Default value: '" + DEFAULT_ERROR_MESSAGE + "'",
-                    defaultValue=DEFAULT_ERROR_MESSAGE) String message) {
-        if(StringUtils.isNotEmpty(message)) {
+          @Parameter(key = "errorMessage",
+                label = "Error Message",
+                description = "The error message explaining the error. Default value: '" + DEFAULT_ERROR_MESSAGE + "'",
+                defaultValue = DEFAULT_ERROR_MESSAGE) String message) {
+        if (StringUtils.isNotEmpty(message)) {
             error = new IllegalStateException(message);
         }
         return this;

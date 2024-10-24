@@ -6,9 +6,11 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,72 +31,75 @@ import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("serial")
 public class BasicIseParser extends BasicParser {
 
-	private static final Logger _LOG = LoggerFactory
-			.getLogger(BasicIseParser.class);
-	static final transient ISEParser _parser = new ISEParser("header=");
+    private static final Logger _LOG = LoggerFactory
+          .getLogger(BasicIseParser.class);
+    static final ISEParser _parser = new ISEParser("header=");
 
-	@Override
-	public void configure(Map<String, Object> parserConfig) {
-    setReadCharset(parserConfig);
-	}
+    @Override
+    public void configure(Map<String, Object> parserConfig) {
+        setReadCharset(parserConfig);
+    }
 
-	@Override
-	public void init() {
+    @Override
+    public void init() {
 
-	}
+    }
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public List<JSONObject> parse(byte[] msg) {
-	
-		String raw_message = "";
-		List<JSONObject> messages = new ArrayList<>();
-		try {
+    @SuppressWarnings({"unchecked", "checkstyle:VariableDeclarationUsageDistance"})
+    @Override
+    public List<JSONObject> parse(byte[] msg) {
 
-			raw_message = new String(msg, getReadCharset());
-			_LOG.debug("Received message: {}", raw_message);
+        String rawMessage = "";
+        List<JSONObject> messages = new ArrayList<>();
+        try {
 
-			/*
-			 * Reinitialize Parser. It has the effect of calling the constructor again.
-			 */
-			_parser.ReInit(new StringReader("header=" + raw_message.trim()));
+            rawMessage = new String(msg, getReadCharset());
+            _LOG.debug("Received message: {}", rawMessage);
 
-			JSONObject payload = _parser.parseObject();
+            /*
+             * Reinitialize Parser. It has the effect of calling the constructor again.
+             */
+            _parser.ReInit(new StringReader("header=" + rawMessage.trim()));
 
-			String ip_src_addr = (String) payload.get("Device IP Address");
-			String ip_src_port = (String) payload.get("Device Port");
-			String ip_dst_addr = (String) payload.get("DestinationIPAddress");
-			String ip_dst_port = (String) payload.get("DestinationPort");
+            JSONObject payload = _parser.parseObject();
 
-			/*
-			 * Standard Fields for Metron.
-			 */
+            String ipSrcAddr = (String) payload.get("Device IP Address");
+            String ipSrcPort = (String) payload.get("Device Port");
+            String ipDstAddr = (String) payload.get("DestinationIPAddress");
+            String ipDstPort = (String) payload.get("DestinationPort");
 
-			if(ip_src_addr != null)
-				payload.put("ip_src_addr", ip_src_addr);
-			if(ip_src_port != null)
-				payload.put("ip_src_port", ip_src_port);
-			if(ip_dst_addr != null)
-				payload.put("ip_dst_addr", ip_dst_addr);
-			if(ip_dst_port != null)
-				payload.put("ip_dst_port", ip_dst_port);
-			messages.add(payload);
-			return messages;
+            /*
+             * Standard Fields for Metron.
+             */
 
-		} catch (Exception e) {
-			Log.error(e.toString());
-			e.printStackTrace();
-		}
-		return null;
-	}
+            if (ipSrcAddr != null) {
+                payload.put("ip_src_addr", ipSrcAddr);
+            }
+            if (ipSrcPort != null) {
+                payload.put("ip_src_port", ipSrcPort);
+            }
+            if (ipDstAddr != null) {
+                payload.put("ip_dst_addr", ipDstAddr);
+            }
+            if (ipDstPort != null) {
+                payload.put("ip_dst_port", ipDstPort);
+            }
+            messages.add(payload);
+            return messages;
 
-	@Override
-	public boolean validate(JSONObject message) {
-		return true;
-	}
+        } catch (Exception e) {
+            Log.error(e.toString());
+            e.printStackTrace();
+        }
+        return null;
+    }
 
-	
+    @Override
+    public boolean validate(JSONObject message) {
+        return true;
+    }
+
+
 }

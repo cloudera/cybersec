@@ -12,16 +12,14 @@
 
 package com.cloudera.cyber.profiler;
 
+import static com.cloudera.cyber.profiler.ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION;
+import static com.cloudera.cyber.profiler.StatsProfileAggregateFunction.STATS_PROFILE_GROUP_SUFFIX;
+import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.STATS_EXTENSION_SUFFIXES;
+
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.cloudera.cyber.profiler.dto.MeasurementDataDto;
 import com.cloudera.cyber.profiler.dto.MeasurementDto;
 import com.cloudera.cyber.profiler.dto.ProfileDto;
-import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.api.common.functions.RichFlatMapFunction;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.util.Collector;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -30,10 +28,10 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.cloudera.cyber.profiler.ProfileAggregateFunction.PROFILE_GROUP_NAME_EXTENSION;
-import static com.cloudera.cyber.profiler.StatsProfileAggregateFunction.STATS_PROFILE_GROUP_SUFFIX;
-import static com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAcc.STATS_EXTENSION_SUFFIXES;
+import lombok.RequiredArgsConstructor;
+import org.apache.flink.api.common.functions.RichFlatMapFunction;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.util.Collector;
 
 @RequiredArgsConstructor
 public class ProfileMessageToMeasurementDataDtoMapping extends RichFlatMapFunction<ProfileMessage, MeasurementDataDto> {
@@ -44,14 +42,16 @@ public class ProfileMessageToMeasurementDataDtoMapping extends RichFlatMapFuncti
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        this.profileNameToKeyFieldNames = this.profileDtos.stream().collect(Collectors.toMap(ProfileDto::getProfileGroupName
-                , profileDto -> profileDto.getKeyFieldNames().split(","),
-                (first, second) -> first,
-                HashMap::new));
-        this.profileNameToProfileDto = this.profileDtos.stream().collect(Collectors.toMap(ProfileDto::getProfileGroupName
-                , Function.identity(),
-                (first, second) -> first,
-                HashMap::new));
+        this.profileNameToKeyFieldNames =
+              this.profileDtos.stream().collect(Collectors.toMap(ProfileDto::getProfileGroupName,
+                    profileDto -> profileDto.getKeyFieldNames().split(","),
+                    (first, second) -> first,
+                    HashMap::new));
+        this.profileNameToProfileDto =
+              this.profileDtos.stream().collect(Collectors.toMap(ProfileDto::getProfileGroupName,
+                    Function.identity(),
+                    (first, second) -> first,
+                    HashMap::new));
     }
 
     @Override
@@ -68,14 +68,20 @@ public class ProfileMessageToMeasurementDataDtoMapping extends RichFlatMapFuncti
         profileMessage.getExtensions().forEach((key, value) -> {
             if (STATS_EXTENSION_SUFFIXES.stream().anyMatch(key::endsWith)) {
                 String[] parts = key.split("\\.");
-                MeasurementDataDto measurementDto = MeasurementDataDto.builder()
-                        .measurementId(getMeasurementIdByName(parts[0]).orElse(-1))
-                        .measurementName(parts[0])
-                        .measurementType(parts[1])
-                        .measurementTime(Timestamp.from(Instant.ofEpochMilli(
-                                Long.parseLong(profileMessage.getExtensions().get(ProfileGroupAcc.START_PERIOD_EXTENSION)))))
-                        .measurementValue(Double.parseDouble(Optional.ofNullable(value).orElse("0")))
-                        .build();
+                MeasurementDataDto measurementDto =
+                      MeasurementDataDto.builder()
+                                        .measurementId(
+                                              getMeasurementIdByName(parts[0]).orElse(-1))
+                                        .measurementName(parts[0])
+                                        .measurementType(parts[1])
+                                        .measurementTime(
+                                              Timestamp.from(Instant.ofEpochMilli(
+                                                    Long.parseLong(
+                                                          profileMessage.getExtensions()
+                                                                        .get(ProfileGroupAcc.START_PERIOD_EXTENSION)))))
+                                        .measurementValue(Double.parseDouble(
+                                              Optional.ofNullable(value).orElse("0")))
+                                        .build();
                 collector.collect(measurementDto);
             }
         });
@@ -83,28 +89,38 @@ public class ProfileMessageToMeasurementDataDtoMapping extends RichFlatMapFuncti
 
     private Optional<Integer> getMeasurementIdByName(String measurementName) {
         return profileDtos.stream().flatMap(profile -> profile.getMeasurementDtos().stream())
-                .filter(measurementDto -> measurementDto.getResultExtensionName().equals(measurementName))
-                .findFirst().map(MeasurementDto::getId);
+                          .filter(measurementDto -> measurementDto.getResultExtensionName().equals(measurementName))
+                          .findFirst().map(MeasurementDto::getId);
     }
 
     private void flatMapProfile(ProfileMessage profileMessage, Collector<MeasurementDataDto> collector) {
         String profileGroupName = profileMessage.getExtensions().get(PROFILE_GROUP_NAME_EXTENSION);
         ProfileDto profileDto = profileNameToProfileDto.get(profileGroupName);
         if (profileDto != null) {
-            final ArrayList<String> keyFieldNamesValues = Arrays.stream(profileNameToKeyFieldNames.get(profileGroupName))
-                    .map(keyFieldName -> profileMessage.getExtensions().get(keyFieldName))
-                    .collect(Collectors.toCollection(ArrayList::new));
+            final ArrayList<String> keyFieldNamesValues =
+                  Arrays.stream(profileNameToKeyFieldNames.get(profileGroupName))
+                        .map(keyFieldName -> profileMessage.getExtensions().get(keyFieldName))
+                        .collect(Collectors.toCollection(ArrayList::new));
             for (MeasurementDto measurementDto : profileDto.getMeasurementDtos()) {
                 String measurementName = measurementDto.getResultExtensionName();
-                MeasurementDataDto measurementDataDto = MeasurementDataDto.builder()
-                        .measurementId(measurementDto.getId())
-                        .keys(keyFieldNamesValues)
-                        .measurementName(measurementName)
-                        .profileId(profileDto.getId())
-                        .measurementTime(Timestamp.from(Instant.ofEpochMilli(
-                                Long.parseLong(profileMessage.getExtensions().get(ProfileGroupAcc.START_PERIOD_EXTENSION)))))
-                        .measurementValue(Double.parseDouble(Optional.ofNullable(profileMessage.getExtensions()).map(map -> map.get(measurementName)).orElse("0")))
-                        .build();
+                MeasurementDataDto measurementDataDto =
+                      MeasurementDataDto.builder()
+                                        .measurementId(measurementDto.getId())
+                                        .keys(keyFieldNamesValues)
+                                        .measurementName(measurementName)
+                                        .profileId(profileDto.getId())
+                                        .measurementTime(
+                                              Timestamp.from(Instant.ofEpochMilli(
+                                                    Long.parseLong(
+                                                          profileMessage.getExtensions()
+                                                                        .get(ProfileGroupAcc.START_PERIOD_EXTENSION)))))
+                                        .measurementValue(Double.parseDouble(
+                                              Optional.ofNullable(
+                                                            profileMessage.getExtensions())
+                                                      .map(map -> map.get(
+                                                            measurementName))
+                                                      .orElse("0")))
+                                        .build();
                 collector.collect(measurementDataDto);
             }
         }

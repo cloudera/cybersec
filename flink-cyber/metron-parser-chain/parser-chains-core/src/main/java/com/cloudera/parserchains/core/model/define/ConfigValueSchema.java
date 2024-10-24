@@ -14,13 +14,12 @@ package com.cloudera.parserchains.core.model.define;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * Describes the configuration values defined by the user when building a parser chain.
@@ -65,21 +64,21 @@ public class ConfigValueSchema implements Serializable {
         }
         ConfigValueSchema that = (ConfigValueSchema) o;
         return new EqualsBuilder()
-                .append(values, that.values)
-                .isEquals();
+              .append(values, that.values)
+              .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(values)
-                .toHashCode();
+              .append(values)
+              .toHashCode();
     }
 
     @Override
     public String toString() {
-        return "ConfigValue{" +
-                "values=" + values +
-                '}';
+        return "ConfigValue{"
+               + "values=" + values
+               + '}';
     }
 }

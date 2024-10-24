@@ -27,8 +27,8 @@ import org.apache.commons.lang3.StringUtils;
  * tracking the time when a message was parsed.
  */
 @MessageParser(
-    name="Timestamp",
-    description="Adds a timestamp to a message. Can be used to mark processing time.")
+      name = "Timestamp",
+      description = "Adds a timestamp to a message. Can be used to mark processing time.")
 public class TimestampParser implements Parser {
     private static final String DEFAULT_OUTPUT_FIELD = "timestamp";
     private FieldName outputField;
@@ -44,24 +44,26 @@ public class TimestampParser implements Parser {
         long now = clock.currentTimeMillis();
         FieldValue timestamp = StringFieldValue.of(Long.toString(now));
         return Message.builder()
-                .withFields(input)
-                .addField(outputField, timestamp)
-                .build();
+                      .withFields(input)
+                      .addField(outputField, timestamp)
+                      .build();
     }
 
-    @Configurable(key="outputField",
-            label="Output Field",
-            description="The field that will contain the timestamp. Default value: '" + DEFAULT_OUTPUT_FIELD + "'",
-            isOutputName=true,
-            defaultValue=DEFAULT_OUTPUT_FIELD)
+    @Configurable(key = "outputField",
+          label = "Output Field",
+          description = "The field that will contain the timestamp. Default value: '" + DEFAULT_OUTPUT_FIELD + "'",
+          isOutputName = true,
+          defaultValue = DEFAULT_OUTPUT_FIELD)
     public TimestampParser withOutputField(String fieldName) {
-        if(StringUtils.isNotBlank(fieldName)) {
+        if (StringUtils.isNotBlank(fieldName)) {
             this.outputField = FieldName.of(fieldName);
         }
         return this;
     }
 
     /**
+     * Clock setter.
+     *
      * @param clock A {@link Clock} to use during testing.
      */
     public TimestampParser withClock(Clock clock) {

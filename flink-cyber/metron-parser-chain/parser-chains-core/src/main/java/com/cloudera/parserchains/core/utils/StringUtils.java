@@ -12,18 +12,17 @@
 
 package com.cloudera.parserchains.core.utils;
 
-import lombok.experimental.UtilityClass;
-import org.apache.commons.lang3.StringEscapeUtils;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import lombok.experimental.UtilityClass;
+import org.apache.commons.lang3.StringEscapeUtils;
 
 @UtilityClass
 public final class StringUtils {
 
-    private static JSONUtils jsonUtils = JSONUtils.INSTANCE;
+    private static final JSONUtils jsonUtils = JSONUtils.INSTANCE;
 
     public static char getFirstChar(String delimiter) {
         return unescapeJava(delimiter).charAt(0);
@@ -36,25 +35,25 @@ public final class StringUtils {
     public static Object parseProperType(String s) {
         Optional<?> result;
         result = getLong(s);
-        if (result.isPresent()){
+        if (result.isPresent()) {
             return result.get();
         }
         result = getDouble(s);
-        if (result.isPresent()){
+        if (result.isPresent()) {
             return result.get();
         }
         result = getList(s);
-        if (result.isPresent()){
+        if (result.isPresent()) {
             return result.get();
         }
         result = getMap(s);
-        if (result.isPresent()){
+        if (result.isPresent()) {
             return result.get();
         }
         return s;
     }
 
-    public static Optional<Double> getDouble(String text){
+    public static Optional<Double> getDouble(String text) {
         if (text == null) {
             return Optional.empty();
         }
@@ -65,7 +64,7 @@ public final class StringUtils {
         }
     }
 
-    public static Optional<Long> getLong(String text){
+    public static Optional<Long> getLong(String text) {
         if (text == null) {
             return Optional.empty();
         }
@@ -76,7 +75,7 @@ public final class StringUtils {
         }
     }
 
-    public static Optional<List<Object>> getList(String text){
+    public static Optional<List<Object>> getList(String text) {
         if (text == null || getMap(text).isPresent()) {
             return Optional.empty();
         }
@@ -87,7 +86,7 @@ public final class StringUtils {
         }
     }
 
-    public static Optional<Map<Object,Object>> getMap(String text){
+    public static Optional<Map<Object, Object>> getMap(String text) {
         if (text == null) {
             return Optional.empty();
         }

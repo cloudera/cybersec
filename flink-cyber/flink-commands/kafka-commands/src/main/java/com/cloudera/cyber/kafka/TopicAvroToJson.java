@@ -12,6 +12,10 @@
 
 package com.cloudera.cyber.kafka;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Collections;
+import java.util.Properties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumWriter;
@@ -22,11 +26,6 @@ import org.apache.avro.io.JsonEncoder;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Collections;
-import java.util.Properties;
 
 @Slf4j
 public class TopicAvroToJson {
@@ -63,7 +62,8 @@ public class TopicAvroToJson {
         }
     }
 
-    private static void consume(Properties consumerProperties, String topic, boolean pretty, int maxRetries, int maxRecords) {
+    private static void consume(Properties consumerProperties, String topic, boolean pretty, int maxRetries,
+                                int maxRecords) {
 
         try (KafkaConsumer<String, GenericRecord> consumer = new KafkaConsumer<>(consumerProperties)) {
             boolean gotResponse = false;

@@ -12,12 +12,13 @@
 
 package com.cloudera.cyber.hbase;
 
-import lombok.*;
+import java.util.Map;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
-
-import java.util.Map;
 
 @Getter
 @SuperBuilder
@@ -29,5 +30,6 @@ public abstract class LookupKey {
     private String key;
 
     public abstract Get toGet();
+
     public abstract Map<String, Object> resultToMap(Result hbaseResult);
 }

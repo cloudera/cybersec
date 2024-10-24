@@ -14,11 +14,10 @@ package com.cloudera.parserchains.core.model.define;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
-
 import java.io.Serializable;
 import java.util.Objects;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 /**
  * The name of a parser.
@@ -32,6 +31,7 @@ public class ParserName implements Serializable {
 
     /**
      * Create a new {@link ParserName}.
+     *
      * @param name The name of the parser.
      */
     @JsonCreator
@@ -67,21 +67,21 @@ public class ParserName implements Serializable {
         }
         ParserName that = (ParserName) o;
         return new EqualsBuilder()
-                .append(name, that.name)
-                .isEquals();
+              .append(name, that.name)
+              .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(name)
-                .toHashCode();
+              .append(name)
+              .toHashCode();
     }
 
     @Override
     public String toString() {
-        return "ParserName{" +
-                "name='" + name + '\'' +
-                '}';
+        return "ParserName{"
+               + "name='" + name + '\''
+               + '}';
     }
 }

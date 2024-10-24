@@ -12,18 +12,17 @@
 
 package com.cloudera.cyber.profiler.accumulator;
 
-import org.apache.datasketches.memory.Memory;
-import org.apache.datasketches.theta.SetOperation;
-import org.apache.datasketches.theta.Sketch;
-import org.apache.datasketches.theta.Sketches;
-import org.apache.datasketches.theta.Union;
+import static org.apache.datasketches.theta.SetOperation.builder;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-
-import static org.apache.datasketches.theta.SetOperation.builder;
+import org.apache.datasketches.memory.Memory;
+import org.apache.datasketches.theta.SetOperation;
+import org.apache.datasketches.theta.Sketch;
+import org.apache.datasketches.theta.Sketches;
+import org.apache.datasketches.theta.Union;
 
 public class SerializableUnion implements Serializable {
 
@@ -38,7 +37,7 @@ public class SerializableUnion implements Serializable {
     }
 
     private void writeObject(ObjectOutputStream oos)
-            throws IOException {
+          throws IOException {
         oos.defaultWriteObject();
         byte[] unionBytes = union.getResult().toByteArray();
         oos.writeInt(unionBytes.length);
@@ -46,7 +45,7 @@ public class SerializableUnion implements Serializable {
     }
 
     private void readObject(ObjectInputStream ois)
-            throws ClassNotFoundException, IOException {
+          throws ClassNotFoundException, IOException {
         ois.defaultReadObject();
         int unionByteLength = ois.readInt();
         byte[] unionBytes = new byte[unionByteLength];

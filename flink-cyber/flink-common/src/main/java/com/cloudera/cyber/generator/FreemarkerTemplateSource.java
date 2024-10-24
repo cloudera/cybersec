@@ -17,14 +17,6 @@ import freemarker.cache.MultiTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import lombok.extern.java.Log;
-import org.apache.avro.Schema;
-import org.apache.avro.Schema.Parser;
-import org.apache.commons.math3.distribution.EnumeratedDistribution;
-import org.apache.commons.math3.util.Pair;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.streaming.api.functions.source.ParallelSourceFunction;
-
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -35,9 +27,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.extern.java.Log;
+import org.apache.avro.Schema;
+import org.apache.avro.Schema.Parser;
+import org.apache.commons.math3.distribution.EnumeratedDistribution;
+import org.apache.commons.math3.util.Pair;
+import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.streaming.api.functions.source.ParallelSourceFunction;
 
 @Log
-public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<String,byte[]>> {
+public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<String, byte[]>> {
 
     private final EnumeratedDistribution<GenerationSource> files;
     private volatile boolean isRunning = true;
@@ -57,7 +56,7 @@ public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<S
 
         JsonStringToAvro(String schemaString) {
             Parser avroSchemaParser = new Parser();
-            this.avroSchema =  avroSchemaParser.parse(schemaString);
+            this.avroSchema = avroSchemaParser.parse(schemaString);
         }
 
         @Override
@@ -75,14 +74,13 @@ public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<S
     }
 
 
-
     public FreemarkerTemplateSource(GeneratorConfig generatorConfig, long maxRecords, int eps) {
         // normalise weights
         List<GenerationSource> files = generatorConfig.getGenerationSources();
         Double total = files.stream().mapToDouble(GenerationSource::getWeight).sum();
         List<Pair<GenerationSource, Double>> weights = files.stream()
-                .map(e -> Pair.create(e, e.getWeight() / total))
-                .collect(Collectors.toList());
+              .map(e -> Pair.create(e, e.getWeight() / total))
+              .collect(Collectors.toList());
 
         // create a reverse sorted version of the weights
         this.files = new EnumeratedDistribution<>(weights);
@@ -97,24 +95,25 @@ public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<S
     }
 
     @Override
-    public void run(SourceContext<Tuple2<String,byte[]>> sourceContext) throws Exception {
+    public void run(SourceContext<Tuple2<String, byte[]>> sourceContext) throws Exception {
         Configuration cfg = new Configuration(Configuration.VERSION_2_3_30);
 
         TemplateLoader templateLoader = new ClassTemplateLoader(Thread.currentThread().getContextClassLoader(), "");
         if (templateBaseDir != null) {
             FlinkFileTemplateLoader flinkFileLoader = new FlinkFileTemplateLoader(templateBaseDir);
-            templateLoader = new MultiTemplateLoader(new TemplateLoader[]{flinkFileLoader, templateLoader});
+            templateLoader = new MultiTemplateLoader(new TemplateLoader[] {flinkFileLoader, templateLoader});
         }
 
         cfg.setTemplateLoader(templateLoader);
-        cfg.setCacheStorage(new freemarker.cache.MruCacheStorage(50,50));
-        cfg.setTemplateUpdateDelayMilliseconds(3600*24*1000);
+        cfg.setCacheStorage(new freemarker.cache.MruCacheStorage(50, 50));
+        cfg.setTemplateUpdateDelayMilliseconds(3600 * 24 * 1000);
 
         Map<String, Function<String, byte[]>> topicOutputConverter = new HashMap<>();
 
-        for(GenerationSource generationSource : generationSources) {
+        for (GenerationSource generationSource : generationSources) {
             if (generationSource.getOutputAvroSchema() != null) {
-                topicOutputConverter.put(generationSource.getTopic(), new JsonStringToAvro(generationSource.getOutputAvroSchema()));
+                topicOutputConverter.put(generationSource.getTopic(),
+                      new JsonStringToAvro(generationSource.getOutputAvroSchema()));
             } else {
                 topicOutputConverter.put(generationSource.getTopic(), new TextToBytes());
             }
@@ -144,20 +143,22 @@ public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<S
             Writer out = new StringWriter();
 
             SyntheticEntry entry = SyntheticEntry.builder().ts(
-                    Instant.now().toEpochMilli())
-                    .utils(utils)
-                    .params(file.getRandomParameters())
-                    .build();
+                        Instant.now().toEpochMilli())
+                  .utils(utils)
+                  .params(file.getRandomParameters())
+                  .build();
 
             temp.process(entry, out);
 
             if (count % 100 == 0) {
                 Instant endTime = Instant.now();
-                log.info(String.format("Produced %d records from template %s to topic %s from: %s to: %s", count, file.getFile(), file.getTopic(), startTime, endTime));
+                log.info(String.format("Produced %d records from template %s to topic %s from: %s to: %s", count,
+                      file.getFile(), file.getTopic(), startTime, endTime));
                 startTime = endTime;
             }
 
-            sourceContext.collect(Tuple2.of(file.getTopic(), topicOutputConverter.get(file.getTopic()).apply(out.toString())));
+            sourceContext.collect(
+                  Tuple2.of(file.getTopic(), topicOutputConverter.get(file.getTopic()).apply(out.toString())));
             if (eps > 0) {
                 Thread.sleep(ms, ns);
             }

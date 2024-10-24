@@ -12,13 +12,26 @@
 
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.*;
-import com.github.palindromicity.syslog.SyslogSpecification;
-import org.junit.jupiter.api.Test;
-
-import static com.github.palindromicity.syslog.dsl.SyslogFieldKeys.*;
+import static com.github.palindromicity.syslog.dsl.SyslogFieldKeys.HEADER_APPNAME;
+import static com.github.palindromicity.syslog.dsl.SyslogFieldKeys.HEADER_HOSTNAME;
+import static com.github.palindromicity.syslog.dsl.SyslogFieldKeys.HEADER_MSGID;
+import static com.github.palindromicity.syslog.dsl.SyslogFieldKeys.HEADER_PRI;
+import static com.github.palindromicity.syslog.dsl.SyslogFieldKeys.HEADER_PRI_FACILITY;
+import static com.github.palindromicity.syslog.dsl.SyslogFieldKeys.HEADER_PRI_SEVERITY;
+import static com.github.palindromicity.syslog.dsl.SyslogFieldKeys.HEADER_PROCID;
+import static com.github.palindromicity.syslog.dsl.SyslogFieldKeys.HEADER_TIMESTAMP;
+import static com.github.palindromicity.syslog.dsl.SyslogFieldKeys.HEADER_VERSION;
+import static com.github.palindromicity.syslog.dsl.SyslogFieldKeys.MESSAGE;
+import static com.github.palindromicity.syslog.dsl.SyslogFieldKeys.STRUCTURED_BASE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.cloudera.parserchains.core.Constants;
+import com.cloudera.parserchains.core.FieldName;
+import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.StringFieldValue;
+import com.github.palindromicity.syslog.SyslogSpecification;
+import org.junit.jupiter.api.Test;
 
 public class SyslogParserTest {
 
@@ -57,8 +70,8 @@ public class SyslogParserTest {
         assertEquals(expected, output);
     }
 
-    private static final String SYSLOG_3164 = "<181>2018-09-14T00:54:09+00:00 lzpqrst-admin.in.mycompany.com.lg " +
-            "CISE_RADIUS_Accounting 0018032501 1 0 2018-09-14 10:54:09.095 +10:00";
+    private static final String SYSLOG_3164 = "<181>2018-09-14T00:54:09+00:00 lzpqrst-admin.in.mycompany.com.lg "
+            + "CISE_RADIUS_Accounting 0018032501 1 0 2018-09-14 10:54:09.095 +10:00";
 
     @Test
     void parse3164() {

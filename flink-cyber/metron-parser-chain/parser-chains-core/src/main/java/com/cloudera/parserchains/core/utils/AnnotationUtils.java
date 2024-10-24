@@ -15,7 +15,6 @@ package com.cloudera.parserchains.core.utils;
 import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.Parameter;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -42,18 +41,18 @@ public class AnnotationUtils {
 
     public static Map<Configurable, Method> getAnnotatedMethodsInOrder(Class<? extends Parser> clazz) {
         return getAnnotatedMethods(clazz).entrySet().stream()
-                .sorted(Comparator.comparing(entry -> entry.getKey().orderPriority()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                        (first, second) -> first,
-                        LinkedHashMap::new));
+                                         .sorted(Comparator.comparing(entry -> entry.getKey().orderPriority()))
+                                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                                               (first, second) -> first,
+                                               LinkedHashMap::new));
     }
 
     public static List<Parameter> getAnnotatedParameters(Method method) {
         List<Parameter> results = new ArrayList<>();
-        for (Annotation[] parameterAnnotations : method.getParameterAnnotations()) {
-            for (Annotation aParameterAnnotation : parameterAnnotations) {
-                if (aParameterAnnotation instanceof Parameter) {
-                    results.add((Parameter) aParameterAnnotation);
+        for (Annotation[] parameterAnnotationArray : method.getParameterAnnotations()) {
+            for (Annotation parameterAnnotation : parameterAnnotationArray) {
+                if (parameterAnnotation instanceof Parameter) {
+                    results.add((Parameter) parameterAnnotation);
                 }
             }
         }

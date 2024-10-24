@@ -12,7 +12,12 @@
 
 package com.cloudera.cyber.enrichment.rest;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.flink.util.Preconditions;
 

@@ -18,54 +18,55 @@
 
 package org.apache.metron.stellar.common.evaluators;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.metron.stellar.common.FrameContext;
 import org.apache.metron.stellar.common.generated.StellarParser;
 import org.apache.metron.stellar.dsl.ParseException;
 import org.apache.metron.stellar.dsl.Token;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum NumberLiteralEvaluator {
-  INSTANCE;
-  public enum Strategy {
-     INTEGER(StellarParser.IntLiteralContext.class, new IntLiteralEvaluator())
-    , DOUBLE(StellarParser.DoubleLiteralContext.class, new DoubleLiteralEvaluator())
-    , FLOAT(StellarParser.FloatLiteralContext.class, new FloatLiteralEvaluator())
-    , LONG(StellarParser.LongLiteralContext.class, new LongLiteralEvaluator());
-    Class<? extends StellarParser.Arithmetic_operandsContext> context;
-    NumberEvaluator evaluator;
-    private static Map<Class<? extends StellarParser.Arithmetic_operandsContext>, NumberEvaluator> strategyMap;
+    INSTANCE;
 
-    static {
-      strategyMap = new HashMap<>();
-      for (Strategy strat : Strategy.values()) {
-        strategyMap.put(strat.context, strat.evaluator);
-      }
+    public enum Strategy {
+        INTEGER(StellarParser.IntLiteralContext.class, new IntLiteralEvaluator()),
+        DOUBLE(StellarParser.DoubleLiteralContext.class, new DoubleLiteralEvaluator()),
+        FLOAT(StellarParser.FloatLiteralContext.class, new FloatLiteralEvaluator()),
+        LONG(StellarParser.LongLiteralContext.class, new LongLiteralEvaluator());
+        Class<? extends StellarParser.Arithmetic_operandsContext> context;
+        NumberEvaluator evaluator;
+        private static final Map<Class<? extends StellarParser.Arithmetic_operandsContext>, NumberEvaluator> strategyMap;
+
+        static {
+            strategyMap = new HashMap<>();
+            for (Strategy strat : Strategy.values()) {
+                strategyMap.put(strat.context, strat.evaluator);
+            }
+        }
+
+        Strategy(Class<? extends StellarParser.Arithmetic_operandsContext> context,
+                 NumberEvaluator<? extends StellarParser.Arithmetic_operandsContext> evaluator
+        ) {
+            this.context = context;
+            this.evaluator = evaluator;
+        }
     }
 
-    Strategy(Class<? extends StellarParser.Arithmetic_operandsContext> context
-            , NumberEvaluator<? extends StellarParser.Arithmetic_operandsContext> evaluator
+    @SuppressWarnings("unchecked")
+    Token<? extends Number> evaluate(StellarParser.Arithmetic_operandsContext context,
+                                     Map<Class<? extends StellarParser.Arithmetic_operandsContext>, NumberEvaluator> instanceMap,
+                                     FrameContext.Context contextVariety
     ) {
-      this.context = context;
-      this.evaluator = evaluator;
+        NumberEvaluator evaluator = instanceMap.get(context.getClass());
+        if (evaluator == null) {
+            throw new ParseException("Does not support evaluation for type " + context.getClass());
+        }
+        return evaluator.evaluate(context, contextVariety);
     }
-  }
 
-  @SuppressWarnings("unchecked")
-  Token<? extends Number> evaluate(StellarParser.Arithmetic_operandsContext context,
-                                          Map<Class<? extends StellarParser.Arithmetic_operandsContext>, NumberEvaluator> instanceMap,
-                                          FrameContext.Context contextVariety
-                                         ) {
-    NumberEvaluator evaluator = instanceMap.get(context.getClass());
-    if (evaluator == null) {
-      throw new ParseException("Does not support evaluation for type " + context.getClass());
+    public Token<? extends Number> evaluate(StellarParser.Arithmetic_operandsContext context,
+                                            FrameContext.Context contextVariety) {
+        return evaluate(context, Strategy.strategyMap, contextVariety);
     }
-    return evaluator.evaluate(context, contextVariety);
-  }
-
-  public Token<? extends Number> evaluate(StellarParser.Arithmetic_operandsContext context, FrameContext.Context contextVariety) {
-    return evaluate(context, Strategy.strategyMap, contextVariety);
-  }
 
 }

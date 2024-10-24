@@ -6,23 +6,26 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.metron.enrichment.lookup.accesstracker;
 
-import org.apache.metron.stellar.common.utils.BloomFilter;
-import org.apache.metron.enrichment.lookup.LookupKey;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.Map;
 import java.util.function.Function;
+import org.apache.metron.enrichment.lookup.LookupKey;
+import org.apache.metron.stellar.common.utils.BloomFilter;
 
 public class BloomAccessTracker implements AccessTracker {
     private static final long serialVersionUID = 1L;
@@ -50,7 +53,10 @@ public class BloomAccessTracker implements AccessTracker {
         this.falsePositiveRate = falsePositiveRate;
         filter = new BloomFilter<LookupKey>(new LookupKeySerializer(), expectedInsertions, falsePositiveRate);
     }
-    public BloomAccessTracker() {}
+
+    public BloomAccessTracker() {
+    }
+
     public BloomAccessTracker(Map<String, Object> config) {
         configure(config);
     }
@@ -58,6 +64,7 @@ public class BloomAccessTracker implements AccessTracker {
     protected BloomFilter<LookupKey> getFilter() {
         return filter;
     }
+
     @Override
     public void logAccess(LookupKey key) {
         numInsertions++;
@@ -83,24 +90,21 @@ public class BloomAccessTracker implements AccessTracker {
     }
 
     private static double toDouble(Object o) {
-        if(o instanceof String) {
-            return Double.parseDouble((String)o);
-        }
-        else if(o instanceof Number) {
+        if (o instanceof String) {
+            return Double.parseDouble((String) o);
+        } else if (o instanceof Number) {
             return ((Number) o).doubleValue();
-        }
-        else {
+        } else {
             throw new IllegalStateException("Unable to convert " + o + " to a double.");
         }
     }
+
     private static int toInt(Object o) {
-        if(o instanceof String) {
-            return Integer.parseInt((String)o);
-        }
-        else if(o instanceof Number) {
+        if (o instanceof String) {
+            return Integer.parseInt((String) o);
+        } else if (o instanceof Number) {
             return ((Number) o).intValue();
-        }
-        else {
+        } else {
             throw new IllegalStateException("Unable to convert " + o + " to a double.");
         }
     }
@@ -113,15 +117,15 @@ public class BloomAccessTracker implements AccessTracker {
 
     @Override
     public AccessTracker union(AccessTracker tracker) {
-        if(filter == null) {
+        if (filter == null) {
             throw new IllegalStateException("Unable to union access tracker, because this tracker is not initialized.");
         }
-        if(tracker instanceof BloomAccessTracker ) {
-            filter.merge(((BloomAccessTracker)tracker).getFilter());
+        if (tracker instanceof BloomAccessTracker) {
+            filter.merge(((BloomAccessTracker) tracker).getFilter());
             return this;
-        }
-        else {
-            throw new IllegalStateException("Unable to union access tracker, because it's not of the right type (BloomAccessTracker)");
+        } else {
+            throw new IllegalStateException(
+                  "Unable to union access tracker, because it's not of the right type (BloomAccessTracker)");
         }
     }
 

@@ -12,14 +12,13 @@
 
 package com.cloudera.cyber;
 
-import org.springframework.util.CollectionUtils;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.springframework.util.CollectionUtils;
 
 public final class ValidateUtils {
 
@@ -31,7 +30,9 @@ public final class ValidateUtils {
 
     public static void validatePhoenixName(String value, String parameter) {
         if (!PHOENIX_NAME_REGEXP.matcher(value).matches() || UNDERSCORE_PATTERN.matcher(value).matches()) {
-            throw new IllegalArgumentException(String.format("Invalid value %s for parameter '%s'. It can only contain alphanumerics or underscore(a-z, A-Z, 0-9, _)", value, parameter));
+            throw new IllegalArgumentException(String.format(
+                  "Invalid value %s for parameter '%s'. It can only contain alphanumerics or underscore(a-z, A-Z, 0-9, _)",
+                  value, parameter));
         }
     }
 
@@ -40,11 +41,11 @@ public final class ValidateUtils {
             return Collections.emptyList();
         }
         return list.stream()
-            .collect(Collectors.groupingBy(classifier, Collectors.counting()))
-            .entrySet()
-            .stream().filter(entry -> entry.getValue() > 1)
-            .map(Entry::getKey)
-            .collect(Collectors.toList());
+              .collect(Collectors.groupingBy(classifier, Collectors.counting()))
+              .entrySet()
+              .stream().filter(entry -> entry.getValue() > 1)
+              .map(Entry::getKey)
+              .collect(Collectors.toList());
     }
 
     public static <T> Collection<T> getDuplicates(Collection<T> collections) {

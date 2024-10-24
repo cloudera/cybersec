@@ -12,11 +12,10 @@
 
 package com.cloudera.cyber.enrichment.lookup;
 
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.Map;
 
 @Data
 @Builder

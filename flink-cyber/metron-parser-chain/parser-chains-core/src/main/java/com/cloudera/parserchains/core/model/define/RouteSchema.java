@@ -14,10 +14,9 @@ package com.cloudera.parserchains.core.model.define;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import java.io.Serializable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-
-import java.io.Serializable;
 
 /**
  * Describes the structure of one route.
@@ -79,8 +78,8 @@ public class RouteSchema implements Serializable {
         return isDefault;
     }
 
-    public RouteSchema setDefault(boolean aDefault) {
-        isDefault = aDefault;
+    public RouteSchema setDefault(boolean defaultValue) {
+        isDefault = defaultValue;
         return this;
     }
 
@@ -112,33 +111,33 @@ public class RouteSchema implements Serializable {
         }
         RouteSchema that = (RouteSchema) o;
         return new EqualsBuilder()
-                .append(isDefault, that.isDefault)
-                .append(matchingValue, that.matchingValue)
-                .append(subChain, that.subChain)
-                .append(label, that.label)
-                .append(name, that.name)
-                .isEquals();
+              .append(isDefault, that.isDefault)
+              .append(matchingValue, that.matchingValue)
+              .append(subChain, that.subChain)
+              .append(label, that.label)
+              .append(name, that.name)
+              .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(matchingValue)
-                .append(isDefault)
-                .append(subChain)
-                .append(label)
-                .append(name)
-                .toHashCode();
+              .append(matchingValue)
+              .append(isDefault)
+              .append(subChain)
+              .append(label)
+              .append(name)
+              .toHashCode();
     }
 
     @Override
     public String toString() {
-        return "RouteSchema{" +
-                "matchingValue='" + matchingValue + '\'' +
-                ", isDefault=" + isDefault +
-                ", subChain=" + subChain +
-                ", label='" + label + '\'' +
-                ", name=" + name +
-                '}';
+        return "RouteSchema{"
+               + "matchingValue='" + matchingValue + '\''
+               + ", isDefault=" + isDefault
+               + ", subChain=" + subChain
+               + ", label='" + label + '\''
+               + ", name=" + name
+               + '}';
     }
 }

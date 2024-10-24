@@ -12,11 +12,10 @@
 
 package com.cloudera.cyber.generator;
 
+import java.nio.charset.Charset;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
-
-import java.nio.charset.Charset;
 
 public class ThreatGeneratorMap extends RichMapFunction<String, Tuple2<String, byte[]>> {
     private transient ThreatGenerator threatGenerator;

@@ -14,12 +14,11 @@ package com.cloudera.cyber.flink.operators;
 
 import com.cloudera.cyber.GroupedMessage;
 import com.cloudera.cyber.Message;
-import org.apache.flink.api.common.functions.AggregateFunction;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.apache.flink.api.common.functions.AggregateFunction;
 
 public class MessageConcatenate implements AggregateFunction<Message, List<Message>, GroupedMessage> {
 

@@ -12,14 +12,13 @@
 
 package com.cloudera.cyber.profiler.accumulator;
 
+import java.util.ArrayList;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.apache.flink.api.common.accumulators.Accumulator;
 
-import java.util.ArrayList;
-
 public class StatsAcc implements Accumulator<Double, ArrayList<SummaryStatistics>> {
 
-    ArrayList<SummaryStatistics>  mergedStatistics;
+    ArrayList<SummaryStatistics> mergedStatistics;
 
     public StatsAcc() {
         resetLocal();
@@ -48,7 +47,7 @@ public class StatsAcc implements Accumulator<Double, ArrayList<SummaryStatistics
 
     @Override
     public void merge(Accumulator<Double, ArrayList<SummaryStatistics>> other) {
-        mergedStatistics.addAll(((StatsAcc)other).mergedStatistics);
+        mergedStatistics.addAll(((StatsAcc) other).mergedStatistics);
     }
 
     @Override

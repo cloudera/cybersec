@@ -6,8 +6,10 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
+ *
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +24,7 @@ import java.util.Objects;
 
 /**
  * Describes a parser source sample that's used to store and retrieve
- * samples for Live View from the storage
+ * samples for Live View from the storage.
  */
 public class ParserSample {
 
@@ -95,8 +97,8 @@ public class ParserSample {
             return false;
         }
         ParserSample that = (ParserSample) o;
-        return Objects.equals(id, that.id) &&
-                Objects.equals(name, that.name);
+        return Objects.equals(id, that.id)
+               && Objects.equals(name, that.name);
     }
 
     @Override
@@ -106,12 +108,12 @@ public class ParserSample {
 
     @Override
     public String toString() {
-        return "ParserSample{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", source='" + source + '\'' +
-                ", expectedResult='" + expectedResult + '\'' +
-                '}';
+        return "ParserSample{"
+               + "id=" + id
+               + ", name='" + name + '\''
+               + ", description='" + description + '\''
+               + ", source='" + source + '\''
+               + ", expectedResult='" + expectedResult + '\''
+               + '}';
     }
 }

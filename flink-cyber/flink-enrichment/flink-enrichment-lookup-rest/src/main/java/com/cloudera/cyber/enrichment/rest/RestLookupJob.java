@@ -12,12 +12,22 @@
 
 package com.cloudera.cyber.enrichment.rest;
 
+import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
+import static org.apache.commons.codec.digest.DigestUtils.md5;
+
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
@@ -26,47 +36,40 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
-import static org.apache.commons.codec.digest.DigestUtils.md5;
-
 @Slf4j
 public abstract class RestLookupJob {
 
     protected static ObjectMapper getConfigObjectMapper() {
         return new ObjectMapper()
-            .activateDefaultTyping(BasicPolymorphicTypeValidator.builder().
-                allowIfSubType(Map.class).
-                allowIfSubType(List.class).
-                allowIfBaseType(EndpointAuthorizationConfig.class).
-                build())
-            .enable(SerializationFeature.INDENT_OUTPUT);
+              .activateDefaultTyping(BasicPolymorphicTypeValidator.builder()
+                                                                  .allowIfSubType(Map.class)
+                                                                  .allowIfSubType(List.class)
+                                                                  .allowIfBaseType(EndpointAuthorizationConfig.class)
+                                                                  .build())
+              .enable(SerializationFeature.INDENT_OUTPUT);
     }
 
-    public static DataStream<Message> enrich(DataStream<Message> source, String enrichmentConfigPath) throws IOException {
-        List<RestEnrichmentConfig> restConfig = RestLookupJob.parseConfigs(Files.readAllBytes(Paths.get(enrichmentConfigPath)));
+    public static DataStream<Message> enrich(DataStream<Message> source, String enrichmentConfigPath)
+          throws IOException {
+        List<RestEnrichmentConfig> restConfig =
+              RestLookupJob.parseConfigs(Files.readAllBytes(Paths.get(enrichmentConfigPath)));
         return enrich(source, restConfig);
     }
 
     private static DataStream<Message> enrich(DataStream<Message> source, List<RestEnrichmentConfig> configs) {
         return configs.stream().reduce(source, (in, config) -> {
-            Preconditions.checkNotNull(config.getSources(),"specify a list of source names or ANY to match any source");
-            Preconditions.checkArgument(!config.getSources().isEmpty(), "specify a list of source names or ANY to match any source");
+            Preconditions.checkNotNull(config.getSources(),
+                  "specify a list of source names or ANY to match any source");
+            Preconditions.checkArgument(!config.getSources().isEmpty(),
+                  "specify a list of source names or ANY to match any source");
             AsyncHttpRequest asyncHttpRequest = new AsyncHttpRequest(config);
             String processId = "rest-" + md5(source + config.getEndpointTemplate());
 
             return AsyncDataStream.unorderedWait(
-                    in,
-                    asyncHttpRequest, config.getTimeoutMillis(), TimeUnit.MILLISECONDS, config.getCapacity())
-                    .name("REST - " + config.getEndpointTemplate() + " " + config.getSources())
-                    .uid("rest-" + processId);
+                                        in,
+                                        asyncHttpRequest, config.getTimeoutMillis(), TimeUnit.MILLISECONDS, config.getCapacity())
+                                  .name("REST - " + config.getEndpointTemplate() + " " + config.getSources())
+                                  .uid("rest-" + processId);
         }, (a, b) -> a); // TODO - does the combiner really make sense?);
     }
 
@@ -87,13 +90,14 @@ public abstract class RestLookupJob {
 
     public static List<RestEnrichmentConfig> parseConfigs(byte[] configJson) throws IOException {
         return getConfigObjectMapper().readValue(
-                configJson,
-                new TypeReference<ArrayList<RestEnrichmentConfig>>() {
-                });
+              configJson,
+              new TypeReference<ArrayList<RestEnrichmentConfig>>() {
+              });
     }
 
     protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
 
-    protected abstract void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> results);
+    protected abstract void writeResults(StreamExecutionEnvironment env, ParameterTool params,
+                                         DataStream<Message> results);
 
 }

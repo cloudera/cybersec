@@ -14,16 +14,12 @@ package com.cloudera.cyber.profiler;
 
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
-import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
-import org.apache.flink.streaming.util.TwoInputStreamOperatorTestHarness;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
+import org.junit.Assert;
+import org.junit.Test;
 
 
 public class ProfileStatsJoinTest extends ProfileGroupTest {
@@ -42,9 +38,9 @@ public class ProfileStatsJoinTest extends ProfileGroupTest {
     }
 
     private ProfileMessage getExpectedJoinedMessage( ProfileMessage message1, ProfileMessage message2) {
-        Map<String, String> mergedExtensions = message2.getExtensions().entrySet().stream().
-                filter(e -> ProfileStatsJoin.isStatsExtension(e.getKey())).
-                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, String> mergedExtensions = message2.getExtensions().entrySet().stream()
+                .filter(e -> ProfileStatsJoin.isStatsExtension(e.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         message1.getExtensions().forEach(mergedExtensions::putIfAbsent);
         return new ProfileMessage(message1.getTs(), mergedExtensions);
     }
@@ -69,9 +65,9 @@ public class ProfileStatsJoinTest extends ProfileGroupTest {
     }
 
     private ProfileGroupConfig getProfileGroupConfig() {
-        List<ProfileMeasurementConfig> measurements = Collections.singletonList(ProfileMeasurementConfig.builder().resultExtensionName(RESULT_EXTENSION_NAME).
-                aggregationMethod(ProfileAggregationMethod.SUM).fieldName(SUM_FIELD_NAME).format("0.000000").calculateStats(true).
-                build());
+        List<ProfileMeasurementConfig> measurements = Collections.singletonList(ProfileMeasurementConfig.builder().resultExtensionName(RESULT_EXTENSION_NAME)
+                .aggregationMethod(ProfileAggregationMethod.SUM).fieldName(SUM_FIELD_NAME).format("0.000000").calculateStats(true)
+                .build());
 
         return getProfileGroupConfig(measurements);
     }

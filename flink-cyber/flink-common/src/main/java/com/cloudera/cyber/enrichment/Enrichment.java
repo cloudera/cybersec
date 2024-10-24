@@ -15,7 +15,6 @@ package com.cloudera.cyber.enrichment;
 
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,15 +38,17 @@ public abstract class Enrichment {
         return String.join(DELIMITER, prefix, enrichmentName);
     }
 
-    public List<DataQualityMessage> addQualityMessage(List<DataQualityMessage> messages, DataQualityMessageLevel level, String message) {
-        Optional<DataQualityMessage> duplicate = messages.stream().
-            filter(m -> m.getLevel().equals(level.name()) && m.getField().equals(fieldName) && m.getFeature().equals(feature) && m.getMessage().equals(message)).findFirst();
+    public List<DataQualityMessage> addQualityMessage(List<DataQualityMessage> messages, DataQualityMessageLevel level,
+                                                      String message) {
+        Optional<DataQualityMessage> duplicate = messages.stream()
+              .filter(m -> m.getLevel().equals(level.name()) && m.getField().equals(fieldName)
+                           && m.getFeature().equals(feature) && m.getMessage().equals(message)).findFirst();
         if (!duplicate.isPresent()) {
             messages.add(DataQualityMessage.builder()
-                .level(level.name())
-                .feature(feature)
-                .field(fieldName)
-                .message(message).build());
+                  .level(level.name())
+                  .feature(feature)
+                  .field(fieldName)
+                  .message(message).build());
         }
         return messages;
     }

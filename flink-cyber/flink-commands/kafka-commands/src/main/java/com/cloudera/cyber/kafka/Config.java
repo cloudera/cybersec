@@ -12,18 +12,16 @@
 
 package com.cloudera.cyber.kafka;
 
+import static com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient.Configuration.SASL_JAAS_CONFIG;
+
 import com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient;
 import com.hortonworks.registries.schemaregistry.serdes.avro.kafka.KafkaAvroDeserializer;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
-
-import static com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient.Configuration.SASL_JAAS_CONFIG;
-
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
@@ -52,9 +50,11 @@ public class Config {
         Properties kafkaConsumerProperties = getPropertiesWithKafkaPrefix();
         kafkaConsumerProperties.putAll(readSchemaRegistryProperties(properties));
         kafkaConsumerProperties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
-        kafkaConsumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, KafkaAvroDeserializer.class.getName());
+        kafkaConsumerProperties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
+              KafkaAvroDeserializer.class.getName());
 
-        overridePrintDefault(kafkaConsumerProperties, ConsumerConfig.GROUP_ID_CONFIG, "flink_cyber_command_line".concat(UUID.randomUUID().toString()));
+        overridePrintDefault(kafkaConsumerProperties, ConsumerConfig.GROUP_ID_CONFIG,
+              "flink_cyber_command_line".concat(UUID.randomUUID().toString()));
         overridePrintDefault(kafkaConsumerProperties, ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         kafkaConsumerProperties.put("specific.avro.reader", false);
 
@@ -62,14 +62,16 @@ public class Config {
     }
 
     private void overridePrintDefault(Properties kafkaConsumerProperties, String kafkaProperty, String defaultValue) {
-        kafkaConsumerProperties.put(kafkaProperty, properties.getOrDefault(PRINT_KAFKA_PROPERTY_PREFIX.concat(kafkaProperty), defaultValue));
+        kafkaConsumerProperties.put(kafkaProperty,
+              properties.getOrDefault(PRINT_KAFKA_PROPERTY_PREFIX.concat(kafkaProperty), defaultValue));
     }
 
     private Properties getPropertiesWithKafkaPrefix() {
         Properties filteredProperties = new Properties();
         int prefixLength = Config.KAFKA_PREFIX.length();
 
-        properties.stringPropertyNames().stream().filter(k -> k.startsWith(Config.KAFKA_PREFIX)).forEach(k -> filteredProperties.setProperty(k.substring(prefixLength), properties.getProperty(k)));
+        properties.stringPropertyNames().stream().filter(k -> k.startsWith(Config.KAFKA_PREFIX))
+                  .forEach(k -> filteredProperties.setProperty(k.substring(prefixLength), properties.getProperty(k)));
 
         return filteredProperties;
     }

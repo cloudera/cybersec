@@ -24,26 +24,26 @@ import java.util.Map;
  */
 public interface ParserDiscoveryService {
 
-  /**
-   * Finds all the parser types available for the user to build parser chains with.
-   *
-   * @return list of ParserSummaries
-   * @throws IOException in case there are issues reading parsers.
-   */
-  List<ParserSummary> findAll() throws IOException;
+    /**
+     * Finds all the parser types available for the user to build parser chains with.
+     *
+     * @return list of ParserSummaries
+     * @throws IOException in case there are issues reading parsers.
+     */
+    List<ParserSummary> findAll() throws IOException;
 
-  /**
-   * Describes the configuration parameters available for a given parser.
-   *
-   * @param name The parser name.
-   * @return ParserDescriptor based on its ID.
-   */
-  ParserDescriptor describe(ParserID name);
+    /**
+     * Describes the configuration parameters available for a given parser.
+     *
+     * @param name The parser name.
+     * @return ParserDescriptor based on its ID.
+     */
+    ParserDescriptor describe(ParserID name);
 
-  /**
-   * Describes the configuration parameters for all available parser types.
-   *
-   * @return ParserDescriptors with their IDs.
-   */
-  Map<ParserID, ParserDescriptor> describeAll();
+    /**
+     * Describes the configuration parameters for all available parser types.
+     *
+     * @return ParserDescriptors with their IDs.
+     */
+    Map<ParserID, ParserDescriptor> describeAll();
 }

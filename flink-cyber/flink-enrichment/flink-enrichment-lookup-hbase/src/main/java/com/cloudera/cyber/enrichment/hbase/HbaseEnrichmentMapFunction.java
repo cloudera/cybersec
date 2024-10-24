@@ -12,6 +12,8 @@
 
 package com.cloudera.cyber.enrichment.hbase;
 
+import static java.util.stream.Collectors.toMap;
+
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageConfig;
@@ -22,15 +24,12 @@ import com.cloudera.cyber.enrichment.lookup.config.EnrichmentKind;
 import com.cloudera.cyber.hbase.AbstractHbaseMapFunction;
 import com.cloudera.cyber.hbase.LookupKey;
 import com.google.common.base.Joiner;
+import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.flink.util.Collector;
-
-import java.util.List;
-import java.util.Map;
-
-import static java.util.stream.Collectors.toMap;
 
 @Slf4j
 @Getter
@@ -38,14 +37,15 @@ public class HbaseEnrichmentMapFunction extends AbstractHbaseMapFunction<Message
     private final Map<String, List<EnrichmentField>> fieldToLookup;
     private final EnrichmentsConfig enrichmentStorageConfig;
 
-    public HbaseEnrichmentMapFunction(List<EnrichmentConfig> configs, com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig enrichmentStorageConfig) {
+    public HbaseEnrichmentMapFunction(List<EnrichmentConfig> configs,
+                                      com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig enrichmentStorageConfig) {
         super();
 
         fieldToLookup = configs.stream()
-                .filter(c -> c.getKind().equals(EnrichmentKind.HBASE))
-                .collect(toMap(
-                        EnrichmentConfig::getSource, EnrichmentConfig::getFields)
-                );
+                               .filter(c -> c.getKind().equals(EnrichmentKind.HBASE))
+                               .collect(toMap(
+                                     EnrichmentConfig::getSource, EnrichmentConfig::getFields)
+                               );
 
         log.info("Applying HBase enrichments to the following sources: {}", String.join(" ,", fieldToLookup.keySet()));
 
@@ -63,18 +63,22 @@ public class HbaseEnrichmentMapFunction extends AbstractHbaseMapFunction<Message
         if (CollectionUtils.isNotEmpty(enrichmentFields)) {
             messageCounter.inc(1);
             collector.collect(
-                    MessageUtils.addFields(message, enrichmentFields.stream().flatMap(
-                            field -> {
-                                String enrichmentType = field.getEnrichmentType();
-                                String key = message.getExtensions().get(field.getName());
+                  MessageUtils.addFields(message, enrichmentFields.stream().flatMap(
+                                                                        field -> {
+                                                                            String enrichmentType = field.getEnrichmentType();
+                                                                            String key = message.getExtensions().get(field.getName());
 
-                                if (key == null) return notFound().entrySet().stream();
-                                return hbaseLookup(message.getTs(),
-                                        buildLookup(enrichmentType, key),
-                                        Joiner.on(".").join(field.getName(), field.getEnrichmentType())
-                                ).entrySet().stream();
-                            })
-                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b))));
+                                                                            if (key == null) {
+                                                                                return notFound().entrySet().stream();
+                                                                            }
+                                                                            return hbaseLookup(message.getTs(),
+                                                                                  buildLookup(enrichmentType, key),
+                                                                                  Joiner.on(".")
+                                                                                        .join(field.getName(), field.getEnrichmentType())
+                                                                            ).entrySet().stream();
+                                                                        })
+                                                                  .collect(toMap(Map.Entry::getKey, Map.Entry::getValue,
+                                                                        (a, b) -> b))));
         } else {
             collector.collect(message);
         }

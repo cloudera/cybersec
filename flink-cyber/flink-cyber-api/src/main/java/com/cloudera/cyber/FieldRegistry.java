@@ -12,20 +12,18 @@
 
 package com.cloudera.cyber;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class FieldRegistry implements IFieldRegistry {
 
+    private static FieldRegistry instance;
     private Map<String, Field> fields = new HashMap<>();
 
-    private static FieldRegistry instance;
-
     public static FieldRegistry instance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new FieldRegistry();
         }
         return instance;

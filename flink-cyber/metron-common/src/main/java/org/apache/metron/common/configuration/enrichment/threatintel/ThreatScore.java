@@ -6,19 +6,23 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.metron.common.configuration.enrichment.threatintel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The overall threat score which is arrived at by aggregating the individual
@@ -35,60 +39,66 @@ import java.util.List;
  */
 public class ThreatScore {
 
-  /**
-   * The numeric threat score resulting from aggregating
-   * all of the individual scores from each applied rule.
-   */
-  private Double score;
+    /**
+     * The numeric threat score resulting from aggregating
+     * all of the individual scores from each applied rule.
+     */
+    private Double score;
 
-  /**
-   * The individual rule scores produced by applying each rule to the message.
-   */
-  private List<RuleScore> ruleScores;
+    /**
+     * The individual rule scores produced by applying each rule to the message.
+     */
+    private final List<RuleScore> ruleScores;
 
-  public ThreatScore() {
-    this.ruleScores = new ArrayList<>();
-  }
+    public ThreatScore() {
+        this.ruleScores = new ArrayList<>();
+    }
 
-  public Double getScore() {
-    return score;
-  }
+    public Double getScore() {
+        return score;
+    }
 
-  public void setScore(Double score) {
-    this.score = score;
-  }
+    public void setScore(Double score) {
+        this.score = score;
+    }
 
-  public List<RuleScore> getRuleScores() {
-    return ruleScores;
-  }
+    public List<RuleScore> getRuleScores() {
+        return ruleScores;
+    }
 
-  public void addRuleScore(RuleScore score) {
-    this.ruleScores.add(score);
-  }
+    public void addRuleScore(RuleScore score) {
+        this.ruleScores.add(score);
+    }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-    ThreatScore that = (ThreatScore) o;
+        ThreatScore that = (ThreatScore) o;
 
-    if (score != null ? !score.equals(that.score) : that.score != null) return false;
-    return ruleScores != null ? ruleScores.equals(that.ruleScores) : that.ruleScores == null;
-  }
+        if (!Objects.equals(score, that.score)) {
+            return false;
+        }
+        return Objects.equals(ruleScores, that.ruleScores);
+    }
 
-  @Override
-  public int hashCode() {
-    int result = score != null ? score.hashCode() : 0;
-    result = 31 * result + (ruleScores != null ? ruleScores.hashCode() : 0);
-    return result;
-  }
+    @Override
+    public int hashCode() {
+        int result = score != null ? score.hashCode() : 0;
+        result = 31 * result + (ruleScores != null ? ruleScores.hashCode() : 0);
+        return result;
+    }
 
-  @Override
-  public String toString() {
-    return "ThreatScore{" +
-            "score=" + score +
-            ", ruleScores=" + ruleScores +
-            '}';
-  }
+    @Override
+    public String toString() {
+        return "ThreatScore{"
+               + "score=" + score
+               + ", ruleScores=" + ruleScores
+               + '}';
+    }
 }

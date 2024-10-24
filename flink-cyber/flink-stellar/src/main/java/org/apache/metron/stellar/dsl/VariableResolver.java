@@ -7,8 +7,10 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +22,9 @@ package org.apache.metron.stellar.dsl;
 
 
 public interface VariableResolver {
-  public static final String ALL_FIELDS = "_";
-  Object resolve(String variable);
-  boolean exists(String variable);
+    String ALL_FIELDS = "_";
+
+    Object resolve(String variable);
+
+    boolean exists(String variable);
 }

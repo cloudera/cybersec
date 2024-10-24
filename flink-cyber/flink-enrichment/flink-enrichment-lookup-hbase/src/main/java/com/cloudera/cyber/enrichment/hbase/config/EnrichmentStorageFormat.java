@@ -26,7 +26,8 @@ public enum EnrichmentStorageFormat {
     private final EnrichmentCommandMutationConverter mutationConverter;
     private final EnrichmentLookupBuilder lookupBuilder;
 
-    EnrichmentStorageFormat(EnrichmentCommandMutationConverter mutationConverter, EnrichmentLookupBuilder lookupBuilder) {
+    EnrichmentStorageFormat(EnrichmentCommandMutationConverter mutationConverter,
+                            EnrichmentLookupBuilder lookupBuilder) {
         this.mutationConverter = mutationConverter;
         this.lookupBuilder = lookupBuilder;
     }
@@ -35,6 +36,8 @@ public enum EnrichmentStorageFormat {
         return mutationConverter;
     }
 
-    public EnrichmentLookupBuilder getLookupBuilder() { return lookupBuilder; }
+    public EnrichmentLookupBuilder getLookupBuilder() {
+        return lookupBuilder;
+    }
 
 }

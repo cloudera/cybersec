@@ -14,13 +14,12 @@ package com.cloudera.cyber.enrichment.rest;
 
 import com.cloudera.cyber.enrichment.rest.impl.MockRestServer;
 import com.google.common.collect.Lists;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 // tests will run either with or without tls when junit runs derived classes
@@ -44,8 +43,8 @@ public class GetRestRequestTest extends RestRequestTest {
 
     @Test
     public void testPropertiesNull() throws Exception {
-        RestEnrichmentConfig config = mockRestServer.getBuilder(null).sources(Lists.newArrayList(MockRestServer.USER_SOURCE)).
-                endpointTemplate(String.format("%s://%s/user?name=${name}", mockRestServer.getMockProtocol(), mockRestServer.getMockHostAndPort())).build();
+        RestEnrichmentConfig config = mockRestServer.getBuilder(null).sources(Lists.newArrayList(MockRestServer.USER_SOURCE))
+                .endpointTemplate(String.format("%s://%s/user?name=${name}", mockRestServer.getMockProtocol(), mockRestServer.getMockHostAndPort())).build();
 
         Map<String, String> variables = new HashMap<String, String>() {{
             put("name", "Chris");

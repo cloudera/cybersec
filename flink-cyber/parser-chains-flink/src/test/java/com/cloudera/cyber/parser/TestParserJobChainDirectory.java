@@ -12,9 +12,20 @@
 
 package com.cloudera.cyber.parser;
 
+import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.google.common.io.Resources;
+import java.util.HashMap;
+import java.util.stream.Stream;
 import org.adrianwalker.multilinestring.Multiline;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -25,18 +36,6 @@ import org.junit.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import java.util.HashMap;
-import java.util.stream.Stream;
-
-import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
 
 public class TestParserJobChainDirectory extends AbstractParserJobTest {
 
@@ -134,8 +133,8 @@ public class TestParserJobChainDirectory extends AbstractParserJobTest {
     @ParameterizedTest
     @MethodSource("mutuallyExclusiveParams")
     public void testParserMutuallyExclusiveConfig(ParameterTool params) throws Exception {
-        final String message = "It's not allowed to provide more than one chain param! " +
-                "Select one of the following: " + PARAM_CHAIN_CONFIG_EXCLUSIVE_LIST;
+        final String message = "It's not allowed to provide more than one chain param! "
+                + "Select one of the following: " + PARAM_CHAIN_CONFIG_EXCLUSIVE_LIST;
 
         try {
             createPipeline(params);

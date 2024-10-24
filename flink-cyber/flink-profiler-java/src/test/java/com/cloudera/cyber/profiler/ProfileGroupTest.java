@@ -15,7 +15,6 @@ package com.cloudera.cyber.profiler;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -30,10 +29,10 @@ public class ProfileGroupTest {
 
     protected ProfileGroupConfig getProfileGroupConfig(List<ProfileMeasurementConfig> measurements) {
         return ProfileGroupConfig.builder().profileGroupName(ProfileGroupTest.PROFILE_GROUP_NAME).keyFieldNames(Lists.newArrayList(KEY_FIELD_NAME))
-                .sources(Lists.newArrayList("ANY")).
-                        periodDuration(1L).periodDurationUnit(TimeUnit.MINUTES.name()).
-                        measurements(Lists.newArrayList(measurements)).
-                        build();
+                .sources(Lists.newArrayList("ANY"))
+                        .periodDuration(1L).periodDurationUnit(TimeUnit.MINUTES.name())
+                        .measurements(Lists.newArrayList(measurements))
+                        .build();
     }
 
     protected void addMessage(ProfileGroupAcc profileGroupAccumulator, long timestamp, long aggregationFieldValue, ProfileGroupConfig profileGroupConfig) {

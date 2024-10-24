@@ -12,7 +12,18 @@
 
 package com.cloudera.parserchains.core;
 
+import static com.cloudera.parserchains.core.ChainLinkTestUtilities.makeEchoParser;
+import static com.cloudera.parserchains.core.ChainLinkTestUtilities.makeErrorParser;
+import static com.cloudera.parserchains.core.ChainLinkTestUtilities.makeParser;
+import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import com.cloudera.parserchains.core.model.define.ParserName;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,16 +32,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-
-import java.util.List;
-
-import static com.cloudera.parserchains.core.ChainLinkTestUtilities.*;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -173,8 +174,8 @@ public class RouterLinkTest {
         List<Message> results = routerLink.process(input);
 
         // validate
-        assertThat("Expected 1 result showing the error caused by the route taken. " +
-                        "The next link to parser2 should not be followed.",
+        assertThat("Expected 1 result showing the error caused by the route taken. "
+                        + "The next link to parser2 should not be followed.",
                 results.size(), is(1));
 
     }

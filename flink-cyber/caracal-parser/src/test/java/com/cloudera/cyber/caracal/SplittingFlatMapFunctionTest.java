@@ -12,25 +12,24 @@
 
 package com.cloudera.cyber.caracal;
 
-import com.cloudera.cyber.Message;
-import com.cloudera.cyber.TestUtils;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.util.Collector;
-import org.junit.Test;
-
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-
 import static com.cloudera.cyber.flink.Utils.getResourceAsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsMapContaining.hasKey;
 
+import com.cloudera.cyber.Message;
+import com.cloudera.cyber.TestUtils;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.util.Collector;
+import org.junit.Test;
+
 public class SplittingFlatMapFunctionTest {
-    private final static String testInput = getResourceAsString("dpi.json");
+    private static final String testInput = getResourceAsString("dpi.json");
 
     @Test
     public void testSplittingWithHeader() throws Exception {

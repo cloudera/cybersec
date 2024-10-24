@@ -12,11 +12,11 @@
 
 package com.cloudera.cyber.scoring;
 
-import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.junit.Test;
-
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
+
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.junit.Test;
 
 public class TypeTests {
     @Test

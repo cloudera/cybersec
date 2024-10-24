@@ -49,12 +49,14 @@ public class Job {
                 case GENERATOR:
                 case PROFILE:
                 case PARSER:
-                    return new String[]{scriptName, job.getJobBranch(), job.getJobPipeline(), job.getJobName()};
+                    return new String[] {scriptName, job.getJobBranch(), job.getJobPipeline(), job.getJobName()};
                 case INDEX:
                 case TRIAGE:
-                    return new String[]{scriptName, job.getJobBranch(), job.getJobPipeline()};
+                    return new String[] {scriptName, job.getJobBranch(), job.getJobPipeline()};
+                default:
+                    break;
             }
-            return new String[]{};
+            return new String[] {};
         }
 
     }

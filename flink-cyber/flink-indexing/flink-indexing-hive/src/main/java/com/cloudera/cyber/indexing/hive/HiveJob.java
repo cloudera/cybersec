@@ -35,7 +35,8 @@ public abstract class HiveJob {
         if (params.get("flink.writer", "").equalsIgnoreCase("TableAPI")) {
             try {
                 final String connectorName = params.get("flink.output-connector", "hive");
-                final TableApiAbstractJob job = TableApiJobFactory.getJobByConnectorName(connectorName, params, env, source);
+                final TableApiAbstractJob job =
+                      TableApiJobFactory.getJobByConnectorName(connectorName, params, env, source);
                 return job.startJob();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -46,5 +47,6 @@ public abstract class HiveJob {
         return env;
     }
 
-    protected abstract SingleOutputStreamOperator<ScoredMessage> createSource(StreamExecutionEnvironment env, ParameterTool params);
+    protected abstract SingleOutputStreamOperator<ScoredMessage> createSource(StreamExecutionEnvironment env,
+                                                                              ParameterTool params);
 }
