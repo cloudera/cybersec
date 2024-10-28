@@ -24,7 +24,7 @@
     </nz-form-item>
   </ng-container>
   <ng-container *ngFor="let attribute of currentObject.attributes | keyvalue">
-    <nz-collapse *ngIf="attribute.value.object_type && (!requiredOnly || attribute.value.requirement == 'required')">
+    <nz-collapse *ngIf="attribute.value.object_type && schema.objects[attribute.value.object_type] && (!requiredOnly || attribute.value.requirement == 'required')">
       <nz-collapse-panel [nzHeader]="attribute.value.caption + ', ' + attribute.value.requirement"
                          (nzActiveChange)="onCollapseChange(attribute, attribute.key)">
         <app-ocsf-object-form
