@@ -79,14 +79,18 @@ public abstract class SplitJob {
         SingleOutputStreamOperator<Message> parsed = results.map(new ParserChainMapFunction(configMap));
 
 
-        DataStream<Tuple2<String, Long>> counts = parsed
-              .map((MapFunction<Message, Tuple2<String, Long>>) message -> Tuple2.of(message.getSource(), 1L))
-              .keyBy(0)
-              .timeWindow(Time.milliseconds(
-                    params.getLong(PARAM_COUNT_INTERVAL,
-                          DEFAULT_COUNT_INTERVAL)))
-              .allowedLateness(Time.milliseconds(0))
-              .sum(1);
+        DataStream<Tuple2<String, Long>> counts = parsed.map(new MapFunction<Message, Tuple2<String, Long>>() {
+                                                            @Override
+                                                            public Tuple2<String, Long> map(Message message) throws Exception {
+                                                                return Tuple2.of(message.getSource(), 1L);
+                                                            }
+                                                        })
+                                                        .keyBy(0)
+                                                        .timeWindow(Time.milliseconds(
+                                                              params.getLong(PARAM_COUNT_INTERVAL,
+                                                                    DEFAULT_COUNT_INTERVAL)))
+                                                        .allowedLateness(Time.milliseconds(0))
+                                                        .sum(1);
         writeCounts(params, counts);
 
 
