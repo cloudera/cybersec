@@ -13,7 +13,7 @@
 import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 import {ReactiveFormsModule} from '@angular/forms';
 import {NoopAnimationsModule} from '@angular/platform-browser/animations';
-import {ActivatedRoute, Router} from '@angular/router';
+import {ActivatedRoute, convertToParamMap, Router} from '@angular/router';
 import {EditFill, PlusOutline} from '@ant-design/icons-angular/icons';
 import {Store} from '@ngrx/store';
 import {NzModalModule} from 'ng-zorro-antd/modal';
@@ -33,6 +33,7 @@ import {LiveViewComponent} from './components/live-view/live-view.component';
 import {NzBreadCrumbModule} from 'ng-zorro-antd/breadcrumb';
 import {NzPopoverModule} from 'ng-zorro-antd/popover';
 import {findEl} from 'src/app/shared/test/test-helper';
+import {OcsfFormComponent} from 'src/app/chain-page/components/ocsf-form/ocsf-form.component';
 
 describe('ChainPageComponent', () => {
   let component: ChainPageComponent;
@@ -56,7 +57,8 @@ describe('ChainPageComponent', () => {
         ChainPageComponent,
         MockComponent(ChainViewComponent),
         MockComponent(LiveViewComponent),
-        MockComponent(IndexingFormComponent)
+        MockComponent(IndexingFormComponent),
+        MockComponent(OcsfFormComponent)
       ],
       providers: [
         provideMockStore({
@@ -80,7 +82,16 @@ describe('ChainPageComponent', () => {
             },
           }
         }),
-        {provide: ActivatedRoute, useValue: {params: of({id: '123'}),queryParams: of({pipeline: "test-pipeline"})}},
+        {provide: ActivatedRoute, useValue: {
+            snapshot: {
+              paramMap: convertToParamMap({
+                id: '123'
+              }),
+              queryParamMap: convertToParamMap({
+                pipeline: 'test-pipeline'
+              })
+            }
+          }},
         {provide: Router, useValue: {events: of({})}},
       ]
     }).compileComponents();
