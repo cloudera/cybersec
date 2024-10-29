@@ -18,6 +18,7 @@
 
 package com.cloudera.parserchains.core.model.define;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -76,6 +77,11 @@ public class ParserSchema implements Serializable {
    */
   @JsonProperty("routing")
   private RoutingSchema routing;
+  /**
+   * The base path for any path-related parser configs.
+   */
+  @JsonIgnore
+  private String basePath;
 
   public ParserSchema() {
     config = new HashMap<>();
@@ -136,6 +142,14 @@ public class ParserSchema implements Serializable {
   public ParserSchema setRouting(RoutingSchema routing) {
     this.routing = routing;
     return this;
+  }
+
+  public String getBasePath() {
+    return basePath;
+  }
+
+  public void setBasePath(String basePath) {
+    this.basePath = basePath;
   }
 
   @Override

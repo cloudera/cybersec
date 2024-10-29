@@ -52,6 +52,12 @@ import {NzLayoutModule} from "ng-zorro-antd/layout";
 import {NzAutocompleteModule} from "ng-zorro-antd/auto-complete";
 import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
 import {MonacoEditorModule} from "ngx-monaco-editor-v2";
+import {OcsfFormComponent} from './components/ocsf-form/ocsf-form.component';
+import {MatCardModule} from "@angular/material/card";
+import {MatProgressSpinnerModule} from "@angular/material/progress-spinner";
+import {NzDividerModule} from "ng-zorro-antd/divider";
+import {NzSwitchModule} from "ng-zorro-antd/switch";
+import {OcsfObjectFormComponent} from './components/ocsf-form/ocsf-object-form/ocsf-object-form.component';
 
 @NgModule({
   declarations: [
@@ -66,6 +72,8 @@ import {MonacoEditorModule} from "ngx-monaco-editor-v2";
     AutofocusDirective,
     MultiInputComponent,
     IndexingFormComponent,
+    OcsfFormComponent,
+    OcsfObjectFormComponent,
   ],
   entryComponents: [ ChainViewComponent ],
   imports: [
@@ -95,6 +103,10 @@ import {MonacoEditorModule} from "ngx-monaco-editor-v2";
     NzLayoutModule,
     NzAutocompleteModule,
     NzCheckboxModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    NzDividerModule,
+    NzSwitchModule,
   ],
   providers: [
     NzMessageService,
