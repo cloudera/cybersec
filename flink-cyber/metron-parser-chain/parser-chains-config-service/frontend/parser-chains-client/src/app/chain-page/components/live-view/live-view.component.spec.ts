@@ -25,13 +25,14 @@ import {executionTriggered, liveViewInitialized, onOffToggleChanged, sampleDataI
 import {LiveViewComponent} from './live-view.component';
 import {LiveViewState} from './live-view.reducers';
 import {SampleDataType} from './models/sample-data.model';
-import {SampleDataFormComponent} from "./sample-data-form/sample-data-form.component";
-import {MockComponent} from "ng-mocks";
-import {LiveViewResultComponent} from "./live-view-result/live-view-result.component";
-import {LiveViewConsts} from "./live-view.consts";
-import {NzFormModule} from "ng-zorro-antd/form";
-import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from "@angular/core";
-import {ChainDetailsModel} from "../../chain-page.models";
+import {SampleDataFormComponent} from './sample-data-form/sample-data-form.component';
+import {MockComponent} from 'ng-mocks';
+import {LiveViewResultComponent} from './live-view-result/live-view-result.component';
+import {LiveViewConsts} from './live-view.consts';
+import {NzFormModule} from 'ng-zorro-antd/form';
+import {CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA} from '@angular/core';
+import {ChainDetailsModel} from '../../chain-page.models';
+import {ActivatedRoute, convertToParamMap} from '@angular/router';
 
 
 describe('LiveViewComponent', () => {
@@ -69,6 +70,16 @@ describe('LiveViewComponent', () => {
       ],
       providers: [
         provideMockStore({initialState}),
+        {provide: ActivatedRoute, useValue: {
+            snapshot: {
+              paramMap: convertToParamMap({
+                id: '123'
+              }),
+              queryParamMap: convertToParamMap({
+                pipeline: 'fakePipe'
+              })
+            }
+          }},
       ],
       declarations: [
         LiveViewComponent,
@@ -122,7 +133,7 @@ describe('LiveViewComponent', () => {
     (component.chainConfig$ as Subject<unknown>).next({});
     tick(LiveViewConsts.LIVE_VIEW_DEBOUNCE_RATE);
 
-    const action = executionTriggered({sampleData: testSampleData, chainConfig: {}});
+    const action = executionTriggered({sampleData: testSampleData, chainConfig: {}, currentPipeline: 'fakePipe'});
 
     expect(mockStore.dispatch).toHaveBeenCalledWith(action);
   }));
@@ -130,7 +141,7 @@ describe('LiveViewComponent', () => {
   it('should filter out events without sample data input', fakeAsync(() => {
     (component.chainConfig$ as Subject<unknown>).next({});
     tick(LiveViewConsts.LIVE_VIEW_DEBOUNCE_RATE);
-    const action = executionTriggered({sampleData: testSampleData, chainConfig: {}});
+    const action = executionTriggered({sampleData: testSampleData, chainConfig: {}, currentPipeline: 'fakePipe'});
 
     expect(mockStore.dispatch).not.toHaveBeenCalledWith(action);
   }));
@@ -146,7 +157,7 @@ describe('LiveViewComponent', () => {
     (component.chainConfig$ as Subject<unknown>).next({});
 
     tick(LiveViewConsts.LIVE_VIEW_DEBOUNCE_RATE / 2);
-    const action = executionTriggered({sampleData: testSampleData, chainConfig: {}});
+    const action = executionTriggered({sampleData: testSampleData, chainConfig: {}, currentPipeline: 'fakePipe'});
 
     expect(mockStore.dispatch).not.toHaveBeenCalledWith(action);
 

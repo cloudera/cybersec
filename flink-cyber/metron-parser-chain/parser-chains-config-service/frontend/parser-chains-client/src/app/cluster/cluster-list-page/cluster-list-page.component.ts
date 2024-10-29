@@ -24,8 +24,8 @@ import {tap} from 'rxjs/operators';
 })
 export class ClusterListPageComponent {
   private readonly _clusterService = inject(ClusterService);
-  clusters$: Observable<ClusterModel[]> =    this._clusterService.getClusters().pipe(tap(() => this.isLoading$.next(false)));
   displayedColumns: string[] = ['id', 'name', 'status', 'version', 'pipelines'];
+  clusters$: Observable<ClusterModel[]> = this._clusterService.getClusters().pipe(tap(() => this.isLoading$.next(false)));
   isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
 
   getPipelines = (jobs: Job[]) => [...new Set(jobs.map(job => job.jobPipeline))].join(', ');
