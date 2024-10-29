@@ -80,12 +80,12 @@ describe('live-view.reducers', () => {
   });
 
   it('should update isExecuting on executionTriggered action', () => {
-    const newState = reducer(initialState, executionTriggered({ sampleData: testLiveViewState.sampleData, chainConfig: testConfigState }));
+    const newState = reducer(initialState, executionTriggered({ sampleData: testLiveViewState.sampleData, chainConfig: testConfigState, currentPipeline: 'fakePipe' }));
     expect(newState.isExecuting).toBe(true);
   });
 
   it('should update sampleData on executionTriggered action', () => {
-    const newState = reducer(initialState, executionTriggered({ sampleData: testLiveViewState.sampleData, chainConfig: testConfigState }));
+    const newState = reducer(initialState, executionTriggered({ sampleData: testLiveViewState.sampleData, chainConfig: testConfigState, currentPipeline: 'fakePipe' }));
     expect(newState.isExecuting).toBe(true);
   });
 

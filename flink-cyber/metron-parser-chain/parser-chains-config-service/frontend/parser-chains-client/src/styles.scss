@@ -326,3 +326,7 @@ table {
 .mat-form-field-appearance-outline .mat-form-field-outline{
   color: mat.get-color-from-palette($theme-primary);
 }
+
+.delete-icon {
+  color: mat.get-color-from-palette(mat.define-palette(mat.$red-palette), 300);
+}

@@ -34,12 +34,12 @@ import {LiveViewService} from './services/live-view.service';
 @Injectable()
 export class LiveViewEffects {
 
-  execute$: Observable<Action> = createEffect( () =>this._actions$.pipe(
+  execute$: Observable<Action> = createEffect( () => this._actions$.pipe(
     ofType(
       executionTriggered.type,
     ),
-    switchMap(({ sampleData, chainConfig }) => {
-      return this._liveViewService.execute(sampleData, chainConfig).pipe(
+    switchMap(({sampleData, chainConfig, currentPipeline}) => {
+      return this._liveViewService.execute(sampleData, chainConfig, currentPipeline).pipe(
         map(liveViewResult => liveViewRefreshedSuccessfully({ liveViewResult })),
         catchError(( error: { message: string }) => {
           this._messageService.create('error', error.message);

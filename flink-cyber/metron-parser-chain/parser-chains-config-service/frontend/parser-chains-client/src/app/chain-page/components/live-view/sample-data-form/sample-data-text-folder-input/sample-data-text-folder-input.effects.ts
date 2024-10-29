@@ -51,8 +51,8 @@ export class SampleDataTextFolderInputEffects {
     ofType(
       ExecutionListTriggeredAction.type,
     ),
-    switchMap(({ sampleData, chainConfig }) => {
-      return this._sampleFolderService.runTests(sampleData, chainConfig).pipe(
+    switchMap(({ sampleData, chainConfig, currentPipeline }) => {
+      return this._sampleFolderService.runTests(sampleData, chainConfig, currentPipeline).pipe(
         map(sampleFolderResults => ExecutionListSuccessfulAction({ sampleFolderResults })),
         catchError(( error: { message: string }) => {
           this._messageService.create('error', error.message);
