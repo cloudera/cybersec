@@ -31,6 +31,7 @@ import {LiveViewEffects} from './live-view.effects';
 import {SampleDataType} from './models/sample-data.model';
 import {LiveViewService} from './services/live-view.service';
 import {EntryParsingResultModel} from "./models/live-view.model";
+import {provideMockStore} from "@ngrx/store/testing";
 
 describe('live-view.effects', () => {
 
@@ -46,11 +47,24 @@ describe('live-view.effects', () => {
     }
   };
 
-  const testResult:EntryParsingResultModel[] =
-     [
+  const selectedPipeline = 'foo-pipeline';
+  const chainListPageInitialState = {
+    items: [],
+    createModalVisible: false,
+    deleteModalVisible: false,
+    deleteItem: null,
+    loading: false,
+    error: '',
+    pipelines: null,
+    pipelineRenameModalVisible: false,
+    selectedPipeline: selectedPipeline
+  };
+
+  const testResult: EntryParsingResultModel[] =
+    [
       {
         output: 'output result',
-        log: { type: '', message: 'log result', stackTrace: '' },
+        log: {type: '', message: 'log result', stackTrace: ''},
       }
     ];
 
@@ -63,12 +77,20 @@ describe('live-view.effects', () => {
     TestBed.configureTestingModule({
       providers: [
         LiveViewEffects,
-        { provide: LiveViewService, useValue: jasmine.createSpyObj('LiveViewService', {
+        {
+          provide: LiveViewService, useValue: jasmine.createSpyObj('LiveViewService', {
             execute: of({results: testResult})
-          }) },
-        { provide: NzMessageService, useValue: jasmine.createSpyObj('NzMessageService', ['create']) },
+          })
+        },
+        {provide: NzMessageService, useValue: jasmine.createSpyObj('NzMessageService', ['create'])},
 
-        provideMockActions(() => actions$)],
+        provideMockActions(() => actions$),
+        provideMockStore({
+          initialState: {
+            'chain-list-page': chainListPageInitialState
+          },
+          selectors: []
+        })],
     });
 
     liveViewEffects = TestBed.inject(LiveViewEffects) as jasmine.SpyObj<LiveViewEffects>;
@@ -80,16 +102,16 @@ describe('live-view.effects', () => {
     const testSubscriber = jasmine.createSpy('executionTriggeredSpy');
     liveViewEffects.execute$.subscribe(testSubscriber);
 
-    actions$.next(executionTriggered({ ...testPayload }));
+    actions$.next(executionTriggered({...testPayload}));
 
-    expect(fakeLiveViewService.execute).toHaveBeenCalledWith(testPayload.sampleData, testPayload.chainConfig);
+    expect(fakeLiveViewService.execute).toHaveBeenCalledWith(testPayload.sampleData, testPayload.chainConfig, selectedPipeline);
   });
 
   it('should dispatch liveViewRefreshedSuccessfully if liveViewService execute successfully', () => {
     const testSubscriber = jasmine.createSpy('executionTriggeredSpy');
     liveViewEffects.execute$.subscribe(testSubscriber);
 
-    actions$.next(executionTriggered({ ...testPayload }));
+    actions$.next(executionTriggered({...testPayload}));
 
     expect(testSubscriber).toHaveBeenCalledWith({
       liveViewResult: {
@@ -103,9 +125,9 @@ describe('live-view.effects', () => {
     const testSubscriber = jasmine.createSpy('executionTriggeredSpy');
     liveViewEffects.execute$.subscribe(testSubscriber);
 
-    fakeLiveViewService.execute.and.returnValue(throwError({ message: 'something went wrong' }));
+    fakeLiveViewService.execute.and.returnValue(throwError({message: 'something went wrong'}));
 
-    actions$.next(executionTriggered({ ...testPayload }));
+    actions$.next(executionTriggered({...testPayload}));
 
     expect(testSubscriber).toHaveBeenCalledWith({
       error: {
@@ -116,11 +138,11 @@ describe('live-view.effects', () => {
   });
 
   it('should show error message if liveViewService execution fail', () => {
-    fakeLiveViewService.execute.and.returnValue(throwError({ message: 'something went wrong' }));
+    fakeLiveViewService.execute.and.returnValue(throwError({message: 'something went wrong'}));
 
     liveViewEffects.execute$.subscribe();
 
-    actions$.next(executionTriggered({ ...testPayload }));
+    actions$.next(executionTriggered({...testPayload}));
 
     expect(fakeMessageService.create).toHaveBeenCalledWith('error', 'something went wrong');
   });
@@ -130,11 +152,11 @@ describe('live-view.effects', () => {
 
     liveViewEffects.persistingSampleData$.subscribe();
 
-    actions$.next(sampleDataInputChanged({ sampleData: { type: SampleDataType.MANUAL, source: 'testing persistance' } }));
+    actions$.next(sampleDataInputChanged({sampleData: {type: SampleDataType.MANUAL, source: 'testing persistance'}}));
 
     expect(localStorage.setItem).toHaveBeenCalledWith(
       LiveViewConsts.SAMPLE_DATA_STORAGE_KEY,
-      JSON.stringify({ type: SampleDataType.MANUAL, source: 'testing persistance' })
+      JSON.stringify({type: SampleDataType.MANUAL, source: 'testing persistance'})
     );
   });
 
@@ -142,12 +164,15 @@ describe('live-view.effects', () => {
     const testSubscriber = jasmine.createSpy('sampleDataRestoredSpy');
     liveViewEffects.restoreSampleDataFromLocalStore.subscribe(testSubscriber);
 
-    spyOn(localStorage, 'getItem').and.returnValue(JSON.stringify({ type: SampleDataType.MANUAL, source: 'persisted state' }));
+    spyOn(localStorage, 'getItem').and.returnValue(JSON.stringify({
+      type: SampleDataType.MANUAL,
+      source: 'persisted state'
+    }));
 
     actions$.next(liveViewInitialized());
 
     expect(testSubscriber).toHaveBeenCalledWith({
-      sampleData: { type: SampleDataType.MANUAL, source: 'persisted state' },
+      sampleData: {type: SampleDataType.MANUAL, source: 'persisted state'},
       type: sampleDataRestored.type
     });
   });
@@ -157,7 +182,7 @@ describe('live-view.effects', () => {
 
     liveViewEffects.persistingOnOffToggle$.subscribe();
 
-    actions$.next(onOffToggleChanged({ value: true }));
+    actions$.next(onOffToggleChanged({value: true}));
 
     expect(localStorage.setItem).toHaveBeenCalledWith(
       LiveViewConsts.FEATURE_TOGGLE_STORAGE_KEY,
@@ -175,7 +200,7 @@ describe('live-view.effects', () => {
 
     expect(testSubscriber).toHaveBeenCalledWith({
       value: true,
-      type: onOffToggleRestored .type
+      type: onOffToggleRestored.type
     });
   });
 

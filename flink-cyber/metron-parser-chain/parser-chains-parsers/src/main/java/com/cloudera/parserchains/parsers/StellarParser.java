@@ -20,6 +20,7 @@ import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
+import com.cloudera.parserchains.core.catalog.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -69,7 +70,7 @@ public class StellarParser implements Parser {
             label = "Configuration File Path",
             description = "Path to parser config file",
             required = true)
-    public StellarParser configurationPath(String pathToSchema) throws IOException {
+    public StellarParser configurationPath(@Parameter(key = "configurationPath", isPath = true) String pathToSchema) throws IOException {
         FileSystem fileSystem = new Path(pathToSchema).getFileSystem();
         loadParser(pathToSchema, fileSystem);
         return this;
