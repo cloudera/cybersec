@@ -6,12 +6,10 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- * 
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * <p>
- * Unless required by applicable law or agreed to in writing, software
+ *
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * <p>Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
@@ -20,6 +18,7 @@
 
 package com.cloudera.parserchains.core.model.define;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -50,6 +49,12 @@ public class ParserChainSchema implements Serializable {
     private String name;
 
     /**
+     * The base path for any path-related parser configs.
+     */
+    @JsonIgnore
+    private String basePath;
+
+    /**
      * The parsers in this parser chain.
      */
     @JsonProperty("parsers")
@@ -75,6 +80,14 @@ public class ParserChainSchema implements Serializable {
     public ParserChainSchema setName(String name) {
         this.name = name;
         return this;
+    }
+
+    public String getBasePath() {
+        return basePath;
+    }
+
+    public void setBasePath(String basePath) {
+        this.basePath = basePath;
     }
 
     public List<ParserSchema> getParsers() {

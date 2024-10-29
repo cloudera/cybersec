@@ -21,6 +21,7 @@ import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
+import com.cloudera.parserchains.core.catalog.Parameter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Optional;
@@ -71,7 +72,7 @@ public class AvroParser implements Parser {
           description = "Path to schema of avro file. Default value: '" + DEFAULT_AVRO_SCHEMA + "'",
           defaultValue = DEFAULT_AVRO_SCHEMA,
           required = true)
-    public AvroParser schemaPath(String pathToSchema) throws IOException {
+    public AvroParser schemaPath(@Parameter(key = "schemaPath", isPath = true) String pathToSchema) throws IOException {
         FileSystem fileSystem = new Path(pathToSchema).getFileSystem();
         loadSchema(pathToSchema, fileSystem);
         return this;

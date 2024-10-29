@@ -23,6 +23,7 @@ import com.cloudera.parserchains.core.model.define.ParserSchema;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -100,14 +101,20 @@ public class ReflectiveParserBuilder implements ParserBuilder {
             for (ConfigValueSchema value : valuesSchema) {
                 final Map<String, String> valueMap = value.getValues();
                 final String annotationKey = paramAnnotation.key();
+                String finalValue = valueMap.get(annotationKey);
 
                 if (StringUtils.isNotBlank(paramAnnotation.defaultValue()) && valueMap.get(annotationKey) == null) {
-                    valueMap.put(annotationKey, paramAnnotation.defaultValue());
+                    finalValue = paramAnnotation.defaultValue();
                 }
                 if (paramAnnotation.required() && valueMap.get(annotationKey) == null) {
                     throw new InvalidParserException(parserSchema,
                           String.format("Required parameter isn't provided: %s", annotationKey));
                 }
+                if (paramAnnotation.isPath() && parserSchema.getBasePath() != null &&
+                    !parserSchema.getBasePath().equals("null")) {
+                    finalValue = Paths.get(parserSchema.getBasePath(), finalValue).toString();
+                }
+                valueMap.put(annotationKey, finalValue);
             }
         }
     }
@@ -135,7 +142,7 @@ public class ReflectiveParserBuilder implements ParserBuilder {
     private List<String> buildMethodArgs(List<Parameter> parameterAnnotations,
                                          Map<String, String> configValues) {
         List<String> methodArgs = new ArrayList<>();
-        if (parameterAnnotations.size() > 0) {
+        if (!parameterAnnotations.isEmpty()) {
             // use the parameter annotations, if they exist
             for (Parameter annotation : parameterAnnotations) {
                 String value = configValues.get(annotation.key());

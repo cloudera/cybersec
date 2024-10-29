@@ -23,6 +23,7 @@ import com.cloudera.parserchains.core.InvalidParserException;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.queryservice.config.AppProperties;
 import com.cloudera.parserchains.queryservice.model.describe.IndexMappingDescriptor;
+import com.cloudera.parserchains.queryservice.model.describe.OcsfIndexMappingDescriptor;
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestRequest;
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestResponse;
 import com.cloudera.parserchains.queryservice.model.exec.ParserResult;
@@ -232,6 +233,21 @@ public class ChainController {
         }
     }
 
+    @PostMapping(API_INDEXING + "/new")
+    public ResponseEntity<Void> saveMappingsToPath(
+          @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
+          @RequestParam(name = "pipelineName", required = false) String pipelineName,
+          @RequestBody OcsfIndexMappingDescriptor body) throws IOException {
+        final String indexPath = getIndexingPath(body.getFilePath(), pipelineName);
+
+        try {
+            indexingService.saveMappingsToPath(indexPath, body.getMappings());
+            return ResponseEntity.noContent().build();
+            // TODO: fix exception handling
+        } catch (IOException ioe) {
+            throw new RuntimeException("Unable to read mappings from the provided path");
+        }
+    }
 
     @Operation(summary = "Executes a parser chain to parse sample data.",
           responses = {
@@ -241,9 +257,14 @@ public class ChainController {
           })
     @PostMapping(value = API_PARSER_TEST)
     public ResponseEntity<ChainTestResponse> test(
+          @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
+          @RequestParam(name = "pipelineName", required = false) String pipelineName,
           @Parameter(name = "testRun", description = "Describes the parser chain test to run.", required = true)
           @RequestBody ChainTestRequest testRun) throws IOException {
+        String configPath = getConfigPath(pipelineName);
+
         ParserChainSchema chain = testRun.getParserChainSchema();
+        chain.setBasePath(configPath);
         ChainTestResponse results = new ChainTestResponse();
         testRun.getSampleData().getSource()
                .stream()
