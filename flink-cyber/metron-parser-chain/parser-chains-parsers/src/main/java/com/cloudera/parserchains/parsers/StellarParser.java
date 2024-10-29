@@ -12,6 +12,8 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
+
 import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.cyber.stellar.MetronCompatibilityParser;
 import com.cloudera.parserchains.core.FieldName;
@@ -21,6 +23,11 @@ import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -30,17 +37,9 @@ import org.apache.flink.core.fs.Path;
 import org.apache.metron.parsers.interfaces.MessageParserResult;
 import org.json.simple.JSONObject;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
-
 @MessageParser(
-        name = "Metron Stellar parser",
-        description = "Metron compatibility parser.")
+      name = "Metron Stellar parser",
+      description = "Metron compatibility parser.")
 @Slf4j
 public class StellarParser implements Parser {
 
@@ -53,11 +52,11 @@ public class StellarParser implements Parser {
     }
 
     @Configurable(
-            key = "input",
-            label = "Input Field",
-            description = "The input field to parse. Default value: '" + DEFAULT_INPUT_FIELD + "'",
-            defaultValue = DEFAULT_INPUT_FIELD,
-            isOutputName = true)
+          key = "input",
+          label = "Input Field",
+          description = "The input field to parse. Default value: '" + DEFAULT_INPUT_FIELD + "'",
+          defaultValue = DEFAULT_INPUT_FIELD,
+          isOutputName = true)
     public StellarParser inputField(String fieldName) {
         if (StringUtils.isNotBlank(fieldName)) {
             this.inputField = FieldName.of(fieldName);
@@ -66,11 +65,12 @@ public class StellarParser implements Parser {
     }
 
     @Configurable(
-            key = "configurationPath",
-            label = "Configuration File Path",
-            description = "Path to parser config file",
-            required = true)
-    public StellarParser configurationPath(@Parameter(key = "configurationPath", isPath = true) String pathToSchema) throws IOException {
+          key = "configurationPath",
+          label = "Configuration File Path",
+          description = "Path to parser config file",
+          required = true)
+    public StellarParser configurationPath(@Parameter(key = "configurationPath", isPath = true) String pathToSchema)
+          throws IOException {
         FileSystem fileSystem = new Path(pathToSchema).getFileSystem();
         loadParser(pathToSchema, fileSystem);
         return this;
@@ -96,8 +96,8 @@ public class StellarParser implements Parser {
             return doParse(field.get(), builder);
         } else {
             return builder
-                    .withError(String.format("Message missing expected input field '%s'", inputField.toString()))
-                    .build();
+                  .withError(String.format("Message missing expected input field '%s'", inputField.toString()))
+                  .build();
         }
     }
 

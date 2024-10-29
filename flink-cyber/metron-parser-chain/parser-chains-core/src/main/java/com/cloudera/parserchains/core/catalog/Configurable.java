@@ -79,6 +79,7 @@ public @interface Configurable {
 
     /**
      * If true, the value will be treated as path and can be appended with base directory.
+     *
      * <p>This value is optional.
      */
     boolean isPath() default false;
