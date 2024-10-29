@@ -77,6 +77,12 @@ public @interface Parameter {
     boolean isOutputName() default false;
 
     /**
+     * If true, the value will be treated as path and can be appended with base directory.
+     * <p>This value is optional.
+     */
+    boolean isPath() default false;
+
+    /**
      * Defines the type of widget presented to the user when
      * configuring the parameter.
      *

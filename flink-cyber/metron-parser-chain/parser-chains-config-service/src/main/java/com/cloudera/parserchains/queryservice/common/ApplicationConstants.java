@@ -33,6 +33,8 @@ public class ApplicationConstants {
     public static final String PARSER_CONFIG_BASE_URL = API_BASE_URL + "/parserconfig";
     // pipeline controller constants
     public static final String PIPELINE_BASE_URL = API_BASE_URL + "/pipeline";
+    // ocsf controller constraints
+    public static final String OCSF_BASE_URL = API_BASE_URL + "/ocsf";
     // Endpoint names
     public static final String API_CHAINS = "/chains";
 

@@ -13,6 +13,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -34,11 +35,12 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @EnableKafka
 @Configuration
 @RequiredArgsConstructor
+@ConditionalOnProperty(value = "kafka.enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties({ClouderaKafkaProperties.class})
 public class KafkaConfig {
 
     /**
-     * Provides the default kafka properties for the consumers.
+     * Provides the default kafka properties for the consumers
      *
      * @return Default kafka properties for the consumers
      */
@@ -48,11 +50,10 @@ public class KafkaConfig {
         return new ClouderaKafkaProperties();
     }
 
-    /**
-     * Provides a map with key=clusterId and value=ClouderaKafkaProperties.
+    /***
+     * Provides a map with key=clusterId and value=ClouderaKafkaProperties
      *
-     * @return Map with key of clusterId and value - kafkaProperties.
-     *      This map is a mapping between clusterId and connection details for that cluster
+     * @return Map with key of clusterId and value - kafkaProperties. This map is a mapping between clusterId and connection details for that cluster
      */
     @Bean(name = "kafka-external-cluster-map")
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)

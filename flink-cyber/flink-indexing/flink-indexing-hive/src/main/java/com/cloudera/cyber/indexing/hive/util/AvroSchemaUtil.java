@@ -19,7 +19,7 @@ import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.RowType;
 import org.apache.flink.types.Row;
 
-public class AvroSchemaUtil {
+public final class AvroSchemaUtil {
 
     //method that converts from flink Schema to avro Schema
     public static Schema convertToAvro(List<TableColumnDto> tableColumnList) {
@@ -30,11 +30,12 @@ public class AvroSchemaUtil {
     public static Schema convertToAvro(ResolvedSchema schema) {
         SchemaBuilder.FieldAssembler<Schema> fieldAssembler =
               AvroSchemas.createRecordBuilder("com.cloudera.cyber", "base")
-                    .fields();
+                         .fields();
 
         for (Column col : schema.getColumns()) {
             fieldAssembler = fieldAssembler.name(col.getName()).type().optional()
-                  .type(AvroSchemaUtil.convertTypeToAvro(col.getName(), col.getDataType().getLogicalType()));
+                                           .type(AvroSchemaUtil.convertTypeToAvro(col.getName(),
+                                                 col.getDataType().getLogicalType()));
         }
         return fieldAssembler.endRecord();
     }
@@ -136,7 +137,7 @@ public class AvroSchemaUtil {
                 final SchemaBuilder.FieldAssembler<Schema> fieldAssembler = SchemaBuilder.record(name).fields();
                 for (RowType.RowField field : fieldList) {
                     fieldAssembler.name(field.getName()).type().optional()
-                          .type(convertTypeToAvro(name + "_" + field.getName(), field.getType()));
+                                  .type(convertTypeToAvro(name + "_" + field.getName(), field.getType()));
                 }
                 return fieldAssembler.endRecord();
             default:
