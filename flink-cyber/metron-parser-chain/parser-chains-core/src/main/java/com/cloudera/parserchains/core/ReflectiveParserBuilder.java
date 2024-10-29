@@ -12,24 +12,27 @@
 
 package com.cloudera.parserchains.core;
 
-import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedMethodsInOrder;
-import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedParameters;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.Parameter;
 import com.cloudera.parserchains.core.catalog.ParserInfo;
 import com.cloudera.parserchains.core.model.define.ConfigValueSchema;
 import com.cloudera.parserchains.core.model.define.ParserSchema;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+
+import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedMethodsInOrder;
+import static com.cloudera.parserchains.core.utils.AnnotationUtils.getAnnotatedParameters;
 
 /**
  * A {@link ParserBuilder} that uses Java's Reflection API to build and configure a {@link Parser}.
@@ -88,30 +91,35 @@ public class ReflectiveParserBuilder implements ParserBuilder {
     }
 
     private void configureParams(ParserSchema parserSchema, List<ConfigValueSchema> valuesSchema, Method method)
-        throws InvalidParserException {
+            throws InvalidParserException {
         final List<Parameter> paramsAnnotations = Arrays.stream(method.getParameterAnnotations())
-            .flatMap(Arrays::stream)
-            .filter(annotation -> annotation instanceof Parameter)
-            .map(annotation -> (Parameter) annotation)
-            .collect(Collectors.toList());
+                .flatMap(Arrays::stream)
+                .filter(annotation -> annotation instanceof Parameter)
+                .map(annotation -> (Parameter) annotation)
+                .collect(Collectors.toList());
 
         for (Parameter paramAnnotation : paramsAnnotations) {
             for (ConfigValueSchema value : valuesSchema) {
                 final Map<String, String> valueMap = value.getValues();
                 final String annotationKey = paramAnnotation.key();
+                String finalValue = valueMap.get(annotationKey);
 
-                if (StringUtils.isNotBlank(paramAnnotation.defaultValue()) && valueMap.get(annotationKey) == null){
-                    valueMap.put(annotationKey, paramAnnotation.defaultValue());
+                if (StringUtils.isNotBlank(paramAnnotation.defaultValue()) && valueMap.get(annotationKey) == null) {
+                    finalValue = paramAnnotation.defaultValue();
                 }
-                if (paramAnnotation.required() && valueMap.get(annotationKey) == null){
+                if (paramAnnotation.required() && valueMap.get(annotationKey) == null) {
                     throw new InvalidParserException(parserSchema,
-                        String.format("Required parameter isn't provided: %s", annotationKey));
+                            String.format("Required parameter isn't provided: %s", annotationKey));
                 }
+                if (paramAnnotation.isPath() && parserSchema.getBasePath() != null && !parserSchema.getBasePath().equals("null")) {
+                    finalValue = Paths.get(parserSchema.getBasePath(), finalValue).toString();
+                }
+                valueMap.put(annotationKey, finalValue);
             }
         }
     }
 
-  private void invokeMethod(Parser parser,
+    private void invokeMethod(Parser parser,
                               ParserSchema parserSchema,
                               String configKey,
                               Method method,
@@ -133,7 +141,7 @@ public class ReflectiveParserBuilder implements ParserBuilder {
     private List<String> buildMethodArgs(List<Parameter> parameterAnnotations,
                                          Map<String, String> configValues) {
         List<String> methodArgs = new ArrayList<>();
-        if (parameterAnnotations.size() > 0) {
+        if (!parameterAnnotations.isEmpty()) {
             // use the parameter annotations, if they exist
             for (Parameter annotation : parameterAnnotations) {
                 String value = configValues.get(annotation.key());

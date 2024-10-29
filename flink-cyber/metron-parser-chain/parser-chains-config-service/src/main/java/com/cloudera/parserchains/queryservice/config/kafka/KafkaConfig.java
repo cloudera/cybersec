@@ -40,6 +40,7 @@ import java.util.Set;
 @EnableKafka
 @Configuration
 @RequiredArgsConstructor
+@ConditionalOnProperty(value = "kafka.enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties({ClouderaKafkaProperties.class})
 public class KafkaConfig {
 
