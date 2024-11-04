@@ -16,10 +16,9 @@ import {from, Observable} from 'rxjs';
 
 import {EntryParsingResultModel} from '../models/live-view.model';
 import {SampleDataInternalModel, SampleDataModel, SampleDataType} from '../models/sample-data.model';
-import {LiveViewService} from "./live-view.service";
-import {concatAll, map, reduce} from "rxjs/operators";
-import {Store} from "@ngrx/store";
-import {ChainListPageState, getSelectedPipeline} from "../../../../chain-list-page/chain-list-page.reducers";
+import {LiveViewService} from './live-view.service';
+import {concatAll, map, reduce} from 'rxjs/operators';
+import {ActivatedRoute} from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -30,37 +29,37 @@ export class SampleDataTextFolderInputService {
 
   constructor(
     private _http: HttpClient,
-    private _store$: Store<ChainListPageState>,
     private _liveViewService: LiveViewService,
+    private _activatedRoute: ActivatedRoute
   ) {
+
   }
 
-  runTests(sampleDataList: SampleDataInternalModel[], chainConfig: unknown): Observable<Map<number, [SampleDataInternalModel, EntryParsingResultModel[]]>> {
+  runTests(sampleDataList: SampleDataInternalModel[], chainConfig: unknown, currentPipeline: string): Observable<Map<number, [SampleDataInternalModel, EntryParsingResultModel[]]>> {
     const resultList: Observable<{
       id: number,
       sample: SampleDataInternalModel,
       results: EntryParsingResultModel[]
     }>[] = []
-    this._store$.select(getSelectedPipeline).subscribe(
-      selectedPipeline => {
-        sampleDataList.forEach(value => {
-          const sample: SampleDataModel = {
-            source: value.source,
-            type: SampleDataType.MANUAL
-          }
-          const postObservable =
-            this._liveViewService.execute(sample, chainConfig, selectedPipeline)
-              .pipe(map(res => {
-                return {
-                  id: value.id,
-                  sample: value,
-                  results: res.results
-                }
-              }))
-          resultList.push(postObservable)
-        })
+
+    sampleDataList.forEach(value => {
+      const sample: SampleDataModel = {
+        source: value.source,
+        type: SampleDataType.MANUAL
       }
-    )
+      const postObservable =
+        this._liveViewService.execute(sample, chainConfig, currentPipeline)
+          .pipe(map(res => {
+            return {
+              id: value.id,
+              sample: value,
+              results: res.results
+            }
+          }))
+      resultList.push(postObservable)
+    });
+
+
     return from(resultList).pipe(concatAll(), reduce((acc, value) => {
       return acc.set(value.id, [value.sample, value.results])
     }, new Map<number, [SampleDataInternalModel, EntryParsingResultModel[]]>()))

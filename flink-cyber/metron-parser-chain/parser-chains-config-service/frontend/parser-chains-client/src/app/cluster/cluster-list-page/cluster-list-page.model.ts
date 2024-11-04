@@ -27,7 +27,7 @@ export interface ClusterMeta {
 export interface RequestBody {
   clusterServiceId?: string,
   jobIdHex?: string,
-  pipelineDir?: string,
+  pipelineName?: string,
   branch?: string,
   jobConfigs?: { [key: string]: string },
 }

@@ -21,7 +21,7 @@ export const liveViewInitialized = createAction(
 
 export const executionTriggered = createAction(
   '[LiveView] Sample Data Parsing Triggered',
-  props<{ sampleData: SampleDataModel, chainConfig: unknown }>()
+  props<{ sampleData: SampleDataModel, chainConfig: unknown, currentPipeline: string}>()
 );
 
 export const liveViewRefreshedSuccessfully = createAction(

@@ -12,12 +12,20 @@
 
 import {HttpParams} from "@angular/common/http";
 
-export function getHttpParams(pipeline: string) {
-  const httpParams: HttpParams = new HttpParams();
+export function getHttpParams(map: string | Map<string,string> | {[key:string] : string}): HttpParams;
 
-  if (pipeline) {
-    return httpParams.set('pipelineName', pipeline);
+export function getHttpParams(arg: any) {
+  if (arg === null || arg === undefined) {
+    return new HttpParams();
   }
-
-  return httpParams
+  if (typeof arg === 'string' && arg) {
+    return new HttpParams().set('pipelineName', arg);
+  }
+  if (arg instanceof Map) {
+    return arg;
+  }
+  if (typeof arg === 'object') {
+    return new HttpParams({fromObject: arg});
+  }
+  return new HttpParams();
 }
