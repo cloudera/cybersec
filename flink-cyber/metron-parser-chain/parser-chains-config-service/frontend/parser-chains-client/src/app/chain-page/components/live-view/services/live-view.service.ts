@@ -10,12 +10,13 @@
  * limitations governing your use of the file.
  */
 
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 
 import {EntryParsingResultModel, LiveViewRequestModel} from '../models/live-view.model';
 import {SampleDataModel, SampleDataRequestModel} from '../models/sample-data.model';
+import {getHttpParams} from "../../../../shared/service.utils";
 
 @Injectable({
   providedIn: 'root'
@@ -26,15 +27,19 @@ export class LiveViewService {
 
   constructor(
     private _http: HttpClient,
-  ) { }
+  ) {
+  }
 
-  execute(sampleData: SampleDataModel, chainConfig: unknown): Observable<{ results: EntryParsingResultModel[]}> {
+  execute(sampleData: SampleDataModel, chainConfig: unknown, pipeline: string = null): Observable<{
+    results: EntryParsingResultModel[]
+  }> {
+    const httpParams: HttpParams = getHttpParams(pipeline);
     const sampleDataRequest: SampleDataRequestModel = {
       ...sampleData,
       source: sampleData.source.trimEnd().split('\n')
     };
-    return this._http.post<{ results: EntryParsingResultModel[]}>(
+    return this._http.post<{ results: EntryParsingResultModel[] }>(
       LiveViewService.BASE_URL,
-      { sampleData: sampleDataRequest, chainConfig } as LiveViewRequestModel);
+      {sampleData: sampleDataRequest, chainConfig} as LiveViewRequestModel, {params: httpParams});
   }
 }

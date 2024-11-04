@@ -26,7 +26,7 @@ export const SampleFolderPathRestoredAction = createAction(
 
 export const ExecutionListTriggeredAction = createAction(
   '[SampleFolder] Sample Data List Parsing Triggered',
-  props<{ sampleData: SampleDataInternalModel[], chainConfig: ChainDetailsModel }>()
+  props<{ sampleData: SampleDataInternalModel[], chainConfig: ChainDetailsModel, currentPipeline: string }>()
 );
 
 export const ExecutionListSuccessfulAction = createAction(
