@@ -89,7 +89,7 @@
 
 		<file>
 			<source>../cyber-services/cyber-worker-service/target/cyber-worker-service-${project.version}.jar</source>
-			<outputDirectory>jobs/</outputDirectory>
+			<outputDirectory>tools/</outputDirectory>
 			<destName>cyber-worker-service-${cybersec.full.version}.jar</destName>
 			<fileMode>0644</fileMode>
 		</file>
