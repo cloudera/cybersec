@@ -1,6 +1,6 @@
-import {Injectable} from "@angular/core";
-import {HttpClient, HttpResponse} from "@angular/common/http";
-import {ClusterModel, RequestBody} from "../cluster/cluster-list-page/cluster-list-page.model";
+import {Injectable} from '@angular/core';
+import {HttpClient, HttpResponse} from '@angular/common/http';
+import {ClusterModel, RequestBody} from '../cluster/cluster-list-page/cluster-list-page.model';
 
 @Injectable({
   providedIn: 'root'
