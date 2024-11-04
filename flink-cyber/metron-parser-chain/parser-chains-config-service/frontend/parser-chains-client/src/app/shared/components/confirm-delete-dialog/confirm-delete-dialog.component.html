@@ -1,0 +1,11 @@
+<h2 matDialogTitle>Confirm delete</h2>
+<mat-dialog-content [style.width.%]="100">
+  <p>Are you sure you want to delete this item?</p>
+  <mat-progress-bar mode="indeterminate" *ngIf="loading"></mat-progress-bar>
+</mat-dialog-content>
+<mat-dialog-actions align="end" [style.width.%]="100">
+  <button type="submit" mat-flat-button (click)="delete()" [disabled]="loading" color="primary">Delete</button>
+  <button type="reset" mat-stroked-button [mat-dialog-close]="false" color="accent">Cancel</button>
+</mat-dialog-actions>
+
+

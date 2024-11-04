@@ -12,10 +12,10 @@
 
 import {Injectable} from '@angular/core';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {Action, Store} from '@ngrx/store';
+import {Action} from '@ngrx/store';
 import {NzMessageService} from 'ng-zorro-antd/message';
 import {Observable, of} from 'rxjs';
-import {catchError, map, switchMap, tap, withLatestFrom} from 'rxjs/operators';
+import {catchError, map, switchMap, tap} from 'rxjs/operators';
 
 import {
   executionTriggered,
@@ -30,18 +30,16 @@ import {
 } from './live-view.actions';
 import {LiveViewConsts} from './live-view.consts';
 import {LiveViewService} from './services/live-view.service';
-import {ChainListPageState, getSelectedPipeline} from "../../../chain-list-page/chain-list-page.reducers";
 
 @Injectable()
 export class LiveViewEffects {
 
-  execute$: Observable<Action> = createEffect( () =>this._actions$.pipe(
+  execute$: Observable<Action> = createEffect( () => this._actions$.pipe(
     ofType(
       executionTriggered.type,
     ),
-    withLatestFrom(this._store$.select(getSelectedPipeline)),
-    switchMap(([{sampleData, chainConfig}, selectedPipeline]) => {
-      return this._liveViewService.execute(sampleData, chainConfig, selectedPipeline).pipe(
+    switchMap(({sampleData, chainConfig, currentPipeline}) => {
+      return this._liveViewService.execute(sampleData, chainConfig, currentPipeline).pipe(
         map(liveViewResult => liveViewRefreshedSuccessfully({ liveViewResult })),
         catchError(( error: { message: string }) => {
           this._messageService.create('error', error.message);
@@ -91,7 +89,6 @@ export class LiveViewEffects {
 
   constructor(
     private _actions$: Actions<LiveViewActionsType>,
-    private _store$: Store<ChainListPageState>,
     private _liveViewService: LiveViewService,
     private _messageService: NzMessageService,
   ) {}

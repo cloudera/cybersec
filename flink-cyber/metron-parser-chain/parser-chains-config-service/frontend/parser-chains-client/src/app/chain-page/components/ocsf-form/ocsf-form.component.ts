@@ -100,7 +100,7 @@ export class OcsfFormComponent implements OnInit {
   onOcsfImport() {
     this._chainPageService.getIndexMappings({filePath: this.ocsfForm.value._filePath})
       .pipe(
-        catchError(err => {
+        catchError(_ => {
           this._messageService.create('error', `Couldn't fetch indexing fields for the given path '${this.ocsfForm.value._filePath}'`)
           return of(null)
         }),
