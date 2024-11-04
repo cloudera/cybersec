@@ -18,7 +18,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.core.ConsumerFactory;
@@ -39,8 +38,8 @@ import java.util.Set;
 @Slf4j
 @EnableKafka
 @Configuration
-@Profile("kafka")
 @RequiredArgsConstructor
+@ConditionalOnProperty(value = "kafka.enabled", havingValue = "true", matchIfMissing = true)
 @EnableConfigurationProperties({ClouderaKafkaProperties.class})
 public class KafkaConfig {
 

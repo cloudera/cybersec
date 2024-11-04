@@ -93,8 +93,6 @@ export class ChainAddParserPageComponent implements OnInit, OnDestroy {
       });
     });
 
-
-
     this._store.dispatch(new fromActions.GetParserTypesAction());
 
     this.getParserTypesSubscription = this._store.pipe(select(getParserTypes)).subscribe((parserTypes) => {

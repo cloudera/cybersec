@@ -23,8 +23,14 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 @Deprecated
 public class JavaScriptNashornEngineBuilder extends RuleEngineBuilder<JavaScriptNashornEngine> {
+
     @Override
     public JavaScriptNashornEngine build() {
         return new JavaScriptNashornEngine(getScript());
+    }
+
+    @Override
+    public boolean isValid() {
+        return JavaScriptNashornEngine.mgr.getEngineByName(JavaScriptNashornEngine.ENGINE_NAME) != null;
     }
 }

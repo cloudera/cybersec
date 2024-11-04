@@ -81,12 +81,11 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   }
 
   ngOnInit() {
-    this._activatedRoute.params.subscribe((params) => {
-      this.chainId = params.id;
-    });
-    this._activatedRoute.queryParams.subscribe((params) => {
-      this.currentPipeline = params.pipeline;
-    });
+    //get initial params on component load. The parameter would only be accessed once, when the component loads.
+    // It won’t be updated, even on value change from within the component.
+    this.chainId = this._activatedRoute.snapshot.paramMap.get('id');
+    this.currentPipeline = this._activatedRoute.snapshot.queryParamMap.get('pipeline');
+
     this.getChainSubscription = this._store.pipe(select(getChain({ id: this.chainId }))).subscribe((chain: ParserChainModel) => {
       if (!chain) {
         this._store.dispatch(new fromActions.LoadChainDetailsAction({
