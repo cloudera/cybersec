@@ -102,7 +102,7 @@ describe('live-view.effects', () => {
     const testSubscriber = jasmine.createSpy('executionTriggeredSpy');
     liveViewEffects.execute$.subscribe(testSubscriber);
 
-    actions$.next(executionTriggered({...testPayload}));
+    actions$.next(executionTriggered({...testPayload, currentPipeline: selectedPipeline}));
 
     expect(fakeLiveViewService.execute).toHaveBeenCalledWith(testPayload.sampleData, testPayload.chainConfig, selectedPipeline);
   });
@@ -111,7 +111,7 @@ describe('live-view.effects', () => {
     const testSubscriber = jasmine.createSpy('executionTriggeredSpy');
     liveViewEffects.execute$.subscribe(testSubscriber);
 
-    actions$.next(executionTriggered({...testPayload}));
+    actions$.next(executionTriggered({...testPayload, currentPipeline: selectedPipeline}));
 
     expect(testSubscriber).toHaveBeenCalledWith({
       liveViewResult: {
@@ -127,7 +127,7 @@ describe('live-view.effects', () => {
 
     fakeLiveViewService.execute.and.returnValue(throwError({message: 'something went wrong'}));
 
-    actions$.next(executionTriggered({...testPayload}));
+    actions$.next(executionTriggered({...testPayload, currentPipeline: 'fakePipe'}));
 
     expect(testSubscriber).toHaveBeenCalledWith({
       error: {
@@ -142,7 +142,7 @@ describe('live-view.effects', () => {
 
     liveViewEffects.execute$.subscribe();
 
-    actions$.next(executionTriggered({...testPayload}));
+    actions$.next(executionTriggered({...testPayload, currentPipeline: selectedPipeline}));
 
     expect(fakeMessageService.create).toHaveBeenCalledWith('error', 'something went wrong');
   });

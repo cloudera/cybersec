@@ -9,38 +9,8 @@
  * either express or implied. Refer to the License for the specific permissions and
  * limitations governing your use of the file.
  */
-
-.demo-table {
-  width: 100%;
-  font-size: 20px;
-}
-
-.mat-cell {
-  padding-left: 15px;
-  border: 2px solid rgb(141 141 141 / 50%);
-  -webkit-background-clip: padding-box;
-  background-clip: padding-box;
-}
-
-.mat-header-row {
-  background-color: #333;
-  color: white;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: normal;
-}
-.mat-header-cell {
-  padding-left: 15px;
-  color: white;
-}
-
-.mat-header-cell:first-of-type, .mat-cell:first-of-type {
-  width: 60px;
-}
-
-.mat-row:hover {
-  background: linear-gradient(10deg, #f1f2f3, #dce2ff);
-}
+@use '@angular/material' as mat;
+@import "./styles.scss";
 
 .demo-row-is-clicked {
   font-weight: bold;
