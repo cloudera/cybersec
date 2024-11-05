@@ -4,9 +4,8 @@ import com.cloudera.service.common.request.RequestBody;
 import com.cloudera.service.common.request.RequestType;
 import com.cloudera.service.common.response.ResponseBody;
 import com.cloudera.service.common.response.ResponseType;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.List;
+import org.apache.commons.lang3.tuple.Pair;
 
 public interface KafkaServiceInterface {
     Pair<ResponseType, ResponseBody> sendWithReply(RequestType requestType, String clusterId, RequestBody body);
