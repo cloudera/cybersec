@@ -1,21 +1,17 @@
 package com.cloudera.parserchains.queryservice.common.utils;
 
-import org.apache.commons.lang.StringUtils;
-
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 
 
 public class Utils {
@@ -81,10 +77,8 @@ public class Utils {
      * Assume that any date more than 4 days in the future is in the past as per
      * SyslogUtils
      *
-     * @param candidate
-     *            The possible date.
-     * @param validPatterns
-     *            A list of SimpleDateFormat instances to try parsing with.
+     * @param candidate     The possible date.
+     * @param validPatterns A list of SimpleDateFormat instances to try parsing with.
      * @return A java.util.Date based on the parse result
      */
     public static Long parseData(String candidate, List<SimpleDateFormat> validPatterns) {
@@ -94,7 +88,7 @@ public class Utils {
             for (SimpleDateFormat pattern : validPatterns) {
                 try {
                     DateTimeFormatterBuilder formatterBuilder = new DateTimeFormatterBuilder()
-                            .appendPattern(pattern.toPattern());
+                          .appendPattern(pattern.toPattern());
                     DateTimeFormatter formatter = formatterBuilder.toFormatter();
                     ZonedDateTime parsedValue = parseDateTimeWithDefaultTimezone(candidate, formatter);
                     return parsedValue.toInstant().toEpochMilli();
@@ -102,15 +96,15 @@ public class Utils {
                     // Continue to the next pattern
                 }
             }
-          return null;
+            return null;
         }
     }
 
     private static ZonedDateTime parseDateTimeWithDefaultTimezone(String candidate, DateTimeFormatter formatter) {
         TemporalAccessor temporalAccessor = formatter.parseBest(candidate, ZonedDateTime::from, LocalDateTime::from);
         return temporalAccessor instanceof ZonedDateTime
-                ? ((ZonedDateTime) temporalAccessor)
-                : ((LocalDateTime) temporalAccessor).atZone(ZoneId.systemDefault());
+              ? ((ZonedDateTime) temporalAccessor)
+              : ((LocalDateTime) temporalAccessor).atZone(ZoneId.systemDefault());
     }
 
     public static int compareLongs(Long a, Long b) {
