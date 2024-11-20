@@ -15,7 +15,7 @@
                  label="pipeline name"
                  placeholder="pipeline name"
           >
-          <mat-error>{{ errorMessage(main.get('pipelineName')) }}</mat-error>
+          <mat-error *ngIf="main.controls.pipelineName.invalid">{{ errorMessage(main.controls.pipelineName) }}</mat-error>
         </mat-form-field>
         <mat-form-field class="input-form" color="primary" appearance="outline">
           <mat-label>Branch name input</mat-label>
@@ -25,7 +25,7 @@
                  formControlName="branchName"
                  label="branch name"
                  placeholder="branch name">
-          <mat-error>{{ errorMessage(main.get('branchName')) }}</mat-error>
+          <mat-error *ngIf="main.controls.branchName.invalid">{{ errorMessage(main.controls.branchName) }}</mat-error>
         </mat-form-field>
         <mat-form-field class="input-form" color="primary" appearance="outline">
           <mat-label>Parser name input</mat-label>
@@ -36,7 +36,7 @@
                  label="profile name"
                  placeholder="parser name"
           >
-          <mat-error>{{ errorMessage(main.get('parserName')) }}</mat-error>
+          <mat-error *ngIf="main.controls.parserName.invalid">{{ errorMessage(main.controls.parserName) }}</mat-error>
         </mat-form-field>
         <mat-form-field class="input-form" color="primary" appearance="outline">
           <mat-label>Profile name input</mat-label>
@@ -47,7 +47,7 @@
                  label="profile name"
                  placeholder="profile name"
           >
-          <mat-error>{{ errorMessage(main.get('profileName')) }}</mat-error>
+          <mat-error *ngIf="main.controls.profileName.invalid">{{ errorMessage(main.controls.profileName) }}</mat-error>
         </mat-form-field>
         <mat-form-field class="input-form" color="primary" appearance="outline">
           <mat-label>Cluster name select</mat-label>
@@ -57,7 +57,7 @@
               {{ cl.clusterMeta.name }}
             </mat-option>
           </mat-select>
-          <mat-error>{{ errorMessage(main.get('cluster')) }}</mat-error>
+          <mat-error *ngIf="main.controls.cluster.invalid">{{ errorMessage(main.controls.cluster) }}</mat-error>
         </mat-form-field>
       </form>
     </div>
@@ -86,12 +86,12 @@
       <div *ngIf="mode === 'Archive'" class="container" appDragDrop (fileDropped)="onFileDropped($event)">
         <ng-container *ngIf="!fileControl.value else fileList">
           <input
-                 type="file"
-                 id="fileDropRef"
-                 accept="application/gzip,.gz"
-                 (change)="fileBrowseHandler($event)"
-                 [multiple]="false"
-                 />
+            type="file"
+            id="fileDropRef"
+            accept="application/gzip,.gz"
+            (change)="fileBrowseHandler($event)"
+            [multiple]="false"
+          />
           <mat-icon>cloud_upload</mat-icon>
           <h3>Drag and drop file here</h3>
           <h3>or</h3>
@@ -107,7 +107,7 @@
         </ng-template>
       </div>
       <div *ngIf="mode === 'Git'">
-        <form [formGroup]="git" class="flex-cl-jsb-ab horizontal-wrapper">
+        <form [formGroup]="git" class="flex-column-jsb-ab horizontal-wrapper">
           <mat-form-field class="input-form" color="primary" appearance="outline">
             <mat-label>Git url</mat-label>
             <input matInput
@@ -116,25 +116,25 @@
                    id="gitUrl"
                    label="git remote url"
                    placeholder="git remote url"
-                   required
-            >
-            <mat-error>{{ errorMessage(git.get('url')) }}</mat-error>
+                   required>
+            <mat-error *ngIf="git.controls.url.invalid">{{ errorMessage(git.controls.url) }}</mat-error>
           </mat-form-field>
-          <mat-checkbox style="margin: 15px 10px;" color="primary" formControlName="authentication">Authentication</mat-checkbox>
+            <mat-checkbox style="margin: 15px 10px;" color="primary" formControlName="authentication">Authentication
+            </mat-checkbox>
+
           <div *ngIf="git.controls.authentication.value" class="flex-row-jfs-ac">
-            <mat-form-field class="input-form" color="primary" appearance="outline">
+            <mat-form-field color="primary" appearance="outline">
               <mat-label>Git username</mat-label>
               <input matInput
                      type="text"
-                     formControlName="username"
+                     formControlName="userName"
                      id="username"
                      label="git username"
                      placeholder="git username"
-                     required
-              >
-              <mat-error>{{ errorMessage(git.get('username')) }}</mat-error>
+                     required>
+              <mat-error *ngIf="git.controls.userName.invalid">{{ errorMessage(git.controls.userName) }}</mat-error>
             </mat-form-field>
-            <mat-form-field style="margin-left: 15px;" class="input-form" color="primary" appearance="outline">
+            <mat-form-field style="margin-left: 15px;" color="primary" appearance="outline">
               <mat-label>Git password</mat-label>
               <input matInput
                      type="password"
@@ -144,29 +144,76 @@
                      placeholder="git password"
                      required
               >
-              <mat-error>{{ errorMessage(git.get('password')) }}</mat-error>
+              <mat-error *ngIf="git.controls.password.invalid">{{ errorMessage(git.controls.password) }}</mat-error>
             </mat-form-field>
           </div>
         </form>
       </div>
-    </div>
+      <div class="load_source">
+        <mat-divider [style.margin-top.px]="10"></mat-divider>
+        <h2>Source Map:</h2>
+        <div *ngIf="!sourcesLoaded">
+          <app-upload
+            accept=".json"
+            (filesEmitter)="loadSources($event)">
+          </app-upload>
+        </div>
 
+        <app-custom-list *ngIf="sourcesLoaded">
+          <app-custom-list-line *ngFor="let entry of sourceMap | keyvalue">
+            <mat-icon customListIcon fontSet='material-symbols-outlined'>home_storage</mat-icon>
+            <div customListLine>{{ entry.key }}</div>
+            <button
+              customListAction
+              mat-button
+              color="primary"
+              class="flex-row-jc-ac"
+              data-qe-id="view-fields-button"
+              matTooltip="View"
+              matTooltipPosition="below"
+              (click)="viewSourceField(viewFieldsDialog, entry.value)">
+              <mat-icon class="action-button-margin view-action-color">visibility</mat-icon>
+            </button>
+            <button
+              customListAction
+              mat-button
+              color="primary"
+              class="flex-row-jc-ac"
+              data-qe-id="delete-field-type-btn"
+              matTooltip="Delete"
+              matTooltipPosition="below"
+              (click)="deleteSource(entry.key)">
+              <mat-icon class="action-button-margin delete-action-color">delete</mat-icon>
+            </button>
+          </app-custom-list-line>
+        </app-custom-list>
+      </div>
+    </div>
   </mat-card-content>
   <mat-card-footer class="flex-row-je">
     <button [style.margin.px]="15" mat-raised-button color="primary"
             [disabled]="main.invalid || git.invalid || fileControl.invalid"
-            (click)="navigateToReceiver()">Next
-    </button>
+            (click)="navigateToReceiver()">Next</button>
   </mat-card-footer>
 
   <ng-template #loading>
     <mat-card-content class="flex-row-jc-ac">
-      <mat-progress-spinner
-        [diameter]="150"
-        color="primary"
-        mode="indeterminate"
-      >
+      <mat-progress-spinner color="primary"
+                            mode="indeterminate"
+                            [diameter]="150">
       </mat-progress-spinner>
     </mat-card-content>
   </ng-template>
 </mat-card>
+
+<ng-template #viewFieldsDialog let-data>
+  <h2 mat-dialog-title>Fields assignment</h2>
+  <app-styled-chips-list mat-dialog-content
+                         [style.display]="'inline'"
+                         [chips]="data.chips"
+                         [forceStyleDisplay]="true">
+  </app-styled-chips-list>
+  <div mat-dialog-actions align="end">
+    <button mat-raised-button color="primary" [mat-dialog-close]="true" cdkFocusInitial>Ok</button>
+  </div>
+</ng-template>

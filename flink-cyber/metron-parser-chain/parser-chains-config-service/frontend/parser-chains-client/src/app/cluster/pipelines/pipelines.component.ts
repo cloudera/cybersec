@@ -25,7 +25,7 @@ export class PipelinesComponent {
   private _pipelineService = inject(ClusterPipelineService);
   pipelines$ = concat(of({
     type: 'start',
-    value: {}
+    value: []
   }), this._pipelineService.getAllPipelines().pipe(map(value => ({type: 'finish', value}))));
 
   readonly columns = ['name', 'cluster', 'date', 'jobs', 'user', 'action'];

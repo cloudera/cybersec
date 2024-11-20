@@ -1,0 +1,17 @@
+@use '@angular/material' as mat;
+@import "./theme.scss";
+
+.success-chip {
+  background-color: mat.get-color-from-palette($theming-material-components-success, 600);
+  color: mat.get-contrast-color-from-palette($theming-material-components-success, 600);
+}
+
+.primary-chip {
+  background-color: mat.get-color-from-palette($theming-material-components-primary, 600);
+  color: mat.get-contrast-color-from-palette($theming-material-components-primary, 600);
+}
+
+.unselected-chip {
+  background-color: mat.get-color-from-palette($theming-material-components-accent, 600);
+  color: mat.get-contrast-color-from-palette($theming-material-components-accent, 600);
+}

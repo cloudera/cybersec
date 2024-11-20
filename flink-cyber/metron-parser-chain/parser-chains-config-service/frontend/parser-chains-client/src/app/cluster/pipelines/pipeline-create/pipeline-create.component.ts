@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, TemplateRef} from '@angular/core';
 import {MultiButton} from 'src/app/shared/components/multibutton/multi-button.component';
 import {AbstractControl, FormControl, FormGroup, Validators} from '@angular/forms';
 import {ClusterService} from 'src/app/services/cluster.service';
@@ -8,6 +8,9 @@ import {Router} from '@angular/router';
 import {PipelineSubmitState} from 'src/app/cluster/pipelines/pipeline-submit/pipeline-submit.component';
 import {ClusterMeta} from 'src/app/cluster/cluster-list-page/cluster-list-page.model';
 import {JOBS_ENUM} from 'src/app/app.constants';
+import {formatBytes, objMap, toggleValueInArray} from 'src/app/shared/utils';
+import {CustomChip} from 'src/app/shared/components/styled-chips-list/styled-chips-list.component';
+import {MatDialog} from '@angular/material/dialog';
 
 const BUTTONS_CONST = [
   {label: 'Archive', value: 'Archive', disabled: false},
@@ -29,13 +32,15 @@ const urlRegex = /^(?:http(s)?:\/\/)?[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&
 })
 export class PipelineCreateComponent {
   protected readonly jobsEnum = JOBS_ENUM;
+  protected readonly toggleValueInArray = toggleValueInArray;
+  protected readonly formatBytes = formatBytes;
   private readonly _maxSize = 1000000;
   private _router = inject(Router);
   private _clusterService = inject(ClusterService);
+  private _dialog = inject(MatDialog);
 
   jobs: string[] = Object.keys(JOBS_ENUM).map(key => JOBS_ENUM[key].value);
   mode: ButtonsLabelValues = 'Empty';
-
   buttons: Readonly<MultiButton[]> = BUTTONS_CONST;
   main = new FormGroup<{
     pipelineName: FormControl<string>,
@@ -62,11 +67,15 @@ export class PipelineCreateComponent {
       password: new FormControl('')
     }
   );
-
   clusters$ = this._clusterService.getClusters();
   vm$ = combineLatest([this.clusters$]).pipe(map(([cluster]) => ({cluster})));
   fileControl: FormControl<File> = new FormControl(null);
   authentication = true;
+  sourceMap: Record<string, CustomChip[]>;
+
+  get sourcesLoaded() {
+    return this.sourceMap && Object.keys(this.sourceMap).length >= 1;
+  }
 
   errorMessage(formControl: AbstractControl) {
     if (formControl.hasError('minlength')) {
@@ -117,6 +126,7 @@ export class PipelineCreateComponent {
       password: this.git.controls.password.value,
       file: this.fileControl.value,
       jobs: this.jobs,
+      sourceMap: this.sourceMap,
     }
     this._router.navigate(['clusters/pipelines/submit'], {state: {data}});
   }
@@ -136,35 +146,40 @@ export class PipelineCreateComponent {
   prepareFilesList(files: FileList) {
     Array.from(files).forEach((file) => {
       if (Math.ceil(file.size / 3) * 4 > this._maxSize) {
-        alert(`'${file.name}' size is more than ${this.formatBytes(Math.ceil(this._maxSize / 4) * 3)}!`);
+        alert(`'${file.name}' size is more than ${formatBytes(Math.ceil(this._maxSize / 4) * 3)}!`);
       } else {
         this.fileControl.setValue(file);
       }
     });
   }
 
-  formatBytes(bytes: number): string {
-    if (bytes === 0) {
-      return '0 Bytes';
-    }
-    const units = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
-    return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + units[i];
-  }
-
-  toggleValueInArray<T>(array: T[], value: T): T[] {
-    const index = array.indexOf(value);
-    if (index !== -1) {
-      // Value exists in the array, so remove it
-      array.splice(index, 1);
-    } else {
-      // Value does not exist in the array, so add it
-      array.push(value);
-    }
-    return array;
-  }
-
   deleteFile() {
     this.fileControl.setValue(null);
+  }
+
+  viewSourceField(dialog: TemplateRef<any>, chips: CustomChip[]) {
+    this._dialog.open(dialog, {
+      minWidth: '30vw',
+      data: {
+        chips
+      }
+    })
+  }
+
+  deleteSource(key: string) {
+    this.sourceMap = (({[key]: _, ...other}) => other)(this.sourceMap);
+  }
+
+  async loadSources(files: File[]) {
+    const config = await files[0].text();
+    const conf: Record<string, { fields: string[] }> = JSON.parse(config);
+    this.sourceMap = objMap(conf,
+      (_, value) => value.fields.map(fieldName => ({
+        allowMapping: false,
+        name: fieldName,
+        selected: false,
+        removable: false
+      }))
+    );
   }
 }

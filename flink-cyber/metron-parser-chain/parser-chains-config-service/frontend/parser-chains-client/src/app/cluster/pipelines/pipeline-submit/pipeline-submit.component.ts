@@ -14,6 +14,7 @@ export type PipelineSubmitState = {
   userName?: string,
   password?: string,
   mode?: string,
+  sourceMap?: any
 }
 
 @Component({
