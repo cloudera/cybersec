@@ -19,7 +19,6 @@ import * as chainPageActions from './chain-page.actions';
 import {ParserChainModel, ParserModel, RouteModel} from './chain-page.models';
 import {denormalizeParserConfig} from './chain-page.utils';
 import {CustomFormConfig} from './components/custom-form/custom-form.component';
-import * as chainListPageActions from "../chain-list-page/chain-list-page.actions";
 
 export interface ChainPageState {
   chains: { [key: string]: ParserChainModel };
@@ -32,6 +31,7 @@ export interface ChainPageState {
   dirtyParsers: string[];
   dirtyChains: string[];
   path: string[];
+  selectedPipeline: string;
   indexMappings: { path: string, result: object };
 }
 
@@ -40,6 +40,7 @@ export interface ParserDescriptor {
   name: string;
   schemaItems: CustomFormConfig[];
 }
+
 export const initialState: ChainPageState = {
   chains: {},
   parsers: {},
@@ -51,21 +52,19 @@ export const initialState: ChainPageState = {
   dirtyParsers: [],
   dirtyChains: [],
   path: [],
-  indexMappings: { path: '', result: {} },
+  selectedPipeline: '',
+  indexMappings: {path: '', result: {}},
 };
 
 export const uniqueAdd = (haystack: string[], needle: string): string[] => {
-  return [ ...haystack.filter(item => item !== needle), needle];
+  return [...haystack.filter(item => item !== needle), needle];
 };
 
 export function reducer(
   state: ChainPageState = initialState,
-  action: chainPageActions.ChainDetailsAction | addParserActions.ParserAction | chainListPageActions.ChainListAction | chainPageActions.IndexMappingAction
+  action: chainPageActions.ChainDetailsAction | addParserActions.ParserAction | chainPageActions.IndexMappingAction
 ): ChainPageState {
   switch (action.type) {
-    case chainListPageActions.PIPELINE_CHANGED: {
-      return initialState
-    }
     case chainPageActions.LOAD_CHAIN_DETAILS_SUCCESS: {
       return {
         ...state,
@@ -78,7 +77,7 @@ export function reducer(
       };
     }
     case chainPageActions.REMOVE_PARSER: {
-      const parsers = { ...state.parsers };
+      const parsers = {...state.parsers};
       delete parsers[action.payload.id];
       return {
         ...state,
@@ -176,7 +175,7 @@ export function reducer(
       };
     }
     case chainPageActions.GET_INDEX_MAPPINGS_SUCCESS: {
-      const { path, result } = action.payload;
+      const {path, result} = action.payload;
       return {
         ...state,
         indexMappings: {path, result}
@@ -230,7 +229,7 @@ export function reducer(
       };
     }
     case chainPageActions.REMOVE_ROUTE: {
-      const routes = { ...state.routes };
+      const routes = {...state.routes};
       delete routes[action.payload.routeId];
       return {
         ...state,
@@ -284,6 +283,12 @@ export function reducer(
         dirtyChains: uniqueAdd(state.dirtyChains, action.payload.chainId),
         routes
       };
+    }
+    case chainPageActions.LOAD_PIPELINE: {
+      return {
+        ...state,
+        selectedPipeline: action.payload.currentPipeline
+      }
     }
   }
   return state;
@@ -377,6 +382,11 @@ export const getFormConfigs = createSelector(
 export const getPath = createSelector(
   getChainPageState,
   (state) => state.path
+);
+
+export const getSelectedPipeline = createSelector(
+  getChainPageState,
+  (state) => state.selectedPipeline
 );
 
 export const getPathWithChains = createSelector(

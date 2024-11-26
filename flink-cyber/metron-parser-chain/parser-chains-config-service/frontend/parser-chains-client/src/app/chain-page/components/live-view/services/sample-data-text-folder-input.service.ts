@@ -16,60 +16,65 @@ import {from, Observable} from 'rxjs';
 
 import {EntryParsingResultModel} from '../models/live-view.model';
 import {SampleDataInternalModel, SampleDataModel, SampleDataType} from '../models/sample-data.model';
-import {LiveViewService} from "./live-view.service";
-import {concatAll, map, reduce} from "rxjs/operators";
+import {LiveViewService} from './live-view.service';
+import {concatAll, map, reduce} from 'rxjs/operators';
+import {ActivatedRoute} from '@angular/router';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root'
 })
 export class SampleDataTextFolderInputService {
 
-    static readonly SAMPLE_FOLDER_PARSER_URL = '/api/v1/parserconfig/tests/samples/';
+  static readonly SAMPLE_FOLDER_PARSER_URL = '/api/v1/parserconfig/tests/samples/';
 
-    constructor(
-        private _http: HttpClient,
-        private _liveViewService: LiveViewService,
-    ) {
-    }
+  constructor(
+    private _http: HttpClient,
+    private _liveViewService: LiveViewService,
+    private _activatedRoute: ActivatedRoute
+  ) {
 
-    runTests(sampleDataList: SampleDataInternalModel[], chainConfig: unknown): Observable<Map<number, [SampleDataInternalModel, EntryParsingResultModel[]]>> {
-        const resultList: Observable<{
-            id: number,
-            sample: SampleDataInternalModel,
-            results: EntryParsingResultModel[]
-        }>[] = []
+  }
 
-        sampleDataList.forEach(value => {
-            const sample: SampleDataModel = {
-                source: value.source,
-                type: SampleDataType.MANUAL
+  runTests(sampleDataList: SampleDataInternalModel[], chainConfig: unknown, currentPipeline: string): Observable<Map<number, [SampleDataInternalModel, EntryParsingResultModel[]]>> {
+    const resultList: Observable<{
+      id: number,
+      sample: SampleDataInternalModel,
+      results: EntryParsingResultModel[]
+    }>[] = []
+
+    sampleDataList.forEach(value => {
+      const sample: SampleDataModel = {
+        source: value.source,
+        type: SampleDataType.MANUAL
+      }
+      const postObservable =
+        this._liveViewService.execute(sample, chainConfig, currentPipeline)
+          .pipe(map(res => {
+            return {
+              id: value.id,
+              sample: value,
+              results: res.results
             }
-            const postObservable =
-                this._liveViewService.execute(sample, chainConfig)
-                .pipe(map(res => {
-                    return {
-                        id: value.id,
-                        sample: value,
-                        results: res.results
-                    }
-                }))
-            resultList.push(postObservable)
-        })
-        return from(resultList).pipe(concatAll(), reduce((acc, value) => {
-            return acc.set(value.id, [value.sample, value.results])
-        }, new Map<number, [SampleDataInternalModel, EntryParsingResultModel[]]>()))
-    }
+          }))
+      resultList.push(postObservable)
+    });
 
-    fetchSamples(folderPath: string, chainId: string): Observable<SampleDataInternalModel[]> {
-        return this._http.post<SampleDataInternalModel[]>(
-          SampleDataTextFolderInputService.SAMPLE_FOLDER_PARSER_URL + chainId,
-            {folderPath});
-    }
 
-    saveSamples(folderPath: string, chainId: string, sampleList: SampleDataInternalModel[]): Observable<SampleDataInternalModel[]> {
-        return this._http.put<SampleDataInternalModel[]>(
-          SampleDataTextFolderInputService.SAMPLE_FOLDER_PARSER_URL + chainId,
-            {folderPath, sampleList}
-        )
-    }
+    return from(resultList).pipe(concatAll(), reduce((acc, value) => {
+      return acc.set(value.id, [value.sample, value.results])
+    }, new Map<number, [SampleDataInternalModel, EntryParsingResultModel[]]>()))
+  }
+
+  fetchSamples(folderPath: string, chainId: string): Observable<SampleDataInternalModel[]> {
+    return this._http.post<SampleDataInternalModel[]>(
+      SampleDataTextFolderInputService.SAMPLE_FOLDER_PARSER_URL + chainId,
+      {folderPath});
+  }
+
+  saveSamples(folderPath: string, chainId: string, sampleList: SampleDataInternalModel[]): Observable<SampleDataInternalModel[]> {
+    return this._http.put<SampleDataInternalModel[]>(
+      SampleDataTextFolderInputService.SAMPLE_FOLDER_PARSER_URL + chainId,
+      {folderPath, sampleList}
+    )
+  }
 }

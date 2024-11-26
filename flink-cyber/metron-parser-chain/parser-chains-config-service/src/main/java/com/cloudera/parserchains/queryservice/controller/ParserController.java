@@ -23,7 +23,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.MapUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,17 +45,12 @@ import static com.cloudera.parserchains.queryservice.common.ApplicationConstants
 @RequestMapping(value = PARSER_CONFIG_BASE_URL)
 public class ParserController {
 
-
     private final ParserDiscoveryService parserDiscoveryService;
 
-
-
-    @Operation(summary = "Retrieves all available parsers.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "A list of all parser types.", content = @Content(
-                            mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = ParserSummary.class))))
-            })
+    @Operation(summary = "Retrieves all available parsers.")
+    @ApiResponse(responseCode = "200", description = "A list of all parser types.", content = @Content(
+            mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = ParserSummary.class))))
     @GetMapping(value = API_PARSER_TYPES)
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', '*')")
     public ResponseEntity<List<ParserSummary>> findAll() throws IOException {
@@ -65,11 +59,10 @@ public class ParserController {
     }
 
 
-    @Operation(summary = "Describes the configuration parameters for all available parsers.",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "A map of parser types and their associated configuration parameters.", content = @Content(
-                            mediaType = "application/json")),
-                    @ApiResponse(responseCode = "404", description = "Unable to retrieve.")})
+    @Operation(summary = "Describes the configuration parameters for all available parsers.")
+    @ApiResponse(responseCode = "200", description = "A map of parser types and their associated configuration parameters.", content = @Content(
+            mediaType = "application/json"))
+    @ApiResponse(responseCode = "404", description = "Unable to retrieve.")
     @GetMapping(value = API_PARSER_FORM_CONFIG)
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', '*')")
     public ResponseEntity<Map<ParserID, ParserDescriptor>> describeAll() {
