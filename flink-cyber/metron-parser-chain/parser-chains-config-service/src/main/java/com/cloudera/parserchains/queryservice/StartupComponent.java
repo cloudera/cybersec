@@ -46,5 +46,9 @@ public class StartupComponent implements CommandLineRunner {
     log.info("Creating the config dir: {}", appProperties.getConfigPath());
     Files.createDirectories(Paths.get(appProperties.getConfigPath()));
     log.info("Done creating the config dir");
+
+    log.info("Creating the pipeline dir: {}", appProperties.getPipelinesPath());
+    Files.createDirectories(Paths.get(appProperties.getPipelinesPath()));
+    log.info("Done creating the pipeline dir");
   }
 }

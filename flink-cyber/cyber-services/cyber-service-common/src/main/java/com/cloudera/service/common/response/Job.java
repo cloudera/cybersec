@@ -31,6 +31,8 @@ public class Job {
 
     private JobType jobType;
 
+    private String user;
+
     @AllArgsConstructor
     @Getter
     public enum JobType {
@@ -46,7 +48,6 @@ public class Job {
 
         public String[] getScript(Job job) {
             switch (this) {
-                case GENERATOR:
                 case PROFILE:
                 case PARSER:
                     return new String[]{scriptName, job.getJobBranch(), job.getJobPipeline(), job.getJobName()};

@@ -49,12 +49,12 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   parserToBeInvestigated: string[] = [];
   getChainSubscription: Subscription;
   forceDeactivate = false;
-  chainIdBeingEdited: string;
   getChainsSubscription: Subscription;
   popOverVisible = false;
   editChainNameForm: UntypedFormGroup;
   failedParser$: Observable<string>;
   indexingFieldMap: { [key: string]: {[key:string]: boolean} };
+  currentPipeline: string;
 
   constructor(
     private _store: Store<ChainPageState>,
@@ -81,21 +81,24 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
   }
 
   ngOnInit() {
-    this._activatedRoute.params.subscribe((params) => {
-        this.chainId = params.id;
-    });
+    //get initial params on component load. The parameter would only be accessed once, when the component loads.
+    // It won’t be updated, even on value change from within the component.
+    this.chainId = this._activatedRoute.snapshot.paramMap.get('id');
+    this.currentPipeline = this._activatedRoute.snapshot.queryParamMap.get('pipeline');
 
-    this.getChainsSubscription = this._store.pipe(select(getPathWithChains)).subscribe((path) => {
-        this.breadcrumbs = path;
-    });
     this.getChainSubscription = this._store.pipe(select(getChain({ id: this.chainId }))).subscribe((chain: ParserChainModel) => {
       if (!chain) {
         this._store.dispatch(new fromActions.LoadChainDetailsAction({
-          id: this.chainId
+          id: this.chainId,
+          currentPipeline: this.currentPipeline
         }));
       } else {
         this.chain = chain;
       }
+    });
+
+    this.getChainsSubscription = this._store.pipe(select(getPathWithChains)).subscribe((path) => {
+        this.breadcrumbs = path;
     });
 
     this._store.pipe(select(getDirtyStatus)).subscribe((status) => {
@@ -211,7 +214,8 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
       nzCancelText: 'Cancel',
       nzOnOk: () => {
         this._store.dispatch(new fromActions.LoadChainDetailsAction({
-          id: this.chainId
+          id: this.chainId,
+          currentPipeline: this.currentPipeline
         }));
         this._store.dispatch(new fromActions.InvestigateParserAction({ id: '' }));
       }
