@@ -3,7 +3,7 @@
     <mat-card-title>Pipeline Configuration</mat-card-title>
     <mat-card-subtitle>This is general pipeline configuration</mat-card-subtitle>
   </mat-card-header>
-  <mat-card-content *ngIf="vm$ | async as vm;else loading" [style.height.vh]="70">
+  <mat-card-content *ngIf="vm$ | async as vm;else loading" [style.min-height.vh]="70">
     <div class="flex-row-jsb-ab">
       <form [formGroup]="main" class="flex-row-jsb-ab horizontal-wrapper">
         <mat-form-field class="input-form" color="primary" appearance="outline">
