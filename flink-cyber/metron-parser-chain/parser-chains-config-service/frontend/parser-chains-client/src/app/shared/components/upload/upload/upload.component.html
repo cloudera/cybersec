@@ -1,0 +1,45 @@
+<div class="container" appDragDrop (fileDropped)="filesValidate($event)">
+  <input #input_upload
+         id="fileDropRef"
+         type="file"
+         accept="{{accept}}"
+         (change)="filesValidate(input_upload.files)"
+         [disabled]="files.length > 0"
+         [multiple]="multiple"
+  />
+  <mat-icon>cloud_upload</mat-icon>
+  <h3>Drag and drop file here</h3>
+  <h3>or</h3>
+  <label for="fileDropRef">Browse for file</label>
+</div>
+
+<div class="flex-row-jc-ac">
+
+<div class="files-list">
+  <div class="single-file" *ngFor="let file of files; let i = index">
+    <div class="file-icon" style="width: 50px">
+      <mat-icon>file_copy</mat-icon>
+    </div>
+    <div class="info">
+      <h4 class="name">
+        {{ file?.name }}
+      </h4>
+      <p class="size">
+        {{ formatBytes(file?.size) }}
+      </p>
+      <app-upload-progress *ngIf="progress" [progress]="getProgress(file?.name)"></app-upload-progress>
+    </div>
+
+    <a title="Cancel" (click)="cancelFile(file.name)">
+      <mat-icon>cancel</mat-icon>
+    </a>
+  </div>
+</div>
+</div>
+
+
+<div class="flex-row-jc-ac">
+  <button  mat-flat-button color="primary" [disabled]="files.length < 1"  (click)="buttonClick()">Upload</button>
+</div>
+
+

@@ -1,0 +1,40 @@
+@use '@angular/material' as mat;
+@import "./theme.scss";
+
+$font-size1: mat.font-size($typography, headline);
+$font-size2: mat.font-size($typography, body-1);
+
+.action-button-margin {
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+.button1-color {
+  color: mat.get-color-from-palette($theming-material-components-success, 600);
+}
+
+.button2-color {
+  color: mat.get-color-from-palette($theming-material-components-primary, 600);
+}
+
+.edit-action-color {
+  color: mat.get-color-from-palette($theming-material-components-warn, 900);
+}
+
+.view-action-color {
+  color: mat.get-color-from-palette($theming-material-components-primary, 600);
+}
+
+.delete-action-color {
+  color: mat.get-color-from-palette($theming-material-components-error, 600);
+}
+
+.chip1-color {
+  background-color: mat.get-color-from-palette($theming-material-components-success, 600) !important;
+  color: mat.get-contrast-color-from-palette($theming-material-components-success, 600) !important;
+}
+
+.chip2-color {
+  background-color: mat.get-color-from-palette($theming-material-components-primary, 600) !important;
+  color: mat.get-contrast-color-from-palette($theming-material-components-primary, 600) !important;
+}
