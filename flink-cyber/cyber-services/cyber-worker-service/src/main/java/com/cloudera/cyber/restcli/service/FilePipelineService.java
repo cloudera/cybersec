@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 public class FilePipelineService {
     private final AppWorkerConfig config;
 
-
     public void createEmptyPipeline(String pipelineName, String branchName) {
         String fullPath = this.config.getPipelineDir().endsWith("/") ? this.config.getPipelineDir() + pipelineName + "/" + branchName
                 : this.config.getPipelineDir() + "/" + pipelineName + "/" + branchName;
@@ -47,32 +46,51 @@ public class FilePipelineService {
         ArchiveUtil.decompressFromTarGzInMemory(payload, fullPipelinePath, true);
     }
 
-    public void startPipelineJob(String pipelineName, String branch, String profileName, List<String> jobsNames) throws IOException {
-        String fullPipelinePath = pipelineName.endsWith("/") ?this.config.getPipelineDir() + pipelineName + "/" + branch
+    public void startPipelineJob(String pipelineName, String branch, String profileName, String parserName, List<String> jobsNames) throws IOException {
+        String fullPipelinePath = pipelineName.endsWith("/") ? this.config.getPipelineDir() + pipelineName + "/" + branch
                 : this.config.getPipelineDir() + "/" + pipelineName + "/" + branch;
-
-        List<Job> jobs = jobsNames.stream().map(jobName -> Job.builder()
-                .jobPipeline(pipelineName)
-                .jobType(Utils.getEnumFromString(jobName, Job.JobType.class, Job.JobType::getName))
-                .jobBranch(branch)
-                .jobName(StringUtils.defaultString(profileName, "main"))
-                .build()).collect(Collectors.toList());
-        for (Job job : jobs) {
-            job.getJobType().getScript(job);
-            ProcessBuilder processBuilder = new ProcessBuilder(job.getJobType().getScript(job));
-            processBuilder.directory(new File(fullPipelinePath));
-            Process process = processBuilder.start();
-            Thread clt = new Thread(() -> {
-                try {
-                    log.info(IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8));
-                    log.error(IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8));
-                } catch (IOException e) {
-                    log.error("Error happens on stream reading from bash {}", e.getMessage());
-                }
-            });
-            clt.setDaemon(true);
-            clt.start();
-        }
+        jobsNames.stream().map(jobName -> {
+            Job.JobType jobType = Utils.getEnumFromString(jobName, Job.JobType.class, Job.JobType::getName);
+            String confName = getConfName(profileName, parserName, jobType);
+            return Job.builder()
+                    .jobPipeline(pipelineName)
+                    .jobType(jobType)
+                    .jobBranch(branch)
+                    .confName(confName)
+                    .build();
+        }).forEach(job -> {
+            try {
+                job.getJobType().getScript(job);
+                ProcessBuilder processBuilder = new ProcessBuilder(job.getJobType().getScript(job));
+                processBuilder.directory(new File(fullPipelinePath));
+                Process process = processBuilder.start();
+                Thread clt = new Thread(() -> {
+                    try {
+                        log.info(IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8));
+                        log.error(IOUtils.toString(process.getErrorStream(), StandardCharsets.UTF_8));
+                    } catch (IOException e) {
+                        log.error("Error happens on stream reading from bash {}", e.getMessage());
+                    }
+                });
+                clt.setDaemon(true);
+                clt.start();
+            } catch (IOException e) {
+                log.error("Couldn't start job with name '{}', cause '{}'", job.getJobFullName(), e.getMessage());
+            }
+        });
     }
 
+    private static String getConfName(String profileName, String parserName, Job.JobType jobType) {
+        switch (jobType) {
+            case PARSER:
+                return StringUtils.defaultString(parserName, "main");
+            case PROFILE:
+                return StringUtils.defaultString(profileName, "main");
+            case TRIAGE:
+            case GENERATOR:
+            case INDEX:
+            default:
+                return null;
+        }
+    }
 }
