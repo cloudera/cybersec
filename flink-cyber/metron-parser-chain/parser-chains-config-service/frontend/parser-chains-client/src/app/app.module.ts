@@ -10,7 +10,7 @@
  * limitations governing your use of the file.
  */
 
-import {registerLocaleData} from '@angular/common';
+import {NgOptimizedImage, registerLocaleData} from '@angular/common';
 import {HttpClientModule} from '@angular/common/http';
 import en from '@angular/common/locales/en';
 import {CUSTOM_ELEMENTS_SCHEMA, NgModule, NO_ERRORS_SCHEMA} from '@angular/core';
@@ -85,6 +85,7 @@ export const metaReducers: MetaReducer<unknown>[] = !environment.production
     MatDialogModule,
     MatButtonModule,
     DragDropModule,
+    NgOptimizedImage,
   ],
   providers: [
     {provide: NZ_I18N, useValue: en_US},

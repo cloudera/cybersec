@@ -158,7 +158,7 @@ public class JobService {
         job.setJobBranch(jobParameters[0]);
         job.setJobPipeline(jobParameters[1]);
         if (job.getJobType() == Job.JobType.PROFILE || job.getJobType() == Job.JobType.PARSER) {
-            job.setJobName(jobParameters[jobParameters.length - 1]);
+            job.setConfName(jobParameters[jobParameters.length - 1]);
         }
     }
 
