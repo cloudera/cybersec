@@ -151,6 +151,37 @@ function mapState<T>(key: keyof T, value: any, newValue?: any) {
 
 export const unique: UniqueFunction = (value, column) => (items) => isExist(items, value, column);
 
+export function objMap<T, R>(obj: Record<string, T>, fn: ObjectMapFn<T, R>): Record<string, R> {
+  return Object.fromEntries(
+    Object.entries(obj).map(
+      ([key, value], i) => [key, fn(key, value, i)]
+    )
+  )
+}
+
+export function formatBytes(bytes: number): string {
+  if (bytes === 0) {
+    return '0 Bytes';
+  }
+  const units = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+  return parseFloat((bytes / Math.pow(1024, i)).toFixed(2)) + ' ' + units[i];
+}
+
+export function toggleValueInArray<T>(array: T[], value: T): void {
+  const index = array.indexOf(value);
+  if (index !== -1) {
+    // Value exists in the array, so remove it
+    array.splice(index, 1);
+  } else {
+    // Value does not exist in the array, so add it
+    array.push(value);
+  }
+}
+
+
+// Custom types
+
 export type UniqueAsyncValidatorType = <T>(existingValues: Observable<T[]>, column?: keyof T) => AsyncValidatorFn;
 export type UniqueValidatorType = <T>(existingValues: T[], column?: keyof T) => ValidatorFn;
 export type UniqueFunction = <T>(value: string, column?: keyof T) => (items: T[]) => boolean;
@@ -163,3 +194,16 @@ export type TypedFormControls<T extends Record<string, any>> = {
       ? FormGroup<TypedFormControls<T[K]>>
       : FormControl<T[K]>;
 };
+export type ObjectMapFn<T, R> = (key?: string, value?: T, i?: number) => R;
+
+export type UploadFileType = {
+  file?: File;
+  data?: string;
+  name?: string;
+  size?: number;
+  progress?: number;
+  errorMessage?: string;
+}
+
+
+
