@@ -1,0 +1,15 @@
+<span class="custom-list-item-content flex-row-jc-ac" xmlns="http://www.w3.org/1999/html">
+   <ng-content select="[custom-list-icon], [customListIcon]"></ng-content>
+   <span class="custom-list-text flex-row-jfs-ac">
+      <span class="custom-line-container flex-column-jfs-ac">
+         <ng-content select="[custom-list-line], [customListLine]"></ng-content>
+      </span>
+      <span class="flex-column-jfs-afs">
+        <ng-content select="[custom-list-chips], [customListChips]"></ng-content>
+      </span>
+   </span>
+   <span class="custom-list-actions-container flex-row-jfs-ac">
+      <ng-content select="[custom-list-action], [customListAction]"></ng-content>
+   </span>
+   <ng-content></ng-content>
+</span>

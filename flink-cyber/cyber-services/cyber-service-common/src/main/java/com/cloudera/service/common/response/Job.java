@@ -19,7 +19,7 @@ public class Job {
 
     private String jobFullName;
 
-    private String jobName;
+    private String confName;
 
     private JobStatus jobState;
 
@@ -50,7 +50,7 @@ public class Job {
             switch (this) {
                 case PROFILE:
                 case PARSER:
-                    return new String[]{scriptName, job.getJobBranch(), job.getJobPipeline(), job.getJobName()};
+                    return new String[]{scriptName, job.getJobBranch(), job.getJobPipeline(), job.getConfName()};
                 case INDEX:
                 case TRIAGE:
                     return new String[]{scriptName, job.getJobBranch(), job.getJobPipeline()};

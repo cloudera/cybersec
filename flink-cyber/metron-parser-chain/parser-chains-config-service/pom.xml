@@ -196,6 +196,11 @@
             <artifactId>swagger-annotations</artifactId>
             <version>${swagger-annotations.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>5.13.1.202206130422-r</version>
+        </dependency>
     </dependencies>
 
     <build>

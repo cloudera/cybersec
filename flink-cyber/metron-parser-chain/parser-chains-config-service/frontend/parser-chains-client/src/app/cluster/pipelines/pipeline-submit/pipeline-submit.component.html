@@ -3,7 +3,17 @@
 <h2><mat-icon *ngIf="!loadingEmpty" [style.color]="'green'" >check_circle</mat-icon>1. Create empty pipeline</h2>
 <mat-progress-bar mode="indeterminate" *ngIf="loadingEmpty"></mat-progress-bar>
 
-<h2 *ngIf="state.showStartAllJob"><mat-icon *ngIf="finishedSubmitAllJob" [style.color]="'green'" >check_circle</mat-icon>2. Start all jobs for pipeline</h2>
-<mat-progress-bar mode="indeterminate" *ngIf="loadingStartAllJob && state.showStartAllJob"></mat-progress-bar>
+<h2 *ngIf="!!state.mode"><mat-icon *ngIf="finishedSubmitAllJob" [style.color]="'green'" >check_circle</mat-icon>2. Start all jobs for pipeline</h2>
+<mat-progress-bar mode="indeterminate" *ngIf="loadingStartAllJob && !!state.mode"></mat-progress-bar>
+
+<button *ngIf="finishedSubmitAllJob"
+  mat-raised-button
+  color="primary"
+  class="return-button"
+  matTooltip="Return to pipelines list"
+  matTooltipPosition="left"
+  routerLink="/clusters/pipelines"
+>Return to pipelines list
+</button>
 
 

@@ -1,0 +1,14 @@
+<mat-chip-list  class="flex-row-jsb-ab"
+                [style.margin.px]="2"
+>
+  <mat-chip [ngClass]="inputClass(chip)"
+            *ngFor="let chip of chips"
+            #chipHash="matChip"
+            [selected]="chip.selected"
+            (removed)="remove(chip.name)"
+            (click)="click(chipHash, chip.name)"
+
+  >
+    {{ chip.name }}<button *ngIf="chip.removable" matChipRemove><mat-icon>cancel</mat-icon></button>
+  </mat-chip>
+</mat-chip-list>

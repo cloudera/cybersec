@@ -1,6 +1,6 @@
 <h2 matDialogTitle *ngIf="type === 'create'">Create a new {{name}}</h2>
 <h2 matDialogTitle *ngIf="type === 'edit'">Update a {{name}}</h2>
-<form class="flex-cl-jsb-ab" [formGroup]="dialogForm" (ngSubmit)="submit()">
+<form class="flex-column-jsb-ab" [formGroup]="dialogForm" (ngSubmit)="submit()">
 
   <mat-dialog-content [style.width.%]="100">
     <mat-form-field appearance="standard" [style.width.%]="100">
