@@ -111,7 +111,7 @@ import {OcsfObjectFormComponent} from './components/ocsf-form/ocsf-object-form/o
   providers: [
     NzMessageService,
   ],
-  exports: [ ChainPageComponent, ChainViewComponent, AdvancedEditorComponent ],
+  exports: [ChainPageComponent, ChainViewComponent, AdvancedEditorComponent, ParserComponent, ParserComposerComponent],
   schemas: [CUSTOM_ELEMENTS_SCHEMA, NO_ERRORS_SCHEMA]
 })
 export class ChainPageModule { }

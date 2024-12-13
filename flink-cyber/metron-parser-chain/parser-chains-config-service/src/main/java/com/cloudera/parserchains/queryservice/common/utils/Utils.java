@@ -1,5 +1,23 @@
 package com.cloudera.parserchains.queryservice.common.utils;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.jgit.api.FetchCommand;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.internal.storage.dfs.DfsRepositoryDescription;
+import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.RefSpec;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.jgit.treewalk.TreeWalk;
+
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -11,9 +29,8 @@ import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import org.apache.commons.lang.StringUtils;
 
-
+@Slf4j
 public class Utils {
 
     public static List<SimpleDateFormat> DATE_FORMATS_CEF = new ArrayList<SimpleDateFormat>() {
@@ -88,7 +105,7 @@ public class Utils {
             for (SimpleDateFormat pattern : validPatterns) {
                 try {
                     DateTimeFormatterBuilder formatterBuilder = new DateTimeFormatterBuilder()
-                          .appendPattern(pattern.toPattern());
+                            .appendPattern(pattern.toPattern());
                     DateTimeFormatter formatter = formatterBuilder.toFormatter();
                     ZonedDateTime parsedValue = parseDateTimeWithDefaultTimezone(candidate, formatter);
                     return parsedValue.toInstant().toEpochMilli();
@@ -103,12 +120,52 @@ public class Utils {
     private static ZonedDateTime parseDateTimeWithDefaultTimezone(String candidate, DateTimeFormatter formatter) {
         TemporalAccessor temporalAccessor = formatter.parseBest(candidate, ZonedDateTime::from, LocalDateTime::from);
         return temporalAccessor instanceof ZonedDateTime
-              ? ((ZonedDateTime) temporalAccessor)
-              : ((LocalDateTime) temporalAccessor).atZone(ZoneId.systemDefault());
+                ? ((ZonedDateTime) temporalAccessor)
+                : ((LocalDateTime) temporalAccessor).atZone(ZoneId.systemDefault());
     }
 
     public static int compareLongs(Long a, Long b) {
         Comparator<Long> comparator = Comparator.nullsFirst(Long::compareTo);
         return comparator.compare(a, b);
+    }
+
+    public static List<Pair<String, byte[]>> getRepoFiles(String remoteUrl, String branch, String userName, String password) {
+        List<Pair<String, byte[]>> result = new ArrayList<>();
+        try {
+            DfsRepositoryDescription repoDesc = new DfsRepositoryDescription();
+            InMemoryRepository repo = new InMemoryRepository.Builder()
+                    .setRepositoryDescription(repoDesc)
+                    .build();
+            try (Git git = new Git(repo)) {
+                FetchCommand fetchCommand = git.fetch()
+                        .setRemote(remoteUrl)
+                        .setRefSpecs(new RefSpec("+refs/heads/*:refs/heads/*"));
+                if (StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(password)) {
+                    fetchCommand
+                            .setCredentialsProvider(new UsernamePasswordCredentialsProvider(userName, password));
+                }
+                fetchCommand.call();
+                repo.getObjectDatabase();
+                ObjectId lastCommitId = repo.resolve("refs/heads/" + branch);
+                RevWalk revWalk = new RevWalk(repo);
+                RevCommit commit = revWalk.parseCommit(lastCommitId);
+                RevTree tree = commit.getTree();
+                TreeWalk treeWalk = new TreeWalk(repo);
+                treeWalk.addTree(tree);
+                treeWalk.setRecursive(true);
+                while (treeWalk.next()) {
+                    if (!treeWalk.isSubtree()) {
+                        String path = treeWalk.getPathString();
+                        ObjectId objectId = treeWalk.getObjectId(0);
+                        ObjectLoader loader = repo.open(objectId);
+                        byte[] bytes = loader.getBytes();
+                        result.add(Pair.of(path, bytes));
+                    }
+                }
+            }
+        } catch (IOException | GitAPIException e) {
+            log.error("Pull failed: {}", e.getMessage());
+        }
+        return result;
     }
 }

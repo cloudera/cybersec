@@ -1,6 +1,5 @@
 package com.cloudera.cyber.restcli.configuration;
 
-import com.cloudera.service.common.config.kafka.ClouderaKafkaProperties;
 import com.cloudera.service.common.request.RequestBody;
 import com.cloudera.service.common.response.ResponseBody;
 import lombok.AllArgsConstructor;
