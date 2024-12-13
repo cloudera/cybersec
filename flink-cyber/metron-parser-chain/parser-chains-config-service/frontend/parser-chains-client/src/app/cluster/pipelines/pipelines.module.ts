@@ -23,7 +23,7 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatIconModule} from '@angular/material/icon';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
-import {AsyncPipe, NgComponentOutlet, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
+import {AsyncPipe, KeyValuePipe, NgComponentOutlet, NgForOf, NgIf, NgTemplateOutlet} from '@angular/common';
 import {MatSelectModule} from '@angular/material/select';
 import {MatAutocompleteModule} from '@angular/material/autocomplete';
 import {PipelinesComponent} from 'src/app/cluster/pipelines/pipelines.component';
@@ -35,6 +35,7 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
 import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {FileUploadModule} from 'src/app/cluster/component/file-upload/file-upload.module';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 
 
 @NgModule({
@@ -64,7 +65,9 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
     MatProgressBarModule,
     MatSlideToggleModule,
     FileUploadModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatCheckboxModule,
+    KeyValuePipe
   ],
   providers: [],
   exports: [PipelinesComponent]

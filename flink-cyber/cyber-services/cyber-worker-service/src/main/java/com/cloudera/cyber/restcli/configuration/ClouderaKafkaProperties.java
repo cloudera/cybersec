@@ -1,4 +1,4 @@
-package com.cloudera.service.common.config.kafka;
+package com.cloudera.cyber.restcli.configuration;
 
 import lombok.Getter;
 import lombok.Setter;
