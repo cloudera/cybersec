@@ -5,6 +5,10 @@ import com.cloudera.parserchains.queryservice.service.KafkaServiceInterface;
 import com.cloudera.parserchains.queryservice.service.MockKafkaService;
 import com.cloudera.service.common.request.RequestBody;
 import com.cloudera.service.common.response.ResponseBody;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -30,11 +34,6 @@ import org.springframework.kafka.listener.GenericMessageListenerContainer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 @Slf4j
 @EnableKafka
 @Configuration
@@ -43,8 +42,9 @@ import java.util.Set;
 @EnableConfigurationProperties({ClouderaKafkaProperties.class})
 public class KafkaConfig {
 
-    /***
-     * Provides the default kafka properties for the consumers
+    /**
+     * Provides the default kafka properties for the consumers.
+     *
      * @return Default kafka properties for the consumers
      */
     @Bean
@@ -53,9 +53,11 @@ public class KafkaConfig {
         return new ClouderaKafkaProperties();
     }
 
-    /***
-     * Provides a map with key=clusterId and value=ClouderaKafkaProperties
-     * @return Map with key of clusterId and value - kafkaProperties. This map is a mapping between clusterId and connection details for that cluster
+    /**
+     * Provides a map with key=clusterId and value=ClouderaKafkaProperties.
+     *
+     * @return Map with key of clusterId and value - kafkaProperties.
+     *       This map is a mapping between clusterId and connection details for that cluster
      */
     @Bean(name = "kafka-external-cluster-map")
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -70,24 +72,26 @@ public class KafkaConfig {
      * get responses.
      *
      * @param replyKafkaPropertiesMap - replyKafkaPropertiesMap bean with properties for each cluster, injected by Spring
-     * @return Map with key of clusterId and value - kafkaTemplate that allows to send requests over Kafka to different clusters and get
-     * responses.
+     * @return Map with key of clusterId and value - kafkaTemplate that allows to send requests over Kafka to
+     *       different clusters and get responses.
      */
     @Bean(name = "kafkaTemplatePool")
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     @ConditionalOnProperty(name = "spring.kafka.mock", matchIfMissing = true, havingValue = "false")
     public Map<String, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody>> kafkaTemplatePool(
-            @Qualifier("kafka-external-cluster-map") Map<String, ClouderaKafkaProperties> replyKafkaPropertiesMap) {
-        final Map<String, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody>> templatePool = new HashMap<>();
+          @Qualifier("kafka-external-cluster-map") Map<String, ClouderaKafkaProperties> replyKafkaPropertiesMap) {
+        final Map<String, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody>> templatePool =
+              new HashMap<>();
 
         replyKafkaPropertiesMap.forEach((clusterId, kafkaProperties) -> {
             final ProducerFactory<String, RequestBody> producerFactory = producerFactory(kafkaProperties);
             final ConsumerFactory<String, ResponseBody> consumerFactory = consumerFactory(kafkaProperties);
             final GenericMessageListenerContainer<String, ResponseBody> replyContainer = replyContainer(consumerFactory,
-                    kafkaProperties.getReplyTopic());
+                  kafkaProperties.getReplyTopic());
 
-            final ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody> kafkaTemplate = replyingKafkaTemplate(producerFactory,
-                    replyContainer, kafkaProperties.getRequestTopic());
+            final ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody> kafkaTemplate =
+                  replyingKafkaTemplate(producerFactory,
+                        replyContainer, kafkaProperties.getRequestTopic());
             kafkaTemplate.start();
 
             templatePool.put(clusterId, kafkaTemplate);
@@ -99,7 +103,8 @@ public class KafkaConfig {
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     @ConditionalOnProperty(name = "spring.kafka.mock", matchIfMissing = true, havingValue = "false")
-    public Set<String> kafkaClustersSet(@Qualifier("kafka-external-cluster-map") Map<String, ClouderaKafkaProperties> replyKafkaPropertiesMap) {
+    public Set<String> kafkaClustersSet(
+          @Qualifier("kafka-external-cluster-map") Map<String, ClouderaKafkaProperties> replyKafkaPropertiesMap) {
         return Collections.unmodifiableSet(replyKafkaPropertiesMap.keySet());
     }
 
@@ -111,29 +116,34 @@ public class KafkaConfig {
 
     @Bean
     @ConditionalOnProperty(name = "spring.kafka.mock", matchIfMissing = true, havingValue = "false")
-    public KafkaServiceInterface kafkaService(@Qualifier("kafkaTemplatePool") Map<String, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody>> kafkaTemplatePool,
-                                              @Value("${kafka.reply.future.timeout:45}") Long replyFutureTimeout,
-                                              @Value("${kafka.reply.timeout:45}") Long kafkaTemplateTimeout) {
+    public KafkaServiceInterface kafkaService(
+          @Qualifier("kafkaTemplatePool")
+          Map<String, ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody>> kafkaTemplatePool,
+          @Value("${kafka.reply.future.timeout:45}") Long replyFutureTimeout,
+          @Value("${kafka.reply.timeout:45}") Long kafkaTemplateTimeout) {
         return new KafkaService(kafkaTemplatePool, replyFutureTimeout, kafkaTemplateTimeout);
     }
 
 
     private ProducerFactory<String, RequestBody> producerFactory(ClouderaKafkaProperties kafkaProperties) {
-        return new DefaultKafkaProducerFactory<>(kafkaProperties.buildConsumerProperties(), new StringSerializer(), new JsonSerializer<>());
+        return new DefaultKafkaProducerFactory<>(kafkaProperties.buildConsumerProperties(), new StringSerializer(),
+              new JsonSerializer<>());
     }
 
     private ConsumerFactory<String, ResponseBody> consumerFactory(ClouderaKafkaProperties kafkaProperties) {
-        return new DefaultKafkaConsumerFactory<>(kafkaProperties.buildConsumerProperties(), new StringDeserializer(), new JsonDeserializer<>(ResponseBody.class));
+        return new DefaultKafkaConsumerFactory<>(kafkaProperties.buildConsumerProperties(), new StringDeserializer(),
+              new JsonDeserializer<>(ResponseBody.class));
     }
 
     private static ClouderaReplyingKafkaTemplate<String, RequestBody, ResponseBody> replyingKafkaTemplate(
-            ProducerFactory<String, RequestBody> producerFactory, GenericMessageListenerContainer<String, ResponseBody> replyContainer,
-            String requestTopic) {
+          ProducerFactory<String, RequestBody> producerFactory,
+          GenericMessageListenerContainer<String, ResponseBody> replyContainer,
+          String requestTopic) {
         return new ClouderaReplyingKafkaTemplate<>(producerFactory, replyContainer, requestTopic);
     }
 
     private static GenericMessageListenerContainer<String, ResponseBody> replyContainer(
-            ConsumerFactory<String, ResponseBody> consumerFactory, String replyTopic) {
+          ConsumerFactory<String, ResponseBody> consumerFactory, String replyTopic) {
         ContainerProperties containerProperties = new ContainerProperties(replyTopic);
         return new ConcurrentMessageListenerContainer<>(consumerFactory, containerProperties);
     }
