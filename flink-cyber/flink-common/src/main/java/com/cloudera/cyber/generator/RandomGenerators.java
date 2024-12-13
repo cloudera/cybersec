@@ -67,9 +67,11 @@ public class RandomGenerators implements Serializable {
     public static String randomSubject() {
         return faker.lorem().sentence();
     }
+
     public static Book randomBook() {
         return faker.book();
     }
+
     public static String randomDomainName() {
         return faker.internet().domainName();
     }
