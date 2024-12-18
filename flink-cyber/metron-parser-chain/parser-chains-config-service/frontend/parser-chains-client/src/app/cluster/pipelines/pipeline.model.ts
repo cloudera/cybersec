@@ -17,4 +17,5 @@ export type PipelineModel = {
   clusterName: string;
   date: string;
   user: string;
+  jobs: string[];
 }

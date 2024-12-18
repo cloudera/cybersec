@@ -1,0 +1,163 @@
+@use '@angular/cdk';
+@use '@angular/material' as mat;
+@import "./theme.scss";
+
+$side-padding: 16px;
+$icon-padding: 4px;
+$top-padding: 8px;
+$base-height: 48px;
+$avatar-height: 56px;
+$two-line-height: 72px;
+$three-line-height: 88px;
+$multi-line-padding: 16px;
+$icon-size: 40px;
+$action-icon-size: 28px;
+$item-inset-divider-offset: 72px;
+$font-size1: mat.font-size($typography, headline);
+$font-size2: mat.font-size($typography, body-1);
+
+@mixin truncate-line() {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin base($font1, $font2) {
+
+  .custom-line-container {
+    padding: 0 5px;
+
+    .custom-list-line {
+      @include truncate-line();
+      font-size: $font1;
+      font-style: italic;
+      padding-right: 15px;
+
+      // change size of next line
+      &:nth-child(n+2) {
+        font-size: $font2;
+      }
+    }
+  }
+}
+
+@mixin item-base($base-height, $height-with-avatar, $two-line-height,
+  $three-line-height, $multi-line-padding, $icon-size, $action-icon-size, $first-line-font-size, $secondary-line-font-size) {
+
+  @include base($font-size1, $font-size2);
+
+  .custom-list-item-content {
+    box-sizing: border-box;
+    padding: 0 $side-padding;
+    position: relative;
+    height: inherit;
+  }
+
+  .custom-list-text {
+    flex-grow: 1;
+    padding: 0;
+  }
+
+  .custom-list-icon {
+    flex-shrink: 0;
+    color: mat.get-color-from-palette($theming-material-components-primary, 600);;
+    width: $icon-size;
+    height: $icon-size;
+    font-size: $icon-size;
+    box-sizing: content-box;
+    border-radius: 50%;
+    padding: $icon-padding;
+  }
+
+  .action-icon {
+    width: $action-icon-size;
+    height: $action-icon-size;
+    font-size: $action-icon-size;
+  }
+
+  .custom-list-actions-container {
+    flex: 0 0 150px;
+    font-size: $icon-size;
+    box-sizing: content-box;
+    border-radius: 50%;
+    padding: $icon-padding;
+  }
+
+  .custom-divider {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    margin: 0;
+
+    [dir='rtl'] & {
+      margin-left: auto;
+      margin-right: 0;
+    }
+
+    &.custom-divider-inset {
+      position: absolute;
+    }
+  }
+}
+
+.custom-list-subheader {
+  box-sizing: border-box;
+  padding: $side-padding;
+
+  .custom-list-base & {
+    margin: 0;
+  }
+}
+
+button.custom-list-item {
+  padding: 0;
+  width: 100%;
+  background: none;
+  color: inherit;
+  border: none;
+  outline: inherit;
+  -webkit-tap-highlight-color: transparent;
+  text-align: left;
+
+  [dir='rtl'] & {
+    text-align: right;
+  }
+
+  &::-moz-focus-inner {
+    border: 0;
+  }
+}
+
+@mixin subheader-spacing($top-padding, $base-height) {
+  height: $base-height;
+  line-height: $base-height - $side-padding * 2;
+
+  &:first-child {
+    margin-top: -$top-padding;
+  }
+}
+
+.custom-list-base {
+  padding-top: $top-padding;
+  display: block;
+  -webkit-tap-highlight-color: transparent;
+
+  .custom-list-subheader {
+    @include subheader-spacing($top-padding, $base-height);
+  }
+
+  .custom-list-item {
+    @include item-base(
+        $base-height,
+        $avatar-height,
+        $two-line-height,
+        $three-line-height,
+        $multi-line-padding,
+        $icon-size,
+        $action-icon-size,
+        $font-size1,
+        $font-size2
+    );
+  }
+}
