@@ -1,0 +1,17 @@
+@use '@angular/material' as mat;
+@import "./styles.scss";
+
+.save-tab-icon {
+  color: mat.get-color-from-palette($theme-primary);
+}
+
+.delete-tab-icon {
+  color: mat.get-color-from-palette(mat.$red-palette, 300);
+}
+
+.source-list {
+  min-width: 300px;
+  width: 70%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}

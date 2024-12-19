@@ -69,16 +69,16 @@
 
     <div *ngIf="mode !== 'Empty'">
       <div class="flex-row-jsb-ac horizontal-wrapper" [style.min-height.px]="70">
-        <mat-slide-toggle color="primary" [checked]="jobs.indexOf(jobsEnum.PARSER.value) !== -1"
+        <mat-slide-toggle [disabled]="slideToggleDisabled(jobsEnum.PARSER)" color="primary" [checked]="jobs.indexOf(jobsEnum.PARSER.value) !== -1"
                           (change)="toggleValueInArray( jobs , jobsEnum.PARSER.value)">{{ jobsEnum.PARSER.label }}
         </mat-slide-toggle>
-        <mat-slide-toggle color="primary" [checked]="jobs.indexOf(jobsEnum.TRIAGE.value) !== -1"
+        <mat-slide-toggle [disabled]="slideToggleDisabled(jobsEnum.TRIAGE)" color="primary" [checked]="jobs.indexOf(jobsEnum.TRIAGE.value) !== -1"
                           (change)="toggleValueInArray( jobs , jobsEnum.TRIAGE.value)">{{ jobsEnum.TRIAGE.label }}
         </mat-slide-toggle>
-        <mat-slide-toggle color="primary" [checked]="jobs.indexOf(jobsEnum.PROFILE.value) !== -1"
+        <mat-slide-toggle [disabled]="slideToggleDisabled(jobsEnum.PROFILE)" color="primary" [checked]="jobs.indexOf(jobsEnum.PROFILE.value) !== -1"
                           (change)="toggleValueInArray( jobs , jobsEnum.PROFILE.value)">{{ jobsEnum.PROFILE.label }}
         </mat-slide-toggle>
-        <mat-slide-toggle color="primary" [checked]="jobs.indexOf(jobsEnum.INDEX.value) !== -1"
+        <mat-slide-toggle [disabled]="slideToggleDisabled(jobsEnum.INDEX)" color="primary" [checked]="jobs.indexOf(jobsEnum.INDEX.value) !== -1"
                           (change)="toggleValueInArray( jobs , jobsEnum.INDEX.value)">{{ jobsEnum.INDEX.label }}
         </mat-slide-toggle>
       </div>
