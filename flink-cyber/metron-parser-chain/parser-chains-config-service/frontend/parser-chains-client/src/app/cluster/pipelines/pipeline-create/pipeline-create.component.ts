@@ -16,7 +16,7 @@ const BUTTONS_CONST = [
   {label: 'Archive', value: 'Archive', disabled: false},
   {label: 'Git', value: 'Git', disabled: false},
   {label: 'Empty', value: 'Empty', disabled: false},
-  {label: 'Manual', value: 'Manual', disabled: true}
+  {label: 'Manual', value: 'Manual', disabled: false}
 ] as const;
 
 const BUTTON_LABELS = BUTTONS_CONST.map(b => b.value);
@@ -107,6 +107,8 @@ export class PipelineCreateComponent {
         this.fileControl.clearValidators();
         break
       case 'Manual':
+        this.jobs = [JOBS_ENUM.PARSER.value];
+        break;
       default:
     }
     this.fileControl.updateValueAndValidity();
@@ -128,7 +130,13 @@ export class PipelineCreateComponent {
       jobs: this.jobs,
       sourceMap: this.sourceMap,
     }
-    this._router.navigate(['clusters/pipelines/submit'], {state: {data}});
+    if (this.mode === 'Manual') {
+      this._router.navigate(['clusters/pipelines/stepper'], {state: {data}});
+
+    } else {
+      this._router.navigate(['clusters/pipelines/submit'], {state: {data}});
+
+    }
   }
 
   onFileDropped(fileList: FileList) {
@@ -181,5 +189,10 @@ export class PipelineCreateComponent {
         removable: false
       }))
     );
+  }
+
+  slideToggleDisabled(value) {
+    return this.mode === 'Manual' && value !== JOBS_ENUM.PARSER;
+
   }
 }
