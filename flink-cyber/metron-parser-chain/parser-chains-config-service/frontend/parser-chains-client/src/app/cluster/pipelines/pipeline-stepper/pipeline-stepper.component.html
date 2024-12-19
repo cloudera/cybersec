@@ -4,7 +4,7 @@
       <ng-template matStepLabel>Parser config</ng-template>
       <mat-tab-group color="primary" class="parser-chain-step">
         <mat-tab label="General Config">
-          <div style="display: flex; flex-direction: column">
+          <div class="general-section">
             <h1>Kafka Topic config: </h1>
             <span>Configuration of Kafka topic for parser job</span>
             <div style="display: flex; flex-direction: column">
@@ -19,7 +19,7 @@
                          placeholder="topic Output"
                   >
                 </mat-form-field>
-                <mat-form-field class="input-form" color="primary" appearance="outline" style="margin-left: 15px">
+                <mat-form-field class="input-form" color="primary" appearance="outline" [style.margin-left.px]="15">
                   <mat-label>Error Topic</mat-label>
                   <input matInput
                          type="text"
@@ -29,9 +29,9 @@
                          placeholder="error topic">
                 </mat-form-field>
               </div>
-              <mat-slide-toggle color="primary" formControlName="sourceFlag" style="margin-bottom: 10px">Enable source
+              <mat-slide-toggle color="primary" formControlName="sourceFlag" [style.margin-bottom.px]="15">Enable source
               </mat-slide-toggle>
-              <div *ngIf="parserFormGroup.controls.sourceFlag.value" style="display: flex; flex-direction: row;">
+              <div *ngIf="parserFormGroup.controls.sourceFlag.value" class="general-section">
                 <mat-form-field class="input-form" color="primary"
                                 appearance="outline">
                   <mat-label>Original base path</mat-label>
@@ -75,10 +75,10 @@
                   </button>
                 </mat-chip>
                 <input
-                  style="width: 85%"
                   placeholder="Select source..."
                   #sourceInput
                   formControlName="source"
+                  [style.width.%]="85"
                   [matAutocomplete]="auto"
                   [matChipInputFor]="chipList"
                   [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
@@ -115,7 +115,7 @@
                     matTooltipPosition="above"
                     (click)="assignTopic(assignTopicDialog, chain.id, index)">
                     <mat-chip selected>ASSIGN TOPIC
-                      <mat-icon style="color: white;">add</mat-icon>
+                      <mat-icon [style.color]="'white'">add</mat-icon>
                     </mat-chip>
                   </button>
                   <button
@@ -145,7 +145,7 @@
                   </button>
                 </app-custom-list-line>
               </app-custom-list>
-              <button style="margin-bottom: 15px; margin-top: 15px" mat-raised-button routerLink="/parserconfig"
+              <button [style.margin.px]="10" mat-raised-button routerLink="/parserconfig"
                       color="primary">ADD CHAIN
               </button>
             </div>
@@ -170,15 +170,9 @@
 
 <ng-template #assignTopicDialog let-data>
   <h2 mat-dialog-title>Assign Topic</h2>
-  <div mat-dialog-content style="display: inline">
-    <div style="    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    align-content: flex-start;
-    justify-content: space-around;
-    align-items: flex-start;">
-      <span style="    font-size: 20px;
-    margin-bottom: 15px;">
+  <div mat-dialog-content [style.display]="'inline'">
+    <div class="inner-assign-wrapper">
+      <span class="inner-assign-wrapper-span">
         Topic or Topic pattern that would associated with this chain.
       </span>
       <mat-form-field appearance="outline">
