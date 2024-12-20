@@ -64,12 +64,22 @@
       nzOrientation="center">
     </nz-divider>
     <nz-form-item>
+      <nz-form-label>Table Config path</nz-form-label>
+      <nz-form-control>
+        <nz-input-group nzPrefixIcon="file">
+          <input formControlName="_tableFilePath"
+                 nz-input
+                 placeholder="/path/to/tableConfig.json"/>
+        </nz-input-group>
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
       <nz-form-label>Mapping path</nz-form-label>
       <nz-form-control>
         <nz-input-group nzPrefixIcon="file">
-          <input formControlName="_filePath"
+          <input formControlName="_mappingFilePath"
                  nz-input
-                 placeholder="/path/to/file.json"/>
+                 placeholder="/path/to/mappingConfig.json"/>
         </nz-input-group>
       </nz-form-control>
     </nz-form-item>
