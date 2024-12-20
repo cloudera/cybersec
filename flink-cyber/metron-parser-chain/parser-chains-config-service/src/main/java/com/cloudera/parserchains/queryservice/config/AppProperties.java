@@ -30,7 +30,8 @@ public class AppProperties {
     CONFIG_PATH("."),
     PIPELINES_PATH("../../.."),
     SAMPLE_FOLDER_PATH("../samples/"),
-    INDEX_PATH("../../index/conf/mapping-config.json");
+    INDEX_MAPPINGS_PATH("../../index/conf/mapping-config.json"),
+    INDEX_TABLE_PATH("../../index/conf/table-config.json");
 
     @Override
     public String get(Environment source) {
@@ -69,8 +70,12 @@ public class AppProperties {
     return Options.PIPELINES_PATH.get(environment);
   }
 
-  public String getIndexPath() {
-    return Options.INDEX_PATH.get(environment);
+  public String getIndexMappingPath() {
+    return Options.INDEX_MAPPINGS_PATH.get(environment);
+  }
+
+  public String getIndexTablePath() {
+    return Options.INDEX_TABLE_PATH.get(environment);
   }
 
   public String getSampleFolderPath() {

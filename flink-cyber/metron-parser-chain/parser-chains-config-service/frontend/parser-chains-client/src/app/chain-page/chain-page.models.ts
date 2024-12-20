@@ -66,6 +66,12 @@ export interface IndexTableMapping {
   column_mapping: IndexingColumnMapping[]
 }
 
+export interface TableColumnDto {
+  name: string;
+  type: string;
+  nullable: boolean;
+}
+
 export interface IndexingColumnMapping {
   name: string;
   kafka_name?: string;
