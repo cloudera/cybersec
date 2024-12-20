@@ -14,7 +14,7 @@ import {HttpClient, HttpParams, HttpResponse} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 
-import {ChainDetailsModel, IndexTableMapping} from '../chain-page/chain-page.models';
+import {ChainDetailsModel, IndexTableMapping, TableColumnDto} from '../chain-page/chain-page.models';
 import {getHttpParams} from "../shared/service.utils";
 import {ParserDescriptor} from "../chain-page/chain-page.reducers";
 
@@ -66,13 +66,25 @@ export class ChainPageService {
   }
 
   public getIndexMappings(payload: { filePath?: string } = {filePath: ''}) {
-    return this._http.post(`${ChainPageService.BASE_URL}indexing`, payload, {
+    return this._http.post(`${ChainPageService.BASE_URL}indexing/mapping`, payload, {
       headers: {'Content-Type': 'application/json; charset=utf-8'},
       observe: 'response'
     });
   }
 
-  public saveIndexMappings(payload: { filePath?: string, mappings: { [key: string]: IndexTableMapping } }) {
+  public getIndexTableConfig(payload: { filePath?: string } = {filePath: ''}) {
+    return this._http.post(`${ChainPageService.BASE_URL}indexing/table`, payload, {
+      headers: {'Content-Type': 'application/json; charset=utf-8'},
+      observe: 'response'
+    });
+  }
+
+  public saveIndexMappings(payload: {
+    tableFilePath?: string,
+    mappingFilePath?: string,
+    mappings: { [key: string]: IndexTableMapping },
+    tableConfig: { [key: string]: TableColumnDto[] }
+  }) {
     return this._http.post<HttpResponse<any>>(`${ChainPageService.BASE_URL}indexing/new`, payload, {
       headers: {'Content-Type': 'application/json; charset=utf-8'},
       observe: 'response'
