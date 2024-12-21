@@ -371,3 +371,9 @@ flex-column-jfs-ac {
 .delete-icon {
   color: mat.get-color-from-palette(mat.define-palette(mat.$red-palette), 300);
 }
+.parser-chain-step .mat-tab-labels :last-child.mat-tab-label {
+  min-width: 0;
+  padding: 0 12px;
+  color: mat.get-color-from-palette($theme-primary);
+  opacity: 87%;
+}

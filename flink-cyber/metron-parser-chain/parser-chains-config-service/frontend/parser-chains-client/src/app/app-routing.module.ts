@@ -24,6 +24,7 @@ import {ClusterPageComponent} from "./cluster/cluster-page/cluster-page.componen
 import {PipelinesComponent} from 'src/app/cluster/pipelines/pipelines.component';
 import {PipelineCreateComponent} from 'src/app/cluster/pipelines/pipeline-create/pipeline-create.component';
 import {PipelineSubmitComponent} from 'src/app/cluster/pipelines/pipeline-submit/pipeline-submit.component';
+import {PipelineStepperComponent} from 'src/app/cluster/pipelines/pipeline-stepper/pipeline-stepper.component';
 
 export const routes: Routes = [
   { path: '404', component: PageNotFoundComponent },
@@ -37,6 +38,7 @@ export const routes: Routes = [
   { path: 'clusters', component: ClusterListPageComponent },
   { path: 'clusters/pipelines', component: PipelinesComponent },
   { path: 'clusters/pipelines/create', component: PipelineCreateComponent },
+  { path: 'clusters/pipelines/stepper', component: PipelineStepperComponent },
   { path: 'clusters/pipelines/submit', component: PipelineSubmitComponent },
   { path: 'clusters/:clusterId', component: ClusterPageComponent},
 
