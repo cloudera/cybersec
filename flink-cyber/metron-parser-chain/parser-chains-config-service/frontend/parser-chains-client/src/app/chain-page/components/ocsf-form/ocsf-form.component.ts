@@ -8,7 +8,7 @@ import {EntryParsingResultModel} from "../live-view/models/live-view.model";
 import {select, Store} from "@ngrx/store";
 import {LiveViewState} from "../live-view/live-view.reducers";
 import {getResults} from "../live-view/live-view.selectors";
-import {IndexingColumnMapping, IndexTableMapping} from "../../chain-page.models";
+import {IndexingColumnMapping, IndexTableMapping, TableColumnDto} from "../../chain-page.models";
 import {ChainPageService} from "../../../services/chain-page.service";
 import {HttpResponse} from "@angular/common/http";
 import {NzMessageService} from "ng-zorro-antd/message";
@@ -55,7 +55,8 @@ export class OcsfFormComponent implements OnInit {
       dataClasses: [null]
     });
     this.ocsfForm = this._fb.group({
-      _filePath: "",
+      _mappingFilePath: "",
+      _tableFilePath: "",
       _sourceName: ""
     })
 
@@ -74,58 +75,86 @@ export class OcsfFormComponent implements OnInit {
 
   onOcsfSubmit() {
     const columnMappings: IndexingColumnMapping[] = []
-    this.collectFormsValuesToIndexMappings(this.ocsfForm, columnMappings, null)
+    const tableColumnList: TableColumnDto[] = [];
+    this.collectFormsValuesToIndexMappings(this.ocsfForm, columnMappings, tableColumnList)
 
     const tableMapping: IndexTableMapping = {
       table_name: "ocsf",
       column_mapping: columnMappings
     }
 
+    const tableConfig = {
+      "ocsf": tableColumnList
+    }
+
     let sourceName = this.ocsfForm.value._sourceName;
     if (sourceName == null || sourceName === "") {
       sourceName = "squid"
     }
-    const result: { [key: string]: IndexTableMapping } = {};
+    const mappings: { [key: string]: IndexTableMapping } = {};
 
-    result[sourceName] = tableMapping
+    mappings[sourceName] = tableMapping
     this._chainPageService.saveIndexMappings({
-      filePath: this.ocsfForm.value._filePath,
-      mappings: result
+      tableFilePath: this.ocsfForm.value._tableFilePath,
+      mappingFilePath: this.ocsfForm.value._mappingFilePath,
+      mappings,
+      tableConfig
     })
       .pipe(take(1))
       .subscribe(() =>
-        this._messageService.create('success', 'Successfully saved the OCSF schema'))
+        this._messageService.create('success', 'Successfully saved the mapping config and table config files for OCSF schema!'))
   }
 
   onOcsfImport() {
-    this._chainPageService.getIndexMappings({filePath: this.ocsfForm.value._filePath})
+    this._chainPageService.getIndexMappings({filePath: this.ocsfForm.value._mappingFilePath})
       .pipe(
         catchError(_ => {
-          this._messageService.create('error', `Couldn't fetch indexing fields for the given path '${this.ocsfForm.value._filePath}'`)
+          this._messageService.create('error', `Couldn't fetch indexing fields for the given path '${this.ocsfForm.value._mappingFilePath}'`)
           return of(null)
         }),
         take(1)
       )
-      .subscribe((response: HttpResponse<{ path: string, result: { [key: string]: any } }>) => {
-        if (response.status === 200) {
+      .subscribe((mappingResponse: HttpResponse<{ path: string, result: { [key: string]: any } }>) => {
+        if (mappingResponse.status === 200) {
           let sourceName = this.ocsfForm.value._sourceName;
           if (sourceName == null || sourceName === "") {
-            sourceName = Object.keys(response.body.result)[0]
+            sourceName = Object.keys(mappingResponse.body.result)[0]
           }
 
-          const filePath = response.body.path;
-          this.ocsfForm.get("_filePath").setValue(filePath);
-          this.ocsfForm.get("_sourceName").setValue(sourceName);
+          const mappingsFilePath = mappingResponse.body.path;
 
-          const mappings: IndexingColumnMapping[] = response.body.result[sourceName].column_mapping;
+          const mappings: IndexingColumnMapping[] = mappingResponse.body.result[sourceName].column_mapping;
           if (mappings.length === 0) {
             this._messageService.create('warning', `No indexing fields found for the given source name '${sourceName}'`);
             return
           }
-          this.fillFormsValuesFromIndexMappings(null, mappings)
-          this._messageService.create('success', `Imported the OCSF schema from '${filePath}', source: '${sourceName}'`);
-        } else if (response.status === 204) {
-          this._messageService.create('warning', `No indexing fields found for the given path '${this.ocsfForm.value._filePath}'`);
+          // table config fetch
+          this._chainPageService.getIndexTableConfig({filePath: this.ocsfForm.value._tableFilePath})
+            .pipe(
+              catchError(_ => {
+                this._messageService.create('error', `Couldn't fetch indexing table for the given path '${this.ocsfForm.value._tableFilePath}'`)
+                return of(null)
+              }),
+              take(1)
+            )
+            .subscribe((tableResponse: HttpResponse<{ path: string, result: { [key: string]: TableColumnDto[] } }>) => {
+              if (tableResponse.status === 200) {
+
+                const tableFilePath = tableResponse.body.path;
+                this.ocsfForm.get("_tableFilePath").setValue(tableFilePath);
+                this.ocsfForm.get("_mappingFilePath").setValue(mappingsFilePath);
+                this.ocsfForm.get("_sourceName").setValue(sourceName);
+
+                const tableConfig = tableResponse.body.result.ocsf;
+
+                this.fillFormsValuesFromIndexMappings(mappings, tableConfig)
+                this._messageService.create('success', `Imported the OCSF schema from '${mappingsFilePath}' and '${tableFilePath}', source: '${sourceName}'`);
+              } else if (tableResponse.status === 204) {
+                this._messageService.create('warning', `No indexing table found for the given path '${this.ocsfForm.value._mappingFilePath}'`);
+              }
+            })
+        } else if (mappingResponse.status === 204) {
+          this._messageService.create('warning', `No indexing fields found for the given path '${this.ocsfForm.value._mappingFilePath}'`);
         }
         return {
           path: '', result: {}
@@ -133,47 +162,104 @@ export class OcsfFormComponent implements OnInit {
       })
   }
 
-  fillImportedData(importMap: Map<string, any>, fieldHierarchy: string[], value: string, index: number) {
-    const currentField = fieldHierarchy[index];
-    if (fieldHierarchy.length === index + 1) {
-      importMap.set(currentField, value)
-    } else {
-      if (!importMap.has(currentField)) {
-        importMap.set(currentField, new Map<string, any>())
-      }
-      this.fillImportedData(importMap.get(currentField), fieldHierarchy, value, index + 1)
-    }
-  }
+  objectToMap(obj: any): Map<string, any> {
+    const result = new Map<string, any>();
 
-  fillFormsValuesFromIndexMappings(form: UntypedFormGroup, mappings: IndexingColumnMapping[]) {
-    const classNames = new Set();
-    for (const columnMapping of mappings) {
-      const fieldHierarchy = columnMapping.name.split(".");
-      classNames.add(fieldHierarchy[0])
-      this.fillImportedData(this.importedData, fieldHierarchy, columnMapping.kafka_name, 0)
-    }
-    this.filtersForm.get('dataClasses')!.setValue(Array.from(classNames) as string[])
-  }
-
-  collectFormsValuesToIndexMappings(form: UntypedFormGroup, result: IndexingColumnMapping[], path: string) {
-    for (const key in form.controls) {
-      if (key.startsWith("_")) {
-        continue
-      }
-      const control = form.get(key);
-      const keyPath = path == null ? key : path + "." + key
-      if (control instanceof UntypedFormGroup) {
-        this.collectFormsValuesToIndexMappings(control, result, keyPath)
+    for (const [key, value] of Object.entries(obj)) {
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        result.set(key, this.objectToMap(value));
       } else {
-        if (control.value !== null && control.value !== undefined && control.value !== '') {
-          result.push({
-            name: keyPath,
-            kafka_name: control.value,
-            path: "."
-          })
+        result.set(key, value);
+      }
+    }
+
+    return result;
+  }
+
+  fillFormsValuesFromIndexMappings(mappings: IndexingColumnMapping[], tableConfig: TableColumnDto[]) {
+    const classNameSet = new Set();
+    for (const columnMapping of mappings) {
+      const className = columnMapping.name;
+      classNameSet.add(className)
+      for (const tableColumnDto of tableConfig) {
+        if (tableColumnDto.name === className) {
+          let structString = tableColumnDto.type
+          const valuesString = columnMapping.kafka_name
+
+          structString = structString.replace(/struct</g, "{")
+          structString = structString.replace(/>/g, "}")
+          structString = structString.replace(/`/g, "\"")
+
+          for (const valueName of valuesString.split(",")) {
+            structString = structString.replace(": string", ": \"" + valueName + "\"")
+          }
+          this.importedData.set(className, this.objectToMap(JSON.parse(structString)))
+          break
         }
       }
     }
+    this.filtersForm.get('dataClasses')!.setValue(Array.from(classNameSet) as string[])
+  }
+
+  collectFormsValuesToIndexMappings(form: UntypedFormGroup, tableMapping: IndexingColumnMapping[], tableConfig: TableColumnDto[]) {
+    for (const ocsfObject in form.controls) {
+      if (ocsfObject.startsWith("_")) {
+        continue
+      }
+      const tableColumn: TableColumnDto = {
+        name: ocsfObject,
+        type: "",
+        nullable: false,
+      }
+      tableConfig.push(tableColumn)
+      const columnMapping: IndexingColumnMapping = {
+        name: ocsfObject,
+        kafka_name: "",
+        transformation: "",
+        path: "."
+      }
+      tableMapping.push(columnMapping)
+
+      this.collectFormValuesRecursive(form.get(ocsfObject) as UntypedFormGroup, columnMapping, tableColumn)
+    }
+  }
+
+  collectFormValuesRecursive(form: UntypedFormGroup, columnMapping: IndexingColumnMapping, tableColumn: TableColumnDto) {
+    tableColumn.type = tableColumn.type + "struct<"
+
+    columnMapping.transformation = columnMapping.transformation === ""
+      ? columnMapping.transformation + "ROW("
+      : columnMapping.transformation + ", ROW("
+
+    let i = 0;
+    for (const key in form.controls) {
+      if (Object.prototype.hasOwnProperty.call(form.controls, key)) {
+        const control = form.get(key);
+        if (control instanceof UntypedFormGroup) {
+          tableColumn.type = i === 0
+            ? tableColumn.type + "`" + key + "`: "
+            : tableColumn.type + ", `" + key + "`: "
+          this.collectFormValuesRecursive(control, columnMapping, tableColumn)
+          i++;
+        } else {
+          if (control.value !== null && control.value !== undefined && control.value !== '') {
+            if (i > 0) {
+              tableColumn.type = tableColumn.type + ", "
+              columnMapping.transformation = columnMapping.transformation + ", "
+            }
+            tableColumn.type = tableColumn.type + "`" + key + "`: string"
+            columnMapping.transformation = columnMapping.transformation + "%s"
+            columnMapping.kafka_name = columnMapping.kafka_name === ""
+              ? control.value
+              : columnMapping.kafka_name + "," + control.value
+            i++;
+          }
+        }
+      }
+    }
+    tableColumn.type = tableColumn.type + ">"
+    columnMapping.transformation = columnMapping.transformation + ")"
+
   }
 
   filterClasses(classes: { [className: string]: BaseOcsfSchemaModel }): { [className: string]: BaseOcsfSchemaModel } {

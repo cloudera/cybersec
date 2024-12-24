@@ -36,6 +36,8 @@ import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 import {FileUploadModule} from 'src/app/cluster/component/file-upload/file-upload.module';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatChipsModule} from '@angular/material/chips';
 
 
 @NgModule({
@@ -67,7 +69,10 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
     FileUploadModule,
     MatProgressSpinnerModule,
     MatCheckboxModule,
-    KeyValuePipe
+    KeyValuePipe,
+    MatTabsModule,
+    MatChipsModule,
+    SharedModule
   ],
   providers: [],
   exports: [PipelinesComponent]
