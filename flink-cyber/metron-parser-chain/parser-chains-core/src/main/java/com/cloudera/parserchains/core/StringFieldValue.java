@@ -12,12 +12,10 @@
 
 package com.cloudera.parserchains.core;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.cloudera.cyber.parser.MessageToParse;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
-
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 @EqualsAndHashCode
 public class StringFieldValue implements FieldValue {
@@ -32,7 +30,7 @@ public class StringFieldValue implements FieldValue {
      * Instead use {@link StringFieldValue#of(String)}.
      */
     private StringFieldValue(String value) {
-        if(value == null || value.length() > MAX_LENGTH) {
+        if (value == null || value.length() > MAX_LENGTH) {
             throw new IllegalArgumentException("Invalid field value.");
         }
         this.value = value;
@@ -49,6 +47,7 @@ public class StringFieldValue implements FieldValue {
     public String toString() {
         return (value != null) ? value : "null";
     }
+
     @Override
     public MessageToParse toMessageToParse() {
         return MessageToParse.builder().originalBytes(toBytes()).offset(0).partition(0).topic("none").build();

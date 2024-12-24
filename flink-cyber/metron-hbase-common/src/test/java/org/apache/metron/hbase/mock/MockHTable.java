@@ -6,8 +6,10 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
+ * 
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
+ * 
  * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,7 +25,6 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.Service;
 import com.google.protobuf.ServiceException;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -37,7 +38,6 @@ import java.util.NoSuchElementException;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HBaseConfiguration;
@@ -45,7 +45,21 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.TableName;
-import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.client.Append;
+import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Durability;
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Increment;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.client.RegionLocator;
+import org.apache.hadoop.hbase.client.Result;
+import org.apache.hadoop.hbase.client.ResultScanner;
+import org.apache.hadoop.hbase.client.Row;
+import org.apache.hadoop.hbase.client.RowMutations;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
+import org.apache.hadoop.hbase.client.TableDescriptor;
+import org.apache.hadoop.hbase.client.TableDescriptorBuilder;
 import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import org.apache.hadoop.hbase.client.metrics.ScanMetrics;
 import org.apache.hadoop.hbase.filter.CompareFilter;
@@ -266,9 +280,9 @@ public class MockHTable implements Table {
                 for (byte[] qualifier : qualifiers) {
                     if (qualifier == null)
                         qualifier = "".getBytes(StandardCharsets.UTF_8);
-                    if (!data.get(row).containsKey(family) ||
-                            !data.get(row).get(family).containsKey(qualifier) ||
-                            data.get(row).get(family).get(qualifier).isEmpty())
+                    if (!data.get(row).containsKey(family)
+                            || !data.get(row).get(family).containsKey(qualifier)
+                            || data.get(row).get(family).get(qualifier).isEmpty())
                         continue;
                     Map.Entry<Long, byte[]> timestampAndValue = data.get(row).get(family).get(qualifier).lastEntry();
                     kvs.add(new KeyValue(row, family, qualifier, timestampAndValue.getKey(), timestampAndValue.getValue()));
@@ -330,15 +344,15 @@ public class MockHTable implements Table {
             // if row is equal to startRow emit it. When startRow (inclusive) and
             // stopRow (exclusive) is the same, it should not be excluded which would
             // happen w/o this control.
-            if (st != null && st.length > 0 &&
-                    Bytes.BYTES_COMPARATOR.compare(st, row) != 0) {
+            if (st != null && st.length > 0
+                    && Bytes.BYTES_COMPARATOR.compare(st, row) != 0) {
                 // if row is before startRow do not emit, pass to next row
-                if (st != null && st.length > 0 &&
-                        Bytes.BYTES_COMPARATOR.compare(st, row) > 0)
+                if (st != null && st.length > 0
+                        && Bytes.BYTES_COMPARATOR.compare(st, row) > 0)
                     continue;
                 // if row is equal to stopRow or after it do not emit, stop iteration
-                if (sp != null && sp.length > 0 &&
-                        Bytes.BYTES_COMPARATOR.compare(sp, row) <= 0)
+                if (sp != null && sp.length > 0
+                        && Bytes.BYTES_COMPARATOR.compare(sp, row) <= 0)
                     break;
             }
 

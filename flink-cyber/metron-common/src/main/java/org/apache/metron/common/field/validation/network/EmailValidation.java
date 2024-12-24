@@ -7,8 +7,10 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,30 +20,30 @@
 
 package org.apache.metron.common.field.validation.network;
 
+import java.util.function.Predicate;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.apache.metron.common.field.validation.SimpleValidation;
 import org.apache.metron.stellar.dsl.Predicate2StellarFunction;
 import org.apache.metron.stellar.dsl.Stellar;
-import org.apache.metron.common.field.validation.SimpleValidation;
-
-import java.util.function.Predicate;
 
 public class EmailValidation extends SimpleValidation {
 
-  @Stellar(name="IS_EMAIL"
-          ,description = "Tests if a string is a valid email address"
-          ,params = {
-              "address - The string to test"
-                    }
-          , returns = "True if the string is a valid email address and false if otherwise.")
-  public static class IS_EMAIL extends Predicate2StellarFunction {
+    @SuppressWarnings("checkstyle:TypeName")
+    @Stellar(name = "IS_EMAIL",
+          description = "Tests if a string is a valid email address",
+          params = {
+                "address - The string to test"
+          },
+          returns = "True if the string is a valid email address and false if otherwise.")
+    public static class IS_EMAIL extends Predicate2StellarFunction {
 
-    public IS_EMAIL() {
-      super(new EmailValidation());
+        public IS_EMAIL() {
+            super(new EmailValidation());
+        }
     }
-  }
 
-  @Override
-  public Predicate<Object> getPredicate() {
-    return email -> EmailValidator.getInstance().isValid(email == null?null:email.toString());
-  }
+    @Override
+    public Predicate<Object> getPredicate() {
+        return email -> EmailValidator.getInstance().isValid(email == null ? null : email.toString());
+    }
 }

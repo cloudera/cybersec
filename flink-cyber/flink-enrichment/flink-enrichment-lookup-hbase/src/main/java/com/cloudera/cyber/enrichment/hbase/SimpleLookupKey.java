@@ -1,19 +1,20 @@
 package com.cloudera.cyber.enrichment.hbase;
 
 import com.cloudera.cyber.hbase.LookupKey;
-import lombok.*;
+import java.util.HashMap;
+import java.util.Map;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @Getter
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper=true)
+@ToString(callSuper = true)
 public class SimpleLookupKey extends LookupKey {
 
     @Override
@@ -27,7 +28,8 @@ public class SimpleLookupKey extends LookupKey {
     @Override
     public Map<String, Object> resultToMap(Result result) {
         Map<String, Object> hbaseMap = new HashMap<>();
-        result.getFamilyMap(Bytes.toBytes(getCf())).forEach((k,v) -> hbaseMap.put( Bytes.toString(k), Bytes.toString(v)));
+        result.getFamilyMap(Bytes.toBytes(getCf()))
+              .forEach((k, v) -> hbaseMap.put(Bytes.toString(k), Bytes.toString(v)));
 
         return hbaseMap;
     }

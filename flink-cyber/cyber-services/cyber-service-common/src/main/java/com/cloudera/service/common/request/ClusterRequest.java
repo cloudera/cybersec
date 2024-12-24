@@ -1,17 +1,16 @@
 package com.cloudera.service.common.request;
 
+import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.List;
-
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @ToString
-public class ClusterRequest extends AbstractRequest{
+public class ClusterRequest extends AbstractRequest {
     private final String clusterId;
     private final List<String> jobs;
 

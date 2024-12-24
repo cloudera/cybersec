@@ -13,27 +13,13 @@
 package com.cloudera.cyber.enrichment.rest;
 
 
+import static org.apache.http.conn.ssl.SSLConnectionSocketFactory.STRICT_HOSTNAME_VERIFIER;
+
 import com.github.benmanes.caffeine.cache.AsyncCacheLoader;
 import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.text.StringSubstitutor;
-import org.apache.flink.util.Preconditions;
-import org.apache.http.HttpHeaders;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.ssl.PrivateKeyStrategy;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.SSLContexts;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
-
-import javax.annotation.Nonnull;
-import javax.net.ssl.SSLContext;
 import java.io.Closeable;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -48,13 +34,27 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static org.apache.http.conn.ssl.SSLConnectionSocketFactory.STRICT_HOSTNAME_VERIFIER;
+import javax.annotation.Nonnull;
+import javax.net.ssl.SSLContext;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.StringSubstitutor;
+import org.apache.flink.util.Preconditions;
+import org.apache.http.HttpHeaders;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.conn.ssl.PrivateKeyStrategy;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLContextBuilder;
+import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 
 @Slf4j
 public abstract class RestRequest implements AsyncCacheLoader<RestRequestKey, RestRequestResult>, Closeable {
 
-    public static final String REST_REQUEST_RETURNS_FAILED_STATUS = "Rest request returned a success code but the content indicated failure.";
+    public static final String REST_REQUEST_RETURNS_FAILED_STATUS =
+          "Rest request returned a success code but the content indicated failure.";
     public static final String REST_REQUEST_HTTP_FAILURE = "Rest request failed due to '%s'.";
     public static final String REST_REQUEST_ERROR_MESSAGE_WITH_KEY = "Rest request url='%s' entity='%s' failed '%s'";
     private final String resultJsonPath;
@@ -68,8 +68,10 @@ public abstract class RestRequest implements AsyncCacheLoader<RestRequestKey, Re
 
     public RestRequest(RestEnrichmentConfig config) throws Exception {
         Preconditions.checkNotNull(config, "Rest config should not be null");
-        Preconditions.checkNotNull(config.getEndpointTemplate(), "Rest configuration endpoint template must be specified");
-        Preconditions.checkNotNull(config.getResultsJsonPath(), "Json path for extracting results from json must be specified");
+        Preconditions.checkNotNull(config.getEndpointTemplate(),
+              "Rest configuration endpoint template must be specified");
+        Preconditions.checkNotNull(config.getResultsJsonPath(),
+              "Json path for extracting results from json must be specified");
         Map<String, String> requestProperties = config.getProperties();
         if (requestProperties != null && !requestProperties.isEmpty()) {
             this.propertySubstitutor = new StringSubstitutor(config.getProperties());
@@ -83,9 +85,10 @@ public abstract class RestRequest implements AsyncCacheLoader<RestRequestKey, Re
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
         setupConnectionSocketFactory(config, httpClientBuilder);
         this.client = httpClientBuilder.build();
-        this.cache = Caffeine.newBuilder().maximumSize(config.getCacheSize()).
-                expireAfter(new RestRequestCacheExpiry(config.getSuccessCacheExpirationSeconds(), TimeUnit.SECONDS, config.getFailureCacheExpirationSeconds(), TimeUnit.SECONDS))
-                .buildAsync(this);
+        this.cache = Caffeine.newBuilder().maximumSize(config.getCacheSize())
+                             .expireAfter(new RestRequestCacheExpiry(config.getSuccessCacheExpirationSeconds(),
+                                   TimeUnit.SECONDS, config.getFailureCacheExpirationSeconds(), TimeUnit.SECONDS))
+                             .buildAsync(this);
     }
 
     private static PrivateKeyStrategy getPrivateKeyStrategy(final String aliasName) {
@@ -96,7 +99,8 @@ public abstract class RestRequest implements AsyncCacheLoader<RestRequestKey, Re
         }
     }
 
-    private static KeyStore loadKeyStore(String path, String password) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
+    private static KeyStore loadKeyStore(String path, String password)
+          throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException {
         KeyStore store = KeyStore.getInstance("JKS");
         store.load(new FileInputStream(path), password.toCharArray());
 
@@ -127,7 +131,8 @@ public abstract class RestRequest implements AsyncCacheLoader<RestRequestKey, Re
 
             // load the key store
             KeyStore keyStore = loadKeyStore(tlsConfig.getKeyStorePath(), tlsConfig.getKeyStorePassword());
-            sslContextBuilder = sslContextBuilder.loadKeyMaterial(keyStore, tlsConfig.getKeyPassword().toCharArray(), getPrivateKeyStrategy(tlsConfig.getKeyAlias()));
+            sslContextBuilder = sslContextBuilder.loadKeyMaterial(keyStore, tlsConfig.getKeyPassword().toCharArray(),
+                  getPrivateKeyStrategy(tlsConfig.getKeyAlias()));
 
             //Building the SSLContext using the build() method
             SSLContext sslcontext = sslContextBuilder.build();
@@ -140,7 +145,8 @@ public abstract class RestRequest implements AsyncCacheLoader<RestRequestKey, Re
     private void createHeaders(RestEnrichmentConfig config) {
         Map<String, String> configuredHeaders = config.getHeaders();
         if (configuredHeaders != null) {
-            this.headers = configuredHeaders.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> substituteProperties(e.getValue())));
+            this.headers = configuredHeaders.entrySet().stream().collect(
+                  Collectors.toMap(Map.Entry::getKey, e -> substituteProperties(e.getValue())));
         }
 
         EndpointAuthorizationConfig authConfig = config.getAuthorization();
@@ -151,10 +157,13 @@ public abstract class RestRequest implements AsyncCacheLoader<RestRequestKey, Re
     }
 
     protected void addErrorToResult(RestRequestKey key, RestRequestResult result, String errorMessage) {
-        result.getErrors().add(String.format(REST_REQUEST_ERROR_MESSAGE_WITH_KEY, key.getRestUri().toASCIIString(), key.getEntity(), errorMessage));
+        result.getErrors()
+              .add(String.format(REST_REQUEST_ERROR_MESSAGE_WITH_KEY, key.getRestUri().toASCIIString(), key.getEntity(),
+                    errorMessage));
     }
 
-    protected CompletableFuture<RestRequestResult> executeRequest(Executor executor, RestRequestKey key, HttpUriRequest request) {
+    protected CompletableFuture<RestRequestResult> executeRequest(Executor executor, RestRequestKey key,
+                                                                  HttpUriRequest request) {
 
         return CompletableFuture.supplyAsync(() -> {
             headers.forEach(request::addHeader);
@@ -178,7 +187,8 @@ public abstract class RestRequest implements AsyncCacheLoader<RestRequestKey, Re
                         addErrorToResult(key, result, REST_REQUEST_RETURNS_FAILED_STATUS);
                     }
                 } else {
-                    addErrorToResult(key, result, String.format(REST_REQUEST_HTTP_FAILURE, response.getStatusLine().toString()));
+                    addErrorToResult(key, result,
+                          String.format(REST_REQUEST_HTTP_FAILURE, response.getStatusLine().toString()));
                 }
             } catch (Exception e) {
                 addErrorToResult(key, result, e.getMessage());
@@ -199,7 +209,8 @@ public abstract class RestRequest implements AsyncCacheLoader<RestRequestKey, Re
 
     @Nonnull
     @Override
-    public abstract CompletableFuture<RestRequestResult> asyncLoad(@Nonnull RestRequestKey key, @Nonnull Executor executor);
+    public abstract CompletableFuture<RestRequestResult> asyncLoad(@Nonnull RestRequestKey key,
+                                                                   @Nonnull Executor executor);
 
     protected abstract RestRequestKey getKey(Map<String, String> variables);
 

@@ -12,42 +12,46 @@
 
 package com.cloudera.cyber.generator;
 
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericDatumWriter;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.*;
-import org.apache.flink.core.fs.Path;
-
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericDatumReader;
+import org.apache.avro.generic.GenericDatumWriter;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.BinaryEncoder;
+import org.apache.avro.io.DatumReader;
+import org.apache.avro.io.DatumWriter;
+import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.io.JsonDecoder;
+import org.apache.flink.core.fs.Path;
 
 
 public class Utils {
 
-   public static GenericRecord jsonDecodeToAvroGenericRecord(String json, Schema schema) {
-      try {
-         JsonDecoder jsonDecoder = DecoderFactory.get().jsonDecoder(schema, json);
-         DatumReader<GenericRecord> datumReader = new GenericDatumReader<>(schema);
-         return datumReader.read(null, jsonDecoder);
-      } catch (IOException e) {
-         return null;
-      }
-   }
+    public static GenericRecord jsonDecodeToAvroGenericRecord(String json, Schema schema) {
+        try {
+            JsonDecoder jsonDecoder = DecoderFactory.get().jsonDecoder(schema, json);
+            DatumReader<GenericRecord> datumReader = new GenericDatumReader<>(schema);
+            return datumReader.read(null, jsonDecoder);
+        } catch (IOException e) {
+            return null;
+        }
+    }
 
-   public static byte[] jsonDecodeToAvroByteArray(String json, Schema schema) {
-      GenericRecord record = jsonDecodeToAvroGenericRecord(json, schema);
-      DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>(schema);
-      try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-         BinaryEncoder binaryEncoder = EncoderFactory.get().directBinaryEncoder(out, null);
-         datumWriter.write(record, binaryEncoder);
-         return out.toByteArray();
-      } catch (IOException exception) {
-         return null;
-      }
-   }
+    public static byte[] jsonDecodeToAvroByteArray(String json, Schema schema) {
+        GenericRecord record = jsonDecodeToAvroGenericRecord(json, schema);
+        DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>(schema);
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            BinaryEncoder binaryEncoder = EncoderFactory.get().directBinaryEncoder(out, null);
+            datumWriter.write(record, binaryEncoder);
+            return out.toByteArray();
+        } catch (IOException exception) {
+            return null;
+        }
+    }
 
     public static InputStream openFileStream(String baseDir, String filePath) throws IOException {
         Path possiblePath = new Path(filePath);

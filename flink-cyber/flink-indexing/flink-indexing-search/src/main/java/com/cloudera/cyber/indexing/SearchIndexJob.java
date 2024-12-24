@@ -14,6 +14,9 @@ package com.cloudera.cyber.indexing;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import java.io.IOException;
+import java.util.List;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.common.state.MapStateDescriptor;
@@ -23,10 +26,6 @@ import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.BroadcastStream;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.regex.Pattern;
 
 @Slf4j
 public abstract class SearchIndexJob {
@@ -47,7 +46,7 @@ public abstract class SearchIndexJob {
         DataStream<Message> messages;
 
         // allow a general exclusion of any source that matches a regex pattern upfront to avoid retry loops
-        if (StringUtils.isNotBlank(params.get(PARAM_EXCLUDE_PATTERN,""))) {
+        if (StringUtils.isNotBlank(params.get(PARAM_EXCLUDE_PATTERN, ""))) {
             final Pattern filterExpression = Pattern.compile(params.get(PARAM_EXCLUDE_PATTERN));
             messages = source.filter(m -> !filterExpression.matcher(m.getSource()).matches());
         } else {
@@ -57,7 +56,7 @@ public abstract class SearchIndexJob {
         DataStream<CollectionField> configSource = createConfigSource(env, params);
         logConfig(configSource, params);
         BroadcastStream<CollectionField> entryStringKeyedStream = configSource
-                .broadcast(Descriptors.broadcastState);
+              .broadcast(Descriptors.broadcastState);
 
         // TODO - apply any row filtering logic here
         // or at least you would be able to if that didn't rely on the broadcast state for config
@@ -68,18 +67,18 @@ public abstract class SearchIndexJob {
          * as a flat version of message, which may be more long term useful.
          */
         MapStateDescriptor<String, List<String>> broadcastState = new MapStateDescriptor<>(
-                "fieldsByIndex",
-                Types.STRING,
-                Types.LIST(Types.STRING)
+              "fieldsByIndex",
+              Types.STRING,
+              Types.LIST(Types.STRING)
         );
         broadcastState.setQueryable("fieldsByIndex");
 
         // only process messages that we have a collection for, and extract only the fields that are accounted for in target index
         DataStream<IndexEntry> output = messages
-                .keyBy(Message::getSource)
-                .connect(entryStringKeyedStream)
-                .process(new FilterStreamFieldsByConfig(broadcastState))
-                .name("Index Entry Extractor").uid("index-entry-extract");
+              .keyBy(Message::getSource)
+              .connect(entryStringKeyedStream)
+              .process(new FilterStreamFieldsByConfig(broadcastState))
+              .name("Index Entry Extractor").uid("index-entry-extract");
 
         // now add the correctly formed version for tables
 
@@ -94,14 +93,19 @@ public abstract class SearchIndexJob {
 
     protected static class Descriptors {
         public static final MapStateDescriptor<String, List<String>> broadcastState = new MapStateDescriptor<>(
-                "fieldsByIndex",
-                Types.STRING,
-                Types.LIST(Types.STRING)
+              "fieldsByIndex",
+              Types.STRING,
+              Types.LIST(Types.STRING)
         );
 
     }
+
     protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
-    protected abstract DataStream<CollectionField> createConfigSource(StreamExecutionEnvironment env, ParameterTool params);
+
+    protected abstract DataStream<CollectionField> createConfigSource(StreamExecutionEnvironment env,
+                                                                      ParameterTool params);
+
     protected abstract void writeResults(DataStream<IndexEntry> results, ParameterTool params) throws IOException;
+
     protected abstract void logConfig(DataStream<CollectionField> configSource, ParameterTool params);
 }

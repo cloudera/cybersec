@@ -11,7 +11,9 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 public class TableApiJobFactory {
 
-    public static TableApiAbstractJob getJobByConnectorName(String typeName, ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source) throws IOException {
+    public static TableApiAbstractJob getJobByConnectorName(String typeName, ParameterTool params,
+                                                            StreamExecutionEnvironment env,
+                                                            DataStream<ScoredMessage> source) throws IOException {
         if (typeName == null) {
             throw new RuntimeException("Null job type name provided while the Flink writer is selected as TableAPI");
         }
@@ -23,7 +25,8 @@ public class TableApiJobFactory {
             case "filesystem":
                 return new TableApiFilesystemJob(params, env, source);
             default:
-                throw new RuntimeException(String.format("Unknown job type name [%s] provided while the Flink writer is selected as TableAPI", typeName));
+                throw new RuntimeException(String.format(
+                      "Unknown job type name [%s] provided while the Flink writer is selected as TableAPI", typeName));
         }
     }
 

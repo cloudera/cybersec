@@ -28,7 +28,9 @@ public abstract class BatchEnrichmentLoader {
         return env;
     }
 
-    protected abstract void writeResults(ParameterTool params, EnrichmentsConfig enrichmentsConfig,String enrichmentType, DataStream<EnrichmentCommand> enrichmentSource, StreamExecutionEnvironment env);
+    protected abstract void writeResults(ParameterTool params, EnrichmentsConfig enrichmentsConfig,
+                                         String enrichmentType, DataStream<EnrichmentCommand> enrichmentSource,
+                                         StreamExecutionEnvironment env);
 
     protected abstract void load(StreamExecutionEnvironment env, ParameterTool params) throws Exception;
 

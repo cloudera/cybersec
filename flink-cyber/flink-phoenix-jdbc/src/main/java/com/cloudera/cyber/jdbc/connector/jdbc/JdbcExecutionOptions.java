@@ -12,10 +12,9 @@
 
 package com.cloudera.cyber.jdbc.connector.jdbc;
 
-import org.apache.flink.util.Preconditions;
-
 import java.io.Serializable;
 import java.util.Objects;
+import org.apache.flink.util.Preconditions;
 
 public class JdbcExecutionOptions implements Serializable {
     public static final int DEFAULT_MAX_RETRY_TIMES = 3;
@@ -55,8 +54,8 @@ public class JdbcExecutionOptions implements Serializable {
         }
         JdbcExecutionOptions that = (JdbcExecutionOptions) o;
         return batchIntervalMs == that.batchIntervalMs
-                && batchSize == that.batchSize
-                && maxRetries == that.maxRetries;
+               && batchSize == that.batchSize
+               && maxRetries == that.maxRetries;
     }
 
     @Override

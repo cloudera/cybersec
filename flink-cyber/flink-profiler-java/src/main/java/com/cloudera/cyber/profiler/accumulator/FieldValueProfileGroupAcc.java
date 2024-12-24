@@ -12,52 +12,69 @@
 
 package com.cloudera.cyber.profiler.accumulator;
 
+import static com.cloudera.cyber.profiler.ProfileAggregationMethod.COUNT;
+import static com.cloudera.cyber.profiler.ProfileAggregationMethod.COUNT_DISTINCT;
+import static com.cloudera.cyber.profiler.ProfileAggregationMethod.FIRST_SEEN;
+import static com.cloudera.cyber.profiler.ProfileAggregationMethod.MAX;
+import static com.cloudera.cyber.profiler.ProfileAggregationMethod.MIN;
+import static com.cloudera.cyber.profiler.ProfileAggregationMethod.SUM;
+
 import com.cloudera.cyber.profiler.ProfileAggregationMethod;
 import com.cloudera.cyber.profiler.ProfileGroupConfig;
 import com.cloudera.cyber.profiler.ProfileMeasurementConfig;
 import com.cloudera.cyber.profiler.ProfileMessage;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.common.accumulators.*;
-
 import java.io.Serializable;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.cloudera.cyber.profiler.ProfileAggregationMethod.*;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.accumulators.Accumulator;
+import org.apache.flink.api.common.accumulators.DoubleCounter;
+import org.apache.flink.api.common.accumulators.DoubleMaximum;
+import org.apache.flink.api.common.accumulators.DoubleMinimum;
 
 @Slf4j
 public class FieldValueProfileGroupAcc extends ProfileGroupAcc {
 
     private static final Map<ProfileAggregationMethod, Supplier<Accumulator<?, ? extends Serializable>>> accFactory =
-            new HashMap<ProfileAggregationMethod, Supplier<Accumulator<?, ? extends Serializable>>>() {{
-                put(SUM, DoubleCounter::new);
-                put(COUNT, DoubleCounter::new);
-                put(MIN, DoubleMinimum::new);
-                put(MAX, DoubleMaximum::new);
-                put(COUNT_DISTINCT, CountDistinctAcc::new);
-            }};
+          new HashMap<ProfileAggregationMethod, Supplier<Accumulator<?, ? extends Serializable>>>() {
+              {
+                  put(SUM, DoubleCounter::new);
+                  put(COUNT, DoubleCounter::new);
+                  put(MIN, DoubleMinimum::new);
+                  put(MAX, DoubleMaximum::new);
+                  put(COUNT_DISTINCT, CountDistinctAcc::new);
+              }
+          };
 
     @FunctionalInterface
     interface ProfileUpdateFunction {
-        void update(ProfileMeasurementConfig config, ProfileMessage message, Accumulator<?, ? extends Serializable> acc);
+        void update(ProfileMeasurementConfig config, ProfileMessage message,
+                    Accumulator<?, ? extends Serializable> acc);
     }
 
     private static final Map<ProfileAggregationMethod, ProfileUpdateFunction> accUpdate =
-            new HashMap<ProfileAggregationMethod, ProfileUpdateFunction>() {{
-                put(SUM, FieldValueProfileGroupAcc::updateDoubleAccumulator);
-                put(COUNT, FieldValueProfileGroupAcc::updateCounterAccumulator);
-                put(MIN, FieldValueProfileGroupAcc::updateDoubleAccumulator);
-                put(MAX, FieldValueProfileGroupAcc::updateDoubleAccumulator);
-                put(COUNT_DISTINCT, FieldValueProfileGroupAcc::updateStringAccumulator);
-            }};
+          new HashMap<ProfileAggregationMethod, ProfileUpdateFunction>() {
+              {
+                  put(SUM, FieldValueProfileGroupAcc::updateDoubleAccumulator);
+                  put(COUNT, FieldValueProfileGroupAcc::updateCounterAccumulator);
+                  put(MIN, FieldValueProfileGroupAcc::updateDoubleAccumulator);
+                  put(MAX, FieldValueProfileGroupAcc::updateDoubleAccumulator);
+                  put(COUNT_DISTINCT, FieldValueProfileGroupAcc::updateStringAccumulator);
+              }
+          };
 
 
     @FunctionalInterface
     interface ProfileExtensionFunction {
-        void getExtensions(ProfileMeasurementConfig config , Accumulator<?, ? extends Serializable> acc, Map<String, String> extensions, DecimalFormat format);
+        void getExtensions(ProfileMeasurementConfig config, Accumulator<?, ? extends Serializable> acc,
+                           Map<String, String> extensions, DecimalFormat format);
     }
 
     private static Stream<ProfileMeasurementConfig> getAccumulatedMeasurements(ProfileGroupConfig profileGroupConfig) {
@@ -65,30 +82,34 @@ public class FieldValueProfileGroupAcc extends ProfileGroupAcc {
     }
 
     private static final Map<ProfileAggregationMethod, ProfileExtensionFunction> extensionUpdate =
-            new HashMap<ProfileAggregationMethod, ProfileExtensionFunction>() {{
-                put(SUM, FieldValueProfileGroupAcc::getDoubleAccumulatorExtensions);
-                put(COUNT, FieldValueProfileGroupAcc::getDoubleAccumulatorExtensions);
-                put(MIN, FieldValueProfileGroupAcc::getDoubleAccumulatorExtensions);
-                put(MAX, FieldValueProfileGroupAcc::getDoubleAccumulatorExtensions);
-                put(COUNT_DISTINCT, FieldValueProfileGroupAcc::getCountDistinctAccumulatorExtensions);
-            }};
+          new HashMap<ProfileAggregationMethod, ProfileExtensionFunction>() {
+              {
+                  put(SUM, FieldValueProfileGroupAcc::getDoubleAccumulatorExtensions);
+                  put(COUNT, FieldValueProfileGroupAcc::getDoubleAccumulatorExtensions);
+                  put(MIN, FieldValueProfileGroupAcc::getDoubleAccumulatorExtensions);
+                  put(MAX, FieldValueProfileGroupAcc::getDoubleAccumulatorExtensions);
+                  put(COUNT_DISTINCT, FieldValueProfileGroupAcc::getCountDistinctAccumulatorExtensions);
+              }
+          };
 
     List<String> keyFieldValues = new ArrayList<>();
 
     public FieldValueProfileGroupAcc(ProfileGroupConfig profileGroupConfig) {
-        super(getAccumulatedMeasurements(profileGroupConfig).
-                map(config -> accFactory.get(config.getAggregationMethod()).get()).
-                collect(Collectors.toList()));
+        super(getAccumulatedMeasurements(profileGroupConfig)
+              .map(config -> accFactory.get(config.getAggregationMethod()).get())
+              .collect(Collectors.toList()));
     }
 
     @Override
     protected void updateAccumulators(ProfileMessage message, ProfileGroupConfig profileGroupConfig) {
         Map<String, String> extensions = message.getExtensions();
         if (keyFieldValues.isEmpty()) {
-            keyFieldValues = profileGroupConfig.getKeyFieldNames().stream().map(extensions::get).collect(Collectors.toList());
+            keyFieldValues =
+                  profileGroupConfig.getKeyFieldNames().stream().map(extensions::get).collect(Collectors.toList());
         }
 
-        Iterator<ProfileMeasurementConfig> measurementConfigIter = getAccumulatedMeasurements(profileGroupConfig).iterator();
+        Iterator<ProfileMeasurementConfig> measurementConfigIter =
+              getAccumulatedMeasurements(profileGroupConfig).iterator();
         Iterator<Accumulator<?, ? extends Serializable>> accumulatorIter = accumulators.iterator();
         while (measurementConfigIter.hasNext() && accumulatorIter.hasNext()) {
             ProfileMeasurementConfig measurementConfig = measurementConfigIter.next();
@@ -99,20 +120,22 @@ public class FieldValueProfileGroupAcc extends ProfileGroupAcc {
     }
 
     @Override
-    protected void addExtensions(ProfileGroupConfig profileGroupConfig, Map<String, String> extensions, Map<String, DecimalFormat> measurementFormats) {
+    protected void addExtensions(ProfileGroupConfig profileGroupConfig, Map<String, String> extensions,
+                                 Map<String, DecimalFormat> measurementFormats) {
         Iterator<String> keyFieldNameIter = profileGroupConfig.getKeyFieldNames().iterator();
         Iterator<String> keyFieldValueIter = keyFieldValues.iterator();
-        while(keyFieldNameIter.hasNext() && keyFieldValueIter.hasNext()) {
+        while (keyFieldNameIter.hasNext() && keyFieldValueIter.hasNext()) {
             extensions.put(keyFieldNameIter.next(), keyFieldValueIter.next());
         }
         Iterator<Accumulator<?, ? extends Serializable>> myAccIter = accumulators.iterator();
         Iterator<ProfileMeasurementConfig> measurementIter = profileGroupConfig.getMeasurements().iterator();
-        while(myAccIter.hasNext() && measurementIter.hasNext()) {
+        while (myAccIter.hasNext() && measurementIter.hasNext()) {
             ProfileMeasurementConfig measurementConfig = measurementIter.next();
             if (!measurementConfig.getAggregationMethod().equals(FIRST_SEEN)) {
                 Accumulator<?, ? extends Serializable> acc = myAccIter.next();
                 DecimalFormat measurementFormat = measurementFormats.get(measurementConfig.getResultExtensionName());
-                extensionUpdate.get(measurementConfig.getAggregationMethod()).getExtensions(measurementConfig, acc, extensions, measurementFormat);
+                extensionUpdate.get(measurementConfig.getAggregationMethod())
+                               .getExtensions(measurementConfig, acc, extensions, measurementFormat);
             }
         }
     }
@@ -121,35 +144,43 @@ public class FieldValueProfileGroupAcc extends ProfileGroupAcc {
     public void merge(ProfileGroupAcc other) {
         if (other instanceof FieldValueProfileGroupAcc) {
             if (keyFieldValues.isEmpty()) {
-                keyFieldValues.addAll(((FieldValueProfileGroupAcc)other).keyFieldValues);
+                keyFieldValues.addAll(((FieldValueProfileGroupAcc) other).keyFieldValues);
             }
         }
         super.merge(other);
     }
 
-    private static void getDoubleAccumulatorExtensions(ProfileMeasurementConfig config, Accumulator<?, ? extends Serializable> acc, Map<String, String> extensions, DecimalFormat format) {
-        extensions.put(config.getResultExtensionName(), format.format(((Accumulator<?, Double>)acc).getLocalValue()));
+    private static void getDoubleAccumulatorExtensions(ProfileMeasurementConfig config,
+                                                       Accumulator<?, ? extends Serializable> acc,
+                                                       Map<String, String> extensions, DecimalFormat format) {
+        extensions.put(config.getResultExtensionName(), format.format(((Accumulator<?, Double>) acc).getLocalValue()));
     }
 
-    private static void getCountDistinctAccumulatorExtensions(ProfileMeasurementConfig config, Accumulator<?, ? extends Serializable> acc, Map<String, String> extensions, DecimalFormat format) {
-        extensions.put(config.getResultExtensionName(), format.format(((CountDistinctAcc)acc).getLocalValue().getUnion().getResult().getEstimate()));
+    private static void getCountDistinctAccumulatorExtensions(ProfileMeasurementConfig config,
+                                                              Accumulator<?, ? extends Serializable> acc,
+                                                              Map<String, String> extensions, DecimalFormat format) {
+        extensions.put(config.getResultExtensionName(),
+              format.format(((CountDistinctAcc) acc).getLocalValue().getUnion().getResult().getEstimate()));
     }
 
-    private static  void updateDoubleAccumulator(ProfileMeasurementConfig config, ProfileMessage message, Accumulator<?, ? extends Serializable> acc) {
+    private static void updateDoubleAccumulator(ProfileMeasurementConfig config, ProfileMessage message,
+                                                Accumulator<?, ? extends Serializable> acc) {
         Double fieldValueDouble = getFieldValueAsDouble(message, config.getFieldName());
         if (fieldValueDouble != null) {
             ((Accumulator<Double, Double>) acc).add(fieldValueDouble);
         }
     }
 
-    private static void updateCounterAccumulator(ProfileMeasurementConfig config, ProfileMessage message, Accumulator<?, ? extends Serializable> acc) {
-        ((Accumulator<Double, ? extends Serializable>)acc).add(1D);
+    private static void updateCounterAccumulator(ProfileMeasurementConfig config, ProfileMessage message,
+                                                 Accumulator<?, ? extends Serializable> acc) {
+        ((Accumulator<Double, ? extends Serializable>) acc).add(1D);
     }
 
-    private static void updateStringAccumulator(ProfileMeasurementConfig config, ProfileMessage message, Accumulator<?, ? extends Serializable> acc) {
+    private static void updateStringAccumulator(ProfileMeasurementConfig config, ProfileMessage message,
+                                                Accumulator<?, ? extends Serializable> acc) {
         String stringFieldValue = message.getExtensions().get(config.getFieldName());
         if (stringFieldValue != null) {
-            ((Accumulator<String, ? extends Serializable>)acc).add(stringFieldValue);
+            ((Accumulator<String, ? extends Serializable>) acc).add(stringFieldValue);
         }
     }
 

@@ -14,7 +14,6 @@ package com.cloudera.parserchains.core;
 
 /**
  * Parses a {@link Message}.
- *
  */
 public interface Parser {
 

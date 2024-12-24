@@ -26,8 +26,8 @@ public class FieldExtractor extends RichMapFunction<Message, Row> {
 
     public FieldExtractor(List<String> listFields) {
         this.listFields = listFields.stream().filter(n -> !(
-                FieldExtractor.headerFields.contains(n) ||
-                FieldExtractor.footerFields.contains(n))
+                FieldExtractor.headerFields.contains(n)
+                || FieldExtractor.footerFields.contains(n))
         ).collect(toList());
     }
 

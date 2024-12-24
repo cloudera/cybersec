@@ -14,10 +14,9 @@ package com.cloudera.cyber.generator;
 
 import com.github.javafaker.Book;
 import com.github.javafaker.Faker;
-import org.apache.commons.net.util.SubnetUtils;
-
 import java.io.Serializable;
 import java.util.concurrent.ThreadLocalRandom;
+import org.apache.commons.net.util.SubnetUtils;
 
 public class RandomGenerators implements Serializable {
     private static final Faker faker = new Faker();
@@ -37,7 +36,7 @@ public class RandomGenerators implements Serializable {
         return ThreadLocalRandom.current().nextInt(from, to + 1);
     }
 
-    public static String randomChoice(String ...options) {
+    public static String randomChoice(String... options) {
         return options[ThreadLocalRandom.current().nextInt(options.length)];
     }
 
@@ -56,6 +55,7 @@ public class RandomGenerators implements Serializable {
     public static String randomEmail() {
         return faker.internet().emailAddress();
     }
+
     public static String randomUser() {
         return faker.name().username();
     }
@@ -67,9 +67,11 @@ public class RandomGenerators implements Serializable {
     public static String randomSubject() {
         return faker.lorem().sentence();
     }
+
     public static Book randomBook() {
         return faker.book();
     }
+
     public static String randomDomainName() {
         return faker.internet().domainName();
     }

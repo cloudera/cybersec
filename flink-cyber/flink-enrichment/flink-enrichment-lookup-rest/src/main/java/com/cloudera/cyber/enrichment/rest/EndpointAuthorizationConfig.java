@@ -12,20 +12,19 @@
 
 package com.cloudera.cyber.enrichment.rest;
 
-import lombok.*;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.apache.commons.text.StringSubstitutor;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
-
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import java.io.Serializable;
+import lombok.Data;
+import org.apache.commons.text.StringSubstitutor;
 
 @Data
 @JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        property = "type")
+      use = JsonTypeInfo.Id.NAME,
+      property = "type")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = BasicAuthorizationConfig.class, name = "basic"),
-        @JsonSubTypes.Type(value = BearerTokenAuthorizationConfig.class, name = "token")
+      @JsonSubTypes.Type(value = BasicAuthorizationConfig.class, name = "basic"),
+      @JsonSubTypes.Type(value = BearerTokenAuthorizationConfig.class, name = "token")
 })
 public abstract class EndpointAuthorizationConfig implements Serializable {
 

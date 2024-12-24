@@ -15,10 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.metron.enrichment.adapters.maxmind.geo.hash;
 
 import ch.hsr.geohash.WGS84Point;
 
 public interface DistanceStrategy {
-  public double distance(WGS84Point point1, WGS84Point point2);
+    double distance(WGS84Point point1, WGS84Point point2);
 }

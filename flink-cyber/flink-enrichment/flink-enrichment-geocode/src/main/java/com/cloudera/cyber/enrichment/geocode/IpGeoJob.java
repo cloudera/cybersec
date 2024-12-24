@@ -14,20 +14,19 @@ package com.cloudera.cyber.enrichment.geocode;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
-import java.util.Arrays;
-import java.util.List;
-
 public abstract class IpGeoJob {
     public static final String PARAM_GEO_FIELDS = "geo.ip_fields";
     public static final String PARAM_GEO_DATABASE_PATH = "geo.database_path";
 
-    public static final String PARAM_ASN_FIELDS = "asn.ip_fields";;
+    public static final String PARAM_ASN_FIELDS = "asn.ip_fields";
     public static final String PARAM_ASN_DATABASE_PATH = "asn.database_path";
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) {
@@ -47,6 +46,7 @@ public abstract class IpGeoJob {
 
     protected abstract void writeResults(ParameterTool params, DataStream<Message> results);
 
-    protected abstract SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> ipFields);
+    protected abstract SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env,
+                                                                        ParameterTool params, List<String> ipFields);
 
 }

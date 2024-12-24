@@ -8,8 +8,8 @@ import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 @Setter
 public class ClouderaKafkaProperties extends KafkaProperties {
 
-  private String replyTopic;
+    private String replyTopic;
 
-  private String requestTopic;
+    private String requestTopic;
 
 }

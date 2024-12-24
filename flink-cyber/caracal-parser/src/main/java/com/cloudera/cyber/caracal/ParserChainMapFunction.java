@@ -13,23 +13,26 @@
 package com.cloudera.cyber.caracal;
 
 import com.cloudera.cyber.Message;
-import com.cloudera.cyber.parser.ParserJob;
-import com.cloudera.parserchains.core.*;
+import com.cloudera.parserchains.core.ChainBuilder;
+import com.cloudera.parserchains.core.ChainLink;
+import com.cloudera.parserchains.core.ChainRunner;
+import com.cloudera.parserchains.core.DefaultChainBuilder;
+import com.cloudera.parserchains.core.DefaultChainRunner;
+import com.cloudera.parserchains.core.InvalidParserException;
+import com.cloudera.parserchains.core.ReflectiveParserBuilder;
 import com.cloudera.parserchains.core.catalog.ClassIndexParserCatalog;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.util.OutputTag;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
- * Map function to apply the TMO parser chains to Messages
+ * Map function to apply the TMO parser chains to Messages.
  */
 @RequiredArgsConstructor
 @Slf4j
@@ -45,16 +48,16 @@ public class ParserChainMapFunction extends RichMapFunction<Message, Message> {
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
         ChainBuilder chainBuilder = new DefaultChainBuilder(new ReflectiveParserBuilder(),
-                new ClassIndexParserCatalog());
-        chains = chainConfig.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, v ->
-        {
-            try {
-                return chainBuilder.build(v.getValue().getChainSchema());
-            } catch (InvalidParserException e) {
-                log.error("Cannot build parser chain", e);
-                return null;
-            }
-        }));
+              new ClassIndexParserCatalog());
+        chains = chainConfig.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+              v -> {
+                  try {
+                      return chainBuilder.build(v.getValue().getChainSchema());
+                  } catch (InvalidParserException e) {
+                      log.error("Cannot build parser chain", e);
+                      return null;
+                  }
+              }));
 
         chainRunner = new DefaultChainRunner();
     }
@@ -71,14 +74,16 @@ public class ParserChainMapFunction extends RichMapFunction<Message, Message> {
         com.cloudera.parserchains.core.Message.Builder builder = com.cloudera.parserchains.core.Message.builder();
         message.getExtensions().entrySet().forEach(e -> {
             builder
-                .addField(e.getKey(), e.getValue().toString()).build();
-            });
+                  .addField(e.getKey(), e.getValue()).build();
+        });
 
-        List<com.cloudera.parserchains.core.Message> out = chainRunner.run(builder.build(), chains.get(source), results);
+        List<com.cloudera.parserchains.core.Message> out =
+              chainRunner.run(builder.build(), chains.get(source), results);
         com.cloudera.parserchains.core.Message lastMessage = out.get(out.size() - 1);
 
         return message.toBuilder().extensions(lastMessage.getFields().entrySet().stream()
-                .collect(Collectors.toMap(k -> k.getKey().get(), v->v.getValue().get())))
-                .build();
+                                                         .collect(Collectors.toMap(k -> k.getKey().get(),
+                                                               v -> v.getValue().get())))
+                      .build();
     }
 }

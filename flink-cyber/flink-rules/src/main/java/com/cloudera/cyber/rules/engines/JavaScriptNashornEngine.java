@@ -12,6 +12,12 @@
 
 package com.cloudera.cyber.rules.engines;
 
+import javax.script.Bindings;
+import javax.script.Invocable;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.apache.flink.annotation.VisibleForTesting;
-
-import javax.script.*;
 
 
 @Slf4j
@@ -53,7 +57,8 @@ public class JavaScriptNashornEngine extends JavaScriptEngine {
     private static ValidatedScriptEngine create(String functionName, String script) {
         ScriptEngine engine = mgr.getEngineByName(ENGINE_NAME);
         if (engine == null) {
-            log.error("Wasn't able to create Nashorn JavaScript engine. It's likely related to the Java version being higher than 14.");
+            log.error(
+                  "Wasn't able to create Nashorn JavaScript engine. It's likely related to the Java version being higher than 14.");
             new ValidatedScriptEngine(false, null);
         }
         boolean isValid = true;
@@ -102,7 +107,8 @@ public class JavaScriptNashornEngine extends JavaScriptEngine {
     }
 
     @Override
-    public synchronized Object invokeFunction(String function, Object... args) throws ScriptException, NoSuchMethodException {
+    public synchronized Object invokeFunction(String function, Object... args)
+          throws ScriptException, NoSuchMethodException {
         try {
             return ((Invocable) getScriptEngine()).invokeFunction(function, args);
         } catch (ConcurrentException e) {

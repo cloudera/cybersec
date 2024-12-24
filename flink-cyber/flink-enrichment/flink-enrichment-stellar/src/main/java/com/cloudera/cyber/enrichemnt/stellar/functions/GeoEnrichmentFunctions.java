@@ -15,6 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.cloudera.cyber.enrichemnt.stellar.functions;
 
 import com.cloudera.cyber.enrichment.MetronGeoEnrichment;
@@ -24,6 +25,11 @@ import com.cloudera.cyber.enrichment.geocode.impl.IpGeoEnrichment;
 import com.cloudera.cyber.enrichment.geocode.impl.types.GeoFields;
 import com.cloudera.cyber.enrichment.geocode.impl.types.MetronGeoEnrichmentFields;
 import com.google.common.collect.ImmutableMap;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,27 +39,25 @@ import org.apache.metron.stellar.dsl.ParseException;
 import org.apache.metron.stellar.dsl.Stellar;
 import org.apache.metron.stellar.dsl.StellarFunction;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GeoEnrichmentFunctions {
 
-    private static final Map<String,String> ASN_RESULT_TO_METRON_KEYS = ImmutableMap.of("org", "autonomous_system_organization",
-            "number", "autonomous_system_number",
-            "mask","network");
-    @Stellar(name = "GET"
-            , namespace = "GEO"
-            , description = "Look up an IPV4 address and returns geographic information about it"
-            , params = {
-            "ip - The IPV4 address to lookup",
-            "fields - Optional list of GeoIP fields to grab. Options are locID, country, city, postalCode, dmaCode, latitude, longitude, location_point"
-    }
-            , returns = "If a Single field is requested a string of the field, If multiple fields a map of string of the fields, and null otherwise"
+    private static final Map<String, String> ASN_RESULT_TO_METRON_KEYS =
+          ImmutableMap.of("org", "autonomous_system_organization",
+                "number", "autonomous_system_number",
+                "mask", "network");
+
+    @Stellar(name = "GET",
+          namespace = "GEO",
+          description = "Look up an IPV4 address and returns geographic information about it",
+          params = {
+                "ip - The IPV4 address to lookup",
+                "fields - Optional list of GeoIP fields to grab. "
+                    + "Options are locID, country, city, postalCode, dmaCode, latitude, longitude, location_point"
+          },
+          returns = "If a Single field is requested a string of the field, "
+                    + "If multiple fields a map of string of the fields, and null otherwise"
     )
     public static class GeoGet implements StellarFunction {
         boolean initialized = false;
@@ -74,15 +78,19 @@ public class GeoEnrichmentFunctions {
                 if (ip == null || ip.trim().isEmpty()) {
                     return null;
                 }
-                ipGeoEnrichment.lookup(MetronGeoEnrichment::new, null, ip, MetronGeoEnrichmentFields.values(), result, Collections.emptyList());
+                ipGeoEnrichment.lookup(MetronGeoEnrichment::new, null, ip, MetronGeoEnrichmentFields.values(), result,
+                      Collections.emptyList());
 
                 return result;
             } else if (args.size() == 2 && args.get(1) instanceof List) {
                 // If fields are provided, return just those fields.
                 String ip = (String) args.get(0);
                 @SuppressWarnings("unchecked")
-                GeoFields[] geoFieldSet = ((List<String>) args.get(1)).stream().map(MetronGeoEnrichmentFields::fromSingularName).toArray(GeoFields[]::new);
-                ipGeoEnrichment.lookup(MetronGeoEnrichment::new, null, ip, geoFieldSet, result, Collections.emptyList());
+                GeoFields[] geoFieldSet =
+                      ((List<String>) args.get(1)).stream().map(MetronGeoEnrichmentFields::fromSingularName)
+                                                  .toArray(GeoFields[]::new);
+                ipGeoEnrichment.lookup(MetronGeoEnrichment::new, null, ip, geoFieldSet, result,
+                      Collections.emptyList());
                 if (geoFieldSet.length == 1) {
                     if (MapUtils.isNotEmpty(result)) {
                         return result.values().iterator().next();
@@ -107,7 +115,7 @@ public class GeoEnrichmentFunctions {
         @SuppressWarnings("unchecked")
         private static Map<String, Object> getConfig(Context context) {
             return (Map<String, Object>) context.getCapability(Context.Capabilities.GLOBAL_CONFIG, false)
-                    .orElse(new HashMap<>());
+                                                .orElse(new HashMap<>());
         }
 
         @Override
@@ -117,14 +125,16 @@ public class GeoEnrichmentFunctions {
     }
 
 
-    @Stellar(name = "GET"
-            , namespace = "ASN"
-            , description = "Look up an IPV4 address and returns Autonomous System Number information about it"
-            , params = {
-            "ip - The IPV4 address to lookup",
-            "fields - Optional list of ASN fields to grab. Options are autonomous_system_organization, autonomous_system_number, network"
-    }
-            , returns = "If a single field is requested a string of the field, If multiple fields a map of string of the fields, and null otherwise"
+    @Stellar(name = "GET",
+          namespace = "ASN",
+          description = "Look up an IPV4 address and returns Autonomous System Number information about it",
+          params = {
+                "ip - The IPV4 address to lookup",
+                "fields - Optional list of ASN fields to grab. "
+                    + "Options are autonomous_system_organization, autonomous_system_number, network"
+          },
+          returns = "If a single field is requested a string of the field, "
+                    + "If multiple fields a map of string of the fields, and null otherwise"
     )
     public static class AsnGet implements StellarFunction {
 
@@ -138,7 +148,7 @@ public class GeoEnrichmentFunctions {
             }
             if (args.size() > 2) {
                 throw new IllegalArgumentException(
-                        "ASN_GET received more arguments than expected: " + args.size());
+                      "ASN_GET received more arguments than expected: " + args.size());
             }
             HashMap<String, String> result = new HashMap<>();
 
@@ -166,7 +176,8 @@ public class GeoEnrichmentFunctions {
                     return result.get(fields.get(0));
                 } else if (MapUtils.isNotEmpty(result)) {
                     // If multiple fields are requested, return all of them
-                    return result.entrySet().stream().filter(entry -> fields.contains(entry.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    return result.entrySet().stream().filter(entry -> fields.contains(entry.getKey()))
+                                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 }
             }
 
@@ -174,7 +185,9 @@ public class GeoEnrichmentFunctions {
         }
 
         private static HashMap<String, String> convertToMetronKeys(Map<String, String> result) {
-            return result.entrySet().stream().collect(Collectors.toMap(e -> ASN_RESULT_TO_METRON_KEYS.getOrDefault(e.getKey(), e.getKey()), Map.Entry::getValue, (prev, next) -> next, HashMap::new));
+            return result.entrySet().stream().collect(
+                  Collectors.toMap(e -> ASN_RESULT_TO_METRON_KEYS.getOrDefault(e.getKey(), e.getKey()),
+                        Map.Entry::getValue, (prev, next) -> next, HashMap::new));
         }
 
         @Override
@@ -189,7 +202,7 @@ public class GeoEnrichmentFunctions {
         @SuppressWarnings("unchecked")
         private static Map<String, Object> getConfig(Context context) {
             return (Map<String, Object>) context.getCapability(Context.Capabilities.GLOBAL_CONFIG, false)
-                    .orElse(new HashMap<>());
+                                                .orElse(new HashMap<>());
         }
 
         @Override

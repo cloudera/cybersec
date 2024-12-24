@@ -18,14 +18,13 @@
 
 package org.apache.metron.common.field;
 
+import java.lang.invoke.MethodHandles;
 import org.apache.commons.lang.ClassUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.metron.common.configuration.writer.WriterConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.invoke.MethodHandles;
 
 /**
  * Enumerates a set of {@link FieldNameConverter} implementations.
@@ -37,80 +36,81 @@ import java.lang.invoke.MethodHandles;
  */
 public enum FieldNameConverters implements FieldNameConverter {
 
-  /**
-   * A {@link FieldNameConverter} that does not rename any fields.  All field
-   * names remain unchanged.
-   */
-  NOOP(new NoopFieldNameConverter()),
+    /**
+     * A {@link FieldNameConverter} that does not rename any fields.  All field
+     * names remain unchanged.
+     */
+    NOOP(new NoopFieldNameConverter()),
 
-  /**
-   * A {@link FieldNameConverter} that replaces all field names containing dots
-   * with colons.
-   */
-  DEDOT(new DeDotFieldNameConverter());
+    /**
+     * A {@link FieldNameConverter} that replaces all field names containing dots
+     * with colons.
+     */
+    DEDOT(new DeDotFieldNameConverter());
 
-  private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+    private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
-  private FieldNameConverter converter;
+    private final FieldNameConverter converter;
 
-  FieldNameConverters(FieldNameConverter converter) {
-    this.converter = converter;
-  }
-
-  /**
-   * Returns a shared instance of the {@link FieldNameConverter}.
-   *
-   * @return A shared {@link FieldNameConverter} instance.
-   */
-  public FieldNameConverter get() {
-    return converter;
-  }
-
-  /**
-   * Allows the {@link FieldNameConverters} enums to be used directly as a {@link FieldNameConverter}.
-   *
-   * {@code
-   * FieldNameConverter converter = FieldNameConverters.DEDOT;
-   * }
-   *
-   * @param originalField The original field name.
-   * @return the converted field name
-   */
-  @Override
-  public String convert(String originalField) {
-    return converter.convert(originalField);
-  }
-
-  /**
-   * Create a new {@link FieldNameConverter} for a given sensor type and config.
-   *
-   * @param sensorType The type of sensor.
-   * @param config The writer configuration.
-   * @return The new {@link FieldNameConverter}
-   */
-  public static FieldNameConverter create(String sensorType, WriterConfiguration config) {
-    FieldNameConverter result = null;
-
-    // which field name converter has been configured?
-    String converterName = config.getFieldNameConverter(sensorType);
-    if(StringUtils.isNotBlank(converterName)) {
-      try {
-        result = FieldNameConverters.valueOf(converterName);
-
-      } catch (IllegalArgumentException e) {
-        LOG.error("Invalid field name converter, using default; configured={}, knownValues={}, error={}",
-                converterName, FieldNameConverters.values(), ExceptionUtils.getRootCauseMessage(e));
-      }
+    FieldNameConverters(FieldNameConverter converter) {
+        this.converter = converter;
     }
 
-    if(result == null) {
-      // if no converter defined or an invalid converter is defined, default to 'DEDOT'
-      result = FieldNameConverters.DEDOT;
+    /**
+     * Returns a shared instance of the {@link FieldNameConverter}.
+     *
+     * @return A shared {@link FieldNameConverter} instance.
+     */
+    public FieldNameConverter get() {
+        return converter;
     }
 
-    LOG.debug("Created field name converter; sensorType={}, configured={}, class={}",
-            sensorType, converterName, ClassUtils.getShortClassName(result, "null"));
+    /**
+     * Allows the {@link FieldNameConverters} enums to be used directly as a {@link FieldNameConverter}.
+     *
+     * <p>
+     * {@code
+     * FieldNameConverter converter = FieldNameConverters.DEDOT;
+     * }
+     *
+     * @param originalField The original field name.
+     * @return the converted field name
+     */
+    @Override
+    public String convert(String originalField) {
+        return converter.convert(originalField);
+    }
 
-    return result;
-  }
+    /**
+     * Create a new {@link FieldNameConverter} for a given sensor type and config.
+     *
+     * @param sensorType The type of sensor.
+     * @param config     The writer configuration.
+     * @return The new {@link FieldNameConverter}
+     */
+    public static FieldNameConverter create(String sensorType, WriterConfiguration config) {
+        FieldNameConverter result = null;
+
+        // which field name converter has been configured?
+        String converterName = config.getFieldNameConverter(sensorType);
+        if (StringUtils.isNotBlank(converterName)) {
+            try {
+                result = FieldNameConverters.valueOf(converterName);
+
+            } catch (IllegalArgumentException e) {
+                LOG.error("Invalid field name converter, using default; configured={}, knownValues={}, error={}",
+                      converterName, FieldNameConverters.values(), ExceptionUtils.getRootCauseMessage(e));
+            }
+        }
+
+        if (result == null) {
+            // if no converter defined or an invalid converter is defined, default to 'DEDOT'
+            result = FieldNameConverters.DEDOT;
+        }
+
+        LOG.debug("Created field name converter; sensorType={}, configured={}, class={}",
+              sensorType, converterName, ClassUtils.getShortClassName(result, "null"));
+
+        return result;
+    }
 }

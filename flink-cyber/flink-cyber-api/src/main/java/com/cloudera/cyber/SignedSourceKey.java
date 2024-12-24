@@ -12,6 +12,7 @@
 
 package com.cloudera.cyber;
 
+import java.nio.ByteBuffer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,44 +26,39 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.types.Row;
 
-import java.nio.ByteBuffer;
-
 @Data
 @Builder
 //@TypeInfo(SignedSourceKeyTypeFactory.class)
 @NoArgsConstructor
 @AllArgsConstructor
 public class SignedSourceKey extends SpecificRecordBase implements SpecificRecord {
+    public static final Schema SCHEMA$ = SchemaBuilder
+          .record(SignedSourceKey.class.getName())
+          .namespace(SignedSourceKey.class.getPackage().getName())
+          .fields()
+          .requiredString("topic")
+          .requiredInt("partition")
+          .requiredLong("offset")
+          .name("signature").type().bytesBuilder().endBytes().noDefault()
+          .endRecord();
+    public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
+          new String[] {"topic", "partition", "offset", "signature"},
+          Types.STRING, Types.INT, Types.LONG, Types.PRIMITIVE_ARRAY(Types.BYTE));
     private String topic;
     private int partition;
     private long offset;
     private byte[] signature;
 
-    public static final Schema SCHEMA$ = SchemaBuilder
-            .record(SignedSourceKey.class.getName())
-            .namespace(SignedSourceKey.class.getPackage().getName())
-            .fields()
-            .requiredString("topic")
-            .requiredInt("partition")
-            .requiredLong("offset")
-            .name("signature").type().bytesBuilder().endBytes().noDefault()
-            .endRecord();
-
-    public static final TypeInformation<Row> FLINK_TYPE_INFO = Types.ROW_NAMED(
-            new String[]{"topic", "partition", "offset", "signature"},
-            Types.STRING, Types.INT, Types.LONG, Types.PRIMITIVE_ARRAY(Types.BYTE));
-
-
     public Row toRow() {
         return Row.of(topic, partition, offset, signature);
     }
 
-//    static public class SignedSourceKeyBuilder {
-//        public SignedSourceKeyBuilder signature(byte[] bytes) {
-//            this.signature = ByteBuffer.wrap(bytes);
-//            return this;
-//        }
-//    }
+    //    static public class SignedSourceKeyBuilder {
+    //        public SignedSourceKeyBuilder signature(byte[] bytes) {
+    //            this.signature = ByteBuffer.wrap(bytes);
+    //            return this;
+    //        }
+    //    }
 
     @Override
     public Schema getSchema() {
@@ -71,23 +67,37 @@ public class SignedSourceKey extends SpecificRecordBase implements SpecificRecor
 
     @Override
     public Object get(int field) {
-        switch(field) {
-            case 0: return topic;
-            case 1: return partition;
-            case 2: return offset;
-            case 3: return ByteBuffer.wrap(signature);
-            default: throw new AvroRuntimeException("Bad index");
+        switch (field) {
+            case 0:
+                return topic;
+            case 1:
+                return partition;
+            case 2:
+                return offset;
+            case 3:
+                return ByteBuffer.wrap(signature);
+            default:
+                throw new AvroRuntimeException("Bad index");
         }
     }
 
     @Override
     public void put(int field, Object value) {
-        switch(field) {
-            case 0: this.topic = value.toString(); break;
-            case 1: this.partition = (int) value; break;
-            case 2: this.offset = (long) value; break;
-            case 3: this.signature = (value instanceof byte[]) ? (byte[])value: ((ByteBuffer) value).array(); break;
-            default: throw new AvroRuntimeException("Bad index");
+        switch (field) {
+            case 0:
+                this.topic = value.toString();
+                break;
+            case 1:
+                this.partition = (int) value;
+                break;
+            case 2:
+                this.offset = (long) value;
+                break;
+            case 3:
+                this.signature = (value instanceof byte[]) ? (byte[]) value : ((ByteBuffer) value).array();
+                break;
+            default:
+                throw new AvroRuntimeException("Bad index");
         }
     }
 }

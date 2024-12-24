@@ -6,60 +6,62 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.metron.enrichment.lookup.accesstracker;
 
-import org.apache.metron.enrichment.lookup.LookupKey;
+package org.apache.metron.enrichment.lookup.accesstracker;
 
 import java.io.IOException;
 import java.util.Map;
+import org.apache.metron.enrichment.lookup.LookupKey;
 
 public class NoopAccessTracker implements AccessTracker {
-  @Override
-  public void logAccess(LookupKey key) {
+    @Override
+    public void logAccess(LookupKey key) {
 
-  }
+    }
 
-  @Override
-  public void configure(Map<String, Object> config) {
+    @Override
+    public void configure(Map<String, Object> config) {
 
-  }
+    }
 
-  @Override
-  public boolean hasSeen(LookupKey key) {
-    return false;
-  }
+    @Override
+    public boolean hasSeen(LookupKey key) {
+        return false;
+    }
 
-  @Override
-  public String getName() {
-    return "noop";
-  }
+    @Override
+    public String getName() {
+        return "noop";
+    }
 
-  @Override
-  public AccessTracker union(AccessTracker tracker) {
-    return null;
-  }
+    @Override
+    public AccessTracker union(AccessTracker tracker) {
+        return null;
+    }
 
-  @Override
-  public void reset() {
+    @Override
+    public void reset() {
 
-  }
+    }
 
-  @Override
-  public boolean isFull() {
-    return false;
-  }
+    @Override
+    public boolean isFull() {
+        return false;
+    }
 
-  @Override
-  public void cleanup() throws IOException {
+    @Override
+    public void cleanup() throws IOException {
 
-  }
+    }
 }

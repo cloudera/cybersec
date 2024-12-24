@@ -12,6 +12,9 @@
 
 package com.cloudera.cyber.caracal;
 
+import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toMap;
+
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.SignedSourceKey;
 import com.cloudera.cyber.parser.MessageToParse;
@@ -21,15 +24,6 @@ import com.google.common.collect.Streams;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.RichFlatMapFunction;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.util.Collector;
-import org.apache.flink.util.Preconditions;
-
-import javax.script.ScriptException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -39,12 +33,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toMap;
+import javax.script.ScriptException;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.RichFlatMapFunction;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.util.Collector;
+import org.apache.flink.util.Preconditions;
 
 /**
- * Splits up JSON array based on a configured path and dupes 'header' in to multiple messages
+ * Splits up JSON array based on a configured path and dupes 'header' in to multiple messages.
  */
 @Slf4j
 public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse, Message> {
@@ -66,10 +65,11 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
     public enum TimestampSource {
         HEADER, SPLIT
     }
+
     private JsonPath jsonPath;
 
     private static final com.jayway.jsonpath.Configuration STRICT_PROVIDER_CONFIGURATION =
-            com.jayway.jsonpath.Configuration.builder().jsonProvider(new JacksonJsonProvider()).build();
+          com.jayway.jsonpath.Configuration.builder().jsonProvider(new JacksonJsonProvider()).build();
 
     public SplittingFlatMapFunction(SplitConfig config, PrivateKey signKey) {
         Preconditions.checkNotNull(signKey, "Must supply signing key");
@@ -109,7 +109,7 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
             log.error("Failed to initialise signing", e);
         }
 
-        if(config.getTimestampFunction() != null & !config.getTimestampFunction().isEmpty()) {
+        if (config.getTimestampFunction() != null & !config.getTimestampFunction().isEmpty()) {
             this.engine = RuleType.JS.engine("");
 
             this.setTimestampFunction(config.getTimestampFunction());
@@ -127,25 +127,26 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
         signature.update(input.getOriginalBytes());
         final byte[] sig = signature.sign();
 
-        DocumentContext documentContext = JsonPath.using(STRICT_PROVIDER_CONFIGURATION).parse(new String(input.getOriginalBytes(), StandardCharsets.UTF_8));
+        DocumentContext documentContext = JsonPath.using(STRICT_PROVIDER_CONFIGURATION)
+                                                  .parse(new String(input.getOriginalBytes(), StandardCharsets.UTF_8));
 
         // header is all top level simple type fields.
         Object header = documentContext.read(headerPath);
         new HashMap<>();
-        Map<String, Object> headerFields = header instanceof Map ?
-                ((Map<String, Object>) header).entrySet().stream()
-                    .filter(e -> isScalar(e.getValue()))
-                    .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)) :
-                emptyMap();
+        Map<String, Object> headerFields = header instanceof Map
+              ? ((Map<String, Object>) header).entrySet().stream()
+                                              .filter(e -> isScalar(e.getValue()))
+                                              .collect(toMap(Map.Entry::getKey, Map.Entry::getValue))
+              : emptyMap();
 
         Object jsonPathResult = documentContext.read(jsonPath);
 
         ((List) jsonPathResult).forEach(part -> {
             Map<String, Object> fields = (Map<String, Object>) part;
 
-            String tsString = (String) (timestampSource == TimestampSource.SPLIT ?
-                                fields.get(tsField) :
-                                headerFields.get(tsField));
+            String tsString = (String) (timestampSource == TimestampSource.SPLIT
+                  ? fields.get(tsField)
+                  : headerFields.get(tsField));
             long ts;
             try {
                 ts = Long.valueOf(tsString);
@@ -162,19 +163,19 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
             metricGroup.addGroup("parser." + input.getTopic()).counter(1);*/
 
             collector.collect(Message.builder()
-                    .originalSource(
-                            SignedSourceKey.builder()
-                                    .topic(input.getTopic())
-                                    .partition(input.getPartition())
-                                    .offset(input.getOffset())
-                                    .signature(sig)
-                                    .build()
-                    )
-                    .source(input.getTopic())
-                    .ts(ts)
-                    .extensions(childPlusHeader(fields, headerFields)).build());
+                                     .originalSource(
+                                           SignedSourceKey.builder()
+                                                          .topic(input.getTopic())
+                                                          .partition(input.getPartition())
+                                                          .offset(input.getOffset())
+                                                          .signature(sig)
+                                                          .build()
+                                     )
+                                     .source(input.getTopic())
+                                     .ts(ts)
+                                     .extensions(childPlusHeader(fields, headerFields)).build());
         });
-        
+
     }
 
     private boolean isScalar(Object value) {
@@ -183,7 +184,8 @@ public class SplittingFlatMapFunction extends RichFlatMapFunction<MessageToParse
 
     private Map<String, String> childPlusHeader(Map<String, Object> part, Map<String, Object> header) {
         Map<String, String> result = Streams.concat(header.entrySet().stream(), part.entrySet().stream())
-                .collect(toMap(Map.Entry::getKey, v -> v.getValue().toString(), (a, b) -> b));
+                                            .collect(
+                                                  toMap(Map.Entry::getKey, v -> v.getValue().toString(), (a, b) -> b));
         return result;
     }
 

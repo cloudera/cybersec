@@ -18,10 +18,10 @@
 
 package org.apache.metron.stellar.common.evaluators;
 
-import org.apache.metron.stellar.dsl.Token;
 import org.apache.metron.stellar.common.FrameContext;
 import org.apache.metron.stellar.common.generated.StellarParser;
+import org.apache.metron.stellar.dsl.Token;
 
 public interface NumberEvaluator<T extends StellarParser.Arithmetic_operandsContext> {
-  Token<? extends Number> evaluate(T context, FrameContext.Context contextVariety);
+    Token<? extends Number> evaluate(T context, FrameContext.Context contextVariety);
 }

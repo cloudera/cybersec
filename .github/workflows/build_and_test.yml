@@ -27,8 +27,10 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
+      - name: Check codestyle
+        run: mvn -B validate --file flink-cyber/pom.xml
       - name: Build and Test with Maven
-        run: mvn -P '!add-dependencies-for-IDEA,!full-build,!include-front-end' -B package --file flink-cyber/pom.xml
+        run: mvn -P '!add-dependencies-for-IDEA,!full-build,!include-front-end' -B verify --file flink-cyber/pom.xml
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       - name: Update dependency graph

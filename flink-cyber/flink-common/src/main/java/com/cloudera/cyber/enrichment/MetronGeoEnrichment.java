@@ -13,7 +13,6 @@
 package com.cloudera.cyber.enrichment;
 
 import com.google.common.base.Joiner;
-
 import java.util.Map;
 
 public class MetronGeoEnrichment extends Enrichment {
@@ -29,7 +28,7 @@ public class MetronGeoEnrichment extends Enrichment {
     @Override
     public void enrich(Map<String, String> extensions, String enrichmentName, Object enrichmentValue) {
         if (enrichmentValue != null) {
-            String extensionName =getName(enrichmentName);
+            String extensionName = getName(enrichmentName);
             extensions.put(extensionName, enrichmentValue.toString());
         }
 

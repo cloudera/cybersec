@@ -12,18 +12,23 @@
 
 package com.cloudera.parserchains.core;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A {@link ChainLink} that links directly to the next link in a chain.
  */
 public class NextChainLink implements ChainLink {
-    private Parser parser;
+    private final Parser parser;
     private Optional<ChainLink> nextLink;
-    private LinkName linkName;
+    private final LinkName linkName;
 
     /**
-     * @param parser The parser at this link in the chain.
+     * NextChainLink constructor.
+     *
+     * @param parser   The parser at this link in the chain.
      * @param linkName The name of this link in the chain.
      */
     public NextChainLink(Parser parser, LinkName linkName) {
@@ -42,10 +47,10 @@ public class NextChainLink implements ChainLink {
 
         // ensure the message is attributed to this link by name
         Message output = Message.builder()
-                .clone(parsed)
-                .createdBy(linkName)
-                .emit(emitMessage)
-                .build();
+                                .clone(parsed)
+                                .createdBy(linkName)
+                                .emit(emitMessage)
+                                .build();
         List<Message> results = new ArrayList<>();
         results.add(output);
 

@@ -2,11 +2,6 @@ package com.cloudera.cyber.rules.engines;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.libs.CyberFunctionDefinition;
-import lombok.Data;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
-
-import javax.script.ScriptException;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,13 +9,18 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import javax.script.ScriptException;
+import lombok.Data;
+import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 
 @Data
 @Slf4j
 public abstract class JavaScriptEngine implements RuleEngine {
 
     protected static final String SCORE_FUNCTION = "score";
-    protected static final String setupScript = CyberFunctionDefinition.findAll().map(JavaScriptEngine::generateJavascript).collect(Collectors.joining(";"));
+    protected static final String setupScript =
+          CyberFunctionDefinition.findAll().map(JavaScriptEngine::generateJavascript).collect(Collectors.joining(";"));
 
     @NonNull
     protected final String script;
@@ -28,13 +28,14 @@ public abstract class JavaScriptEngine implements RuleEngine {
 
     public JavaScriptEngine(String script) {
         this.script = script;
-        this.functionName = SCORE_FUNCTION + "_" +
-                Math.abs(this.script.hashCode()) + "_"
-                + ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE);
+        this.functionName = SCORE_FUNCTION + "_"
+                            + Math.abs(this.script.hashCode()) + "_"
+                            + ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE);
     }
 
     private static String generateJavascript(CyberFunctionDefinition functionDefinition) {
-        String paramNames = functionDefinition.getParameters().stream().map(Parameter::getName).collect(Collectors.joining(","));
+        String paramNames =
+              functionDefinition.getParameters().stream().map(Parameter::getName).collect(Collectors.joining(","));
         String functionName = functionDefinition.getFunctionName();
         return functionName + "=function(" + paramNames + "){ return _" + functionName + ".eval(" + paramNames + ");}";
     }
@@ -45,7 +46,8 @@ public abstract class JavaScriptEngine implements RuleEngine {
             Class<?> implementationClass = func.getImplementationClass();
             try {
                 log.info("Registering {} as {}", implementationClass, udfFunctionName);
-                bindingConsumer.accept("_".concat(udfFunctionName), implementationClass.getDeclaredConstructor().newInstance());
+                bindingConsumer.accept("_".concat(udfFunctionName),
+                      implementationClass.getDeclaredConstructor().newInstance());
                 log.info("Successfully registered {} as {}", implementationClass, udfFunctionName);
             } catch (Exception e) {
                 log.debug(String.format("Could not register %s as %s", implementationClass, udfFunctionName), e);

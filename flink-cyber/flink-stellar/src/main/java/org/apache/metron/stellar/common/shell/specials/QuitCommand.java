@@ -16,36 +16,37 @@
  *  limitations under the License.
  *
  */
+
 package org.apache.metron.stellar.common.shell.specials;
 
-import org.apache.metron.stellar.common.shell.StellarShellExecutor;
-import org.apache.metron.stellar.common.shell.StellarResult;
+import static org.apache.metron.stellar.common.shell.StellarResult.terminate;
 
 import java.util.function.Function;
-
-import static org.apache.metron.stellar.common.shell.StellarResult.terminate;
+import org.apache.metron.stellar.common.shell.StellarResult;
+import org.apache.metron.stellar.common.shell.StellarShellExecutor;
 
 /**
  * A special command that allows the user to 'quit' their REPL session.
  *
- *    quit
+ * <p>
+ * quit
  */
 public class QuitCommand implements SpecialCommand {
 
-  public static final String QUIT_COMMAND = "quit";
+    public static final String QUIT_COMMAND = "quit";
 
-  @Override
-  public String getCommand() {
-    return QUIT_COMMAND;
-  }
+    @Override
+    public String getCommand() {
+        return QUIT_COMMAND;
+    }
 
-  @Override
-  public Function<String, Boolean> getMatcher() {
-    return (input) -> QUIT_COMMAND.equals(input);
-  }
+    @Override
+    public Function<String, Boolean> getMatcher() {
+        return QUIT_COMMAND::equals;
+    }
 
-  @Override
-  public StellarResult execute(String command, StellarShellExecutor executor) {
-    return terminate();
-  }
+    @Override
+    public StellarResult execute(String command, StellarShellExecutor executor) {
+        return terminate();
+    }
 }

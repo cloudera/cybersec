@@ -24,9 +24,9 @@ public class SlidingWindow {
         final IntUnaryOperator reverseIterate = i -> i == 0 ? window.length - 1 : i - 1;
         final IntUnaryOperator mapper = i -> window[i] & 0xFF;
         return IntStream.iterate(startPosition, reverseIterate)
-                .limit(window.length)
-                .map(mapper)
-                .toArray();
+                        .limit(window.length)
+                        .map(mapper)
+                        .toArray();
     }
 
     public int getByteCount() {

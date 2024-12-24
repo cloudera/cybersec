@@ -25,10 +25,12 @@ public class AbstractHbaseSinkFunction<T> extends HBaseSinkFunction<T> {
 
     private transient Counter hbaseWriteCounter;
 
-    public AbstractHbaseSinkFunction(String hTableName, HBaseMutationConverter<T> mutationConverter, ParameterTool params, String counterName) {
-        super(hTableName, HbaseConfiguration.configureHbase(), mutationConverter, params.getLong("hbase.sink.buffer-flush.max-size", 2),
-                params.getLong("hbase.sink.buffer-flush.max-rows", 1000),
-                params.getLong("hbase.sink.buffer-flush.interval", 1000));
+    public AbstractHbaseSinkFunction(String htableName, HBaseMutationConverter<T> mutationConverter,
+                                     ParameterTool params, String counterName) {
+        super(htableName, HbaseConfiguration.configureHbase(), mutationConverter,
+              params.getLong("hbase.sink.buffer-flush.max-size", 2),
+              params.getLong("hbase.sink.buffer-flush.max-rows", 1000),
+              params.getLong("hbase.sink.buffer-flush.interval", 1000));
         this.counterName = counterName;
     }
 

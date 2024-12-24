@@ -14,10 +14,9 @@ package com.cloudera.parserchains.core.catalog;
 
 import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
-import org.atteo.classindex.IndexAnnotated;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import org.atteo.classindex.IndexAnnotated;
 
 /**
  * A marker for {@link Parser} implementations that parse {@link Message}s.
@@ -38,7 +37,6 @@ public @interface MessageParser {
 
     /**
      * Returns a description of the parser.
-     * @return
      */
     String description() default "";
 }

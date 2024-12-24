@@ -12,11 +12,10 @@
 
 package com.cloudera.cyber.jdbc.connector.jdbc;
 
-import org.apache.flink.util.Preconditions;
-
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Optional;
+import javax.annotation.Nullable;
+import org.apache.flink.util.Preconditions;
 
 
 public class JdbcConnectionOptions implements Serializable {
@@ -24,17 +23,20 @@ public class JdbcConnectionOptions implements Serializable {
     private static final long serialVersionUID = 1L;
 
     protected final String url;
-    @Nullable protected final String driverName;
+    @Nullable
+    protected final String driverName;
     protected final int connectionCheckTimeoutSeconds;
-    @Nullable protected final String username;
-    @Nullable protected final String password;
+    @Nullable
+    protected final String username;
+    @Nullable
+    protected final String password;
 
     protected JdbcConnectionOptions(
-            String url,
-            @Nullable String driverName,
-            @Nullable String username,
-            @Nullable String password,
-            int connectionCheckTimeoutSeconds) {
+          String url,
+          @Nullable String driverName,
+          @Nullable String username,
+          @Nullable String password,
+          int connectionCheckTimeoutSeconds) {
         Preconditions.checkArgument(connectionCheckTimeoutSeconds > 0);
         this.url = Preconditions.checkNotNull(url, "jdbc url is empty");
         this.driverName = driverName;
@@ -92,14 +94,14 @@ public class JdbcConnectionOptions implements Serializable {
         }
 
         public JdbcConnectionOptionsBuilder withConnectionCheckTimeoutSeconds(
-                int connectionCheckTimeoutSeconds) {
+              int connectionCheckTimeoutSeconds) {
             this.connectionCheckTimeoutSeconds = connectionCheckTimeoutSeconds;
             return this;
         }
 
         public JdbcConnectionOptions build() {
             return new JdbcConnectionOptions(
-                    url, driverName, username, password, connectionCheckTimeoutSeconds);
+                  url, driverName, username, password, connectionCheckTimeoutSeconds);
         }
     }
 }

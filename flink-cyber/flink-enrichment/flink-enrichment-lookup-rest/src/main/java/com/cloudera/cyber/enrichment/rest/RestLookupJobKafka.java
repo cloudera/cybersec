@@ -12,6 +12,9 @@
 
 package com.cloudera.cyber.enrichment.rest;
 
+import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
+import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_OUTPUT;
+
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
@@ -21,12 +24,10 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
 
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_OUTPUT;
-
 public class RestLookupJobKafka extends RestLookupJob {
 
     private static final String DEFAULT_GROUP_ID = "enrichment-rest";
+
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
         new RestLookupJobKafka().createPipeline(Utils.getParamToolsFromProperties(args)).execute("Enrichment - REST");
@@ -34,13 +35,16 @@ public class RestLookupJobKafka extends RestLookupJob {
 
     @Override
     protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
-        return env.fromSource(FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, DEFAULT_GROUP_ID),
-                WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
+        return env.fromSource(
+              FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, DEFAULT_GROUP_ID),
+              WatermarkStrategy.noWatermarks(), "Kafka Source").uid("kafka-source");
     }
 
     @Override
     protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> results) {
-        results.sinkTo(new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), DEFAULT_GROUP_ID, params))
-                .name("Kafka Sink").uid("kafka-sink");
+        results.sinkTo(
+                     new FlinkUtils<>(Message.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), DEFAULT_GROUP_ID,
+                           params))
+               .name("Kafka Sink").uid("kafka-sink");
     }
 }

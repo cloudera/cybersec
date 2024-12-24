@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSelector;
@@ -46,22 +45,21 @@ import org.apache.commons.vfs2.provider.VfsComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- *
- */
 public class UniqueFileReplicator implements VfsComponent, FileReplicator {
 
-    private static final char[] TMP_RESERVED_CHARS = new char[] {'?', '/', '\\', ' ', '&', '"', '\'', '*', '#', ';', ':', '<', '>', '|'};
+    private static final char[] TMP_RESERVED_CHARS =
+          new char[] {'?', '/', '\\', ' ', '&', '"', '\'', '*', '#', ';', ':', '<', '>', '|'};
     private static final Logger log = LoggerFactory.getLogger(UniqueFileReplicator.class);
 
-    private File tempDir;
+    private final File tempDir;
     private VfsComponentContext context;
-    private List<File> tmpFiles = Collections.synchronizedList(new ArrayList<File>());
+    private final List<File> tmpFiles = Collections.synchronizedList(new ArrayList<File>());
 
     public UniqueFileReplicator(File tempDir) {
         this.tempDir = tempDir;
-        if (!tempDir.exists() && !tempDir.mkdirs())
+        if (!tempDir.exists() && !tempDir.mkdirs()) {
             log.warn("Unexpected error creating directory " + tempDir);
+        }
     }
 
     @Override
@@ -102,15 +100,17 @@ public class UniqueFileReplicator implements VfsComponent, FileReplicator {
     public void close() {
         synchronized (tmpFiles) {
             for (File tmpFile : tmpFiles) {
-                if (!tmpFile.delete())
+                if (!tmpFile.delete()) {
                     log.warn("File does not exist: " + tmpFile);
+                }
             }
         }
 
         if (tempDir.exists()) {
             int numChildren = tempDir.list().length;
-            if (0 == numChildren && !tempDir.delete())
+            if (0 == numChildren && !tempDir.delete()) {
                 log.warn("Cannot delete empty directory: " + tempDir);
+            }
         }
     }
 }

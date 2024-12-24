@@ -7,14 +7,17 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.metron.common.system;
 
 import java.text.SimpleDateFormat;
@@ -22,22 +25,22 @@ import java.util.Date;
 import java.util.TimeZone;
 
 public class Clock {
-  private final static String UTC = "UTC";
+    private static final String UTC = "UTC";
 
-  public long currentTimeMillis() {
-    return System.currentTimeMillis();
-  }
+    public long currentTimeMillis() {
+        return System.currentTimeMillis();
+    }
 
-  /**
-   * Retrieves the current time in a given format compatible with {@link SimpleDateFormat}.
-   *
-   * @param stdDateFormat The format to use
-   * @return String representation of the current time
-   */
-  public String currentTimeFormatted(String stdDateFormat) {
-    SimpleDateFormat format = new SimpleDateFormat(stdDateFormat);
-    format.setTimeZone(TimeZone.getTimeZone(UTC));
-    return format.format(new Date(currentTimeMillis()));
-  }
+    /**
+     * Retrieves the current time in a given format compatible with {@link SimpleDateFormat}.
+     *
+     * @param stdDateFormat The format to use
+     * @return String representation of the current time
+     */
+    public String currentTimeFormatted(String stdDateFormat) {
+        SimpleDateFormat format = new SimpleDateFormat(stdDateFormat);
+        format.setTimeZone(TimeZone.getTimeZone(UTC));
+        return format.format(new Date(currentTimeMillis()));
+    }
 
 }

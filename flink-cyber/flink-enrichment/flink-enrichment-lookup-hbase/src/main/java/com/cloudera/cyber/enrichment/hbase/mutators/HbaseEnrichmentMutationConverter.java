@@ -31,7 +31,8 @@ public class HbaseEnrichmentMutationConverter implements HBaseMutationConverter<
 
     @Override
     public Mutation convertToMutation(EnrichmentCommand enrichmentCommand) {
-        EnrichmentStorageConfig storageConfig = enrichmentsConfig.getStorageForEnrichmentType(enrichmentCommand.getPayload().getType());
+        EnrichmentStorageConfig storageConfig =
+              enrichmentsConfig.getStorageForEnrichmentType(enrichmentCommand.getPayload().getType());
         EnrichmentCommandMutationConverter mutationConverter = storageConfig.getFormat().getMutationConverter();
         return mutationConverter.convertToMutation(storageConfig, enrichmentCommand);
     }

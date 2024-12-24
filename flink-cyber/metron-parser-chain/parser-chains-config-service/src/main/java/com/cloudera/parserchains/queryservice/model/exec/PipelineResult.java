@@ -12,7 +12,7 @@ import org.apache.flink.core.fs.Path;
 @AllArgsConstructor
 public class PipelineResult {
 
-  private String name;
-  private Path path;
+    private String name;
+    private Path path;
 
 }

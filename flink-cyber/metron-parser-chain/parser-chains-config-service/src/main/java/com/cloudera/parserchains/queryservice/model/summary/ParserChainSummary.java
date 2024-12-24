@@ -7,8 +7,10 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,63 +21,62 @@
 package com.cloudera.parserchains.queryservice.model.summary;
 
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
-
 import java.util.Objects;
 
 public class ParserChainSummary {
 
-  private String id;
-  private String name;
+    private String id;
+    private String name;
 
-  public ParserChainSummary() {
-  }
-
-  public ParserChainSummary(ParserChainSchema chain) {
-    this.id = chain.getId();
-    this.name = chain.getName();
-  }
-
-  public String getId() {
-    return id;
-  }
-
-  public ParserChainSummary setId(String id) {
-    this.id = id;
-    return this;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public ParserChainSummary setName(String name) {
-    this.name = name;
-    return this;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public ParserChainSummary() {
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public ParserChainSummary(ParserChainSchema chain) {
+        this.id = chain.getId();
+        this.name = chain.getName();
     }
-    ParserChainSummary that = (ParserChainSummary) o;
-    return Objects.equals(id, that.id) &&
-        Objects.equals(name, that.name);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, name);
-  }
+    public String getId() {
+        return id;
+    }
 
-  @Override
-  public String toString() {
-    return "ParserChainSummary{" +
-        "id='" + id + '\'' +
-        ", name='" + name + '\'' +
-        '}';
-  }
+    public ParserChainSummary setId(String id) {
+        this.id = id;
+        return this;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public ParserChainSummary setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ParserChainSummary that = (ParserChainSummary) o;
+        return Objects.equals(id, that.id)
+               && Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
+    }
+
+    @Override
+    public String toString() {
+        return "ParserChainSummary{"
+               + "id='" + id + '\''
+               + ", name='" + name + '\''
+               + '}';
+    }
 }

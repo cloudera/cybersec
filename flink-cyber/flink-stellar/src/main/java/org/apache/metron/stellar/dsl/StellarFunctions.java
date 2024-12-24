@@ -7,8 +7,10 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,15 +26,16 @@ import org.apache.metron.stellar.dsl.functions.resolver.SingletonFunctionResolve
 
 public class StellarFunctions {
 
-  public static FunctionResolver FUNCTION_RESOLVER() {
-    return SingletonFunctionResolver.getInstance();
-  }
+    @SuppressWarnings("checkstyle:MethodName")
+    public static FunctionResolver FUNCTION_RESOLVER() {
+        return SingletonFunctionResolver.getInstance();
+    }
 
-  public static void initialize(Context context) {
-    SingletonFunctionResolver.getInstance().initialize(context);
-  }
+    public static void initialize(Context context) {
+        SingletonFunctionResolver.getInstance().initialize(context);
+    }
 
-  public static void close() throws IOException {
-    SingletonFunctionResolver.getInstance().close();
-  }
+    public static void close() throws IOException {
+        SingletonFunctionResolver.getInstance().close();
+    }
 }

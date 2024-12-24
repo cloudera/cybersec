@@ -13,12 +13,10 @@
 package com.cloudera.cyber.rules.engines;
 
 import com.cloudera.cyber.Message;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-
-import javax.script.ScriptException;
-import java.util.Map;
 
 @Getter
 @AllArgsConstructor

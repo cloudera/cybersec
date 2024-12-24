@@ -4,17 +4,15 @@ import com.cloudera.cyber.restcli.configuration.AppWorkerConfig;
 import com.cloudera.service.common.Utils;
 import com.cloudera.service.common.response.Job;
 import com.cloudera.service.common.utils.ArchiveUtil;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -42,11 +40,14 @@ public class FilePipelineService {
     }
 
     public void extractPipeline(byte[] payload, String pipelineName, String branch) throws IOException {
-        String fullPipelinePath = pipelineName.endsWith("/") ? this.config.getPipelineDir() + pipelineName + "/" + branch : this.config.getPipelineDir() + "/" + pipelineName + "/" + branch;
+        String fullPipelinePath = pipelineName.endsWith("/")
+              ? this.config.getPipelineDir() + pipelineName + "/" + branch
+              : this.config.getPipelineDir() + "/" + pipelineName + "/" + branch;
         ArchiveUtil.decompressFromTarGzInMemory(payload, fullPipelinePath, true);
     }
 
-    public void startPipelineJob(String pipelineName, String branch, String profileName, String parserName, List<String> jobsNames) throws IOException {
+    public void startPipelineJob(String pipelineName, String branch, String profileName,
+                                 String parserName, List<String> jobsNames) throws IOException {
         String fullPipelinePath = pipelineName.endsWith("/") ? this.config.getPipelineDir() + pipelineName + "/" + branch
                 : this.config.getPipelineDir() + "/" + pipelineName + "/" + branch;
         jobsNames.stream().map(jobName -> {

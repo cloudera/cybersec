@@ -12,20 +12,27 @@
 
 package com.cloudera.cyber;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import com.cloudera.cyber.flink.Utils;
+import java.security.InvalidKeyException;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.SecureRandom;
+import java.security.SignatureException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.hamcrest.collection.IsArrayWithSize;
 import org.junit.Test;
 
-import java.security.*;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-
 public class TestSigning {
-    
+
     @Test
-    public void testSign() throws NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
+    public void testSign()
+          throws NoSuchProviderException, NoSuchAlgorithmException, SignatureException, InvalidKeyException {
 
         KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA", "SunRsaSign");
         gen.initialize(1024, new SecureRandom());
@@ -42,5 +49,5 @@ public class TestSigning {
         assertThat("verifies messed about data fails", Utils.verify("fsdfsaf", out, pair.getPublic()), is(false));
         assertThat("verifies wrong key fails", Utils.verify(data, out, pair2.getPublic()), is(false));
     }
-    
+
 }

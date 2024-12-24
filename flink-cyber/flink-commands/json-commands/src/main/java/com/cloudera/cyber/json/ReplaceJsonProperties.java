@@ -15,13 +15,15 @@ package com.cloudera.cyber.json;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.extern.slf4j.Slf4j;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Properties;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ReplaceJsonProperties {
@@ -43,7 +45,8 @@ public class ReplaceJsonProperties {
         }
     }
 
-    private static void injectEnvironmentProperties(String templateRestConfigPath, String generatedRestConfigPath, Properties restProperties) throws IOException {
+    private static void injectEnvironmentProperties(String templateRestConfigPath, String generatedRestConfigPath,
+                                                    Properties restProperties) throws IOException {
 
         byte[] templateBytes = Files.readAllBytes(Paths.get(templateRestConfigPath));
 
@@ -53,7 +56,7 @@ public class ReplaceJsonProperties {
             JsonNode nextConfig = rootIter.next();
             JsonNode propertiesNode = nextConfig.get("properties");
             if (propertiesNode != null && propertiesNode.isObject()) {
-                ObjectNode propertiesObject = (ObjectNode)propertiesNode;
+                ObjectNode propertiesObject = (ObjectNode) propertiesNode;
                 for (String propertyName : restProperties.stringPropertyNames()) {
                     if (propertiesObject.has(propertyName)) {
                         propertiesObject.put(propertyName, restProperties.getProperty(propertyName));

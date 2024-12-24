@@ -6,8 +6,10 @@
  * to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
+ *
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,14 +17,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.apache.metron.common.configuration;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.metron.stellar.dsl.Context;
-import org.apache.metron.stellar.dsl.StellarFunctions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.apache.metron.common.configuration.ConfigurationType.ENRICHMENT;
+import static org.apache.metron.common.configuration.ConfigurationType.GLOBAL;
+import static org.apache.metron.common.configuration.ConfigurationType.INDEXING;
+import static org.apache.metron.common.configuration.ConfigurationType.PARSER;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,8 +32,12 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import static org.apache.metron.common.configuration.ConfigurationType.*;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.metron.stellar.dsl.Context;
+import org.apache.metron.stellar.dsl.StellarFunctions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A Utility class for managing various configs, including global configs, sensor specific configs,
@@ -49,20 +54,20 @@ public class ConfigurationsUtils {
      * @param globalConfig Optional global configuration to be used
      */
     public static void setupStellarStatically(CuratorFramework client, Optional<String> globalConfig) {
-    /*
-      In order to validate stellar functions, the function resolver must be initialized.  Otherwise,
-      those utilities that require validation cannot validate the stellar expressions necessarily.
-    */
+        /*
+          In order to validate stellar functions, the function resolver must be initialized.  Otherwise,
+          those utilities that require validation cannot validate the stellar expressions necessarily.
+        */
         Context.Builder builder = new Context.Builder()
-                .with(Context.Capabilities.ZOOKEEPER_CLIENT, () -> client);
+              .with(Context.Capabilities.ZOOKEEPER_CLIENT, () -> client);
 
         if (globalConfig.isPresent()) {
             builder = builder
-                    .with(Context.Capabilities.GLOBAL_CONFIG, () -> GLOBAL.deserialize(globalConfig.get()))
-                    .with(Context.Capabilities.STELLAR_CONFIG, () -> GLOBAL.deserialize(globalConfig.get()));
+                  .with(Context.Capabilities.GLOBAL_CONFIG, () -> GLOBAL.deserialize(globalConfig.get()))
+                  .with(Context.Capabilities.STELLAR_CONFIG, () -> GLOBAL.deserialize(globalConfig.get()));
         } else {
             builder = builder
-                    .with(Context.Capabilities.STELLAR_CONFIG, () -> new HashMap<>());
+                  .with(Context.Capabilities.STELLAR_CONFIG, () -> new HashMap<>());
         }
         Context stellarContext = builder.build();
         StellarFunctions.FUNCTION_RESOLVER().initialize(stellarContext);
@@ -125,7 +130,8 @@ public class ConfigurationsUtils {
      * @return map of file names to the contents of that file as a byte array
      * @throws IOException If there's an issue reading the configs
      */
-    public static Map<String, byte[]> readSensorConfigsFromFile(String rootPath, ConfigurationType configType) throws IOException {
+    public static Map<String, byte[]> readSensorConfigsFromFile(String rootPath, ConfigurationType configType)
+          throws IOException {
         return readSensorConfigsFromFile(rootPath, configType, Optional.empty());
     }
 
@@ -141,7 +147,8 @@ public class ConfigurationsUtils {
      * @throws IOException If there's an issue reading the configs
      */
     public static Map<String, byte[]> readSensorConfigsFromFile(String rootPath,
-                                                                ConfigurationType configType, Optional<String> configName) throws IOException {
+                                                                ConfigurationType configType,
+                                                                Optional<String> configName) throws IOException {
         Map<String, byte[]> sensorConfigs = new HashMap<>();
         File configPath = new File(rootPath, configType.getDirectory());
         if (configPath.exists() && configPath.isDirectory()) {
@@ -149,13 +156,13 @@ public class ConfigurationsUtils {
             if (!configName.isPresent()) {
                 for (File file : children) {
                     sensorConfigs.put(FilenameUtils.removeExtension(file.getName()),
-                            Files.readAllBytes(file.toPath()));
+                          Files.readAllBytes(file.toPath()));
                 }
             } else {
                 for (File file : children) {
                     if (FilenameUtils.removeExtension(file.getName()).equals(configName.get())) {
                         sensorConfigs.put(FilenameUtils.removeExtension(file.getName()),
-                                Files.readAllBytes(file.toPath()));
+                              Files.readAllBytes(file.toPath()));
                     }
                 }
                 if (sensorConfigs.isEmpty()) {
@@ -175,7 +182,8 @@ public class ConfigurationsUtils {
      * @param defaultFieldName The default to use if config is null or key not found
      * @return The config value or the default if config is null or key not found
      */
-    public static String getFieldName(Map<String, Object> globalConfig, String globalConfigKey, String defaultFieldName) {
+    public static String getFieldName(Map<String, Object> globalConfig, String globalConfigKey,
+                                      String defaultFieldName) {
         if (globalConfig == null) {
             return defaultFieldName;
         }

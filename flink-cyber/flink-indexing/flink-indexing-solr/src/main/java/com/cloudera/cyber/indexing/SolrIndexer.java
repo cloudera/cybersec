@@ -12,7 +12,15 @@
 
 package com.cloudera.cyber.indexing;
 
+import static java.util.stream.Collectors.groupingBy;
+
 import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.StreamSupport;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -23,15 +31,6 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.StreamSupport;
-
-import static java.util.stream.Collectors.groupingBy;
 
 @Slf4j
 public class SolrIndexer extends RichWindowFunction<IndexEntry, UpdateResponse, String, TimeWindow> {
@@ -54,10 +53,11 @@ public class SolrIndexer extends RichWindowFunction<IndexEntry, UpdateResponse, 
     }
 
     @Override
-    public void apply(String k, TimeWindow w, Iterable<IndexEntry> logs, Collector<UpdateResponse> output) throws Exception {
+    public void apply(String k, TimeWindow w, Iterable<IndexEntry> logs, Collector<UpdateResponse> output)
+          throws Exception {
         Map<String, List<IndexEntry>> collect = StreamSupport
-                .stream(logs.spliterator(), false)
-                .collect(groupingBy(IndexEntry::getIndex));
+              .stream(logs.spliterator(), false)
+              .collect(groupingBy(IndexEntry::getIndex));
         // TODO - account for all the errors, not just the last
         AtomicReference<Exception> lastError = new AtomicReference<>();
         collect.forEach((collection, entries) -> {
@@ -69,7 +69,7 @@ public class SolrIndexer extends RichWindowFunction<IndexEntry, UpdateResponse, 
             }
         });
         if (lastError.get() != null) {
-            throw(lastError.get());
+            throw (lastError.get());
         }
     }
 
@@ -88,8 +88,8 @@ public class SolrIndexer extends RichWindowFunction<IndexEntry, UpdateResponse, 
     @Override
     public void open(Configuration config) {
         solrClient = SolrClientBuilder.builder()
-                .solrUrls(solrUrls)
-                .build().build();
+              .solrUrls(solrUrls)
+              .build().build();
     }
 
     @Override

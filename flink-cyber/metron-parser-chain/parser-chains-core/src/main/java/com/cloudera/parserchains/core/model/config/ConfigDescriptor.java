@@ -13,7 +13,6 @@
 package com.cloudera.parserchains.core.model.config;
 
 import com.cloudera.parserchains.core.Parser;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +30,7 @@ public class ConfigDescriptor implements Serializable {
      * The unique name of the configuration parameter.
      *
      * <p>This is used to identify the parameter and is not displayed to the user.
+     *
      * <p>For example, 'fieldToRename', 'inputField', or 'outputField'.
      */
     private final ConfigName name;
@@ -116,7 +116,7 @@ public class ConfigDescriptor implements Serializable {
         private ConfigName name;
         private ConfigDescription description;
         private boolean required;
-        private List<ConfigKey> acceptedValues;
+        private final List<ConfigKey> acceptedValues;
         private boolean cumulative;
 
         public Builder() {
@@ -151,32 +151,32 @@ public class ConfigDescriptor implements Serializable {
             return this;
         }
 
+        public Builder acceptsValue(String key, String label, String description) {
+            ConfigKey configKey = ConfigKey.builder()
+                                           .key(key)
+                                           .label(label)
+                                           .description(description)
+                                           .build();
+            return acceptsValue(configKey);
+        }
+
         public Builder isCumulative(boolean cumulative) {
             this.cumulative = cumulative;
             return this;
         }
 
-        public Builder acceptsValue(String key, String label, String description) {
-            ConfigKey configKey = ConfigKey.builder()
-                    .key(key)
-                    .label(label)
-                    .description(description)
-                    .build();
-            return acceptsValue(configKey);
-        }
-
         public ConfigDescriptor build() {
-            if(acceptedValues.size() == 0) {
+            if (acceptedValues.size() == 0) {
                 throw new IllegalArgumentException("Must define at least 1 required value.");
             }
 
             // shortcut - if name not defined, use the name associated with the ConfigKey
-            if(name == null && acceptedValues.size() > 0) {
+            if (name == null && acceptedValues.size() > 0) {
                 name = ConfigName.of(acceptedValues.get(0).getKey());
             }
 
             // shortcut - if description not defined, use the name associated with the ConfigKey
-            if(description == null && acceptedValues.size() > 0) {
+            if (description == null && acceptedValues.size() > 0) {
                 description = acceptedValues.get(0).getDescription();
             }
 

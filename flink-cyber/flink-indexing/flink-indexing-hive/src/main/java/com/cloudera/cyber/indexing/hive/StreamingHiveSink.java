@@ -34,7 +34,7 @@ public class StreamingHiveSink extends RichSinkFunction<ScoredMessage> implement
     }
 
     public void open(Configuration parameters) throws Exception {
-        this.messageWriter =  new HiveStreamingMessageWriter(params);
+        this.messageWriter = new HiveStreamingMessageWriter(params);
         messageWriter.connect();
         this.counter = getRuntimeContext().getMetricGroup().counter("messagesToHive");
         super.open(parameters);

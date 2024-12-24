@@ -17,48 +17,52 @@
  *  limitations under the License.
  *
  */
+
 package org.apache.metron.stellar.common.utils.math;
 
+import java.util.List;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.ParseException;
 import org.apache.metron.stellar.dsl.StellarFunction;
 
-import java.util.List;
-
 public class StellarMathFunction implements StellarFunction {
-  MathOperation _func;
-  public StellarMathFunction(MathOperations _func) {
-    this._func = _func.op;
-  }
+    @SuppressWarnings("checkstyle:MemberName")
+    MathOperation _func;
 
-  public StellarMathFunction(MathOperation _func) {
-    this._func = _func;
-  }
-
-  @Override
-  public Object apply(List<Object> args, Context context) throws ParseException {
-    if(args.size() < _func.getMinArgs()) {
-      return Double.NaN;
-    }
-    Number[] nums = new Number[_func.getMaxArgs()];
-    for(int i = 0; i < _func.getMaxArgs();++i) {
-      nums[i] = (Number)args.get(i);
-      if(nums[i] == null) {
-        return Double.NaN;
-      }
+    @SuppressWarnings("checkstyle:ParameterName")
+    public StellarMathFunction(MathOperations _func) {
+        this._func = _func.op;
     }
 
-    Object ret = _func.getOperation().apply(nums);
-    return ret;
-  }
+    @SuppressWarnings("checkstyle:ParameterName")
+    public StellarMathFunction(MathOperation _func) {
+        this._func = _func;
+    }
 
-  @Override
-  public void initialize(Context context) {
+    @Override
+    public Object apply(List<Object> args, Context context) throws ParseException {
+        if (args.size() < _func.getMinArgs()) {
+            return Double.NaN;
+        }
+        Number[] nums = new Number[_func.getMaxArgs()];
+        for (int i = 0; i < _func.getMaxArgs(); ++i) {
+            nums[i] = (Number) args.get(i);
+            if (nums[i] == null) {
+                return Double.NaN;
+            }
+        }
 
-  }
+        Object ret = _func.getOperation().apply(nums);
+        return ret;
+    }
 
-  @Override
-  public boolean isInitialized() {
-    return true;
-  }
+    @Override
+    public void initialize(Context context) {
+
+    }
+
+    @Override
+    public boolean isInitialized() {
+        return true;
+    }
 }

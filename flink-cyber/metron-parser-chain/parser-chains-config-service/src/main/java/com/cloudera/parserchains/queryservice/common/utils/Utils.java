@@ -1,5 +1,17 @@
 package com.cloudera.parserchains.queryservice.common.utils;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAccessor;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,19 +28,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.RefSpec;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.eclipse.jgit.treewalk.TreeWalk;
-
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.DateTimeParseException;
-import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 
 @Slf4j
 public class Utils {
@@ -105,7 +104,7 @@ public class Utils {
             for (SimpleDateFormat pattern : validPatterns) {
                 try {
                     DateTimeFormatterBuilder formatterBuilder = new DateTimeFormatterBuilder()
-                            .appendPattern(pattern.toPattern());
+                          .appendPattern(pattern.toPattern());
                     DateTimeFormatter formatter = formatterBuilder.toFormatter();
                     ZonedDateTime parsedValue = parseDateTimeWithDefaultTimezone(candidate, formatter);
                     return parsedValue.toInstant().toEpochMilli();
@@ -120,8 +119,8 @@ public class Utils {
     private static ZonedDateTime parseDateTimeWithDefaultTimezone(String candidate, DateTimeFormatter formatter) {
         TemporalAccessor temporalAccessor = formatter.parseBest(candidate, ZonedDateTime::from, LocalDateTime::from);
         return temporalAccessor instanceof ZonedDateTime
-                ? ((ZonedDateTime) temporalAccessor)
-                : ((LocalDateTime) temporalAccessor).atZone(ZoneId.systemDefault());
+              ? ((ZonedDateTime) temporalAccessor)
+              : ((LocalDateTime) temporalAccessor).atZone(ZoneId.systemDefault());
     }
 
     public static int compareLongs(Long a, Long b) {
@@ -129,20 +128,21 @@ public class Utils {
         return comparator.compare(a, b);
     }
 
-    public static List<Pair<String, byte[]>> getRepoFiles(String remoteUrl, String branch, String userName, String password) {
+    public static List<Pair<String, byte[]>> getRepoFiles(String remoteUrl, String branch, String userName,
+                                                          String password) {
         List<Pair<String, byte[]>> result = new ArrayList<>();
         try {
             DfsRepositoryDescription repoDesc = new DfsRepositoryDescription();
             InMemoryRepository repo = new InMemoryRepository.Builder()
-                    .setRepositoryDescription(repoDesc)
-                    .build();
+                  .setRepositoryDescription(repoDesc)
+                  .build();
             try (Git git = new Git(repo)) {
                 FetchCommand fetchCommand = git.fetch()
-                        .setRemote(remoteUrl)
-                        .setRefSpecs(new RefSpec("+refs/heads/*:refs/heads/*"));
+                                               .setRemote(remoteUrl)
+                                               .setRefSpecs(new RefSpec("+refs/heads/*:refs/heads/*"));
                 if (StringUtils.isNotBlank(userName) && StringUtils.isNotBlank(password)) {
                     fetchCommand
-                            .setCredentialsProvider(new UsernamePasswordCredentialsProvider(userName, password));
+                          .setCredentialsProvider(new UsernamePasswordCredentialsProvider(userName, password));
                 }
                 fetchCommand.call();
                 repo.getObjectDatabase();

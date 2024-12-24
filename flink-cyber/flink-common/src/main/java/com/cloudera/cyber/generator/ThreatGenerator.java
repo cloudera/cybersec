@@ -16,8 +16,6 @@ import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import org.apache.commons.io.IOUtils;
-
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -26,6 +24,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
+import org.apache.commons.io.IOUtils;
 
 public class ThreatGenerator {
     private List<String> lines;
@@ -51,21 +50,19 @@ public class ThreatGenerator {
     private static final RandomGenerators utils = new RandomGenerators();
 
     /**
-     * Choose a random threat template, insert the IP address and return the string
+     * Choose a random threat template, insert the IP address and return the string.
+     *
      * <p>
      * random line from the threats resource, treat as freemarker and expose
-     *
-     * @param ip
-     * @return
      */
     public String generateThreat(String ip) throws IOException, TemplateException {
         String template = String.valueOf(ThreadLocalRandom.current().nextInt(lines.size() - 1));
 
         SyntheticThreatEntry entry = SyntheticThreatEntry.builder().ts(
-                LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
-                .utils(utils)
-                .ip(ip)
-                .build();
+                    LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli())
+              .utils(utils)
+              .ip(ip)
+              .build();
 
         // figure out which template we're using, i.e. weighted by the files map
         Template temp = cfg.getTemplate(template);

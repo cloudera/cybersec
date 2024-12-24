@@ -7,8 +7,10 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,25 +22,27 @@ package org.apache.metron.stellar.dsl;
 
 import java.util.function.Function;
 
-public class DefaultVariableResolver implements VariableResolver{
-  Function<String,Object> resolveFunc;
-  Function<String,Boolean> existsFunc;
+public class DefaultVariableResolver implements VariableResolver {
+    Function<String, Object> resolveFunc;
+    Function<String, Boolean> existsFunc;
 
-  public DefaultVariableResolver(Function<String,Object> resolveFunc, Function<String,Boolean> existsFunc){
-    this.resolveFunc = resolveFunc;
-    this.existsFunc = existsFunc;
-  }
-  @Override
-  public Object resolve(String variable) {
-    return resolveFunc.apply(variable);
-  }
+    public DefaultVariableResolver(Function<String, Object> resolveFunc, Function<String, Boolean> existsFunc) {
+        this.resolveFunc = resolveFunc;
+        this.existsFunc = existsFunc;
+    }
 
-  @Override
-  public boolean exists(String variable) {
-    return existsFunc.apply(variable);
-  }
+    @Override
+    public Object resolve(String variable) {
+        return resolveFunc.apply(variable);
+    }
 
-  public static DefaultVariableResolver NULL_RESOLVER() {
-    return new DefaultVariableResolver(x -> null, x -> false);
-  }
+    @Override
+    public boolean exists(String variable) {
+        return existsFunc.apply(variable);
+    }
+
+    @SuppressWarnings("checkstyle:MethodName")
+    public static DefaultVariableResolver NULL_RESOLVER() {
+        return new DefaultVariableResolver(x -> null, x -> false);
+    }
 }

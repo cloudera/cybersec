@@ -24,19 +24,19 @@
   -->
 
 <assembly>
-  <id>archive</id>
-  <formats>
-    <format>tar.gz</format>
-  </formats>
-  <includeBaseDirectory>false</includeBaseDirectory>
-  <fileSets>
-    <fileSet>
-      <directory>${project.basedir}/target</directory>
-      <includes>
-        <include>${project.artifactId}-${project.version}-uber.jar</include>
-      </includes>
-      <outputDirectory>lib</outputDirectory>
-      <useDefaultExcludes>true</useDefaultExcludes>
-    </fileSet>
-  </fileSets>
+    <id>archive</id>
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <directory>${project.basedir}/target</directory>
+            <includes>
+                <include>${project.artifactId}-${project.version}-uber.jar</include>
+            </includes>
+            <outputDirectory>lib</outputDirectory>
+            <useDefaultExcludes>true</useDefaultExcludes>
+        </fileSet>
+    </fileSets>
 </assembly>

@@ -12,8 +12,9 @@
 
 package com.cloudera.cyber;
 
-import com.cloudera.cyber.parser.MessageToParse;
+import static java.lang.String.format;
 
+import com.cloudera.cyber.parser.MessageToParse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -26,8 +27,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
 import java.util.Stack;
-
-import static java.lang.String.format;
 
 public class TestUtils {
 
@@ -56,11 +55,11 @@ public class TestUtils {
 
     public static SignedSourceKey source(String topic, int partition, long offset) {
         return SignedSourceKey.builder()
-                .topic(topic)
-                .partition(partition)
-                .offset(offset)
-                .signature(new byte[128])
-                .build();
+              .topic(topic)
+              .partition(partition)
+              .offset(offset)
+              .signature(new byte[128])
+              .build();
     }
 
     public static SignedSourceKey source() {
@@ -73,13 +72,13 @@ public class TestUtils {
 
     public static Message createMessage(long timestamp, String source, Map<String, String> extensions) {
         return Message.builder()
-                .ts(timestamp)
-                .source(source)
-                .extensions(extensions)
-                .message("")
-                .originalSource(
-                        source("topic", 0, 0)).
-                        build();
+              .ts(timestamp)
+              .source(source)
+              .extensions(extensions)
+              .message("")
+              .originalSource(
+                    source("topic", 0, 0))
+              .build();
     }
 
     public static Message createMessage() {
@@ -92,15 +91,16 @@ public class TestUtils {
 
     public static MessageToParse.MessageToParseBuilder createMessageToParse(String source, String topic) {
         return MessageToParse.builder()
-                .originalBytes(source.getBytes(StandardCharsets.UTF_8))
-                .topic(topic)
-                .offset(0)
-                .partition(0);
+              .originalBytes(source.getBytes(StandardCharsets.UTF_8))
+              .topic(topic)
+              .offset(0)
+              .partition(0);
     }
 
     public static SignedSourceKey createOriginal(String topic) {
         return SignedSourceKey.builder().topic(topic).offset(0).partition(0).signature(new byte[128]).build();
     }
+
     public static SignedSourceKey createOriginal() {
         return createOriginal("test");
     }
@@ -120,7 +120,7 @@ public class TestUtils {
      * Create directory that is automatically cleaned up after the
      * JVM shuts down through use of a Runtime shutdown hook.
      *
-     * @param dir Directory to create, including missing parent directories
+     * @param dir     Directory to create, including missing parent directories
      * @param cleanup true/false
      * @return File handle to the created temp directory
      */
@@ -150,7 +150,7 @@ public class TestUtils {
      * Create directory that is optionally cleaned up after the
      * JVM shuts down through use of a Runtime shutdown hook.
      *
-     * @param prefix Prefix to apply to temp directory name
+     * @param prefix  Prefix to apply to temp directory name
      * @param cleanup true/false
      * @return File handle to the created temp directory
      * @throws IOException Unable to create temp directory
@@ -216,7 +216,7 @@ public class TestUtils {
     /**
      * Reads file contents into a String
      *
-     * @param in Input file
+     * @param in      Input file
      * @param charset charset to use for reading
      * @return contents of input file
      * @throws IOException

@@ -7,8 +7,10 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,7 +24,6 @@ import com.cloudera.parserchains.core.model.define.ParserID;
 import com.cloudera.parserchains.core.model.define.ParserName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Objects;
 
 /**
@@ -31,69 +32,69 @@ import java.util.Objects;
  */
 public class ParserSummary {
 
-  @JsonProperty("id")
-  private ParserID id;
+    @JsonProperty("id")
+    private ParserID id;
 
-  @JsonProperty("name")
-  private ParserName name;
+    @JsonProperty("name")
+    private ParserName name;
 
-  @JsonIgnore
-  private String description;
+    @JsonIgnore
+    private String description;
 
-  public String getDescription() {
-    return description;
-  }
-
-  public ParserSummary setDescription(String description) {
-    this.description = description;
-    return this;
-  }
-
-  public ParserID getId() {
-    return id;
-  }
-
-  public ParserSummary setId(ParserID id) {
-    this.id = id;
-    return this;
-  }
-
-  public ParserName getName() {
-    return name;
-  }
-
-  public ParserSummary setName(ParserName name) {
-    this.name = name;
-    return this;
-  }
-
-  public ParserSummary setName(String name) {
-    return setName(ParserName.of(name));
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public String getDescription() {
+        return description;
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public ParserSummary setDescription(String description) {
+        this.description = description;
+        return this;
     }
-    ParserSummary that = (ParserSummary) o;
-    return Objects.equals(id, that.id) &&
-            Objects.equals(name, that.name);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(id, name);
-  }
+    public ParserID getId() {
+        return id;
+    }
 
-  @Override
-  public String toString() {
-    return "ParserType{" +
-            "id=" + id +
-            ", name=" + name +
-            '}';
-  }
+    public ParserSummary setId(ParserID id) {
+        this.id = id;
+        return this;
+    }
+
+    public ParserName getName() {
+        return name;
+    }
+
+    public ParserSummary setName(ParserName name) {
+        this.name = name;
+        return this;
+    }
+
+    public ParserSummary setName(String name) {
+        return setName(ParserName.of(name));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ParserSummary that = (ParserSummary) o;
+        return Objects.equals(id, that.id)
+               && Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
+    }
+
+    @Override
+    public String toString() {
+        return "ParserType{"
+               + "id=" + id
+               + ", name=" + name
+               + '}';
+    }
 }

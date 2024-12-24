@@ -13,8 +13,9 @@
 package com.cloudera.parserchains.queryservice.config;
 
 import com.google.common.cache.CacheBuilder;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -22,16 +23,7 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.resource.PathResourceResolver;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @EnableCaching
 @Configuration
@@ -48,9 +40,9 @@ public class CachingConfig implements WebMvcConfigurer {
 
     private Cache createExpiringCache(String name, long expireAfter, TimeUnit timeUnit) {
         return new ConcurrentMapCache(name,
-                CacheBuilder.newBuilder()
-                        .expireAfterWrite(expireAfter, timeUnit)
-                        .build()
-                        .asMap(), true);
+              CacheBuilder.newBuilder()
+                          .expireAfterWrite(expireAfter, timeUnit)
+                          .build()
+                          .asMap(), true);
     }
 }

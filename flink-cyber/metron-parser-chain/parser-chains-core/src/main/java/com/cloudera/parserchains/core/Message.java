@@ -13,17 +13,23 @@
 package com.cloudera.parserchains.core;
 
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-
-import java.util.*;
 
 /**
  * A {@link Message} is consumed and parsed by a {@link Parser}.
  *
+ * <p>
  * A {@link Message} is composed of a collection of fields. The message fields
  * are represented as ({@link FieldName}, {@link FieldValue}) pairs.
  *
+ * <p>
  * A {@link Message} is immutable and a {@link Builder} should be used to
  * construct one.
  */
@@ -35,7 +41,7 @@ public class Message {
      * Constructs a {@link Message}.
      */
     public static class Builder {
-        private Map<FieldName, FieldValue> fields;
+        private final Map<FieldName, FieldValue> fields;
         private Throwable error;
         private LinkName createdBy;
         private boolean emit = true;
@@ -46,8 +52,8 @@ public class Message {
 
         /**
          * Adds all fields from a {@link Message}.
+         *
          * @param message The message to copy fields from.
-         * @return
          */
         public Builder withFields(Message message) {
             Objects.requireNonNull(message, "A message is required.");
@@ -57,8 +63,8 @@ public class Message {
 
         /**
          * Clones a message by copying all underlying fields.
+         *
          * @param message The message to clone.
-         * @return
          */
         public Builder clone(Message message) {
             Objects.requireNonNull(message, "A message to clone is required.");
@@ -70,22 +76,22 @@ public class Message {
 
         /**
          * Add a field to the message.
-         * @param name The name of the field to add.
+         *
+         * @param name  The name of the field to add.
          * @param value The value of the field to add.
-         * @return
          */
         public Builder addField(FieldName name, FieldValue value) {
             this.fields.put(
-                    Objects.requireNonNull(name, "A valid field name is required."),
-                    Objects.requireNonNull(value, "A valid field value is required."));
+                  Objects.requireNonNull(name, "A valid field name is required."),
+                  Objects.requireNonNull(value, "A valid field value is required."));
             return this;
         }
 
         /**
          * Add a field to the message.
-         * @param name The name of the field to add.
+         *
+         * @param name  The name of the field to add.
          * @param value The value of the field to add.
-         * @return
          */
         public Builder addField(FieldName name, String value) {
             return addField(name, StringFieldValue.of(value));
@@ -93,9 +99,9 @@ public class Message {
 
         /**
          * Add a field to the message.
-         * @param name The name of the field to add.
+         *
+         * @param name  The name of the field to add.
          * @param value The value of the field to add.
-         * @return
          */
         public Builder addField(String name, String value) {
             return addField(FieldName.of(name), StringFieldValue.of(value));
@@ -103,8 +109,8 @@ public class Message {
 
         /**
          * Remove a field from the message.
+         *
          * @param name The name of the field to remove.
-         * @return
          */
         public Builder removeField(FieldName name) {
             this.fields.remove(Objects.requireNonNull(name, "The name of the field to remove is required."));
@@ -113,11 +119,11 @@ public class Message {
 
         /**
          * Removes multiple fields from the message.
+         *
          * @param fieldNames The name of the fields to remove.
-         * @return
          */
         public Builder removeFields(List<FieldName> fieldNames) {
-            for(FieldName fieldName: fieldNames) {
+            for (FieldName fieldName : fieldNames) {
                 this.fields.remove(Objects.requireNonNull(fieldName, "The name of the field to remove is required."));
             }
             return this;
@@ -126,12 +132,12 @@ public class Message {
         /**
          * Renames a field, if the field exists within the message. If the
          * field does not exist, no action taken.
+         *
          * @param from The original field name.
-         * @param to The new field name.
-         * @return
+         * @param to   The new field name.
          */
         public Builder renameField(FieldName from, FieldName to) {
-            if(fields.containsKey(from)) {
+            if (fields.containsKey(from)) {
                 FieldValue value = fields.remove(from);
                 fields.put(to, value);
             }
@@ -141,8 +147,8 @@ public class Message {
         /**
          * Adds an error to the message. This indicates that an error
          * occurred while parsing.
+         *
          * @param error The error that occurred.
-         * @return
          */
         public Builder withError(Throwable error) {
             this.error = Objects.requireNonNull(error, "An error is required.");
@@ -152,8 +158,8 @@ public class Message {
         /**
          * Adds an error to the message. This indicates that an error
          * occurred while parsing.
+         *
          * @param message The error message.
-         * @return
          */
         public Builder withError(String message) {
             this.error = new IllegalStateException(Objects.requireNonNull(message, "An error message is required."));
@@ -163,9 +169,9 @@ public class Message {
         /**
          * Adds an error to the message to indicate that an error occurred
          * while parsing.
-         * @param message The error message.
+         *
+         * @param message   The error message.
          * @param rootCause The root cause exception.
-         * @return
          */
         public Builder withError(String message, Throwable rootCause) {
             this.error = new RuntimeException(message, rootCause);
@@ -175,8 +181,8 @@ public class Message {
         /**
          * Assigns a {@link LinkName} to this message indicating which link in the
          * chain was responsible for creating the message.
+         *
          * @param createdBy The name of the link that created this message.
-         * @return
          */
         public Builder createdBy(LinkName createdBy) {
             this.createdBy = createdBy;
@@ -187,8 +193,10 @@ public class Message {
             this.emit = emit;
             return this;
         }
+
         /**
          * Builds a {@link Message}.
+         *
          * @return The message.
          */
         public Message build() {
@@ -196,10 +204,10 @@ public class Message {
         }
     }
 
-    private Map<FieldName, FieldValue> fields;
-    private Throwable error;
-    private LinkName createdBy;
-    private boolean emit;
+    private final Map<FieldName, FieldValue> fields;
+    private final Throwable error;
+    private final LinkName createdBy;
+    private final boolean emit;
 
     private Message(Builder builder) {
         this.fields = new HashMap<>();
@@ -210,6 +218,8 @@ public class Message {
     }
 
     /**
+     * Builder method.
+     *
      * @return A {@link Builder} that can be used to create a message.
      */
     public static Builder builder() {
@@ -218,11 +228,12 @@ public class Message {
 
     /**
      * Returns the value of a field within this message.
+     *
      * @param fieldName The name of the field.
      * @return The value of the field or Optional.empty if it does not exist.
      */
     public Optional<FieldValue> getField(FieldName fieldName) {
-        if(fields.containsKey(fieldName)) {
+        if (fields.containsKey(fieldName)) {
             return Optional.of(fields.get(fieldName));
         } else {
             return Optional.empty();

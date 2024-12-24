@@ -54,8 +54,9 @@ public class Job {
                 case INDEX:
                 case TRIAGE:
                     return new String[]{scriptName, job.getJobBranch(), job.getJobPipeline()};
+                default:
+                    return new String[]{};
             }
-            return new String[]{};
         }
 
     }

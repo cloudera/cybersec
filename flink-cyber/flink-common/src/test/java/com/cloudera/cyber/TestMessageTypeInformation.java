@@ -12,11 +12,11 @@
 
 package com.cloudera.cyber;
 
-import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.junit.Test;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
+
+import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.junit.Test;
 
 public class TestMessageTypeInformation {
 

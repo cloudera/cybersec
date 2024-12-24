@@ -12,13 +12,12 @@
 
 package com.cloudera.cyber.pruner;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
 @Data
 @Builder
@@ -32,7 +31,7 @@ public class PrunerConfig {
     private String logsLocation = "/data/logs/";
 
     /**
-     * Hive Table containing all the events
+     * Hive Table containing all the events.
      */
     @Builder.Default
     private String eventsTable = "events";
@@ -50,8 +49,9 @@ public class PrunerConfig {
     private transient DateFormat dateFormat;
 
     public DateFormat getDateFormatter() {
-        if (dateFormat == null)
+        if (dateFormat == null) {
             this.dateFormat = new SimpleDateFormat(datePattern);
+        }
         return dateFormat;
     }
 
@@ -62,6 +62,7 @@ public class PrunerConfig {
     public long getLogsMaxMs() {
         return logsMaxAge * 3600000;
     }
+
     public long getEventsMaxMs() {
         return eventsMaxAge * 3600000;
     }

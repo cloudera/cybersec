@@ -12,24 +12,23 @@
 
 package com.cloudera.cyber.profiler.accumulator;
 
+import static com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc.END_PERIOD_EXTENSION;
+import static com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc.START_PERIOD_EXTENSION;
+
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.profiler.ProfileAggregationMethod;
 import com.cloudera.cyber.profiler.ProfileGroupConfig;
 import com.cloudera.cyber.profiler.ProfileMeasurementConfig;
 import com.cloudera.cyber.profiler.ProfileMessage;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc.END_PERIOD_EXTENSION;
-import static com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc.START_PERIOD_EXTENSION;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
     public static final String SUM_FIELD = "sum_field";
@@ -63,10 +62,10 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
                 createMeasurement(ProfileAggregationMethod.MAX, MAX_RESULT, MAX_FIELD),
                 createMeasurement(ProfileAggregationMethod.MIN, MIN_RESULT, MIN_FIELD),
                 createMeasurement(ProfileAggregationMethod.FIRST_SEEN, FIRST_SEEN_RESULT, null));
-        ProfileGroupConfig profileGroupConfig = ProfileGroupConfig.builder().
-                profileGroupName(TEST_PROFILE_GROUP).keyFieldNames(Lists.newArrayList(KEY_1, KEY_2)).
-                periodDuration(5L).periodDurationUnit("MINUTES").
-                sources(Lists.newArrayList("ANY")).measurements(measurements).build();
+        ProfileGroupConfig profileGroupConfig = ProfileGroupConfig.builder()
+                .profileGroupName(TEST_PROFILE_GROUP).keyFieldNames(Lists.newArrayList(KEY_1, KEY_2))
+                .periodDuration(5L).periodDurationUnit("MINUTES")
+                .sources(Lists.newArrayList("ANY")).measurements(measurements).build();
 
         // create the first accumulator
         FieldValueProfileGroupAcc acc1 = new FieldValueProfileGroupAcc(profileGroupConfig);
@@ -155,10 +154,10 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
                 createMeasurement(ProfileAggregationMethod.MAX, MAX_RESULT, MAX_FIELD, format),
                 createMeasurement(ProfileAggregationMethod.MIN, MIN_RESULT, MIN_FIELD, format),
                 createMeasurement(ProfileAggregationMethod.FIRST_SEEN, FIRST_SEEN_RESULT, null, format));
-        return ProfileGroupConfig.builder().
-                profileGroupName(TEST_PROFILE_GROUP).keyFieldNames(Lists.newArrayList(KEY_1, KEY_2)).
-                periodDuration(5L).periodDurationUnit("MINUTES").
-                sources(Lists.newArrayList("ANY")).measurements(measurements).build();
+        return ProfileGroupConfig.builder()
+                .profileGroupName(TEST_PROFILE_GROUP).keyFieldNames(Lists.newArrayList(KEY_1, KEY_2))
+                .periodDuration(5L).periodDurationUnit("MINUTES")
+                .sources(Lists.newArrayList("ANY")).measurements(measurements).build();
 
     }
 
@@ -189,8 +188,8 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
     }
 
     public static Map<String, DecimalFormat> getFormats(ProfileGroupConfig profileGroupConfig){
-        return profileGroupConfig.getMeasurements().stream().
-                collect(Collectors.toMap(ProfileMeasurementConfig::getResultExtensionName,
+        return profileGroupConfig.getMeasurements().stream()
+                .collect(Collectors.toMap(ProfileMeasurementConfig::getResultExtensionName,
                         ProfileMeasurementConfig::getDecimalFormat));
     }
 

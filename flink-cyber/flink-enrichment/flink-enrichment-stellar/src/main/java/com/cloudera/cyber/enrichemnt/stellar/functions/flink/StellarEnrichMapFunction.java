@@ -12,6 +12,8 @@
 
 package com.cloudera.cyber.enrichemnt.stellar.functions.flink;
 
+import static org.apache.metron.stellar.common.Constants.STELLAR_CONTEXT_CONF;
+
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.Message;
@@ -20,6 +22,13 @@ import com.cloudera.cyber.enrichemnt.stellar.adapter.MetronGeoEnrichmentAdapter;
 import com.cloudera.cyber.enrichment.geocode.IpGeoJob;
 import com.cloudera.cyber.hbase.HbaseConfiguration;
 import com.google.common.collect.ImmutableMap;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.flink.api.common.functions.RichMapFunction;
@@ -39,22 +48,13 @@ import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.StellarFunctions;
 import org.json.simple.JSONObject;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.apache.metron.stellar.common.Constants.STELLAR_CONTEXT_CONF;
-
 
 @Slf4j
 public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> {
     private static final String GEO_ADAPTER_NAME = "geo";
     private static final String STELLAR_ADAPTER_NAME = "stellar";
-    private static final Map<String, String> ADAPTER_NAME_FEATURE = ImmutableMap.of(GEO_ADAPTER_NAME, "stellar_geo_feature", STELLAR_ADAPTER_NAME, "stellar_feature");
+    private static final Map<String, String> ADAPTER_NAME_FEATURE =
+          ImmutableMap.of(GEO_ADAPTER_NAME, "stellar_geo_feature", STELLAR_ADAPTER_NAME, "stellar_feature");
     private final Map<String, String> stringEnrichmentConfigs;
     private final String geoDatabasePath;
     private final String asnDatabasePath;
@@ -91,10 +91,14 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
         Map<String, SensorEnrichmentConfig> result = new HashMap<>();
         for (Map.Entry<String, String> stringConfigEntry : stringEnrichmentConfigs.entrySet()) {
             EnrichmentConfigurations enrichmentConfigurations = new EnrichmentConfigurations();
-            enrichmentConfigurations.updateGlobalConfig(ImmutableMap.of(IpGeoJob.PARAM_GEO_DATABASE_PATH, geoDatabasePath, IpGeoJob.PARAM_ASN_DATABASE_PATH, asnDatabasePath));
+            enrichmentConfigurations.updateGlobalConfig(
+                  ImmutableMap.of(IpGeoJob.PARAM_GEO_DATABASE_PATH, geoDatabasePath, IpGeoJob.PARAM_ASN_DATABASE_PATH,
+                        asnDatabasePath));
             SensorEnrichmentConfig sensorEnrichmentConfig;
-            sensorEnrichmentConfig = JSONUtils.INSTANCE.load(stringConfigEntry.getValue(), SensorEnrichmentConfig.class);
-            sensorEnrichmentConfig.getConfiguration().putIfAbsent(STELLAR_CONTEXT_CONF, initializeStellarContext(enrichmentConfigurations));
+            sensorEnrichmentConfig =
+                  JSONUtils.INSTANCE.load(stringConfigEntry.getValue(), SensorEnrichmentConfig.class);
+            sensorEnrichmentConfig.getConfiguration().putIfAbsent(STELLAR_CONTEXT_CONF,
+                  initializeStellarContext(enrichmentConfigurations));
             enrichmentConfigurations.updateSensorEnrichmentConfig(ENRICHMENT, sensorEnrichmentConfig);
             result.put(stringConfigEntry.getKey(), sensorEnrichmentConfig);
 
@@ -103,14 +107,18 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
     }
 
     private Context initializeStellarContext(EnrichmentConfigurations enrichmentConfigurations) {
-        org.apache.hadoop.conf.Configuration hbaseConfig = HBaseConfigurationUtil.deserializeConfiguration(serializedHbaseConfig, HBaseConfigurationUtil.createHBaseConf());
+        org.apache.hadoop.conf.Configuration hbaseConfig =
+              HBaseConfigurationUtil.deserializeConfiguration(serializedHbaseConfig,
+                    HBaseConfigurationUtil.createHBaseConf());
         Context stellarContext = new Context.Builder()
-                .with(Context.Capabilities.GLOBAL_CONFIG, () -> ImmutableMap.builder()
-                        .putAll(enrichmentConfigurations.getGlobalConfig())
-                        .put(HbaseConfiguration.HBASE_CONFIG_NAME, hbaseConfig)
-                        .build())
-                .with(Context.Capabilities.STELLAR_CONFIG, enrichmentConfigurations::getGlobalConfig)
-                .build();
+              .with(Context.Capabilities.GLOBAL_CONFIG, () -> ImmutableMap.builder()
+                                                                          .putAll(
+                                                                                enrichmentConfigurations.getGlobalConfig())
+                                                                          .put(HbaseConfiguration.HBASE_CONFIG_NAME,
+                                                                                hbaseConfig)
+                                                                          .build())
+              .with(Context.Capabilities.STELLAR_CONFIG, enrichmentConfigurations::getGlobalConfig)
+              .build();
 
         StellarFunctions.initialize(stellarContext);
         return stellarContext;
@@ -120,8 +128,10 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
     private Map<String, List<JSONObject>> generateTasks(JSONObject message, SensorEnrichmentConfig config
     ) {
         Map<String, List<JSONObject>> streamMessageMap = new HashMap<>();
-        Map<String, Object> enrichmentFieldMap = EnrichmentStrategies.ENRICHMENT.getUnderlyingConfig(config).getFieldMap();
-        Map<String, ConfigHandler> fieldToHandler = EnrichmentStrategies.ENRICHMENT.getUnderlyingConfig(config).getEnrichmentConfigs();
+        Map<String, Object> enrichmentFieldMap =
+              EnrichmentStrategies.ENRICHMENT.getUnderlyingConfig(config).getFieldMap();
+        Map<String, ConfigHandler> fieldToHandler =
+              EnrichmentStrategies.ENRICHMENT.getUnderlyingConfig(config).getEnrichmentConfigs();
 
         Set<String> enrichmentTypes = new HashSet<>(enrichmentFieldMap.keySet());
 
@@ -136,11 +146,13 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
 
             //How this is split depends on the ConfigHandler
             List<JSONObject> enrichmentObject = retriever.getType()
-                    .splitByFields(message
-                            , fields
-                            , field -> ((EnrichmentStrategy) EnrichmentStrategies.ENRICHMENT).fieldToEnrichmentKey(enrichmentType, field)
-                            , retriever
-                    );
+                                                         .splitByFields(message,
+                                                               fields,
+                                                               field -> ((EnrichmentStrategy)
+                                                                     EnrichmentStrategies.ENRICHMENT).fieldToEnrichmentKey(
+                                                                           enrichmentType, field),
+                                                               retriever
+                                                         );
             streamMessageMap.put(enrichmentType, enrichmentObject);
         }
         return streamMessageMap;
@@ -171,7 +183,9 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
         }
     }
 
-    private void collectData(SensorEnrichmentConfig sensorEnrichmentConfig, Map.Entry<String, List<JSONObject>> task, EnrichmentAdapter<CacheKey> adapter, JSONObject m, Map<String, String> tmpMap, List<DataQualityMessage> dataQualityMessages) {
+    private void collectData(SensorEnrichmentConfig sensorEnrichmentConfig, Map.Entry<String, List<JSONObject>> task,
+                             EnrichmentAdapter<CacheKey> adapter, JSONObject m, Map<String, String> tmpMap,
+                             List<DataQualityMessage> dataQualityMessages) {
         for (Object fieldValue : m.entrySet()) {
             Map.Entry<String, Object> fieldValueEntry = (Map.Entry<String, Object>) fieldValue;
             String field = fieldValueEntry.getKey();
@@ -184,7 +198,9 @@ public class StellarEnrichMapFunction extends RichMapFunction<Message, Message> 
                 });
             } catch (Exception e) {
                 log.error("Error with " + task.getKey() + " failed: " + e.getMessage(), e);
-                MessageUtils.addQualityMessage(dataQualityMessages, DataQualityMessageLevel.ERROR, "Error with " + task.getKey() + " failed: " + e.getMessage(), field, ADAPTER_NAME_FEATURE.get(task.getKey()));
+                MessageUtils.addQualityMessage(dataQualityMessages, DataQualityMessageLevel.ERROR,
+                      "Error with " + task.getKey() + " failed: " + e.getMessage(), field,
+                      ADAPTER_NAME_FEATURE.get(task.getKey()));
             }
         }
     }

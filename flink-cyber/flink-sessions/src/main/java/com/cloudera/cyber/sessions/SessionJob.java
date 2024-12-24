@@ -12,18 +12,17 @@
 
 package com.cloudera.cyber.sessions;
 
+import static com.cloudera.cyber.sessions.Session.sessionize;
+
 import com.cloudera.cyber.GroupedMessage;
 import com.cloudera.cyber.Message;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static com.cloudera.cyber.sessions.Session.sessionize;
 
 public abstract class SessionJob {
     private static final long DEFAULT_SESSION_TIMEOUT = 1000;
@@ -46,6 +45,8 @@ public abstract class SessionJob {
     }
 
     protected abstract void writeResults(ParameterTool params, SingleOutputStreamOperator<GroupedMessage> results);
-    protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> sessionKey, Long sessionTimeout);
+
+    protected abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params,
+                                                        List<String> sessionKey, Long sessionTimeout);
 
 }

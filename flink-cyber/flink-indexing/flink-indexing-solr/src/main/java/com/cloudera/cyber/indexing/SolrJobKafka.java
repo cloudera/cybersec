@@ -12,9 +12,12 @@
 
 package com.cloudera.cyber.indexing;
 
+import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
+
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -23,10 +26,6 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
-
-import java.util.Arrays;
-
-import static com.cloudera.cyber.flink.ConfigConstants.PARAMS_TOPIC_INPUT;
 
 @Slf4j
 public class SolrJobKafka extends SolrJob {
@@ -41,28 +40,29 @@ public class SolrJobKafka extends SolrJob {
     @Override
     public DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         return env.fromSource(
-                FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, "indexer-solr"),
-                WatermarkStrategy.noWatermarks(), "Message Source").uid("message-source");
+              FlinkUtils.createKafkaSource(params.getRequired(PARAMS_TOPIC_INPUT), params, "indexer-solr"),
+              WatermarkStrategy.noWatermarks(), "Message Source").uid("message-source");
     }
 
     protected DataStream<CollectionField> createConfigSource(StreamExecutionEnvironment env, ParameterTool params) {
         DataStreamSource<CollectionField> dataStreamSource = env.addSource(
-                new SolrCollectionFieldsSource(Arrays.asList(params.getRequired("solr.urls").split(",")),
-                        params.getLong(PARAMS_SCHEMA_REFRESH_INTERVAL, DEFAULT_SCHEMA_REFRESH_INTERVAL))
+              new SolrCollectionFieldsSource(Arrays.asList(params.getRequired("solr.urls").split(",")),
+                    params.getLong(PARAMS_SCHEMA_REFRESH_INTERVAL, DEFAULT_SCHEMA_REFRESH_INTERVAL))
         );
         return dataStreamSource
-                .name("Schema Stream").uid("schema-stream")
-                .setMaxParallelism(1)
-                .setParallelism(1);
+              .name("Schema Stream").uid("schema-stream")
+              .setMaxParallelism(1)
+              .setParallelism(1);
     }
 
     @Override
     protected void logConfig(DataStream<CollectionField> configSource, ParameterTool params) {
         String topic = params.get(PARAMS_TOPIC_CONFIG_LOG, DEFAULT_TOPIC_CONFIG_LOG);
 
-        KafkaSink<CollectionField> sink =  new FlinkUtils<>(CollectionField.class).createKafkaSink(topic,"indexer-solr-schema", params);
+        KafkaSink<CollectionField> sink =
+              new FlinkUtils<>(CollectionField.class).createKafkaSink(topic, "indexer-solr-schema", params);
 
         configSource.sinkTo(sink).name("Schema Log").uid("schema-log")
-                .setParallelism(1);
+              .setParallelism(1);
     }
 }

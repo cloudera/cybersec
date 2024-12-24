@@ -3,7 +3,9 @@ package com.cloudera.parserchains.queryservice.model.enums;
 import org.apache.commons.lang3.StringUtils;
 
 public enum JobActions {
-    START(Constants.START_VALUE), STOP(Constants.STOP_VALUE), RESTART(Constants.RESTART_VALUE), UPDATE_CONFIG(Constants.UPDATE_CONFIG_VALUE), GET_CONFIG(Constants.GET_CONFIG_VALUE), STATUS(Constants.STATUS_VALUE);
+    START(Constants.START_VALUE), STOP(Constants.STOP_VALUE), RESTART(Constants.RESTART_VALUE),
+    UPDATE_CONFIG(Constants.UPDATE_CONFIG_VALUE), GET_CONFIG(Constants.GET_CONFIG_VALUE),
+    STATUS(Constants.STATUS_VALUE);
 
     public final String action;
 

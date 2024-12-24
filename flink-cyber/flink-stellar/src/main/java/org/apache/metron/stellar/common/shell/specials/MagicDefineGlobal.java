@@ -16,71 +16,72 @@
  *  limitations under the License.
  *
  */
+
 package org.apache.metron.stellar.common.shell.specials;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.metron.stellar.common.StellarAssignment;
-import org.apache.metron.stellar.common.shell.StellarShellExecutor;
-import org.apache.metron.stellar.common.shell.StellarResult;
-
-import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 import static org.apache.metron.stellar.common.shell.StellarResult.error;
 import static org.apache.metron.stellar.common.shell.StellarResult.success;
 
+import java.util.function.Function;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.metron.stellar.common.StellarAssignment;
+import org.apache.metron.stellar.common.shell.StellarResult;
+import org.apache.metron.stellar.common.shell.StellarShellExecutor;
+
 /**
  * Allows a variable to be defined (or redefined) a within the global configuration.
  *
- *   %define newVar := newValue
+ * <p>
+ * %define newVar := newValue
  */
 public class MagicDefineGlobal implements SpecialCommand {
 
-  public static final String MAGIC_DEFINE = "%define";
+    public static final String MAGIC_DEFINE = "%define";
 
-  @Override
-  public String getCommand() {
-    return MAGIC_DEFINE;
-  }
-
-  @Override
-  public Function<String, Boolean> getMatcher() {
-    return (input) -> startsWith(trimToEmpty(input), MAGIC_DEFINE);
-  }
-
-  @Override
-  public StellarResult execute(String command, StellarShellExecutor executor) {
-
-    // grab the expression in '%define <assign-expression>'
-    String assignExpr = StringUtils.trimToEmpty(command.substring(MAGIC_DEFINE.length()));
-    if(StringUtils.length(assignExpr) < 1) {
-      return error(MAGIC_DEFINE + " missing assignment expression");
+    @Override
+    public String getCommand() {
+        return MAGIC_DEFINE;
     }
 
-    // the expression must be an assignment
-    if(!StellarAssignment.isAssignment(assignExpr)) {
-      return error(MAGIC_DEFINE + " expected assignment expression");
+    @Override
+    public Function<String, Boolean> getMatcher() {
+        return (input) -> startsWith(trimToEmpty(input), MAGIC_DEFINE);
     }
 
-    // execute the expression
-    StellarAssignment expr = StellarAssignment.from(assignExpr);
-    StellarResult result = executor.execute(expr.getStatement());
+    @Override
+    public StellarResult execute(String command, StellarShellExecutor executor) {
 
-    // execution must be successful
-    if(!result.isSuccess()) {
-      return error(MAGIC_DEFINE + " expression execution failed");
+        // grab the expression in '%define <assign-expression>'
+        String assignExpr = StringUtils.trimToEmpty(command.substring(MAGIC_DEFINE.length()));
+        if (StringUtils.length(assignExpr) < 1) {
+            return error(MAGIC_DEFINE + " missing assignment expression");
+        }
+
+        // the expression must be an assignment
+        if (!StellarAssignment.isAssignment(assignExpr)) {
+            return error(MAGIC_DEFINE + " expected assignment expression");
+        }
+
+        // execute the expression
+        StellarAssignment expr = StellarAssignment.from(assignExpr);
+        StellarResult result = executor.execute(expr.getStatement());
+
+        // execution must be successful
+        if (!result.isSuccess()) {
+            return error(MAGIC_DEFINE + " expression execution failed");
+        }
+
+        // expression should have a result
+        if (!result.getValue().isPresent()) {
+            return error(MAGIC_DEFINE + " expression produced no result");
+        }
+
+        // alter the global configuration
+        Object value = result.getValue().get();
+        executor.getGlobalConfig().put(expr.getVariable(), value);
+
+        return success(value);
     }
-
-    // expression should have a result
-    if(!result.getValue().isPresent()) {
-      return error(MAGIC_DEFINE + " expression produced no result");
-    }
-
-    // alter the global configuration
-    Object value = result.getValue().get();
-    executor.getGlobalConfig().put(expr.getVariable(), value);
-
-    return success(value);
-  }
 }

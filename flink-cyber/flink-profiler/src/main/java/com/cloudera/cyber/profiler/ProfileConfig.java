@@ -13,11 +13,10 @@
 package com.cloudera.cyber.profiler;
 
 
-import lombok.Builder;
-import lombok.Data;
-
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import lombok.Builder;
+import lombok.Data;
 
 @Data
 @Builder

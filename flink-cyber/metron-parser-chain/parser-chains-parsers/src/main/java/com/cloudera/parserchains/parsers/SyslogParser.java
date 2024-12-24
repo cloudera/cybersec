@@ -12,6 +12,8 @@
 
 package com.cloudera.parserchains.parsers;
 
+import static java.lang.String.format;
+
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
@@ -21,15 +23,12 @@ import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.github.palindromicity.syslog.SyslogParserBuilder;
 import com.github.palindromicity.syslog.SyslogSpecification;
+import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Objects;
-
-import static java.lang.String.format;
-
 @MessageParser(
-    name="Syslog",
-    description="Parses Syslog according to RFC 3164 and 5424.")
+      name = "Syslog",
+      description = "Parses Syslog according to RFC 3164 and 5424.")
 public class SyslogParser implements Parser {
     private static final String DEFAULT_SYSLOG_SPEC = "RFC_5424";
     private FieldName inputField;
@@ -41,12 +40,13 @@ public class SyslogParser implements Parser {
     }
 
     @Configurable(
-            key="specification",
-            label="Specification",
-            description="The Syslog specification; 'RFC_5424' or 'RFC_3164'. Default value: '" + DEFAULT_SYSLOG_SPEC + "'",
-            defaultValue=DEFAULT_SYSLOG_SPEC)
+          key = "specification",
+          label = "Specification",
+          description = "The Syslog specification; 'RFC_5424' or 'RFC_3164'. Default value: '" + DEFAULT_SYSLOG_SPEC
+                        + "'",
+          defaultValue = DEFAULT_SYSLOG_SPEC)
     public void withSpecification(String specification) {
-        if(StringUtils.isNotBlank(specification)) {
+        if (StringUtils.isNotBlank(specification)) {
             SyslogSpecification spec = SyslogSpecification.valueOf(specification);
             withSpecification(spec);
         }
@@ -61,13 +61,13 @@ public class SyslogParser implements Parser {
         return specification;
     }
 
-    @Configurable(key="inputField",
-            label="Input Field",
-            description="The name of the input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
-            defaultValue = Constants.DEFAULT_INPUT_FIELD,
-            isOutputName = true)
+    @Configurable(key = "inputField",
+          label = "Input Field",
+          description = "The name of the input field to parse. Default value: '" + Constants.DEFAULT_INPUT_FIELD + "'",
+          defaultValue = Constants.DEFAULT_INPUT_FIELD,
+          isOutputName = true)
     public SyslogParser withInputField(String inputField) {
-        if(StringUtils.isNotBlank(inputField)) {
+        if (StringUtils.isNotBlank(inputField)) {
             this.inputField = FieldName.of(inputField);
         }
         return this;
@@ -80,10 +80,10 @@ public class SyslogParser implements Parser {
     @Override
     public Message parse(Message input) {
         Message.Builder output = Message.builder().withFields(input);
-        if(inputField == null) {
+        if (inputField == null) {
             output.withError("Input Field has not been defined.");
 
-        } else if(!input.getField(inputField).isPresent()) {
+        } else if (!input.getField(inputField).isPresent()) {
             output.withError(format("Message missing expected input field '%s'", inputField.toString()));
 
         } else {
@@ -95,12 +95,12 @@ public class SyslogParser implements Parser {
     private void doParse(String valueToParse, Message.Builder output) {
         try {
             new SyslogParserBuilder()
-                    .forSpecification(specification)
-                    .build()
-                    .parseLine(valueToParse)
-                    .forEach((k, v) -> output.addField(FieldName.of(k), StringFieldValue.of(v.toString())));
+                  .forSpecification(specification)
+                  .build()
+                  .parseLine(valueToParse)
+                  .forEach((k, v) -> output.addField(FieldName.of(k), StringFieldValue.of(v.toString())));
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             output.withError(e);
         }
     }

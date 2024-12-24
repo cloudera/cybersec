@@ -1,7 +1,6 @@
 package com.cloudera.cyber.generator;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -9,8 +8,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class GenerationSourceTest {
 
@@ -24,7 +23,7 @@ public class GenerationSourceTest {
     @Test
     public void testSchemaDoesNotExist() {
         assertThatThrownBy(() -> verifySchemaRead("doesnt_exist", false)).isInstanceOf(FileNotFoundException.class)
-                .hasMessage("Basedir: '' File: 'doesnt_exist'");
+              .hasMessage("Basedir: '' File: 'doesnt_exist'");
     }
 
     private void verifySchemaRead(String schemaPath, boolean isNull) throws IOException {
@@ -49,12 +48,13 @@ public class GenerationSourceTest {
 
     @Test
     public void testScenarioFileDoesntExist() {
-        assertThatThrownBy(() -> testScenarioFile("doesnt_exist.csv", Collections.emptySet())).isInstanceOf(FileNotFoundException.class)
-                .hasMessage("Basedir: '' File: 'doesnt_exist.csv'");
+        assertThatThrownBy(() -> testScenarioFile("doesnt_exist.csv", Collections.emptySet())).isInstanceOf(
+                    FileNotFoundException.class)
+              .hasMessage("Basedir: '' File: 'doesnt_exist.csv'");
     }
 
     private void testScenarioFile(String scenarioFilePath, Set<String> expectedKeys) throws IOException {
-        GenerationSource gs = new GenerationSource("file", "topic", null, 1.0, scenarioFilePath, null,  null );
+        GenerationSource gs = new GenerationSource("file", "topic", null, 1.0, scenarioFilePath, null, null);
         gs.readScenarioFile("");
 
         Assert.assertEquals(scenarioFilePath == null, gs.getScenario() == null);

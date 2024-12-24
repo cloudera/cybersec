@@ -13,24 +13,27 @@
 package com.cloudera.cyber.json;
 
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 public class ReplaceJsonPropertiesTest {
 
@@ -44,20 +47,20 @@ public class ReplaceJsonPropertiesTest {
         ReplaceJsonProperties.main(args);
         List<Map<String, String>> actualPropertyMaps = getProperties(outputFile.getAbsolutePath());
         List<Map<String, String>> expectedPropertyMaps = new ArrayList<>();
-        expectedPropertyMaps.add(ImmutableMap.<String, String>builder().
-                put("server", "myhost:1080").
-                put("protocol", "http").
-                put("dga_access_key", "dga_model_key").
-                put("bearer_token", "btoken_value").
-                build());
+        expectedPropertyMaps.add(ImmutableMap.<String, String>builder()
+                .put("server", "myhost:1080")
+                .put("protocol", "http")
+                .put("dga_access_key", "dga_model_key")
+                .put("bearer_token", "btoken_value")
+                .build());
 
-        expectedPropertyMaps.add(ImmutableMap.<String, String>builder().
-                put("server", "myhost:1080").
-                put("protocol", "http").
-                put("other_access_key", "other_model_key").
-                put("bearer_token", "btoken_value").
-                put("empty_prop", "").
-                build());
+        expectedPropertyMaps.add(ImmutableMap.<String, String>builder()
+                .put("server", "myhost:1080")
+                .put("protocol", "http")
+                .put("other_access_key", "other_model_key")
+                .put("bearer_token", "btoken_value")
+                .put("empty_prop", "")
+                .build());
 
         Assert.assertEquals(expectedPropertyMaps, actualPropertyMaps);
     }

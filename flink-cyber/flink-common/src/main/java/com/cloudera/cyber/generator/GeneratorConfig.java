@@ -1,9 +1,8 @@
 package com.cloudera.cyber.generator;
 
-import lombok.Data;
-
 import java.io.IOException;
 import java.util.List;
+import lombok.Data;
 
 @Data
 public class GeneratorConfig {
@@ -11,7 +10,7 @@ public class GeneratorConfig {
     List<GenerationSource> generationSources;
 
     public void open() throws IOException {
-        for(GenerationSource source : getGenerationSources()) {
+        for (GenerationSource source : getGenerationSources()) {
             source.readAvroSchema(baseDirectory);
         }
     }

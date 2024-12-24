@@ -18,59 +18,58 @@
 
 package org.apache.metron.parsers;
 
-import org.apache.metron.parsers.interfaces.MessageParserResult;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.metron.parsers.interfaces.MessageParserResult;
 
 public class DefaultMessageParserResult<T> implements MessageParserResult<T> {
-  private List<T> messages = new ArrayList<>();
-  private Map<Object, Throwable> errors = new HashMap<>();
-  private Throwable masterThrowable;
+    private final List<T> messages = new ArrayList<>();
+    private final Map<Object, Throwable> errors = new HashMap<>();
+    private Throwable masterThrowable;
 
-  public DefaultMessageParserResult() {
-  }
+    public DefaultMessageParserResult() {
+    }
 
-  public DefaultMessageParserResult(Throwable masterThrowable) {
-    this.masterThrowable = masterThrowable;
-  }
+    public DefaultMessageParserResult(Throwable masterThrowable) {
+        this.masterThrowable = masterThrowable;
+    }
 
-  public DefaultMessageParserResult(List<T> list) {
-    messages.addAll(list);
-  }
+    public DefaultMessageParserResult(List<T> list) {
+        messages.addAll(list);
+    }
 
-  public DefaultMessageParserResult(Map<Object, Throwable> map) {
-    errors.putAll(map);
-  }
+    public DefaultMessageParserResult(Map<Object, Throwable> map) {
+        errors.putAll(map);
+    }
 
-  public DefaultMessageParserResult(List<T> list, Map<Object, Throwable> map) {
-    messages.addAll(list);
-    errors.putAll(map);
-  }
+    public DefaultMessageParserResult(List<T> list, Map<Object, Throwable> map) {
+        messages.addAll(list);
+        errors.putAll(map);
+    }
 
-  public void addMessage(T message) {
-    messages.add(message);
-  }
+    public void addMessage(T message) {
+        messages.add(message);
+    }
 
-  public void addError(Object message, Throwable throwable) {
-    errors.put(message, throwable);
-  }
+    public void addError(Object message, Throwable throwable) {
+        errors.put(message, throwable);
+    }
 
-  @Override
-  public List<T> getMessages() {
-    return messages;
-  }
+    @Override
+    public List<T> getMessages() {
+        return messages;
+    }
 
-  @Override
-  public Map<Object, Throwable> getMessageThrowables() {
-    return errors;
-  }
+    @Override
+    public Map<Object, Throwable> getMessageThrowables() {
+        return errors;
+    }
 
-  @Override
-  public Optional<Throwable> getMasterThrowable() {
-    return Optional.ofNullable(masterThrowable);
-  }
+    @Override
+    public Optional<Throwable> getMasterThrowable() {
+        return Optional.ofNullable(masterThrowable);
+    }
 }

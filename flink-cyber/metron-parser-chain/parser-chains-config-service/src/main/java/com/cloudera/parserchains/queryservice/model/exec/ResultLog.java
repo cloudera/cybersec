@@ -63,7 +63,7 @@ public class ResultLog {
     }
 
     public String getParserId() {
-      return parserId;
+        return parserId;
     }
 
     public String getParserName() {
@@ -84,31 +84,31 @@ public class ResultLog {
         }
         ResultLog resultLog = (ResultLog) o;
         return new EqualsBuilder()
-                .append(type, resultLog.type)
-                .append(message, resultLog.message)
-                .append(parserId, resultLog.parserId)
-                .append(parserName, resultLog.parserName)
-                .isEquals();
+              .append(type, resultLog.type)
+              .append(message, resultLog.message)
+              .append(parserId, resultLog.parserId)
+              .append(parserName, resultLog.parserName)
+              .isEquals();
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder(17, 37)
-                .append(type)
-                .append(message)
-                .append(parserId)
-                .append(parserName)
-                .toHashCode();
+              .append(type)
+              .append(message)
+              .append(parserId)
+              .append(parserName)
+              .toHashCode();
     }
 
     @Override
     public String toString() {
-        return "ResultLog{" +
-                "type='" + type + '\'' +
-                ", message='" + message + '\'' +
-                ", parserId='" + parserId + '\'' +
-                ", parserName='" + parserName + '\'' +
-                '}';
+        return "ResultLog{"
+               + "type='" + type + '\''
+               + ", message='" + message + '\''
+               + ", parserId='" + parserId + '\''
+               + ", parserName='" + parserName + '\''
+               + '}';
     }
 
 }

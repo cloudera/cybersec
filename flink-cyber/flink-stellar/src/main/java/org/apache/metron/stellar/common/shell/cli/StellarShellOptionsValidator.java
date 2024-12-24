@@ -20,108 +20,106 @@
 
 package org.apache.metron.stellar.common.shell.cli;
 
+import com.google.common.base.Splitter;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.google.common.base.Splitter;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.InetAddressValidator;
 
 public class StellarShellOptionsValidator {
 
-  private static final Pattern validPortPattern = Pattern.compile("(^.*)[:](\\d+)$");
-  private static final Predicate<String> hostnameValidator = hostname -> {
-    if(StringUtils.isEmpty(hostname)) {
-      return false;
+    private static final Pattern validPortPattern = Pattern.compile("(^.*)[:](\\d+)$");
+    private static final Predicate<String> hostnameValidator = hostname -> {
+        if (StringUtils.isEmpty(hostname)) {
+            return false;
+        }
+        try {
+            InetAddress add = InetAddress.getByName(hostname);
+            return true;
+        } catch (UnknownHostException e) {
+            return false;
+        }
+    };
+
+
+    private static final InetAddressValidator inetAddressValidator = InetAddressValidator
+          .getInstance();
+
+    /**
+     * Validates Stellar CLI Options.
+     */
+    public static void validateOptions(CommandLine commandLine) throws IllegalArgumentException {
+        if (commandLine.hasOption('z')) {
+            validateZookeeperOption(commandLine.getOptionValue('z'));
+        }
+        // v, irc, p are files
+        if (commandLine.hasOption('v')) {
+            validateFileOption("v", commandLine.getOptionValue('v'));
+        }
+        if (commandLine.hasOption("irc")) {
+            validateFileOption("irc", commandLine.getOptionValue("irc"));
+        }
+        if (commandLine.hasOption('p')) {
+            validateFileOption("p", commandLine.getOptionValue('p'));
+        }
+
     }
-    try {
-      InetAddress add = InetAddress.getByName(hostname);
-      return true;
-    } catch (UnknownHostException e) {
-      return false;
+
+    /**
+     * Zookeeper argument should be in the form [HOST|IP]:PORT.
+     *
+     * @param zooMulti the zookeeper url fragment
+     */
+    private static void validateZookeeperOption(String zooMulti) throws IllegalArgumentException {
+        for (String z : Splitter.on(",").split(zooMulti)) {
+            Matcher matcher = validPortPattern.matcher(z);
+            boolean hasPort = z.contains(":");
+            if (hasPort && !matcher.matches()) {
+                throw new IllegalArgumentException(String.format("Zookeeper option must have valid port: %s", z));
+            }
+
+            if (hasPort && matcher.groupCount() != 2) {
+                throw new IllegalArgumentException(
+                      String.format("Zookeeper Option must be in the form of [HOST|IP]:PORT  %s", z));
+            }
+            String name = hasPort ? matcher.group(1) : z;
+            Integer port = hasPort ? Integer.parseInt(matcher.group(2)) : null;
+
+            if (!hostnameValidator.test(name) && !inetAddressValidator.isValid(name)) {
+                throw new IllegalArgumentException(
+                      String.format("Zookeeper Option %s is not a valid host name or ip address  %s", name, z));
+            }
+
+            if (hasPort && (port == 0 || port > 65535)) {
+                throw new IllegalArgumentException(
+                      String.format("Zookeeper Option %s port is not valid", z));
+            }
+        }
     }
-  };
 
-
-
-  private static final InetAddressValidator inetAddressValidator = InetAddressValidator
-      .getInstance();
-
-  /**
-   * Validates Stellar CLI Options.
-   */
-  public static void validateOptions(CommandLine commandLine) throws IllegalArgumentException {
-    if (commandLine.hasOption('z')) {
-      validateZookeeperOption(commandLine.getOptionValue('z'));
+    /**
+     * File options must exist and be readable.
+     *
+     * @param option   name of the option
+     * @param fileName the file name
+     */
+    private static void validateFileOption(String option, String fileName)
+          throws IllegalArgumentException {
+        File file = new File(fileName);
+        if (!file.exists()) {
+            throw new IllegalArgumentException(
+                  String.format("%s: File %s doesn't exist", option, fileName));
+        }
+        if (!file.canRead()) {
+            throw new IllegalArgumentException(
+                  String.format("%s: File %s is not readable", option, fileName));
+        }
     }
-    // v, irc, p are files
-    if (commandLine.hasOption('v')) {
-      validateFileOption("v", commandLine.getOptionValue('v'));
-    }
-    if (commandLine.hasOption("irc")) {
-      validateFileOption("irc", commandLine.getOptionValue("irc"));
-    }
-    if (commandLine.hasOption('p')) {
-      validateFileOption("p", commandLine.getOptionValue('p'));
-    }
-
-  }
-
-  /**
-   * Zookeeper argument should be in the form [HOST|IP]:PORT.
-   *
-   * @param zMulti the zookeeper url fragment
-   */
-  private static void validateZookeeperOption(String zMulti) throws IllegalArgumentException {
-    for(String z : Splitter.on(",").split(zMulti)) {
-      Matcher matcher = validPortPattern.matcher(z);
-      boolean hasPort = z.contains(":");
-      if (hasPort && !matcher.matches()) {
-        throw new IllegalArgumentException(String.format("Zookeeper option must have valid port: %s", z));
-      }
-
-      if (hasPort && matcher.groupCount() != 2) {
-        throw new IllegalArgumentException(
-                String.format("Zookeeper Option must be in the form of [HOST|IP]:PORT  %s", z));
-      }
-      String name = hasPort?matcher.group(1):z;
-      Integer port = hasPort?Integer.parseInt(matcher.group(2)):null;
-
-      if (!hostnameValidator.test(name) && !inetAddressValidator.isValid(name)) {
-        throw new IllegalArgumentException(
-                String.format("Zookeeper Option %s is not a valid host name or ip address  %s", name, z));
-      }
-
-      if (hasPort && (port == 0 || port > 65535)) {
-        throw new IllegalArgumentException(
-                String.format("Zookeeper Option %s port is not valid", z));
-      }
-    }
-  }
-
-  /**
-   * File options must exist and be readable.
-   *
-   * @param option name of the option
-   * @param fileName the file name
-   */
-  private static void validateFileOption(String option, String fileName)
-      throws IllegalArgumentException {
-    File file = new File(fileName);
-    if (!file.exists()) {
-      throw new IllegalArgumentException(
-          String.format("%s: File %s doesn't exist", option, fileName));
-    }
-    if (!file.canRead()) {
-      throw new IllegalArgumentException(
-          String.format("%s: File %s is not readable", option, fileName));
-    }
-  }
 }
 
 

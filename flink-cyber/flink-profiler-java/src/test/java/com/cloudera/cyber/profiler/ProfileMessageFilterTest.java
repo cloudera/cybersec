@@ -12,6 +12,9 @@
 
 package com.cloudera.cyber.profiler;
 
+import static com.cloudera.cyber.profiler.ScoredMessageToProfileMessageMap.CYBER_SCORE_FIELD;
+import static com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.createMeasurement;
+
 import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.scoring.ScoredMessage;
@@ -19,15 +22,15 @@ import com.cloudera.cyber.scoring.ScoringProcessFunction;
 import com.cloudera.cyber.scoring.ScoringSummarizationMode;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.cloudera.cyber.profiler.ScoredMessageToProfileMessageMap.CYBER_SCORE_FIELD;
-import static com.cloudera.cyber.profiler.accumulator.ProfileGroupConfigTestUtils.createMeasurement;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ProfileMessageFilterTest {
 
@@ -53,10 +56,10 @@ public class ProfileMessageFilterTest {
         ProfileGroupConfig profileGroupConfig = createProfileGroupConfig(Lists.newArrayList(source),includeNullFieldMeasurements, includeScoreMeasurement);
         ProfileMessageFilter filter = new ProfileMessageFilter(profileGroupConfig);
 
-        Map<String, String> keyFieldValues = profileGroupConfig.getKeyFieldNames().stream().
-                collect(Collectors.toMap(keyFieldName -> keyFieldName, value ->"value"));
-        String requiredMeasurementFieldName = profileGroupConfig.getMeasurementFieldNames().stream().filter(name -> !name.equals(CYBER_SCORE_FIELD)).
-                findFirst().orElseThrow(() -> new RuntimeException("test should contain at least one required field"));
+        Map<String, String> keyFieldValues = profileGroupConfig.getKeyFieldNames().stream()
+                .collect(Collectors.toMap(keyFieldName -> keyFieldName, value ->"value"));
+        String requiredMeasurementFieldName = profileGroupConfig.getMeasurementFieldNames().stream().filter(name -> !name.equals(CYBER_SCORE_FIELD))
+                .findFirst().orElseThrow(() -> new RuntimeException("test should contain at least one required field"));
 
         Map<String, String> allFields = new HashMap<>(keyFieldValues);
         allFields.put(requiredMeasurementFieldName, "value");
@@ -78,7 +81,7 @@ public class ProfileMessageFilterTest {
     }
 
     private void verifyFilter(ProfileMessageFilter filter, String source, Map<String, String> fieldValues, boolean matches) {
-        ScoredMessage scoredMessage = ScoringProcessFunction.scoreMessage(TestUtils.createMessage(MessageUtils.getCurrentTimestamp(), source, fieldValues), Collections.emptyList(), ScoringSummarizationMode.DEFAULT());
+        ScoredMessage scoredMessage = ScoringProcessFunction.scoreMessage(TestUtils.createMessage(MessageUtils.getCurrentTimestamp(), source, fieldValues), Collections.emptyList(), ScoringSummarizationMode.defaultValue());
         Assert.assertEquals(matches, filter.filter(scoredMessage));
     }
 
@@ -100,10 +103,10 @@ public class ProfileMessageFilterTest {
             measurements.add(createMeasurement(ProfileAggregationMethod.SUM, "total_score", CYBER_SCORE_FIELD, null));
         }
 
-        return ProfileGroupConfig.builder().
-                profileGroupName(TEST_PROFILE_GROUP).keyFieldNames(Lists.newArrayList(KEY_1, KEY_2)).
-                periodDuration(5L).periodDurationUnit("MINUTES").
-                sources(sources).measurements(measurements).build();
+        return ProfileGroupConfig.builder()
+                .profileGroupName(TEST_PROFILE_GROUP).keyFieldNames(Lists.newArrayList(KEY_1, KEY_2))
+                .periodDuration(5L).periodDurationUnit("MINUTES")
+                .sources(sources).measurements(measurements).build();
 
     }
 }

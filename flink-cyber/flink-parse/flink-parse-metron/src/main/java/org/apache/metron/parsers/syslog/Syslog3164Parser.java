@@ -22,7 +22,6 @@ import com.github.palindromicity.syslog.AllowableDeviations;
 import com.github.palindromicity.syslog.SyslogParser;
 import com.github.palindromicity.syslog.SyslogParserBuilder;
 import com.github.palindromicity.syslog.SyslogSpecification;
-
 import java.io.Serializable;
 import java.util.EnumSet;
 import java.util.Map;
@@ -33,11 +32,11 @@ import java.util.Map;
  */
 public class Syslog3164Parser extends BaseSyslogParser implements Serializable {
 
-  @Override
-  public SyslogParser buildSyslogParser(Map<String, Object> config) {
-    return new SyslogParserBuilder()
-            .forSpecification(SyslogSpecification.RFC_3164)
-            .withDeviations(EnumSet.of(AllowableDeviations.PRIORITY, AllowableDeviations.VERSION))
-            .build();
-  }
+    @Override
+    public SyslogParser buildSyslogParser(Map<String, Object> config) {
+        return new SyslogParserBuilder()
+              .forSpecification(SyslogSpecification.RFC_3164)
+              .withDeviations(EnumSet.of(AllowableDeviations.PRIORITY, AllowableDeviations.VERSION))
+              .build();
+    }
 }

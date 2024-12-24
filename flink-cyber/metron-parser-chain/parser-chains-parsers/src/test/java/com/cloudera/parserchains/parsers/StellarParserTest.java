@@ -12,19 +12,18 @@
 
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.FieldName;
-import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.StringFieldValue;
-import org.junit.jupiter.api.Test;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
 import static com.cloudera.parserchains.parsers.ResourceTestUtil.getFileFromResource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.entry;
+
+import com.cloudera.parserchains.core.FieldName;
+import com.cloudera.parserchains.core.Message;
+import com.cloudera.parserchains.core.StringFieldValue;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import org.junit.jupiter.api.Test;
 
 public class StellarParserTest {
 
@@ -61,8 +60,8 @@ public class StellarParserTest {
 
     @Test
     public void testParserErrorConfigFileDoesNotExist() {
-        assertThatThrownBy(() -> new StellarParser().configurationPath(DOESNT_EXIST_CONFIG_FILE)).
-                isInstanceOf(FileNotFoundException.class).hasMessageContaining(String.format("%s (No such file or directory)", DOESNT_EXIST_CONFIG_FILE));
+        assertThatThrownBy(() -> new StellarParser().configurationPath(DOESNT_EXIST_CONFIG_FILE))
+                .isInstanceOf(FileNotFoundException.class).hasMessageContaining(String.format("%s (No such file or directory)", DOESNT_EXIST_CONFIG_FILE));
     }
 
     @Test

@@ -6,18 +6,21 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(value = HttpStatus.BAD_REQUEST)
 public class ValidationException extends RuntimeException {
     public ValidationException() {
-        this(null,null);
+        this(null, null);
     }
+
     public ValidationException(String message) {
-        this(message,null);
+        this(message, null);
     }
+
     public ValidationException(Throwable cause) {
-        this(null,cause);
+        this(null, cause);
     }
+
     public ValidationException(String message, Throwable cause) {
-       super(message);
-       if (cause != null) {
-           this.initCause(cause);
-       }
+        super(message);
+        if (cause != null) {
+            this.initCause(cause);
+        }
     }
 }

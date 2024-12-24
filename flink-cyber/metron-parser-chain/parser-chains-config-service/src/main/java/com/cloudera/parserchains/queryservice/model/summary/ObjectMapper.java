@@ -12,7 +12,7 @@
 
 package com.cloudera.parserchains.queryservice.model.summary;
 
-public interface ObjectMapper <T, R> {
+public interface ObjectMapper<T, R> {
 
     T reform(R source);
 

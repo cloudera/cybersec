@@ -12,28 +12,14 @@
 
 package com.cloudera.cyber.flink;
 
+import static com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient.Configuration.SASL_JAAS_CONFIG;
+import static org.apache.flink.configuration.GlobalConfiguration.loadConfiguration;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 import com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient;
-
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.client.cli.CliFrontend;
-import org.apache.flink.configuration.Configuration;
-import org.apache.flink.core.fs.FSDataInputStream;
-import org.apache.flink.core.fs.FileSystem;
-import org.apache.flink.core.fs.Path;
-import org.apache.flink.util.Preconditions;
-import org.apache.flink.util.encrypttool.EncryptTool;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
-
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -47,11 +33,22 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.function.ToLongFunction;
-
-import static com.hortonworks.registries.schemaregistry.client.SchemaRegistryClient.Configuration.SASL_JAAS_CONFIG;
-import static org.apache.flink.configuration.GlobalConfiguration.loadConfiguration;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.client.cli.CliFrontend;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.core.fs.FSDataInputStream;
+import org.apache.flink.core.fs.FileSystem;
+import org.apache.flink.core.fs.Path;
+import org.apache.flink.util.Preconditions;
+import org.apache.flink.util.encrypttool.EncryptTool;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 
 @Slf4j
 public class Utils {
@@ -96,18 +93,20 @@ public class Utils {
         // interceptor currently unable to work with flink transactional kafka
         // https://docs.google.com/document/d/19jIN_POJvZPV466V5DolBKJxlqWOxYz-2gJV4e5cYtE/edit
 
-//        kafkaProperties.put(consumer ? ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG : ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
-//                consumer ?
-//                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringConsumerInterceptor" :
-//                        "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringProducerInterceptor");
+        //kafkaProperties.put(consumer ? ConsumerConfig.INTERCEPTOR_CLASSES_CONFIG : ProducerConfig.INTERCEPTOR_CLASSES_CONFIG,
+        //        consumer ?
+        //                "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringConsumerInterceptor" :
+        //                "com.hortonworks.smm.kafka.monitoring.interceptors.MonitoringProducerInterceptor");
 
         groupId = (String) kafkaProperties.getOrDefault(ConsumerConfig.GROUP_ID_CONFIG, groupId);
         if (!consumer) {
             kafkaProperties.putIfAbsent(ProducerConfig.ACKS_CONFIG, "all");
-            kafkaProperties.put(ProducerConfig.CLIENT_ID_CONFIG, String.format("%s-producer-%d", groupId, nextKafkaClientId.incrementAndGet()));
+            kafkaProperties.put(ProducerConfig.CLIENT_ID_CONFIG,
+                  String.format("%s-producer-%d", groupId, nextKafkaClientId.incrementAndGet()));
         } else {
             kafkaProperties.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-            kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG, String.format("%s-consumer-%d", groupId, nextKafkaClientId.incrementAndGet()));
+            kafkaProperties.put(ConsumerConfig.CLIENT_ID_CONFIG,
+                  String.format("%s-consumer-%d", groupId, nextKafkaClientId.incrementAndGet()));
         }
 
         return kafkaProperties;
@@ -132,9 +131,11 @@ public class Utils {
         if (params.get(K_SCHEMA_REG_URL).startsWith("https")) {
             Map<String, String> sslClientConfig = new HashMap<>();
             String sslKey = K_SCHEMA_REG_SSL_CLIENT_KEY + "." + K_TRUSTSTORE_PATH;
-            sslClientConfig.put(K_TRUSTSTORE_PATH, isSensitive(sslKey) ? decrypt(params.get(sslKey)) : params.get(sslKey));
+            sslClientConfig.put(K_TRUSTSTORE_PATH,
+                  isSensitive(sslKey) ? decrypt(params.get(sslKey)) : params.get(sslKey));
             sslKey = K_SCHEMA_REG_SSL_CLIENT_KEY + "." + K_TRUSTSTORE_PASSWORD;
-            sslClientConfig.put(K_TRUSTSTORE_PASSWORD, isSensitive(sslKey) ? decrypt(params.get(sslKey)) : params.get(sslKey));
+            sslClientConfig.put(K_TRUSTSTORE_PASSWORD,
+                  isSensitive(sslKey) ? decrypt(params.get(sslKey)) : params.get(sslKey));
             sslClientConfig.put(K_KEYSTORE_PASSWORD, ""); //ugly hack needed for SchemaRegistryClient
 
             //schemaRegistryConf.put(K_SCHEMA_REG_SSL_CLIENT_KEY, sslClientConfig);
@@ -151,9 +152,11 @@ public class Utils {
         if (schemaRegistryUrl.startsWith("https")) {
             Map<String, String> sslClientConfig = new HashMap<>();
             String sslKey = K_SCHEMA_REG_SSL_CLIENT_KEY + "." + K_TRUSTSTORE_PATH;
-            sslClientConfig.put(K_TRUSTSTORE_PATH, isSensitive(sslKey, params) ? decrypt(params.getRequired(sslKey)) : params.getRequired(sslKey));
+            sslClientConfig.put(K_TRUSTSTORE_PATH,
+                  isSensitive(sslKey, params) ? decrypt(params.getRequired(sslKey)) : params.getRequired(sslKey));
             sslKey = K_SCHEMA_REG_SSL_CLIENT_KEY + "." + K_TRUSTSTORE_PASSWORD;
-            sslClientConfig.put(K_TRUSTSTORE_PASSWORD, isSensitive(sslKey, params) ? decrypt(params.getRequired(sslKey)) : params.getRequired(sslKey));
+            sslClientConfig.put(K_TRUSTSTORE_PASSWORD,
+                  isSensitive(sslKey, params) ? decrypt(params.getRequired(sslKey)) : params.getRequired(sslKey));
             sslClientConfig.put(K_KEYSTORE_PASSWORD, ""); //ugly hack needed for SchemaRegistryClient
 
             schemaRegistryConf.put(K_SCHEMA_REG_SSL_CLIENT_KEY, sslClientConfig);
@@ -169,7 +172,8 @@ public class Utils {
         return MAPPER.readValue(json, typeReference);
     }
 
-    public static <T> T readResourceFile(String resourceLocation, Class<?> cls, TypeReference<T> typeReference) throws IOException {
+    public static <T> T readResourceFile(String resourceLocation, Class<?> cls, TypeReference<T> typeReference)
+          throws IOException {
         return jsonToObject(readResourceFile(resourceLocation, cls), typeReference);
     }
 
@@ -245,8 +249,10 @@ public class Utils {
         return TimeUnit.valueOf(unitType1).toMillis(unit1) == TimeUnit.valueOf(unitType2).toMillis(unit2);
     }
 
-    public static <T> boolean isTimeEqual(T object1, T object2, ToLongFunction<T> timeUnitSelector, Function<T, String> timeUnitTypeSelector) {
-        return isTimeEqual(timeUnitSelector.applyAsLong(object1), timeUnitTypeSelector.apply(object1), timeUnitSelector.applyAsLong(object2), timeUnitTypeSelector.apply(object2));
+    public static <T> boolean isTimeEqual(T object1, T object2, ToLongFunction<T> timeUnitSelector,
+                                          Function<T, String> timeUnitTypeSelector) {
+        return isTimeEqual(timeUnitSelector.applyAsLong(object1), timeUnitTypeSelector.apply(object1),
+              timeUnitSelector.applyAsLong(object2), timeUnitTypeSelector.apply(object2));
     }
 
     private static class ConfigHolder {
@@ -264,20 +270,22 @@ public class Utils {
     }
 
     public static ParameterTool getParamToolsFromProperties(String[] pathToPropertyFiles) {
-        return Arrays.stream(pathToPropertyFiles).filter(pathToPropertyFile -> pathToPropertyFile.endsWith(".properties")).map(Path::new).reduce(ParameterTool.fromMap(new HashMap<>()), (parameterTool, path) -> {
-            try {
-                FileSystem fileSystem = path.getFileSystem();
-                if (fileSystem.exists(path)) {
-                    try (FSDataInputStream fsDataInputStream = fileSystem.open(path)) {
-                        ParameterTool nextParamTool = ParameterTool.fromPropertiesFile(fsDataInputStream);
-                        return parameterTool.mergeWith(nextParamTool);
-                    }
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            return parameterTool;
-        }, ParameterTool::mergeWith);
+        return Arrays.stream(pathToPropertyFiles)
+              .filter(pathToPropertyFile -> pathToPropertyFile.endsWith(".properties")).map(Path::new)
+              .reduce(ParameterTool.fromMap(new HashMap<>()), (parameterTool, path) -> {
+                  try {
+                      FileSystem fileSystem = path.getFileSystem();
+                      if (fileSystem.exists(path)) {
+                          try (FSDataInputStream fsDataInputStream = fileSystem.open(path)) {
+                              ParameterTool nextParamTool = ParameterTool.fromPropertiesFile(fsDataInputStream);
+                              return parameterTool.mergeWith(nextParamTool);
+                          }
+                      }
+                  } catch (IOException e) {
+                      throw new RuntimeException(e);
+                  }
+                  return parameterTool;
+              }, ParameterTool::mergeWith);
     }
 
 
@@ -296,14 +304,16 @@ public class Utils {
     }
 
 
-    public static byte[] sign(String s, PrivateKey key) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public static byte[] sign(String s, PrivateKey key)
+          throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         Signature sig = Signature.getInstance("SHA1WithRSA");
         sig.initSign(key);
         sig.update(s.getBytes(StandardCharsets.UTF_8));
         return sig.sign();
     }
 
-    public static boolean verify(String s, byte[] signature, PublicKey key) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    public static boolean verify(String s, byte[] signature, PublicKey key)
+          throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         Signature sig = Signature.getInstance("SHA1WithRSA");
         sig.initVerify(key);
         sig.update(s.getBytes(StandardCharsets.UTF_8));

@@ -12,9 +12,23 @@
 
 package com.cloudera.cyber.jdbc.connector.jdbc.internal;
 
+import static org.apache.flink.util.Preconditions.checkNotNull;
+
 import com.cloudera.cyber.jdbc.connector.jdbc.JdbcExecutionOptions;
 import com.cloudera.cyber.jdbc.connector.jdbc.internal.connection.JdbcConnectionProvider;
 import com.cloudera.cyber.jdbc.connector.jdbc.internal.executor.JdbcBatchStatementExecutor;
+import java.io.Flushable;
+import java.io.IOException;
+import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import org.apache.flink.annotation.VisibleForTesting;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.functions.RuntimeContext;
@@ -27,23 +41,8 @@ import org.apache.flink.util.concurrent.ExecutorThreadFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.io.Flushable;
-import java.io.IOException;
-import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-
-import static org.apache.flink.util.Preconditions.checkNotNull;
-
 public class JdbcOutputFormat<In, JdbcIn, JdbcExec extends JdbcBatchStatementExecutor<JdbcIn>>
-        extends RichOutputFormat<In> implements Flushable, InputTypeConfigurable {
+      extends RichOutputFormat<In> implements Flushable, InputTypeConfigurable {
 
     protected final JdbcConnectionProvider connectionProvider;
     @Nullable
@@ -64,7 +63,7 @@ public class JdbcOutputFormat<In, JdbcIn, JdbcExec extends JdbcBatchStatementExe
     }
 
     public interface StatementExecutorFactory<T extends JdbcBatchStatementExecutor<?>>
-            extends Function<RuntimeContext, T>, Serializable {
+          extends Function<RuntimeContext, T>, Serializable {
     }
 
     private static final long serialVersionUID = 1L;
@@ -84,10 +83,10 @@ public class JdbcOutputFormat<In, JdbcIn, JdbcExec extends JdbcBatchStatementExe
     private transient volatile Exception flushException;
 
     public JdbcOutputFormat(
-            @Nonnull JdbcConnectionProvider connectionProvider,
-            @Nonnull JdbcExecutionOptions executionOptions,
-            @Nonnull StatementExecutorFactory<JdbcExec> statementExecutorFactory,
-            @Nonnull RecordExtractor<In, JdbcIn> recordExtractor) {
+          @Nonnull JdbcConnectionProvider connectionProvider,
+          @Nonnull JdbcExecutionOptions executionOptions,
+          @Nonnull StatementExecutorFactory<JdbcExec> statementExecutorFactory,
+          @Nonnull RecordExtractor<In, JdbcIn> recordExtractor) {
         this.connectionProvider = checkNotNull(connectionProvider);
         this.executionOptions = checkNotNull(executionOptions);
         this.statementExecutorFactory = checkNotNull(statementExecutorFactory);
@@ -103,29 +102,29 @@ public class JdbcOutputFormat<In, JdbcIn, JdbcExec extends JdbcBatchStatementExe
         jdbcStatementExecutor = createAndOpenStatementExecutor(statementExecutorFactory);
         if (executionOptions.getBatchIntervalMs() != 0 && executionOptions.getBatchSize() != 1) {
             this.scheduler =
-                    Executors.newScheduledThreadPool(
-                            1, new ExecutorThreadFactory("jdbc-upsert-output-format"));
+                  Executors.newScheduledThreadPool(
+                        1, new ExecutorThreadFactory("jdbc-upsert-output-format"));
             this.scheduledFuture =
-                    this.scheduler.scheduleWithFixedDelay(
-                            () -> {
-                                synchronized (JdbcOutputFormat.this) {
-                                    if (!closed) {
-                                        try {
-                                            flush();
-                                        } catch (Exception e) {
-                                            flushException = e;
-                                        }
+                  this.scheduler.scheduleWithFixedDelay(
+                        () -> {
+                            synchronized (JdbcOutputFormat.this) {
+                                if (!closed) {
+                                    try {
+                                        flush();
+                                    } catch (Exception e) {
+                                        flushException = e;
                                     }
                                 }
-                            },
-                            executionOptions.getBatchIntervalMs(),
-                            executionOptions.getBatchIntervalMs(),
-                            TimeUnit.MILLISECONDS);
+                            }
+                        },
+                        executionOptions.getBatchIntervalMs(),
+                        executionOptions.getBatchIntervalMs(),
+                        TimeUnit.MILLISECONDS);
         }
     }
 
     private JdbcExec createAndOpenStatementExecutor(
-            StatementExecutorFactory<JdbcExec> statementExecutorFactory) throws IOException {
+          StatementExecutorFactory<JdbcExec> statementExecutorFactory) throws IOException {
         JdbcExec exec = statementExecutorFactory.apply(getRuntimeContext());
         try {
             exec.prepareStatements(connectionProvider.getConnection());
@@ -150,8 +149,7 @@ public class JdbcOutputFormat<In, JdbcIn, JdbcExec extends JdbcBatchStatementExe
             JdbcIn extractedRecord = jdbcRecordExtractor.apply(recordCopy);
             jdbcStatementExecutor.addToBatch(extractedRecord);
             batchCount++;
-            if (executionOptions.getBatchSize() > 0
-                    && batchCount >= executionOptions.getBatchSize()) {
+            if (executionOptions.getBatchSize() > 0 && batchCount >= executionOptions.getBatchSize()) {
                 flush();
             }
         } catch (Exception e) {
@@ -186,8 +184,8 @@ public class JdbcOutputFormat<In, JdbcIn, JdbcExec extends JdbcBatchStatementExe
                     }
                 } catch (Exception exception) {
                     LOG.error(
-                            "JDBC connection is not valid, and reestablish connection failed.",
-                            exception);
+                          "JDBC connection is not valid, and reestablish connection failed.",
+                          exception);
                     throw new IOException("Reestablish JDBC connection failed", exception);
                 }
                 try {
@@ -195,7 +193,7 @@ public class JdbcOutputFormat<In, JdbcIn, JdbcExec extends JdbcBatchStatementExe
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                     throw new IOException(
-                            "unable to flush; interrupted while doing another attempt", e);
+                          "unable to flush; interrupted while doing another attempt", e);
                 }
             }
         }

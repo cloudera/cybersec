@@ -13,8 +13,6 @@
 package com.cloudera.cyber.rules.engines;
 
 import com.cloudera.cyber.Message;
-
-import javax.script.ScriptException;
 import java.util.Map;
 
 public class UnimplementedEngine implements RuleEngine {

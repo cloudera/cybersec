@@ -13,6 +13,15 @@
 package com.cloudera.cyber.rules;
 
 import com.cloudera.cyber.Message;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,15 +31,13 @@ import org.apache.flink.streaming.api.functions.co.BroadcastProcessFunction;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 
-import java.util.*;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 @RequiredArgsConstructor
 @Slf4j
-public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C extends DynamicRuleCommand<R>, CR extends DynamicRuleCommandResult<R>, T>
-        extends BroadcastProcessFunction<Message, C, T> {
+public abstract class DynamicRuleProcessFunction<
+      R extends DynamicRule<R>,
+      C extends DynamicRuleCommand<R>,
+      CR extends DynamicRuleCommandResult<R>, T>
+      extends BroadcastProcessFunction<Message, C, T> {
     @NonNull
     protected OutputTag<CR> outputSink;
     @NonNull
@@ -38,21 +45,27 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C ext
     protected transient Supplier<DynamicRuleCommandResult.DynamicRuleCommandResultBuilder<R, CR>> resultBuilderSupplier;
 
     @Override
-    public void processElement(Message message, ReadOnlyContext readOnlyContext, Collector<T> collector) throws Exception {
-        log.debug("{}, time: {}, processing: {}, watermark: {}: {}", Thread.currentThread().getId(), readOnlyContext.timestamp(), readOnlyContext.currentProcessingTime(), readOnlyContext.currentWatermark(), message);
+    public void processElement(Message message, ReadOnlyContext readOnlyContext, Collector<T> collector)
+          throws Exception {
+        log.debug("{}, time: {}, processing: {}, watermark: {}: {}", Thread.currentThread().getId(),
+              readOnlyContext.timestamp(), readOnlyContext.currentProcessingTime(), readOnlyContext.currentWatermark(),
+              message);
         List<R> rules = readOnlyContext.getBroadcastState(rulesStateDescriptor).get(RulesForm.ACTIVE);
         processMessages(message, collector, rules);
     }
 
-    protected void setResultBuilderSupplier(Supplier<DynamicRuleCommandResult.DynamicRuleCommandResultBuilder<R, CR>> resultBuilderSupplier) {
+    protected void setResultBuilderSupplier(
+          Supplier<DynamicRuleCommandResult.DynamicRuleCommandResultBuilder<R, CR>> resultBuilderSupplier) {
         this.resultBuilderSupplier = resultBuilderSupplier;
     }
 
     protected abstract void processMessages(Message message, Collector<T> collector, List<R> rules);
 
     @Override
-    public void processBroadcastElement(C dynamicRuleCommand, Context context, Collector<T> collector) throws Exception {
-        log.info("Rule Command {}, time: {}, processing: %{}, watermark: {}: {}", Thread.currentThread().getId(), context.timestamp(), context.currentProcessingTime(), context.currentWatermark(), dynamicRuleCommand);
+    public void processBroadcastElement(C dynamicRuleCommand, Context context, Collector<T> collector)
+          throws Exception {
+        log.info("Rule Command {}, time: {}, processing: %{}, watermark: {}: {}", Thread.currentThread().getId(),
+              context.timestamp(), context.currentProcessingTime(), context.currentWatermark(), dynamicRuleCommand);
         BroadcastState<RulesForm, List<R>> state = context.getBroadcastState(rulesStateDescriptor);
         List<R> scoringRules = processRulesCommands(state.get(RulesForm.ALL), dynamicRuleCommand, context);
 
@@ -60,9 +73,9 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C ext
         state.put(RulesForm.ALL, scoringRules);
 
         List<R> activeRules = scoringRules.stream()
-                .filter(DynamicRule::isEnabled)
-                .sorted(Comparator.comparingInt(DynamicRule::getOrder))
-                .collect(Collectors.toList());
+              .filter(DynamicRule::isEnabled)
+              .sorted(Comparator.comparingInt(DynamicRule::getOrder))
+              .collect(Collectors.toList());
 
         // update the ordered version with just the active rules for processing
         state.put(RulesForm.ACTIVE, activeRules);
@@ -76,23 +89,24 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C ext
         switch (ruleCommand.getType()) {
             case DELETE:
                 final List<R> newRules = rules.stream()
-                        .filter(r -> {
-                            if (r.getId().equals(ruleCommand.getRuleId())) {
-                                log.info("Successfully removed rule with id '{}'.", ruleCommand.getRuleId());
-                                outputRule(context, r, ruleCommand.getId());
-                                return false;
-                            } else {
-                                return true;
-                            }
-                        })
-                        .collect(Collectors.toList());
+                      .filter(r -> {
+                          if (r.getId().equals(ruleCommand.getRuleId())) {
+                              log.info("Successfully removed rule with id '{}'.", ruleCommand.getRuleId());
+                              outputRule(context, r, ruleCommand.getId());
+                              return false;
+                          } else {
+                              return true;
+                          }
+                      })
+                      .collect(Collectors.toList());
                 if (newRules.size() == rules.size()) {
                     log.info("Unable to find rule with id '{}' to remove.", ruleCommand.getRuleId());
                     outputRule(context, null, ruleCommand.getId());
                 }
                 return newRules;
             case UPSERT:
-                String ruleId = (ruleCommand.getRule().getId() == null) ? UUID.randomUUID().toString() : ruleCommand.getRule().getId();
+                String ruleId = (ruleCommand.getRule().getId() == null) ? UUID.randomUUID().toString() :
+                      ruleCommand.getRule().getId();
                 Optional<R> matchingRule = rules.stream().filter(r -> r.getId().equals(ruleId)).findFirst();
                 int newRuleVersion = 0;
                 if (matchingRule.isPresent()) {
@@ -106,10 +120,11 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C ext
                 Boolean success = newRule.isValid();
 
                 outputRule(context, newRule, ruleCommand.getId(), success);
-                if(success) {
-                return Stream.concat(rules.stream().filter(r -> !r.getId().equals(ruleCommand.getRuleId())),
-                        Stream.of(newRule))
-                        .collect(Collectors.toList());} else {
+                if (success) {
+                    return Stream.concat(rules.stream().filter(r -> !r.getId().equals(ruleCommand.getRuleId())),
+                                Stream.of(newRule))
+                          .collect(Collectors.toList());
+                } else {
                     return rules;
                 }
 
@@ -118,7 +133,8 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C ext
             case DISABLE:
                 return setEnable(context, ruleCommand.getId(), rules, ruleCommand.getRuleId(), false);
             case GET:
-                R getRuleResult = rules.stream().filter(r -> r.getId().equals(ruleCommand.getRuleId())).findFirst().orElse(null);
+                R getRuleResult =
+                      rules.stream().filter(r -> r.getId().equals(ruleCommand.getRuleId())).findFirst().orElse(null);
                 log.info("Get rule with id '{}' ", ruleCommand.getRuleId());
                 outputRule(context, getRuleResult, ruleCommand.getId());
                 return rules;
@@ -135,16 +151,16 @@ public abstract class DynamicRuleProcessFunction<R extends DynamicRule<R>, C ext
 
     private void outputRule(Context context, R r, String cmdId) {
 
-         outputRule(context, r, cmdId, true);
+        outputRule(context, r, cmdId, true);
     }
 
     private void outputRule(Context context, R r, String cmdId, Boolean success) {
         context.output(this.outputSink, resultBuilderSupplier.get()
-                .cmdId(cmdId)
-                .rule(r)
-                .success(success)
-                .subtaskNumber(getRuntimeContext().getIndexOfThisSubtask())
-                .build());
+              .cmdId(cmdId)
+              .rule(r)
+              .success(success)
+              .subtaskNumber(getRuntimeContext().getIndexOfThisSubtask())
+              .build());
     }
 
     private List<R> setEnable(Context context, String id, List<R> allScoringRules, String ruleId, boolean state) {

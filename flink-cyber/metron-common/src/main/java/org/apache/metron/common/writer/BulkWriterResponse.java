@@ -21,12 +21,11 @@ package org.apache.metron.common.writer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
-import org.apache.metron.common.configuration.writer.WriterConfiguration;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.apache.metron.common.configuration.writer.WriterConfiguration;
 
 /**
  * This class contains the results of a {@link org.apache.metron.common.writer.BulkMessageWriter#write(String, WriterConfiguration, List)}
@@ -34,21 +33,21 @@ import java.util.Map;
  * {@link org.apache.metron.common.writer.MessageId}.
  */
 public class BulkWriterResponse {
-    private Multimap<Throwable, MessageId> errors = ArrayListMultimap.create();
-    private List<MessageId> successes = new ArrayList<>();
+    private final Multimap<Throwable, MessageId> errors = ArrayListMultimap.create();
+    private final List<MessageId> successes = new ArrayList<>();
 
     public void addError(Throwable error, MessageId id) {
         errors.put(error, id);
     }
 
-  /**
-   * Adds provided errors and associated tuples.
-   *
-   * @param error The error to add
-   * @param ids Iterable of all messages with the error
-   */
+    /**
+     * Adds provided errors and associated tuples.
+     *
+     * @param error The error to add
+     * @param ids   Iterable of all messages with the error
+     */
     public void addAllErrors(Throwable error, Iterable<MessageId> ids) {
-        if(ids != null) {
+        if (ids != null) {
             errors.putAll(error, ids);
         }
     }
@@ -61,13 +60,13 @@ public class BulkWriterResponse {
         successes.add(success);
     }
 
-  /**
-   * Adds all provided successes.
-   *
-   * @param allSuccesses Successes to add
-   */
+    /**
+     * Adds all provided successes.
+     *
+     * @param allSuccesses Successes to add
+     */
     public void addAllSuccesses(Iterable<MessageId> allSuccesses) {
-        if(allSuccesses != null) {
+        if (allSuccesses != null) {
             Iterables.addAll(successes, allSuccesses);
         }
     }
@@ -82,12 +81,18 @@ public class BulkWriterResponse {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         BulkWriterResponse that = (BulkWriterResponse) o;
 
-        if (!errors.equals(that.errors)) return false;
+        if (!errors.equals(that.errors)) {
+            return false;
+        }
         return successes.equals(that.successes);
 
     }
@@ -101,9 +106,9 @@ public class BulkWriterResponse {
 
     @Override
     public String toString() {
-        return "BulkWriterResponse{" +
-                "errors=" + errors +
-                ", successes=" + successes +
-                '}';
+        return "BulkWriterResponse{"
+               + "errors=" + errors
+               + ", successes=" + successes
+               + '}';
     }
 }

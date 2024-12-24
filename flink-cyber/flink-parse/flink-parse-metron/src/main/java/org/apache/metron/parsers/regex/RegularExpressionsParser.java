@@ -4,8 +4,10 @@
  * copyright ownership. The ASF licenses this file to you under the Apache License, Version 2.0 (the
  * "License"); you may not use this file except in compliance with the License. You may obtain a
  * copy of the License at
+ *
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
+ *
  * <p>
  * Unless required by applicable law or agreed to in writing, software distributed under the License
  * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
@@ -17,7 +19,7 @@ package org.apache.metron.parsers.regex;
 
 import com.google.common.base.CaseFormat;
 import java.lang.invoke.MethodHandles;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -30,8 +32,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.metron.stellar.common.Constants;
 import org.apache.metron.parsers.BasicParser;
+import org.apache.metron.stellar.common.Constants;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +47,9 @@ import org.slf4j.LoggerFactory;
  * <code>
  * "convertCamelCaseToUnderScore": true,
  * "recordTypeRegex": "(?&lt;process&gt;(?&lt;=\\s)\\b(kernel|syslog)\\b(?=\\[|:))",
- * "messageHeaderRegex": "(?&lt;syslogpriority&gt;(?&lt;=^&lt;)\\d{1,4}(?=&gt;)).*?(?&lt;timestamp>(?&lt;=&gt;)[A-Za-z]{3}\\s{1,2}\\d{1,2}\\s\\d{1,2}:\\d{1,2}:\\d{1,2}(?=\\s)).*?(?&lt;syslogHost&gt;(?&lt;=\\s).*?(?=\\s))",
+ * "messageHeaderRegex": "(?&lt;syslogpriority&gt;(?&lt;=^&lt;)\\d{1,4}(?=&gt;)).*?
+ *                          (?&lt;timestamp>(?&lt;=&gt;)[A-Za-z]{3}\\s{1,2}\\d{1,2}\\s\\d{1,2}:\\d{1,2}:\\d{1,2}(?=\\s)).*?
+ *                          (?&lt;syslogHost&gt;(?&lt;=\\s).*?(?=\\s))",
  * "fields": [
  * {
  * "recordType": "kernel",
@@ -53,12 +57,15 @@ import org.slf4j.LoggerFactory;
  * },
  * {
  * "recordType": "syslog",
- * "regex": ".*(?&lt;processid&gt;(?&lt;=PID\\s=\\s).*?(?=\\sLine)).*(?&lt;filePath&gt;(?&lt;=64\\s)\/([A-Za-z0-9_-]+\/)+(?=\\w))(?&lt;fileName&gt;.*?(?=\")).*(?&lt;eventInfo&gt;(?&lt;=\").*?(?=$))"
+ * "regex": ".*(?&lt;processid&gt;(?&lt;=PID\\s=\\s).*?(?=\\sLine)).*
+ *                  (?&lt;filePath&gt;(?&lt;=64\\s)\/([A-Za-z0-9_-]+\/)+(?=\\w))(?&lt;fileName&gt;.*?(?=\")).*
+ *                  (?&lt;eventInfo&gt;(?&lt;=\").*?(?=$))"
  * }
  * ]
  * </code>
  * </pre>
  *
+ * <p>
  * Note: messageHeaderRegex could be specified as lists also e.g.
  *
  * <pre>
@@ -70,6 +77,7 @@ import org.slf4j.LoggerFactory;
  * </code>
  * </pre>
  *
+ * <p>
  * Where <strong>regular expression 1</strong> are valid regular expressions and may have named
  * groups, which would be extracted into fields. This list will be evaluated in order until a
  * matching regular expression is found.<br>
@@ -87,9 +95,11 @@ import org.slf4j.LoggerFactory;
  * <br>
  * </pre>
  *
+ * <p>
  * Here message structure (<7>Jun 26 16:18:01 hostName kernel) is common across all messages.
  * Hence messageHeaderRegex could be used to extract fields from this part.
  *
+ * <p>
  * fields : json list of objects containing recordType and regex. regex could be a further list e.g.
  *
  * <pre>
@@ -114,29 +124,34 @@ import org.slf4j.LoggerFactory;
  * </code>
  * </pre>
  *
+ * <p>
  * This means that an _ (underscore), cannot be used as part of a named group name. E.g. this is an
  * invalid regular expression <code>.*(?&lt;event_info&gt;(?&lt;=\\]|\\w\\:).*?(?=$))</code>
  *
+ * <p>
  * However, this limitation can be easily overcome by adding a parser configuration setting.
  *
+ * <p>
  * <code>
  *  "convertCamelCaseToUnderScore": true,
- * <code>
- * If above property is added to the sensor parser configuration, in parserConfig object, this parser will automatically convert all the camel case property names to underscore seperated.
+ * </code>
+ * If above property is added to the sensor parser configuration,
+ * in parserConfig object, this parser will automatically convert all the camel case property names to underscore seperated.
  * For example, following conversions will automatically happen:
  *
+ * <p>
  * <code>
  * ipSrcAddr -> ip_src_addr
  * ipDstAddr -> ip_dst_addr
  * ipSrcPort -> ip_src_port
- * <code>
+ * </code>
  * etc.
  */
 //@formatter:on
 public class RegularExpressionsParser extends BasicParser {
 
     protected static final Logger LOG =
-        LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+          LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 
     private List<Map<String, Object>> fields;
     private Map<String, Object> parserConfig;
@@ -145,7 +160,7 @@ public class RegularExpressionsParser extends BasicParser {
     private Pattern recordTypePattern;
     private final Set<String> recordTypePatternNamedGroups = new HashSet<>();
     private final Map<String, Map<Pattern, Set<String>>> recordTypePatternMap =
-        new LinkedHashMap<>();
+          new LinkedHashMap<>();
     private final Map<Pattern, Set<String>> messageHeaderPatternsMap = new LinkedHashMap<>();
 
     /**
@@ -163,7 +178,7 @@ public class RegularExpressionsParser extends BasicParser {
             LOG.debug(" raw message. {}", originalMessage);
             if (originalMessage.isEmpty()) {
                 LOG.warn("Message is empty.");
-                return Arrays.asList(new JSONObject());
+                return Collections.singletonList(new JSONObject());
             }
         } catch (Exception e) {
             LOG.error("[Metron] Could not read raw message. {} " + originalMessage, e);
@@ -176,115 +191,12 @@ public class RegularExpressionsParser extends BasicParser {
         }
         parsedJson.putAll(parse(originalMessage));
         parsedJson.put(Constants.Fields.ORIGINAL.getName(), originalMessage);
-        /**
+        /*
          * Populate the output json with default timestamp.
          */
         parsedJson.put(Constants.Fields.TIMESTAMP.getName(), System.currentTimeMillis());
         applyFieldTransformations(parsedJson);
-        return Arrays.asList(parsedJson);
-    }
-
-    private void applyFieldTransformations(JSONObject parsedJson) {
-        if (getParserConfig().get(ParserConfigConstants.CONVERT_CAMELCASE_TO_UNDERSCORE.getName())
-            != null && (Boolean) getParserConfig()
-            .get(ParserConfigConstants.CONVERT_CAMELCASE_TO_UNDERSCORE.getName())) {
-            convertCamelCaseToUnderScore(parsedJson);
-        }
-
-    }
-
-    // @formatter:off
-  /**
-   * This method is called during the parser initialization. It parses the parser
-   * configuration and configures the parser accordingly. It then initializes
-   * instance variables.
-   *
-   * @param parserConfig ParserConfig(Map<String, Object>) supplied to the sensor.
-   * @see org.apache.metron.parsers.interfaces.Configurable#configure(java.util.Map)<br>
-   *      <br>
-   */
-  // @formatter:on
-  @Override
-  public void configure(Map<String, Object> parserConfig) {
-      setReadCharset(parserConfig);
-      setParserConfig(parserConfig);
-      setFields((List<Map<String, Object>>) getParserConfig()
-          .get(ParserConfigConstants.FIELDS.getName()));
-      String recordTypeRegex =
-          (String) getParserConfig().get(ParserConfigConstants.RECORD_TYPE_REGEX.getName());
-
-      if (StringUtils.isBlank(recordTypeRegex)) {
-          LOG.error("Invalid config :recordTypeRegex is missing in parserConfig");
-          throw new IllegalStateException(
-              "Invalid config :recordTypeRegex is missing in parserConfig");
-      }
-
-      setRecordTypePattern(recordTypeRegex);
-      recordTypePatternNamedGroups.addAll(getNamedGroups(recordTypeRegex));
-      List<Map<String, Object>> fields =
-          (List<Map<String, Object>>) getParserConfig().get(ParserConfigConstants.FIELDS.getName());
-
-      try {
-          configureRecordTypePatterns(fields);
-          configureMessageHeaderPattern();
-      } catch (PatternSyntaxException e) {
-          LOG.error("Invalid config : {} ", e.getMessage());
-          throw new IllegalStateException("Invalid config : " + e.getMessage());
-      }
-
-      validateConfig();
-  }
-
-    private void configureMessageHeaderPattern() {
-        if (getParserConfig().get(ParserConfigConstants.MESSAGE_HEADER.getName()) != null) {
-            if (getParserConfig()
-                .get(ParserConfigConstants.MESSAGE_HEADER.getName()) instanceof List) {
-                List<String> messageHeaderPatternList = (List<String>) getParserConfig()
-                    .get(ParserConfigConstants.MESSAGE_HEADER.getName());
-                for (String messageHeaderPatternStr : messageHeaderPatternList) {
-                    messageHeaderPatternsMap.put(Pattern.compile(messageHeaderPatternStr),
-                        getNamedGroups(messageHeaderPatternStr));
-                }
-            } else if (getParserConfig()
-                .get(ParserConfigConstants.MESSAGE_HEADER.getName()) instanceof String) {
-                String messageHeaderPatternStr =
-                    (String) getParserConfig().get(ParserConfigConstants.MESSAGE_HEADER.getName());
-                if (StringUtils.isNotBlank(messageHeaderPatternStr)) {
-                    messageHeaderPatternsMap.put(Pattern.compile(messageHeaderPatternStr),
-                        getNamedGroups(messageHeaderPatternStr));
-                }
-            }
-        }
-    }
-
-    private void configureRecordTypePatterns(List<Map<String, Object>> fields) {
-
-        for (Map<String, Object> field : fields) {
-            if (field.get(ParserConfigConstants.RECORD_TYPE.getName()) != null
-                && field.get(ParserConfigConstants.REGEX.getName()) != null) {
-                String recordType =
-                    ((String) field.get(ParserConfigConstants.RECORD_TYPE.getName())).toLowerCase();
-                recordTypePatternMap.put(recordType, new LinkedHashMap<>());
-                if (field.get(ParserConfigConstants.REGEX.getName()) instanceof List) {
-                    List<String> regexList =
-                        (List<String>) field.get(ParserConfigConstants.REGEX.getName());
-                    regexList.forEach(s -> {
-                        recordTypePatternMap.get(recordType)
-                            .put(Pattern.compile(s), getNamedGroups(s));
-                    });
-                } else if (field.get(ParserConfigConstants.REGEX.getName()) instanceof String) {
-                    recordTypePatternMap.get(recordType).put(
-                        Pattern.compile((String) field.get(ParserConfigConstants.REGEX.getName())),
-                        getNamedGroups((String) field.get(ParserConfigConstants.REGEX.getName())));
-                }
-            }
-        }
-    }
-
-    private void setRecordTypePattern(String recordTypeRegex) {
-        if (recordTypeRegex != null) {
-            recordTypePattern = Pattern.compile(recordTypeRegex);
-        }
+        return Collections.singletonList(parsedJson);
     }
 
     private JSONObject parse(String originalMessage) {
@@ -307,8 +219,106 @@ public class RegularExpressionsParser extends BasicParser {
         return parsedJson;
     }
 
+    private void applyFieldTransformations(JSONObject parsedJson) {
+        if (getParserConfig().get(ParserConfigConstants.CONVERT_CAMELCASE_TO_UNDERSCORE.getName()) != null
+                && (Boolean) getParserConfig()
+              .get(ParserConfigConstants.CONVERT_CAMELCASE_TO_UNDERSCORE.getName())) {
+            convertCamelCaseToUnderScore(parsedJson);
+        }
+
+    }
+
+    // @formatter:off
+    /**
+     * This method is called during the parser initialization. It parses the parser
+     * configuration and configures the parser accordingly. It then initializes
+     * instance variables.
+     *
+     * @param parserConfig {@code ParserConfig(Map<String, Object>)} supplied to the sensor.
+     * @see org.apache.metron.parsers.interfaces.Configurable#configure(java.util.Map)
+     */
+    // @formatter:on
+    @Override
+    public void configure(Map<String, Object> parserConfig) {
+        setReadCharset(parserConfig);
+        setParserConfig(parserConfig);
+        setFields((List<Map<String, Object>>) getParserConfig()
+              .get(ParserConfigConstants.FIELDS.getName()));
+        String recordTypeRegex =
+              (String) getParserConfig().get(ParserConfigConstants.RECORD_TYPE_REGEX.getName());
+        if (StringUtils.isBlank(recordTypeRegex)) {
+            LOG.error("Invalid config :recordTypeRegex is missing in parserConfig");
+            throw new IllegalStateException(
+                  "Invalid config :recordTypeRegex is missing in parserConfig");
+        }
+        setRecordTypePattern(recordTypeRegex);
+        recordTypePatternNamedGroups.addAll(getNamedGroups(recordTypeRegex));
+        List<Map<String, Object>> fields =
+              (List<Map<String, Object>>) getParserConfig().get(ParserConfigConstants.FIELDS.getName());
+        try {
+            configureRecordTypePatterns(fields);
+            configureMessageHeaderPattern();
+        } catch (PatternSyntaxException e) {
+            LOG.error("Invalid config : {} ", e.getMessage());
+            throw new IllegalStateException("Invalid config : " + e.getMessage());
+        }
+        validateConfig();
+    }
+
+    private void configureMessageHeaderPattern() {
+        if (getParserConfig().get(ParserConfigConstants.MESSAGE_HEADER.getName()) != null) {
+            if (getParserConfig()
+                  .get(ParserConfigConstants.MESSAGE_HEADER.getName()) instanceof List) {
+                List<String> messageHeaderPatternList = (List<String>) getParserConfig()
+                      .get(ParserConfigConstants.MESSAGE_HEADER.getName());
+                for (String messageHeaderPatternStr : messageHeaderPatternList) {
+                    messageHeaderPatternsMap.put(Pattern.compile(messageHeaderPatternStr),
+                          getNamedGroups(messageHeaderPatternStr));
+                }
+            } else if (getParserConfig()
+                  .get(ParserConfigConstants.MESSAGE_HEADER.getName()) instanceof String) {
+                String messageHeaderPatternStr =
+                      (String) getParserConfig().get(ParserConfigConstants.MESSAGE_HEADER.getName());
+                if (StringUtils.isNotBlank(messageHeaderPatternStr)) {
+                    messageHeaderPatternsMap.put(Pattern.compile(messageHeaderPatternStr),
+                          getNamedGroups(messageHeaderPatternStr));
+                }
+            }
+        }
+    }
+
+    private void configureRecordTypePatterns(List<Map<String, Object>> fields) {
+
+        for (Map<String, Object> field : fields) {
+            if (field.get(ParserConfigConstants.RECORD_TYPE.getName()) != null
+                    && field.get(ParserConfigConstants.REGEX.getName()) != null) {
+                String recordType =
+                      ((String) field.get(ParserConfigConstants.RECORD_TYPE.getName())).toLowerCase();
+                recordTypePatternMap.put(recordType, new LinkedHashMap<>());
+                if (field.get(ParserConfigConstants.REGEX.getName()) instanceof List) {
+                    List<String> regexList =
+                          (List<String>) field.get(ParserConfigConstants.REGEX.getName());
+                    regexList.forEach(s -> {
+                        recordTypePatternMap.get(recordType)
+                                            .put(Pattern.compile(s), getNamedGroups(s));
+                    });
+                } else if (field.get(ParserConfigConstants.REGEX.getName()) instanceof String) {
+                    recordTypePatternMap.get(recordType).put(
+                          Pattern.compile((String) field.get(ParserConfigConstants.REGEX.getName())),
+                          getNamedGroups((String) field.get(ParserConfigConstants.REGEX.getName())));
+                }
+            }
+        }
+    }
+
+    private void setRecordTypePattern(String recordTypeRegex) {
+        if (recordTypeRegex != null) {
+            recordTypePattern = Pattern.compile(recordTypeRegex);
+        }
+    }
+
     private void extractNamedGroups(Map<String, Object> json, String recordType,
-        String originalMessage) {
+                                    String originalMessage) {
         Map<Pattern, Set<String>> patternMap = recordTypePatternMap.get(recordType.toLowerCase());
         if (patternMap != null) {
             for (Map.Entry<Pattern, Set<String>> entry : patternMap.entrySet()) {
@@ -318,7 +328,7 @@ public class RegularExpressionsParser extends BasicParser {
                     Matcher m = pattern.matcher(originalMessage);
                     if (m.matches()) {
                         LOG.debug("RecordType : {} Trying regex : {} for message : {} ", recordType,
-                            pattern.toString(), originalMessage);
+                              pattern, originalMessage);
                         for (String namedGroup : namedGroups) {
                             if (m.group(namedGroup) != null) {
                                 json.put(namedGroup, m.group(namedGroup).trim());
@@ -353,7 +363,7 @@ public class RegularExpressionsParser extends BasicParser {
     private Map<String, Object> extractHeaderFields(String originalMessage) {
         Map<String, Object> messageHeaderJson = new JSONObject();
         for (Map.Entry<Pattern, Set<String>> syslogPatternEntry : messageHeaderPatternsMap
-            .entrySet()) {
+              .entrySet()) {
             Matcher m = syslogPatternEntry.getKey().matcher(originalMessage);
             if (m.find()) {
                 for (String namedGroup : syslogPatternEntry.getValue()) {
@@ -384,7 +394,7 @@ public class RegularExpressionsParser extends BasicParser {
         for (Map.Entry<String, Object> entry : json.entrySet()) {
             if (capitalLettersPattern.matcher(entry.getKey()).matches()) {
                 oldKeyNewKeyMap.put(entry.getKey(),
-                    CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey()));
+                      CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, entry.getKey()));
             }
         }
         oldKeyNewKeyMap.forEach((oldKey, newKey) -> json.put(newKey, json.remove(oldKey)));
@@ -408,15 +418,15 @@ public class RegularExpressionsParser extends BasicParser {
 
     enum ParserConfigConstants {
         //@formatter:off
-    RECORD_TYPE("recordType"),
-    RECORD_TYPE_REGEX("recordTypeRegex"),
-    REGEX("regex"),
-    FIELDS("fields"),
-    MESSAGE_HEADER("messageHeaderRegex"),
-    CONVERT_CAMELCASE_TO_UNDERSCORE("convertCamelCaseToUnderScore");
-    //@formatter:on
-    private final String name;
-        private static Map<String, ParserConfigConstants> nameToField;
+        RECORD_TYPE("recordType"),
+        RECORD_TYPE_REGEX("recordTypeRegex"),
+        REGEX("regex"),
+        FIELDS("fields"),
+        MESSAGE_HEADER("messageHeaderRegex"),
+        CONVERT_CAMELCASE_TO_UNDERSCORE("convertCamelCaseToUnderScore");
+        //@formatter:on
+        private final String name;
+        private static final Map<String, ParserConfigConstants> nameToField;
 
         ParserConfigConstants(String name) {
             this.name = name;

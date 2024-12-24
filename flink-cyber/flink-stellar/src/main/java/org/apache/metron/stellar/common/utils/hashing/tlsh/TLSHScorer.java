@@ -1,8 +1,8 @@
 package org.apache.metron.stellar.common.utils.hashing.tlsh;
 
-import java.util.Arrays;
-
 import static org.apache.metron.stellar.common.utils.hashing.tlsh.TLSHConstants.DIFF_SCALE;
+
+import java.util.Arrays;
 
 public class TLSHScorer {
 
@@ -29,7 +29,7 @@ public class TLSHScorer {
     private int scoreBuckets(final int[] buckets1, final int[] buckets2) {
         if (buckets1.length != buckets2.length) {
             throw new IllegalArgumentException(
-                    String.format("Number of body bytes differ %d != %d", buckets1.length, buckets2.length));
+                  String.format("Number of body bytes differ %d != %d", buckets1.length, buckets2.length));
         }
 
         int diff = 0;
@@ -42,7 +42,7 @@ public class TLSHScorer {
     private int scoreChecksum(final int[] checksumA, final int[] checksumB) {
         if (checksumA.length != checksumB.length) {
             throw new IllegalArgumentException(
-                    String.format("Number of checksum bytes differ %d != %d", checksumA.length, checksumB.length));
+                  String.format("Number of checksum bytes differ %d != %d", checksumA.length, checksumB.length));
         }
         return Arrays.equals(checksumA, checksumB) ? 0 : 1;
     }
@@ -53,6 +53,7 @@ public class TLSHScorer {
         return q1diff <= 1 ? q1diff : (q1diff - 1) * DIFF_SCALE;
     }
 
+    @SuppressWarnings("checkstyle:ParameterName")
     private int scoreLValue(final int lValue2, final int lValue3) {
         final int ldiff = modDiff(lValue2, lValue3, 256);
         switch (ldiff) {

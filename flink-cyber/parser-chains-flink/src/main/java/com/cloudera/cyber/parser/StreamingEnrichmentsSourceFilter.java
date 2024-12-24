@@ -13,10 +13,9 @@
 package com.cloudera.cyber.parser;
 
 import com.cloudera.cyber.Message;
-import org.apache.flink.api.common.functions.FilterFunction;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.flink.api.common.functions.FilterFunction;
 
 public class StreamingEnrichmentsSourceFilter implements FilterFunction<Message> {
     private final ArrayList<String> streamingEnrichmentSources;

@@ -19,15 +19,14 @@
 package com.cloudera.cyber.jdbc.connector.jdbc.internal.executor;
 
 import com.cloudera.cyber.jdbc.connector.jdbc.internal.JdbcStatementBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class SimpleBatchStatementExecutor<T, V> implements JdbcBatchStatementExecutor<T> {
 
@@ -42,7 +41,7 @@ class SimpleBatchStatementExecutor<T, V> implements JdbcBatchStatementExecutor<T
     private transient Connection connection;
 
     SimpleBatchStatementExecutor(
-            String sql, JdbcStatementBuilder<V> statementBuilder, Function<T, V> valueTransformer) {
+          String sql, JdbcStatementBuilder<V> statementBuilder, Function<T, V> valueTransformer) {
         this.sql = sql;
         this.parameterSetter = statementBuilder;
         this.valueTransformer = valueTransformer;

@@ -28,14 +28,14 @@ public class ProfileGroupConfigTestUtils {
     }
 
     public static ProfileMeasurementConfig createMeasurement(ProfileAggregationMethod aggMethod, String resultName, String fieldName, String format) {
-        return ProfileMeasurementConfig.builder().aggregationMethod(aggMethod).
-                resultExtensionName(resultName).fieldName(fieldName).format(format).build();
+        return ProfileMeasurementConfig.builder().aggregationMethod(aggMethod)
+                .resultExtensionName(resultName).fieldName(fieldName).format(format).build();
     }
 
     public static ProfileMeasurementConfig createMeasurement(ProfileAggregationMethod aggMethod, String resultName, String fieldName, String format, boolean calculateStats) {
-        return ProfileMeasurementConfig.builder().aggregationMethod(aggMethod).
-                resultExtensionName(resultName).fieldName(fieldName).format(format).
-                calculateStats(calculateStats).build();
+        return ProfileMeasurementConfig.builder().aggregationMethod(aggMethod)
+                .resultExtensionName(resultName).fieldName(fieldName).format(format)
+                .calculateStats(calculateStats).build();
     }
 
 }

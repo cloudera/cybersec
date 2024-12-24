@@ -12,10 +12,14 @@
 
 package com.cloudera.cyber.sessions;
 
+import static com.cloudera.cyber.flink.FlinkUtils.createKafkaSource;
+
 import com.cloudera.cyber.GroupedMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.flink.Utils;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
@@ -23,11 +27,6 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Preconditions;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static com.cloudera.cyber.flink.FlinkUtils.createKafkaSource;
 
 public class SessionJobKafka extends SessionJob {
 
@@ -39,37 +38,38 @@ public class SessionJobKafka extends SessionJob {
     }
 
     /**
-     * Returns a consumer group id for the sessioniser ensuring that each topic is only processed once with the same keys
+     * Returns a consumer group id for the sessioniser ensuring that each topic is only processed once with the same keys.
      *
-     * @param inputTopic topic to read from
-     * @param sessionKey the keys being used to sessionise
+     * @param inputTopic     topic to read from
+     * @param sessionKey     the keys being used to sessionise
      * @param sessionTimeout duration of time window for session
      * @return Generated group id for Kakfa
      */
     private String createGroupId(String inputTopic, List<String> sessionKey, Long sessionTimeout) {
         List<String> parts = Arrays.asList("sessionizer",
-                inputTopic,
-                String.valueOf(sessionKey.hashCode()),
-                String.valueOf(sessionTimeout));
+              inputTopic,
+              String.valueOf(sessionKey.hashCode()),
+              String.valueOf(sessionTimeout));
         return String.join(".", parts);
     }
 
     @Override
     protected void writeResults(ParameterTool params, SingleOutputStreamOperator<GroupedMessage> results) {
         KafkaSink<GroupedMessage> sink = new FlinkUtils<>(GroupedMessage.class).createKafkaSink(
-                params.getRequired("topic.enrichment"), "sessionizer",
-                params);
+              params.getRequired("topic.enrichment"), "sessionizer",
+              params);
         results.sinkTo(sink).name("Kafka Results").uid("kafka.results");
     }
 
     @Override
-    protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> sessionKey, Long sessionTimeout) {
+    protected DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params,
+                                               List<String> sessionKey, Long sessionTimeout) {
         String inputTopic = params.getRequired("topic.input");
         String groupId = createGroupId(inputTopic, sessionKey, sessionTimeout);
         return
-                env.fromSource(createKafkaSource(inputTopic,
-                        params,
-                        groupId), WatermarkStrategy.noWatermarks(), "Kafka Source")
-                        .uid("kafka.input");
+              env.fromSource(createKafkaSource(inputTopic,
+                       params,
+                       groupId), WatermarkStrategy.noWatermarks(), "Kafka Source")
+                 .uid("kafka.input");
     }
 }

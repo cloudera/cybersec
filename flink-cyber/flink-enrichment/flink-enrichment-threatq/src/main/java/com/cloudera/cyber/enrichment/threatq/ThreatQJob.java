@@ -12,25 +12,24 @@
 
 package com.cloudera.cyber.enrichment.threatq;
 
+import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
+import static com.cloudera.cyber.enrichment.hbase.HbaseJob.PARAMS_ENRICHMENT_CONFIG;
+
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.flink.FlinkUtils;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-
-import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
-import static com.cloudera.cyber.enrichment.hbase.HbaseJob.PARAMS_ENRICHMENT_CONFIG;
 
 @Slf4j
 public abstract class ThreatQJob {
@@ -39,16 +38,18 @@ public abstract class ThreatQJob {
                                              List<ThreatQConfig> configs,
                                              EnrichmentsConfig enrichmentStorageConfig
     ) {
-        return source.process(new ThreatQHBaseMap(configs, enrichmentStorageConfig)).name("Apply ThreatQ").uid("threatq-enrich");
+        return source.process(new ThreatQHBaseMap(configs, enrichmentStorageConfig)).name("Apply ThreatQ")
+                     .uid("threatq-enrich");
     }
 
     public static List<ThreatQConfig> parseConfigs(byte[] configJson) throws IOException {
         return new ObjectMapper().readValue(
-                configJson,
-                new TypeReference<List<ThreatQConfig>>() {
-                });
+              configJson,
+              new TypeReference<List<ThreatQConfig>>() {
+              });
     }
 
+    @SuppressWarnings("checkstyle:VariableDeclarationUsageDistance")
     public StreamExecutionEnvironment createPipeline(ParameterTool params) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         FlinkUtils.setupEnv(env, params);
@@ -60,29 +61,33 @@ public abstract class ThreatQJob {
         List<ThreatQConfig> configs = parseConfigs(configJson);
         log.info("ThreatQ Configs {}", configs);
 
-        EnrichmentsConfig enrichmentsStorageConfig = EnrichmentsConfig.load(params.getRequired(PARAMS_ENRICHMENT_CONFIG));
+        EnrichmentsConfig enrichmentsStorageConfig =
+              EnrichmentsConfig.load(params.getRequired(PARAMS_ENRICHMENT_CONFIG));
 
         writeEnrichments(enrichmentSource, enrichmentsStorageConfig, params);
 
         String enrichmentsStorageConfigFileName = params.get(PARAMS_ENRICHMENT_CONFIG);
-        EnrichmentsConfig enrichmentStorageConfig = new EnrichmentsConfig(Collections.emptyMap(), Collections.emptyMap());
+        EnrichmentsConfig enrichmentStorageConfig =
+              new EnrichmentsConfig(Collections.emptyMap(), Collections.emptyMap());
         if (enrichmentsStorageConfigFileName != null) {
             enrichmentStorageConfig = EnrichmentsConfig.load(enrichmentsStorageConfigFileName);
         }
 
-        DataStream<Message> pipeline = enrich(source,configs, enrichmentStorageConfig);
+        DataStream<Message> pipeline = enrich(source, configs, enrichmentStorageConfig);
         writeResults(env, params, pipeline);
         return env;
     }
 
-    protected abstract void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<Message> reduction);
+    protected abstract void writeResults(StreamExecutionEnvironment env, ParameterTool params,
+                                         DataStream<Message> reduction);
 
     public abstract DataStream<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
 
-    protected abstract DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
+    protected abstract DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env,
+                                                                            ParameterTool params);
 
     public abstract void writeEnrichments(DataStream<EnrichmentCommand> enrichmentSource,
-                                                              EnrichmentsConfig enrichmentsConfig,
-                                                              ParameterTool params);
+                                          EnrichmentsConfig enrichmentsConfig,
+                                          ParameterTool params);
 
 }
