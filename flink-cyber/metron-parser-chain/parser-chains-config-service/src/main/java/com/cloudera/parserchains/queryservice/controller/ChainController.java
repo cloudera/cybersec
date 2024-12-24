@@ -212,7 +212,7 @@ public class ChainController {
 
     @Operation(summary = "Loads table mappings for the indexing job.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "The mapping file parsed successfully."),
+                @ApiResponse(responseCode = "200", description = "The mapping file parsed successfully."),
             })
     @PostMapping(value = API_INDEXING + "/table")
     public ResponseEntity<Map<String, Object>> getTableConfigFromPath(
