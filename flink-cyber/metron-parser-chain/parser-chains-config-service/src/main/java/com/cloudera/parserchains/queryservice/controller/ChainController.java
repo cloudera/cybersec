@@ -186,12 +186,12 @@ public class ChainController {
           responses = {
                 @ApiResponse(responseCode = "200", description = "The mapping file parsed successfully."),
           })
-    @PostMapping(value = API_INDEXING)
+    @PostMapping(value = API_INDEXING + "/mapping")
     public ResponseEntity<Map<String, Object>> getMappingsFromPath(
           @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
           @RequestParam(name = "pipelineName", required = false) String pipelineName,
           @RequestBody IndexMappingDescriptor body) throws IOException {
-        final String indexPath = getIndexingPath(body.getFilePath(), pipelineName);
+        final String indexPath = getIndexMappingPath(body.getFilePath(), pipelineName);
 
         try {
             final Object mappingDtoMap = indexingService.getMappingsFromPath(indexPath);
@@ -209,15 +209,45 @@ public class ChainController {
         }
     }
 
+
+    @Operation(summary = "Loads table mappings for the indexing job.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "The mapping file parsed successfully."),
+            })
+    @PostMapping(value = API_INDEXING + "/table")
+    public ResponseEntity<Map<String, Object>> getTableConfigFromPath(
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName,
+            @RequestBody IndexMappingDescriptor body) throws IOException {
+        final String indexPath = getIndexTablePath(body.getFilePath(), pipelineName);
+
+        try {
+            final Object tableConfigs = indexingService.getTableConfigFromPath(indexPath);
+            if (null == tableConfigs) {
+                return ResponseEntity.noContent().build();
+            } else {
+                Map<String, Object> result = new HashMap<>();
+                result.put("path", indexPath);
+                result.put("result", tableConfigs);
+                return ResponseEntity.ok(result);
+            }
+            // TODO: fix exception handling
+        } catch (IOException ioe) {
+            throw new RuntimeException("Unable to read table configs from the provided path");
+        }
+    }
+
     @PostMapping(API_INDEXING + "/new")
     public ResponseEntity<Void> saveMappingsToPath(
           @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
           @RequestParam(name = "pipelineName", required = false) String pipelineName,
           @RequestBody OcsfIndexMappingDescriptor body) throws IOException {
-        final String indexPath = getIndexingPath(body.getFilePath(), pipelineName);
+        final String indexMappingPath = getIndexMappingPath(body.getMappingFilePath(), pipelineName);
+        final String indexTablePath = getIndexTablePath(body.getTableFilePath(), pipelineName);
 
         try {
-            indexingService.saveMappingsToPath(indexPath, body.getMappings());
+            indexingService.saveDataToPath(indexMappingPath, body.getMappings());
+            indexingService.saveDataToPath(indexTablePath, body.getTableConfig());
             return ResponseEntity.noContent().build();
             // TODO: fix exception handling
         } catch (IOException ioe) {
@@ -277,11 +307,18 @@ public class ChainController {
         return getPipelinePath(pipelineName, appProperties::getConfigPath);
     }
 
-    private String getIndexingPath(String filePath, String pipelineName) throws IOException {
+    private String getIndexMappingPath(String filePath, String pipelineName) throws IOException {
         if (StringUtils.hasText(filePath)) {
             return filePath;
         }
-        return getPipelinePath(pipelineName, appProperties::getIndexPath);
+        return getPipelinePath(pipelineName, appProperties::getIndexMappingPath);
+    }
+
+    private String getIndexTablePath(String filePath, String pipelineName) throws IOException {
+        if (StringUtils.hasText(filePath)) {
+            return filePath;
+        }
+        return getPipelinePath(pipelineName, appProperties::getIndexTablePath);
     }
 
     private String getPipelinePath(String pipelineName, Supplier<String> defaultPathSupplier) throws IOException {

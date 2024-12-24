@@ -1,5 +1,6 @@
 package com.cloudera.cyber.indexing.hive.tableapi;
 
+import com.cloudera.cyber.indexing.hive.tableapi.impl.TableApiFilesystemJob;
 import com.cloudera.cyber.indexing.hive.tableapi.impl.TableApiHiveJob;
 import com.cloudera.cyber.indexing.hive.tableapi.impl.TableApiKafkaJob;
 import com.cloudera.cyber.scoring.ScoredMessage;
@@ -21,6 +22,8 @@ public class TableApiJobFactory {
                 return new TableApiHiveJob(params, env, source);
             case "kafka":
                 return new TableApiKafkaJob(params, env, source);
+            case "filesystem":
+                return new TableApiFilesystemJob(params, env, source);
             default:
                 throw new RuntimeException(String.format(
                       "Unknown job type name [%s] provided while the Flink writer is selected as TableAPI", typeName));
