@@ -76,7 +76,7 @@ public class SplitBroadcastProcessFunction extends KeyedBroadcastProcessFunction
         log.info(String.format("Adding splitter %s on thread %d ", splitConfig, Thread.currentThread().getId()));
         context.getBroadcastState(SplitJob.Descriptors.broadcastState).put(splitConfig.getTopic(), splitConfig);
         SplittingFlatMapFunction f = new SplittingFlatMapFunction(splitConfig, signKey);
-        f.open(null);
+        f.open((Configuration)null);
         splitters.put(splitConfig.getTopic(), f);
     }
 }
