@@ -1,6 +1,8 @@
 package com.cloudera.cyber.indexing.hive.tableapi;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.cloudera.cyber.indexing.MappingColumnDto;
 import com.cloudera.cyber.indexing.MappingDto;
 import com.cloudera.cyber.indexing.hive.tableapi.impl.TableApiKafkaJob;
@@ -51,7 +53,40 @@ class TableApiAbstractJobTest {
                     new MappingColumnDto("column6", null, null, null, false),
                     new MappingColumnDto("column7", null, null, null, false),
                     new MappingColumnDto("column8", null, null, null, false),
-                    new MappingColumnDto("column9", null, null, null, false))))));
+                    new MappingColumnDto("column9", null, null, null, false))))),
+
+        Arguments.of(Collections.singletonMap(GIVEN_TABLE_NAME, ResolvedSchema.of(
+                Column.physical("column1", DataTypes.STRING()),
+                Column.physical("column2", DataTypes.STRING()),
+                Column.physical("column3", DataTypes.STRING()))),
+            Collections.singletonMap(GIVEN_SOURCE,
+                new MappingDto(GIVEN_TABLE_NAME, new ArrayList<>(), Arrays.asList(
+                    new MappingColumnDto("column1", "column1,column2", null, null, false),
+                    new MappingColumnDto("column2", "column3", null, null, false))))));
+  }
+
+  public static Stream<Arguments> insertSqlData() {
+    return Stream.of(
+          Arguments.of("topic",
+                new MappingDto("tableName", Collections.emptyList(), Collections.emptyList()),
+                ResolvedSchema.of(),
+                "CREATE TEMPORARY VIEW  topic_tmpview(  )  AS \n" +
+                " SELECT   \n" +
+                " from KafkaTempView\n" +
+                " where `source`='topic'"),
+          Arguments.of("topic",
+                new MappingDto("tableName", Collections.emptyList(), Arrays.asList(
+                      new MappingColumnDto("column1", "column1,column2", null, "ROW(%s, %s)", false),
+                      new MappingColumnDto("column2", "column3", null, null, false))),
+                ResolvedSchema.of(
+                      Column.physical("column1", DataTypes.STRING()),
+                      Column.physical("column2", DataTypes.STRING()),
+                      Column.physical("column3", DataTypes.STRING())),
+                "CREATE TEMPORARY VIEW  topic_tmpview( column1, column2 )  AS \n" +
+                " SELECT  ROW((message.extensions.column1), (message.extensions.column2)), (message.extensions.column3) \n" +
+                " from KafkaTempView\n" +
+                " where `source`='topic'")
+    );
   }
 
   public static Stream<Arguments> mappingsExceptionData() {
@@ -92,11 +127,19 @@ class TableApiAbstractJobTest {
                 "Found column mappings of non-string type without transformations for source [%s]: %s",
                 GIVEN_SOURCE, "[column1]")));
   }
+
   @ParameterizedTest
   @MethodSource("mappingsData")
   void shouldValidateMappings(Map<String, ResolvedSchema> givenTableSchemaMap,
       Map<String, MappingDto> givenTopicMapping) {
     job.validateMappings(givenTableSchemaMap, givenTopicMapping);
+  }
+
+  @ParameterizedTest
+  @MethodSource("insertSqlData")
+  void shouldGenerateInsertSql(String topic, MappingDto mappingDto, ResolvedSchema tableSchema, String expectedSql) {
+      String actualSql = job.buildInsertSql(topic, mappingDto, tableSchema);
+      assertThat(actualSql).isEqualTo(expectedSql);
   }
 
   @ParameterizedTest

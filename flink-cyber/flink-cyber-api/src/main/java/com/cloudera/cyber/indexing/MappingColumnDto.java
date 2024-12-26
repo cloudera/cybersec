@@ -2,6 +2,10 @@ package com.cloudera.cyber.indexing;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,23 +32,35 @@ public class MappingColumnDto {
     private Boolean isMap;
 
     @JsonIgnore
-    public String getKafkaName() {
+    public List<String> getKafkaNameList() {
         final String properName = kafkaName == null ? name : kafkaName;
         if (getIsMap()) {
-            return String.format("['%s']", properName);
-        } else {
-            if (getPath().equals("..")) {
-                return String.format("%s", properName);
-            }
-            return String.format(".%s", properName);
+            return Collections.singletonList(String.format("['%s']", properName));
         }
+
+        String[] kafkaNamesSplit = properName.split(",");
+
+        return Arrays.stream(kafkaNamesSplit)
+              .map(singleKafkaName -> {
+                  if (getPath().equals("..")) {
+                      return String.format("%s", singleKafkaName);
+                  }
+                  return String.format(".%s", singleKafkaName);
+              })
+              .collect(Collectors.toList());
     }
 
     @JsonIgnore
-    public String getRawKafkaName(){
+    public String getRawKafkaName() {
         return kafkaName;
     }
 
+    @JsonProperty("path")
+    public String getRawPath() {
+        return this.path;
+    }
+
+    @JsonIgnore
     public String getPath() {
         if (StringUtils.isEmpty(path)) {
             return "extensions";
