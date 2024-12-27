@@ -48,7 +48,9 @@ public class DefaultChainBuilder implements ChainBuilder {
         for(ParserSchema parserSchema: chainSchema.getParsers()) {
             ChainLink next;
             boolean isRouter = ParserID.router().equals(parserSchema.getId());
-            parserSchema.setBasePath(Paths.get(chainSchema.getBasePath(), "..").toString());
+            if (chainSchema.getBasePath() != null) {
+                parserSchema.setBasePath(Paths.get(chainSchema.getBasePath(), "..").toString());
+            }
             if(isRouter) {
                 next = buildRouter(parserSchema);
             } else {
