@@ -41,8 +41,8 @@ const mockChains: ChainModel[] = [{id: '1', name: 'test1'}, {id: '2', name: 'tes
 describe('PipelinesComponent', () => {
   let component: ChainListPageComponent;
   let fixture: ComponentFixture<ChainListPageComponent>;
-  let pipelineService: jasmine.SpyObj<PipelineService>
-  let chainListPageService: jasmine.SpyObj<ChainListPageService>
+  let pipelineService: jasmine.SpyObj<PipelineService>;
+  let chainListPageService: jasmine.SpyObj<ChainListPageService>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({

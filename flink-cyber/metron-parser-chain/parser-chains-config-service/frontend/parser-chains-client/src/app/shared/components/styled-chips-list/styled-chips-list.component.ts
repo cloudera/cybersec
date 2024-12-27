@@ -29,11 +29,11 @@ export class StyledChipsListComponent {
   click(chipHash: MatChip, name: string) {
     if (this.selectable) {
       this.chips = this.chips.map(c => {
-        if (c.name === name ) {
+        if (c.name === name) {
           console.log(chipHash);
           this.selectionField.emit(c);
 
-          return  {...c, selected: !c.selected};
+          return {...c, selected: !c.selected};
         }
         return c;
       })
