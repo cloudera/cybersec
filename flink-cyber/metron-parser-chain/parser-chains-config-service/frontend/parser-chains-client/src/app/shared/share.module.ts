@@ -27,11 +27,13 @@ import {UploadComponent} from './components/upload/upload/upload.component';
 import {FileUploadModule} from 'src/app/cluster/component/file-upload/file-upload.module';
 import {UploadProgressComponent} from 'src/app/shared/components/upload/upload/progress/progress.component';
 import {FormsModule} from '@angular/forms';
+import {FilterPipe} from './pipes/filter.pipe';
+import { ContainsPipe } from './pipes/contains.pipe';
 
 @NgModule({
-    imports: [CommonModule, MatButtonToggleModule, A11yModule, MatDialogModule, MatButtonModule, MatProgressSpinnerModule, MatProgressBarModule, MatIconModule, MatChipsModule, MatTooltipModule, FileUploadModule, FormsModule],
-  declarations: [SortPipe, WithLoadingPipe, MultiButtonComponent, ConfirmDeleteDialogComponent, CustomListComponent, CustomListItemComponent, CustomListIconDirective, CustomListActionDirective, CustomListLineDirective, CustomListSubheaderDirective, CustomListChipsDirective, StyledChipsListComponent, UploadComponent, UploadProgressComponent],
-  exports: [SortPipe, WithLoadingPipe, MultiButtonComponent, ConfirmDeleteDialogComponent, CustomListItemComponent, CustomListComponent, CustomListIconDirective, CustomListActionDirective, CustomListLineDirective, CustomListSubheaderDirective, CustomListChipsDirective, StyledChipsListComponent, UploadComponent]
+  imports: [CommonModule, MatButtonToggleModule, A11yModule, MatDialogModule, MatButtonModule, MatProgressSpinnerModule, MatProgressBarModule, MatIconModule, MatChipsModule, MatTooltipModule, FileUploadModule, FormsModule],
+  declarations: [SortPipe, FilterPipe, WithLoadingPipe, MultiButtonComponent, ConfirmDeleteDialogComponent, CustomListComponent, CustomListItemComponent, CustomListIconDirective, CustomListActionDirective, CustomListLineDirective, CustomListSubheaderDirective, CustomListChipsDirective, StyledChipsListComponent, UploadComponent, UploadProgressComponent, ContainsPipe],
+  exports: [SortPipe, FilterPipe, WithLoadingPipe, MultiButtonComponent, ConfirmDeleteDialogComponent, CustomListItemComponent, CustomListComponent, CustomListIconDirective, CustomListActionDirective, CustomListLineDirective, CustomListSubheaderDirective, CustomListChipsDirective, StyledChipsListComponent, UploadComponent, ContainsPipe]
 })
 export class SharedModule {
 }

@@ -1,3 +1,188 @@
-<p>pipeline-stepper works!</p>
 <mat-stepper #stepper>
+  <mat-step [stepControl]="parserFormGroup">
+    <form [formGroup]="parserFormGroup">
+      <ng-template matStepLabel>Parser config</ng-template>
+      <mat-tab-group color="primary" class="parser-chain-step">
+        <mat-tab label="General Config">
+          <div class="general-section">
+            <h1>Kafka Topic config: </h1>
+            <span>Configuration of Kafka topic for parser job</span>
+            <div style="display: flex; flex-direction: column">
+              <div style="display: flex; flex-direction: row">
+                <mat-form-field class="input-form" color="primary" appearance="outline">
+                  <mat-label>Topic output</mat-label>
+                  <input matInput
+                         type="text"
+                         formControlName="topicOutput"
+                         id="topicOutput"
+                         label="topic Output"
+                         placeholder="topic Output"
+                  >
+                </mat-form-field>
+                <mat-form-field class="input-form" color="primary" appearance="outline" [style.margin-left.px]="15">
+                  <mat-label>Error Topic</mat-label>
+                  <input matInput
+                         type="text"
+                         formControlName="errorTopic"
+                         id="errorTopic"
+                         label="error topic name"
+                         placeholder="error topic">
+                </mat-form-field>
+              </div>
+              <mat-slide-toggle color="primary" formControlName="sourceFlag" [style.margin-bottom.px]="15">Enable source
+              </mat-slide-toggle>
+              <div *ngIf="parserFormGroup.controls.sourceFlag.value" class="general-section">
+                <mat-form-field class="input-form" color="primary"
+                                appearance="outline">
+                  <mat-label>Original base path</mat-label>
+                  <input matInput
+                         type="text"
+                         formControlName="origBasePath"
+                         id="origBasePath"
+                         label="original base path"
+                         placeholder="orig Base Path name">
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+
+        </mat-tab>
+
+        <div formArrayName="chains">
+          <mat-tab *ngFor="let chain of chains.controls; let index = index" formGroupName="{{index}}">
+            <ng-template mat-tab-label>
+              <ng-container *ngIf="!chain.getRawValue().editMode">
+                <div (dblclick)="dbClick(chain)">{{ chain.getRawValue().chainName }}</div>
+              </ng-container>
+
+              <ng-container *ngIf="chain.getRawValue().editMode">
+                <input style="max-width: 100px" formControlName="chainName"/>
+                <mat-icon class="save-tab-icon" (click)="dbClick(chain)">save</mat-icon>
+                <mat-icon *ngIf="chains.length > 1" class="delete-tab-icon" (click)="deleteChain(index)">delete
+                </mat-icon>
+              </ng-container>
+            </ng-template>
+            <mat-form-field *ngIf="vm$ | async as vm" class="source-list" appearance="outline">
+              <mat-label>Source</mat-label>
+              <mat-chip-list #chipList aria-label="Source selection" selectable="false">
+                <mat-chip
+                  *ngFor="let selectedPipeline of getSelectedSource(index)"
+                  (removed)="remove(selectedPipeline, index)"
+                >
+                  {{ selectedPipeline }}
+                  <button matChipRemove>
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </mat-chip>
+                <input
+                  placeholder="Select source..."
+                  #sourceInput
+                  formControlName="source"
+                  [style.width.%]="85"
+                  [matAutocomplete]="auto"
+                  [matChipInputFor]="chipList"
+                  [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                  (matChipInputTokenEnd)="add($event, index)">
+                <mat-autocomplete #auto="matAutocomplete"
+                                  (optionSelected)="selected($event, index)">
+                  <mat-option
+                    *ngFor="let searchedPipeline of vm.pipelines | filter:getSelectedSource(index) | contains:getSource(index)"
+                    [value]="searchedPipeline">
+                    {{ searchedPipeline }}
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-chip-list>
+
+            </mat-form-field>
+
+            <!-- Chains list -->
+
+            <div *ngIf="vm$ | async as vm">
+              <app-custom-list *ngIf="vm.currentChains.length > 0">
+                <app-custom-list-line *ngFor="let chain of vm.currentChains">
+                  <mat-icon customListIcon>link</mat-icon>
+                  <div customListLine>{{ chain.name }}</div>
+                  <app-styled-chips-list customListChips
+                                         [chips]="topicMap.get(index)?.get(chain.id) ? [topicMap.get(index).get(chain.id)] : [] "
+                                         [forceStyleDisplay]="true"></app-styled-chips-list>
+                  <button
+                    customListAction
+                    mat-button
+                    color="primary"
+                    class="flex-row-jc-ac"
+                    data-qe-id="view-fields-button"
+                    matTooltip="Add topic to the chain"
+                    matTooltipPosition="above"
+                    (click)="assignTopic(assignTopicDialog, chain.id, index)">
+                    <mat-chip selected>ASSIGN TOPIC
+                      <mat-icon [style.color]="'white'">add</mat-icon>
+                    </mat-chip>
+                  </button>
+                  <button
+                    customListAction
+                    mat-button
+                    color="primary"
+                    class="flex-row-jc-ac"
+                    data-qe-id="view-fields-button"
+                    matTooltip="Edit"
+                    matTooltipPosition="below"
+                    [routerLink]="['/parserconfig', 'chains', chain.id]"
+                    [queryParams]="{pipeline: chain.pipeline}"
+
+                  >
+                    <mat-icon class="edit-action-color">edit</mat-icon>
+                  </button>
+                  <button
+                    customListAction
+                    mat-button
+                    color="primary"
+                    class="flex-row-jc-ac"
+                    data-qe-id="delete-field-type-btn"
+                    matTooltip="Delete"
+                    matTooltipPosition="below"
+                    (click)="deleteItem(chain.id)">
+                    <mat-icon class="delete-action-color">delete</mat-icon>
+                  </button>
+                </app-custom-list-line>
+              </app-custom-list>
+              <button [style.margin.px]="10" mat-raised-button routerLink="/parserconfig"
+                      color="primary">ADD CHAIN
+              </button>
+            </div>
+          </mat-tab>
+        </div>
+        <mat-tab disabled>
+          <ng-template mat-tab-label>
+            <button mat-icon-button (click)="addTab()">
+              <mat-icon>add_circle</mat-icon>
+            </button>
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
+      <div>
+        <button mat-raised-button color="primary" (click)="navigateToReceiver()" matStepperNext>Next
+        </button>
+      </div>
+    </form>
+  </mat-step>
 </mat-stepper>
+
+
+<ng-template #assignTopicDialog let-data>
+  <h2 mat-dialog-title>Assign Topic</h2>
+  <div mat-dialog-content [style.display]="'inline'">
+    <div class="inner-assign-wrapper">
+      <span class="inner-assign-wrapper-span">
+        Topic or Topic pattern that would associated with this chain.
+      </span>
+      <mat-form-field appearance="outline">
+        <mat-label>Topic Name</mat-label>
+        <input matInput [(ngModel)]="data.name">
+      </mat-form-field>
+    </div>
+  </div>
+  <div mat-dialog-actions align="end">
+    <button mat-raised-button color="accent" [mat-dialog-close]="false">Cancel</button>
+    <button mat-raised-button color="primary" [mat-dialog-close]="data">Assign</button>
+  </div>
+</ng-template>
