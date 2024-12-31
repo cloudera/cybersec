@@ -178,9 +178,18 @@ export class PipelineStepperComponent {
       }
     }).afterClosed().subscribe((data: { id: string, name: string }) => {
       if (data) {
-        const tmp: Map<string, CustomChip> = new Map();
-        tmp.set(chainId, {name: data.name, allowMapping: false, selected: true, removable: false});
-        this.topicMap.set(index, tmp);
+        if (this.topicMap.get(index)) {
+          this.topicMap.get(index).set(chainId, {
+            name: data.name,
+            allowMapping: false,
+            selected: true,
+            removable: false
+          });
+        } else {
+          const tmp: Map<string, CustomChip> = new Map();
+          tmp.set(chainId, {name: data.name, allowMapping: false, selected: true, removable: false});
+          this.topicMap.set(index, tmp);
+        }
       }
     });
   }
@@ -203,4 +212,4 @@ export class PipelineStepperComponent {
   }
 }
 
-type PipedChainModel = ChainModel & { pipeline: string}
+type PipedChainModel = ChainModel & { pipeline: string }
