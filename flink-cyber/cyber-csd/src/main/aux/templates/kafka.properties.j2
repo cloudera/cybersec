@@ -30,6 +30,10 @@ schema.registry.url={{globals['schema.registry.url']}}
 kafka.security.protocol=SASL_SSL
 kafka.ssl.truststore.location={{globals['ssl.client.truststore.location']}}
 kafka.ssl.truststore.password={{globals['ssl.client.truststore.password']}}
+kafka.sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required debug=true \
+  useKeyTab=true storeKey=true keyTab="{{'{{CMF_CONF_DIR}}/cybersec.keytab'}}" \
+  principal="{{ globals['cybersec.service.principal'] }}";
+kafka.sasl.kerberos.service.name={{ globals['kafka_principal_name'] }}
 
 schema.registry.client.ssl.trustStorePath={{globals['ssl.client.truststore.location']}}
 schema.registry.client.ssl.trustStorePassword={{globals['ssl.client.truststore.password']}}

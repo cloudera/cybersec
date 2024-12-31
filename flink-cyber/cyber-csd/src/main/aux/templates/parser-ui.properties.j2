@@ -20,4 +20,19 @@ spring.kafka.external-clusters.{{ obj['name'] }}.consumer.key-deserializer={{ gl
 spring.kafka.external-clusters.{{ obj['name'] }}.consumer.value-deserializer={{ globals['spring.kafka.consumer.value-deserializer'] }}
 spring.kafka.external-clusters.{{ obj['name'] }}.producer.key-serializer={{ globals['spring.kafka.producer.key-deserialize'] }}
 spring.kafka.external-clusters.{{ obj['name'] }}.producer.value-serializer={{ globals['spring.kafka.producer.value-serializer'] }}
+
+{% if globals['kerberos.auth.enable'] %}
+
+spring.kafka.security.protocol=SASL_SSL
+spring.kafka.properties.sasl.kerberos.service.name={{ globals['kafka_principal_name'] }}
+spring.kafka.properties.sasl.jaas.config=com.sun.security.auth.module.Krb5LoginModule required debug=true \
+  useKeyTab=true storeKey=true keyTab="{{'{{CONF_DIR}}/cybersec.keytab'}}" \
+  principal="{{ globals['cybersec.service.principal'] }}";
+spring.kafka.ssl.trustStoreLocation=file:{{ globals['security.ssl.rest.truststore'] }}
+spring.kafka.ssl.keyStoreLocation=file:{{ globals['ssl.server.keystore.location'] }}
+spring.kafka.ssl.trustStorePassword={{ globals['security.ssl.rest.truststore-password'] }}
+spring.kafka.ssl.keyStorePassword={{ globals['ssl.server.keystore.password'] }}
+spring.kafka.ssl.keyPassword={{ globals['ssl.server.keystore.keypassword'] }}
+
+{% endif %}
 {% endfor %}
