@@ -238,9 +238,10 @@ export class ChainPageComponent implements OnInit, OnDestroy, DeactivatePrevente
 
   onAddParserClick(event: Event) {
     event.preventDefault();
-    const routeParams = this.breadcrumbs.length > 1
+    const routeParams: {subchain?: string, pipeline?: string} = this.breadcrumbs.length > 1
       ? { subchain: this.breadcrumbs[this.breadcrumbs.length - 1].id }
       : {};
+    routeParams.pipeline = this.currentPipeline
     this._router.navigate([`/parserconfig/chains/${this.chainId}/new`, routeParams]);
   }
 

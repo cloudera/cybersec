@@ -96,7 +96,7 @@ describe('ChainAddParserPageComponent', () => {
             ]
           }),
         {provide: ActivatedRoute, useValue: {params: of({id: testChain.id, chainId: testChain.name})}},
-        {provide: Router, useValue: jasmine.createSpyObj('Router', ['navigateByUrl'])}
+        {provide: Router, useValue: jasmine.createSpyObj('Router', ['navigate'])}
       ]
     })
       .compileComponents();
@@ -122,7 +122,7 @@ describe('ChainAddParserPageComponent', () => {
 
   it('should dispatch AddParserAction with subchain if exist', fakeAsync(() => {
     const dispatchSpy = spyOn(store, 'dispatch').and.callThrough();
-    routerSpy.navigateByUrl = jasmine.createSpy('navigateByUrl').and.callThrough();
+    routerSpy.navigate = jasmine.createSpy('navigate').and.callThrough();
     const expectChainId = 'fooTestChain';
     const expectSubchainId = "testSubchainId";
 
@@ -151,7 +151,7 @@ describe('ChainAddParserPageComponent', () => {
         parser: expectedParser
       })
     );
-    expect(routerSpy.navigateByUrl).toHaveBeenCalledWith(`/parserconfig/chains/${expectChainId}`);
+    expect(routerSpy.navigate).toHaveBeenCalledWith([`/parserconfig/chains/${expectChainId}`, {}], {queryParams: {pipeline: undefined}});
     flush();
   }));
 });
