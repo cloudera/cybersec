@@ -378,6 +378,7 @@
       "kerberosPrincipals": [
         {
           "name": "cybersec_service_principal",
+          "propertyName": "cybersec.service.principal",
           "primary": "${principal}",
           "instance": "${host}"
         },
@@ -390,10 +391,10 @@
       "sslServer": {
         "keyIdentifier": "parser_ui_chaining",
         "enabledConfigName": "ssl_enabled",
-        "keystoreLocationConfigName": "ssl_server_keystore_location",
-        "keystorePasswordConfigName": "ssl_server_keystore_password",
+        "keystoreLocationConfigName": "ssl.server.keystore.location",
+        "keystorePasswordConfigName": "ssl.server.keystore.password",
         "keyPasswordOptionality": "required",
-        "keystoreKeyPasswordConfigName": "ssl_server_keystore_keypassword",
+        "keystoreKeyPasswordConfigName": "ssl.server.keystore.keypassword",
         "autoTlsMode": "auto"
       },
       "sslClient": {
