@@ -39,7 +39,11 @@ public class OcsfService {
                 String[] parts = uri.toString().split("!");
                 URI jarUri = URI.create(parts[0]);
                 try (FileSystem fs = FileSystems.newFileSystem(jarUri, Collections.emptyMap())) {
-                    return Files.readAllBytes(fs.getPath(parts[1]));
+                    StringBuilder filePathInsideJarBuilder = new StringBuilder();
+                    for (int i = 1; i < parts.length; i++) {
+                        filePathInsideJarBuilder.append(parts[i]);
+                    }
+                    return Files.readAllBytes(fs.getPath(filePathInsideJarBuilder.toString()));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
