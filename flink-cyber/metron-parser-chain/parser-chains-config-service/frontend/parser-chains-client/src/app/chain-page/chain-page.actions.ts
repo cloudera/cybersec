@@ -21,6 +21,7 @@ import {
   RouteModel
 } from './chain-page.models';
 import {CustomFormConfig} from './components/custom-form/custom-form.component';
+import {ParserDescriptor} from "./chain-page.reducers";
 
 export const LOAD_CHAIN_DETAILS = '[Chain Details] load start';
 export const LOAD_CHAIN_DETAILS_SUCCESS = '[Chain Details] load success';
@@ -48,10 +49,11 @@ export const REMOVE_ROUTE = '[Chain Details] remove route';
 export const SET_ROUTE_AS_DEFAULT = '[Chain Details] set route as default';
 export const ADD_TO_PATH = '[Chain Details] add to path';
 export const REMOVE_FROM_PATH = '[Chain Details] remove from path';
+export const LOAD_PIPELINE = '[Chain List] load pipeline';
 
 export class LoadChainDetailsAction implements Action {
   readonly type = LOAD_CHAIN_DETAILS;
-  constructor(public payload: { id: string }) {}
+  constructor(public payload: { id: string, currentPipeline:string }) {}
 }
 
 export class LoadChainDetailsSuccessAction implements Action {
@@ -119,7 +121,7 @@ export class GetFormConfigAction implements Action {
 
 export class GetFormConfigSuccessAction implements Action {
   readonly type = GET_FORM_CONFIG_SUCCESS;
-  constructor(public payload: { parserType: string, formConfig: CustomFormConfig[] }) {}
+  constructor(public payload: { parserType: string, formConfig: ParserDescriptor }) {}
 }
 
 export class GetFormConfigFailAction implements Action {
@@ -134,7 +136,7 @@ export class GetFormConfigsAction implements Action {
 
 export class GetFormConfigsSuccessAction implements Action {
   readonly type = GET_FORM_CONFIGS_SUCCESS;
-  constructor(public payload: { formConfigs: { [key: string]: CustomFormConfig[] } }) {}
+  constructor(public payload: { formConfigs: { [key: string]: ParserDescriptor } }) {}
 }
 
 export class GetFormConfigsFailAction implements Action {
@@ -203,6 +205,11 @@ export class SetRouteAsDefaultAction implements Action {
   }) {}
 }
 
+export class LoadPipelineAction implements Action {
+  readonly type = LOAD_PIPELINE;
+  constructor(public  payload: {currentPipeline: string}) {}
+}
+
 export type ChainDetailsAction = LoadChainDetailsAction
   | LoadChainDetailsSuccessAction
   | LoadChainDetailsFailAction
@@ -225,6 +232,7 @@ export type ChainDetailsAction = LoadChainDetailsAction
   | RemoveRouteAction
   | SetRouteAsDefaultAction
   | AddToPathAction
+  | LoadPipelineAction
   | RemoveFromPathAction;
 
 export type IndexMappingAction = GetIndexMappingsAction

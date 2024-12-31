@@ -10,11 +10,11 @@
  * limitations governing your use of the file.
  */
 
-import { TestBed } from '@angular/core/testing';
-import { provideMockActions } from '@ngrx/effects/testing';
-import { Action } from '@ngrx/store';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { of, Subject, throwError } from 'rxjs';
+import {TestBed} from '@angular/core/testing';
+import {provideMockActions} from '@ngrx/effects/testing';
+import {Action} from '@ngrx/store';
+import {NzMessageService} from 'ng-zorro-antd/message';
+import {of, Subject, throwError} from 'rxjs';
 
 import {
   executionTriggered,
@@ -26,20 +26,12 @@ import {
   sampleDataInputChanged,
   sampleDataRestored
 } from './live-view.actions';
-import { LiveViewConsts } from './live-view.consts';
-import { LiveViewEffects } from './live-view.effects';
-import { SampleDataModel, SampleDataType } from './models/sample-data.model';
-import { LiveViewService } from './services/live-view.service';
-
-class MockLiveViewService {
-  execute(sampleData: SampleDataModel, chainConfig: {}) {
-    return new Subject();
-  }
-}
-
-class MockMessageService {
-  create(type: string, message: string) {}
-}
+import {LiveViewConsts} from './live-view.consts';
+import {LiveViewEffects} from './live-view.effects';
+import {SampleDataType} from './models/sample-data.model';
+import {LiveViewService} from './services/live-view.service';
+import {EntryParsingResultModel} from "./models/live-view.model";
+import {provideMockStore} from "@ngrx/store/testing";
 
 describe('live-view.effects', () => {
 
@@ -55,67 +47,75 @@ describe('live-view.effects', () => {
     }
   };
 
-  const testResult = {
-    entries: [
-      {
-        output: 'output result',
-        log: { type: '', message: 'log result'},
-      }
-    ]
+  const selectedPipeline = 'foo-pipeline';
+  const chainListPageInitialState = {
+    items: [],
+    createModalVisible: false,
+    deleteModalVisible: false,
+    deleteItem: null,
+    loading: false,
+    error: '',
+    pipelines: null,
+    pipelineRenameModalVisible: false,
+    selectedPipeline: selectedPipeline
   };
 
+  const testResult: EntryParsingResultModel[] =
+    [
+      {
+        output: 'output result',
+        log: {type: '', message: 'log result', stackTrace: ''},
+      }
+    ];
+
   const actions$ = new Subject<Action>();
-  let liveViewEffects: LiveViewEffects;
-  let fakeLiveViewService: LiveViewService;
-  let fakeMessageService: NzMessageService;
+  let liveViewEffects: jasmine.SpyObj<LiveViewEffects>;
+  let fakeLiveViewService: jasmine.SpyObj<LiveViewService>;
+  let fakeMessageService: jasmine.SpyObj<NzMessageService>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         LiveViewEffects,
-        { provide: LiveViewService, useClass: MockLiveViewService },
-        { provide: NzMessageService, useClass: MockMessageService },
+        {
+          provide: LiveViewService, useValue: jasmine.createSpyObj('LiveViewService', {
+            execute: of({results: testResult})
+          })
+        },
+        {provide: NzMessageService, useValue: jasmine.createSpyObj('NzMessageService', ['create'])},
 
-        provideMockActions(() => actions$)],
+        provideMockActions(() => actions$),
+        provideMockStore({
+          initialState: {
+            'chain-list-page': chainListPageInitialState
+          },
+          selectors: []
+        })],
     });
 
-    liveViewEffects = TestBed.get(LiveViewEffects);
-    fakeLiveViewService = TestBed.get(LiveViewService);
-    fakeMessageService = TestBed.get(NzMessageService);
+    liveViewEffects = TestBed.inject(LiveViewEffects) as jasmine.SpyObj<LiveViewEffects>;
+    fakeLiveViewService = TestBed.inject(LiveViewService) as jasmine.SpyObj<LiveViewService>;
+    fakeMessageService = TestBed.inject(NzMessageService) as jasmine.SpyObj<NzMessageService>;
   });
 
   it('should call liveViewService.execute on executionTriggered', () => {
     const testSubscriber = jasmine.createSpy('executionTriggeredSpy');
     liveViewEffects.execute$.subscribe(testSubscriber);
 
-    spyOn(fakeLiveViewService, 'execute').and.returnValue(
-        of({
-          ...testPayload,
-          result: testResult
-         }
-        )
-    );
+    actions$.next(executionTriggered({...testPayload, currentPipeline: selectedPipeline}));
 
-    actions$.next(executionTriggered({ ...testPayload }));
-
-    expect(fakeLiveViewService.execute).toHaveBeenCalledWith(testPayload.sampleData, testPayload.chainConfig);
+    expect(fakeLiveViewService.execute).toHaveBeenCalledWith(testPayload.sampleData, testPayload.chainConfig, selectedPipeline);
   });
 
   it('should dispatch liveViewRefreshedSuccessfully if liveViewService execute successfully', () => {
     const testSubscriber = jasmine.createSpy('executionTriggeredSpy');
     liveViewEffects.execute$.subscribe(testSubscriber);
 
-    spyOn(fakeLiveViewService, 'execute').and.returnValue(of({
-      ...testPayload,
-      result: testResult,
-    }));
-
-    actions$.next(executionTriggered({ ...testPayload }));
+    actions$.next(executionTriggered({...testPayload, currentPipeline: selectedPipeline}));
 
     expect(testSubscriber).toHaveBeenCalledWith({
       liveViewResult: {
-        ...testPayload,
-        result: testResult,
+        results: testResult,
       },
       type: liveViewRefreshedSuccessfully.type
     });
@@ -125,9 +125,9 @@ describe('live-view.effects', () => {
     const testSubscriber = jasmine.createSpy('executionTriggeredSpy');
     liveViewEffects.execute$.subscribe(testSubscriber);
 
-    spyOn(fakeLiveViewService, 'execute').and.returnValue(throwError({ message: 'something went wrong' }));
+    fakeLiveViewService.execute.and.returnValue(throwError({message: 'something went wrong'}));
 
-    actions$.next(executionTriggered({ ...testPayload }));
+    actions$.next(executionTriggered({...testPayload, currentPipeline: 'fakePipe'}));
 
     expect(testSubscriber).toHaveBeenCalledWith({
       error: {
@@ -138,12 +138,11 @@ describe('live-view.effects', () => {
   });
 
   it('should show error message if liveViewService execution fail', () => {
-    spyOn(fakeLiveViewService, 'execute').and.returnValue(throwError({ message: 'something went wrong' }));
-    spyOn(fakeMessageService, 'create');
+    fakeLiveViewService.execute.and.returnValue(throwError({message: 'something went wrong'}));
 
     liveViewEffects.execute$.subscribe();
 
-    actions$.next(executionTriggered({ ...testPayload }));
+    actions$.next(executionTriggered({...testPayload, currentPipeline: selectedPipeline}));
 
     expect(fakeMessageService.create).toHaveBeenCalledWith('error', 'something went wrong');
   });
@@ -153,11 +152,11 @@ describe('live-view.effects', () => {
 
     liveViewEffects.persistingSampleData$.subscribe();
 
-    actions$.next(sampleDataInputChanged({ sampleData: { type: SampleDataType.MANUAL, source: 'testing persistance' } }));
+    actions$.next(sampleDataInputChanged({sampleData: {type: SampleDataType.MANUAL, source: 'testing persistance'}}));
 
     expect(localStorage.setItem).toHaveBeenCalledWith(
       LiveViewConsts.SAMPLE_DATA_STORAGE_KEY,
-      JSON.stringify({ type: SampleDataType.MANUAL, source: 'testing persistance' })
+      JSON.stringify({type: SampleDataType.MANUAL, source: 'testing persistance'})
     );
   });
 
@@ -165,12 +164,15 @@ describe('live-view.effects', () => {
     const testSubscriber = jasmine.createSpy('sampleDataRestoredSpy');
     liveViewEffects.restoreSampleDataFromLocalStore.subscribe(testSubscriber);
 
-    spyOn(localStorage, 'getItem').and.returnValue(JSON.stringify({ type: SampleDataType.MANUAL, source: 'persisted state' }));
+    spyOn(localStorage, 'getItem').and.returnValue(JSON.stringify({
+      type: SampleDataType.MANUAL,
+      source: 'persisted state'
+    }));
 
     actions$.next(liveViewInitialized());
 
     expect(testSubscriber).toHaveBeenCalledWith({
-      sampleData: { type: SampleDataType.MANUAL, source: 'persisted state' },
+      sampleData: {type: SampleDataType.MANUAL, source: 'persisted state'},
       type: sampleDataRestored.type
     });
   });
@@ -180,7 +182,7 @@ describe('live-view.effects', () => {
 
     liveViewEffects.persistingOnOffToggle$.subscribe();
 
-    actions$.next(onOffToggleChanged({ value: true }));
+    actions$.next(onOffToggleChanged({value: true}));
 
     expect(localStorage.setItem).toHaveBeenCalledWith(
       LiveViewConsts.FEATURE_TOGGLE_STORAGE_KEY,
@@ -198,7 +200,7 @@ describe('live-view.effects', () => {
 
     expect(testSubscriber).toHaveBeenCalledWith({
       value: true,
-      type: onOffToggleRestored .type
+      type: onOffToggleRestored.type
     });
   });
 

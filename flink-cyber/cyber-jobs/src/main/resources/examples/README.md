@@ -43,7 +43,7 @@ Install the following services on the CDP Base Cluster.
 
 #### CDP Public Cloud
 
-Provision the resources below in the same CDP Environment and use the same prefix at the begining of each resource name:
+Provision the resources below in the same CDP Environment:
 
 | Resource Type | Configuration | Basic | Full |
 | -----------------| ------| ---- | ------|
@@ -66,7 +66,7 @@ Provision the resources below in the same CDP Environment and use the same prefi
 CYBERSEC-2.3.1-1.16.1-csadh1.10.0.0-cdh7.2.17.0-334-2308141830/meta/
 ...
 ```
-4. Create a link from CYBERSEC to the parcel directory.
+4\. Create a link from CYBERSEC to the parcel directory.
 ```shell script
 [cduby@cduby-csa-081423-master0 ~]$ ln -s CYBERSEC-2.3.1-1.16.1-csadh1.10.0.0-cdh7.2.17.0-334-2308141830 CYBERSEC
 [cduby@cduby-csa-081423-master0 ~]$ ls -ld CYBERSEC
@@ -74,18 +74,18 @@ lrwxrwxrwx. 1 cduby cduby 62 Aug 14 20:41 CYBERSEC -> CYBERSEC-2.3.1-1.16.1-csad
 [cduby@cduby-csa-081423-master0 ~]$ ls CYBERSEC
 bin  etc  jobs  lib  meta  tools
 ```
-5. Edit the shell configuration defining the PATH variable.  For example, edit .bash_profile.  
+5\. Edit the shell configuration defining the PATH variable.  For example, edit .bash_profile.  
 ```shell script
 ## The shell config file, maybe different.  Locate the definition of PATH in your configs.
 [cduby@cduby-csa-081423-master0 ~]$ vi .bash_profile
 ```
-6. Add $HOME/CYBERSEC/bin to the PATH
+6\. Add $HOME/CYBERSEC/bin to the PATH
 ```shell script
 ### this is an example, use your path here
 PATH=$PATH:$HOME/CYBERSEC/bin:$HOME/.local/bin:$HOME/bin
 export PATH
 ```
-7. Source the shell config or log out and log back in again to refresh the shell settings.  Check the availability of the cybersec commands in the path.
+7\. Source the shell config or log out and log back in again to refresh the shell settings.  Check the availability of the cybersec commands in the path.
 ```shell script
 [cduby@cduby-csa-081423-master0 ~]$ source .bash_profile
 [cduby@cduby-csa-081423-master0 ~]$ which cs-restart-parser
@@ -102,52 +102,59 @@ export PATH
 
 #### CDP Base
 1. Copy the files in examples/setup/templates to example/pipelines
-
 ```
 cd cybersec/flink-cyber/
 ```
 2. Edit the .properties files in example/pipelines with the correct settings for the cluster.
-2. If the Hbase service is not in the same cluster as Flink, download the Hbase client configs from Cloudera Manager.  Move the hbase config zip to the pipelines directory.  Unzip the hbase configuration files.     
-3. If the Hive service is not in the same cluster as Flink, download the Hive on tez client configs from Cloudera Manager.  Move the hive config zip to the pipelines directory.  Unzip the hive config files.
-4. If using a separate Hive cluster, remove the hive_conf/core-site.xml and hive-conf/yarn-site.xml files.  
+3. If the Hbase service is not in the same cluster as Flink, download the Hbase client configs from Cloudera Manager.  Move the hbase config zip to the pipelines directory.  Unzip the hbase configuration files.     
+4. If the Hive service is not in the same cluster as Flink, download the Hive on tez client configs from Cloudera Manager.  Move the hive config zip to the pipelines directory.  Unzip the hive config files.
+5. If using a separate Hive cluster, remove the hive_conf/core-site.xml and hive-conf/yarn-site.xml files.  
 
 #### CDP Public Cloud
 1. If necessary, install the [CDP CLI client](https://docs.cloudera.com/cdp-public-cloud/cloud/cli/topics/mc-cli-client-setup.html).
-2. Run the command line ./create_datahub_config.sh <environment_name> <prefix>. When prompted enter your workload password.
+2. [Install the jq package](https://jqlang.github.io/jq/download/).
+3. Create a properties file with the names of the CDP cloud resources.  
+```shell script
+hive_datahub_name=name_of_hive_datahub
+kafka_datahub_name=name_of_kafka_datahub
+opdb_database_name=name_of_operational_db
+```
+Omit any lines for the hive datahubs or operational DB.  The minimal properties files is shown below:
+```shell script
+kafka_datahub_name=name_of_kafka_datahub
+```
+4\. Run the command line ./create_datahub_config.sh <environment_name> <properties_file>. When prompted enter your workload password.
 ```shell script
 cduby@cduby-MBP16-21649 examples % cd cybersec/flink-cyber/cyber-jobs/src/main/resources/examples/setup 
-cduby@cduby-MBP16-21649 setup % ./create_datahub_config.sh se-sandboxx-aws cduby
-cleaning up hive configs
+cduby@cduby-MBP16-21649 setup % ./create_datahub_config.sh se-sandboxx-aws datahub_setup_kafka_hive_opdb.properties 
+When prompted, enter your workload user password.
+INFO: resetting hive configs from datahub de-cduby-013024
 Enter host password for user 'cduby':
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100 11102    0 11102    0     0   2870      0 --:--:--  0:00:03 --:--:--  2876
-x hive-conf/mapred-site.xml
+x hive-conf/hadoop-env.sh
 x hive-conf/hdfs-site.xml
+x hive-conf/log4j2.properties
+x hive-conf/beeline-site.xml
+x hive-conf/yarn-site.xml
+x hive-conf/mapred-site.xml
 x hive-conf/hive-site.xml
 x hive-conf/atlas-application.properties
-x hive-conf/log4j.properties
-x hive-conf/hadoop-env.sh
-x hive-conf/log4j2.properties
-x hive-conf/redaction-rules.json
-x hive-conf/core-site.xml
-x hive-conf/yarn-site.xml
 x hive-conf/hive-env.sh
-x hive-conf/beeline-site.xml
+x hive-conf/core-site.xml
+x hive-conf/redaction-rules.json
+x hive-conf/log4j.properties
+INFO: Resetting OPDB configs from datahub ckdodb-013024
 Enter host password for user 'cduby':
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-100  5828  100  5828    0     0   5394      0  0:00:01  0:00:01 --:--:--  5436
-x hbase-conf/hdfs-site.xml
-x hbase-conf/atlas-application.properties
 x hbase-conf/hbase-omid-client-config.yml
-x hbase-conf/hbase-env.sh
-x hbase-conf/core-site.xml
-x hbase-conf/log4j.properties
 x hbase-conf/hbase-site.xml
 x hbase-conf/jaas.conf
+x hbase-conf/hdfs-site.xml
+x hbase-conf/hbase-env.sh
+x hbase-conf/core-site.xml
+x hbase-conf/atlas-application.properties
+x hbase-conf/log4j.properties
+INFO: getting Phoenix connection settings
+Enter host password for user 'cduby':
 Certificate was added to keystore
-PRINCIPAL=cduby@SE-SANDB.A465-9Q4K.CLOUDERA.SITE
 ```
 ### (Optional) Download Maxmind Database
 1. Optionally download the binary (mmdb) version of the [Maxmind GeoLite2 City and ASN Databases](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data). Create a Maxmind account login if you don't have one already.  If you don't download the databases, the triaging job will operate but events will not have geocode (country, city, lat, lon) or asn (network) enrichments. 
@@ -155,7 +162,7 @@ PRINCIPAL=cduby@SE-SANDB.A465-9Q4K.CLOUDERA.SITE
 ```shell script
 cduby@cduby-MBP16-21649 templates % cp GeoLite2-*.tar.gz examples/setup
 ```
-3. Scp the examples directory tree to the flink gateway host.
+3\. Scp the examples directory tree to the flink gateway host.
 ```shell script
 scp -r examples <user>@<flink_gateway_host>:/home/<user>
 ```
@@ -193,7 +200,7 @@ no mock server running
 100   138  100   138    0     0    874      0 --:--:-- --:--:-- --:--:--   878
 
 ```
-3. Start the basic pipeline.  If you have all the required services installed, start the full pipeline.
+3\. Start the basic pipeline.  If you have all the required services installed, start the full pipeline.
 ```shell script
 ./start_basic.sh
 ## if all required services are installed

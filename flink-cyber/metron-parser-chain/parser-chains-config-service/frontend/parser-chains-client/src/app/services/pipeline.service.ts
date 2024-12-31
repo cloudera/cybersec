@@ -13,37 +13,36 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {Injectable} from '@angular/core';
 
-import {map} from "rxjs/operators";
-import {getHttpParams} from "../chain-list-page/chain-list-page.utils";
+import {map} from 'rxjs/operators';
+import {getHttpParams} from '../shared/service.utils';
 
 @Injectable({
     providedIn: 'root'
 })
 export class PipelineService {
 
-    private readonly BASE_URL = '/api/v1/pipeline';
+    static readonly BASE_URL = '/api/v1/pipeline';
 
     constructor(
-        private http: HttpClient,
+        private _http: HttpClient,
     ) {
     }
 
     public getPipelines() {
-        let httpParams: HttpParams = getHttpParams(null);
-
-        return this.http.get<string[]>(this.BASE_URL, {params: httpParams})
+        const httpParams: HttpParams = getHttpParams(null);
+        return this._http.get<string[]>(PipelineService.BASE_URL, {params: httpParams})
             .pipe(map(strArr => strArr.map(pipelineName => {
                 return pipelineName
             })));
     }
 
     public createPipeline(pipelineName: string) {
-        let httpParams: HttpParams = getHttpParams(null);
+        const httpParams: HttpParams = getHttpParams(null);
 
-        return this.http.post<string[]>(this.BASE_URL + "/" + pipelineName,
+        return this._http.post<string[]>(PipelineService.BASE_URL + "/" + pipelineName,
             null,{params: httpParams})
-            .pipe(map(strArr => strArr.map(pipelineName => {
-                return pipelineName
+            .pipe(map(strArr => strArr.map(pName => {
+                return pName
             })));
     }
 
@@ -51,20 +50,19 @@ export class PipelineService {
         let httpParams: HttpParams = getHttpParams(null);
         httpParams = httpParams.set('newName', newPipelineName)
 
-        return this.http.put<string[]>(this.BASE_URL + "/" + pipelineName,
+        return this._http.put<string[]>(PipelineService.BASE_URL + "/" + pipelineName,
             null,{params: httpParams})
-            .pipe(map(strArr => strArr.map(pipelineName => {
-                return pipelineName
+            .pipe(map(strArr => strArr.map(pName => {
+                return pName
             })));
     }
 
     public deletePipeline(pipelineName: string) {
-        let httpParams: HttpParams = getHttpParams(null);
+        const httpParams: HttpParams = getHttpParams(null);
 
-        return this.http.delete<string[]>(this.BASE_URL + "/" + pipelineName, {params: httpParams})
-            .pipe(map(strArr => strArr.map(pipelineName => {
-                return pipelineName
+        return this._http.delete<string[]>(PipelineService.BASE_URL + "/" + pipelineName, {params: httpParams})
+            .pipe(map(strArr => strArr.map(pName => {
+                return pName
             })));
     }
-
 }

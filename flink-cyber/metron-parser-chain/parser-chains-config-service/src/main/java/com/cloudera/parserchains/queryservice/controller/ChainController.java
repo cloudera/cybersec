@@ -12,11 +12,18 @@
 
 package com.cloudera.parserchains.queryservice.controller;
 
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_READ_URL;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_INDEXING;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_PARSER_TEST;
+import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PARSER_CONFIG_BASE_URL;
+
 import com.cloudera.parserchains.core.ChainLink;
 import com.cloudera.parserchains.core.InvalidParserException;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.queryservice.config.AppProperties;
 import com.cloudera.parserchains.queryservice.model.describe.IndexMappingDescriptor;
+import com.cloudera.parserchains.queryservice.model.describe.OcsfIndexMappingDescriptor;
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestRequest;
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestResponse;
 import com.cloudera.parserchains.queryservice.model.exec.ParserResult;
@@ -29,10 +36,20 @@ import com.cloudera.parserchains.queryservice.service.ChainPersistenceService;
 import com.cloudera.parserchains.queryservice.service.IndexingService;
 import com.cloudera.parserchains.queryservice.service.PipelineService;
 import com.cloudera.parserchains.queryservice.service.ResultLogBuilder;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.core.fs.Path;
@@ -49,21 +66,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Supplier;
-
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_CHAINS_READ_URL;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_INDEXING;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.API_PARSER_TEST;
-import static com.cloudera.parserchains.queryservice.common.ApplicationConstants.PARSER_CONFIG_BASE_URL;
-
 /**
  * The controller responsible for operations on parser chains.
  */
@@ -77,100 +79,86 @@ public class ChainController {
      * The maximum number of sample text values that can be used to test a parser chain.
      */
     static final int MAX_SAMPLES_PER_TEST = 200;
-
     private final ChainPersistenceService chainPersistenceService;
-
     private final ChainBuilderService chainBuilderService;
-
     private final ChainExecutorService chainExecutorService;
-
     private final PipelineService pipelineService;
-
     private final IndexingService indexingService;
-
     private final AppProperties appProperties;
 
-    @ApiOperation(value = "Finds and returns all available parser chains.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A list of all parser chains.")
-    })
+    @Operation(summary = "Retrieves all available parser chains.")
+    @ApiResponse(responseCode = "200", description = "A list of all parser chains.", content = @Content(
+            mediaType = "application/json",
+            array = @ArraySchema(schema = @Schema(implementation = ParserChainSummary.class))))
     @GetMapping(value = API_CHAINS)
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', #pipelineName)")
     public ResponseEntity<List<ParserChainSummary>> findAll(
-            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName
     ) throws IOException {
         String configPath = getConfigPath(pipelineName);
-
         List<ParserChainSummary> configs = chainPersistenceService.findAll(Paths.get(configPath));
         return ResponseEntity.ok(configs);
     }
 
-    @ApiOperation(value = "Creates a new parser chain.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Parser chain created successfully."),
-            @ApiResponse(code = 404, message = "Unable to create a new parser chain.")
-    })
+    @Operation(summary = "Creates a new parser chain.")
+    @ApiResponse(responseCode = "200", description = "The parser chain was created.", content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ParserChainSchema.class)))
+    @ApiResponse(responseCode = "404", description = "Unable to create a new parser chain.")
     @PostMapping(value = API_CHAINS)
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('post', #pipelineName)")
     public ResponseEntity<ParserChainSchema> create(
-            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
-            @ApiParam(name = "parserChain", value = "The parser chain to create.", required = true)
+            @Parameter(name = "parserChain", description = "The parser chain to create.", required = true)
             @RequestBody ParserChainSchema chain) throws IOException {
         String configPath = getConfigPath(pipelineName);
-
         ParserChainSchema createdChain = chainPersistenceService.create(chain, Paths.get(configPath));
-        if (null == createdChain) {
+        if (createdChain == null) {
             return ResponseEntity.notFound().build();
         } else {
-            return ResponseEntity
-                    .created(URI.create(API_CHAINS_READ_URL.replace("{id}", createdChain.getId())))
-                    .body(createdChain);
+            return ResponseEntity.created(URI.create(API_CHAINS_READ_URL.replace("{id}", createdChain.getId()))).body(createdChain);
         }
     }
 
-    @ApiOperation(value = "Retrieves an existing parser chain.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "The parser chain with the given ID."),
-            @ApiResponse(code = 404, message = "The parser chain does not exist.")
-    })
+    @Operation(summary = "Retrieves an existing parser chain.")
+    @ApiResponse(responseCode = "200", description = "The parser chain with the given ID.", content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ParserChainSchema.class)))
+    @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
     @GetMapping(value = API_CHAINS + "/{id}")
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', #pipelineName)")
     public ResponseEntity<ParserChainSchema> read(
-            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
-            @ApiParam(name = "id", value = "The ID of the parser chain to retrieve.", required = true)
+            @Parameter(name = "id", description = "The ID of the parser chain to retrieve.", required = true)
             @PathVariable String id) throws IOException {
         String configPath = getConfigPath(pipelineName);
-
         ParserChainSchema chain = chainPersistenceService.read(id, Paths.get(configPath));
-        if (null == chain) {
+        if (chain == null) {
             return ResponseEntity.notFound().build();
         } else {
             return ResponseEntity.ok(chain);
         }
     }
 
-    @ApiOperation(value = "Updates an existing parser chain.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "The parser chain was updated."),
-            @ApiResponse(code = 404, message = "The parser chain does not exist.")
-    })
+    @Operation(summary = "Updates an existing parser chain.")
+    @ApiResponse(responseCode = "204", description = "The parser chain was updated.")
+    @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
     @PutMapping(value = API_CHAINS + "/{id}")
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('put', #pipelineName)")
     public ResponseEntity<ParserChainSchema> update(
-            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
-            @ApiParam(name = "parserChain", value = "The new parser chain definition.", required = true)
+            @Parameter(name = "parserChain", description = "The new parser chain definition.", required = true)
             @RequestBody ParserChainSchema chain,
-            @ApiParam(name = "id", value = "The ID of the parser chain to update.")
+            @Parameter(name = "id", description = "The ID of the parser chain to update.")
             @PathVariable String id) throws IOException {
         String configPath = getConfigPath(pipelineName);
-
         try {
             ParserChainSchema updatedChain = chainPersistenceService.update(id, chain, Paths.get(configPath));
-            if (null == updatedChain) {
+            if (updatedChain == null) {
                 return ResponseEntity.notFound().build();
             } else {
                 return ResponseEntity.noContent().build();
@@ -180,20 +168,17 @@ public class ChainController {
         }
     }
 
-    @ApiOperation(value = "Deletes a parser chain.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "The parser chain was deleted."),
-            @ApiResponse(code = 404, message = "The parser chain does not exist.")
-    })
+    @Operation(summary = "Deletes a parser chain.")
+    @ApiResponse(responseCode = "204", description = "The parser chain was deleted.")
+    @ApiResponse(responseCode = "404", description = "The parser chain does not exist.")
     @DeleteMapping(value = API_CHAINS + "/{id}")
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('delete', #pipelineName)")
     public ResponseEntity<Void> delete(
-            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
-            @ApiParam(name = "id", value = "The ID of the parser chain to delete.", required = true)
+            @Parameter(name = "id", description = "The ID of the parser chain to delete.", required = true)
             @PathVariable String id) throws IOException {
         String configPath = getConfigPath(pipelineName);
-
         if (chainPersistenceService.delete(id, Paths.get(configPath))) {
             return ResponseEntity.noContent().build();
         } else {
@@ -201,17 +186,18 @@ public class ChainController {
         }
     }
 
-    @ApiOperation(value = "Loads table mappings for the indexing job")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "The mapping file parsed successfully."),
-    })
-    @PostMapping(value = API_INDEXING)
+
+    @Operation(summary = "Loads table mappings for the indexing job.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "The mapping file parsed successfully."),
+            })
+    @PostMapping(value = API_INDEXING + "/mapping")
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', #pipelineName)")
     public ResponseEntity<Map<String, Object>> getMappingsFromPath(
-            @ApiParam(name = "pipelineName", value = "The pipeline to execute request in.")
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
             @RequestParam(name = "pipelineName", required = false) String pipelineName,
             @RequestBody IndexMappingDescriptor body) throws IOException {
-        final String indexPath = getIndexingPath(body.getFilePath(), pipelineName);
+        final String indexPath = getIndexMappingPath(body.getFilePath(), pipelineName);
 
         try {
             final Object mappingDtoMap = indexingService.getMappingsFromPath(indexPath);
@@ -223,21 +209,76 @@ public class ChainController {
                 result.put("result", mappingDtoMap);
                 return ResponseEntity.ok(result);
             }
+            // TODO: fix exception handling
         } catch (IOException ioe) {
             throw new RuntimeException("Unable to read mappings from the provided path");
         }
     }
 
-    @ApiOperation(value = "Executes a parser chain to parse sample data.")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "The result of parsing the message."),
-    })
+
+    @Operation(summary = "Loads table mappings for the indexing job.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "The mapping file parsed successfully."),
+            })
+    @PostMapping(value = API_INDEXING + "/table")
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', #pipelineName)")
+    public ResponseEntity<Map<String, Object>> getTableConfigFromPath(
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName,
+            @RequestBody IndexMappingDescriptor body) throws IOException {
+        final String indexPath = getIndexTablePath(body.getFilePath(), pipelineName);
+
+        try {
+            final Object tableConfigs = indexingService.getTableConfigFromPath(indexPath);
+            if (null == tableConfigs) {
+                return ResponseEntity.noContent().build();
+            } else {
+                Map<String, Object> result = new HashMap<>();
+                result.put("path", indexPath);
+                result.put("result", tableConfigs);
+                return ResponseEntity.ok(result);
+            }
+            // TODO: fix exception handling
+        } catch (IOException ioe) {
+            throw new RuntimeException("Unable to read table configs from the provided path");
+        }
+    }
+
+    @PostMapping(API_INDEXING + "/new")
+    @PreAuthorize("@spnegoUserDetailsService.hasAccess('post', #pipelineName)")
+    public ResponseEntity<Void> saveMappingsToPath(
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName,
+            @RequestBody OcsfIndexMappingDescriptor body) throws IOException {
+
+        final String indexMappingPath = getIndexMappingPath(body.getMappingFilePath(), pipelineName);
+        final String indexTablePath = getIndexTablePath(body.getTableFilePath(), pipelineName);
+
+        try {
+            indexingService.saveDataToPath(indexMappingPath, body.getMappings());
+            indexingService.saveDataToPath(indexTablePath, body.getTableConfig());
+            return ResponseEntity.noContent().build();
+            // TODO: fix exception handling
+        } catch (IOException ioe) {
+            throw new RuntimeException("Unable to read mappings from the provided path");
+        }
+    }
+
+    @Operation(summary = "Executes a parser chain to parse sample data.")
+    @ApiResponse(responseCode = "200", description = "The result of parsing the message.", content = @Content(
+            mediaType = "application/json",
+            schema = @Schema(implementation = ChainTestResponse.class)))
     @PostMapping(value = API_PARSER_TEST)
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', '*')")
     public ResponseEntity<ChainTestResponse> test(
-            @ApiParam(name = "testRun", value = "Describes the parser chain test to run.", required = true)
+            @Parameter(name = "pipelineName", description = "The pipeline to execute request in.")
+            @RequestParam(name = "pipelineName", required = false) String pipelineName,
+            @Parameter(name = "testRun", description = "Describes the parser chain test to run.", required = true)
             @RequestBody ChainTestRequest testRun) throws IOException {
+        String configPath = getConfigPath(pipelineName);
+
         ParserChainSchema chain = testRun.getParserChainSchema();
+        chain.setBasePath(configPath);
         ChainTestResponse results = new ChainTestResponse();
         testRun.getSampleData().getSource()
                 .stream()
@@ -252,7 +293,7 @@ public class ChainController {
      *
      * @param schema      Defines the parser chain that needs to be constructed.
      * @param textToParse The text to parse.
-     * @return
+     * @return The result of parsing the text.
      */
     private ParserResult doTest(ParserChainSchema schema, String textToParse) {
         ParserResult result;
@@ -276,11 +317,18 @@ public class ChainController {
         return getPipelinePath(pipelineName, appProperties::getConfigPath);
     }
 
-    private String getIndexingPath(String filePath, String pipelineName) throws IOException {
+    private String getIndexMappingPath(String filePath, String pipelineName) throws IOException {
         if (StringUtils.hasText(filePath)) {
             return filePath;
         }
-        return getPipelinePath(pipelineName, appProperties::getIndexPath);
+        return getPipelinePath(pipelineName, appProperties::getIndexMappingPath);
+    }
+
+    private String getIndexTablePath(String filePath, String pipelineName) throws IOException {
+        if (StringUtils.hasText(filePath)) {
+            return filePath;
+        }
+        return getPipelinePath(pipelineName, appProperties::getIndexTablePath);
     }
 
     private String getPipelinePath(String pipelineName, Supplier<String> defaultPathSupplier) throws IOException {

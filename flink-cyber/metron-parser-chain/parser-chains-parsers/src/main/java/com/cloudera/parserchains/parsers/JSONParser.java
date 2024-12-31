@@ -12,8 +12,6 @@
 
 package com.cloudera.parserchains.parsers;
 
-import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
-import static java.lang.String.format;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
@@ -23,6 +21,8 @@ import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +31,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
+
+import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
+import static java.lang.String.format;
 
 @MessageParser(
         name="Simple JSON",
@@ -52,7 +54,8 @@ public class JSONParser implements Parser {
             key="input",
             label="Input Field",
             description= "The input field to parse. Default value: '" + DEFAULT_INPUT_FIELD + "'",
-            defaultValue=DEFAULT_INPUT_FIELD)
+            defaultValue=DEFAULT_INPUT_FIELD,
+            isOutputName = true)
     public JSONParser inputField(String fieldName) {
         if(StringUtils.isNotBlank(fieldName)) {
             this.inputField = FieldName.of(fieldName);

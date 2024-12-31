@@ -1,6 +1,7 @@
-import {Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {SampleDataModel} from "../../models/sample-data.model";
 import {NzMessageService} from "ng-zorro-antd/message";
+import {convertToString} from "../../../../../shared/utils";
 
 @Component({
   selector: 'app-sample-data-text-input',
@@ -11,32 +12,33 @@ export class SampleDataTextInputComponent {
 
   @Input() sampleData: SampleDataModel;
   @Output() sampleDataChange = new EventEmitter<SampleDataModel>();
-  @ViewChild('sampleDataInput', { static: true }) sampleDataInput: ElementRef;
 
-  constructor(private messageService: NzMessageService) {}
+  constructor(private _messageService: NzMessageService) {}
 
-  onApply(sampleDataInput: string) {
+  onApply(event: Event) {
+    const source = (event.target as HTMLInputElement).value;
     this.sampleDataChange.emit({
-      ...this.sampleData,
-      source: sampleDataInput
+      type: this.sampleData.type,
+      source
     });
+    return source;
   }
 
   uploadToForm(e) {
     const file = e.target.files[0];
     const reader = new FileReader();
     reader.onload = () => {
-      const fileTypeError = this.checkFileType(file);
+      const fileTypeError = this._checkFileType(file);
       if (fileTypeError) {
         return;
       }
-      this.sampleDataInput.nativeElement.value = reader.result;
-      this.onApply(this.sampleDataInput.nativeElement.value);
+      this.sampleData.source = convertToString(reader.result);
+      this.sampleDataChange.emit(this.sampleData);
     };
     reader.readAsText(file);
   }
 
-  private checkFileType(file: File) {
+  private _checkFileType(file: File) {
     if (!file) {
       return false;
     }
@@ -45,7 +47,7 @@ export class SampleDataTextInputComponent {
     const fileTypes = ['text/plain', 'text/csv'];
 
     if (!fileExt.find(ext => ext === extension.toLowerCase()) || !fileTypes.find(type => file.type === type)) {
-        this.messageService.create('error', 'The file must be a .txt or .csv');
+        this._messageService.create('error', 'The file must be a .txt or .csv');
         return true;
     }
     return false;

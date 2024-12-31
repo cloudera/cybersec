@@ -10,8 +10,19 @@ import com.cloudera.cyber.scoring.ScoredMessage;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Streams;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -19,7 +30,11 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.*;
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.FormatDescriptor;
+import org.apache.flink.table.api.Schema;
+import org.apache.flink.table.api.SqlDialect;
+import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.bridge.java.StreamStatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Column;
@@ -77,7 +92,7 @@ public abstract class TableApiAbstractJob {
     System.out.println("Creating tables...");
     setConnectorDialect(tableEnv);
 
-    final Map<String, ResolvedSchema> tableSchemaMap = createTables(tableEnv, rawTablesConfig, tablesConfig);
+    final Map<String, ResolvedSchema> tableSchemaMap = createTables(tableEnv, tablesConfig);
 
     System.out.println("Getting topic mapping...");
     final Map<String, MappingDto> topicMapping = getTopicMapping();
@@ -104,18 +119,17 @@ public abstract class TableApiAbstractJob {
   /**
    * Creates tables in the tableEnv based on the tablesConfig. If table already exists, its schema is fetched.
    *
-   * @param tableEnv        is the Flink environment in which the tables are going to be created.
-   * @param rawTablesConfig map that contains contents of tables config file without any modifications.
-   * @param tablesConfig    modified version of rawTablesConfig that contains default and partition columns.
+   * @param tableEnv     is the Flink environment in which the tables are going to be created.
+   * @param tablesConfig modified version of rawTablesConfig that contains default and partition columns.
    * @return Map with table name as a key and table schema as a value.
    */
   private Map<String, ResolvedSchema> createTables(StreamTableEnvironment tableEnv,
-      Map<String, List<TableColumnDto>> rawTablesConfig, Map<String, List<TableColumnDto>> tablesConfig) {
+                                                   Map<String, List<TableColumnDto>> tablesConfig) {
     final Set<String> tableList = getExistingTableList(tableEnv);
 
     return tablesConfig.entrySet().stream()
         .collect(Collectors.toMap(Entry::getKey,
-            entry -> createTableIfNotExists(tableEnv, tableList, entry.getKey(), rawTablesConfig.get(entry.getKey()), entry.getValue())));
+            entry -> createTableIfNotExists(tableEnv, tableList, entry.getKey(), entry.getValue())));
   }
 
   protected void validateMappings(Map<String, ResolvedSchema> tableSchemaMap,
@@ -223,13 +237,9 @@ public abstract class TableApiAbstractJob {
   }
 
   private ResolvedSchema createTableIfNotExists(StreamTableEnvironment tableEnv, Set<String> tableList,
-      String tableName, List<TableColumnDto> rawColumnList, List<TableColumnDto> columnList) {
+                                                String tableName, List<TableColumnDto> columnList) {
     if (tableList.contains(tableName)) {
       return handleExistingTable(tableEnv, tableName, columnList);
-    }
-
-    if (CollectionUtils.isEmpty(rawColumnList)) {
-      throw new RuntimeException(String.format("%s table [%s] config is empty. Aborting...", connectorName, tableName));
     }
 
     return createTable(tableEnv, tableName, columnList);
@@ -334,11 +344,15 @@ public abstract class TableApiAbstractJob {
 
   protected final String buildInsertSql(String topic, MappingDto mappingDto, ResolvedSchema tableSchema) {
     return String.join("\n",
-        getInsertSqlPrefix() + " " + mappingDto.getTableName() + "(" + getInsertColumns(mappingDto) + ") "
+        getInsertSqlPrefix() + " " + getTableName(topic, mappingDto) + "(" + getInsertColumns(mappingDto) + ") "
         + getInsertSqlSuffix(),
         " SELECT " + getFromColumns(mappingDto, tableSchema),
         " from " + KAFKA_TABLE,
         String.format(" where `source`='%s'", topic));
+  }
+
+  protected String getTableName(String source, MappingDto mappingDto) {
+    return mappingDto.getTableName();
   }
 
   protected String getInsertSqlPrefix() {
@@ -356,30 +370,42 @@ public abstract class TableApiAbstractJob {
   }
 
   private String getFromColumns(MappingDto mappingDto, ResolvedSchema tableSchema) {
+    System.out.println("Building from columns");
     return mappingDto.getColumnMapping().stream()
         .map(mappingColumnDto -> {
-          final String kafkaName = mappingColumnDto.getKafkaName();
+          final List<String> kafkaNameList = mappingColumnDto.getKafkaNameList();
           final String path = mappingColumnDto.getPath();
 
-          String fullPath;
-          if (path.startsWith("..")) {
-            fullPath = path.substring(2);
-          } else {
-            fullPath = String.format("message.%s", path);
-          }
-          if (StringUtils.hasText(fullPath)) {
-            fullPath = String.join(".", fullPath.split("\\."));
-          }
+          List<String> fullPathList = kafkaNameList.stream()
+                                              .map(kafkaName -> {
+                                                String fullPath;
+                                                if (path.startsWith("..")) {
+                                                  fullPath = path.substring(2);
+                                                } else {
+                                                  fullPath = String.format("message.%s", path);
+                                                }
+                                                if (StringUtils.hasText(fullPath)) {
+                                                  fullPath = String.join(".", fullPath.split("\\."));
+                                                }
 
-          fullPath = fullPath + kafkaName;
+                                                return "(" + fullPath + kafkaName + ")";
+                                              }).collect(Collectors.toList());
 
           Optional<Column> column = tableSchema.getColumn(mappingColumnDto.getName());
           final String transformation = column.map(value -> getTransformation(value.getDataType(), mappingColumnDto)).orElse("");
 
+          if (!CollectionUtils.isEmpty(mappingDto.getIgnoreFields())) {
+            String fieldsToIgnore = mappingDto.getIgnoreFields().stream()
+                                       .filter(StringUtils::hasText)
+                                       .collect(Collectors.joining("','", "'", "'"));
+            if (StringUtils.hasText(transformation)) {
+              fullPathList.add(fieldsToIgnore);
+            }
+          }
+
           return StringUtils.hasText(transformation)
-              ? String.format(transformation, "(" + fullPath + ")", mappingDto.getIgnoreFields().stream()
-              .collect(Collectors.joining("','", "'", "'")))
-              : fullPath;
+                ? String.format(transformation, fullPathList.toArray(new Object[0]))
+                : String.join(", ", fullPathList);
         })
         .collect(Collectors.joining(", ", " ", " "));
   }

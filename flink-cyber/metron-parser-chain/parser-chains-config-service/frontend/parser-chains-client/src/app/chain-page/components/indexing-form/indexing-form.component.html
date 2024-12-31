@@ -10,8 +10,8 @@
   ~ limitations governing your use of the file.
   -->
 
-<div>
-    <form nz-form [formGroup]="form" [nzLayout]="'inline'" (ngSubmit)="submitForm()">
+<div >
+    <form nz-form [formGroup]="form" [nzLayout]="'inline'" (ngSubmit)="subjectMappingPath$.next(form.value.filePath)">
         <nz-form-item>
             <nz-form-label>Mapping path</nz-form-label>
             <nz-form-control>
@@ -32,7 +32,7 @@
         <app-advanced-editor
                 class="indexing-form-editor"
                 [isReadOnly]="true"
-                [config]="mappingJson"
+                [config]="(mappingJson$ | async)?.result || {}"
                 (configChanged)="onAdvancedEditorChanged($event)"
         ></app-advanced-editor>
     </div>

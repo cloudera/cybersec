@@ -51,22 +51,11 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
             mappingDto.getTableName(), "indexing-job", params);
 
         //read from view and write to kafka sink
-        final Table table = tableEnv.from(mappingDto.getTableName());
+        final Table table = tableEnv.from(getTableName(topic, mappingDto));
         final String schemaString = AvroSchemaUtil.convertToAvro(tablesConfig.get(mappingDto.getTableName()))
             .toString();
 
-        final DataStream<GenericRecord> stream = tableEnv.toDataStream(table).map(row -> {
-          final Schema schema = new Schema.Parser().parse(schemaString);
-          final GenericRecord record = new GenericData.Record(schema);
-          final Set<String> fieldNames = row.getFieldNames(true);
-          if (fieldNames != null) {
-            for (String fieldName : fieldNames) {
-              AvroSchemaUtil.putRowIntoAvro(row, record, fieldName);
-            }
-          }
-
-          return record;
-        });
+        final DataStream<GenericRecord> stream = tableEnv.toDataStream(table).map(new MapRowToAvro(schemaString));
         stream.sinkTo(kafkaSink);
         System.out.printf("Insert SQL added to the queue for the table: %s%nSQL: %s%n", mappingDto.getTableName(),
             insertSql);
@@ -96,6 +85,11 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
   @Override
   protected FormatDescriptor getFormatDescriptor() {
     return null;
+  }
+
+  @Override
+  protected String getTableName(String source, MappingDto mappingDto) {
+    return source.concat("_tmpview");
   }
 
   @Override

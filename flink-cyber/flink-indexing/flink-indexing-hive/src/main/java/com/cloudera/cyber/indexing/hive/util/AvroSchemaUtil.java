@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class AvroSchemaUtil {
+public final class AvroSchemaUtil {
 
     //method that converts from flink Schema to avro Schema
     public static Schema convertToAvro(List<TableColumnDto> tableColumnList) {
@@ -52,7 +52,6 @@ public class AvroSchemaUtil {
             }
         }
         record.put(avroFieldName, value);
-        System.out.println("fieldName: " + fieldName + " value: " + value);
     }
 
     private static Object convertToAvroObject(Schema fieldSchema, Object value) {

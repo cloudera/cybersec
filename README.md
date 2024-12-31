@@ -1,5 +1,7 @@
 # Cybersec Toolkit
 
+[![Build and Test](https://github.com/cloudera/cybersec/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/cloudera/cybersec/actions/workflows/build_and_test.yml)
+
 ## Overview
 Enterprises deploy many point solutions to defend their networks.  These point solutions provide a wealth of data about the enterprise assets and networks but it is difficult to provide analytics on this data because there is no common repository and the events are in different formats.  The Cybersec Toolkit is a pipeline that ingests, correlates and prepares cybersecurity data for analytics.  The Cyber Toolkit leverages the Cloudera Data Platform to build a Security Data Lakehouse.
 
@@ -19,7 +21,12 @@ The Cyber Toolkit is flexible and configurable so the ingestion can be changed w
 3. [Event Generation](flink-cyber/caracal-generator/README.md)
 
 ## Packaging
-The Cybersec Toolkit includes a Cloudera Manager parcel and service for easier installation. 
+The Cybersec Toolkit includes a Cloudera Manager parcel and service for easier installation.
+
+Artifacts are available for download on the [releases page](https://github.com/cloudera/cybersec/releases).
+You can also find less stable, but more up to date artifacts by selecting one of successful runs on [this page](https://github.com/cloudera/cybersec/actions/workflows/publish_release.yml) and scrolling to the bottom of the selected run page.
+
+Or you can find artifacts after the build in the following directories:
 1. [Parcel](flink-cyber/cyber-parcel)
 2. [Cloudera Service](flink-cyber/cyber-csd)
 

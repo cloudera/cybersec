@@ -1,0 +1,107 @@
+<!--
+  ~ Copyright 2020 - 2022 Cloudera. All Rights Reserved.
+  ~
+  ~ This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+  ~ except in compliance with the License. You may obtain a copy of the License at
+  ~ http://www.apache.org/licenses/LICENSE-2.0.
+  ~
+  ~ This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+  ~ either express or implied. Refer to the License for the specific permissions and
+  ~ limitations governing your use of the file.
+  -->
+<mat-card>
+  <mat-card-header>
+    <mat-card-title-group class="flex-row-jsb-ab-w">
+      <mat-card-title>Pipeline Chains</mat-card-title>
+      <div class="title-action-wrapper">
+        <button
+          mat-raised-button
+          color="primary"
+          class="create-new-pipeline"
+          matTooltip="Create Pipeline"
+          matTooltipPosition="left"
+          routerLink="create"
+        >Create pipeline
+        </button>
+      </div>
+    </mat-card-title-group>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div *ngIf="pipelines$ | withLoading | async as pipelines">
+      <table mat-table [dataSource]="pipelines.value" [style.width.%]="100" class="mat-elevation-z8">
+        <caption *ngIf="!pipelines.loading">Pipeline list</caption>
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>Name</th>
+          <td style="font-weight: 900" mat-cell *matCellDef="let tablePipeline">
+            <mat-icon>valve</mat-icon>
+            {{ tablePipeline.name }}
+          </td>
+        </ng-container>
+
+        <!-- Cluster Column -->
+        <ng-container matColumnDef="cluster">
+          <th mat-header-cell *matHeaderCellDef>Cluster</th>
+          <td mat-cell *matCellDef="let tablePipeline">{{ tablePipeline.clusterName }}</td>
+        </ng-container>
+
+        <!-- Date Column -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let tablePipeline">{{ tablePipeline.date }}</td>
+        </ng-container>
+
+        <!-- Jobs Column -->
+        <ng-container matColumnDef="jobs">
+          <th mat-header-cell *matHeaderCellDef>Jobs</th>
+          <td mat-cell *matCellDef="let tablePipeline">{{ tablePipeline.jobs.toString() }}</td>
+        </ng-container>
+        <!-- User Column -->
+        <ng-container matColumnDef="user">
+          <th mat-header-cell *matHeaderCellDef>User</th>
+          <td [style.font-weight]="900" mat-cell
+              *matCellDef="let tablePipeline">{{ tablePipeline.userName }}
+          </td>
+        </ng-container>
+
+        <!-- Action Column -->
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef>Action</th>
+          <td mat-cell *matCellDef="let pipeline">
+            <div class="flex-row-jfs-ac">
+              <a class="flex-row-jc-ac chain-open-btn"
+                 [routerLink]="['pipeline', pipeline.id]"
+                 matTooltip="Open chain"
+              >
+                <span class="flex-row-jc-ac chain-open-btn-square">
+                  <mat-icon>chevron_right</mat-icon>
+                </span> Open
+              </a>
+              <span class="flex-row-jc-ac mat-divider-wrapper">
+            <mat-divider vertical="true"></mat-divider>
+          </span>
+              <a matTooltip="Remove chain" class="flex-row-jc-ac chain-delete-btn">
+                <mat-icon>delete_forever</mat-icon>
+                Delete
+              </a>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columns"></tr>
+        <tr mat-row *matRowDef="let row; columns: columns;"></tr>
+      </table>
+      <!-- Loading spinner -->
+      <mat-card *ngIf="pipelines.loading" class="flex-row-jc-ac">
+        <mat-progress-spinner
+          *ngIf="pipelines.loading"
+          color="primary"
+          mode="indeterminate"
+        >
+        </mat-progress-spinner>
+      </mat-card>
+    </div>
+  </mat-card-content>
+
+</mat-card>

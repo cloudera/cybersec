@@ -14,9 +14,10 @@ package com.cloudera.parserchains.queryservice.controller;
 
 import com.cloudera.parserchains.queryservice.model.exec.PipelineResult;
 import com.cloudera.parserchains.queryservice.service.PipelineService;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,10 +46,10 @@ public class PipelineController {
 
     private final PipelineService pipelineService;
 
-    @ApiOperation(value = "Finds and returns all available pipelines.")
+    @Operation(description = "Finds and returns all available pipelines.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A list of all pipelines."),
-            @ApiResponse(code = 404, message = "No valid pipelines found.")
+            @ApiResponse(responseCode = "200", description = "A list of all pipelines."),
+            @ApiResponse(responseCode = "404", description = "No valid pipelines found.")
     })
     @GetMapping
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('get', '*')")
@@ -60,13 +61,14 @@ public class PipelineController {
         return ResponseEntity.ok(pipelineMap.keySet());
     }
 
-    @ApiOperation(value = "Allows to create a new pipeline.")
+    @Operation(description = "Allows to create a new pipeline.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A new list of all pipelines.")
+            @ApiResponse(responseCode = "200", description = "A new list of all pipelines.")
     })
     @PostMapping("/{pipelineName}")
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('post', '*')")
-    public ResponseEntity<Set<String>> createPipeline(@PathVariable String pipelineName) throws IOException {
+    public ResponseEntity<Set<String>> createPipeline(
+            @Parameter(description = "The name of the pipeline to create") @PathVariable String pipelineName) throws IOException {
         PipelineResult newPipeline = pipelineService.createPipeline(pipelineName);
         if (newPipeline != null) {
             return findAll();
@@ -74,14 +76,15 @@ public class PipelineController {
         return ResponseEntity.badRequest().build();
     }
 
-    @ApiOperation(value = "Allows to rename existing pipeline.")
+    @Operation(description = "Allows to rename existing pipeline.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A new list of all pipelines.")
+            @ApiResponse(responseCode = "200", description = "A new list of all pipelines.")
     })
     @PutMapping("/{pipelineName}")
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('put', '*')")
-    public ResponseEntity<Set<String>> renamePipeline(@PathVariable String pipelineName,
-                                                      @RequestParam String newName) throws IOException {
+    public ResponseEntity<Set<String>> renamePipeline(
+            @Parameter(description = "The current name of the pipeline to be renamed") @PathVariable String pipelineName,
+            @Parameter(description = "The new name for the pipeline") @RequestParam String newName) throws IOException {
         PipelineResult updatedPipeline = pipelineService.renamePipeline(pipelineName, newName);
         if (updatedPipeline != null) {
             return findAll();
@@ -89,18 +92,18 @@ public class PipelineController {
         return ResponseEntity.badRequest().build();
     }
 
-    @ApiOperation(value = "Allows to delete existing pipeline.")
+    @Operation(description = "Allows to delete existing pipeline.")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "A new list of all pipelines.")
+            @ApiResponse(responseCode = "200", description = "A new list of all pipelines.")
     })
     @DeleteMapping("/{pipelineName}")
     @PreAuthorize("@spnegoUserDetailsService.hasAccess('delete', '*')")
-    public ResponseEntity<Set<String>> deletePipeline(@PathVariable String pipelineName) throws IOException {
+    public ResponseEntity<Set<String>> deletePipeline(
+            @Parameter(description = "The name of the pipeline to be deleted") @PathVariable String pipelineName) throws IOException {
         boolean pipelineDeleted = pipelineService.deletePipeline(pipelineName);
         if (pipelineDeleted) {
             return findAll();
         }
         return ResponseEntity.badRequest().build();
     }
-
 }

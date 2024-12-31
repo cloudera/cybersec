@@ -1,0 +1,219 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Pipeline Configuration</mat-card-title>
+    <mat-card-subtitle>This is general pipeline configuration</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content *ngIf="vm$ | async as vm;else loading" [style.min-height.vh]="70">
+    <div class="flex-row-jsb-ab">
+      <form [formGroup]="main" class="flex-row-jsb-ab horizontal-wrapper">
+        <mat-form-field class="input-form" color="primary" appearance="outline">
+          <mat-label>Pipeline name input</mat-label>
+          <input matInput
+                 type="text"
+                 formControlName="pipelineName"
+                 id="pipelineName"
+                 label="pipeline name"
+                 placeholder="pipeline name"
+          >
+          <mat-error *ngIf="main.controls.pipelineName.invalid">{{ errorMessage(main.controls.pipelineName) }}</mat-error>
+        </mat-form-field>
+        <mat-form-field class="input-form" color="primary" appearance="outline">
+          <mat-label>Branch name input</mat-label>
+          <input matInput
+                 type="text"
+                 id="branchName"
+                 formControlName="branchName"
+                 label="branch name"
+                 placeholder="branch name">
+          <mat-error *ngIf="main.controls.branchName.invalid">{{ errorMessage(main.controls.branchName) }}</mat-error>
+        </mat-form-field>
+        <mat-form-field class="input-form" color="primary" appearance="outline">
+          <mat-label>Parser name input</mat-label>
+          <input matInput
+                 type="text"
+                 formControlName="parserName"
+                 id="parserName"
+                 label="profile name"
+                 placeholder="parser name"
+          >
+          <mat-error *ngIf="main.controls.parserName.invalid">{{ errorMessage(main.controls.parserName) }}</mat-error>
+        </mat-form-field>
+        <mat-form-field class="input-form" color="primary" appearance="outline">
+          <mat-label>Profile name input</mat-label>
+          <input matInput
+                 type="text"
+                 formControlName="profileName"
+                 id="profileName"
+                 label="profile name"
+                 placeholder="profile name"
+          >
+          <mat-error *ngIf="main.controls.profileName.invalid">{{ errorMessage(main.controls.profileName) }}</mat-error>
+        </mat-form-field>
+        <mat-form-field class="input-form" color="primary" appearance="outline">
+          <mat-label>Cluster name select</mat-label>
+          <mat-select formControlName="cluster" disableOptionCentering
+                      panelClass="panel-class">
+            <mat-option *ngFor="let cl of vm.cluster" [value]="cl.clusterMeta">
+              {{ cl.clusterMeta.name }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="main.controls.cluster.invalid">{{ errorMessage(main.controls.cluster) }}</mat-error>
+        </mat-form-field>
+      </form>
+    </div>
+    <div class="flex-row-jfs-ac" [style.margin-top.px]="30">
+      <span class="text-container"><b>Configuration Type:</b></span>
+      <app-multi-button [style.margin-left.px]="120" [buttons]="buttons" defaultValue="Empty"
+                        (valueChange)="selectPipelineMode($any($event))"></app-multi-button>
+    </div>
+
+    <div *ngIf="mode !== 'Empty'">
+      <div class="flex-row-jsb-ac horizontal-wrapper" [style.min-height.px]="70">
+        <mat-slide-toggle [disabled]="slideToggleDisabled(jobsEnum.PARSER)" color="primary" [checked]="jobs.indexOf(jobsEnum.PARSER.value) !== -1"
+                          (change)="toggleValueInArray( jobs , jobsEnum.PARSER.value)">{{ jobsEnum.PARSER.label }}
+        </mat-slide-toggle>
+        <mat-slide-toggle [disabled]="slideToggleDisabled(jobsEnum.TRIAGE)" color="primary" [checked]="jobs.indexOf(jobsEnum.TRIAGE.value) !== -1"
+                          (change)="toggleValueInArray( jobs , jobsEnum.TRIAGE.value)">{{ jobsEnum.TRIAGE.label }}
+        </mat-slide-toggle>
+        <mat-slide-toggle [disabled]="slideToggleDisabled(jobsEnum.PROFILE)" color="primary" [checked]="jobs.indexOf(jobsEnum.PROFILE.value) !== -1"
+                          (change)="toggleValueInArray( jobs , jobsEnum.PROFILE.value)">{{ jobsEnum.PROFILE.label }}
+        </mat-slide-toggle>
+        <mat-slide-toggle [disabled]="slideToggleDisabled(jobsEnum.INDEX)" color="primary" [checked]="jobs.indexOf(jobsEnum.INDEX.value) !== -1"
+                          (change)="toggleValueInArray( jobs , jobsEnum.INDEX.value)">{{ jobsEnum.INDEX.label }}
+        </mat-slide-toggle>
+      </div>
+
+      <div *ngIf="mode === 'Archive'" class="container" appDragDrop (fileDropped)="onFileDropped($event)">
+        <ng-container *ngIf="!fileControl.value else fileList">
+          <input
+            type="file"
+            id="fileDropRef"
+            accept="application/gzip,.gz"
+            (change)="fileBrowseHandler($event)"
+            [multiple]="false"
+          />
+          <mat-icon>cloud_upload</mat-icon>
+          <h3>Drag and drop file here</h3>
+          <h3>or</h3>
+          <label for="fileDropRef">Browse for file</label>
+        </ng-container>
+        <ng-template #fileList class="flex-row-jc-ac">
+          <mat-icon>file_copy</mat-icon>
+          <span [style.margin-left.px]="5">{{ fileControl.value.name }}</span>
+          <span [style.margin-left.px]="15">[size:{{ formatBytes(fileControl.value.size) }}]</span>
+          <a title="Delete" (click)="deleteFile()">
+            <mat-icon class="delete-icon">delete</mat-icon>
+          </a>
+        </ng-template>
+      </div>
+      <div *ngIf="mode === 'Git'">
+        <form [formGroup]="git" class="flex-column-jsb-ab horizontal-wrapper">
+          <mat-form-field class="input-form" color="primary" appearance="outline">
+            <mat-label>Git url</mat-label>
+            <input matInput
+                   type="text"
+                   formControlName="url"
+                   id="gitUrl"
+                   label="git remote url"
+                   placeholder="git remote url"
+                   required>
+            <mat-error *ngIf="git.controls.url.invalid">{{ errorMessage(git.controls.url) }}</mat-error>
+          </mat-form-field>
+            <mat-checkbox style="margin: 15px 10px;" color="primary" formControlName="authentication">Authentication
+            </mat-checkbox>
+
+          <div *ngIf="git.controls.authentication.value" class="flex-row-jfs-ac">
+            <mat-form-field color="primary" appearance="outline">
+              <mat-label>Git username</mat-label>
+              <input matInput
+                     type="text"
+                     formControlName="userName"
+                     id="username"
+                     label="git username"
+                     placeholder="git username"
+                     required>
+              <mat-error *ngIf="git.controls.userName.invalid">{{ errorMessage(git.controls.userName) }}</mat-error>
+            </mat-form-field>
+            <mat-form-field style="margin-left: 15px;" color="primary" appearance="outline">
+              <mat-label>Git password</mat-label>
+              <input matInput
+                     type="password"
+                     formControlName="password"
+                     id="password"
+                     label="git password"
+                     placeholder="git password"
+                     required
+              >
+              <mat-error *ngIf="git.controls.password.invalid">{{ errorMessage(git.controls.password) }}</mat-error>
+            </mat-form-field>
+          </div>
+        </form>
+      </div>
+      <div class="load_source">
+        <mat-divider [style.margin-top.px]="10"></mat-divider>
+        <h2>Source Map:</h2>
+        <div *ngIf="!sourcesLoaded">
+          <app-upload
+            accept=".json"
+            (filesEmitter)="loadSources($event)">
+          </app-upload>
+        </div>
+
+        <app-custom-list *ngIf="sourcesLoaded">
+          <app-custom-list-line *ngFor="let entry of sourceMap | keyvalue">
+            <mat-icon customListIcon fontSet='material-symbols-outlined'>home_storage</mat-icon>
+            <div customListLine>{{ entry.key }}</div>
+            <button
+              customListAction
+              mat-button
+              color="primary"
+              class="flex-row-jc-ac"
+              data-qe-id="view-fields-button"
+              matTooltip="View"
+              matTooltipPosition="below"
+              (click)="viewSourceField(viewFieldsDialog, entry.value)">
+              <mat-icon class="action-button-margin view-action-color">visibility</mat-icon>
+            </button>
+            <button
+              customListAction
+              mat-button
+              color="primary"
+              class="flex-row-jc-ac"
+              data-qe-id="delete-field-type-btn"
+              matTooltip="Delete"
+              matTooltipPosition="below"
+              (click)="deleteSource(entry.key)">
+              <mat-icon class="action-button-margin delete-action-color">delete</mat-icon>
+            </button>
+          </app-custom-list-line>
+        </app-custom-list>
+      </div>
+    </div>
+  </mat-card-content>
+  <mat-card-footer class="flex-row-je">
+    <button [style.margin.px]="15" mat-raised-button color="primary"
+            [disabled]="main.invalid || git.invalid || fileControl.invalid"
+            (click)="navigateToReceiver()">Next</button>
+  </mat-card-footer>
+
+  <ng-template #loading>
+    <mat-card-content class="flex-row-jc-ac">
+      <mat-progress-spinner color="primary"
+                            mode="indeterminate"
+                            [diameter]="150">
+      </mat-progress-spinner>
+    </mat-card-content>
+  </ng-template>
+</mat-card>
+
+<ng-template #viewFieldsDialog let-data>
+  <h2 mat-dialog-title>Fields assignment</h2>
+  <app-styled-chips-list mat-dialog-content
+                         [style.display]="'inline'"
+                         [chips]="data.chips"
+                         [forceStyleDisplay]="true">
+  </app-styled-chips-list>
+  <div mat-dialog-actions align="end">
+    <button mat-raised-button color="primary" [mat-dialog-close]="true" cdkFocusInitial>Ok</button>
+  </div>
+</ng-template>
