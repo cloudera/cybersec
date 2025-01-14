@@ -9,8 +9,6 @@
 name: Publish Release
 
 on:
-  schedule:
-    on: workflow_dispatch
   workflow_dispatch:
     inputs:
       tag:
