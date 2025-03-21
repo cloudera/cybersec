@@ -62,7 +62,8 @@ export class LoadChainDetailsSuccessAction implements Action {
     chains: { [key: string]: ParserChainModel },
     routes: { [key: string]: RouteModel },
     parsers: { [key: string]: ParserModel },
-    chainId: string
+    chainId: string,
+    currentPipeline: string
   }) {}
 }
 

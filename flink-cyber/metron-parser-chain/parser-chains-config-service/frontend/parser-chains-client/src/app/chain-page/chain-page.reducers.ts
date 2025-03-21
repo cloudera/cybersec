@@ -73,7 +73,8 @@ export function reducer(
         routes: action.payload.routes,
         dirtyParsers: [],
         dirtyChains: [],
-        path: [action.payload.chainId]
+        path: [action.payload.chainId],
+        selectedPipeline: action.payload.currentPipeline
       };
     }
     case chainPageActions.REMOVE_PARSER: {

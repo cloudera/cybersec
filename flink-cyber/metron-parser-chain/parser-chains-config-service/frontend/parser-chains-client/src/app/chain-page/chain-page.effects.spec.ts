@@ -154,6 +154,7 @@ describe('chain parser page: effects', () => {
           parsers: ['456']
         }
       },
+      currentPipeline: 'foo-pipeline',
       parsers: {
         123: {
           id: '123',
