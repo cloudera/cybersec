@@ -1,0 +1,34 @@
+{
+  "id" : "91480bc4-2a6d-49de-8f0f-5e654b10e90f",
+  "name" : "asa",
+  "parsers" : [ {
+    "id" : "fa555d30-0689-11f0-9048-9faa4f53dab2",
+    "name" : "initial_grok",
+    "type" : "com.cloudera.parserchains.parsers.GrokTableParser",
+    "config" : {
+      "grokPatternPath" : [ {
+        "grokPatternPath" : "grok/cisco_asa"
+      } ],
+      "initialGrokExpression" : [ {
+        "initialGrokExpression" : "%{CISCO_TAGGED_SYSLOG}"
+      } ],
+      "keyFieldName" : [ {
+        "keyFieldName" : "cisco_tag"
+      } ],
+      "messageFieldName" : [ {
+        "messageFieldName" : "message"
+      } ]
+    }
+  }, {
+    "id" : "fec11030-0693-11f0-8f14-4f461159ed6f",
+    "name" : "convert_timestamp",
+    "type" : "com.cloudera.parserchains.parsers.TimestampFormatParser",
+    "config" : {
+      "fields" : [ {
+        "field" : "timestamp",
+        "tz" : "UTC",
+        "format" : "MMM dd yyyy HH:mm:ss"
+      } ]
+    }
+  } ]
+}
