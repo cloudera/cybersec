@@ -112,7 +112,9 @@ public class ReflectiveParserBuilder implements ParserBuilder {
                             String.format("Required parameter isn't provided: %s", annotationKey));
                 }
                 if (paramAnnotation.isPath() && parserSchema.getBasePath() != null && !parserSchema.getBasePath().equals("null")) {
-                    finalValue = Paths.get(parserSchema.getBasePath(), finalValue).toString();
+                    if (!Paths.get(finalValue).isAbsolute()) {
+                        finalValue = Paths.get(parserSchema.getBasePath(), finalValue).toString();
+                    }
                 }
                 valueMap.put(annotationKey, finalValue);
             }
