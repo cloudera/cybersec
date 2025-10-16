@@ -41,7 +41,11 @@ public class ShellFunctionsTest {
             .with(Context.Capabilities.SHELL_VARIABLES , () -> variables).build();
 
   static String expectedListWithFoo = String.join("\n",
-        "*/"
+        "╔══════════╤═══════╤════════════╗",
+        "║ VARIABLE │ VALUE │ EXPRESSION ║",
+        "╠══════════╪═══════╪════════════╣",
+        "║ foo      │ 2.0   │ 1 + 1      ║",
+        "╚══════════╧═══════╧════════════╝"
       );
 
   @Test
@@ -57,7 +61,11 @@ public class ShellFunctionsTest {
   }
 
   static String expectedEmptyList = String.join("\n",
-        "*/"
+        "╔══════════╤═══════╤════════════╗",
+        "║ VARIABLE │ VALUE │ EXPRESSION ║",
+        "╠══════════╧═══════╧════════════╣",
+        "║ (empty)                       ║",
+        "╚═══════════════════════════════╝"
       );
 
   @Test
@@ -69,7 +77,13 @@ public class ShellFunctionsTest {
     assertEquals(expectedEmptyList, out);
   }
   static String expectedMap2Table = String.join("\n",
-        "*/"
+        "╔════════╤═══════╗",
+        "║ KEY    │ VALUE ║",
+        "╠════════╪═══════╣",
+        "║ field1 │ val1  ║",
+        "╟────────┼───────╢",
+        "║ field2 │ val2  ║",
+        "╚════════╧═══════╝"
       );
 
   @Test
@@ -80,7 +94,11 @@ public class ShellFunctionsTest {
     assertEquals(expectedMap2Table, out);
   }
   static String expectedMap2TableNullInput = String.join("\n",
-        "*/"
+        "╔═════╤═══════╗",
+        "║ KEY │ VALUE ║",
+        "╠═════╧═══════╣",
+        "║ (empty)     ║",
+        "╚═════════════╝"
       );
 
   @Test
