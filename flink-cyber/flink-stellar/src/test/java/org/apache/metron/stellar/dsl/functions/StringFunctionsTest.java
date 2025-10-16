@@ -492,15 +492,32 @@ public class StringFunctionsTest {
    */
 
   // Input strings to be used
-private String string1 = "";
+private String string1 = String.join("\n",
+    "{ \"foo\" : 2 }");
 
-private String string2 = "";
+private String string2 = String.join("\n",
+    "{",
+    "  \"foo\" : \"abc\",",
+    "  \"bar\" : \"def\"",
+    "}");
 
-private String string3 = "";
+private String string3 = String.join("\n",
+    "[ \"foo\", 2 ]");
 
-private String string4 = "";
+private String string4 = String.join("\n",
+    "[ \"foo\", \"bar\", \"car\" ]");
 
-private String string5 = "";
+private String string5 = String.join("\n",
+    "[",
+    "  {",
+    "    \"foo1\":\"abc\",",
+    "    \"bar1\":\"def\"",
+    "  },",
+    "  {",
+    "    \"foo2\":\"ghi\",",
+    "    \"bar2\":\"jkl\"",
+    "  }",
+    "]");
 
   @Test
   @SuppressWarnings("unchecked")
