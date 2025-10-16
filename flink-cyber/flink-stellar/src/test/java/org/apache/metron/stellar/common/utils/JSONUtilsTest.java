@@ -30,7 +30,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class JSONUtilsTest {
   private static File tmpDir;
 
-private static String config = "";
+private static String config = "{ \"a\" : \"hello\", \"b\" : \"world\" }";
   private static File configFile;
 
   @BeforeAll
