@@ -44,7 +44,13 @@ public class JSONMapParserTest {
     parser = new JSONMapParser();
   }
 
-static String happyPathJSON = "";
+static String happyPathJSON = String.join("\n",
+        "{",
+        "  \"foo\" : \"bar\"",
+        " ,\"blah\" : \"blah\"",
+        " ,\"number\" : 2.0",
+        "}"
+      );
 
   @Test
   public void testHappyPath() {
@@ -61,9 +67,20 @@ static String happyPathJSON = "";
     assertTrue(message.get("number") instanceof Number);
   }
 
-static String collectionHandlingJSON = "";
+static String collectionHandlingJSON = String.join("\n",
+        "{",
+        " \"collection\" : { \"blah\" : 7, \"blah2\" : \"foo\", \"bigblah\" : { \"innerBlah\" : \"baz\", \"reallyInnerBlah\" : { \"color\" : \"grey\" }}}",
+        "}"
+      );
 
-static String mixCollectionHandlingJSON = "";
+static String mixCollectionHandlingJSON = String.join("\n",
+        "{",
+        " \"collection\" : {",
+        "    \"key\" : \"value\"",
+        "  },",
+        " \"key\" : \"value\"",
+        "}"
+      );
 
   @Test
   public void testCollectionHandlingDrop() {
