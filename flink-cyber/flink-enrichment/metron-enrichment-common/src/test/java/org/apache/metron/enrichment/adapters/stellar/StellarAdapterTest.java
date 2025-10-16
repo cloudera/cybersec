@@ -133,8 +133,33 @@ public class StellarAdapterTest extends StellarEnrichmentTest {
     }
   }
 
-public static String mapConfig_subgroup = "";
-public static String mapConfig_default = "";
+public static String mapConfig_subgroup = String.join("\n",
+    "{",
+    "  \"fieldMap\": {",
+    "    \"stellar\" : {",
+    "      \"config\" : {",
+    "        \"group1\" : [",
+    "          \"stmt1 := TO_UPPER(source.type)\",",
+    "          \"stmt2 := { 'foo' : source.type }\"",
+    "        ]",
+    "      }",
+    "    }",
+    "  }",
+    "}"
+  );
+
+  public static String mapConfig_default = String.join("\n",
+    "{",
+    "  \"fieldMap\": {",
+    "    \"stellar\" : {",
+    "      \"config\" : [",
+    "          \"stmt1 := TO_UPPER(source.type)\",",
+    "          \"stmt2 := { 'foo' : source.type }\"",
+    "      ]",
+    "    }",
+    "  }",
+    "}"
+  );
 
 
   private void testMapEnrichment(String config, String field) throws Exception {
@@ -158,7 +183,17 @@ public static String mapConfig_default = "";
     testMapEnrichment(mapConfig_default, "");
   }
 
-public static String allVariableConfig = "";
+public static String allVariableConfig = String.join("\n",
+    "{",
+    "  \"fieldMap\": {",
+    "    \"stellar\" : {",
+    "      \"config\" : [",
+    "          \"stmt1 := MAP_GET('source.type', _)\"",
+    "      ]",
+    "    }",
+    "  }",
+    "}"
+  );
 
   @Test
   public void testAllVariableUsage() throws Exception {
