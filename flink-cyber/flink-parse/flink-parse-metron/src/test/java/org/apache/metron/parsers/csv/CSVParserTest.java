@@ -39,7 +39,20 @@ import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 
 public class CSVParserTest {
-public static String parserConfig = "";
+public static String parserConfig = String.join("\n",
+        "{",
+        " \"parserClassName\" : \"org.apache.metron.parsers.csv.CSVParser\"",
+        ",\"sensorTopic\":\"dummy\"",
+        ",\"parserConfig\":",
+        "{",
+        " \"columns\" : {",
+        "             \"col1\" : 0",
+        "            ,\" col2\" : 1",
+        "            ,\"col3 \" : 2",
+        "              }",
+        "}",
+        "}"
+      );
 
   @Test
   public void test() throws IOException {
