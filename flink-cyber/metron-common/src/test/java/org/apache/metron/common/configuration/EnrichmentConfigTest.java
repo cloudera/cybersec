@@ -29,7 +29,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EnrichmentConfigTest {
-public static String sourceConfigStr = "";
+public static String sourceConfigStr = String.join("\n",
+        "{",
+        " \"fieldMap\": {",
+        "   \"geo\": [\"ip_dst_addr\", \"ip_src_addr\"],",
+        "   \"host\": [\"host\"],",
+        "   \"stellar\" : {",
+        "      \"type\" : \"STELLAR\"",
+        "     ,\"config\" : {",
+        "         \"foo\" : \"1 + 1\"",
+        "        ,\"ALL_CAPS\" : \"TO_UPPER(source.type)\"",
+        "                 }",
+        "               }",
+        "           }",
+        "}"
+      );
 
   @Test
   public void testSerialization() throws Exception
