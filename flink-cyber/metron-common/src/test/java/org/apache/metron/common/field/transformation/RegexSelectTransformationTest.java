@@ -32,7 +32,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class RegexSelectTransformationTest {
-public static String routeSingleInSingleOut = "";
+public static String routeSingleInSingleOut = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"input\" : \"in_field\",",
+    "      \"output\" : \"out_field\",",
+    "      \"transformation\" : \"REGEX_SELECT\",",
+    "      \"config\" : {",
+    "        \"option_1\" : \".*foo.*\",",
+    "        \"option_2\" : [ \".*metron.*\", \".*mortron.*\" ]",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   private String transform(String in, String config) throws Exception {
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(config));
@@ -61,21 +74,58 @@ public static String routeSingleInSingleOut = "";
     assertEquals("option_1", transform("metron is for foorensic cybersecurity", routeSingleInSingleOut));
   }
 
-public static String routeMissingInput = "";
+public static String routeMissingInput = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"output\" : \"out_field\",",
+    "      \"transformation\" : \"REGEX_SELECT\",",
+    "      \"config\" : {",
+    "        \"option_1\" : \".*foo.*\",",
+    "        \"option_2\" : [ \".*metron.*\", \".*mortron.*\" ]",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testMissingInput() throws Exception {
     assertNull(transform("metron", routeMissingInput));
   }
 
-public static String routeMissingOutput = "";
+public static String routeMissingOutput = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"input\" : \"in_field\",",
+    "      \"transformation\" : \"REGEX_SELECT\",",
+    "      \"config\" : {",
+    "        \"option_1\" : \".*foo.*\",",
+    "        \"option_2\" : [ \".*metron.*\", \".*mortron.*\" ]",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testMissingOutput() throws Exception {
     assertNull(transform("metron", routeMissingOutput));
   }
 
-public static String routeMultiOutput = "";
+public static String routeMultiOutput = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"input\" : \"in_field\",",
+    "      \"output\" : [ \"out_field\", \"baz_field\" ],",
+    "      \"transformation\" : \"REGEX_SELECT\",",
+    "      \"config\" : {",
+    "        \"option_1\" : \".*foo.*\",",
+    "        \"option_2\" : [ \".*metron.*\", \".*mortron.*\" ]",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testMultiOutput() throws Exception{
@@ -83,7 +133,20 @@ public static String routeMultiOutput = "";
     assertNull(transform("bar", routeMultiOutput));
   }
 
-public static String routeBadRegex = "";
+public static String routeBadRegex = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"input\" : \"in_field\",",
+    "      \"output\" : \"out_field\",",
+    "      \"transformation\" : \"REGEX_SELECT\",",
+    "      \"config\" : {",
+    "        \"option_1\" : \"[a-z\",",
+    "        \"option_2\" : [ \".*metron.*\", \".*mortron.*\" ]",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testBadRegex() throws Exception{

@@ -34,9 +34,32 @@ import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 
 public class StellarTransformationTest {
-public static String badConfig = "";
+public static String badConfig = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"transformation\" : \"STELLAR\",",
+    "      \"output\" : [ \"full_hostname\", \"domain_without_subdomains\" ],",
+    "      \"config\" : {",
+    "        \"full_hostname\" : \"URL_TO_HOST(123)\",",
+    "        \"domain_without_subdomains\" : \"DOMAIN_REMOVE_SUBDOMAINS(full_hostname)\"",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
-public static String configAll = "";
+public static String configAll = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"transformation\" : \"STELLAR\",",
+    "      \"output\" : [ \"new_field\" ],",
+    "      \"config\" : {",
+    "        \"new_field\" : \"MAP_GET('source.type', _)\"",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testConfigAll() throws Exception {
@@ -51,7 +74,21 @@ public static String configAll = "";
     assertEquals("test", input.get("new_field"));
   }
 
-public static String configRename = "";
+public static String configRename = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"transformation\" : \"STELLAR\",",
+    "      \"output\" : [ \"new_field\", \"new_field2\", \"old_field\", \"old_field2\" ],",
+    "      \"config\" : {",
+    "        \"new_field\" : \"old_field\",",
+    "        \"new_field2\" : \"old_field2\",",
+    "        \"old_field\" : \"null\",",
+    "        \"old_field2\" : \"null\"",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testStellarRename() throws Exception {
@@ -84,7 +121,19 @@ public static String configRename = "";
     }
   }
 
-public static String configNumericDomain = "";
+public static String configNumericDomain = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"transformation\" : \"STELLAR\",",
+    "      \"output\" : [ \"full_hostname\", \"domain_without_subdomains\" ],",
+    "      \"config\" : {",
+    "        \"full_hostname\" : \"URL_TO_HOST('http://1234567890123456789012345678901234567890123456789012345678901234567890/index.html')\",",
+    "        \"domain_without_subdomains\" : \"DOMAIN_REMOVE_SUBDOMAINS(full_hostname)\"",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testStellarNumericDomain() throws Exception {
@@ -118,9 +167,33 @@ public static String configNumericDomain = "";
     assertTrue(ex.getMessage().contains("123"));
   }
 
-public static String stellarConfig = "";
+public static String stellarConfig = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"transformation\" : \"STELLAR\",",
+    "      \"output\" : \"utc_timestamp\",",
+    "      \"config\" : {",
+    "        \"utc_timestamp\" : \"TO_EPOCH_TIMESTAMP(timestamp, 'yyyy-MM-dd HH:mm:ss', 'UTC')\"",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
-public static String intermediateValuesConfig = "";
+public static String intermediateValuesConfig = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"transformation\" : \"STELLAR\",",
+    "      \"output\" : \"final_value\",",
+    "      \"config\" : {",
+    "        \"value1\" : \"1\",",
+    "        \"value2\" : \"value1 + 1\",",
+    "        \"final_value\" : \"value2 + 1\"",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testIntermediateValues() throws Exception {
@@ -136,7 +209,19 @@ public static String intermediateValuesConfig = "";
     assertFalse(input.containsKey("value2"));
   }
 
-public static String stellarConfigEspecial = "";
+public static String stellarConfigEspecial = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"transformation\" : \"STELLAR\",",
+    "      \"output\" : [ \"newStellarField\", \"utc_timestamp\" ],",
+    "      \"config\" : {",
+    "        \"newStellarField\" : \"'<<??>>'\"," ,
+    "        \"utc_timestamp\" : \"TO_EPOCH_TIMESTAMP(timestamp, 'yyyy-MM-dd HH:mm:ss', 'UTC')\"",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
 
   @Test
@@ -190,7 +275,27 @@ public static String stellarConfigEspecial = "";
     assertTrue(input.isEmpty());
   }
 
-public static String stellarConfig_multi = "";
+public static String stellarConfig_multi = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"transformation\" : \"STELLAR\",",
+    "      \"output\" : [ \"utc_timestamp\", \"url_host\", \"url_protocol\" ],",
+    "      \"config\" : {",
+    "        \"utc_timestamp\" : \"TO_EPOCH_TIMESTAMP(timestamp, 'yyyy-MM-dd HH:mm:ss', MAP_GET(dc, dc2tz, 'UTC') )\",",
+    "        \"url_host\" : \"TO_LOWER(URL_TO_HOST(url))\",",
+    "        \"url_protocol\" : \"URL_TO_PROTOCOL(url)\"",
+    "      }",
+    "    }",
+    "  ],",
+    "  \"parserConfig\" : {",
+    "    \"dc2tz\" : {",
+    "      \"nyc\" : \"EST\",",
+    "      \"la\" : \"PST\",",
+    "      \"london\" : \"UTC\"",
+    "    }",
+    "  }",
+    "}");
 
   /**
    * A more complicated test where we are transforming multiple fields:

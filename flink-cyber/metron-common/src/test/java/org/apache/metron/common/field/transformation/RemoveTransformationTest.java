@@ -32,7 +32,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RemoveTransformationTest {
-public static String removeUnconditionalConfig = "";
+public static String removeUnconditionalConfig = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"input\" : \"field1\",",
+    "      \"transformation\" : \"REMOVE\"",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testUnconditionalRemove() throws Exception{
@@ -45,7 +53,18 @@ public static String removeUnconditionalConfig = "";
     assertFalse(input.containsKey("field1"));
   }
 
-public static String removeConditionalConfig = "";
+public static String removeConditionalConfig = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"output\" : \"field1\",",
+    "      \"transformation\" : \"REMOVE\",",
+    "      \"config\" : {",
+    "        \"condition\" : \"exists(field2) and field2 == 'foo'\"",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
   @Test
   public void testConditionalRemove() throws Exception {
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(removeConditionalConfig));

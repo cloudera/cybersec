@@ -51,11 +51,38 @@ public class FieldTransformationTest {
     }
   }
 
-public static String complexConfig = "";
+public static String complexConfig = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"input\" : [ \"field1\", \"field2\" ],",
+    "      \"output\" : \"output\",",
+    "      \"transformation\" : \"org.apache.metron.common.field.transformation.FieldTransformationTest$TestTransformation\",",
+    "      \"config\" : {",
+    "        \"delim\" : \",\"",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
-public static String config = "";
+public static String config = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"input\" : \"protocol\",",
+    "      \"transformation\" : \"IP_PROTOCOL\"",
+    "    }",
+    "  ]",
+    "}");
 
-public static String badConfigMissingMapping = "";
+public static String badConfigMissingMapping = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"input\" : \"protocol\"",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testValidSerde_simple() throws IOException {
