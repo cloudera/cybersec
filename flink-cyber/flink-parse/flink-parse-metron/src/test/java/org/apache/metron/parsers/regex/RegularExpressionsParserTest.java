@@ -40,7 +40,69 @@ public class RegularExpressionsParserTest {
     }
 
     //@formatter:off
-public static String parserConfig1 = "";
+public static String parserConfig1 = String.join("\n",
+        "{",
+        "   \"convertCamelCaseToUnderScore\": true,",
+        "   \"messageHeaderRegex\": \"(?<syslogpriority>(?<=^<)\\\\d{1,4}(?=>)).*?(?<timestampDeviceOriginal>(?<=>)[A-Za-z]{3}\\\\s{1,2}\\\\d{1,2}\\\\s\\\\d{1,2}:\\\\d{1,2}:\\\\d{1,2}(?=\\\\s)).*?(?<deviceName>(?<=\\\\s).*?(?=\\\\s))\",",
+        "   \"recordTypeRegex\": \"(?<dstProcessName>(?<=\\\\s)\\\\b(kesl|sshd|run-parts|kernel|vsftpd|ftpd|su)\\\\b(?=\\\\[|:))\",",
+        "   \"fields\": [",
+        "     {",
+        "       \"recordType\": \"kesl\",",
+        "       \"regex\": \".*(?<eventInfo>(?<=\\\\:).*?(?=$))\"",
+        "     },",
+        "     {",
+        "       \"recordType\": \"run-parts\",",
+        "       \"regex\": \".*(?<eventInfo>(?<=\\\\sparts).*?(?=$))\"",
+        "     },",
+        "     {",
+        "       \"recordType\": \"sshd\",",
+        "       \"regex\": [",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=\\\\]:\\\\s).*?(?=\\\\sfor)).*?(?<dstUserId>(?<=\\\\sfor\\\\s).*?(?=\\\\sfrom)).*?(?<ipSrcAddr>(?<=\\\\sfrom\\\\s).*?(?=\\\\sport)).*?(?<ipSrcPort>(?<=\\\\sport\\\\s).*?(?=\\\\s)).*?(?<appProtocol>(?<=port\\\\s\\\\d{1,5}\\\\s).*(?=:\\\\s)).*?(?<encryptionAlgorithm>(?<=:\\\\s).+?(?=\\\\s)).*(?<correlationId>(?<=\\\\s).+?(?=$))\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=\\\\]:\\\\s).*?(?=\\\\sfor)).*?(?<dstUserId>(?<=\\\\sfor\\\\s).*?(?=\\\\sfrom)).*?(?<ipSrcAddr>(?<=\\\\sfrom\\\\s).*?(?=\\\\sport)).*?(?<ipSrcPort>(?<=\\\\sport\\\\s).*?(?=\\\\s)).*?(?<appProtocol>(?<=port\\\\s\\\\d{1,5}\\\\s).*?(?=$))\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<ipDstAddr>(?<=Remote:).*?(?=\\\\-)).*?(?<ipDstPort>(?<=\\\\-).*?(?=;)).*?(?<appProtocol>(?<=Protocol:).*?(?=;)).*?(?<sshClient>(?<=Client:).*?(?=$))\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<appProtocol>(?<=\\\\]:).*?(?=:)).*?(?<ipDstAddr>(?<=Remote:).*?(?=\\\\-)).*?(?<ipDstPort>(?<=\\\\-).*?(?=;)).*?(?<encryptionAlgorithm>(?<=Enc:\\\\s).*?(?=$))\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<ipDstAddr>(?<=Remote:).*?(?=\\\\-)).*?(?<ipDstPort>(?<=\\\\-).*?(?=;)).*?(?<encryptionAlgorithm>(?<=Enc:\\\\s).*?(?=$))\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=:).*?(?=for)).*?(?<dstUserId>(?<=for).*?(?=from)).*?(?<ipSrcAddr>(?<=from).*?(?=port)).*?(?<ipSrcPort>(?<=port).*?(?=\\\\s)).*?(?<appProtocol>(?<=\\\\s).*?(?=$))\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\]))]:\\\\s.*?(?<eventInfo>subsystem.*?(?=by\\\\suser)).*?(?<srcUserId>(?<=user).*?(?=$))\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<action>(?<=Received).*?(?=from)).*?(?<ipSrcAddr>(?<=from).*?(?=:)).*?(?<eventInfo>(?<=11:).*?(?=$))\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=\\\\]:\\\\s)Server\\\\slistening(?=\\\\s)).*?(?<ipSrcAddr>(?<=\\\\son\\\\s).*?(?=port)).*?(?<ipSrcPort>(?<=port\\\\s)\\\\d{1,6}(?=\\\\.)).*$\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=\\\\]:\\\\s)Invalid user(?=\\\\s)).*?(?<dstUserId>(?<=\\\\s).*?(?=from)).*?(?<ipSrcAddr>(?<=from\\\\s).*(?=$))\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=]:\\\\s)).*(?<subProcess>(?<=]:\\\\s).*\\\\)(?=:)).*(?<eventInfo>(?<=:\\\\s).*(?=;)).*(?<logname>(?<=logname=).*?(?=\\\\s)).*(?<dstUserId>(?<=uid=).*?(?=\\\\s)).*(?<effectiveUserId>(?<=euid=).*?(?=\\\\s)).*(?<sessionName>(?<=tty=).*?(?=\\\\s)).*(?<srcUserId>(?<=ruser=).*?(?=\\\\s)).*(?<ipSrcAddr>(?<=rhost=).*?(?=\\\\s)).*(?<userId>(?<=user=).*?(?=$))\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=]:\\\\s)).*(?<eventInfo>(?<=:\\\\s).*(?=;)).*(?<logname>(?<=logname=).*?(?=\\\\s)).*(?<dstUserId>(?<=uid=).*?(?=\\\\s)).*(?<effectiveUserId>(?<=euid=).*?(?=\\\\s)).*(?<sessionName>(?<=tty=).*?(?=\\\\s)).*(?<srcUserId>(?<=ruser=).*?(?=\\\\s)).*(?<ipSrcAddr>(?<=rhost=).*?(?=\\\\s)).*(?<userId>(?<=user=).*?(?=$))\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=\\\\]:\\\\s).*?(?=for)).*?(?<dstUserId>(?<=\\\\sfor).*?(?=\\\\[)).*?(?<subProcess>(?<=\\\\[).*?(?=\\\\])).*$\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=:\\\\s)Excess permission or bad ownership on file(?=\\\\s\\\\/)).*?(?<filePath>(?<=\\\\s).*(?=\\\\/)).*?(?<fileName>(?<=\\\\/).*(?=$))\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=:).*?(?=;)).*$\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=:).*?(?=\\\\d)).*$\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=:).*?(?=$))\"",
+        "       ]",
+        "     },",
+        "     {",
+        "       \"recordType\": \"kernel\",",
+        "       \"regex\": [",
+        "         \".*(?<connectedDeviceName>(?<=\\\\:\\\\susb).*?(?=\\\\:)).*?(?<eventInfo>(?<=\\\\:).*?(?=$))\",",
+        "         \".*(?<subProcess>(?<=\\\\:\\\\s).*?(?=\\\\:)).*?(?<eventInfo>(?<=\\\\:).*?(?=$))\"",
+        "       ]",
+        "     },",
+        "     {",
+        "       \"recordType\": \"vsftpd\",",
+        "       \"regex\": \".*(?<dstProcessId>(?<=\\\\[).*?(?=]:\\\\s)).*(?<subProcess>(?<=]:\\\\s).*\\\\)(?=:)).*(?<eventInfo>(?<=:\\\\s).*(?=;)).*(?<effectiveUserId>(?<=euid=).*?(?=\\\\s)).*(?<sessionName>(?<=tty=).*?(?=\\\\s)).*(?<srcUserId>(?<=user=).*?(?=\\\\s)).*(?<ipSrcAddr>(?<=rhost=).*?(?=\\\\s)).*(?<dstUserId>(?<=user=).*?(?=$))\"",
+        "     },",
+        "     {",
+        "       \"recordType\": \"ftpd\",",
+        "       \"regex\": [",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=]:\\\\s)).*(?<eventInfo>(?<=:\\\\s).*(?=FROM)).*(?<srcHost>(?<=\\\\s).*?(?=\\\\s)).*(?<ipSrcAddr>(?<=\\\\s).*?(?=,)).*(?<dstUserId>(?<=,).*?(?=$))\",",
+        "         \".*(?<dstProcessId>(?<=\\\\[).*?(?=]:\\\\s)).*(?<eventInfo>(?<=:\\\\s).*(?=from)).*(?<srcHost>(?<=\\\\s).*?(?=\\\\s)).*(?<ipSrcAddr>(?<=\\\\s).*?(?=,)).*(?<dstUserId>(?<=,).*?(?=$))\"",
+        "       ]",
+        "     },",
+        "     {",
+        "       \"recordType\": \"su\",",
+        "       \"regex\": [",
+        "         \".*(?<eventInfo>(?<=:\\\\s).*(?=for)).*(?<dstUserId>(?<=user=).*?(?=to)).*(?<responseCode>(?<=to).*?(?=$))\"",
+        "       ]",
+        "     }",
+        "   ]",
+        "}"
+      );
     //@formatter:on
 
 
@@ -68,7 +130,68 @@ public static String parserConfig1 = "";
     }
 
     //@formatter:off
-public static String parserConfigNoMessageHeader = "";
+public static String parserConfigNoMessageHeader = String.join("\n",
+        "{",
+        "\"convertCamelCaseToUnderScore\": true,",
+        "\"recordTypeRegex\": \"(?<dstProcessName>(?<=\\\\s)\\\\b(kesl|sshd|run-parts|kernel|vsftpd|ftpd|su)\\\\b(?=\\\\[|:))\",",
+        "\"fields\": [",
+        "  {",
+        "    \"recordType\": \"kesl\",",
+        "    \"regex\": \".*(?<eventInfo>(?<=\\\\:).*?(?=$))\"",
+        "  },",
+        "  {",
+        "    \"recordType\": \"run-parts\",",
+        "    \"regex\": \".*(?<eventInfo>(?<=\\\\sparts).*?(?=$))\"",
+        "  },",
+        "  {",
+        "    \"recordType\": \"sshd\",",
+        "    \"regex\": [",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=\\\\]:\\\\s).*?(?=\\\\sfor)).*?(?<dstUserId>(?<=\\\\sfor\\\\s).*?(?=\\\\sfrom)).*?(?<ipSrcAddr>(?<=\\\\sfrom\\\\s).*?(?=\\\\sport)).*?(?<ipSrcPort>(?<=\\\\sport\\\\s).*?(?=\\\\s)).*?(?<appProtocol>(?<=port\\\\s\\\\d{1,5}\\\\s).*(?=:\\\\s)).*?(?<encryptionAlgorithm>(?<=:\\\\s).+?(?=\\\\s)).*(?<correlationId>(?<=\\\\s).+?(?=$))\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=\\\\]:\\\\s).*?(?=\\\\sfor)).*?(?<dstUserId>(?<=\\\\sfor\\\\s).*?(?=\\\\sfrom)).*?(?<ipSrcAddr>(?<=\\\\sfrom\\\\s).*?(?=\\\\sport)).*?(?<ipSrcPort>(?<=\\\\sport\\\\s).*?(?=\\\\s)).*?(?<appProtocol>(?<=port\\\\s\\\\d{1,5}\\\\s).*?(?=$))\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<ipDstAddr>(?<=Remote:).*?(?=\\\\-)).*?(?<ipDstPort>(?<=\\\\-).*?(?=;)).*?(?<appProtocol>(?<=Protocol:).*?(?=;)).*?(?<sshClient>(?<=Client:).*?(?=$))\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<appProtocol>(?<=\\\\]:).*?(?=:)).*?(?<ipDstAddr>(?<=Remote:).*?(?=\\\\-)).*?(?<ipDstPort>(?<=\\\\-).*?(?=;)).*?(?<encryptionAlgorithm>(?<=Enc:\\\\s).*?(?=$))\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<ipDstAddr>(?<=Remote:).*?(?=\\\\-)).*?(?<ipDstPort>(?<=\\\\-).*?(?=;)).*?(?<encryptionAlgorithm>(?<=Enc:\\\\s).*?(?=$))\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=:).*?(?=for)).*?(?<dstUserId>(?<=for).*?(?=from)).*?(?<ipSrcAddr>(?<=from).*?(?=port)).*?(?<ipSrcPort>(?<=port).*?(?=\\\\s)).*?(?<appProtocol>(?<=\\\\s).*?(?=$))\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\]))]:\\\\s.*?(?<eventInfo>subsystem.*?(?=by\\\\suser)).*?(?<srcUserId>(?<=user).*?(?=$))\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<action>(?<=Received).*?(?=from)).*?(?<ipSrcAddr>(?<=from).*?(?=:)).*?(?<eventInfo>(?<=11:).*?(?=$))\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=\\\\]:\\\\s)Server\\\\slistening(?=\\\\s)).*?(?<ipSrcAddr>(?<=\\\\son\\\\s).*?(?=port)).*?(?<ipSrcPort>(?<=port\\\\s)\\\\d{1,6}(?=\\\\.)).*$\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=\\\\]:\\\\s)Invalid user(?=\\\\s)).*?(?<dstUserId>(?<=\\\\s).*?(?=from)).*?(?<ipSrcAddr>(?<=from\\\\s).*(?=$))\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=]:\\\\s)).*(?<subProcess>(?<=]:\\\\s).*\\\\)(?=:)).*(?<eventInfo>(?<=:\\\\s).*(?=;)).*(?<logname>(?<=logname=).*?(?=\\\\s)).*(?<dstUserId>(?<=uid=).*?(?=\\\\s)).*(?<effectiveUserId>(?<=euid=).*?(?=\\\\s)).*(?<sessionName>(?<=tty=).*?(?=\\\\s)).*(?<srcUserId>(?<=ruser=).*?(?=\\\\s)).*(?<ipSrcAddr>(?<=rhost=).*?(?=\\\\s)).*(?<userId>(?<=user=).*?(?=$))\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=]:\\\\s)).*(?<eventInfo>(?<=:\\\\s).*(?=;)).*(?<logname>(?<=logname=).*?(?=\\\\s)).*(?<dstUserId>(?<=uid=).*?(?=\\\\s)).*(?<effectiveUserId>(?<=euid=).*?(?=\\\\s)).*(?<sessionName>(?<=tty=).*?(?=\\\\s)).*(?<srcUserId>(?<=ruser=).*?(?=\\\\s)).*(?<ipSrcAddr>(?<=rhost=).*?(?=\\\\s)).*(?<userId>(?<=user=).*?(?=$))\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=\\\\]:\\\\s).*?(?=for)).*?(?<dstUserId>(?<=\\\\sfor).*?(?=\\\\[)).*?(?<subProcess>(?<=\\\\[).*?(?=\\\\])).*$\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=:\\\\s)Excess permission or bad ownership on file(?=\\\\s\\\\/)).*?(?<filePath>(?<=\\\\s).*(?=\\\\/)).*?(?<fileName>(?<=\\\\/).*(?=$))\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=:).*?(?=;)).*$\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=:).*?(?=\\\\d)).*$\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=\\\\])).*?(?<eventInfo>(?<=:).*?(?=$))\"",
+        "    ]",
+        "  },",
+        "  {",
+        "    \"recordType\": \"kernel\",",
+        "    \"regex\": [",
+        "      \".*(?<connectedDeviceName>(?<=\\\\:\\\\susb).*?(?=\\\\:)).*?(?<eventInfo>(?<=\\\\:).*?(?=$))\",",
+        "      \".*(?<subProcess>(?<=\\\\:\\\\s).*?(?=\\\\:)).*?(?<eventInfo>(?<=\\\\:).*?(?=$))\"",
+        "    ]",
+        "  },",
+        "  {",
+        "    \"recordType\": \"vsftpd\",",
+        "    \"regex\": \".*(?<dstProcessId>(?<=\\\\[).*?(?=]:\\\\s)).*(?<subProcess>(?<=]:\\\\s).*\\\\)(?=:)).*(?<eventInfo>(?<=:\\\\s).*(?=;)).*(?<effectiveUserId>(?<=euid=).*?(?=\\\\s)).*(?<sessionName>(?<=tty=).*?(?=\\\\s)).*(?<srcUserId>(?<=user=).*?(?=\\\\s)).*(?<ipSrcAddr>(?<=rhost=).*?(?=\\\\s)).*(?<dstUserId>(?<=user=).*?(?=$))\"",
+        "  },",
+        "  {",
+        "    \"recordType\": \"ftpd\",",
+        "    \"regex\": [",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=]:\\\\s)).*(?<eventInfo>(?<=:\\\\s).*(?=FROM)).*(?<srcHost>(?<=\\\\s).*?(?=\\\\s)).*(?<ipSrcAddr>(?<=\\\\s).*?(?=,)).*(?<dstUserId>(?<=,).*?(?=$))\",",
+        "      \".*(?<dstProcessId>(?<=\\\\[).*?(?=]:\\\\s)).*(?<eventInfo>(?<=:\\\\s).*(?=from)).*(?<srcHost>(?<=\\\\s).*?(?=\\\\s)).*(?<ipSrcAddr>(?<=\\\\s).*?(?=,)).*(?<dstUserId>(?<=,).*?(?=$))\"",
+        "    ]",
+        "  },",
+        "  {",
+        "    \"recordType\": \"su\",",
+        "    \"regex\": [",
+        "      \".*(?<eventInfo>(?<=:\\\\s).*(?=for)).*(?<dstUserId>(?<=user=).*?(?=to)).*(?<responseCode>(?<=to).*?(?=$))\"",
+        "    ]",
+        "  }",
+        "]",
+        "}"
+      );
     //@formatter:on
 
     @Test
@@ -93,7 +216,18 @@ public static String parserConfigNoMessageHeader = "";
     }
 
     //@formatter:off
-public static String invalidParserConfig = "";
+public static String invalidParserConfig = String.join("\n",
+        "{",
+        "    \"messageHeaderRegex\": \"(?<syslog_priority>(?<=^<)\\\\d{1,4}(?=>)).*?(?<timestampDeviceOriginal>(?<=>)[A-Za-z]{3}\\\\s{1,2}\\\\d{1,2}\\\\s\\\\d{1,2}:\\\\d{1,2}:\\\\d{1,2}(?=\\\\s)).*?(?<deviceName>(?<=\\\\s).*?(?=\\\\s))\",",
+        "    \"recordTypeRegex\": \"(?<dstProcessName>(?<=\\\\s)\\\\b(tch-replicant|audispd|syslog)\\\\b(?=\\\\[|:))\",",
+        "    \"fields\": [",
+        "        {",
+        "            \"recordType\": \"syslog\",",
+        "            \"regex\": \".*(?<dstProcessId>(?<=PID\\\\s=\\\\s).*?(?=\\\\sLine)).*\"",
+        "        }",
+        "    ]",
+        "}"
+      );
     //@formatter:on
 
     @Test
@@ -103,7 +237,17 @@ public static String invalidParserConfig = "";
     }
 
     //@formatter:off
-public static String noRecordTypeParserConfig = "";
+public static String noRecordTypeParserConfig = String.join("\n",
+        "{",
+        "    \"messageHeaderRegex\": \"(?<syslog_priority>(?<=^<)\\\\d{1,4}(?=>)).*?(?<timestampDeviceOriginal>(?<=>)[A-Za-z]{3}\\\\s{1,2}\\\\d{1,2}\\\\s\\\\d{1,2}:\\\\d{1,2}:\\\\d{1,2}(?=\\\\s)).*?(?<deviceName>(?<=\\\\s).*?(?=\\\\s))\",",
+        "    \"fields\": [",
+        "        {",
+        "            \"recordType\": \"syslog\",",
+        "            \"regex\": \".*(?<dstProcessId>(?<=PID\\\\s=\\\\s).*?(?=\\\\sLine)).*\"",
+        "        }",
+        "    ]",
+        "}"
+      );
     //@formatter:on
 
     @Test
