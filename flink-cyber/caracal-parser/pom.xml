@@ -194,10 +194,6 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.adrianwalker</groupId>
-            <artifactId>multiline-string</artifactId>
-        </dependency>
     </dependencies>
 
     <build>

@@ -18,7 +18,6 @@
 package org.apache.metron.stellar.dsl.functions;
 
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.stellar.common.shell.VariableResult;
 import org.apache.metron.stellar.dsl.Context;
 import org.junit.jupiter.api.Test;
@@ -41,15 +40,9 @@ public class ShellFunctionsTest {
   Context context = new Context.Builder()
             .with(Context.Capabilities.SHELL_VARIABLES , () -> variables).build();
 
-/**
-╔══════════╤═══════╤════════════╗
-║ VARIABLE │ VALUE │ EXPRESSION ║
-╠══════════╪═══════╪════════════╣
-║ foo      │ 2.0   │ 1 + 1      ║
-╚══════════╧═══════╧════════════╝
- **/
-  @Multiline
-  static String expectedListWithFoo;
+  static String expectedListWithFoo = String.join("\n",
+        "*/"
+      );
 
   @Test
   public void testListVarsWithVars() {
@@ -63,15 +56,9 @@ public class ShellFunctionsTest {
     assertEquals(expectedListWithFoo, out);
   }
 
-/**
-╔══════════╤═══════╤════════════╗
-║ VARIABLE │ VALUE │ EXPRESSION ║
-╠══════════╧═══════╧════════════╣
-║ (empty)                       ║
-╚═══════════════════════════════╝
- **/
-  @Multiline
-  static String expectedEmptyList;
+  static String expectedEmptyList = String.join("\n",
+        "*/"
+      );
 
   @Test
   public void testListVarsWithoutVars() {
@@ -81,17 +68,9 @@ public class ShellFunctionsTest {
     Object out = run("SHELL_LIST_VARS()", new HashMap<>(), context);
     assertEquals(expectedEmptyList, out);
   }
-/**
-╔════════╤═══════╗
-║ KEY    │ VALUE ║
-╠════════╪═══════╣
-║ field1 │ val1  ║
-╟────────┼───────╢
-║ field2 │ val2  ║
-╚════════╧═══════╝
- **/
-  @Multiline
-  static String expectedMap2Table;
+  static String expectedMap2Table = String.join("\n",
+        "*/"
+      );
 
   @Test
   public void testMap2Table() {
@@ -100,15 +79,9 @@ public class ShellFunctionsTest {
     Object out = run("SHELL_MAP2TABLE(map_field)", variables, context);
     assertEquals(expectedMap2Table, out);
   }
- /**
-╔═════╤═══════╗
-║ KEY │ VALUE ║
-╠═════╧═══════╣
-║ (empty)     ║
-╚═════════════╝
- **/
-  @Multiline
-  static String expectedMap2TableNullInput;
+  static String expectedMap2TableNullInput = String.join("\n",
+        "*/"
+      );
 
   @Test
   public void testMap2TableNullInput() {

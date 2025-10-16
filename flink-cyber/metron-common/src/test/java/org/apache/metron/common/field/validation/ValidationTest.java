@@ -19,7 +19,6 @@
 package org.apache.metron.common.field.validation;
 
 import com.google.common.collect.ImmutableList;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.configuration.Configurations;
 import org.junit.jupiter.api.Test;
 
@@ -28,42 +27,10 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ValidationTest extends BaseValidationTest{
-  /**
-   {
-    "fieldValidations" : [
-            {
-              "input" : "field1"
-             ,"validation" : "NOT_EMPTY"
-            }
-                         ]
-   }
-   */
-  @Multiline
-  public static String validValidationConfigWithStringInput;
+public static String validValidationConfigWithStringInput = "";
 
-  /**
-   {
-    "fieldValidations" : [
-            {
-              "input" : [ "field1", "field2" ]
-             ,"validation" : "NOT_EMPTY"
-            }
-                         ]
-   }
-   */
-  @Multiline
-  public static String validValidationConfigWithListInput;
-  /**
-   {
-    "fieldValidations" : [
-            {
-              "input" : "field1"
-            }
-                         ]
-   }
-   */
-  @Multiline
-  public static String invalidValidationConfig;
+public static String validValidationConfigWithListInput = "";
+public static String invalidValidationConfig = "";
   @Test
   public void testValidConfiguration() throws IOException {
     {

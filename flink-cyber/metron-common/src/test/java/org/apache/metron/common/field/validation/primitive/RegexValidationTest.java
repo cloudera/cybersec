@@ -19,7 +19,6 @@
 package org.apache.metron.common.field.validation.primitive;
 
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.field.validation.BaseValidationTest;
 import org.junit.jupiter.api.Test;
 
@@ -29,38 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RegexValidationTest extends BaseValidationTest {
-  /**
-   {
-    "fieldValidations" : [
-            {
-              "input" : "field1"
-             ,"validation" : "REGEX_MATCH"
-             ,"config" : {
-                  "pattern" : "fo.*"
-                         }
-            }
-                         ]
-   }
-   */
+public static String validWithSingleField = "";
 
-  @Multiline
-  public static String validWithSingleField;
-
-  /**
-   {
-    "fieldValidations" : [
-            {
-              "input" : [ "field1", "field2" ]
-             ,"validation" : "REGEX_MATCH"
-             ,"config" : {
-                  "pattern" : "fo.*"
-                         }
-            }
-                         ]
-   }
-   */
-  @Multiline
-  public static String validWithMultipleFields;
+public static String validWithMultipleFields = "";
 
   @Test
   public void positiveTest_single() throws IOException {

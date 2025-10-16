@@ -17,7 +17,6 @@
  */
 package org.apache.metron.common.configuration;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentUpdateConfig;
 import org.apache.metron.common.utils.JSONUtils;
@@ -31,53 +30,9 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SensorEnrichmentUpdateConfigTest {
-  /**
-   {
-      "enrichment" : {
-        "fieldMap": {
-          "geo": ["ip_dst_addr", "ip_src_addr"],
-          "host": ["host"]
-                    }
-      },
-      "threatIntel": {
-        "fieldMap": {
-          "hbaseThreatIntel": ["ip_dst_addr", "ip_src_addr"]
-                    },
-        "fieldToTypeMap": {
-          "ip_dst_addr" : [ "malicious_ip" ]
-         ,"ip_src_addr" : [ "malicious_ip" ]
-                          },
-        "triageConfig" : {
-          "riskLevelRules" : [
-            {
-              "rule" : "not(IN_SUBNET(ip_dst_addr, '192.168.0.0/24'))",
-              "score" : 10
-            }
-                             ],
-          "aggregator" : "MAX"
-                        }
-      }
-    }
-   */
-  @Multiline
-  public static String sourceConfigStr;
+public static String sourceConfigStr = "";
 
-  /**
-{
-  "zkQuorum" : "localhost:2181"
- ,"sensorToFieldList" : {
-      "bro" : {
-           "type" : "THREAT_INTEL"
-          ,"fieldToEnrichmentTypes" : {
-              "ip_src_addr" : [ "playful" ]
-             ,"ip_dst_addr" : [ "playful" ]
-                                      }
-              }
-                        }
-}
-  */
-  @Multiline
-  public static String threatIntelConfigStr;
+public static String threatIntelConfigStr = "";
 
   @Test
   public void testThreatIntel() throws Exception {
@@ -193,22 +148,7 @@ public class SensorEnrichmentUpdateConfigTest {
         finalEnrichmentConfig.get("bro").toJSON());
   }
 
-  /**
-   {
-  "zkQuorum" : "localhost:2181"
- ,"sensorToFieldList" : {
-  "bro" : {
-           "type" : "ENRICHMENT"
-          ,"fieldToEnrichmentTypes" : {
-            "ip_src_addr" : [ "playful" ]
-           ,"ip_dst_addr" : [ "playful" ]
-                                      }
-          }
-                        }
-   }
-   */
-  @Multiline
-  public static String enrichmentConfigStr;
+public static String enrichmentConfigStr = "";
   @Test
   public void testEnrichment() throws Exception {
 

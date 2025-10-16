@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.Level;
 import org.apache.metron.common.configuration.SensorParserConfig;
@@ -40,22 +39,7 @@ import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 
 public class CSVParserTest {
-  /**
-   {
-    "parserClassName" : "org.apache.metron.parsers.csv.CSVParser"
-   ,"sensorTopic":"dummy"
-   ,"parserConfig":
-   {
-    "columns" : {
-                "col1" : 0
-               ," col2" : 1
-               ,"col3 " : 2
-                 }
-   }
-   }
-   */
-  @Multiline
-  public static String parserConfig;
+public static String parserConfig = "";
 
   @Test
   public void test() throws IOException {

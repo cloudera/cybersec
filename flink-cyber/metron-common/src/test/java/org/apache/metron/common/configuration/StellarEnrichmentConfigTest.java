@@ -20,7 +20,6 @@ package org.apache.metron.common.configuration;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.configuration.enrichment.EnrichmentConfig;
 import org.apache.metron.common.configuration.enrichment.handler.ConfigHandler;
 import org.apache.metron.common.configuration.enrichment.handler.Configs;
@@ -36,26 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class StellarEnrichmentConfigTest extends StellarEnrichmentTest {
 
-  /**
-   {
-    "fieldMap": {
-      "stellar" : {
-        "config" : [
-   "dga_model_endpoint := MAAS_GET_ENDPOINT('dga')",
-   "dga_result_map := MAAS_MODEL_APPLY( dga_model_endpoint, { 'host' : domain_without_subdomains } )",
-   "dga_result := MAP_GET('is_malicious', dga_result_map)",
-   "is_dga := dga_result != null && dga_result == 'dga'",
-   "dga_model_version := MAP_GET('version', dga_model_endpoint)",
-   "dga_model_endpoint := null",
-   "dga_result_map := null",
-   "dga_result := null"
-        ]
-      }
-    }
-  }
-   */
-  @Multiline
-  public static String conf;
+public static String conf = "";
 
   @Test
   public void testSplitter_listWithTemporaryVariables() throws IOException {

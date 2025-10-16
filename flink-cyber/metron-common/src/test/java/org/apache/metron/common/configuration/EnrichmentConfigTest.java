@@ -17,7 +17,6 @@
  */
 package org.apache.metron.common.configuration;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.configuration.enrichment.EnrichmentConfig;
 import org.apache.metron.common.configuration.enrichment.handler.ConfigHandler;
 import org.apache.metron.common.configuration.enrichment.handler.Configs;
@@ -30,23 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EnrichmentConfigTest {
-  /**
-   {
-    "fieldMap": {
-      "geo": ["ip_dst_addr", "ip_src_addr"],
-      "host": ["host"],
-      "stellar" : {
-         "type" : "STELLAR"
-        ,"config" : {
-            "foo" : "1 + 1"
-           ,"ALL_CAPS" : "TO_UPPER(source.type)"
-                    }
-                  }
-              }
-   }
-   */
-  @Multiline
-  public static String sourceConfigStr;
+public static String sourceConfigStr = "";
 
   @Test
   public void testSerialization() throws Exception

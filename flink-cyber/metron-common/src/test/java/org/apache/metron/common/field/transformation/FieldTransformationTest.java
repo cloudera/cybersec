@@ -22,7 +22,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.common.configuration.FieldTransformer;
 import org.apache.metron.common.configuration.SensorParserConfig;
@@ -52,47 +51,11 @@ public class FieldTransformationTest {
     }
   }
 
- /**
-   {
-    "fieldTransformations" : [
-          {
-            "input" : [ "field1", "field2" ]
-          , "output" : "output"
-          , "transformation" : "org.apache.metron.common.field.transformation.FieldTransformationTest$TestTransformation"
-          , "config" : {
-                "delim" : ","
-                      }
-          }
-                      ]
-   }
-   */
-  @Multiline
-  public static String complexConfig;
+public static String complexConfig = "";
 
-  /**
-   {
-    "fieldTransformations" : [
-          {
-            "input" : "protocol"
-          , "transformation" : "IP_PROTOCOL"
-          }
-                      ]
-   }
-   */
-  @Multiline
-  public static String config;
+public static String config = "";
 
-  /**
-   {
-    "fieldTransformations" : [
-          {
-            "input" : "protocol"
-          }
-                      ]
-   }
-   */
-  @Multiline
-  public static String badConfigMissingMapping;
+public static String badConfigMissingMapping = "";
 
   @Test
   public void testValidSerde_simple() throws IOException {

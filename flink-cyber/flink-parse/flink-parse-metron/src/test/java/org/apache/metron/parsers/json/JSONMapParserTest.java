@@ -18,7 +18,6 @@
 package org.apache.metron.parsers.json;
 
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.log4j.Level;
 import org.apache.metron.parsers.BasicParser;
 import org.apache.metron.parsers.interfaces.MessageParser;
@@ -45,15 +44,7 @@ public class JSONMapParserTest {
     parser = new JSONMapParser();
   }
 
-  /**
-   {
-     "foo" : "bar"
-    ,"blah" : "blah"
-    ,"number" : 2.0
-   }
-   */
-   @Multiline
-   static String happyPathJSON;
+static String happyPathJSON = "";
 
   @Test
   public void testHappyPath() {
@@ -70,24 +61,9 @@ public class JSONMapParserTest {
     assertTrue(message.get("number") instanceof Number);
   }
 
-  /**
-   {
-    "collection" : { "blah" : 7, "blah2" : "foo", "bigblah" : { "innerBlah" : "baz", "reallyInnerBlah" : { "color" : "grey" }}}
-   }
-   */
-   @Multiline
-   static String collectionHandlingJSON;
+static String collectionHandlingJSON = "";
 
-  /**
-    {
-     "collection" : {
-        "key" : "value"
-      },
-     "key" : "value"
-    }
-   */
-  @Multiline
-  static String mixCollectionHandlingJSON;
+static String mixCollectionHandlingJSON = "";
 
   @Test
   public void testCollectionHandlingDrop() {

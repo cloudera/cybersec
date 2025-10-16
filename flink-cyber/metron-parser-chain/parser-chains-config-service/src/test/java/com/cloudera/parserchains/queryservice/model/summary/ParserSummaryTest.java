@@ -15,7 +15,6 @@ package com.cloudera.parserchains.queryservice.model.summary;
 import com.cloudera.parserchains.core.model.define.ParserID;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.cloudera.parserchains.parsers.SyslogParser;
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -23,14 +22,12 @@ import static org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingW
 
 public class ParserSummaryTest {
 
-    /**
-     * {
-     *  "id" : "com.cloudera.parserchains.parsers.SyslogParser",
-     *  "name" : "Syslog"
-     * }
-     */
-    @Multiline
-    private String expectedJSON;
+    private String expectedJSON = String.join("\n",
+        "{",
+        "\"id\" : \"com.cloudera.parserchains.parsers.SyslogParser\",",
+        "\"name\" : \"Syslog\"",
+        "}"
+        );
 
     @Test
     void toJSON() throws Exception {

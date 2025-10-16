@@ -300,12 +300,6 @@
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.adrianwalker/multiline-string -->
-        <dependency>
-            <groupId>org.adrianwalker</groupId>
-            <artifactId>multiline-string</artifactId>
-        </dependency>
-
     </dependencies>
     <build>
         <plugins>

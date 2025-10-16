@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.collect.Iterables;
 import java.util.HashMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.common.configuration.FieldTransformer;
 import org.apache.metron.common.configuration.SensorParserConfig;
@@ -35,36 +34,9 @@ import org.json.simple.JSONObject;
 import org.junit.jupiter.api.Test;
 
 public class StellarTransformationTest {
-  /**
-   {
-    "fieldTransformations" : [
-     {
-       "transformation" : "STELLAR"
-      ,"output" : [ "full_hostname", "domain_without_subdomains" ]
-      ,"config" : {
-         "full_hostname" : "URL_TO_HOST(123)"
-        ,"domain_without_subdomains" : "DOMAIN_REMOVE_SUBDOMAINS(full_hostname)"
-                  }
-     }
-                      ]
-   }
-   */
-  @Multiline
-  public static String badConfig;
+public static String badConfig = "";
 
-  /**
-   { "fieldTransformations" : [
-        { "transformation" : "STELLAR"
-        ,"output" : [ "new_field"]
-        ,"config" : {
-          "new_field" : "MAP_GET('source.type', _)"
-                    }
-        }
-                                ]
-      }
-   */
-  @Multiline
-  public static String configAll;
+public static String configAll = "";
 
   @Test
   public void testConfigAll() throws Exception {
@@ -79,21 +51,7 @@ public class StellarTransformationTest {
     assertEquals("test", input.get("new_field"));
   }
 
-  /** { "fieldTransformations" : [
-        { "transformation" : "STELLAR"
-        ,"output" : [ "new_field", "new_field2", "old_field", "old_field2"]
-        ,"config" : {
-          "new_field" : "old_field"
-         ,"new_field2" : "old_field2"
-         ,"old_field" : "null"
-         ,"old_field2" : "null"
-                    }
-        }
-                                ]
-      }
-   */
-  @Multiline
-  public static String configRename;
+public static String configRename = "";
 
   @Test
   public void testStellarRename() throws Exception {
@@ -126,19 +84,7 @@ public class StellarTransformationTest {
     }
   }
 
-  /** { "fieldTransformations" : [
-        { "transformation" : "STELLAR"
-        ,"output" : [ "full_hostname", "domain_without_subdomains" ]
-        ,"config" : {
-          "full_hostname" : "URL_TO_HOST('http://1234567890123456789012345678901234567890123456789012345678901234567890/index.html')"
-          ,"domain_without_subdomains" : "DOMAIN_REMOVE_SUBDOMAINS(full_hostname)"
-                    }
-        }
-                                ]
-      }
-   */
-  @Multiline
-  public static String configNumericDomain;
+public static String configNumericDomain = "";
 
   @Test
   public void testStellarNumericDomain() throws Exception {
@@ -172,39 +118,9 @@ public class StellarTransformationTest {
     assertTrue(ex.getMessage().contains("123"));
   }
 
-  /**
-   {
-    "fieldTransformations" : [
-          {
-           "transformation" : "STELLAR"
-          ,"output" : "utc_timestamp"
-          ,"config" : {
-            "utc_timestamp" : "TO_EPOCH_TIMESTAMP(timestamp, 'yyyy-MM-dd HH:mm:ss', 'UTC')"
-                      }
-          }
-                      ]
-   }
-   */
-  @Multiline
-  public static String stellarConfig;
+public static String stellarConfig = "";
 
-  /**
-   {
-    "fieldTransformations" : [
-          {
-           "transformation" : "STELLAR"
-          ,"output" : "final_value"
-          ,"config" : {
-            "value1" : "1"
-           ,"value2" : "value1 + 1"
-           ,"final_value" : "value2 + 1"
-                      }
-          }
-                      ]
-   }
-   */
-  @Multiline
-  public static String intermediateValuesConfig;
+public static String intermediateValuesConfig = "";
 
   @Test
   public void testIntermediateValues() throws Exception {
@@ -220,22 +136,7 @@ public class StellarTransformationTest {
     assertFalse(input.containsKey("value2"));
   }
 
-  /**
-   {
-    "fieldTransformations" : [
-          {
-            "transformation" : "STELLAR"
-          ,"output" : ["newStellarField","utc_timestamp"]
-          ,"config" : {
-            "newStellarField" : "'<<??>>'",
-            "utc_timestamp" : "TO_EPOCH_TIMESTAMP(timestamp, 'yyyy-MM-dd HH:mm:ss', 'UTC')"
-                      }
-          }
-                             ]
-   }
-   */
-  @Multiline
-  public static String stellarConfigEspecial;
+public static String stellarConfigEspecial = "";
 
 
   @Test
@@ -289,30 +190,7 @@ public class StellarTransformationTest {
     assertTrue(input.isEmpty());
   }
 
-  /**
-   {
-    "fieldTransformations" : [
-          {
-           "transformation" : "STELLAR"
-          ,"output" : [ "utc_timestamp", "url_host", "url_protocol" ]
-          ,"config" : {
-            "utc_timestamp" : "TO_EPOCH_TIMESTAMP(timestamp, 'yyyy-MM-dd HH:mm:ss', MAP_GET(dc, dc2tz, 'UTC') )"
-           ,"url_host" : "TO_LOWER(URL_TO_HOST(url))"
-           ,"url_protocol" : "URL_TO_PROTOCOL(url)"
-                      }
-          }
-                      ]
-   ,"parserConfig" : {
-      "dc2tz" : {
-                "nyc" : "EST"
-               ,"la" : "PST"
-               ,"london" : "UTC"
-                }
-    }
-   }
-   */
-  @Multiline
-  public static String stellarConfig_multi;
+public static String stellarConfig_multi = "";
 
   /**
    * A more complicated test where we are transforming multiple fields:

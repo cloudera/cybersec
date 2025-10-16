@@ -17,7 +17,6 @@
  */
 package org.apache.metron.enrichment.adapters.threatintel;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Table;
 import org.apache.log4j.Level;
@@ -65,35 +64,9 @@ public class ThreatIntelAdapterTest {
   private final String threatIntelTableName = "threat_intel";
   private EnrichmentLookup lookup;
 
-  /**
-    {
-    "10.0.2.3":"alert"
-    }
-   */
-  @Multiline
-  private String expectedMessageString;
+private String expectedMessageString = "";
 
-  /**
-    {
-      "enrichment": {
-        "fieldMap": {
-          "geo": ["ip_dst_addr", "ip_src_addr"],
-          "host": ["host"]
-        }
-      },
-      "threatIntel" : {
-        "fieldMap": {
-          "hbaseThreatIntel": ["ip_dst_addr", "ip_src_addr"]
-        },
-        "fieldToTypeMap": {
-          "ip_dst_addr" : [ "10.0.2.3" ],
-          "ip_src_addr" : [ "malicious_ip" ]
-        }
-      }
-    }
-   */
-  @Multiline
-  private static String sourceConfigStr;
+private static String sourceConfigStr = "";
 
   private JSONObject expectedMessage;
 

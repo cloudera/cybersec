@@ -14,7 +14,6 @@ package com.cloudera.parserchains.parsers;
 
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.Message;
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,23 +29,21 @@ public class XPathParserTest {
         parser = new XPathParser();
     }
 
-    /**
-     * <UserInfoRequest>
-     *   <header>
-     *     <partnerId>STL</partnerId>
-     *     <partnerTransactionId>87c9-d8c7-4e3f-aafd-8f4b8c2fafe1</partnerTransactionId>
-     *     <partnerTimestamp>2020-03-04T13:05:21.3222285-08:00</partnerTimestamp>
-     *     <application>STL</application>
-     *     <channel>STL</channel>
-     *     <dealerCode>0000002</dealerCode>
-     *   </header>
-     *   <userId>CAcuna6</userId>
-     *   <systemIdsToRetrieve>Streamline</systemIdsToRetrieve>
-     *   <returnAccountInfo>true</returnAccountInfo>
-     * </UserInfoRequest>
-     */
-    @Multiline
-    static String xml;
+    static String xml = String.join("\n",
+        "<UserInfoRequest>",
+        "<header>",
+        "<partnerId>STL</partnerId>",
+        "<partnerTransactionId>87c9-d8c7-4e3f-aafd-8f4b8c2fafe1</partnerTransactionId>",
+        "<partnerTimestamp>2020-03-04T13:05:21.3222285-08:00</partnerTimestamp>",
+        "<application>STL</application>",
+        "<channel>STL</channel>",
+        "<dealerCode>0000002</dealerCode>",
+        "</header>",
+        "<userId>CAcuna6</userId>",
+        "<systemIdsToRetrieve>Streamline</systemIdsToRetrieve>",
+        "<returnAccountInfo>true</returnAccountInfo>",
+        "</UserInfoRequest>"
+        );
 
     @Test
     void noNamespaces() {
@@ -84,23 +81,21 @@ public class XPathParserTest {
                 () -> parser.expression("field", ",invalid/expr/text()"));
     }
 
-    /**
-     * <UserInfoRequest xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-     *    <header xmlns="http://retail.tmobile.com/sdo">
-     *       <partnerId>STL</partnerId>
-     *       <partnerTransactionId>87c9-d8c7-4e3f-aafd-8f4b8c2fafe1</partnerTransactionId>
-     *       <partnerTimestamp>2020-03-04T13:05:21.3222285-08:00</partnerTimestamp>
-     *       <application>STL</application>
-     *       <channel>STL</channel>
-     *       <dealerCode>0000002</dealerCode>
-     *    </header>
-     *    <userId xmlns="http://retail.tmobile.com/sdo">CAcuna6</userId>
-     *    <systemIdsToRetrieve xmlns="http://retail.tmobile.com/sdo">Streamline</systemIdsToRetrieve>
-     *    <returnAccountInfo xmlns="http://retail.tmobile.com/sdo">true</returnAccountInfo>
-     * </UserInfoRequest>
-     */
-    @Multiline
-    static String privateNamespace;
+    static String privateNamespace = String.join("\n",
+        "<UserInfoRequest xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">",
+        "<header xmlns=\"http://retail.tmobile.com/sdo\">",
+        "<partnerId>STL</partnerId>",
+        "<partnerTransactionId>87c9-d8c7-4e3f-aafd-8f4b8c2fafe1</partnerTransactionId>",
+        "<partnerTimestamp>2020-03-04T13:05:21.3222285-08:00</partnerTimestamp>",
+        "<application>STL</application>",
+        "<channel>STL</channel>",
+        "<dealerCode>0000002</dealerCode>",
+        "</header>",
+        "<userId xmlns=\"http://retail.tmobile.com/sdo\">CAcuna6</userId>",
+        "<systemIdsToRetrieve xmlns=\"http://retail.tmobile.com/sdo\">Streamline</systemIdsToRetrieve>",
+        "<returnAccountInfo xmlns=\"http://retail.tmobile.com/sdo\">true</returnAccountInfo>",
+        "</UserInfoRequest>"
+        );
 
     @Test
     void privateNamespace() {

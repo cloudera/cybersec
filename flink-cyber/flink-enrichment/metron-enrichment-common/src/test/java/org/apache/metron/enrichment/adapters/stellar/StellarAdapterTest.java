@@ -17,7 +17,6 @@
  */
 package org.apache.metron.enrichment.adapters.stellar;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.configuration.StellarEnrichmentTest;
 import org.apache.metron.common.configuration.enrichment.EnrichmentConfig;
 import org.apache.metron.common.configuration.enrichment.handler.ConfigHandler;
@@ -134,36 +133,8 @@ public class StellarAdapterTest extends StellarEnrichmentTest {
     }
   }
 
-  /**
-   {
-    "fieldMap": {
-      "stellar" : {
-        "config" : {
-          "group1" : [
-            "stmt1 := TO_UPPER(source.type)",
-            "stmt2 := { 'foo' : source.type }"
-          ]
-        }
-      }
-    }
-  }
-   */
-  @Multiline
-  public static String mapConfig_subgroup;
-  /**
-   {
-    "fieldMap": {
-      "stellar" : {
-        "config" : [
-            "stmt1 := TO_UPPER(source.type)",
-            "stmt2 := { 'foo' : source.type }"
-        ]
-      }
-    }
-  }
-   */
-  @Multiline
-  public static String mapConfig_default;
+public static String mapConfig_subgroup = "";
+public static String mapConfig_default = "";
 
 
   private void testMapEnrichment(String config, String field) throws Exception {
@@ -187,19 +158,7 @@ public class StellarAdapterTest extends StellarEnrichmentTest {
     testMapEnrichment(mapConfig_default, "");
   }
 
-  /**
-   {
-    "fieldMap": {
-      "stellar" : {
-        "config" : [
-            "stmt1 := MAP_GET('source.type', _)"
-        ]
-      }
-    }
-  }
-   */
-  @Multiline
-  public static String allVariableConfig;
+public static String allVariableConfig = "";
 
   @Test
   public void testAllVariableUsage() throws Exception {

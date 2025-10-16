@@ -15,7 +15,6 @@ package com.cloudera.cyber.parser;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.google.common.io.Resources;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.JobTester;
@@ -31,47 +30,45 @@ import static org.hamcrest.Matchers.*;
 
 public class TestNetflowParser extends AbstractParserJobTest {
 
-    /**
-     * {
-     * "netflow": {
-     * "id": "220ee8c5-07d7-48d9-8df5-7d23376cb664",
-     * "name": "Netflow Parser",
-     * "parsers": [
-     * {
-     * "id": "f812c6dc-40cc-4c77-abf8-e15fccdfea32",
-     * "name": "Netflow as JSON",
-     * "type": "com.cloudera.parserchains.parsers.JSONParser",
-     * "config": {
-     * "input" : { "input": "original_string" },
-     * "norm": { "norm": "UNFOLD_NESTED" }
-     * }
-     * },
-     * {
-     * "id": "6b8797a2-95df-4021-83c2-60ac4c786e67",
-     * "name": "Field Renamer",
-     * "type" : "com.cloudera.parserchains.parsers.RenameFieldParser",
-     * "config": {
-     * "fieldToRename": [
-     * { "from": "@timestamp", "to":"timestamp" }
-     * ]
-     * }
-     * },
-     * {
-     * "id": "9549004f-83e4-4d24-8baa-abdbdad06e61",
-     * "name": "Timestamp Parser",
-     * "type" : "com.cloudera.parserchains.parsers.TimestampFormatParser",
-     * "config": {
-     * "fields": [
-     * { "field": "timestamp", "format":"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "tz": "" }
-     * ]
-     * }
-     * }
-     * ]
-     * }
-     * }
-     */
-    @Multiline
-    private String config;
+    private String config = String.join("\n",
+        "{",
+        "\"netflow\": {",
+        "\"id\": \"220ee8c5-07d7-48d9-8df5-7d23376cb664\",",
+        "\"name\": \"Netflow Parser\",",
+        "\"parsers\": [",
+        "{",
+        "\"id\": \"f812c6dc-40cc-4c77-abf8-e15fccdfea32\",",
+        "\"name\": \"Netflow as JSON\",",
+        "\"type\": \"com.cloudera.parserchains.parsers.JSONParser\",",
+        "\"config\": {",
+        "\"input\" : { \"input\": \"original_string\" },",
+        "\"norm\": { \"norm\": \"UNFOLD_NESTED\" }",
+        "}",
+        "},",
+        "{",
+        "\"id\": \"6b8797a2-95df-4021-83c2-60ac4c786e67\",",
+        "\"name\": \"Field Renamer\",",
+        "\"type\" : \"com.cloudera.parserchains.parsers.RenameFieldParser\",",
+        "\"config\": {",
+        "\"fieldToRename\": [",
+        "{ \"from\": \"@timestamp\", \"to\":\"timestamp\" }",
+        "]",
+        "}",
+        "},",
+        "{",
+        "\"id\": \"9549004f-83e4-4d24-8baa-abdbdad06e61\",",
+        "\"name\": \"Timestamp Parser\",",
+        "\"type\" : \"com.cloudera.parserchains.parsers.TimestampFormatParser\",",
+        "\"config\": {",
+        "\"fields\": [",
+        "{ \"field\": \"timestamp\", \"format\":\"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'\", \"tz\": \"\" }",
+        "]",
+        "}",
+        "}",
+        "]",
+        "}",
+        "}"
+        );
 
 
     @Test

@@ -14,7 +14,6 @@ package com.cloudera.parserchains.parsers;
 
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.Message;
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,23 +28,21 @@ public class XMLFlattenerTest {
         parser = new XMLFlattener();
     }
 
-    /**
-     * <UserInfoRequest>
-     *   <header>
-     *     <partnerId>STL</partnerId>
-     *     <partnerTransactionId>87c9-d8c7-4e3f-aafd-8f4b8c2fafe1</partnerTransactionId>
-     *     <partnerTimestamp>2020-03-04T13:05:21.3222285-08:00</partnerTimestamp>
-     *     <application>STL</application>
-     *     <channel>STL</channel>
-     *     <dealerCode>0000002</dealerCode>
-     *   </header>
-     *   <userId>CAcuna6</userId>
-     *   <systemIdsToRetrieve>Streamline</systemIdsToRetrieve>
-     *   <returnAccountInfo>true</returnAccountInfo>
-     * </UserInfoRequest>
-     */
-    @Multiline
-    static String flatten;
+    static String flatten = String.join("\n",
+        "<UserInfoRequest>",
+        "<header>",
+        "<partnerId>STL</partnerId>",
+        "<partnerTransactionId>87c9-d8c7-4e3f-aafd-8f4b8c2fafe1</partnerTransactionId>",
+        "<partnerTimestamp>2020-03-04T13:05:21.3222285-08:00</partnerTimestamp>",
+        "<application>STL</application>",
+        "<channel>STL</channel>",
+        "<dealerCode>0000002</dealerCode>",
+        "</header>",
+        "<userId>CAcuna6</userId>",
+        "<systemIdsToRetrieve>Streamline</systemIdsToRetrieve>",
+        "<returnAccountInfo>true</returnAccountInfo>",
+        "</UserInfoRequest>"
+        );
 
     @Test
     void flatten() {
@@ -70,22 +67,20 @@ public class XMLFlattenerTest {
         assertThat(output, is(expected));
     }
 
-    /**
-     * <breakfast>
-     *    <food>
-     *       <name>Belgian Waffles</name>
-     *       <price>$5.95</price>
-     *       <calories>650</calories>
-     *    </food>
-     *    <food>
-     *       <name>French Toast</name>
-     *       <price>$4.50</price>
-     *       <calories>600</calories>
-     *    </food>
-     * </breakfast>
-     */
-    @Multiline
-    static String arrays;
+    static String arrays = String.join("\n",
+        "<breakfast>",
+        "<food>",
+        "<name>Belgian Waffles</name>",
+        "<price>$5.95</price>",
+        "<calories>650</calories>",
+        "</food>",
+        "<food>",
+        "<name>French Toast</name>",
+        "<price>$4.50</price>",
+        "<calories>600</calories>",
+        "</food>",
+        "</breakfast>"
+        );
 
     @Test
     void flattenArrays() {
@@ -105,17 +100,15 @@ public class XMLFlattenerTest {
         assertThat(output, is(expected));
     }
 
-    /**
-     * <breakfast>
-     *    <food>
-     *       <name>Belgian Waffles</name>
-     *       <price type="USD">$5.95</price>
-     *       <calories type="kcals">650</calories>
-     *    </food>
-     * </breakfast>
-     */
-    @Multiline
-    static String flattenAttributes;
+    static String flattenAttributes = String.join("\n",
+        "<breakfast>",
+        "<food>",
+        "<name>Belgian Waffles</name>",
+        "<price type=\"USD\">$5.95</price>",
+        "<calories type=\"kcals\">650</calories>",
+        "</food>",
+        "</breakfast>"
+        );
 
     @Test
     void flattenAttributes() {
@@ -134,17 +127,15 @@ public class XMLFlattenerTest {
         assertThat(output, is(expected));
     }
 
-    /**
-     * <breakfast>
-     *    <food>
-     *       <name>Belgian Waffles</name>
-     *       <price type="USD">5.95</price>
-     *       <calories type="kcals">650</calories>
-     *    </food>
-     * </breakfast>
-     */
-    @Multiline
-    static String setSeparator;
+    static String setSeparator = String.join("\n",
+        "<breakfast>",
+        "<food>",
+        "<name>Belgian Waffles</name>",
+        "<price type=\"USD\">5.95</price>",
+        "<calories type=\"kcals\">650</calories>",
+        "</food>",
+        "</breakfast>"
+        );
 
     @Test
     void setSeparator() {

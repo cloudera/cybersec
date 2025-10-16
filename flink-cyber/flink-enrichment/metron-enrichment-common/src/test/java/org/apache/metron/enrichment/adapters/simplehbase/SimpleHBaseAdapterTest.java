@@ -19,7 +19,6 @@ package org.apache.metron.enrichment.adapters.simplehbase;
 
 
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
 import org.apache.metron.enrichment.cache.CacheKey;
 import org.apache.metron.enrichment.converter.EnrichmentKey;
@@ -59,47 +58,10 @@ public class SimpleHBaseAdapterTest {
     put("orientation", "north");
   }};
 
-  /**
-    {
-    "playful_classification.orientation":"north"
-    }
-   */
-  @Multiline
-  private String expectedMessageString;
+private String expectedMessageString = "";
 
-  /**
-    {
-      "enrichment": {
-        "fieldMap": {
-           "hbaseEnrichment" : [ "ip_dst_addr" ]
-        },
-      "fieldToTypeMap": {
-        "ip_dst_addr" : [ "playful_classification", "cf1" ]
-        }
-      }
-   }
-   */
-  @Multiline
-  private String sourceConfigStr;
-  /**
-    {
-      "enrichment": {
-        "fieldMap": {
-           "hbaseEnrichment" : [ "ip_dst_addr" ]
-        },
-      "fieldToTypeMap": {
-        "ip_dst_addr" : [ "playful_classification", "cf1" ]
-        },
-      "config" : {
-          "typeToColumnFamily" : {
-                        "cf1" : "cf1"
-                                 }
-                }
-      }
-   }
-   */
-  @Multiline
-  private String sourceConfigWithCFStr;
+private String sourceConfigStr = "";
+private String sourceConfigWithCFStr = "";
   private JSONObject expectedMessage;
 
   @BeforeEach

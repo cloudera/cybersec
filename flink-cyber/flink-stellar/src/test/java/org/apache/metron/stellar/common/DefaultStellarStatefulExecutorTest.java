@@ -20,7 +20,6 @@
 
 package org.apache.metron.stellar.common;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.functions.resolver.ClasspathFunctionResolver;
 import org.json.simple.JSONObject;
@@ -49,14 +48,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 // Suppressing on the class level, given that every test is a typical example of use pattern.
 public class DefaultStellarStatefulExecutorTest {
 
-  /**
-   * {
-   *   "ip_src_addr": "10.0.0.1",
-   *   "ip_dst_addr": "10.0.0.20"
-   * }
-   */
-  @Multiline
-  private String input;
+  private String input = String.join("\n",
+        "{",
+        "\"ip_src_addr\": \"10.0.0.1\",",
+        "\"ip_dst_addr\": \"10.0.0.20\"",
+        "}"
+      );
 
   private JSONObject message;
   private DefaultStellarStatefulExecutor executor;

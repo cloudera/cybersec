@@ -18,7 +18,6 @@ import com.cloudera.parserchains.core.catalog.AnnotationBasedParserInfoBuilder;
 import com.cloudera.parserchains.core.catalog.ParserInfo;
 import com.cloudera.parserchains.core.catalog.ParserInfoBuilder;
 import com.cloudera.parserchains.core.utils.JSONUtils;
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -27,36 +26,34 @@ import static org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingW
 public class ParserChainSchemaTest {
     private ParserInfoBuilder parserInfoBuilder = new AnnotationBasedParserInfoBuilder();
 
-    /**
-     * {
-     *   "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *   "name" : "My Parser Chain",
-     *   "parsers" : [ {
-     *     "id" : "26bf648f-930e-44bf-a4de-bfd34ac16165",
-     *     "name" : "Test Parser",
-     *     "type" : "com.cloudera.parserchains.core.TestParser",
-     *     "config" : {
-     *       "inputField" : [ {
-     *         "inputField" : "input"
-     *       } ]
-     *     }
-     *   }, {
-     *     "id" : "bdf7d8be-50b1-4998-8b3f-f525d1e95931",
-     *     "name" : "Test Parser",
-     *     "type" : "com.cloudera.parserchains.core.TestParser",
-     *     "config" : {
-     *       "inputField" : [ {
-     *         "inputField" : "input"
-     *       } ],
-     *       "outputField" : [ {
-     *         "outputField" : "output"
-     *       } ]
-     *     }
-     *   } ]
-     * }
-     */
-    @Multiline
-    private String chainWithParsersExpectedJSON;
+    private String chainWithParsersExpectedJSON = String.join("\n",
+        "{",
+        "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\" : \"My Parser Chain\",",
+        "\"parsers\" : [ {",
+        "\"id\" : \"26bf648f-930e-44bf-a4de-bfd34ac16165\",",
+        "\"name\" : \"Test Parser\",",
+        "\"type\" : \"com.cloudera.parserchains.core.TestParser\",",
+        "\"config\" : {",
+        "\"inputField\" : [ {",
+        "\"inputField\" : \"input\"",
+        "} ]",
+        "}",
+        "}, {",
+        "\"id\" : \"bdf7d8be-50b1-4998-8b3f-f525d1e95931\",",
+        "\"name\" : \"Test Parser\",",
+        "\"type\" : \"com.cloudera.parserchains.core.TestParser\",",
+        "\"config\" : {",
+        "\"inputField\" : [ {",
+        "\"inputField\" : \"input\"",
+        "} ],",
+        "\"outputField\" : [ {",
+        "\"outputField\" : \"output\"",
+        "} ]",
+        "}",
+        "} ]",
+        "}"
+        );
 
     @Test
     void chainWithParsersToJSON() throws Exception {
@@ -88,74 +85,72 @@ public class ParserChainSchemaTest {
         assertThat(actual, equalToCompressingWhiteSpace(chainWithParsersExpectedJSON));
     }
 
-    /**
-     * {
-     *   "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *   "name" : "My Parser Chain",
-     *   "parsers" : [ {
-     *     "id" : "26bf648f-930e-44bf-a4de-bfd34ac16165",
-     *     "name" : "Test Parser",
-     *     "type" : "com.cloudera.parserchains.core.TestParser",
-     *     "config" : {
-     *       "outputField" : [ {
-     *         "inputField" : "input"
-     *       } ]
-     *     }
-     *   }, {
-     *     "id" : "123e4567-e89b-12d3-a456-556642440000",
-     *     "name" : "Router",
-     *     "type" : "Router",
-     *     "config" : { },
-     *     "routing" : {
-     *       "matchingField" : "name",
-     *       "routes" : [ {
-     *         "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *         "name" : "successRoute",
-     *         "matchingValue" : "Ada Lovelace",
-     *         "default" : false,
-     *         "subchain" : {
-     *           "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *           "name" : "Success Chain",
-     *           "parsers" : [ {
-     *             "id" : "26bf648f-930e-44bf-a4de-bfd34ac16165",
-     *             "name" : "Test Parser",
-     *             "type" : "com.cloudera.parserchains.core.TestParser",
-     *             "config" : {
-     *               "inputField" : [ {
-     *                 "inputField" : "input"
-     *               } ]
-     *             }
-     *           } ]
-     *         }
-     *       }, {
-     *         "id" : "cdb0729f-a929-4f3c-9cb7-675b57d10a73",
-     *         "name" : "defaultRoute",
-     *         "matchingValue" : "",
-     *         "default" : true,
-     *         "subchain" : {
-     *           "id" : "cdb0729f-a929-4f3c-9cb7-675b57d10a73",
-     *           "name" : "Default Chain",
-     *           "parsers" : [ {
-     *             "id" : "bdf7d8be-50b1-4998-8b3f-f525d1e95931",
-     *             "name" : "Test Parser",
-     *             "type" : "com.cloudera.parserchains.core.TestParser",
-     *             "config" : {
-     *               "inputField" : [ {
-     *                 "inputField" : "input"
-     *               } ],
-     *               "outputField" : [ {
-     *                 "outputField" : "output"
-     *               } ]
-     *             }
-     *           } ]
-     *         }
-     *       } ]
-     *     }
-     *   } ]
-     * }
-     */
-    @Multiline
-    private String chainWithRoutingExpectedJSON;
+    private String chainWithRoutingExpectedJSON = String.join("\n",
+        "{",
+        "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\" : \"My Parser Chain\",",
+        "\"parsers\" : [ {",
+        "\"id\" : \"26bf648f-930e-44bf-a4de-bfd34ac16165\",",
+        "\"name\" : \"Test Parser\",",
+        "\"type\" : \"com.cloudera.parserchains.core.TestParser\",",
+        "\"config\" : {",
+        "\"outputField\" : [ {",
+        "\"inputField\" : \"input\"",
+        "} ]",
+        "}",
+        "}, {",
+        "\"id\" : \"123e4567-e89b-12d3-a456-556642440000\",",
+        "\"name\" : \"Router\",",
+        "\"type\" : \"Router\",",
+        "\"config\" : { },",
+        "\"routing\" : {",
+        "\"matchingField\" : \"name\",",
+        "\"routes\" : [ {",
+        "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\" : \"successRoute\",",
+        "\"matchingValue\" : \"Ada Lovelace\",",
+        "\"default\" : false,",
+        "\"subchain\" : {",
+        "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\" : \"Success Chain\",",
+        "\"parsers\" : [ {",
+        "\"id\" : \"26bf648f-930e-44bf-a4de-bfd34ac16165\",",
+        "\"name\" : \"Test Parser\",",
+        "\"type\" : \"com.cloudera.parserchains.core.TestParser\",",
+        "\"config\" : {",
+        "\"inputField\" : [ {",
+        "\"inputField\" : \"input\"",
+        "} ]",
+        "}",
+        "} ]",
+        "}",
+        "}, {",
+        "\"id\" : \"cdb0729f-a929-4f3c-9cb7-675b57d10a73\",",
+        "\"name\" : \"defaultRoute\",",
+        "\"matchingValue\" : \"\",",
+        "\"default\" : true,",
+        "\"subchain\" : {",
+        "\"id\" : \"cdb0729f-a929-4f3c-9cb7-675b57d10a73\",",
+        "\"name\" : \"Default Chain\",",
+        "\"parsers\" : [ {",
+        "\"id\" : \"bdf7d8be-50b1-4998-8b3f-f525d1e95931\",",
+        "\"name\" : \"Test Parser\",",
+        "\"type\" : \"com.cloudera.parserchains.core.TestParser\",",
+        "\"config\" : {",
+        "\"inputField\" : [ {",
+        "\"inputField\" : \"input\"",
+        "} ],",
+        "\"outputField\" : [ {",
+        "\"outputField\" : \"output\"",
+        "} ]",
+        "}",
+        "} ]",
+        "}",
+        "} ]",
+        "}",
+        "} ]",
+        "}"
+        );
 
     @Test
     void chainWithRoutingToJSON() throws Exception {

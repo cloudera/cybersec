@@ -19,7 +19,6 @@
 package org.apache.metron.common.field.validation.primitive;
 
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.field.validation.BaseValidationTest;
 import org.junit.jupiter.api.Test;
 
@@ -30,39 +29,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DateValidationTest extends BaseValidationTest{
-  /**
-   {
-    "fieldValidations" : [
-            {
-              "input" : "field1"
-             ,"validation" : "DATE"
-             ,"config" : {
-                  "format" : "yyyy-MM-dd"
-                         }
-            }
-                         ]
-   }
-   */
-
-  @Multiline
-  public static String validWithSingleField;
+public static String validWithSingleField = "";
   public static String validWithSingleField_MQL = "IS_DATE(field1, 'yyyy-MM-dd')";
 
-  /**
-   {
-    "fieldValidations" : [
-            {
-              "input" : [ "field1", "field2" ]
-             ,"validation" : "DATE"
-             ,"config" : {
-                  "format" : "yyyy-MM-dd"
-                         }
-            }
-                         ]
-   }
-   */
-  @Multiline
-  public static String validWithMultipleFields;
+public static String validWithMultipleFields = "";
   public static String validWithMultipleFields_MQL = "IS_DATE(field1, 'yyyy-MM-dd') && IS_DATE(field2, 'yyyy-MM-dd')";
 
   @Test
