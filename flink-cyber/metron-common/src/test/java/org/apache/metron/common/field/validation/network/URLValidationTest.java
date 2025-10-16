@@ -30,10 +30,26 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class URLValidationTest  extends BaseValidationTest {
-public static String validWithSingleField = "";
+public static String validWithSingleField = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : \"field1\"",
+    "          ,\"validation\" : \"URL\"",
+    "         }",
+    "                      ]",
+    "}");
   public static String validWithSingleField_MQL = "IS_URL(field1)";
 
-public static String validWithMultipleFields = "";
+public static String validWithMultipleFields = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : [ \"field1\", \"field2\" ]",
+    "          ,\"validation\" : \"URL\"",
+    "         }",
+    "                      ]",
+    "}");
   public static String validWithMultipleFields_MQL = "IS_URL(field1) and IS_URL(field2)";
 
   @Test

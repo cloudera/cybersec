@@ -30,10 +30,26 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmailValidationTest extends BaseValidationTest {
-public static String validWithSingleField = "";
+public static String validWithSingleField = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : \"field1\"",
+    "          ,\"validation\" : \"EMAIL\"",
+    "         }",
+    "                      ]",
+    "}");
   public static String validWithSingleField_MQL = "IS_EMAIL(field1)";
 
-public static String validWithMultipleFields = "";
+public static String validWithMultipleFields = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : [ \"field1\", \"field2\" ]",
+    "          ,\"validation\" : \"EMAIL\"",
+    "         }",
+    "                      ]",
+    "}");
   public static String validWithMultipleFields_MQL = "IS_EMAIL(field1) and IS_EMAIL(field2)";
 
   @Test

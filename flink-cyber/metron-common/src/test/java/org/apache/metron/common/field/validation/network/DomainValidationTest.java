@@ -30,10 +30,26 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DomainValidationTest extends BaseValidationTest{
-public static String validWithSingleField = "";
+public static String validWithSingleField = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : \"field1\"",
+    "          ,\"validation\" : \"DOMAIN\"",
+    "         }",
+    "                      ]",
+    "}");
   public static String validWithSingleField_MQL = "IS_DOMAIN(field1)";
 
-public static String validWithMultipleFields = "";
+public static String validWithMultipleFields = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : [ \"field1\", \"field2\" ]",
+    "          ,\"validation\" : \"DOMAIN\"",
+    "         }",
+    "                      ]",
+    "}");
   public static String validWithMultipleFields_MQL = "IS_DOMAIN(field1) and IS_DOMAIN(field2)";
 
   @Test
