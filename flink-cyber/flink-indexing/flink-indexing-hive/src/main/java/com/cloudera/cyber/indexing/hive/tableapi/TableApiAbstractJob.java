@@ -247,7 +247,9 @@ public abstract class TableApiAbstractJob {
 
   protected String getTransformation(DataType tableColumnDataType, MappingColumnDto mapping) {
     String transformation = mapping.getTransformation();
-    if (transformation == null && isNonDefaultColumn(mapping.getName()) && (DataTypes.BOOLEAN().equals(tableColumnDataType) || tableColumnDataType.getLogicalType().is(LogicalTypeFamily.NUMERIC))) {
+    if (transformation == null && isNonDefaultColumn(mapping.getName())
+            && (DataTypes.BOOLEAN().equals(tableColumnDataType)
+            || tableColumnDataType.getLogicalType().is(LogicalTypeFamily.NUMERIC))) {
       transformation = String.format("TRY_CAST(%%s AS %s)", tableColumnDataType.getLogicalType().getTypeRoot().name());
     }
 
