@@ -58,10 +58,42 @@ public class SimpleHBaseAdapterTest {
     put("orientation", "north");
   }};
 
-private String expectedMessageString = "";
+private String expectedMessageString = String.join("\n",
+    "{",
+    "\"playful_classification.orientation\":\"north\"",
+    "}"
+  );
 
-private String sourceConfigStr = "";
-private String sourceConfigWithCFStr = "";
+  private String sourceConfigStr = String.join("\n",
+    "{",
+    "  \"enrichment\": {",
+    "    \"fieldMap\": {",
+    "       \"hbaseEnrichment\" : [ \"ip_dst_addr\" ]",
+    "    },",
+    "  \"fieldToTypeMap\": {",
+    "    \"ip_dst_addr\" : [ \"playful_classification\", \"cf1\" ]",
+    "    }",
+    "  }",
+    "}"
+  );
+
+  private String sourceConfigWithCFStr = String.join("\n",
+    "{",
+    "  \"enrichment\": {",
+    "    \"fieldMap\": {",
+    "       \"hbaseEnrichment\" : [ \"ip_dst_addr\" ]",
+    "    },",
+    "  \"fieldToTypeMap\": {",
+    "    \"ip_dst_addr\" : [ \"playful_classification\", \"cf1\" ]",
+    "    },",
+    "  \"config\" : {",
+    "      \"typeToColumnFamily\" : {",
+    "                    \"cf1\" : \"cf1\"",
+    "                             }",
+    "            }",
+    "  }",
+    "}"
+  );
   private JSONObject expectedMessage;
 
   @BeforeEach
