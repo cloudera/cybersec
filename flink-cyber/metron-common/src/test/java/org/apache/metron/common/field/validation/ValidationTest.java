@@ -27,10 +27,34 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ValidationTest extends BaseValidationTest{
-public static String validValidationConfigWithStringInput = "";
+public static String validValidationConfigWithStringInput = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : \"field1\"",
+    "          ,\"validation\" : \"NOT_EMPTY\"",
+    "         }",
+    "                      ]",
+    "}");
 
-public static String validValidationConfigWithListInput = "";
-public static String invalidValidationConfig = "";
+public static String validValidationConfigWithListInput = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : [ \"field1\", \"field2\" ]",
+    "          ,\"validation\" : \"NOT_EMPTY\"",
+    "         }",
+    "                      ]",
+    "}");
+
+public static String invalidValidationConfig = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : \"field1\"",
+    "         }",
+    "                      ]",
+    "}");
   @Test
   public void testValidConfiguration() throws IOException {
     {
