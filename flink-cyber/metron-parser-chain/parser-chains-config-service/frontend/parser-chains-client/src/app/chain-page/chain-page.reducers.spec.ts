@@ -143,7 +143,8 @@ describe('chain-page: reducers', () => {
       chainId: '123',
       chains,
       parsers,
-      routes
+      routes,
+      currentPipeline: "test-pipeline"
     }));
     expect(newState.chains).toBe(chains);
     expect(newState.parsers).toBe(parsers);
