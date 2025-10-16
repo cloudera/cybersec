@@ -1,0 +1,50 @@
+<166>Aug 05 2016 01:01:00 ASA : %ASA-5-111010: Failed login attempt from 192.168.1.199/ssh for user 'root'
+<166>Aug 05 2016 01:01:10 ASA : %ASA-6-302013: Built outbound TCP connection 82133946 for outside:203.0.113.70/443 to inside:192.168.1.49/53235
+<166>Aug 05 2016 01:01:20 ASA : %ASA-6-302013: Built outbound TCP connection 28488738 for outside:203.0.113.74/8080 to inside:192.168.1.139/15963 (session lasted 2509 seconds, 3 GB transferred)
+<166>Aug 05 2016 01:01:30 ASA : %ASA-4-400013: IDS:2004 ICMP PING SWEEP from 192.168.1.48 on interface outside. Potentially a reconnaissance attempt.
+<166>Aug 05 2016 01:01:40 ASA : %ASA-3-305006: portmap translation creation failed for udp src inside:192.168.1.35/27281 dst outside:203.0.113.86/10679
+<166>Aug 05 2016 01:01:50 ASA : %ASA-4-106023: Deny tcp src outside:192.168.1.185/33425 dst inside:203.0.113.78/43222 by access-group "outside_access_in" [0x0, 0x0]
+<166>Aug 05 2016 01:02:00 ASA : %ASA-5-111010: Failed login attempt from 192.168.1.245/ssh for user 'user1'
+<166>Aug 05 2016 01:02:10 ASA : %ASA-4-106023: Deny tcp src outside:192.168.1.207/6733 dst inside:203.0.113.136/24270 by access-group "outside_access_in" [0x0, 0x0]
+<166>Aug 05 2016 01:02:20 ASA : %ASA-4-400013: IDS:2004 ICMP PING SWEEP from 192.168.1.124 on interface outside. Potentially a reconnaissance attempt.
+<166>Aug 05 2016 01:02:30 ASA : %ASA-4-400013: IDS:2004 ICMP PING SWEEP from 192.168.1.77 on interface outside. Potentially a reconnaissance attempt.
+<166>Aug 05 2016 01:02:40 ASA : %ASA-4-106023: Deny tcp src outside:192.168.1.105/47867 dst inside:203.0.113.72/4011 by access-group "outside_access_in" [0x0, 0x0]
+<166>Aug 05 2016 01:02:50 ASA : %ASA-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.1.237 dst inside:203.0.113.212 (type 3, code 3) on outside interface.
+<166>Aug 05 2016 01:03:00 ASA : %ASA-6-302013: Built outbound TCP connection 71778197 for outside:203.0.113.60/8080 to inside:192.168.1.243/62767 (session lasted 1591 seconds, 10 GB transferred)
+<166>Aug 05 2016 01:03:10 ASA : %ASA-4-400013: IDS:2004 ICMP PING SWEEP from 192.168.1.204 on interface outside. Potentially a reconnaissance attempt.
+<166>Aug 05 2016 01:03:20 ASA : %ASA-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.1.28 dst inside:203.0.113.118 (type 3, code 3) on outside interface.
+<166>Aug 05 2016 01:03:30 ASA : %ASA-6-302013: Built outbound TCP connection 21235826 for outside:203.0.113.232/443 to inside:192.168.1.35/57987
+<166>Aug 05 2016 01:03:40 ASA : %ASA-3-305006: portmap translation creation failed for udp src inside:192.168.1.146/31215 dst outside:203.0.113.214/17544
+<166>Aug 05 2016 01:03:50 ASA : %ASA-5-111010: Failed login attempt from 192.168.1.36/ssh for user 'root'
+<166>Aug 05 2016 01:04:00 ASA : %ASA-6-302013: Built outbound TCP connection 65554300 for outside:203.0.113.235/443 to inside:192.168.1.153/35324
+<166>Aug 05 2016 01:04:10 ASA : %ASA-6-302013: Built outbound TCP connection 86288205 for outside:203.0.113.64/8080 to inside:192.168.1.225/24361 (session lasted 5995 seconds, 2 GB transferred)
+<166>Aug 05 2016 01:04:20 ASA : %ASA-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.1.19 dst inside:203.0.113.234 (type 3, code 3) on outside interface.
+<166>Aug 05 2016 01:04:30 ASA : %ASA-5-111010: Failed login attempt from 192.168.1.63/ssh for user 'user1'
+<166>Aug 05 2016 01:04:40 ASA : %ASA-5-111010: Failed login attempt from 192.168.1.186/ssh for user 'user1'
+<166>Aug 05 2016 01:04:50 ASA : %ASA-5-111010: Failed login attempt from 192.168.1.244/ssh for user 'user1'
+<166>Aug 05 2016 01:05:00 ASA : %ASA-6-302013: Built outbound TCP connection 39234062 for outside:203.0.113.11/8080 to inside:192.168.1.89/20664 (session lasted 465 seconds, 6 GB transferred)
+<166>Aug 05 2016 01:05:10 ASA : %ASA-5-111010: Failed login attempt from 192.168.1.5/ssh for user 'admin'
+<166>Aug 05 2016 01:05:20 ASA : %ASA-6-302013: Built outbound TCP connection 35055656 for outside:203.0.113.231/443 to inside:192.168.1.73/31031
+<166>Aug 05 2016 01:05:30 ASA : %ASA-4-106023: Deny tcp src outside:192.168.1.13/21008 dst inside:203.0.113.82/36378 by access-group "outside_access_in" [0x0, 0x0]
+<166>Aug 05 2016 01:05:40 ASA : %ASA-5-111010: Failed login attempt from 192.168.1.52/ssh for user 'user1'
+<166>Aug 05 2016 01:05:50 ASA : %ASA-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.1.114 dst inside:203.0.113.249 (type 3, code 3) on outside interface.
+<166>Aug 05 2016 01:06:00 ASA : %ASA-4-106023: Deny tcp src outside:192.168.1.254/35812 dst inside:203.0.113.4/48884 by access-group "outside_access_in" [0x0, 0x0]
+<166>Aug 05 2016 01:06:10 ASA : %ASA-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.1.94 dst inside:203.0.113.173 (type 3, code 3) on outside interface.
+<166>Aug 05 2016 01:06:20 ASA : %ASA-6-302013: Built outbound TCP connection 82554922 for outside:203.0.113.75/443 to inside:192.168.1.201/44338
+<166>Aug 05 2016 01:06:30 ASA : %ASA-6-302013: Built outbound TCP connection 42701734 for outside:203.0.113.222/443 to inside:192.168.1.205/21435
+<166>Aug 05 2016 01:06:40 ASA : %ASA-4-106023: Deny tcp src outside:192.168.1.195/40493 dst inside:203.0.113.205/62028 by access-group "outside_access_in" [0x0, 0x0]
+<166>Aug 05 2016 01:06:50 ASA : %ASA-4-106023: Deny tcp src outside:192.168.1.79/45112 dst inside:203.0.113.63/62563 by access-group "outside_access_in" [0x0, 0x0]
+<166>Aug 05 2016 01:07:00 ASA : %ASA-4-106023: Deny tcp src outside:192.168.1.35/21904 dst inside:203.0.113.219/50940 by access-group "outside_access_in" [0x0, 0x0]
+<166>Aug 05 2016 01:07:10 ASA : %ASA-6-302013: Built outbound TCP connection 49890331 for outside:203.0.113.10/8080 to inside:192.168.1.87/51767 (session lasted 3877 seconds, 6 GB transferred)
+<166>Aug 05 2016 01:07:20 ASA : %ASA-4-400013: IDS:2004 ICMP PING SWEEP from 192.168.1.208 on interface outside. Potentially a reconnaissance attempt.
+<166>Aug 05 2016 01:07:30 ASA : %ASA-4-106023: Deny tcp src outside:192.168.1.6/25226 dst inside:203.0.113.49/15638 by access-group "outside_access_in" [0x0, 0x0]
+<166>Aug 05 2016 01:07:40 ASA : %ASA-6-302013: Built outbound TCP connection 42193182 for outside:203.0.113.197/443 to inside:192.168.1.246/58966
+<166>Aug 05 2016 01:07:50 ASA : %ASA-4-400013: IDS:2004 ICMP PING SWEEP from 192.168.1.234 on interface outside. Potentially a reconnaissance attempt.
+<166>Aug 05 2016 01:08:00 ASA : %ASA-6-302013: Built outbound TCP connection 49955429 for outside:203.0.113.21/443 to inside:192.168.1.96/58844
+<166>Aug 05 2016 01:08:10 ASA : %ASA-4-106023: Deny tcp src outside:192.168.1.194/30591 dst inside:203.0.113.226/19073 by access-group "outside_access_in" [0x0, 0x0]
+<166>Aug 05 2016 01:08:20 ASA : %ASA-6-302013: Built outbound TCP connection 89392405 for outside:203.0.113.165/8080 to inside:192.168.1.130/37276 (session lasted 568 seconds, 6 GB transferred)
+<166>Aug 05 2016 01:08:30 ASA : %ASA-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.1.195 dst inside:203.0.113.155 (type 3, code 3) on outside interface.
+<166>Aug 05 2016 01:08:40 ASA : %ASA-3-305006: portmap translation creation failed for udp src inside:192.168.1.142/8061 dst outside:203.0.113.28/25227
+<166>Aug 05 2016 01:08:50 ASA : %ASA-4-400013: IDS:2004 ICMP PING SWEEP from 192.168.1.146 on interface outside. Potentially a reconnaissance attempt.
+<166>Aug 05 2016 01:09:00 ASA : %ASA-4-106023: Deny tcp src outside:192.168.1.191/59896 dst inside:203.0.113.241/51735 by access-group "outside_access_in" [0x0, 0x0]
+<166>Aug 05 2016 01:09:10 ASA : %ASA-4-313005: No matching connection for ICMP error message: icmp src outside:192.168.1.12 dst inside:203.0.113.232 (type 3, code 3) on outside interface.

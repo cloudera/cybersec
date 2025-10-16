@@ -36,7 +36,8 @@ export class ChainPageEffects {
           return new fromActions.LoadChainDetailsSuccessAction(
             {
               ...normalizedParserConfig,
-              chainId: chain.id
+              chainId: chain.id,
+              currentPipeline: finalAction.payload.currentPipeline
             }
           );
         }),

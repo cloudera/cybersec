@@ -112,7 +112,9 @@ public class ReflectiveParserBuilder implements ParserBuilder {
                             String.format("Required parameter isn't provided: %s", annotationKey));
                 }
                 if (paramAnnotation.isPath() && parserSchema.getBasePath() != null && !parserSchema.getBasePath().equals("null")) {
-                    finalValue = Paths.get(parserSchema.getBasePath(), finalValue).toString();
+                    if (!Paths.get(finalValue).isAbsolute()) {
+                        finalValue = Paths.get(parserSchema.getBasePath(), finalValue).toString();
+                    }
                 }
                 valueMap.put(annotationKey, finalValue);
             }
@@ -126,7 +128,7 @@ public class ReflectiveParserBuilder implements ParserBuilder {
                               Map<String, String> configValues) throws InvalidParserException {
         List<Parameter> annotatedParams = getAnnotatedParameters(method);
         List<String> methodArgs = buildMethodArgs(annotatedParams, configValues);
-        log.info(String.format("Invoking method %s(%s); key=%s, parser=%s", method.getName(), methodArgs, configKey, parser.getClass().getName()));
+        log.info("Invoking method {}({}); key={}, parser={}", method.getName(), methodArgs, configKey, parser.getClass().getName());
 
         try {
             method.invoke(parser, methodArgs.toArray());

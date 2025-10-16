@@ -70,7 +70,8 @@ export class ChainAddParserPageComponent implements OnInit, OnDestroy {
       parser
     }));
 
-    this._router.navigateByUrl(`/parserconfig/chains/${this.chainId}`);
+    const queryParams = {pipeline: this.currentPipeline}
+    this._router.navigate([`/parserconfig/chains/${this.chainId}`, {}], {queryParams});
   }
 
   ngOnInit() {
