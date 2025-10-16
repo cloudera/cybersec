@@ -46,7 +46,7 @@ public class ShellFunctionsTest {
         "╠══════════╪═══════╪════════════╣",
         "║ foo      │ 2.0   │ 1 + 1      ║",
         "╚══════════╧═══════╧════════════╝"
-      );
+      ) + "\n";
 
   @Test
   public void testListVarsWithVars() {
@@ -66,7 +66,7 @@ public class ShellFunctionsTest {
         "╠══════════╧═══════╧════════════╣",
         "║ (empty)                       ║",
         "╚═══════════════════════════════╝"
-      );
+      ) + "\n";
 
   @Test
   public void testListVarsWithoutVars() {
@@ -84,7 +84,7 @@ public class ShellFunctionsTest {
         "╟────────┼───────╢",
         "║ field2 │ val2  ║",
         "╚════════╧═══════╝"
-      );
+      ) + "\n";
 
   @Test
   public void testMap2Table() {
@@ -99,7 +99,7 @@ public class ShellFunctionsTest {
         "╠═════╧═══════╣",
         "║ (empty)     ║",
         "╚═════════════╝"
-      );
+      ) + "\n";
 
   @Test
   public void testMap2TableNullInput() {
