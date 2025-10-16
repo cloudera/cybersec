@@ -29,10 +29,32 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DateValidationTest extends BaseValidationTest{
-public static String validWithSingleField = "";
+public static String validWithSingleField = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : \"field1\"",
+    "          ,\"validation\" : \"DATE\"",
+    "          ,\"config\" : {",
+    "               \"format\" : \"yyyy-MM-dd\"",
+    "                      }",
+    "         }",
+    "                      ]",
+    "}");
   public static String validWithSingleField_MQL = "IS_DATE(field1, 'yyyy-MM-dd')";
 
-public static String validWithMultipleFields = "";
+public static String validWithMultipleFields = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : [ \"field1\", \"field2\" ]",
+    "          ,\"validation\" : \"DATE\"",
+    "          ,\"config\" : {",
+    "               \"format\" : \"yyyy-MM-dd\"",
+    "                      }",
+    "         }",
+    "                      ]",
+    "}");
   public static String validWithMultipleFields_MQL = "IS_DATE(field1, 'yyyy-MM-dd') && IS_DATE(field2, 'yyyy-MM-dd')";
 
   @Test

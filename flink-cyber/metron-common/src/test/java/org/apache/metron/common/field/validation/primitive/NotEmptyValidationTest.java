@@ -30,9 +30,25 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NotEmptyValidationTest extends BaseValidationTest {
 
-public static String validWithSingleField = "";
+public static String validWithSingleField = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : \"field1\"",
+    "          ,\"validation\" : \"NOT_EMPTY\"",
+    "         }",
+    "                      ]",
+    "}");
 
-public static String validWithMultipleFields = "";
+public static String validWithMultipleFields = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : [ \"field1\", \"field2\" ]",
+    "          ,\"validation\" : \"NOT_EMPTY\"",
+    "         }",
+    "                      ]",
+    "}");
 
   @Test
   public void positiveTest_single() throws IOException {
