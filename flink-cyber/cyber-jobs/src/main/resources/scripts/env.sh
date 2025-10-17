@@ -149,7 +149,8 @@ function get_kerberos_config() {
   if [ -f "${kerberos_properties}" ]; then
     read_properties_into_variables "${kerberos_properties}"
     read_properties_into_variables "${internal_ssl_properties}"
-    security_options+=("-yD" "security.kerberos.login.keytab=${kerberos_keytab}")
+    kerberos_keytab_abs=$(readlink -f "${kerberos_keytab}")
+    security_options+=("-yD" "security.kerberos.login.keytab=${kerberos_keytab_abs}")
     security_options+=("-yD" "security.kerberos.login.principal=${kerberos_principal}")
     security_options+=("-yD" "security.ssl.internal.enabled=true")
     security_options+=("-yD" "security.ssl.internal.keystore=${flink_internal_keystore}")
