@@ -55,11 +55,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-        <csa.version>csa1.15.2.0</csa.version>
-        <flink.version>1.20.1-${csa.version}</flink.version>
+        <csa.version>csa1.14.1.0</csa.version>
+        <flink.version>1.19.2-${csa.version}</flink.version>
         <cloudera.registry>1.0-${csa.version}</cloudera.registry>
         <flink.hbase.version>2.4</flink.hbase.version>
-        <cdh.version>7.3.1.400-100</cdh.version>
+        <cdh.version>7.3.1.300-81</cdh.version>
         <lombok.version>1.18.22</lombok.version>
         <lombok.plugin.version>1.18.16.0</lombok.plugin.version>
         <guava.version>21.0</guava.version>
@@ -68,8 +68,8 @@
         <scala.binary.version>2.12</scala.binary.version>
         <kafka.version>3.4.1.${cdh.version}</kafka.version>
         <nifi.version>1.11.4</nifi.version>
-        <jackson.version>2.15.3</jackson.version>
-        <jackson.datatype.version>2.15.3</jackson.datatype.version>
+        <jackson.version>2.11.2</jackson.version>
+        <jackson.datatype.version>2.10.1</jackson.datatype.version>
         <smm.intercepter.version>2.3.0.${cdh.version}</smm.intercepter.version>
         <flink.format.parquet.version>1.12.2</flink.format.parquet.version>
         <slf4j.version>1.7.36</slf4j.version>
