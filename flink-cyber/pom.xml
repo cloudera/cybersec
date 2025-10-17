@@ -55,7 +55,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-        <csa.version>csa1.15.0.0</csa.version>
+        <csa.version>csa1.15.2.0</csa.version>
         <flink.version>1.20.1-${csa.version}</flink.version>
         <cloudera.registry>1.0-${csa.version}</cloudera.registry>
         <flink.hbase.version>2.4</flink.hbase.version>
@@ -264,7 +264,7 @@
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-hbase-${flink.hbase.version}</artifactId>
-                <version>3.0-csa1.14.1.0</version>
+                <version>3.0-${csa.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.hbase</groupId>
@@ -734,7 +734,7 @@
                 <dependency>
                     <groupId>org.apache.flink</groupId>
                     <artifactId>flink-connector-kafka</artifactId>
-                    <version>3.2-${csa.version}</version>
+                    <version>3.4.0-${csa.version}</version>
                 </dependency>
             </dependencies>
         </profile>
