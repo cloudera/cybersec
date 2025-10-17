@@ -21,6 +21,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -36,16 +37,13 @@ public class ThreatGenerator {
         cfg.setClassLoaderForTemplateLoading(Thread.currentThread().getContextClassLoader(), "");
         cfg.setCacheStorage(new freemarker.cache.MruCacheStorage(50, 50));
         cfg.setTemplateUpdateDelayMilliseconds(3600 * 24 * 1000);
-        try {
-            lines = IOUtils.readLines(getClass().getResourceAsStream("/threats/threatq.json"));
-            StringTemplateLoader stringLoader = new StringTemplateLoader();
-            IntStream.range(0, lines.size()).forEach(i -> {
-                stringLoader.putTemplate(String.valueOf(i), lines.get(i));
-            });
-            cfg.setTemplateLoader(stringLoader);
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
+
+        lines = IOUtils.readLines(getClass().getResourceAsStream("/threats/threatq.json"), StandardCharsets.UTF_8);
+        StringTemplateLoader stringLoader = new StringTemplateLoader();
+        IntStream.range(0, lines.size()).forEach(i -> {
+            stringLoader.putTemplate(String.valueOf(i), lines.get(i));
+        });
+        cfg.setTemplateLoader(stringLoader);
     }
 
     private static final RandomGenerators utils = new RandomGenerators();
