@@ -47,7 +47,7 @@ public class TestParserJobChainDirectory extends AbstractParserJobTest {
         "{\"store\":",
         "{\"book\":[",
         "{\"category\":\"reference\",",
-        "\"author\":\"	    Nigel \\"Rees\\", Stas 	\",",
+        "\"author\":\"	    Nigel \\\"Rees\\\", Stas 	\",",
         "\"title\":\"Sayings of the Century\",",
         "\"price\":8.95},",
         "{\"category\":\"fiction\",",
