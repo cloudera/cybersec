@@ -55,13 +55,13 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-        <csa.version>csa1.15.2.0</csa.version>
+        <csa.version>csa1.15.0.0</csa.version>
         <flink.version>1.20.1-${csa.version}</flink.version>
         <cloudera.registry>1.0-${csa.version}</cloudera.registry>
         <flink.hbase.version>2.4</flink.hbase.version>
         <cdh.version>7.3.1.400-100</cdh.version>
-        <lombok.version>1.18.22</lombok.version>
-        <lombok.plugin.version>1.18.16.0</lombok.plugin.version>
+        <lombok.version>1.18.30</lombok.version>
+        <lombok.plugin.version>1.18.20.0</lombok.plugin.version>
         <guava.version>21.0</guava.version>
         <avro.version>1.11.4</avro.version>
         <log4j.kafka.version>3.4.1.${cdh.version}</log4j.kafka.version>
@@ -181,7 +181,7 @@
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-kafka</artifactId>
-                <version>3.2-${csa.version}</version>
+                <version>3.4.0-${csa.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.kafka</groupId>
@@ -264,7 +264,7 @@
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-hbase-${flink.hbase.version}</artifactId>
-                <version>3.0-${csa.version}</version>
+                <version>3.0-csa1.14.1.0</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.hbase</groupId>
@@ -288,7 +288,7 @@
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-cloudera-registry</artifactId>
-                <version>1.0-${csa.version}</version>
+                <version>1.2.0-${csa.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.everit.json</groupId>
@@ -648,6 +648,14 @@
                     <configuration>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
+                        <fork>true</fork>
+                        <compilerArgs>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                        </compilerArgs>
                     </configuration>
                 </plugin>
 
