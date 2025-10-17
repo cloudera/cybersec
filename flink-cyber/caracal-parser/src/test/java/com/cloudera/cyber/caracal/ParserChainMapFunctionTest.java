@@ -36,7 +36,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.collection.IsMapContaining.hasKey;
 
 public class ParserChainMapFunctionTest {
-    private String splitConfigString = null = String.join("\n",
+    private String splitConfigString = String.join("\n",
         "[",
         "{",
         "\"topic\": \"test\",",
