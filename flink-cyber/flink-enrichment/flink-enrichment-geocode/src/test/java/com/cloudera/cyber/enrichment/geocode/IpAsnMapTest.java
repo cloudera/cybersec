@@ -16,9 +16,9 @@ import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import org.apache.flink.configuration.Configuration;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.*;
@@ -29,7 +29,7 @@ public class IpAsnMapTest {
     private static final List<String> ENRICH_FIELD_NAMES = Collections.singletonList(IP_FIELD_NAME);
     private IpAsnMap asnMap;
 
-    @Before
+    @BeforeEach
     public void createAsnMap() {
          asnMap = new IpAsnMap(IpAsnTestData.ASN_DATABASE_PATH, ENRICH_FIELD_NAMES, null);
          asnMap.open(new Configuration());
@@ -42,21 +42,21 @@ public class IpAsnMapTest {
         Map<String, String> inputFields = new HashMap<>();
         inputFields.put(IP_FIELD_NAME, IpAsnTestData.IP_WITH_NUMBER_AND_ORG);
         Message result = emptyFields.map(TestUtils.createMessage(inputFields));
-        Assert.assertEquals(inputFields, result.getExtensions());
+        Assertions.assertEquals(inputFields, result.getExtensions());
         assertNoErrorsOrInfos(result);
     }
 
     @Test
     public void testFieldNotDefined() {
         Message emptyMessage = asnMap.map(TestUtils.createMessage(Collections.emptyMap()));
-        Assert.assertEquals(Collections.emptyMap(), emptyMessage.getExtensions());
+        Assertions.assertEquals(Collections.emptyMap(), emptyMessage.getExtensions());
         assertNoErrorsOrInfos(emptyMessage);
     }
 
     @Test
     public void testFieldsNull() {
         Message emptyMessage = asnMap.map(TestUtils.createMessage());
-        Assert.assertNull(emptyMessage.getExtensions());
+        Assertions.assertNull(emptyMessage.getExtensions());
         assertNoErrorsOrInfos(emptyMessage);
     }
 
@@ -75,7 +75,7 @@ public class IpAsnMapTest {
     public void testFieldNotSet() {
         Message input = TestUtils.createMessage();
         Message output = asnMap.map(input);
-        Assert.assertNull(output.getExtensions());
+        Assertions.assertNull(output.getExtensions());
         assertNoErrorsOrInfos(output);
     }
 
@@ -83,7 +83,7 @@ public class IpAsnMapTest {
     public void testThrowsAsnDatabaseDoesNotExist() {
         String doesntExistPath = "./src/test/resources/geolite/doesntexist";
         File databaseFile = new File(doesntExistPath);
-        Assert.assertFalse(databaseFile.exists());
+        Assertions.assertFalse(databaseFile.exists());
         IpAsnMap map = new IpAsnMap(doesntExistPath, ENRICH_FIELD_NAMES, null);
         assertThatThrownBy(() -> map.open(new Configuration())).
                 isInstanceOfAny(IllegalStateException.class).
@@ -94,8 +94,8 @@ public class IpAsnMapTest {
     public void testThrowsAsnDatabaseEmptyFile() {
         String emptyFilePath = "./src/test/resources/geolite/invalid_maxmind_db";
         File databaseFile = new File(emptyFilePath);
-        Assert.assertTrue(databaseFile.exists());
-        Assert.assertTrue(databaseFile.length() > 0);
+        Assertions.assertTrue(databaseFile.exists());
+        Assertions.assertTrue(databaseFile.length() > 0);
         IpAsnMap map = new IpAsnMap(emptyFilePath, ENRICH_FIELD_NAMES, null);
         assertThatThrownBy(() ->map.open(new Configuration())).isInstanceOfAny(IllegalStateException.class).
                 hasMessage("Could not read asn database %s", emptyFilePath);
@@ -114,14 +114,14 @@ public class IpAsnMapTest {
         Map<String, String> expected = new HashMap<>(input.getExtensions());
         inputFields.forEach((field, value) -> expected.putAll(IpAsnTestData.getExpectedValues(field, value)));
         Message output = asnMap.map(input);
-        Assert.assertEquals(expected, output.getExtensions());
+        Assertions.assertEquals(expected, output.getExtensions());
 
         return output;
     }
 
     private void assertNoErrorsOrInfos(Message output) {
         List<DataQualityMessage> dataQualityMessages = output.getDataQualityMessages();
-        Assert.assertTrue(dataQualityMessages == null || dataQualityMessages.isEmpty());
+        Assertions.assertTrue(dataQualityMessages == null || dataQualityMessages.isEmpty());
     }
 
 }

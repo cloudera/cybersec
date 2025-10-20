@@ -22,8 +22,8 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.time.Instant;
@@ -125,21 +125,21 @@ public class HbaseBatchEnrichmentCSVLoaderTest extends BatchEnrichmentLoaderCSV 
 
     private void verifyEnrichmentCommands(Map<String, Map<String, String>> enrichmentsToVerify, List<EnrichmentCommand> enrichmentCommands) {
         for(EnrichmentCommand command: enrichmentCommands) {
-            Assert.assertEquals(CommandType.ADD, command.getType());
-            Assert.assertEquals(Collections.emptyMap(), command.getHeaders());
+            Assertions.assertEquals(CommandType.ADD, command.getType());
+            Assertions.assertEquals(Collections.emptyMap(), command.getHeaders());
             EnrichmentEntry entry = command.getPayload();
-            Assert.assertFalse(entry.getKey().isEmpty());
-            Assert.assertEquals(MAJESTIC_MILLION_CF, entry.getType());
+            Assertions.assertFalse(entry.getKey().isEmpty());
+            Assertions.assertEquals(MAJESTIC_MILLION_CF, entry.getType());
             Instant earliestTime = Instant.now().minus(5, ChronoUnit.MINUTES);
             Instant timestampInstant = Instant.ofEpochMilli(entry.getTs());
-            Assert.assertTrue(earliestTime.isBefore(timestampInstant));
-            Assert.assertTrue(timestampInstant.isBefore(Instant.now()));
+            Assertions.assertTrue(earliestTime.isBefore(timestampInstant));
+            Assertions.assertTrue(timestampInstant.isBefore(Instant.now()));
             Map<String, String> expectedEnrichmentValues = enrichmentsToVerify.get(entry.getKey());
             if (expectedEnrichmentValues != null) {
-                Assert.assertEquals(expectedEnrichmentValues, entry.getEntries());
+                Assertions.assertEquals(expectedEnrichmentValues, entry.getEntries());
             }
         }
-        Assert.assertEquals(9, enrichmentCommands.size());
+        Assertions.assertEquals(9, enrichmentCommands.size());
     }
 
     @Override

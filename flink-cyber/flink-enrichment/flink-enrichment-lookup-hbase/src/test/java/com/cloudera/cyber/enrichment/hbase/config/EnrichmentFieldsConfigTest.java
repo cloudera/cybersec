@@ -13,8 +13,8 @@
 package com.cloudera.cyber.enrichment.hbase.config;
 
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -90,9 +90,9 @@ public class EnrichmentFieldsConfigTest {
         EnrichmentFieldsConfig fieldConfig = new EnrichmentFieldsConfig(keyFields, keyDelimiter, valueFields, null);
         fieldConfig.validate(enrichmentType);
         if (keyDelimiter == null) {
-            Assert.assertEquals(EnrichmentFieldsConfig.DEFAULT_KEY_DELIMITER, fieldConfig.getKeyDelimiter());
+            Assertions.assertEquals(EnrichmentFieldsConfig.DEFAULT_KEY_DELIMITER, fieldConfig.getKeyDelimiter());
         } else {
-            Assert.assertEquals(keyDelimiter, fieldConfig.getKeyDelimiter());
+            Assertions.assertEquals(keyDelimiter, fieldConfig.getKeyDelimiter());
         }
     }
 

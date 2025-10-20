@@ -27,10 +27,10 @@ import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
 import org.hamcrest.Matchers;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -40,7 +40,7 @@ import java.util.*;
 import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @Slf4j
 public class RestLookupJobTest extends RestLookupJob {
@@ -54,7 +54,7 @@ public class RestLookupJobTest extends RestLookupJob {
     public static TemporaryFolder configTempFolder = new TemporaryFolder();
     private static String configFilePath;
 
-    @BeforeClass
+    @BeforeAll
     public static void startMockRestServer() throws IOException {
         mockRestServer = new MockRestServer(true);
         File configFile = configTempFolder.newFile("rest-job-test.json");
@@ -68,7 +68,7 @@ public class RestLookupJobTest extends RestLookupJob {
         configFilePath = configFile.getPath();
     }
 
-    @AfterClass
+    @AfterAll
     public static void stopMockRestServer() {
         mockRestServer.close();
     }

@@ -20,8 +20,8 @@ import com.cloudera.cyber.enrichment.cidr.impl.IpRegionCidrEnrichment;
 import com.cloudera.cyber.enrichment.cidr.impl.types.RegionCidrEnrichmentConfiguration;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -48,7 +48,7 @@ public class IpRegionCidrMapTest {
     @Mock
     private IpRegionCidrEnrichment regionCidrEnrichment;
 
-    @Before
+    @BeforeEach
     public void createIpRegionMap() throws Exception {
         regionMap = new IpRegionMap(new RegionCidrEnrichmentConfiguration(), ENRICH_FIELD_NAMES);
         FieldUtils.writeField(regionMap, "regionCidrEnrichment", regionCidrEnrichment, true);

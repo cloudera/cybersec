@@ -13,8 +13,8 @@
 package com.cloudera.cyber.enrichment.rest;
 
 import com.google.common.base.Joiner;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
@@ -145,24 +145,24 @@ public class RestRequestKeyTest {
 
     private void verifyCreateUriOnly(Map<String, String> variables, String urlTemplate, String expectedUrlString, List<String> expectedErrors) {
         RestRequestKey key = new RestRequestKey(variables, urlTemplate);
-        Assert.assertEquals(expectedErrors, key.getErrors());
+        Assertions.assertEquals(expectedErrors, key.getErrors());
         verifyUri(key, expectedUrlString);
-        Assert.assertNull(key.getEntity());
+        Assertions.assertNull(key.getEntity());
     }
 
     private void verifyCreateUriWithEntity(Map<String, String> variables, String urlTemplate, String entityTemplate,
                                            String expectedUrlString, String expectedEntityString, List<String> expectedErrors) {
         RestRequestKey key = new RestRequestKey(variables, urlTemplate, entityTemplate);
-        Assert.assertEquals(expectedErrors, key.getErrors());
+        Assertions.assertEquals(expectedErrors, key.getErrors());
         verifyUri(key, expectedUrlString);
-        Assert.assertEquals(expectedEntityString, key.getEntity());
+        Assertions.assertEquals(expectedEntityString, key.getEntity());
     }
 
     private void verifyUri(RestRequestKey key, String expectedUrlString) {
         if (expectedUrlString != null) {
-            Assert.assertEquals(expectedUrlString, key.getRestUri().toASCIIString());
+            Assertions.assertEquals(expectedUrlString, key.getRestUri().toASCIIString());
         } else {
-            Assert.assertNull(key.getRestUri());
+            Assertions.assertNull(key.getRestUri());
         }
     }
 }

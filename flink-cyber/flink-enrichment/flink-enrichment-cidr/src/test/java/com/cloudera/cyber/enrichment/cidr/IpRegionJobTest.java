@@ -27,8 +27,8 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -179,7 +179,7 @@ public class IpRegionJobTest extends IpRegionCidrJob {
         return source.getDataStream().map(s -> s);
     }
 
-    @After
+    @AfterEach
     public void clean() throws Exception{
         JobTester.stopTest();
     }

@@ -17,9 +17,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -59,7 +59,7 @@ public class ReplaceJsonPropertiesTest {
                 put("empty_prop", "").
                 build());
 
-        Assert.assertEquals(expectedPropertyMaps, actualPropertyMaps);
+        Assertions.assertEquals(expectedPropertyMaps, actualPropertyMaps);
     }
 
     @Test

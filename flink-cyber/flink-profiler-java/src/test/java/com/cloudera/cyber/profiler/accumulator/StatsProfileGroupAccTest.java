@@ -19,8 +19,8 @@ import com.cloudera.cyber.profiler.ProfileMeasurementConfig;
 import com.cloudera.cyber.profiler.ProfileMessage;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -112,7 +112,7 @@ public class StatsProfileGroupAccTest {
             put(STATS_RESULT_NAME.concat(StatsProfileGroupAcc.MEAN_RESULT_SUFFIX),  formats.get(STATS_RESULT_NAME).format(expectedMean));
             put(STATS_RESULT_NAME.concat(StatsProfileGroupAcc.STDDEV_RESULT_SUFFIX),  formats.get(STATS_RESULT_NAME).format(expectedStdDev));
         }};
-        Assert.assertEquals(expectedExtensions, actualExtensions);
-        Assert.assertEquals(endPeriod, acc.getEndTimestamp());
+        Assertions.assertEquals(expectedExtensions, actualExtensions);
+        Assertions.assertEquals(endPeriod, acc.getEndTimestamp());
     }
 }

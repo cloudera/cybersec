@@ -105,8 +105,7 @@
         <java-grok.version>0.1.9</java-grok.version>
         <everit-json-schema.version>1.14.2</everit-json-schema.version>
         <graalvm.version>21.3.10</graalvm.version>
-        <junit.version>4.12</junit.version>
-        <junit5.version>5.7.0</junit5.version>
+        <junit5.version>5.9.3</junit5.version>
         <orc.version>1.8.3.${cdh.version}</orc.version>
         <swagger-annotations.version>1.6.0</swagger-annotations.version>
 
@@ -120,7 +119,7 @@
         <!--Maven-->
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
         <maven-shade-plugin.version>3.4.1</maven-shade-plugin.version>
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
@@ -402,7 +401,6 @@
                 <version>${avro.version}</version>
             </dependency>
 
-
             <!-- Kafka -->
             <dependency>
                 <groupId>org.apache.kafka</groupId>
@@ -561,18 +559,6 @@
             </dependency>
 
             <!-- Test -->
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter</artifactId>
-                <version>${junit5.version}</version>
-                <scope>test</scope>
-            </dependency>
 
             <dependency>
                 <groupId>org.assertj</groupId>

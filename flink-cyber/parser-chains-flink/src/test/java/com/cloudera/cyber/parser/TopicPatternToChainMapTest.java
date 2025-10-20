@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.entry;
 
 import java.util.Map;
 import java.util.regex.Pattern;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TopicPatternToChainMapTest {
     private final String TOPIC_NAME_1 = "topic1";

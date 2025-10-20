@@ -18,9 +18,9 @@ import com.cloudera.cyber.enrichment.geocode.IpGeoTestData;
 import com.cloudera.cyber.enrichment.geocode.impl.types.GeoEnrichmentFields;
 import com.maxmind.geoip2.DatabaseProvider;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class IpGeoEnrichmentTest {
     private IpGeoEnrichment ipGeoEnrichment;
     private static final String TEST_ENRICHMENT_FIELD_NAME = "test_field";
 
-    @Before
+    @BeforeEach
     public void createGeoEnrichment() {
         ipGeoEnrichment = new IpGeoEnrichment(IpGeoTestData.GEOCODE_DATABASE_PATH);
     }
@@ -78,8 +78,8 @@ public class IpGeoEnrichmentTest {
         List<DataQualityMessage> emptyMessages = new ArrayList<>();
 
         ipGeoEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, null, GeoEnrichmentFields.values(), emptyEnrichments, emptyMessages);
-        Assert.assertTrue(emptyEnrichments.isEmpty());
-        Assert.assertTrue(emptyMessages.isEmpty());
+        Assertions.assertTrue(emptyEnrichments.isEmpty());
+        Assertions.assertTrue(emptyMessages.isEmpty());
     }
 
     @Test
@@ -107,8 +107,8 @@ public class IpGeoEnrichmentTest {
         Map<String, String> actualExtensions = new HashMap<>();
         List<DataQualityMessage> actualQualityMessages = new ArrayList<>();
         testIpGeoEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, ipAddress, GeoEnrichmentFields.values(), actualExtensions, actualQualityMessages);
-        Assert.assertEquals(expectedExtensions, actualExtensions);
-        Assert.assertEquals(expectedQualityMessages, actualQualityMessages);
+        Assertions.assertEquals(expectedExtensions, actualExtensions);
+        Assertions.assertEquals(expectedQualityMessages, actualQualityMessages);
     }
 
     private List<DataQualityMessage> createExpectedDataQualityMessages(DataQualityMessageLevel level, String messageText) {

@@ -22,8 +22,8 @@ import com.hortonworks.registries.schemaregistry.errors.SchemaNotFoundException;
 import com.hortonworks.registries.schemaregistry.serdes.avro.AvroSnapshotSerializer;
 import com.hortonworks.registries.schemaregistry.serdes.avro.AvroUtils;
 import org.apache.avro.Schema;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -64,7 +64,7 @@ public class TestMessageSerializer {
                 .build();
     }
 
-    @Before
+    @BeforeEach
     public void init() throws SchemaNotFoundException, InvalidSchemaException, IncompatibleSchemaException {
         ISchemaRegistryClient testClient = mock(ISchemaRegistryClient.class);
         when(testClient.uploadSchemaVersion(any(),any(),any(),any()))

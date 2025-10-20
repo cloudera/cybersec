@@ -19,8 +19,8 @@ import com.cloudera.cyber.enrichment.geocode.impl.IpGeoEnrichment;
 import com.cloudera.cyber.enrichment.geocode.impl.types.MetronGeoEnrichmentFields;
 import com.google.common.collect.ImmutableList;
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -60,7 +60,7 @@ public class GeoGetEnrichmentTest {
     @Captor
     private ArgumentCaptor<BiFunction<String, String, Enrichment>> enrichCreationCapture;
 
-    @Before
+    @BeforeEach
     public void createGeoMap() {
 
     }

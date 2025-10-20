@@ -18,8 +18,8 @@ import com.cloudera.cyber.profiler.ProfileGroupConfig;
 import com.cloudera.cyber.profiler.ProfileMeasurementConfig;
 import com.cloudera.cyber.profiler.ProfileMessage;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -197,22 +197,22 @@ public class FieldValueProfileGroupAccTest extends ProfileGroupConfigTestUtils {
     private void verifyResults(ProfileGroupConfig profileGroupConfig, FieldValueProfileGroupAcc acc, long startPeriod, long endPeriod, String key1, String key2, double sum, double count,
                                double countDistinct, double max, double min) {
 
-        Assert.assertEquals(endPeriod, acc.getEndTimestamp());
+        Assertions.assertEquals(endPeriod, acc.getEndTimestamp());
         Map<String, DecimalFormat> formats = getFormats(profileGroupConfig);
         Map<String, String> actualExtensions = acc.getProfileExtensions(profileGroupConfig, formats);
-        Assert.assertEquals(Long.toString(startPeriod), actualExtensions.get(START_PERIOD_EXTENSION));
-        Assert.assertEquals(Long.toString(endPeriod), actualExtensions.get(END_PERIOD_EXTENSION));
-        Assert.assertEquals(formats.get(SUM_RESULT).format(sum), actualExtensions.get(SUM_RESULT));
-        Assert.assertEquals(formats.get(COUNT_RESULT).format(count), actualExtensions.get(COUNT_RESULT));
-        Assert.assertEquals(formats.get(COUNT_DIST_RESULT).format(countDistinct), actualExtensions.get(COUNT_DIST_RESULT));
-        Assert.assertEquals(formats.get(MAX_RESULT).format(max), actualExtensions.get(MAX_RESULT));
-        Assert.assertEquals(formats.get(MIN_RESULT).format(min), actualExtensions.get(MIN_RESULT));
+        Assertions.assertEquals(Long.toString(startPeriod), actualExtensions.get(START_PERIOD_EXTENSION));
+        Assertions.assertEquals(Long.toString(endPeriod), actualExtensions.get(END_PERIOD_EXTENSION));
+        Assertions.assertEquals(formats.get(SUM_RESULT).format(sum), actualExtensions.get(SUM_RESULT));
+        Assertions.assertEquals(formats.get(COUNT_RESULT).format(count), actualExtensions.get(COUNT_RESULT));
+        Assertions.assertEquals(formats.get(COUNT_DIST_RESULT).format(countDistinct), actualExtensions.get(COUNT_DIST_RESULT));
+        Assertions.assertEquals(formats.get(MAX_RESULT).format(max), actualExtensions.get(MAX_RESULT));
+        Assertions.assertEquals(formats.get(MIN_RESULT).format(min), actualExtensions.get(MIN_RESULT));
         if (key1 != null && key2 != null) {
-            Assert.assertEquals(key1, actualExtensions.get(KEY_1));
-            Assert.assertEquals(key2, actualExtensions.get(KEY_2));
-            Assert.assertEquals(9, actualExtensions.size());
+            Assertions.assertEquals(key1, actualExtensions.get(KEY_1));
+            Assertions.assertEquals(key2, actualExtensions.get(KEY_2));
+            Assertions.assertEquals(9, actualExtensions.size());
         } else {
-            Assert.assertEquals(7, actualExtensions.size());
+            Assertions.assertEquals(7, actualExtensions.size());
         }
     }
 

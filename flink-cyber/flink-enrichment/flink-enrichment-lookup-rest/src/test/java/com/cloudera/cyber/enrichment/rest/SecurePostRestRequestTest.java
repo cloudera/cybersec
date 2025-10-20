@@ -27,12 +27,12 @@ public class SecurePostRestRequestTest extends PostRestRequestTest {
 
     private static final String KEY_ALIAS = "client";
 
-    @BeforeClass
+    @BeforeAll
     public static void createMockService() {
         createMockService(true);
     }
 
-    @AfterClass
+    @AfterAll
     public static void stopMockServer() {
         mockRestServer.close();
     }

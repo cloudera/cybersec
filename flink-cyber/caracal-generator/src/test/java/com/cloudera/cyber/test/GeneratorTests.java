@@ -17,8 +17,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import freemarker.template.TemplateException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -86,12 +86,12 @@ public class GeneratorTests {
     private Map<String, Object> testFile(String file) throws IOException, TemplateException {
         FreemarkerImmediateGenerator generator = new FreemarkerImmediateGenerator();
         String result = generator.generateEntry(file);
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
         ObjectMapper mapper = new ObjectMapper();
         TypeFactory typeFactory = mapper.getTypeFactory();
         MapType mapType = typeFactory.constructMapType(HashMap.class, String.class, Object.class);
         Map<String, Object> output = mapper.readValue(result, mapType);
-        Assert.assertNotNull(output);
+        Assertions.assertNotNull(output);
         return output;
     }
 

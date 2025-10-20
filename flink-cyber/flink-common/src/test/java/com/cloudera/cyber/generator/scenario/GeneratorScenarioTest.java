@@ -2,8 +2,8 @@ package com.cloudera.cyber.generator.scenario;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.*;
@@ -29,12 +29,12 @@ public class GeneratorScenarioTest {
         int count = 100;
         for(int i = 0; i < count; i++) {
             Map<String, String> randomParameters = scenario.randomParameters();
-            Assert.assertTrue(String.format("randomParameters = %s does not match expected values", randomParameters), expectedValues.contains(randomParameters));
+            Assertions.assertTrue(String.format("randomParameters = %s does not match expected values", randomParameters), expectedValues.contains(randomParameters));
             actualIpDstAddrValues.add(randomParameters.get(IP_DEST_ADDR));
             actualRandomParameters.add(randomParameters);
         }
-        Assert.assertEquals(count, actualRandomParameters.size());
-        Assert.assertEquals(2, actualIpDstAddrValues.size());
+        Assertions.assertEquals(count, actualRandomParameters.size());
+        Assertions.assertEquals(2, actualIpDstAddrValues.size());
     }
 
     @Test

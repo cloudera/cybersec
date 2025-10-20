@@ -1,7 +1,7 @@
 package com.cloudera.cyber.generator;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -33,7 +33,7 @@ public class GenerationSourceTest {
         GenerationSource source = new GenerationSource(test_template, test_topic, schemaPath, 1.0);
 
         source.readAvroSchema("");
-        Assert.assertEquals(isNull, source.getOutputAvroSchema() == null);
+        Assertions.assertEquals(isNull, source.getOutputAvroSchema() == null);
     }
 
     @Test
@@ -57,10 +57,10 @@ public class GenerationSourceTest {
         GenerationSource gs = new GenerationSource("file", "topic", null, 1.0, scenarioFilePath, null,  null );
         gs.readScenarioFile("");
 
-        Assert.assertEquals(scenarioFilePath == null, gs.getScenario() == null);
+        Assertions.assertEquals(scenarioFilePath == null, gs.getScenario() == null);
 
         Map<String, String> randomParameters = gs.getRandomParameters();
 
-        Assert.assertEquals(expectedKeys, randomParameters.keySet());
+        Assertions.assertEquals(expectedKeys, randomParameters.keySet());
     }
 }

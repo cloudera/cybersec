@@ -19,8 +19,8 @@ import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -46,11 +46,11 @@ public class FirstSeenHbaseTest {
         FirstSeenHBase firstSeenHbase = new FirstSeenHBase(enrichmentStorageConfig, profileGroupConfig);
 
         // test constructor correctness
-        Assert.assertEquals(TABLE_NAME, firstSeenHbase.getEnrichmentStorageConfig().getHbaseTableName());
-        Assert.assertNull(firstSeenHbase.getEnrichmentStorageConfig().getColumnFamily());
-        Assert.assertEquals(FIRST_SEEN_RESULT_NAME, firstSeenHbase.getFirstSeenResultName());
-        Assert.assertEquals(Lists.newArrayList(KEY_1, KEY_2), firstSeenHbase.getKeyFieldNames());
-        Assert.assertEquals(TEST_PROFILE_GROUP, firstSeenHbase.getProfileName());
+        Assertions.assertEquals(TABLE_NAME, firstSeenHbase.getEnrichmentStorageConfig().getHbaseTableName());
+        Assertions.assertNull(firstSeenHbase.getEnrichmentStorageConfig().getColumnFamily());
+        Assertions.assertEquals(FIRST_SEEN_RESULT_NAME, firstSeenHbase.getFirstSeenResultName());
+        Assertions.assertEquals(Lists.newArrayList(KEY_1, KEY_2), firstSeenHbase.getKeyFieldNames());
+        Assertions.assertEquals(TEST_PROFILE_GROUP, firstSeenHbase.getProfileName());
 
         long endPeriod = MessageUtils.getCurrentTimestamp();
         long startPeriod = endPeriod - 500L;
@@ -59,11 +59,11 @@ public class FirstSeenHbaseTest {
 
         ProfileMessage profileMessage = new ProfileMessage(endPeriod, extensions);
         LookupKey key = firstSeenHbase.getKey(profileMessage);
-        Assert.assertEquals(FIRST_SEEN_ENRICHMENT_TYPE, key.getCf());
-        Assert.assertEquals(Joiner.on(":").join(TEST_PROFILE_GROUP, KEY_1_VALUE, KEY_2_VALUE), key.getKey());
+        Assertions.assertEquals(FIRST_SEEN_ENRICHMENT_TYPE, key.getCf());
+        Assertions.assertEquals(Joiner.on(":").join(TEST_PROFILE_GROUP, KEY_1_VALUE, KEY_2_VALUE), key.getKey());
 
-        Assert.assertEquals(Long.toString(startPeriod), firstSeenHbase.getFirstSeen(profileMessage));
-        Assert.assertEquals(Long.toString(endPeriod), firstSeenHbase.getLastSeen(profileMessage));
+        Assertions.assertEquals(Long.toString(startPeriod), firstSeenHbase.getFirstSeen(profileMessage));
+        Assertions.assertEquals(Long.toString(endPeriod), firstSeenHbase.getLastSeen(profileMessage));
 
     }
 

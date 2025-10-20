@@ -11,8 +11,8 @@ import org.apache.flink.api.common.io.InputStreamFSInputWrapper;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.connector.file.src.reader.StreamFormat;
 import org.apache.flink.formats.csv.CsvReaderFormat;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -130,14 +130,14 @@ public class CsvToEnrichmentCommandDeserializerTest {
 
         for(EnrichmentCommand expectedCommand : expectedCommands) {
             EnrichmentCommand actualCommand = reader.read();
-            Assert.assertEquals(expectedCommand.getType(), Objects.requireNonNull(actualCommand).getType());
+            Assertions.assertEquals(expectedCommand.getType(), Objects.requireNonNull(actualCommand).getType());
             EnrichmentEntry expectedPayload = expectedCommand.getPayload();
             EnrichmentEntry actualPayload = actualCommand.getPayload();
-            Assert.assertEquals(expectedPayload.getKey(), actualPayload.getKey());
-            Assert.assertEquals(expectedPayload.getType(), actualPayload.getType());
-            Assert.assertEquals(expectedPayload.getEntries(), actualPayload.getEntries());
+            Assertions.assertEquals(expectedPayload.getKey(), actualPayload.getKey());
+            Assertions.assertEquals(expectedPayload.getType(), actualPayload.getType());
+            Assertions.assertEquals(expectedPayload.getEntries(), actualPayload.getEntries());
             long timestampDelta = actualPayload.getTs() - expectedPayload.getTs();
-            Assert.assertTrue( String.format("timestamp delta %d too large", timestampDelta), timestampDelta < 1000L);
+            Assertions.assertTrue( String.format("timestamp delta %d too large", timestampDelta), timestampDelta < 1000L);
         }
     }
 

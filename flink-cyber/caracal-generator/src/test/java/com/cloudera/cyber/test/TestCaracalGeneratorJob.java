@@ -20,8 +20,8 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.*;
@@ -101,7 +101,7 @@ public class TestCaracalGeneratorJob extends CaracalGeneratorFlinkJob {
         for (int i = 0; i < expectedCount; i++) {
             Tuple2<String, byte[]> generatedRecord = sink.poll(Duration.ofMillis(100));
             String actualTopic = generatedRecord.f0;
-            Assert.assertTrue(String.format("Generated topic '%s' is not in expected topics '%s'", actualTopic, expectedTopics), expectedTopics.contains(actualTopic));
+            Assertions.assertTrue(String.format("Generated topic '%s' is not in expected topics '%s'", actualTopic, expectedTopics), expectedTopics.contains(actualTopic));
             results.add(generatedRecord);
         }
 

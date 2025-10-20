@@ -84,6 +84,7 @@
             <classifier>tests</classifier>
             <type>test-jar</type>
             <version>${project.parent.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
@@ -91,6 +92,7 @@
             <classifier>tests</classifier>
             <type>test-jar</type>
             <version>${project.parent.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
