@@ -29,7 +29,7 @@ public class GeneratorScenarioTest {
         int count = 100;
         for(int i = 0; i < count; i++) {
             Map<String, String> randomParameters = scenario.randomParameters();
-            Assertions.assertTrue(String.format("randomParameters = %s does not match expected values", randomParameters), expectedValues.contains(randomParameters));
+            Assertions.assertTrue(expectedValues.contains(randomParameters), String.format("randomParameters = %s does not match expected values", randomParameters));
             actualIpDstAddrValues.add(randomParameters.get(IP_DEST_ADDR));
             actualRandomParameters.add(randomParameters);
         }
