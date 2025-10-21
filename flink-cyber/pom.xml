@@ -86,7 +86,6 @@
         <datasketches.version>1.3.0-incubating</datasketches.version>
         <assertj.version>3.17.2</assertj.version>
         <json.simple.version>1.1.1</json.simple.version>
-        <jupiter.junit.version>5.9.3</jupiter.junit.version>
         <phoenix.version>5.1.1.${cdh.version}</phoenix.version>
         <phoenix.queryserver>6.0.0.${cdh.version}</phoenix.queryserver>
         <classindex.version>3.4</classindex.version>
@@ -106,6 +105,8 @@
         <everit-json-schema.version>1.14.2</everit-json-schema.version>
         <graalvm.version>21.3.10</graalvm.version>
         <junit5.version>5.9.3</junit5.version>
+        <!-- required for tests with hbase-testing-util -->
+        <legacy.junit.version>4.13.2</legacy.junit.version>
         <orc.version>1.8.3.${cdh.version}</orc.version>
         <swagger-annotations.version>1.6.0</swagger-annotations.version>
 
@@ -115,6 +116,8 @@
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <commons-text.version>1.10.0</commons-text.version>
         <commons-cli.version>1.5.0</commons-cli.version>
+        <commons-vfs2.version>2.6.0</commons-vfs2.version>
+        <commons-collections4.version>4.4</commons-collections4.version>
 
         <!--Maven-->
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
@@ -623,28 +626,18 @@
 
             <!-- JUnit 5 Dependencies -->
             <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-api</artifactId>
-                <version>${jupiter.junit.version}</version>
-                <scope>test</scope>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit5.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
+
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-engine</artifactId>
-                <version>${jupiter.junit.version}</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-params</artifactId>
-                <version>${jupiter.junit.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.platform</groupId>
-                <artifactId>junit-platform-launcher</artifactId>
-                <version>1.9.3</version>
-                <scope>test</scope>
+                <version>${junit5.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

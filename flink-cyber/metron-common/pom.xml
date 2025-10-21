@@ -199,7 +199,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.1</version>
+            <version>${commons-collections4.version}</version>
         </dependency>
 
         <!-- Guava dependency -->
@@ -268,13 +268,11 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>${jupiter.junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-migrationsupport</artifactId>
-            <version>${jupiter.junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -330,7 +328,7 @@
                     <dependency>
                         <groupId>org.junit.jupiter</groupId>
                         <artifactId>junit-jupiter-engine</artifactId>
-                        <version>${jupiter.junit.version}</version>
+                        <version>${junit5.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
