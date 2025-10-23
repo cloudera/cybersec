@@ -19,12 +19,14 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import freemarker.template.TemplateException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -74,7 +76,8 @@ public class GeneratorTests {
     }
 
 
-    @Test(timeout = 1000)
+    @Test
+    @Timeout(value = 1, unit = TimeUnit.SECONDS)
     public void testBulkProduction10000eps() throws IOException, TemplateException {
         FreemarkerImmediateGenerator generator = new FreemarkerImmediateGenerator();
         for (int i = 0; i < 10000; i++) {

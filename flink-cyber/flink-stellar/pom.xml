@@ -41,7 +41,6 @@
         <global_json_simple_version>1.1.1</global_json_simple_version>
         <global_antlr_version>${antlr.version}</global_antlr_version>
         <global_classindex_version>${classindex.version}</global_classindex_version>
-        <global_hamcrest_version>2.2</global_hamcrest_version>
         <global_mockito_version>3.1.0</global_mockito_version>
     </properties>
     <dependencies>
@@ -242,28 +241,18 @@
         <dependency>
             <groupId>org.hamcrest</groupId>
             <artifactId>hamcrest-core</artifactId>
-            <version>${global_hamcrest_version}</version>
             <scope>test</scope>
         </dependency>
         
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
+            <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-        </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-migrationsupport</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-params</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -25,14 +25,14 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
 import static com.cloudera.cyber.enrichment.ConfigUtils.PARAMS_CONFIG_FILE;
 
-@Ignore
+@Disabled
 public class HbaseJobTest extends HbaseJob {
     private transient ManualSource<Message> source;
     private final CollectingSink<EnrichmentCommandResponse> enrichmentResponseSink = new CollectingSink<>();
@@ -70,7 +70,7 @@ public class HbaseJobTest extends HbaseJob {
     @Test
     public void test() throws Exception {
         JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
-                PARAMS_CONFIG_FILE, "config.json"
+                PARAMS_CONFIG_FILE, "configs.json"
         ))));
         source.sendRecord(TestUtils.createMessage(Collections.singletonMap("hostname", "test")), 0);
         JobTester.stopTest();

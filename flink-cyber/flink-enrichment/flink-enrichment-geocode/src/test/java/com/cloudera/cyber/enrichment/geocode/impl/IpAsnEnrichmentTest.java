@@ -17,16 +17,15 @@ import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.enrichment.geocode.IpAsnTestData;
 import com.cloudera.cyber.enrichment.geocode.IpGeoTestData;
 import com.maxmind.geoip2.DatabaseProvider;
-import com.maxmind.geoip2.DatabaseReader;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -40,14 +39,14 @@ public class IpAsnEnrichmentTest {
         ipAsnEnrichment = new IpAsnEnrichment((IpAsnTestData.ASN_DATABASE_PATH));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void throwsWithNullAsnDatabaseForNullPathDb() {
-        new IpAsnEnrichment((String) null);
+        assertThrows(IllegalArgumentException.class, () -> new IpAsnEnrichment((String) null), "Expected IllegalArgumentException");
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void throwsWithNullAsnDatabaseForNullDb() {
-        new IpAsnEnrichment((DatabaseProvider) null);
+        assertThrows(NullPointerException.class, () -> new IpAsnEnrichment((DatabaseProvider) null), "Expected NullPointerException");
     }
 
     @Test

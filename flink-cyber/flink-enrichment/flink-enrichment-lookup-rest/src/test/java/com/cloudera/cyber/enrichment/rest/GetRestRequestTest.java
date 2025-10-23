@@ -16,7 +16,7 @@ import com.cloudera.cyber.enrichment.rest.impl.MockRestServer;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -24,7 +24,7 @@ import java.util.Map;
 
 @Slf4j
 // tests will run either with or without tls when junit runs derived classes
-@Ignore
+@Disabled
 public class GetRestRequestTest extends RestRequestTest {
 
     public static void createMockService(boolean enableTlsMutualAuth) {

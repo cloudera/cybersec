@@ -99,6 +99,7 @@
             <scope>compile</scope>
         </dependency>
 
+
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-enrichment-lookup-common</artifactId>

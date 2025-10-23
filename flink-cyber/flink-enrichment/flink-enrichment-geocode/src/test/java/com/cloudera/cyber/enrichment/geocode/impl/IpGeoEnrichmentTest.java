@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -41,14 +42,14 @@ public class IpGeoEnrichmentTest {
         ipGeoEnrichment = new IpGeoEnrichment(IpGeoTestData.GEOCODE_DATABASE_PATH);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void throwsWithNullAsnDatabaseForNullPathDb() {
-        new IpGeoEnrichment((String) null);
+        assertThrows(IllegalArgumentException.class, () -> new IpGeoEnrichment((String) null), "Expected IllegalArgumentException");
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void throwsWithNullCityDatabase() {
-        new IpGeoEnrichment((DatabaseProvider) null);
+        assertThrows(NullPointerException.class, () -> new IpGeoEnrichment((DatabaseProvider) null), "Expected NullPointerException");
     }
 
     @Test

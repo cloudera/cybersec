@@ -29,9 +29,8 @@ import org.apache.flink.test.util.ManualSource;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.ClassRule;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,14 +49,14 @@ public class RestLookupJobTest extends RestLookupJob {
     private ManualSource<Message> source;
     private static MockRestServer mockRestServer;
 
-    @ClassRule
-    public static TemporaryFolder configTempFolder = new TemporaryFolder();
+    @TempDir
+    public static File configTempFolder;
     private static String configFilePath;
 
     @BeforeAll
     public static void startMockRestServer() throws IOException {
         mockRestServer = new MockRestServer(true);
-        File configFile = configTempFolder.newFile("rest-job-test.json");
+        File configFile = new File(configTempFolder, "rest-job-test.json");
         List<RestEnrichmentConfig> modelRestConfig = new ArrayList<>();
         modelRestConfig.add(mockRestServer.configureModelPostRequest().build());
         modelRestConfig.add(mockRestServer.configureGetAssetRequest().build());

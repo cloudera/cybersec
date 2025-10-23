@@ -101,7 +101,7 @@ public class TestCaracalGeneratorJob extends CaracalGeneratorFlinkJob {
         for (int i = 0; i < expectedCount; i++) {
             Tuple2<String, byte[]> generatedRecord = sink.poll(Duration.ofMillis(100));
             String actualTopic = generatedRecord.f0;
-            Assertions.assertTrue(String.format("Generated topic '%s' is not in expected topics '%s'", actualTopic, expectedTopics), expectedTopics.contains(actualTopic));
+            Assertions.assertTrue(expectedTopics.contains(actualTopic),String.format("Generated topic '%s' is not in expected topics '%s'", actualTopic, expectedTopics));
             results.add(generatedRecord);
         }
 

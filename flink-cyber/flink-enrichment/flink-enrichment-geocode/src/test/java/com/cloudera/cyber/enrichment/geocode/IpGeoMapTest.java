@@ -13,17 +13,17 @@
 package com.cloudera.cyber.enrichment.geocode;
 
 import com.cloudera.cyber.DataQualityMessage;
-import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import org.apache.flink.configuration.Configuration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class IpGeoMapTest {
 
@@ -74,30 +74,30 @@ public class IpGeoMapTest {
         assertNoErrorsOrInfos(output);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testThrowsCityDatabaseDoesNotExist() {
         String doesntExistPath = "./src/test/resources/geolite/doesntexist";
         File databaseFile = new File(doesntExistPath);
         Assertions.assertFalse(databaseFile.exists());
         IpGeoMap map = new IpGeoMap(doesntExistPath, ENRICH_FIELD_NAMES, null);
-        map.open(new Configuration());
+        assertThrows(IllegalStateException.class, () -> map.open(new Configuration()), "Expected IllegalStateException");
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testThrowsCityDatabaseEmptyFile() {
         String emptyFilePath = "./src/test/resources/geolite/invalid_maxmind_db";
         File databaseFile = new File(emptyFilePath);
         Assertions.assertTrue(databaseFile.exists());
         Assertions.assertTrue(databaseFile.length() > 0);
         IpGeoMap map = new IpGeoMap(emptyFilePath, ENRICH_FIELD_NAMES, null);
-        map.open(new Configuration());
+        assertThrows(IllegalStateException.class, () -> map.open(new Configuration()), "Expected IllegalStateException");
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testThrowsBadFilesystem() {
         String badFilesystemPath = "bad:/src/test/resources/geolite/invalid_maxmind_db";
         IpGeoMap map = new IpGeoMap(badFilesystemPath, ENRICH_FIELD_NAMES, null);
-        map.open(new Configuration());
+        assertThrows(IllegalStateException.class, () -> map.open(new Configuration()), "Expected IllegalStateException");
     }
 
     private Message testGeoMap(Map<String, String> inputFields) {

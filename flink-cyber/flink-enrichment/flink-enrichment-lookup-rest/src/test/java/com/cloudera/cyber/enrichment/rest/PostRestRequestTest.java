@@ -16,7 +16,7 @@ import com.cloudera.cyber.enrichment.rest.impl.MockRestServer;
 import com.google.common.collect.Lists;
 import org.apache.http.client.methods.HttpPost;
 import org.junit.jupiter.api.Assertions;
-import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 // tests will run either with or without tls when junit runs derived classes
-@Ignore
+@Disabled
 public class PostRestRequestTest extends RestRequestTest {
     private static RestEnrichmentConfig modelResultPostRequest;
 

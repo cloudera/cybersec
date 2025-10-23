@@ -137,7 +137,7 @@ public class CsvToEnrichmentCommandDeserializerTest {
             Assertions.assertEquals(expectedPayload.getType(), actualPayload.getType());
             Assertions.assertEquals(expectedPayload.getEntries(), actualPayload.getEntries());
             long timestampDelta = actualPayload.getTs() - expectedPayload.getTs();
-            Assertions.assertTrue( String.format("timestamp delta %d too large", timestampDelta), timestampDelta < 1000L);
+            Assertions.assertTrue(timestampDelta < 1000L, String.format("timestamp delta %d too large", timestampDelta));
         }
     }
 
