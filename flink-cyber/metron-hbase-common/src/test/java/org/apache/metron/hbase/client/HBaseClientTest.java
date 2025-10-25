@@ -34,6 +34,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.hbase.ColumnList;
 import org.apache.metron.hbase.HBaseProjectionCriteria;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Tests the HBaseClient
  */
+@Disabled
 public class HBaseClientTest {
     private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
 

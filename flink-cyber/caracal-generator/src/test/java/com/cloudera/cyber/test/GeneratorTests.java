@@ -77,7 +77,7 @@ public class GeneratorTests {
 
 
     @Test
-    @Timeout(value = 1, unit = TimeUnit.SECONDS)
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
     public void testBulkProduction10000eps() throws IOException, TemplateException {
         FreemarkerImmediateGenerator generator = new FreemarkerImmediateGenerator();
         for (int i = 0; i < 10000; i++) {

@@ -55,11 +55,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-        <csa.version>csa1.14.1.0</csa.version>
-        <flink.version>1.19.2-${csa.version}</flink.version>
+        <csa.version>csa1.15.2.0</csa.version>
+        <flink.version>1.20.1-${csa.version}</flink.version>
         <cloudera.registry>1.0-${csa.version}</cloudera.registry>
         <flink.hbase.version>2.4</flink.hbase.version>
-        <cdh.version>7.3.1.300-81</cdh.version>
+        <cdh.version>7.3.1.400-100</cdh.version>
         <lombok.version>1.18.30</lombok.version>
         <lombok.plugin.version>1.18.20.0</lombok.plugin.version>
         <guava.version>21.0</guava.version>
@@ -71,7 +71,7 @@
         <jackson.version>2.11.2</jackson.version>
         <jackson.datatype.version>2.10.1</jackson.datatype.version>
         <smm.intercepter.version>2.3.0.${cdh.version}</smm.intercepter.version>
-        <flink.format.parquet.version>1.12.2</flink.format.parquet.version>
+        <flink.format.parquet.version>1.15.1</flink.format.parquet.version>
         <slf4j.version>1.7.36</slf4j.version>
         <log4j.version>2.17.2</log4j.version>
         <spring-boot.version>2.7.6</spring-boot.version>
@@ -106,6 +106,8 @@
         <graalvm.version>21.3.10</graalvm.version>
         <junit5.version>5.9.3</junit5.version>
         <hamcrest.version>2.2</hamcrest.version>
+        <curator.version>5.4.0.7.3.1.300-81</curator.version>
+
         <!-- required for tests with hbase-testing-util -->
         <legacy.junit.version>4.13.2</legacy.junit.version>
         <orc.version>1.8.3.${cdh.version}</orc.version>
@@ -184,7 +186,7 @@
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-kafka</artifactId>
-                <version>3.2-${csa.version}</version>
+                <version>3.4.0-${csa.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.kafka</groupId>
@@ -267,7 +269,7 @@
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-hbase-${flink.hbase.version}</artifactId>
-                <version>3.0-${csa.version}</version>
+                <version>4.0-${csa.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.hbase</groupId>
@@ -291,7 +293,7 @@
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-cloudera-registry</artifactId>
-                <version>1.0-${csa.version}</version>
+                <version>1.2.0-${csa.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.everit.json</groupId>
@@ -754,7 +756,7 @@
                 <dependency>
                     <groupId>org.apache.flink</groupId>
                     <artifactId>flink-connector-kafka</artifactId>
-                    <version>3.2-${csa.version}</version>
+                    <version>3.4.0-${csa.version}</version>
                 </dependency>
             </dependencies>
         </profile>
