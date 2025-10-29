@@ -18,7 +18,6 @@
 package org.apache.metron.common.configuration;
 
 import com.google.common.collect.ImmutableList;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.utils.JSONUtils;
 import org.json.simple.JSONObject;
 
@@ -27,197 +26,167 @@ import java.util.List;
 import java.util.Map;
 
 public class StellarEnrichmentTest {
-  /**
-   {
-    "fieldMap": {
-      "stellar" : {
-        "config" : {
-          "stmt1" : "TO_UPPER(source.type)",
-          "stmt2" : "TO_LOWER(stmt1)",
-          "stmt3" : "TO_LOWER(string)"
-        }
-      }
-    }
-  }
-   */
-  @Multiline
-  public static String defaultStellarConfig_map;
+public static String defaultStellarConfig_map = String.join("\n",
+    "{",
+    "  \"fieldMap\": {",
+    "    \"stellar\" : {",
+    "      \"config\" : {",
+    "        \"stmt1\" : \"TO_UPPER(source.type)\",",
+    "        \"stmt2\" : \"TO_LOWER(stmt1)\",",
+    "        \"stmt3\" : \"TO_LOWER(string)\"",
+    "      }",
+    "    }",
+    "  }",
+    "}");
 
-  /**
-   {
-    "fieldMap": {
-      "stellar" : {
-        "config" : [
-          "stmt1 := TO_UPPER(source.type)",
-          "stmt2 := TO_LOWER(stmt1)",
-          "stmt3 := TO_LOWER(string)"
-        ]
-      }
-    }
-  }
-   */
-  @Multiline
-  public static String defaultStellarConfig_list;
+public static String defaultStellarConfig_list = String.join("\n",
+    "{",
+    "  \"fieldMap\": {",
+    "    \"stellar\" : {",
+    "      \"config\" : [",
+    "        \"stmt1 := TO_UPPER(source.type)\",",
+    "        \"stmt2 := TO_LOWER(stmt1)\",",
+    "        \"stmt3 := TO_LOWER(string)\"",
+    "      ]",
+    "    }",
+    "  }",
+    "}");
 
-  /**
-   {
-    "fieldMap": {
-      "stellar" : {
-        "config" : [
-          "stmt1 := TO_UPPER(source.type)",
-          "stmt4 := TO_LOWER(string)",
-          "stmt2 := TO_LOWER(stmt1)",
-          "stmt3 := TO_LOWER(string)",
-          "stmt4 := null"
-        ]
-      }
-    }
-  }
-   */
-  @Multiline
-  public static String defaultStellarConfig_listWithTemp;
+public static String defaultStellarConfig_listWithTemp = String.join("\n",
+    "{",
+    "  \"fieldMap\": {",
+    "    \"stellar\" : {",
+    "      \"config\" : [",
+    "        \"stmt1 := TO_UPPER(source.type)\",",
+    "        \"stmt4 := TO_LOWER(string)\",",
+    "        \"stmt2 := TO_LOWER(stmt1)\",",
+    "        \"stmt3 := TO_LOWER(string)\",",
+    "        \"stmt4 := null\"",
+    "      ]",
+    "    }",
+    "  }",
+    "}");
   public static List<String> DEFAULT_CONFIGS = ImmutableList.of(defaultStellarConfig_list, defaultStellarConfig_map, defaultStellarConfig_listWithTemp);
 
-/**
-   {
-    "fieldMap": {
-      "stellar" : {
-        "config" : {
-          "group1" : {
-            "stmt1" : "TO_UPPER(source.type)",
-            "stmt2" : "TO_LOWER(stmt1)"
-          },
-          "group2" : {
-            "stmt3" : "TO_LOWER(string)"
-          }
-        }
-      }
-    }
-  }
-   */
-  @Multiline
-  public static String groupedStellarConfig_map;
+public static String groupedStellarConfig_map = String.join("\n",
+    "{",
+    "  \"fieldMap\": {",
+    "    \"stellar\" : {",
+    "      \"config\" : {",
+    "        \"group1\" : {",
+    "          \"stmt1\" : \"TO_UPPER(source.type)\",",
+    "          \"stmt2\" : \"TO_LOWER(stmt1)\"",
+    "        },",
+    "        \"group2\" : {",
+    "          \"stmt3\" : \"TO_LOWER(string)\"",
+    "        }",
+    "      }",
+    "    }",
+    "  }",
+    "}");
 
-  /**
-   {
-    "fieldMap": {
-      "stellar" : {
-        "config" : {
-          "group1" : [
-            "stmt1 := TO_UPPER(source.type)",
-            "stmt2 := TO_LOWER(stmt1)"
-          ],
-          "group2" : [
-            "stmt3 := TO_LOWER(string)"
-          ]
-        }
-      }
-    }
-  }
-   */
-  @Multiline
-  public static String groupedStellarConfig_list;
+public static String groupedStellarConfig_list = String.join("\n",
+    "{",
+    "  \"fieldMap\": {",
+    "    \"stellar\" : {",
+    "      \"config\" : {",
+    "        \"group1\" : [",
+    "          \"stmt1 := TO_UPPER(source.type)\",",
+    "          \"stmt2 := TO_LOWER(stmt1)\"",
+    "        ],",
+    "        \"group2\" : [",
+    "          \"stmt3 := TO_LOWER(string)\"",
+    "        ]",
+    "      }",
+    "    }",
+    "  }",
+    "}");
 
-  /**
-   {
-    "fieldMap": {
-      "stellar" : {
-        "config" : {
-          "group1" : [
-            "stmt1 := TO_UPPER(source.type)",
-            "stmt2 := TO_LOWER(stmt1)"
-          ],
-          "group2" : [
-            "stmt3 := TO_LOWER(string)",
-            "stmt4 := TO_LOWER(string)",
-            "stmt4 := null"
-          ]
-        }
-      }
-    }
-  }
-   */
-  @Multiline
-  public static String groupedStellarConfig_listWithTemp;
+public static String groupedStellarConfig_listWithTemp = String.join("\n",
+    "{",
+    "  \"fieldMap\": {",
+    "    \"stellar\" : {",
+    "      \"config\" : {",
+    "        \"group1\" : [",
+    "          \"stmt1 := TO_UPPER(source.type)\",",
+    "          \"stmt2 := TO_LOWER(stmt1)\"",
+    "        ],",
+    "        \"group2\" : [",
+    "          \"stmt3 := TO_LOWER(string)\",",
+    "          \"stmt4 := TO_LOWER(string)\",",
+    "          \"stmt4 := null\"",
+    "        ]",
+    "      }",
+    "    }",
+    "  }",
+    "}");
   public static List<String> GROUPED_CONFIGS = ImmutableList.of(groupedStellarConfig_listWithTemp, groupedStellarConfig_list, groupedStellarConfig_map);
 
-  /**
-   {
-    "fieldMap": {
-      "stellar" : {
-        "config" : {
-          "group1" : {
-            "stmt1" : "TO_UPPER(source.type)",
-            "stmt2" : "TO_LOWER(stmt1)"
-          },
-          "group2" : {
-            "stmt3" : "TO_LOWER(string)"
-          },
-          "stmt4" : "1 + 1",
-          "stmt5" : "FORMAT('%s', source.type)"
-        }
-      }
-    }
-  }
-   */
-  @Multiline
-  public static String mixedStellarConfig_map;
+public static String mixedStellarConfig_map = String.join("\n",
+    "{",
+    "  \"fieldMap\": {",
+    "    \"stellar\" : {",
+    "      \"config\" : {",
+    "        \"group1\" : {",
+    "          \"stmt1\" : \"TO_UPPER(source.type)\",",
+    "          \"stmt2\" : \"TO_LOWER(stmt1)\"",
+    "        },",
+    "        \"group2\" : {",
+    "          \"stmt3\" : \"TO_LOWER(string)\"",
+    "        },",
+    "        \"stmt4\" : \"1 + 1\",",
+    "        \"stmt5\" : \"FORMAT('%s', source.type)\"",
+    "      }",
+    "    }",
+    "  }",
+    "}");
 
-  /**
-   {
-    "fieldMap": {
-      "stellar" : {
-        "config" : {
-          "group1" : [
-            "stmt1 := TO_UPPER(source.type)",
-            "stmt2 := TO_LOWER(stmt1)"
-          ],
-          "group2" : [
-            "stmt3 := TO_LOWER(string)"
-          ],
-          "stmt4" : "1 + 1",
-          "stmt5" : "FORMAT('%s', source.type)"
-        }
-      }
-    }
-  }
-   */
-  @Multiline
-  public static String mixedStellarConfig_list;
+public static String mixedStellarConfig_list = String.join("\n",
+    "{",
+    "  \"fieldMap\": {",
+    "    \"stellar\" : {",
+    "      \"config\" : {",
+    "        \"group1\" : [",
+    "          \"stmt1 := TO_UPPER(source.type)\",",
+    "          \"stmt2 := TO_LOWER(stmt1)\"",
+    "        ],",
+    "        \"group2\" : [",
+    "          \"stmt3 := TO_LOWER(string)\"",
+    "        ],",
+    "        \"stmt4\" : \"1 + 1\",",
+    "        \"stmt5\" : \"FORMAT('%s', source.type)\"",
+    "      }",
+    "    }",
+    "  }",
+    "}");
   public static List<String> MIXED_CONFIGS = ImmutableList.of(mixedStellarConfig_list, mixedStellarConfig_map);
 
-  /**
-   {
-    "fieldMap": {
-      "stellar" : {
-        "config" : {
-          "group1" : [
-            "stmt1 := TO_UPPER(source.type)",
-            "stmt2 := TO_LOWER(stmt1)",
-            "stmt1 := null"
-          ],
-          "group2" : [
-            "stmt3 := TO_LOWER(string)"
-          ],
-          "stmt4" : "1 + 1",
-          "stmt5" : "FORMAT('%s', source.type)"
-        }
-      }
-    }
-  }
-   */
-  @Multiline
-  public static String tempVarStellarConfig_list;
+public static String tempVarStellarConfig_list = String.join("\n",
+    "{",
+    "  \"fieldMap\": {",
+    "    \"stellar\" : {",
+    "      \"config\" : {",
+    "        \"group1\" : [",
+    "          \"stmt1 := TO_UPPER(source.type)\",",
+    "          \"stmt2 := TO_LOWER(stmt1)\",",
+    "          \"stmt1 := null\"",
+    "        ],",
+    "        \"group2\" : [",
+    "          \"stmt3 := TO_LOWER(string)\"",
+    "        ],",
+    "        \"stmt4\" : \"1 + 1\",",
+    "        \"stmt5\" : \"FORMAT('%s', source.type)\"",
+    "      }",
+    "    }",
+    "  }",
+    "}");
 
-  /**
-   {
-    "string" : "foo"
-   ,"number" : 2
-   ,"source.type" : "stellar_test"
-   }
-   */
-  @Multiline
-  public static String message;
+public static String message = String.join("\n",
+    "{",
+    "  \"string\" : \"foo\",",
+    "  \"number\" : 2,",
+    "  \"source.type\" : \"stellar_test\"",
+    "}");
 
   public static JSONObject getMessage() throws IOException {
     Map<String, Object> ret = JSONUtils.INSTANCE.load(message, JSONUtils.MAP_SUPPLIER);

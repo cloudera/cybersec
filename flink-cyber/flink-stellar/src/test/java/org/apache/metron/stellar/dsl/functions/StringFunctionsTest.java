@@ -20,7 +20,6 @@ package org.apache.metron.stellar.dsl.functions;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.metron.stellar.dsl.DefaultVariableResolver;
 import org.apache.metron.stellar.dsl.ParseException;
@@ -493,47 +492,32 @@ public class StringFunctionsTest {
    */
 
   // Input strings to be used
-  /**
-   { "foo" : 2 }
-   */
-  @Multiline
-  private String string1;
+private String string1 = String.join("\n",
+    "{ \"foo\" : 2 }");
 
-  /**
-   {
-     "foo" : "abc",
-     "bar" : "def"
-   }
-   */
-  @Multiline
-  private String string2;
+private String string2 = String.join("\n",
+    "{",
+    "  \"foo\" : \"abc\",",
+    "  \"bar\" : \"def\"",
+    "}");
 
-  /**
-   [ "foo", 2 ]
-   */
-  @Multiline
-  private String string3;
+private String string3 = String.join("\n",
+    "[ \"foo\", 2 ]");
 
-  /**
-   [ "foo", "bar", "car" ]
-   */
-  @Multiline
-  private String string4;
+private String string4 = String.join("\n",
+    "[ \"foo\", \"bar\", \"car\" ]");
 
-  /**
-   [
-     {
-       "foo1":"abc",
-       "bar1":"def"
-     },
-     {
-       "foo2":"ghi",
-       "bar2":"jkl"
-     }
-   ]
-   */
-  @Multiline
-  private String string5;
+private String string5 = String.join("\n",
+    "[",
+    "  {",
+    "    \"foo1\":\"abc\",",
+    "    \"bar1\":\"def\"",
+    "  },",
+    "  {",
+    "    \"foo2\":\"ghi\",",
+    "    \"bar2\":\"jkl\"",
+    "  }",
+    "]");
 
   @Test
   @SuppressWarnings("unchecked")

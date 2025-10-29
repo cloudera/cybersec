@@ -13,7 +13,6 @@
 package com.cloudera.parserchains.parsers;
 
 import com.cloudera.parserchains.core.Message;
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,37 +30,35 @@ public class JSONParserTest {
         jsonParser = new JSONParser();
     }
 
-    /**
-     * {
-     *    "name":"Cake",
-     *    "type":"Donut",
-     *    "ppu":0.55,
-     *    "batters":{
-     *       "batter":[
-     *          {
-     *             "id":"1001",
-     *             "type":"Regular"
-     *          },
-     *          {
-     *             "id":"1002",
-     *             "type":"Chocolate"
-     *          }
-     *       ]
-     *    },
-     *    "topping":[
-     *       {
-     *          "id":"5001",
-     *          "type":"None"
-     *       },
-     *       {
-     *          "id":"5002",
-     *          "type":"Glazed"
-     *       }
-     *    ]
-     * }
-     */
-    @Multiline
-    static String jsonToParse;
+    static String jsonToParse = String.join("\n",
+        "{",
+        "\"name\":\"Cake\",",
+        "\"type\":\"Donut\",",
+        "\"ppu\":0.55,",
+        "\"batters\":{",
+        "\"batter\":[",
+        "{",
+        "\"id\":\"1001\",",
+        "\"type\":\"Regular\"",
+        "},",
+        "{",
+        "\"id\":\"1002\",",
+        "\"type\":\"Chocolate\"",
+        "}",
+        "]",
+        "},",
+        "\"topping\":[",
+        "{",
+        "\"id\":\"5001\",",
+        "\"type\":\"None\"",
+        "},",
+        "{",
+        "\"id\":\"5002\",",
+        "\"type\":\"Glazed\"",
+        "}",
+        "]",
+        "}"
+        );
 
     @Test
     void byDefault() {
@@ -87,14 +84,12 @@ public class JSONParserTest {
         assertThat(output, is(expected));
     }
 
-    /**
-     * {
-     *      "invalid",
-     *      "json"
-     * }
-     */
-    @Multiline
-    static String invalidJSON;
+    static String invalidJSON = String.join("\n",
+        "{",
+        "\"invalid\",",
+        "\"json\"",
+        "}"
+        );
 
     @Test
     void invalidJSON() {

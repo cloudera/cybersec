@@ -16,7 +16,6 @@ import com.cloudera.parserchains.core.model.define.ParserID;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.cloudera.parserchains.parsers.SyslogParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -37,11 +36,9 @@ public class ParserIDTest {
         assertEquals("com.cloudera.parserchains.parsers.SyslogParser", id.getId());
     }
 
-    /**
-     * "com.cloudera.parserchains.parsers.SyslogParser"
-     */
-    @Multiline
-    private String expectedJSON;
+    private String expectedJSON = String.join("\n",
+        "\"com.cloudera.parserchains.parsers.SyslogParser\""
+        );
 
     @Test
     void toJSON() throws JsonProcessingException {

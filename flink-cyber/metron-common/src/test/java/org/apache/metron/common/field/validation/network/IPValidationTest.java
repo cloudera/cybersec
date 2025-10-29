@@ -19,7 +19,6 @@
 package org.apache.metron.common.field.validation.network;
 
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.field.validation.BaseValidationTest;
 import org.junit.jupiter.api.Test;
 
@@ -30,51 +29,42 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IPValidationTest extends BaseValidationTest {
-  /**
-   {
-    "fieldValidations" : [
-            {
-              "input" : "field1"
-             ,"validation" : "IP"
-            }
-                         ]
-   }
-   */
-  @Multiline
-  public static String validWithSingleField;
+public static String validWithSingleField = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : \"field1\"",
+    "          ,\"validation\" : \"IP\"",
+    "         }",
+    "                      ]",
+    "}");
   public static String validWithSingleField_MQL = "IS_IP(field1)";
-  /**
-   {
-    "fieldValidations" : [
-            {
-              "input" : [ "field1", "field2" ]
-             ,"validation" : "IP"
-             ,"config" : {
-                  "type" : "IPV4"
-                         }
-            }
-                         ]
-   }
-   */
-  @Multiline
-  public static String validWithMultipleFields;
+public static String validWithMultipleFields = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : [ \"field1\", \"field2\" ]",
+    "          ,\"validation\" : \"IP\"",
+    "          ,\"config\" : {",
+    "               \"type\" : \"IPV4\"",
+    "                      }",
+    "         }",
+    "                      ]",
+    "}");
   public static String validWithMultipleFields_MQL = "IS_IP(field1, 'IPV4') && IS_IP(field2, 'IPV4')";
 
-  /**
-   {
-   "fieldValidations" : [
-   {
-   "input" : [ "field1", "field2" ]
-   ,"validation" : "IP"
-   ,"config" : {
-   "type" : ["IPV4","IPV6"]
-   }
-   }
-   ]
-   }
-   */
-  @Multiline
-  public static String validWithMultipleFieldsMultipleTypes;
+public static String validWithMultipleFieldsMultipleTypes = String.join("\n",
+    "{",
+    "\"fieldValidations\" : [",
+    "{",
+    "\"input\" : [ \"field1\", \"field2\" ]",
+    ",\"validation\" : \"IP\"",
+    ",\"config\" : {",
+    "\"type\" : [\"IPV4\",\"IPV6\"]",
+    "}",
+    "}",
+    "]",
+    "}");
   public static String validWithMultipleFieldsMultipleTypes_MQL = "IS_IP(field1, '[IPV4,IPV6]') && IS_IP(field2, '[IPV4,IPV6]')";
 
 

@@ -21,7 +21,6 @@ package com.cloudera.cyber.enrichemnt.stellar;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.enrichment.geocode.IpGeoJob;
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.enrichment.adapters.maxmind.geo.GeoLiteCityDatabase;
 import org.apache.metron.stellar.common.StellarProcessor;
 import org.apache.metron.stellar.dsl.Context;
@@ -45,33 +44,29 @@ public class GeoEnrichmentFunctionsTest {
   private static Context context;
   private static File geoHdfsFile;
 
-  /**
-   * {
-   * "locID":"5803556",
-   * "country":"US",
-   * "city":"Milton",
-   * "postalCode":"98354",
-   * "latitude":"47.2513",
-   * "longitude":"-122.3149",
-   * "dmaCode":"819",
-   * "location_point":"47.2513,-122.3149"
-   * }
-   */
-  @Multiline
-  private static String expectedMessageString;
+  private static String expectedMessageString = String.join("\n",
+        "{",
+        "\"locID\":\"5803556\",",
+        "\"country\":\"US\",",
+        "\"city\":\"Milton\",",
+        "\"postalCode\":\"98354\",",
+        "\"latitude\":\"47.2513\",",
+        "\"longitude\":\"-122.3149\",",
+        "\"dmaCode\":\"819\",",
+        "\"location_point\":\"47.2513,-122.3149\"",
+        "}"
+      );
 
   private static JSONObject expectedMessage;
 
-  /**
-   * {
-   * "country":"US",
-   * "city":"Milton",
-   * "dmaCode":"819",
-   * "location_point":"47.2513,-122.3149"
-   * }
-   */
-  @Multiline
-  private static String expectedSubsetString;
+  private static String expectedSubsetString = String.join("\n",
+        "{",
+        "\"country\":\"US\",",
+        "\"city\":\"Milton\",",
+        "\"dmaCode\":\"819\",",
+        "\"location_point\":\"47.2513,-122.3149\"",
+        "}"
+      );
 
   private static JSONObject expectedSubsetMessage;
 

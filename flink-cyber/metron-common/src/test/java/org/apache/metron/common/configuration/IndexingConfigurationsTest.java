@@ -18,7 +18,6 @@
 
 package org.apache.metron.common.configuration;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,23 +29,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IndexingConfigurationsTest {
 
-  /**
-   * {
-   *  "indexing.writer.elasticsearch.setDocumentId" : "true"
-   * }
-   */
-  @Multiline
-  private static String globalConfig;
+  private static String globalConfig = String.join("\n",
+        "{",
+        "\"indexing.writer.elasticsearch.setDocumentId\" : \"true\"",
+        "}"
+      );
 
-  /**
-   * {
-   *  "writer" : {
-   *    "setDocumentId": true
-   *  }
-   * }
-   */
-  @Multiline
-  private static String sensorConfig;
+  private static String sensorConfig = String.join("\n",
+        "{",
+        "\"writer\" : {",
+        "\"setDocumentId\": true",
+        "}",
+        "}"
+      );
 
   private IndexingConfigurations configurations;
 

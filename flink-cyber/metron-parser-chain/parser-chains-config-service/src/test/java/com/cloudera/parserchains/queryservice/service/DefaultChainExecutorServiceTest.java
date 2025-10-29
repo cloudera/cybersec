@@ -19,7 +19,6 @@ import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.cloudera.parserchains.queryservice.model.exec.ParserResult;
 import com.cloudera.parserchains.queryservice.service.impl.DefaultChainBuilderService;
 import com.cloudera.parserchains.queryservice.service.impl.DefaultChainExecutorService;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,112 +49,106 @@ public class DefaultChainExecutorServiceTest {
         return chainBuilderService.build(chainSchema);
     }
 
-    /**
-     * {
-     *     "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *     "name" : "My Parser Chain",
-     *     "parsers" : [ {
-     *       "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *       "name" : "Delimited Text",
-     *       "type" : "com.cloudera.parserchains.parsers.DelimitedTextParser",
-     *       "config" : {
-     *         "inputField" : [ {
-     *           "inputField": "original_string"
-     *         }],
-     *         "outputField" : [ {
-     *           "fieldIndex" : "0",
-     *           "fieldName" : "name"
-     *         }, {
-     *           "fieldIndex" : "1",
-     *           "fieldName" : "address"
-     *         }, {
-     *           "fieldIndex" : "2",
-     *           "fieldName" : "phone"
-     *         }  ]
-     *       }
-     *     }]
-     * }
-     */
-    @Multiline
-    private String parserChain;
+    private String parserChain = String.join("\n",
+        "{",
+        "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\" : \"My Parser Chain\",",
+        "\"parsers\" : [ {",
+        "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\" : \"Delimited Text\",",
+        "\"type\" : \"com.cloudera.parserchains.parsers.DelimitedTextParser\",",
+        "\"config\" : {",
+        "\"inputField\" : [ {",
+        "\"inputField\": \"original_string\"",
+        "}],",
+        "\"outputField\" : [ {",
+        "\"fieldIndex\" : \"0\",",
+        "\"fieldName\" : \"name\"",
+        "}, {",
+        "\"fieldIndex\" : \"1\",",
+        "\"fieldName\" : \"address\"",
+        "}, {",
+        "\"fieldIndex\" : \"2\",",
+        "\"fieldName\" : \"phone\"",
+        "}  ]",
+        "}",
+        "}]",
+        "}"
+        );
 
-    /**
-     * {
-     *   "input" : {
-     *     "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309"
-     *   },
-     *   "output" : {
-     *     "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309",
-     *     "address" : "1600 Pennsylvania Ave",
-     *     "phone" : "614-867-5309",
-     *     "name" : "Jane Doe"
-     *   },
-     *   "log" : {
-     *     "type" : "info",
-     *     "message" : "success",
-     *     "parserId" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *     "parserName" : "Delimited Text"
-     *   },
-     *   "parserResults" : [ {
-     *     "input" : {
-     *       "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309"
-     *     },
-     *     "output" : {
-     *       "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309",
-     *       "address" : "1600 Pennsylvania Ave",
-     *       "phone" : "614-867-5309",
-     *       "name" : "Jane Doe"
-     *     },
-     *     "log" : {
-     *       "type" : "info",
-     *       "message" : "success",
-     *       "parserId" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *       "parserName" : "Delimited Text"
-     *     }
-     *   } ]
-     * }
-     */
-    @Multiline
-    private String successExpectedJava11;
+    private String successExpectedJava11 = String.join("\n",
+        "{",
+        "\"input\" : {",
+        "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\"",
+        "},",
+        "\"output\" : {",
+        "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\",",
+        "\"address\" : \"1600 Pennsylvania Ave\",",
+        "\"phone\" : \"614-867-5309\",",
+        "\"name\" : \"Jane Doe\"",
+        "},",
+        "\"log\" : {",
+        "\"type\" : \"info\",",
+        "\"message\" : \"success\",",
+        "\"parserId\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"parserName\" : \"Delimited Text\"",
+        "},",
+        "\"parserResults\" : [ {",
+        "\"input\" : {",
+        "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\"",
+        "},",
+        "\"output\" : {",
+        "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\",",
+        "\"address\" : \"1600 Pennsylvania Ave\",",
+        "\"phone\" : \"614-867-5309\",",
+        "\"name\" : \"Jane Doe\"",
+        "},",
+        "\"log\" : {",
+        "\"type\" : \"info\",",
+        "\"message\" : \"success\",",
+        "\"parserId\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"parserName\" : \"Delimited Text\"",
+        "}",
+        "} ]",
+        "}"
+        );
 
-    /**
-     * {
-     *   "input" : {
-     *     "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309"
-     *   },
-     *   "output" : {
-     *     "address" : "1600 Pennsylvania Ave",
-     *     "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309",
-     *     "phone" : "614-867-5309",
-     *     "name" : "Jane Doe"
-     *   },
-     *   "log" : {
-     *     "type" : "info",
-     *     "message" : "success",
-     *     "parserId" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *     "parserName" : "Delimited Text"
-     *   },
-     *   "parserResults" : [ {
-     *     "input" : {
-     *       "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309"
-     *     },
-     *     "output" : {
-     *       "address" : "1600 Pennsylvania Ave",
-     *       "original_string" : "Jane Doe,1600 Pennsylvania Ave,614-867-5309",
-     *       "phone" : "614-867-5309",
-     *       "name" : "Jane Doe"
-     *     },
-     *     "log" : {
-     *       "type" : "info",
-     *       "message" : "success",
-     *       "parserId" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *       "parserName" : "Delimited Text"
-     *     }
-     *   } ]
-     * }
-     */
-    @Multiline
-    private String successExpectedJava8;
+    private String successExpectedJava8 = String.join("\n",
+        "{",
+        "\"input\" : {",
+        "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\"",
+        "},",
+        "\"output\" : {",
+        "\"address\" : \"1600 Pennsylvania Ave\",",
+        "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\",",
+        "\"phone\" : \"614-867-5309\",",
+        "\"name\" : \"Jane Doe\"",
+        "},",
+        "\"log\" : {",
+        "\"type\" : \"info\",",
+        "\"message\" : \"success\",",
+        "\"parserId\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"parserName\" : \"Delimited Text\"",
+        "},",
+        "\"parserResults\" : [ {",
+        "\"input\" : {",
+        "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\"",
+        "},",
+        "\"output\" : {",
+        "\"address\" : \"1600 Pennsylvania Ave\",",
+        "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\",",
+        "\"phone\" : \"614-867-5309\",",
+        "\"name\" : \"Jane Doe\"",
+        "},",
+        "\"log\" : {",
+        "\"type\" : \"info\",",
+        "\"message\" : \"success\",",
+        "\"parserId\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"parserName\" : \"Delimited Text\"",
+        "}",
+        "} ]",
+        "}"
+        );
 
     @Test
     void success() throws Exception {
@@ -215,20 +208,18 @@ public class DefaultChainExecutorServiceTest {
         assertThat(actual, hasJsonPath("$.parserResults[0].log.stackTrace", startsWith("java.lang.IllegalStateException")));
     }
 
-    /**
-     * {
-     *     "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *     "name" : "My Parser Chain",
-     *     "parsers" : [ {
-     *       "id" : "8673f8f4-a308-4689-822c-0b01477ef378",
-     *       "name" : "Bad Parser",
-     *       "type" : "com.cloudera.parserchains.queryservice.service.MisbehavingParser",
-     *       "config" : { }
-     *     } ]
-     * }
-     */
-    @Multiline
-    private String exceptionalChainJSON;
+    private String exceptionalChainJSON = String.join("\n",
+        "{",
+        "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\" : \"My Parser Chain\",",
+        "\"parsers\" : [ {",
+        "\"id\" : \"8673f8f4-a308-4689-822c-0b01477ef378\",",
+        "\"name\" : \"Bad Parser\",",
+        "\"type\" : \"com.cloudera.parserchains.queryservice.service.MisbehavingParser\",",
+        "\"config\" : { }",
+        "} ]",
+        "}"
+        );
 
     @Test
     void handleException() throws Exception {
@@ -259,73 +250,71 @@ public class DefaultChainExecutorServiceTest {
                 result.getLog().getMessage(), is("No parser chain defined."));
     }
 
-    /**
-     * {
-     *   "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *   "name" : "My Parser Chain",
-     *   "parsers" : [ {
-     *     "id" : "26bf648f-930e-44bf-a4de-bfd34ac16165",
-     *     "name" : "Delimited Text",
-     *     "type" : "com.cloudera.parserchains.parsers.DelimitedTextParser",
-     *     "config" : {
-     *       "inputField" : [ {
-     *         "inputField": "original_string"
-     *       }],
-     *       "outputField" : [ {
-     *         "fieldIndex" : "0",
-     *         "fieldName" : "name"
-     *       }, {
-     *         "fieldIndex" : "1",
-     *         "fieldName" : "address"
-     *       }, {
-     *         "fieldIndex" : "2",
-     *         "fieldName" : "phone"
-     *       }  ]
-     *     }
-     *   }, {
-     *     "id" : "123e4567-e89b-12d3-a456-556642440000",
-     *     "name" : "Router",
-     *     "type" : "Router",
-     *     "config" : { },
-     *     "routing" : {
-     *       "matchingField" : "name",
-     *       "routes" : [ {
-     *         "matchingValue" : "Ada Lovelace",
-     *         "default" : false,
-     *         "subchain" : {
-     *           "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *           "name" : "Success Chain",
-     *           "parsers" : [ {
-     *             "id" : "123e4567-e89b-12d3-a456-556642440000",
-     *             "name" : "Timestamp",
-     *             "type" : "com.cloudera.parserchains.parsers.TimestampParser",
-     *             "config" : {
-     *               "outputField" : [ {
-     *                 "outputField" : "processing_time"
-     *               } ]
-     *             }
-     *           } ]
-     *         }
-     *       }, {
-     *         "matchingValue" : "",
-     *         "default" : true,
-     *         "subchain" : {
-     *           "id" : "cdb0729f-a929-4f3c-9cb7-675b57d10a73",
-     *           "name" : "Default Chain",
-     *           "parsers" : [ {
-     *             "id" : "ceb95dd5-1e3f-41f2-bf60-ee2fe2c962c6",
-     *             "name" : "Error",
-     *             "type" : "com.cloudera.parserchains.parsers.AlwaysFailParser",
-     *             "config" : { }
-     *           } ]
-     *         }
-     *       } ]
-     *     }
-     *   } ]
-     * }
-     */
-    @Multiline
-    private String chainWithRouting;
+    private String chainWithRouting = String.join("\n",
+        "{",
+        "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\" : \"My Parser Chain\",",
+        "\"parsers\" : [ {",
+        "\"id\" : \"26bf648f-930e-44bf-a4de-bfd34ac16165\",",
+        "\"name\" : \"Delimited Text\",",
+        "\"type\" : \"com.cloudera.parserchains.parsers.DelimitedTextParser\",",
+        "\"config\" : {",
+        "\"inputField\" : [ {",
+        "\"inputField\": \"original_string\"",
+        "}],",
+        "\"outputField\" : [ {",
+        "\"fieldIndex\" : \"0\",",
+        "\"fieldName\" : \"name\"",
+        "}, {",
+        "\"fieldIndex\" : \"1\",",
+        "\"fieldName\" : \"address\"",
+        "}, {",
+        "\"fieldIndex\" : \"2\",",
+        "\"fieldName\" : \"phone\"",
+        "}  ]",
+        "}",
+        "}, {",
+        "\"id\" : \"123e4567-e89b-12d3-a456-556642440000\",",
+        "\"name\" : \"Router\",",
+        "\"type\" : \"Router\",",
+        "\"config\" : { },",
+        "\"routing\" : {",
+        "\"matchingField\" : \"name\",",
+        "\"routes\" : [ {",
+        "\"matchingValue\" : \"Ada Lovelace\",",
+        "\"default\" : false,",
+        "\"subchain\" : {",
+        "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\" : \"Success Chain\",",
+        "\"parsers\" : [ {",
+        "\"id\" : \"123e4567-e89b-12d3-a456-556642440000\",",
+        "\"name\" : \"Timestamp\",",
+        "\"type\" : \"com.cloudera.parserchains.parsers.TimestampParser\",",
+        "\"config\" : {",
+        "\"outputField\" : [ {",
+        "\"outputField\" : \"processing_time\"",
+        "} ]",
+        "}",
+        "} ]",
+        "}",
+        "}, {",
+        "\"matchingValue\" : \"\",",
+        "\"default\" : true,",
+        "\"subchain\" : {",
+        "\"id\" : \"cdb0729f-a929-4f3c-9cb7-675b57d10a73\",",
+        "\"name\" : \"Default Chain\",",
+        "\"parsers\" : [ {",
+        "\"id\" : \"ceb95dd5-1e3f-41f2-bf60-ee2fe2c962c6\",",
+        "\"name\" : \"Error\",",
+        "\"type\" : \"com.cloudera.parserchains.parsers.AlwaysFailParser\",",
+        "\"config\" : { }",
+        "} ]",
+        "}",
+        "} ]",
+        "}",
+        "} ]",
+        "}"
+        );
 
     @Test
     void chainWithRouting() throws Exception {
