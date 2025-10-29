@@ -134,10 +134,6 @@
             <id>cloudera</id>
             <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
         </repository>
-        <repository>
-            <id>multiline-release-repo</id>
-            <url>https://raw.github.com/benelog/multiline/master/maven-repository</url>
-        </repository>
     </repositories>
 
     <dependencyManagement>
