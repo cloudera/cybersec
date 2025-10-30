@@ -115,7 +115,6 @@
             <artifactId>flink-connector-kafka</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>com.hortonworks.smm</groupId>
             <artifactId>monitoring-interceptors</artifactId>
@@ -166,8 +165,8 @@
 
         <!-- Unit tests dependency -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -189,6 +188,13 @@
         </dependency>
 
         <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <scope>test</scope>
@@ -198,6 +204,7 @@
             <artifactId>classindex-transformer</artifactId>
             <version>3.4</version>
         </dependency>
+
     </dependencies>
 
     <build>
@@ -281,7 +288,8 @@
                         <artifactId>classindex-transformer</artifactId>
                         <version>3.4</version>
                     </dependency>
-                </dependencies>
+
+    </dependencies>
             </plugin>
         </plugins>
     </build>

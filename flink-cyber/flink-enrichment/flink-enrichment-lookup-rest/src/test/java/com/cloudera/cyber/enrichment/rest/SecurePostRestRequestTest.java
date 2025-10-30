@@ -14,25 +14,28 @@ package com.cloudera.cyber.enrichment.rest;
 
 import com.cloudera.cyber.enrichment.rest.impl.MockRestServer;
 import org.hamcrest.Matcher;
-import org.junit.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
+import org.junit.jupiter.api.Test;
 import static org.junit.Assert.assertThat;
 
 public class SecurePostRestRequestTest extends PostRestRequestTest {
 
     private static final String KEY_ALIAS = "client";
 
-    @BeforeClass
+    @BeforeAll
     public static void createMockService() {
         createMockService(true);
     }
 
-    @AfterClass
+    @AfterAll
     public static void stopMockServer() {
         mockRestServer.close();
     }
@@ -53,9 +56,9 @@ public class SecurePostRestRequestTest extends PostRestRequestTest {
         }};
         RestRequestResult result = badHandshakePost.getResult(true, extensions).get();
 
-        Assert.assertTrue(result.getExtensions().isEmpty());
+        Assertions.assertTrue(result.getExtensions().isEmpty());
         List<String> errors = result.getErrors();
-        Assert.assertEquals(1, errors.size());
+        Assertions.assertEquals(1, errors.size());
         Matcher<String> expectedString = containsString(String.format("Rest request url='%s://%s/model' entity='{\"accessKey\":\"mup8kz1hsl3erczwepbt8jupamita6y6\",\"request\":{\"domain\":\"google\"}}'", mockRestServer.getMockProtocol(), mockRestServer.getMockHostAndPort()));
         assertThat(errors.get(0), expectedString);
     }

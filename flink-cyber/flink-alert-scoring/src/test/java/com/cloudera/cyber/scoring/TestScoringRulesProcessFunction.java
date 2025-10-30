@@ -21,8 +21,8 @@ import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.streaming.util.BroadcastOperatorTestHarness;
 import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.cloudera.cyber.flink.FlinkUtils.PARAMS_PARALLELISM;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TestScoringRulesProcessFunction {
@@ -158,9 +158,9 @@ public class TestScoringRulesProcessFunction {
 
     private void testScoreMessage(Message baseMessage, List<Scores> scoreDetails, double expectedScore, ScoringSummarizationMode mode) {
         ScoredMessage scoredMessage =  ScoringProcessFunction.scoreMessage(baseMessage, scoreDetails, mode);
-        Assert.assertEquals(baseMessage, scoredMessage.getMessage());
-        Assert.assertEquals(scoreDetails, scoredMessage.getCyberScoresDetails());
-        Assert.assertEquals(expectedScore, scoredMessage.getCyberScore(), 0.01);
+        Assertions.assertEquals(baseMessage, scoredMessage.getMessage());
+        Assertions.assertEquals(scoreDetails, scoredMessage.getCyberScoresDetails());
+        Assertions.assertEquals(expectedScore, scoredMessage.getCyberScore(), 0.01);
     }
 
     @Test

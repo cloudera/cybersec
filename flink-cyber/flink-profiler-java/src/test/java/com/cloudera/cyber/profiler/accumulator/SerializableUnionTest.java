@@ -14,8 +14,8 @@ package com.cloudera.cyber.profiler.accumulator;
 
 import com.google.common.collect.Lists;
 import org.apache.datasketches.theta.Union;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.*;
 import java.util.List;
@@ -30,11 +30,11 @@ public class SerializableUnionTest {
         Union union = unionWrapper.getUnion();
         // add strings and verify the distinct count
         distinctStrings.forEach(union::update);
-        Assert.assertEquals(distinctStrings.size(), union.getResult().getEstimate(), 0.1);
+        Assertions.assertEquals(distinctStrings.size(), union.getResult().getEstimate(), 0.1);
 
         // add same strings again - distinct count should remain the same
         distinctStrings.forEach(union::update);
-        Assert.assertEquals(3.0, union.getResult().getEstimate(), 0.1);
+        Assertions.assertEquals(3.0, union.getResult().getEstimate(), 0.1);
 
         // test serialization and deserialization
         testSerDe(unionWrapper);
@@ -52,6 +52,6 @@ public class SerializableUnionTest {
         ByteArrayInputStream byteInputStream = new ByteArrayInputStream(byteOutputStream.toByteArray());
         ObjectInputStream objectInputStream = new ObjectInputStream(byteInputStream);
         SerializableUnion deserUnionWrapper = (SerializableUnion) objectInputStream.readObject();
-        Assert.assertEquals(unionWrapper.getUnion().getResult().getEstimate(), deserUnionWrapper.getUnion().getResult().getEstimate(), 0.1);
+        Assertions.assertEquals(unionWrapper.getUnion().getResult().getEstimate(), deserUnionWrapper.getUnion().getResult().getEstimate(), 0.1);
     }
 }

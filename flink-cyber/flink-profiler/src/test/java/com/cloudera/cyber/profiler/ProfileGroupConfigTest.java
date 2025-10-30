@@ -13,8 +13,8 @@
 package com.cloudera.cyber.profiler;
 
 import org.apache.commons.compress.utils.Lists;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -48,9 +48,9 @@ public class ProfileGroupConfigTest {
                 periodDuration(20L).periodDurationUnit(TimeUnit.HOURS.name()).
                 build();
         goodNoStatsProfile.verify();
-        Assert.assertFalse(goodNoStatsProfile.hasStats());
-        Assert.assertFalse(goodNoStatsProfile.hasFirstSeen());
-        Assert.assertEquals(Collections.singletonList("field"), goodNoStatsProfile.getMeasurementFieldNames());
+        Assertions.assertFalse(goodNoStatsProfile.hasStats());
+        Assertions.assertFalse(goodNoStatsProfile.hasFirstSeen());
+        Assertions.assertEquals(Collections.singletonList("field"), goodNoStatsProfile.getMeasurementFieldNames());
 
         ProfileGroupConfig goodStatsProfile = ProfileGroupConfig.builder().
                 profileGroupName("good_name").sources(TEST_SOURCES).
@@ -59,8 +59,8 @@ public class ProfileGroupConfigTest {
                 statsSlide(10L).statsSlideUnit(TimeUnit.HOURS.name()).
                 build();
         goodStatsProfile.verify();
-        Assert.assertTrue(goodStatsProfile.hasStats());
-        Assert.assertFalse(goodStatsProfile.hasFirstSeen());
+        Assertions.assertTrue(goodStatsProfile.hasStats());
+        Assertions.assertFalse(goodStatsProfile.hasFirstSeen());
 
         ProfileGroupConfig goodFirstSeen = ProfileGroupConfig.builder().
                 profileGroupName("good_name").sources(TEST_SOURCES).
@@ -68,8 +68,8 @@ public class ProfileGroupConfigTest {
                 periodDuration(20L).periodDurationUnit(TimeUnit.HOURS.name()).
                 build();
         goodFirstSeen.verify();
-        Assert.assertFalse(goodFirstSeen.hasStats());
-        Assert.assertTrue(goodFirstSeen.hasFirstSeen());
+        Assertions.assertFalse(goodFirstSeen.hasStats());
+        Assertions.assertTrue(goodFirstSeen.hasFirstSeen());
     }
 
     @Test
@@ -144,14 +144,14 @@ public class ProfileGroupConfigTest {
                 periodDuration(20L).periodDurationUnit(TimeUnit.HOURS.name()).
                 build();
         profileWithoutANYSource.verify();
-        Assert.assertTrue(profileWithoutANYSource.needsSourceFilter());
+        Assertions.assertTrue(profileWithoutANYSource.needsSourceFilter());
 
         ProfileGroupConfig profileWithANYSource = ProfileGroupConfig.builder().
                 profileGroupName("good_name").sources(ANY_SOURCES).
                 keyFieldNames(TEST_KEY_FIELDS).measurements(MEASUREMENTS).
                 periodDuration(20L).periodDurationUnit(TimeUnit.HOURS.name()).
                 build();
-        Assert.assertFalse(profileWithANYSource.needsSourceFilter());
+        Assertions.assertFalse(profileWithANYSource.needsSourceFilter());
     }
 
     @Test

@@ -19,8 +19,8 @@ import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.streaming.util.KeyedBroadcastOperatorTestHarness;
 import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
 import org.hamcrest.collection.IsCollectionWithSize;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,14 +28,14 @@ import java.util.List;
 import static com.cloudera.cyber.indexing.SearchIndexJob.Descriptors.broadcastState;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TestFilterStreamFieldsByConfig {
 
     private FilterStreamFieldsByConfig f;
     private KeyedBroadcastOperatorTestHarness<String, Message, CollectionField, IndexEntry> testHarness;
 
-    @Before
+    @BeforeEach
     public void setupTestHarness() throws Exception {
 
         //instantiate user-defined function

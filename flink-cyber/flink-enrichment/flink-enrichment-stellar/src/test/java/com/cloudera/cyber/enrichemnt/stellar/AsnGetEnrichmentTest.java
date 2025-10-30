@@ -19,10 +19,10 @@ import com.cloudera.cyber.enrichment.geocode.impl.IpAsnEnrichment;
 import com.cloudera.cyber.enrichment.geocode.impl.types.MetronGeoEnrichmentFields;
 import com.google.common.collect.ImmutableList;
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +35,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AsnGetEnrichmentTest {
     private static final String IP = "10.0.0.1";
     private static final String TEST_RESULT_KEY = "key";

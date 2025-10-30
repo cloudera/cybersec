@@ -14,8 +14,8 @@ package com.cloudera.cyber.profiler.accumulator;
 
 import org.apache.commons.math3.stat.descriptive.AggregateSummaryStatistics;
 import org.apache.commons.math3.stat.descriptive.StatisticalSummaryValues;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class StatsAccTest {
 
@@ -51,9 +51,9 @@ public class StatsAccTest {
 
     private static void verifyResults(StatsAcc acc, double min, double max, double mean, double stddev) {
         StatisticalSummaryValues summary  = AggregateSummaryStatistics.aggregate(acc.getLocalValue());
-        Assert.assertEquals(min, summary.getMin(), 0.1);
-        Assert.assertEquals(max, summary.getMax(), 0.1);
-        Assert.assertEquals(mean, summary.getMean(), 0.1);
-        Assert.assertEquals(stddev, summary.getStandardDeviation(), 0.1);
+        Assertions.assertEquals(min, summary.getMin(), 0.1);
+        Assertions.assertEquals(max, summary.getMax(), 0.1);
+        Assertions.assertEquals(mean, summary.getMean(), 0.1);
+        Assertions.assertEquals(stddev, summary.getStandardDeviation(), 0.1);
     }
 }

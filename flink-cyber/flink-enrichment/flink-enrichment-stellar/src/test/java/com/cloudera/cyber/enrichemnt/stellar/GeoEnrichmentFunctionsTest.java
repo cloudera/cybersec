@@ -29,9 +29,9 @@ import org.apache.metron.stellar.dsl.StellarFunctions;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
-import org.junit.BeforeClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.Collections;
@@ -70,7 +70,7 @@ public class GeoEnrichmentFunctionsTest {
 
   private static JSONObject expectedSubsetMessage;
 
-  @BeforeClass
+  @BeforeAll
   public static void setupOnce() throws ParseException {
     JSONParser jsonParser = new JSONParser();
     expectedMessage = (JSONObject) jsonParser.parse(expectedMessageString);
@@ -81,7 +81,7 @@ public class GeoEnrichmentFunctionsTest {
     geoHdfsFile = new File(new File(baseDir), "GeoIP2-City-Test.mmdb");
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     context = new Context.Builder().with(Context.Capabilities.GLOBAL_CONFIG
             , () -> ImmutableMap.of(IpGeoJob.PARAM_GEO_DATABASE_PATH, geoHdfsFile.getAbsolutePath())

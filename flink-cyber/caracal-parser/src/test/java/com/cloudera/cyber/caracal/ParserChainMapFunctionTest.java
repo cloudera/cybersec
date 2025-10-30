@@ -17,7 +17,7 @@ import com.cloudera.cyber.SignedSourceKey;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import lombok.NonNull;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
