@@ -18,7 +18,6 @@
 
 package org.apache.metron.common.configuration.writer;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.configuration.EnrichmentConfigurations;
 import org.junit.jupiter.api.Test;
 
@@ -31,14 +30,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class EnrichmentWriterConfigurationTest {
 
-  /**
-   * {
-   *  "enrichment.writer.batchSize" : 12345,
-   *  "enrichment.writer.batchTimeout" : 555
-   * }
-   */
-  @Multiline
-  private static String globalJson;
+  private static String globalJson = String.join("\n",
+        "{",
+        "\"enrichment.writer.batchSize\" : 12345,",
+        "\"enrichment.writer.batchTimeout\" : 555",
+        "}"
+      );
 
   @Test
   public void gets_batch_size_and_timeout_from_global_config() throws IOException {

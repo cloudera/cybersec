@@ -19,7 +19,6 @@ package org.apache.metron.enrichment.adapters.maxmind.geo;
 
 import com.cloudera.cyber.TestUtils;
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -60,53 +59,47 @@ public class GeoLiteCityDatabaseTest {
   private static final String GEO_CITY_FILE_NAME = GEO_CITY + EXTENSION_MMDB_GZ;
   private static final String GEO_CITY_COPY_FILE_NAME = GEO_CITY + "-2" + EXTENSION_MMDB_GZ;
 
-  /**
-   * {
-   * "locID":"5803556",
-   * "country":"US",
-   * "city":"Milton",
-   * "postalCode":"98354",
-   * "latitude":"47.2513",
-   * "longitude":"-122.3149",
-   * "dmaCode":"819",
-   * "location_point":"47.2513,-122.3149"
-   * }
-   */
-  @Multiline
-  private static String expectedNoDmaMessageString;
+  private static String expectedNoDmaMessageString = String.join("\n",
+        "{",
+        "\"locID\":\"5803556\",",
+        "\"country\":\"US\",",
+        "\"city\":\"Milton\",",
+        "\"postalCode\":\"98354\",",
+        "\"latitude\":\"47.2513\",",
+        "\"longitude\":\"-122.3149\",",
+        "\"dmaCode\":\"819\",",
+        "\"location_point\":\"47.2513,-122.3149\"",
+        "}"
+      );
   private static JSONObject expectedNoDmaMessage;
 
-  /**
-   * {
-   * "locID":"2643743",
-   * "country":"GB",
-   * "city":"London",
-   * "postalCode":"",
-   * "latitude":"51.5142",
-   * "longitude":"-0.0931",
-   * "dmaCode":"",
-   * "location_point":"51.5142,-0.0931"
-   * }
-   */
-  @Multiline
-  private static String expectedDmaMessageString;
+  private static String expectedDmaMessageString = String.join("\n",
+        "{",
+        "\"locID\":\"2643743\",",
+        "\"country\":\"GB\",",
+        "\"city\":\"London\",",
+        "\"postalCode\":\"\",",
+        "\"latitude\":\"51.5142\",",
+        "\"longitude\":\"-0.0931\",",
+        "\"dmaCode\":\"\",",
+        "\"location_point\":\"51.5142,-0.0931\"",
+        "}"
+      );
   private static JSONObject expectedDmaMessage;
 
 
-  /**
-   * {
-   * "locID":"2640894",
-   * "country":"GB",
-   * "city":"Orpington",
-   * "postalCode":"BR6",
-   * "latitude":"51.3581",
-   * "longitude":"0.1277",
-   * "dmaCode":"",
-   * "location_point":"51.3581,0.1277"
-   * }
-   */
-  @Multiline
-  private static String expectedMessageStringTarGz;
+  private static String expectedMessageStringTarGz = String.join("\n",
+        "{",
+        "\"locID\":\"2640894\",",
+        "\"country\":\"GB\",",
+        "\"city\":\"Orpington\",",
+        "\"postalCode\":\"BR6\",",
+        "\"latitude\":\"51.3581\",",
+        "\"longitude\":\"0.1277\",",
+        "\"dmaCode\":\"\",",
+        "\"location_point\":\"51.3581,0.1277\"",
+        "}"
+      );
   private static JSONObject expectedMessageTarGz;
 
   private static FileSystem fs;

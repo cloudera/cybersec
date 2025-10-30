@@ -18,7 +18,6 @@ import com.cloudera.parserchains.core.model.define.ParserID;
 import com.cloudera.parserchains.core.model.define.ParserName;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.cloudera.parserchains.parsers.SyslogParser;
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -26,38 +25,36 @@ import static org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingW
 
 public class ParserDescriptorTest {
 
-    /**
-     * {
-     *   "id" : "com.cloudera.parserchains.parsers.SyslogParser",
-     *   "name" : "Syslog",
-     *   "schemaItems" : [ {
-     *     "name" : "outputField",
-     *     "type" : "text",
-     *     "label" : "Output Field",
-     *     "description" : "The name of the output field.",
-     *     "required" : true,
-     *     "multipleValues" : false,
-     *     "path" : "config",
-     *     "multiple" : false,
-     *     "outputName" : false
-     *   }, {
-     *     "name" : "inputField",
-     *     "type" : "text",
-     *     "label" : "Input Field",
-     *     "description" : "The name of the input field.",
-     *     "required" : true,
-     *     "multipleValues" : false,
-     *     "path" : "config",
-     *     "multiple" : false,
-     *     "defaultValue" : [ {
-     *       "outputField" : "original_string"
-     *     } ],
-     *     "outputName" : false
-     *   } ]
-     * }
-      */
-    @Multiline
-    private String expectedJSON;
+    private String expectedJSON = String.join("\n",
+        "{",
+        "\"id\" : \"com.cloudera.parserchains.parsers.SyslogParser\",",
+        "\"name\" : \"Syslog\",",
+        "\"schemaItems\" : [ {",
+        "\"name\" : \"outputField\",",
+        "\"type\" : \"text\",",
+        "\"label\" : \"Output Field\",",
+        "\"description\" : \"The name of the output field.\",",
+        "\"required\" : true,",
+        "\"multipleValues\" : false,",
+        "\"path\" : \"config\",",
+        "\"multiple\" : false,",
+        "\"outputName\" : false",
+        "}, {",
+        "\"name\" : \"inputField\",",
+        "\"type\" : \"text\",",
+        "\"label\" : \"Input Field\",",
+        "\"description\" : \"The name of the input field.\",",
+        "\"required\" : true,",
+        "\"multipleValues\" : false,",
+        "\"path\" : \"config\",",
+        "\"multiple\" : false,",
+        "\"defaultValue\" : [ {",
+        "\"outputField\" : \"original_string\"",
+        "} ],",
+        "\"outputName\" : false",
+        "} ]",
+        "}"
+        );
 
     @Test
     void toJSON() throws Exception {

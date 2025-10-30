@@ -18,7 +18,6 @@
 package org.apache.metron.common.field.transformation;
 
 import com.google.common.collect.Iterables;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.common.configuration.FieldTransformer;
 import org.apache.metron.common.configuration.SensorParserConfig;
@@ -32,21 +31,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class RenameTransformationTest {
-  /**
-   {
-    "fieldTransformations" : [
-          {
-            "transformation" : "RENAME",
-            "config" : {
-              "old_field1" : "new_field1",
-              "old_field2" : "new_field2"
-                      }
-          }
-                             ]
-   }
-   */
-  @Multiline
-  public static String smoketestConfig;
+public static String smoketestConfig = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"transformation\" : \"RENAME\",",
+    "      \"config\" : {",
+    "        \"old_field1\" : \"new_field1\",",
+    "        \"old_field2\" : \"new_field2\"",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void smokeTest() throws Exception {
@@ -68,20 +64,17 @@ public class RenameTransformationTest {
     assertEquals(10, input.size());
   }
 
-  /**
-   {
-    "fieldTransformations" : [
-          {
-            "transformation" : "RENAME",
-            "config" : {
-              "old_field1" : "new_field1"
-                      }
-          }
-                             ]
-   }
-   */
-  @Multiline
-  public static String renameMissingField;
+public static String renameMissingField = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"transformation\" : \"RENAME\",",
+    "      \"config\" : {",
+    "        \"old_field1\" : \"new_field1\"",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
   @Test
   public void renameMissingField() throws Exception {
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(renameMissingField));

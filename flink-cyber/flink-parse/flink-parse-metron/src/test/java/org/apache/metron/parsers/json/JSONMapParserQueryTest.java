@@ -18,7 +18,6 @@
 package org.apache.metron.parsers.json;
 
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.log4j.Level;
 import org.apache.metron.parsers.BasicParser;
 import org.apache.metron.stellar.common.Constants.Fields;
@@ -36,29 +35,23 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class JSONMapParserQueryTest {
 
-  /**
-   * {
-   * "foo" :
-   * [
-   * { "name" : "foo1", "value" : "bar", "number" : 1.0 },
-   * { "name" : "foo2", "value" : "baz", "number" : 2.0 }
-   * ]
-   * }
-   */
-  @Multiline
-  static String JSON_LIST;
+  static String JSON_LIST = String.join("\n",
+        "{",
+        "\"foo\" :",
+        "[",
+        "{ \"name\" : \"foo1\", \"value\" : \"bar\", \"number\" : 1.0 },",
+        "{ \"name\" : \"foo2\", \"value\" : \"baz\", \"number\" : 2.0 }",
+        "]",
+        "}"
+      );
 
-  /**
-   * { "name" : "foo1", "value" : "bar", "number" : 1.0 }
-   */
-  @Multiline
-  static String JSON_SINGLE;
+  static String JSON_SINGLE = String.join("\n",
+        "{ \"name\" : \"foo1\", \"value\" : \"bar\", \"number\" : 1.0 }"
+      );
 
-  /**
-   * { "name" : "foo2", "value" : "baz", "number" : 2.0 }
-   */
-  @Multiline
-  static String JSON_SINGLE2;
+  static String JSON_SINGLE2 = String.join("\n",
+        "{ \"name\" : \"foo2\", \"value\" : \"baz\", \"number\" : 2.0 }"
+      );
 
   @Test
   public void testHappyPath() {
@@ -151,21 +144,19 @@ public class JSONMapParserQueryTest {
     assertEquals(0, output.size());
   }
 
-  /**
-   * {
-   * "foo" :
-   * [
-   * {
-   * "collection" : { "blah" : 7, "blah2" : "foo", "bigblah" : { "innerBlah" : "baz", "reallyInnerBlah" : { "color" : "grey" }}}
-   * },
-   * {
-   * "collection" : { "blah" : 8, "blah2" : "bar", "bigblah" : { "innerBlah" : "baz2", "reallyInnerBlah" : { "color" : "blue" }}}
-   * }
-   * ]
-   * }
-   */
-  @Multiline
-  static String collectionHandlingJSON;
+  static String collectionHandlingJSON = String.join("\n",
+        "{",
+        "\"foo\" :",
+        "[",
+        "{",
+        "\"collection\" : { \"blah\" : 7, \"blah2\" : \"foo\", \"bigblah\" : { \"innerBlah\" : \"baz\", \"reallyInnerBlah\" : { \"color\" : \"grey\" }}}",
+        "},",
+        "{",
+        "\"collection\" : { \"blah\" : 8, \"blah2\" : \"bar\", \"bigblah\" : { \"innerBlah\" : \"baz2\", \"reallyInnerBlah\" : { \"color\" : \"blue\" }}}",
+        "}",
+        "]",
+        "}"
+      );
 
   @Test
   public void testCollectionHandlingDrop() {

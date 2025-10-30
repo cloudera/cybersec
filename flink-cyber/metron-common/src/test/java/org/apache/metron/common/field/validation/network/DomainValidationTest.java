@@ -19,7 +19,6 @@
 package org.apache.metron.common.field.validation.network;
 
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.field.validation.BaseValidationTest;
 import org.junit.jupiter.api.Test;
 
@@ -31,32 +30,26 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DomainValidationTest extends BaseValidationTest{
-  /**
-   {
-    "fieldValidations" : [
-            {
-              "input" : "field1"
-             ,"validation" : "DOMAIN"
-            }
-                         ]
-   }
-   */
-  @Multiline
-  public static String validWithSingleField;
+public static String validWithSingleField = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : \"field1\"",
+    "          ,\"validation\" : \"DOMAIN\"",
+    "         }",
+    "                      ]",
+    "}");
   public static String validWithSingleField_MQL = "IS_DOMAIN(field1)";
 
-  /**
-   {
-    "fieldValidations" : [
-            {
-              "input" : [ "field1", "field2" ]
-             ,"validation" : "DOMAIN"
-            }
-                         ]
-   }
-   */
-  @Multiline
-  public static String validWithMultipleFields;
+public static String validWithMultipleFields = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "         {",
+    "           \"input\" : [ \"field1\", \"field2\" ]",
+    "          ,\"validation\" : \"DOMAIN\"",
+    "         }",
+    "                      ]",
+    "}");
   public static String validWithMultipleFields_MQL = "IS_DOMAIN(field1) and IS_DOMAIN(field2)";
 
   @Test

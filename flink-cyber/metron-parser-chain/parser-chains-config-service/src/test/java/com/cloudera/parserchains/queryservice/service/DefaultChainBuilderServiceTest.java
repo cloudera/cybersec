@@ -18,7 +18,6 @@ import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.core.model.define.ParserName;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.cloudera.parserchains.queryservice.service.impl.DefaultChainBuilderService;
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -40,43 +39,41 @@ public class DefaultChainBuilderServiceTest {
         service = new DefaultChainBuilderService(chainBuilder);
     }
 
-    /**
-     * {
-     *     "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *     "name" : "My Parser Chain",
-     *     "parsers" : [ {
-     *       "id" : "8673f8f4-a308-4689-822c-0b01477ef378",
-     *       "name" : "Timestamp",
-     *       "type" : "com.cloudera.parserchains.parsers.TimestampParser",
-     *       "config" : {
-     *         "outputField" : {
-     *           "outputField": "processing_time"
-     *         }
-     *       }
-     *     }, {
-     *       "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *       "name" : "Delimited Text",
-     *       "type" : "com.cloudera.parserchains.parsers.DelimitedTextParser",
-     *       "config" : {
-     *         "inputField" : [ {
-     *           "inputField": "original_string"
-     *         }],
-     *         "outputField" : [ {
-     *           "fieldIndex" : "0",
-     *           "fieldName" : "name"
-     *         }, {
-     *           "fieldIndex" : "1",
-     *           "fieldName" : "address"
-     *         }, {
-     *           "fieldIndex" : "2",
-     *           "fieldName" : "phone"
-     *         }  ]
-     *       }
-     *     }]
-     * }
-     */
-    @Multiline
-    private String parserChain;
+    private String parserChain = String.join("\n",
+        "{",
+        "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\" : \"My Parser Chain\",",
+        "\"parsers\" : [ {",
+        "\"id\" : \"8673f8f4-a308-4689-822c-0b01477ef378\",",
+        "\"name\" : \"Timestamp\",",
+        "\"type\" : \"com.cloudera.parserchains.parsers.TimestampParser\",",
+        "\"config\" : {",
+        "\"outputField\" : {",
+        "\"outputField\": \"processing_time\"",
+        "}",
+        "}",
+        "}, {",
+        "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\" : \"Delimited Text\",",
+        "\"type\" : \"com.cloudera.parserchains.parsers.DelimitedTextParser\",",
+        "\"config\" : {",
+        "\"inputField\" : [ {",
+        "\"inputField\": \"original_string\"",
+        "}],",
+        "\"outputField\" : [ {",
+        "\"fieldIndex\" : \"0\",",
+        "\"fieldName\" : \"name\"",
+        "}, {",
+        "\"fieldIndex\" : \"1\",",
+        "\"fieldName\" : \"address\"",
+        "}, {",
+        "\"fieldIndex\" : \"2\",",
+        "\"fieldName\" : \"phone\"",
+        "}  ]",
+        "}",
+        "}]",
+        "}"
+        );
 
     @Test
     void success() throws InvalidParserException, IOException {
@@ -106,27 +103,25 @@ public class DefaultChainBuilderServiceTest {
                 results.get(1).getFields().keySet(), hasItem(FieldName.of("phone")));
     }
 
-    /**
-     * {
-     *    "id":"1",
-     *    "name":"Hello, Chain",
-     *    "parsers":[
-     *       {
-     *          "name":"Route by Name",
-     *          "type":"Router",
-     *          "id":"96f5f340-5d96-11ea-89de-3b83ec1839cd",
-     *          "config":{
-     *          },
-     *          "routing":{
-     *             "routes":[
-     *             ]
-     *          }
-     *       }
-     *    ]
-     * }
-     */
-    @Multiline
-    private String missingMatchingField;
+    private String missingMatchingField = String.join("\n",
+        "{",
+        "\"id\":\"1\",",
+        "\"name\":\"Hello, Chain\",",
+        "\"parsers\":[",
+        "{",
+        "\"name\":\"Route by Name\",",
+        "\"type\":\"Router\",",
+        "\"id\":\"96f5f340-5d96-11ea-89de-3b83ec1839cd\",",
+        "\"config\":{",
+        "},",
+        "\"routing\":{",
+        "\"routes\":[",
+        "]",
+        "}",
+        "}",
+        "]",
+        "}"
+        );
 
     @Test
     void error() throws IOException {

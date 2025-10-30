@@ -19,7 +19,6 @@
 package org.apache.metron.common.field.transformation;
 
 import com.google.common.collect.Iterables;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.common.configuration.FieldTransformer;
 import org.apache.metron.common.configuration.SensorParserConfig;
@@ -33,18 +32,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RemoveTransformationTest {
-  /**
-   {
-    "fieldTransformations" : [
-          {
-            "input" : "field1"
-          , "transformation" : "REMOVE"
-          }
-                      ]
-   }
-   */
-  @Multiline
-  public static String removeUnconditionalConfig;
+public static String removeUnconditionalConfig = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"input\" : \"field1\",",
+    "      \"transformation\" : \"REMOVE\"",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testUnconditionalRemove() throws Exception{
@@ -57,21 +53,18 @@ public class RemoveTransformationTest {
     assertFalse(input.containsKey("field1"));
   }
 
-  /**
-   {
-    "fieldTransformations" : [
-          {
-            "output" : "field1"
-          , "transformation" : "REMOVE"
-          , "config" : {
-              "condition" : "exists(field2) and field2 == 'foo'"
-                       }
-          }
-                      ]
-   }
-   */
-  @Multiline
-  public static String removeConditionalConfig;
+public static String removeConditionalConfig = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"output\" : \"field1\",",
+    "      \"transformation\" : \"REMOVE\",",
+    "      \"config\" : {",
+    "        \"condition\" : \"exists(field2) and field2 == 'foo'\"",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
   @Test
   public void testConditionalRemove() throws Exception {
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(removeConditionalConfig));
