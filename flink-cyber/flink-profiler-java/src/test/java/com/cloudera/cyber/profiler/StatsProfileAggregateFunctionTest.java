@@ -16,8 +16,8 @@ import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import com.cloudera.cyber.profiler.accumulator.StatsProfileGroupAccTest;
 import com.google.common.collect.ImmutableMap;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.text.DecimalFormat;
 import java.util.Map;
@@ -74,19 +74,19 @@ public class StatsProfileAggregateFunctionTest {
                                       long startPeriod, long endPeriod,
                                       double min, double max, double mean, double stddev) {
 
-        Assert.assertEquals(endPeriod, profileMessage.getTs());
+        Assertions.assertEquals(endPeriod, profileMessage.getTs());
 
         Map<String, DecimalFormat> formats = getFormats(profileGroupConfig);
         DecimalFormat format = formats.get(STATS_RESULT_NAME);
         Map<String, String> actualExtensions = profileMessage.getExtensions();
-        Assert.assertEquals(profileGroupConfig.getProfileGroupName().concat(STATS_PROFILE_GROUP_SUFFIX), actualExtensions.get(PROFILE_GROUP_NAME_EXTENSION));
-        Assert.assertEquals(Long.toString(startPeriod), actualExtensions.get(START_PERIOD_EXTENSION));
-        Assert.assertEquals(Long.toString(endPeriod), actualExtensions.get(END_PERIOD_EXTENSION));
-        Assert.assertEquals(format.format(min), actualExtensions.get(MIN_STATS_RESULT));
-        Assert.assertEquals(format.format(max), actualExtensions.get(MAX_STATS_RESULT));
-        Assert.assertEquals(format.format(mean), actualExtensions.get(MEAN_STATUS_RESULT));
-        Assert.assertEquals(format.format(stddev), actualExtensions.get(STDDEV_STATUS_RESULT));
+        Assertions.assertEquals(profileGroupConfig.getProfileGroupName().concat(STATS_PROFILE_GROUP_SUFFIX), actualExtensions.get(PROFILE_GROUP_NAME_EXTENSION));
+        Assertions.assertEquals(Long.toString(startPeriod), actualExtensions.get(START_PERIOD_EXTENSION));
+        Assertions.assertEquals(Long.toString(endPeriod), actualExtensions.get(END_PERIOD_EXTENSION));
+        Assertions.assertEquals(format.format(min), actualExtensions.get(MIN_STATS_RESULT));
+        Assertions.assertEquals(format.format(max), actualExtensions.get(MAX_STATS_RESULT));
+        Assertions.assertEquals(format.format(mean), actualExtensions.get(MEAN_STATUS_RESULT));
+        Assertions.assertEquals(format.format(stddev), actualExtensions.get(STDDEV_STATUS_RESULT));
 
-        Assert.assertEquals(7, actualExtensions.size());
+        Assertions.assertEquals(7, actualExtensions.size());
     }
 }

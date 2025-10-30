@@ -13,17 +13,17 @@
 package com.cloudera.cyber.enrichment.geocode;
 
 import com.cloudera.cyber.DataQualityMessage;
-import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import org.apache.flink.configuration.Configuration;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class IpGeoMapTest {
 
@@ -32,7 +32,7 @@ public class IpGeoMapTest {
     private static final List<String> ENRICH_FIELD_NAMES = Arrays.asList(SINGLE_IP_FIELD_NAME, LIST_IPS_FIELD_NAME);
     private IpGeoMap geoMap;
 
-    @Before
+    @BeforeEach
     public void createGeoMap() {
         geoMap = new IpGeoMap(IpGeoTestData.GEOCODE_DATABASE_PATH, ENRICH_FIELD_NAMES, null);
         geoMap.open(new Configuration());
@@ -54,7 +54,7 @@ public class IpGeoMapTest {
         initialExtensions.put(LIST_IPS_FIELD_NAME, IpGeoTestData.LOCAL_IP);
         Message input = TestUtils.createMessage(initialExtensions);
         Message output = geoMap.map(input);
-        Assert.assertEquals(1, output.getExtensions().size());
+        Assertions.assertEquals(1, output.getExtensions().size());
         assertNoErrorsOrInfos(output);
     }
 
@@ -62,7 +62,7 @@ public class IpGeoMapTest {
     public void testFieldNotSet() {
         Message input = TestUtils.createMessage(Collections.emptyMap());
         Message output = geoMap.map(input);
-        Assert.assertEquals(Collections.emptyMap(), output.getExtensions());
+        Assertions.assertEquals(Collections.emptyMap(), output.getExtensions());
         assertNoErrorsOrInfos(output);
     }
 
@@ -70,34 +70,34 @@ public class IpGeoMapTest {
     public void testNullExtensions() {
         Message input = TestUtils.createMessage();
         Message output = geoMap.map(input);
-        Assert.assertNull(output.getExtensions());
+        Assertions.assertNull(output.getExtensions());
         assertNoErrorsOrInfos(output);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testThrowsCityDatabaseDoesNotExist() {
         String doesntExistPath = "./src/test/resources/geolite/doesntexist";
         File databaseFile = new File(doesntExistPath);
-        Assert.assertFalse(databaseFile.exists());
+        Assertions.assertFalse(databaseFile.exists());
         IpGeoMap map = new IpGeoMap(doesntExistPath, ENRICH_FIELD_NAMES, null);
-        map.open(new Configuration());
+        assertThrows(IllegalStateException.class, () -> map.open(new Configuration()), "Expected IllegalStateException");
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testThrowsCityDatabaseEmptyFile() {
         String emptyFilePath = "./src/test/resources/geolite/invalid_maxmind_db";
         File databaseFile = new File(emptyFilePath);
-        Assert.assertTrue(databaseFile.exists());
-        Assert.assertTrue(databaseFile.length() > 0);
+        Assertions.assertTrue(databaseFile.exists());
+        Assertions.assertTrue(databaseFile.length() > 0);
         IpGeoMap map = new IpGeoMap(emptyFilePath, ENRICH_FIELD_NAMES, null);
-        map.open(new Configuration());
+        assertThrows(IllegalStateException.class, () -> map.open(new Configuration()), "Expected IllegalStateException");
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testThrowsBadFilesystem() {
         String badFilesystemPath = "bad:/src/test/resources/geolite/invalid_maxmind_db";
         IpGeoMap map = new IpGeoMap(badFilesystemPath, ENRICH_FIELD_NAMES, null);
-        map.open(new Configuration());
+        assertThrows(IllegalStateException.class, () -> map.open(new Configuration()), "Expected IllegalStateException");
     }
 
     private Message testGeoMap(Map<String, String> inputFields) {
@@ -105,13 +105,13 @@ public class IpGeoMapTest {
         Map<String, String> expected = new HashMap<>(input.getExtensions());
         inputFields.forEach((field, value) -> IpGeoTestData.getExpectedEnrichmentValues(expected, field, value));
         Message output = geoMap.map(input);
-        Assert.assertEquals(expected, output.getExtensions());
+        Assertions.assertEquals(expected, output.getExtensions());
 
         return output;
     }
 
     private void assertNoErrorsOrInfos(Message output) {
         List<DataQualityMessage> dataQualityMessages = output.getDataQualityMessages();
-        Assert.assertTrue(dataQualityMessages == null || dataQualityMessages.isEmpty());
+        Assertions.assertTrue(dataQualityMessages == null || dataQualityMessages.isEmpty());
     }
 }

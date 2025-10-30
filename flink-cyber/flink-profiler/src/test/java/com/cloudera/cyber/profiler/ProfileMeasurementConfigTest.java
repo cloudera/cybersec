@@ -12,8 +12,8 @@
 
 package com.cloudera.cyber.profiler;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -35,8 +35,8 @@ public class ProfileMeasurementConfigTest {
                 aggregationMethod(aggregationMethod).
                 build();
         verifyGoodConfig(measurementConfig);
-        Assert.assertFalse(measurementConfig.hasStats());
-        Assert.assertEquals(ProfileAggregationMethod.defaultFormat.get(ProfileAggregationMethod.COUNT_DISTINCT), measurementConfig.getDecimalFormat());
+        Assertions.assertFalse(measurementConfig.hasStats());
+        Assertions.assertEquals(ProfileAggregationMethod.defaultFormat.get(ProfileAggregationMethod.COUNT_DISTINCT), measurementConfig.getDecimalFormat());
 
         measurementConfig = ProfileMeasurementConfig.builder().
                 fieldName("field").
@@ -45,8 +45,8 @@ public class ProfileMeasurementConfigTest {
                 calculateStats(true).
                 build();
         verifyGoodConfig(measurementConfig);
-        Assert.assertTrue(measurementConfig.hasStats());
-        Assert.assertEquals(ProfileAggregationMethod.defaultFormat.get(ProfileAggregationMethod.COUNT_DISTINCT), measurementConfig.getDecimalFormat());
+        Assertions.assertTrue(measurementConfig.hasStats());
+        Assertions.assertEquals(ProfileAggregationMethod.defaultFormat.get(ProfileAggregationMethod.COUNT_DISTINCT), measurementConfig.getDecimalFormat());
 
         String formatString = "##";
         measurementConfig = ProfileMeasurementConfig.builder().
@@ -56,8 +56,8 @@ public class ProfileMeasurementConfigTest {
                 format(formatString).
                 build();
         verifyGoodConfig(measurementConfig);
-        Assert.assertFalse(measurementConfig.hasStats());
-        Assert.assertEquals(new DecimalFormat(formatString), measurementConfig.getDecimalFormat());
+        Assertions.assertFalse(measurementConfig.hasStats());
+        Assertions.assertEquals(new DecimalFormat(formatString), measurementConfig.getDecimalFormat());
 
         measurementConfig = ProfileMeasurementConfig.builder().
                 fieldName("field").
@@ -65,8 +65,8 @@ public class ProfileMeasurementConfigTest {
                 aggregationMethod(ProfileAggregationMethod.FIRST_SEEN).
                 build();
         verifyGoodConfig(measurementConfig);
-        Assert.assertFalse(measurementConfig.hasStats());
-        Assert.assertEquals(new DecimalFormat(formatString), measurementConfig.getDecimalFormat());
+        Assertions.assertFalse(measurementConfig.hasStats());
+        Assertions.assertEquals(new DecimalFormat(formatString), measurementConfig.getDecimalFormat());
 
         measurementConfig = ProfileMeasurementConfig.builder().
                 fieldName("field").
@@ -75,8 +75,8 @@ public class ProfileMeasurementConfigTest {
                 firstSeenExpirationDuration(60L).firstSeenExpirationDurationUnit(TimeUnit.MINUTES.name()).
                 build();
         verifyGoodConfig(measurementConfig);
-        Assert.assertFalse(measurementConfig.hasStats());
-        Assert.assertEquals(new DecimalFormat(formatString), measurementConfig.getDecimalFormat());
+        Assertions.assertFalse(measurementConfig.hasStats());
+        Assertions.assertEquals(new DecimalFormat(formatString), measurementConfig.getDecimalFormat());
     }
 
     private void verifyGoodConfig(ProfileMeasurementConfig measurementConfig) {

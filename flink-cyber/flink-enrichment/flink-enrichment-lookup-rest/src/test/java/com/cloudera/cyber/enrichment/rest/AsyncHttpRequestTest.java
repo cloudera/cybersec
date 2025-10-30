@@ -21,10 +21,10 @@ import com.google.common.collect.Lists;
 import lombok.Data;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.async.ResultFuture;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -34,12 +34,12 @@ public class AsyncHttpRequestTest extends RestRequestTest {
 
     private static MockRestServer mockRestServer;
 
-    @BeforeClass
+    @BeforeAll
     public static void startMockServer() {
         mockRestServer = new MockRestServer(false);
     }
 
-    @AfterClass
+    @AfterAll
     public static void stopMockServer() {
         mockRestServer.close();
     }
@@ -188,14 +188,14 @@ public class AsyncHttpRequestTest extends RestRequestTest {
         result.awaitCompletion();
         request.close();
 
-        Assert.assertEquals(1, result.getCollectionResult().size());
+        Assertions.assertEquals(1, result.getCollectionResult().size());
         Optional<Message> optionalMessage = result.getCollectionResult().stream().findFirst();
-        Assert.assertTrue(optionalMessage.isPresent());
+        Assertions.assertTrue(optionalMessage.isPresent());
         Message resultMessage = optionalMessage.get();
 
-        Assert.assertEquals(expectedExtensions, resultMessage.getExtensions());
-        Assert.assertNull(result.getExceptionResult());
-        Assert.assertEquals(expectedDataQualityMessages, resultMessage.getDataQualityMessages());
+        Assertions.assertEquals(expectedExtensions, resultMessage.getExtensions());
+        Assertions.assertNull(result.getExceptionResult());
+        Assertions.assertEquals(expectedDataQualityMessages, resultMessage.getDataQualityMessages());
     }
 
 }

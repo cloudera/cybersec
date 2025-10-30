@@ -1,8 +1,8 @@
 package com.cloudera.cyber.generator;
 
 import com.nimbusds.jose.util.IOUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -29,6 +29,6 @@ public class GeneratorUtilsTest {
         try (InputStream stream = Utils.openFileStream(baseDir, file)) {
             result = IOUtils.readInputStreamToString(stream, Charset.defaultCharset());
         }
-        Assert.assertEquals(expectedResult, result);
+        Assertions.assertEquals(expectedResult, result);
     }
 }

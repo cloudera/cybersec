@@ -15,7 +15,7 @@ package com.cloudera.cyber;
 import com.cloudera.cyber.flink.Utils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.hamcrest.collection.IsArrayWithSize;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.security.*;
 

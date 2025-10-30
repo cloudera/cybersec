@@ -16,8 +16,8 @@ import com.cloudera.cyber.MessageUtils;
 import com.cloudera.cyber.profiler.accumulator.ProfileGroupAcc;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.streaming.util.TwoInputStreamOperatorTestHarness;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,7 +38,7 @@ public class ProfileStatsJoinTest extends ProfileGroupTest {
 
         ProfileMessage joinedMessage = join.join(profileMessage, statsMessage);
 
-        Assert.assertEquals(getExpectedJoinedMessage(profileMessage, statsMessage), joinedMessage);
+        Assertions.assertEquals(getExpectedJoinedMessage(profileMessage, statsMessage), joinedMessage);
     }
 
     private ProfileMessage getExpectedJoinedMessage( ProfileMessage message1, ProfileMessage message2) {

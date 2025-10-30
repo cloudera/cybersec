@@ -15,16 +15,16 @@ package com.cloudera.cyber.enrichment.rest;
 import com.cloudera.cyber.enrichment.rest.impl.MockRestServer;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 // tests will run either with or without tls when junit runs derived classes
-@Ignore
+@Disabled
 public class GetRestRequestTest extends RestRequestTest {
 
     public static void createMockService(boolean enableTlsMutualAuth) {
@@ -39,7 +39,7 @@ public class GetRestRequestTest extends RestRequestTest {
             put("name", "Chris");
         }};
         RestRequestResult result = makeRequest(config, variables);
-        Assert.assertEquals(MockRestServer.DEPARTMENT_NAME, result.getExtensions().get(MockRestServer.DEPARTMENT_NAME_PROPERTY));
+        Assertions.assertEquals(MockRestServer.DEPARTMENT_NAME, result.getExtensions().get(MockRestServer.DEPARTMENT_NAME_PROPERTY));
     }
 
     @Test
@@ -52,13 +52,13 @@ public class GetRestRequestTest extends RestRequestTest {
         }};
 
         RestRequestResult result = makeRequest(config, variables);
-        Assert.assertEquals(MockRestServer.DEPARTMENT_NAME, result.getExtensions().get(MockRestServer.DEPARTMENT_NAME_PROPERTY));
+        Assertions.assertEquals(MockRestServer.DEPARTMENT_NAME, result.getExtensions().get(MockRestServer.DEPARTMENT_NAME_PROPERTY));
     }
 
     @Test
     public void testBasicAuthGet() throws Exception {
         RestRequestResult result = makeAssetRequest(MockRestServer.ASSET_ID);
-        Assert.assertEquals(MockRestServer.ASSET_LOCATION, result.getExtensions().get(MockRestServer.ASSET_LOCATION_PROPERTY));
+        Assertions.assertEquals(MockRestServer.ASSET_LOCATION, result.getExtensions().get(MockRestServer.ASSET_LOCATION_PROPERTY));
     }
 
     @Test

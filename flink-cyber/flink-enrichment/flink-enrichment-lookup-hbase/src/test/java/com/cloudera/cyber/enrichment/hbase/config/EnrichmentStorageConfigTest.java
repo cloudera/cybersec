@@ -12,7 +12,7 @@
 
 package com.cloudera.cyber.enrichment.hbase.config;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_METRON;
 import static com.cloudera.cyber.enrichment.hbase.config.EnrichmentStorageFormat.HBASE_SIMPLE;

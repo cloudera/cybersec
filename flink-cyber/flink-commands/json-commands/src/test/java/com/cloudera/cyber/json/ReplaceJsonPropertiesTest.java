@@ -17,10 +17,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,12 +33,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class ReplaceJsonPropertiesTest {
 
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    @TempDir
+    public File folder;
 
     @Test
     public void testJsonReplace() throws IOException {
-        File outputFile = folder.newFile("enrichment-rest.json.template");
+        File outputFile = new File(folder, "enrichment-rest.json.template");
         String[] args = new String[]{getFileResource("/enrichment-rest.json.template"), getFileResource("/rest.properties"), outputFile.getAbsolutePath()};
         ReplaceJsonProperties.main(args);
         List<Map<String, String>> actualPropertyMaps = getProperties(outputFile.getAbsolutePath());
@@ -59,12 +58,12 @@ public class ReplaceJsonPropertiesTest {
                 put("empty_prop", "").
                 build());
 
-        Assert.assertEquals(expectedPropertyMaps, actualPropertyMaps);
+        Assertions.assertEquals(expectedPropertyMaps, actualPropertyMaps);
     }
 
     @Test
     public void testTemplateDoesntExist() throws IOException {
-        File outputFile = folder.newFile("enrichment-rest.json.template");
+        File outputFile = new File(folder, "enrichment-rest.json.template");
         String missingFile = "/missing_file.template";
         String[] args = new String[]{missingFile, getFileResource("/rest.properties"), outputFile.getAbsolutePath()};
         assertThatThrownBy(() -> ReplaceJsonProperties.main(args)).isInstanceOf(NoSuchFileException.class).hasMessageContaining(missingFile);
@@ -72,7 +71,7 @@ public class ReplaceJsonPropertiesTest {
 
     @Test
     public void testPropertiesDoesntExist() throws IOException {
-        File outputFile = folder.newFile("enrichment-rest.json.template");
+        File outputFile = new File(folder, "enrichment-rest.json.template");
         String missingFile = "/missing_file.template";
         String[] args = new String[]{getFileResource("/enrichment-rest.json.template"), missingFile, outputFile.getAbsolutePath()};
         assertThatThrownBy(() -> ReplaceJsonProperties.main(args)).isInstanceOf(FileNotFoundException.class).hasMessageContaining(missingFile);

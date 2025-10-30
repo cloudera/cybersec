@@ -12,16 +12,16 @@
 
 package com.cloudera.cyber.enrichment.rest;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 
 public class NonSecureGetRequestTest extends GetRestRequestTest {
-    @BeforeClass
+    @BeforeAll
     public static void createMockService() {
         createMockService(false);
     }
 
-    @AfterClass
+    @AfterAll
     public static void stopMockServer() {
         mockRestServer.close();
     }
