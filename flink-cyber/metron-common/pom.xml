@@ -298,19 +298,12 @@
             <scope>test</scope>
             <type>test-jar</type>
         </dependency>
-
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-vfs2</artifactId>
             <version>${commons-vfs2.version}</version>
             <scope>test</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.adrianwalker/multiline-string -->
-        <dependency>
-            <groupId>org.adrianwalker</groupId>
-            <artifactId>multiline-string</artifactId>
-        </dependency>
-
     </dependencies>
     <build>
         <plugins>

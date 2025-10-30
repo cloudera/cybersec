@@ -19,7 +19,6 @@
 package org.apache.metron.common.field.validation;
 
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -28,66 +27,55 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 public class QueryValidationTest extends BaseValidationTest{
-  /**
-   {
-    "fieldValidations" : [
-          {
-           "validation" : "STELLAR"
-          ,"config" : {
-                "condition" : "exists(field1)"
-                      }
-          }
-                         ]
-   }
-   */
-  @Multiline
-  public static String validQueryConfig;
+public static String validQueryConfig = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "       {",
+    "        \"validation\" : \"STELLAR\"",
+    "       ,\"config\" : {",
+    "             \"condition\" : \"exists(field1)\"",
+    "                   }",
+    "       }",
+    "                      ]",
+    "}");
 
-  /**
-   {
-    "fieldValidations" : [
-          {
-           "validation" : "STELLAR"
-          ,"config" : {
-                      }
-          }
-                         ]
-   }
-   */
-  @Multiline
-  public static String invalidQueryConfig1;
+public static String invalidQueryConfig1 = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "       {",
+    "        \"validation\" : \"STELLAR\"",
+    "       ,\"config\" : {",
+    "                   }",
+    "       }",
+    "                      ]",
+    "}");
 
-  /**
-   {
-    "fieldValidations" : [
-          {
-           "validation" : "STELLAR"
-          ,"config" : {
-              "condition" : "exi and "
-                      }
-          }
-                         ]
-   }
-   */
-  @Multiline
-  public static String invalidQueryConfig2;
-  /**
-   {
-    "fieldValidations" : [
-          {
-           "validation" : "STELLAR"
-          ,"config" : {
-                "condition" : "MAP_EXISTS(dc, dc2tz)"
-                ,"dc2tz" : {
-                          "la" : "PST"
-                           }
-                      }
-          }
-                         ]
-   }
-   */
-  @Multiline
-  public static String validQueryConfig_map;
+public static String invalidQueryConfig2 = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "       {",
+    "        \"validation\" : \"STELLAR\"",
+    "       ,\"config\" : {",
+    "           \"condition\" : \"exi and \"",
+    "                   }",
+    "       }",
+    "                      ]",
+    "}");
+
+public static String validQueryConfig_map = String.join("\n",
+    "{",
+    " \"fieldValidations\" : [",
+    "       {",
+    "        \"validation\" : \"STELLAR\"",
+    "       ,\"config\" : {",
+    "             \"condition\" : \"MAP_EXISTS(dc, dc2tz)\"",
+    "             ,\"dc2tz\" : {",
+    "                       \"la\" : \"PST\"",
+    "                        }",
+    "                   }",
+    "       }",
+    "                      ]",
+    "}");
 
   @Test
   public void testPositive() throws IOException {

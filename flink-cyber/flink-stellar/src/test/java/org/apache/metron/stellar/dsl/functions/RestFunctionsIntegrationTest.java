@@ -19,7 +19,6 @@
 package org.apache.metron.stellar.dsl.functions;
 
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.commons.io.FileUtils;
 import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.ParseException;
@@ -194,14 +193,12 @@ public class RestFunctionsIntegrationTest {
     assertNull(run(String.format("REST_GET('%s')", getUri), context));
   }
 
-  /**
-   * {
-   *   "response.codes.allowed": [200,404],
-   *   "empty.content.override": "function config override"
-   * }
-   */
-  @Multiline
-  private String emptyContentOverride;
+  private String emptyContentOverride = String.join("\n",
+        "{",
+        "\"response.codes.allowed\": [200,404],",
+        "\"empty.content.override\": \"function config override\"",
+        "}"
+      );
 
   /**
    * The REST_GET function should return the empty content override setting when status is allowed and content is empty.
@@ -211,13 +208,11 @@ public class RestFunctionsIntegrationTest {
     assertEquals("function config override", run(String.format("REST_GET('%s', %s)", emptyGetUri, emptyContentOverride), context));
   }
 
-  /**
-   * {
-   *   "error.value.override": "error message"
-   * }
-   */
-  @Multiline
-  private String errorValueOverride;
+  private String errorValueOverride = String.join("\n",
+        "{",
+        "\"error.value.override\": \"error message\"",
+        "}"
+      );
 
   /**
    * The REST_GET function should return the error value override setting on error.
@@ -263,13 +258,11 @@ public class RestFunctionsIntegrationTest {
     assertNull(actual);
   }
 
-  /**
-   * {
-   * "timeout": 10
-   * }
-   */
-  @Multiline
-  private String timeoutConfig;
+  private String timeoutConfig = String.join("\n",
+        "{",
+        "\"timeout\": 10",
+        "}"
+      );
 
   /**
    * The REST_GET function should honor the function supplied timeout setting.

@@ -17,7 +17,6 @@
  */
 package org.apache.metron.stellar.common.utils;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -31,14 +30,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class JSONUtilsTest {
   private static File tmpDir;
 
-  /**
-   {
-   "a" : "hello",
-   "b" : "world"
-   }
-   */
-  @Multiline
-  private static String config;
+private static String config = "{ \"a\" : \"hello\", \"b\" : \"world\" }";
   private static File configFile;
 
   @BeforeAll

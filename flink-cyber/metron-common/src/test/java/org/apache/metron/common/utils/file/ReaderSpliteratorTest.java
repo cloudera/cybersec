@@ -17,7 +17,6 @@
  */
 package org.apache.metron.common.utils.file;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -40,19 +39,17 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 
 public class ReaderSpliteratorTest {
-  /**
-   foo
-   bar
-   grok
-   foo
-   the
-   and
-   grok
-   foo
-   bar
-   */
-  @Multiline
-  public static String data;
+  public static String data = String.join("\n",
+    "foo",
+    "bar", 
+    "grok",
+    "foo",
+    "the",
+    "and",
+    "grok",
+    "foo",
+    "bar"
+  );
   public static final File dataFile = new File("target/readerspliteratortest.data");
 
   @BeforeAll

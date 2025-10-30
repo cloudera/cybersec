@@ -19,7 +19,6 @@
 package org.apache.metron.common.field.transformation;
 
 import com.google.common.collect.Iterables;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.common.configuration.FieldTransformer;
 import org.apache.metron.common.configuration.SensorParserConfig;
@@ -33,23 +32,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class RegexSelectTransformationTest {
-  /**
-   {
-    "fieldTransformations" : [
-          {
-            "input" : "in_field"
-          , "output" : "out_field"
-          , "transformation" : "REGEX_SELECT"
-          , "config" : {
-              "option_1" : ".*foo.*",
-              "option_2" : [ ".*metron.*", ".*mortron.*" ]
-             }
-          }
-                      ]
-   }
-   */
-  @Multiline
-  public static String routeSingleInSingleOut;
+public static String routeSingleInSingleOut = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"input\" : \"in_field\",",
+    "      \"output\" : \"out_field\",",
+    "      \"transformation\" : \"REGEX_SELECT\",",
+    "      \"config\" : {",
+    "        \"option_1\" : \".*foo.*\",",
+    "        \"option_2\" : [ \".*metron.*\", \".*mortron.*\" ]",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   private String transform(String in, String config) throws Exception {
     SensorParserConfig c = SensorParserConfig.fromBytes(Bytes.toBytes(config));
@@ -78,67 +74,58 @@ public class RegexSelectTransformationTest {
     assertEquals("option_1", transform("metron is for foorensic cybersecurity", routeSingleInSingleOut));
   }
 
-  /**
-   {
-    "fieldTransformations" : [
-          {
-           "output" : "out_field"
-          , "transformation" : "REGEX_SELECT"
-          , "config" : {
-              "option_1" : ".*foo.*",
-              "option_2" : [ ".*metron.*", ".*mortron.*" ]
-             }
-          }
-                      ]
-   }
-   */
-  @Multiline
-  public static String routeMissingInput;
+public static String routeMissingInput = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"output\" : \"out_field\",",
+    "      \"transformation\" : \"REGEX_SELECT\",",
+    "      \"config\" : {",
+    "        \"option_1\" : \".*foo.*\",",
+    "        \"option_2\" : [ \".*metron.*\", \".*mortron.*\" ]",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testMissingInput() throws Exception {
     assertNull(transform("metron", routeMissingInput));
   }
 
-  /**
-   {
-    "fieldTransformations" : [
-          {
-           "input" : "in_field"
-          , "transformation" : "REGEX_SELECT"
-          , "config" : {
-              "option_1" : ".*foo.*",
-              "option_2" : [ ".*metron.*", ".*mortron.*" ]
-             }
-          }
-                      ]
-   }
-   */
-  @Multiline
-  public static String routeMissingOutput;
+public static String routeMissingOutput = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"input\" : \"in_field\",",
+    "      \"transformation\" : \"REGEX_SELECT\",",
+    "      \"config\" : {",
+    "        \"option_1\" : \".*foo.*\",",
+    "        \"option_2\" : [ \".*metron.*\", \".*mortron.*\" ]",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testMissingOutput() throws Exception {
     assertNull(transform("metron", routeMissingOutput));
   }
 
-  /**
-   {
-    "fieldTransformations" : [
-          {
-           "input" : "in_field"
-          ,"output" : [ "out_field", "baz_field" ]
-          , "transformation" : "REGEX_SELECT"
-          , "config" : {
-              "option_1" : ".*foo.*",
-              "option_2" : [ ".*metron.*", ".*mortron.*" ]
-             }
-          }
-                      ]
-   }
-   */
-  @Multiline
-  public static String routeMultiOutput;
+public static String routeMultiOutput = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"input\" : \"in_field\",",
+    "      \"output\" : [ \"out_field\", \"baz_field\" ],",
+    "      \"transformation\" : \"REGEX_SELECT\",",
+    "      \"config\" : {",
+    "        \"option_1\" : \".*foo.*\",",
+    "        \"option_2\" : [ \".*metron.*\", \".*mortron.*\" ]",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testMultiOutput() throws Exception{
@@ -146,23 +133,20 @@ public class RegexSelectTransformationTest {
     assertNull(transform("bar", routeMultiOutput));
   }
 
-  /**
-   {
-    "fieldTransformations" : [
-          {
-           "input" : "in_field"
-          ,"output" : "out_field"
-          , "transformation" : "REGEX_SELECT"
-          , "config" : {
-              "option_1" : "[a-z",
-              "option_2" : [ ".*metron.*", ".*mortron.*" ]
-             }
-          }
-                      ]
-   }
-   */
-  @Multiline
-  public static String routeBadRegex;
+public static String routeBadRegex = String.join("\n",
+    "{",
+    "  \"fieldTransformations\" : [",
+    "    {",
+    "      \"input\" : \"in_field\",",
+    "      \"output\" : \"out_field\",",
+    "      \"transformation\" : \"REGEX_SELECT\",",
+    "      \"config\" : {",
+    "        \"option_1\" : \"[a-z\",",
+    "        \"option_2\" : [ \".*metron.*\", \".*mortron.*\" ]",
+    "      }",
+    "    }",
+    "  ]",
+    "}");
 
   @Test
   public void testBadRegex() throws Exception{

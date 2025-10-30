@@ -30,7 +30,6 @@ import com.cloudera.parserchains.queryservice.model.describe.ParserDescriptor;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummary;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummaryMapper;
 import com.cloudera.parserchains.queryservice.service.impl.DefaultParserDiscoveryService;
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -84,74 +83,72 @@ public class DefaultParserDiscoveryServiceTest {
     assertThat(actual.size(), equalTo(2));
   }
 
-  /**
-   * {
-   *   "id" : "com.cloudera.parserchains.parsers.DelimitedTextParser",
-   *   "name" : "Delimited Text",
-   *   "schemaItems" : [ {
-   *     "name" : "delimiter",
-   *     "type" : "text",
-   *     "label" : "Delimiter",
-   *     "description" : "A regex used to split the text. Default value: ','",
-   *     "required" : false,
-   *     "multipleValues" : false,
-   *     "path" : "config.delimiter",
-   *     "multiple" : true,
-   *     "defaultValue" : [ {
-   *       "delimiter" : ","
-   *     } ],
-   *     "outputName" : false
-   *   }, {
-   *     "name" : "fieldIndex",
-   *     "type" : "text",
-   *     "label" : "Column Index",
-   *     "description" : "The index of the column containing the data.",
-   *     "required" : true,
-   *     "multipleValues" : true,
-   *     "path" : "config.outputField",
-   *     "multiple" : true,
-   *     "outputName" : false
-   *   }, {
-   *     "name" : "fieldName",
-   *     "type" : "text",
-   *     "label" : "Field Name",
-   *     "description" : "The name of the output field.",
-   *     "required" : true,
-   *     "multipleValues" : true,
-   *     "path" : "config.outputField",
-   *     "multiple" : true,
-   *     "outputName" : true
-   *   }, {
-   *     "name" : "inputField",
-   *     "type" : "text",
-   *     "label" : "Input Field",
-   *     "description" : "The name of the input field to parse. Default value: 'original_string'",
-   *     "required" : false,
-   *     "multipleValues" : false,
-   *     "path" : "config.inputField",
-   *     "multiple" : true,
-   *     "defaultValue" : [ {
-   *       "inputField" : "original_string"
-   *     } ],
-   *     "outputName" : false
-   *   }, {
-   *     "name" : "trim",
-   *     "type" : "text",
-   *     "label" : "Trim Whitespace",
-   *     "description" : "Trim whitespace from each value. Default value: 'true'",
-   *     "required" : false,
-   *     "multipleValues" : false,
-   *     "path" : "config.trim",
-   *     "multiple" : true,
-   *     "defaultValue" : [ {
-   *       "trim" : "true"
-   *     } ],
-   *     "outputName" : false
-   *   } ]
-   * }
-   */
-  @Multiline
-  String describeExpected;
+  String describeExpected = String.join("\n",
+        "{",
+        "\"id\" : \"com.cloudera.parserchains.parsers.DelimitedTextParser\",",
+        "\"name\" : \"Delimited Text\",",
+        "\"schemaItems\" : [ {",
+        "\"name\" : \"delimiter\",",
+        "\"type\" : \"text\",",
+        "\"label\" : \"Delimiter\",",
+        "\"description\" : \"A regex used to split the text. Default value: ','\",",
+        "\"required\" : false,",
+        "\"multipleValues\" : false,",
+        "\"path\" : \"config.delimiter\",",
+        "\"multiple\" : true,",
+        "\"defaultValue\" : [ {",
+        "\"delimiter\" : \",\"",
+        "} ],",
+        "\"outputName\" : false",
+        "}, {",
+        "\"name\" : \"fieldIndex\",",
+        "\"type\" : \"text\",",
+        "\"label\" : \"Column Index\",",
+        "\"description\" : \"The index of the column containing the data.\",",
+        "\"required\" : true,",
+        "\"multipleValues\" : true,",
+        "\"path\" : \"config.outputField\",",
+        "\"multiple\" : true,",
+        "\"outputName\" : false",
+        "}, {",
+        "\"name\" : \"fieldName\",",
+        "\"type\" : \"text\",",
+        "\"label\" : \"Field Name\",",
+        "\"description\" : \"The name of the output field.\",",
+        "\"required\" : true,",
+        "\"multipleValues\" : true,",
+        "\"path\" : \"config.outputField\",",
+        "\"multiple\" : true,",
+        "\"outputName\" : true",
+        "}, {",
+        "\"name\" : \"inputField\",",
+        "\"type\" : \"text\",",
+        "\"label\" : \"Input Field\",",
+        "\"description\" : \"The name of the input field to parse. Default value: 'original_string'\",",
+        "\"required\" : false,",
+        "\"multipleValues\" : false,",
+        "\"path\" : \"config.inputField\",",
+        "\"multiple\" : true,",
+        "\"defaultValue\" : [ {",
+        "\"inputField\" : \"original_string\"",
+        "} ],",
+        "\"outputName\" : false",
+        "}, {",
+        "\"name\" : \"trim\",",
+        "\"type\" : \"text\",",
+        "\"label\" : \"Trim Whitespace\",",
+        "\"description\" : \"Trim whitespace from each value. Default value: 'true'\",",
+        "\"required\" : false,",
+        "\"multipleValues\" : false,",
+        "\"path\" : \"config.trim\",",
+        "\"multiple\" : true,",
+        "\"defaultValue\" : [ {",
+        "\"trim\" : \"true\"",
+        "} ],",
+        "\"outputName\" : false",
+        "} ]",
+        "}"
+      );
 
   @Test
   void describe() throws IOException {
@@ -161,91 +158,89 @@ public class DefaultParserDiscoveryServiceTest {
     assertThat(actual, equalToCompressingWhiteSpace(describeExpected));
   }
 
-  /**
-   * {
-   *   "com.cloudera.parserchains.parsers.RemoveFieldParser" : {
-   *     "id" : "com.cloudera.parserchains.parsers.RemoveFieldParser",
-   *     "name" : "Remove Field(s)",
-   *     "schemaItems" : [ {
-   *       "name" : "fieldToRemove",
-   *       "type" : "text",
-   *       "label" : "Field to Remove",
-   *       "description" : "The name of a field to remove.",
-   *       "required" : true,
-   *       "multipleValues" : true,
-   *       "path" : "config.fieldToRemove",
-   *       "multiple" : true,
-   *       "outputName" : false
-   *     } ]
-   *   },
-   *   "com.cloudera.parserchains.parsers.DelimitedTextParser" : {
-   *     "id" : "com.cloudera.parserchains.parsers.DelimitedTextParser",
-   *     "name" : "Delimited Text",
-   *     "schemaItems" : [ {
-   *       "name" : "delimiter",
-   *       "type" : "text",
-   *       "label" : "Delimiter",
-   *       "description" : "A regex used to split the text. Default value: ','",
-   *       "required" : false,
-   *       "multipleValues" : false,
-   *       "path" : "config.delimiter",
-   *       "multiple" : true,
-   *       "defaultValue" : [ {
-   *         "delimiter" : ","
-   *       } ],
-   *       "outputName" : false
-   *     }, {
-   *       "name" : "fieldIndex",
-   *       "type" : "text",
-   *       "label" : "Column Index",
-   *       "description" : "The index of the column containing the data.",
-   *       "required" : true,
-   *       "multipleValues" : true,
-   *       "path" : "config.outputField",
-   *       "multiple" : true,
-   *       "outputName" : false
-   *     }, {
-   *       "name" : "fieldName",
-   *       "type" : "text",
-   *       "label" : "Field Name",
-   *       "description" : "The name of the output field.",
-   *       "required" : true,
-   *       "multipleValues" : true,
-   *       "path" : "config.outputField",
-   *       "multiple" : true,
-   *       "outputName" : true
-   *     }, {
-   *       "name" : "inputField",
-   *       "type" : "text",
-   *       "label" : "Input Field",
-   *       "description" : "The name of the input field to parse. Default value: 'original_string'",
-   *       "required" : false,
-   *       "multipleValues" : false,
-   *       "path" : "config.inputField",
-   *       "multiple" : true,
-   *       "defaultValue" : [ {
-   *         "inputField" : "original_string"
-   *       } ],
-   *       "outputName" : false
-   *     }, {
-   *       "name" : "trim",
-   *       "type" : "text",
-   *       "label" : "Trim Whitespace",
-   *       "description" : "Trim whitespace from each value. Default value: 'true'",
-   *       "required" : false,
-   *       "multipleValues" : false,
-   *       "path" : "config.trim",
-   *       "multiple" : true,
-   *       "defaultValue" : [ {
-   *         "trim" : "true"
-   *       } ],
-   *       "outputName" : false
-   *     } ]
-   *   }
-   * }
-   */
-  @Multiline
-  String describeAllExpected;
+  String describeAllExpected = String.join("\n",
+        "{",
+        "\"com.cloudera.parserchains.parsers.RemoveFieldParser\" : {",
+        "\"id\" : \"com.cloudera.parserchains.parsers.RemoveFieldParser\",",
+        "\"name\" : \"Remove Field(s)\",",
+        "\"schemaItems\" : [ {",
+        "\"name\" : \"fieldToRemove\",",
+        "\"type\" : \"text\",",
+        "\"label\" : \"Field to Remove\",",
+        "\"description\" : \"The name of a field to remove.\",",
+        "\"required\" : true,",
+        "\"multipleValues\" : true,",
+        "\"path\" : \"config.fieldToRemove\",",
+        "\"multiple\" : true,",
+        "\"outputName\" : false",
+        "} ]",
+        "},",
+        "\"com.cloudera.parserchains.parsers.DelimitedTextParser\" : {",
+        "\"id\" : \"com.cloudera.parserchains.parsers.DelimitedTextParser\",",
+        "\"name\" : \"Delimited Text\",",
+        "\"schemaItems\" : [ {",
+        "\"name\" : \"delimiter\",",
+        "\"type\" : \"text\",",
+        "\"label\" : \"Delimiter\",",
+        "\"description\" : \"A regex used to split the text. Default value: ','\",",
+        "\"required\" : false,",
+        "\"multipleValues\" : false,",
+        "\"path\" : \"config.delimiter\",",
+        "\"multiple\" : true,",
+        "\"defaultValue\" : [ {",
+        "\"delimiter\" : \",\"",
+        "} ],",
+        "\"outputName\" : false",
+        "}, {",
+        "\"name\" : \"fieldIndex\",",
+        "\"type\" : \"text\",",
+        "\"label\" : \"Column Index\",",
+        "\"description\" : \"The index of the column containing the data.\",",
+        "\"required\" : true,",
+        "\"multipleValues\" : true,",
+        "\"path\" : \"config.outputField\",",
+        "\"multiple\" : true,",
+        "\"outputName\" : false",
+        "}, {",
+        "\"name\" : \"fieldName\",",
+        "\"type\" : \"text\",",
+        "\"label\" : \"Field Name\",",
+        "\"description\" : \"The name of the output field.\",",
+        "\"required\" : true,",
+        "\"multipleValues\" : true,",
+        "\"path\" : \"config.outputField\",",
+        "\"multiple\" : true,",
+        "\"outputName\" : true",
+        "}, {",
+        "\"name\" : \"inputField\",",
+        "\"type\" : \"text\",",
+        "\"label\" : \"Input Field\",",
+        "\"description\" : \"The name of the input field to parse. Default value: 'original_string'\",",
+        "\"required\" : false,",
+        "\"multipleValues\" : false,",
+        "\"path\" : \"config.inputField\",",
+        "\"multiple\" : true,",
+        "\"defaultValue\" : [ {",
+        "\"inputField\" : \"original_string\"",
+        "} ],",
+        "\"outputName\" : false",
+        "}, {",
+        "\"name\" : \"trim\",",
+        "\"type\" : \"text\",",
+        "\"label\" : \"Trim Whitespace\",",
+        "\"description\" : \"Trim whitespace from each value. Default value: 'true'\",",
+        "\"required\" : false,",
+        "\"multipleValues\" : false,",
+        "\"path\" : \"config.trim\",",
+        "\"multiple\" : true,",
+        "\"defaultValue\" : [ {",
+        "\"trim\" : \"true\"",
+        "} ],",
+        "\"outputName\" : false",
+        "} ]",
+        "}",
+        "}"
+      );
 
   @Test
   void describeAll() throws IOException {

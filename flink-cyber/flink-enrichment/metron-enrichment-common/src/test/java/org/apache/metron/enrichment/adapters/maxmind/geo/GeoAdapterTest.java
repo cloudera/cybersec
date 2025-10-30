@@ -19,7 +19,6 @@ package org.apache.metron.enrichment.adapters.maxmind.geo;
 
 import com.cloudera.cyber.TestUtils;
 import com.google.common.collect.ImmutableMap;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.enrichment.adapters.geo.GeoAdapter;
 import org.apache.metron.enrichment.cache.CacheKey;
 import org.json.simple.JSONObject;
@@ -36,20 +35,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class GeoAdapterTest {
   private static final String IP = "216.160.83.56";
 
-  /**
-   * {
-   * "locID":"5803556",
-   * "country":"US",
-   * "city":"Milton",
-   * "postalCode":"98354",
-   * "latitude":"47.2513",
-   * "longitude":"-122.3149",
-   * "dmaCode":"819",
-   * "location_point":"47.2513,-122.3149"
-   * }
-   */
-  @Multiline
-  private static String expectedMessageString;
+  private static String expectedMessageString = String.join("\n",
+        "{",
+        "\"locID\":\"5803556\",",
+        "\"country\":\"US\",",
+        "\"city\":\"Milton\",",
+        "\"postalCode\":\"98354\",",
+        "\"latitude\":\"47.2513\",",
+        "\"longitude\":\"-122.3149\",",
+        "\"dmaCode\":\"819\",",
+        "\"location_point\":\"47.2513,-122.3149\"",
+        "}"
+      );
 
   private static JSONObject expectedMessage;
 

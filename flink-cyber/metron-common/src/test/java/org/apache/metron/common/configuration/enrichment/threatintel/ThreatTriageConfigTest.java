@@ -18,7 +18,6 @@
 
 package org.apache.metron.common.configuration.enrichment.threatintel;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
 import org.junit.jupiter.api.Test;
 
@@ -31,27 +30,25 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ThreatTriageConfigTest {
 
-  /**
-   * {
-   *   "enrichment": {
-   *   },
-   *   "threatIntel": {
-   *     "triageConfig": {
-   *       "riskLevelRules": [
-   *         {
-   *           "name": "Rule Name",
-   *           "comment": "Rule Comment",
-   *           "reason": "'Rule Reason'",
-   *           "rule": "ip_src_addr == '10.0.2.3'",
-   *           "score": 10
-   *         }
-   *       ]
-   *     }
-   *   }
-   * }
-   */
-  @Multiline
-  private String triageRuleWithNumericScore;
+  private String triageRuleWithNumericScore = String.join("\n",
+        "{",
+        "\"enrichment\": {",
+        "},",
+        "\"threatIntel\": {",
+        "\"triageConfig\": {",
+        "\"riskLevelRules\": [",
+        "{",
+        "\"name\": \"Rule Name\",",
+        "\"comment\": \"Rule Comment\",",
+        "\"reason\": \"'Rule Reason'\",",
+        "\"rule\": \"ip_src_addr == '10.0.2.3'\",",
+        "\"score\": 10",
+        "}",
+        "]",
+        "}",
+        "}",
+        "}"
+      );
 
   @Test
   public void shouldAllowNumericRuleScore() throws Exception {
@@ -72,27 +69,25 @@ public class ThreatTriageConfigTest {
     assertEquals("10", rule.getScoreExpression());
   }
 
-  /**
-   * {
-   *   "enrichment": {
-   *   },
-   *   "threatIntel": {
-   *     "triageConfig": {
-   *       "riskLevelRules": [
-   *         {
-   *           "name": "Rule Name",
-   *           "comment": "Rule Comment",
-   *           "reason": "'Rule Reason'",
-   *           "rule": "ip_src_addr == '10.0.2.3'",
-   *           "score": "10 + 10"
-   *         }
-   *       ]
-   *     }
-   *   }
-   * }
-   */
-  @Multiline
-  private String triageRuleWithScoreExpression;
+  private String triageRuleWithScoreExpression = String.join("\n",
+        "{",
+        "\"enrichment\": {",
+        "},",
+        "\"threatIntel\": {",
+        "\"triageConfig\": {",
+        "\"riskLevelRules\": [",
+        "{",
+        "\"name\": \"Rule Name\",",
+        "\"comment\": \"Rule Comment\",",
+        "\"reason\": \"'Rule Reason'\",",
+        "\"rule\": \"ip_src_addr == '10.0.2.3'\",",
+        "\"score\": \"10 + 10\"",
+        "}",
+        "]",
+        "}",
+        "}",
+        "}"
+      );
 
   @Test
   public void shouldAllowScoreAsStellarExpression() throws Exception {

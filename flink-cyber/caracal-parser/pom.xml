@@ -206,11 +206,6 @@
             </exclusions>
         </dependency>
 
-        <dependency>
-            <groupId>org.adrianwalker</groupId>
-            <artifactId>multiline-string</artifactId>
-        </dependency>
-
     </dependencies>
 
     <build>

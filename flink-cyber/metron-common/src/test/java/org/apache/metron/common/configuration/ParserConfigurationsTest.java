@@ -18,7 +18,6 @@
 
 package org.apache.metron.common.configuration;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -31,48 +30,46 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ParserConfigurationsTest {
 
-  /**
-   * {
-   *  "parserClassName" : "parser-class",
-   *  "filterClassName" : "filter-class",
-   *  "sensorTopic" : "sensor-topic",
-   *  "outputTopic" : "output-topic",
-   *  "errorTopic" : "error-topic",
-   *  "writerClassName" : "writer-class",
-   *  "errorWriterClassName" : "error-writer-class",
-   *  "readMetadata" : true,
-   *  "mergeMetadata" : true,
-   *  "numWorkers" : 40,
-   *  "numAckers" : 40,
-   *  "spoutParallelism" : 40,
-   *  "spoutNumTasks" : 40,
-   *  "parserParallelism" : 40,
-   *  "parserNumTasks" : 40,
-   *  "errorWriterParallelism" : 40,
-   *  "errorWriterNumTasks" : 40,
-   *  "securityProtocol" : "security-protocol",
-   *  "spoutConfig" : {
-   *    "foo" : "bar"
-   *  },
-   *  "stormConfig" : {
-   *    "storm" : "config"
-   *  },
-   *  "cacheConfig" : {
-   *    "stellar.cache.maxSize" : 20000
-   *  },
-   *  "parserConfig" : {
-   *    "parser" : "config"
-   *  },
-   *  "fieldTransformations" : [
-   *    {
-   *      "input" : "input-field",
-   *      "transformation" : "REMOVE"
-   *    }
-   *  ]
-   * }
-   */
-  @Multiline
-  private static String parserConfig;
+  private static String parserConfig = String.join("\n",
+        "{",
+        "\"parserClassName\" : \"parser-class\",",
+        "\"filterClassName\" : \"filter-class\",",
+        "\"sensorTopic\" : \"sensor-topic\",",
+        "\"outputTopic\" : \"output-topic\",",
+        "\"errorTopic\" : \"error-topic\",",
+        "\"writerClassName\" : \"writer-class\",",
+        "\"errorWriterClassName\" : \"error-writer-class\",",
+        "\"readMetadata\" : true,",
+        "\"mergeMetadata\" : true,",
+        "\"numWorkers\" : 40,",
+        "\"numAckers\" : 40,",
+        "\"spoutParallelism\" : 40,",
+        "\"spoutNumTasks\" : 40,",
+        "\"parserParallelism\" : 40,",
+        "\"parserNumTasks\" : 40,",
+        "\"errorWriterParallelism\" : 40,",
+        "\"errorWriterNumTasks\" : 40,",
+        "\"securityProtocol\" : \"security-protocol\",",
+        "\"spoutConfig\" : {",
+        "\"foo\" : \"bar\"",
+        "},",
+        "\"stormConfig\" : {",
+        "\"storm\" : \"config\"",
+        "},",
+        "\"cacheConfig\" : {",
+        "\"stellar.cache.maxSize\" : 20000",
+        "},",
+        "\"parserConfig\" : {",
+        "\"parser\" : \"config\"",
+        "},",
+        "\"fieldTransformations\" : [",
+        "{",
+        "\"input\" : \"input-field\",",
+        "\"transformation\" : \"REMOVE\"",
+        "}",
+        "]",
+        "}"
+      );
 
   @Test
   public void sensorParserConfig_properties_populated_by_JSON_configuration() throws IOException {

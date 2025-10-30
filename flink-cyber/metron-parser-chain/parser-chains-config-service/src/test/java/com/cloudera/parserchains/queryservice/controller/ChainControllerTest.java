@@ -18,7 +18,6 @@ import com.cloudera.parserchains.queryservice.model.exec.ChainTestRequest;
 import com.cloudera.parserchains.queryservice.model.exec.ChainTestResponse;
 import com.cloudera.parserchains.queryservice.model.summary.ParserChainSummary;
 import com.cloudera.parserchains.queryservice.service.ChainPersistenceService;
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -94,13 +93,11 @@ public class ChainControllerTest {
                 .andExpect(jsonPath("$.*", hasSize(0)));
     }
 
-    /**
-     * {
-     *   "name" : "{name}"
-     * }
-     */
-    @Multiline
-    public static String createChainJSON;
+    public static String createChainJSON = String.join("\n",
+        "{",
+        "\"name\" : \"{name}\"",
+        "}"
+        );
 
     @Test
     public void creates_chain() throws Exception {
@@ -123,14 +120,12 @@ public class ChainControllerTest {
                 .andExpect(jsonPath("$.name", is(chainNameOne)));
     }
 
-    /**
-     * {
-     *   "id" : "{id}",
-     *   "name" : "{name}"
-     * }
-     */
-    @Multiline
-    public static String readChainJSON;
+    public static String readChainJSON = String.join("\n",
+        "{",
+        "\"id\" : \"{id}\",",
+        "\"name\" : \"{name}\"",
+        "}"
+        );
 
     @Test
     public void read_chain_by_id_returns_chain_config() throws Exception {
@@ -202,100 +197,96 @@ public class ChainControllerTest {
                 .andExpect(status().isNotFound());
     }
 
-    /**
-     * {
-     *   "sampleData": {
-     *     "type": "manual",
-     *     "source": "Marie, Curie"
-     *   },
-     *   "chainConfig": {
-     *     "id": "3b31e549-340f-47ce-8a71-d702685137f4",
-     *     "name": "My Parser Chain",
-     *     "parsers": [
-     *       {
-     *         "id": "61e99275-e076-46b6-aaed-8acce58cc0e4",
-     *         "name": "Rename Field",
-     *         "type": "com.cloudera.parserchains.parsers.RenameFieldParser",
-     *         "config": {
-     *           "fieldToRename": [
-     *             {
-     *               "from": "original_string",
-     *               "to": "ORIGINAL_STRING"
-     *             }
-     *           ]
-     *         }
-     *       }, {
-     *         "id": "1ee889fc-7495-4b47-8243-c16e5e74bb82",
-     *         "name": "Rename Field",
-     *         "type": "com.cloudera.parserchains.parsers.RenameFieldParser",
-     *         "config": {
-     *           "fieldToRename": [
-     *             {
-     *               "from": "ORIGINAL_STRING",
-     *               "to": "original_string"
-     *             }
-     *           ]
-     *         }
-     *       }
-     *     ]
-     *   }
-     * }
-     */
-    @Multiline
-    static String test_chain_request;
+    static String test_chain_request = String.join("\n",
+        "{",
+        "\"sampleData\": {",
+        "\"type\": \"manual\",",
+        "\"source\": \"Marie, Curie\"",
+        "},",
+        "\"chainConfig\": {",
+        "\"id\": \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\": \"My Parser Chain\",",
+        "\"parsers\": [",
+        "{",
+        "\"id\": \"61e99275-e076-46b6-aaed-8acce58cc0e4\",",
+        "\"name\": \"Rename Field\",",
+        "\"type\": \"com.cloudera.parserchains.parsers.RenameFieldParser\",",
+        "\"config\": {",
+        "\"fieldToRename\": [",
+        "{",
+        "\"from\": \"original_string\",",
+        "\"to\": \"ORIGINAL_STRING\"",
+        "}",
+        "]",
+        "}",
+        "}, {",
+        "\"id\": \"1ee889fc-7495-4b47-8243-c16e5e74bb82\",",
+        "\"name\": \"Rename Field\",",
+        "\"type\": \"com.cloudera.parserchains.parsers.RenameFieldParser\",",
+        "\"config\": {",
+        "\"fieldToRename\": [",
+        "{",
+        "\"from\": \"ORIGINAL_STRING\",",
+        "\"to\": \"original_string\"",
+        "}",
+        "]",
+        "}",
+        "}",
+        "]",
+        "}",
+        "}"
+        );
 
-    /**
-     * {
-     *    "results":[
-     *       {
-     *          "input":{
-     *             "original_string":"Marie, Curie"
-     *          },
-     *          "output":{
-     *             "original_string":"Marie, Curie"
-     *          },
-     *          "log":{
-     *             "type":"info",
-     *             "message":"success",
-     *             "parserId":"1ee889fc-7495-4b47-8243-c16e5e74bb82",
-     *             "parserName":"Rename Field"
-     *          },
-     *          "parserResults":[
-     *             {
-     *                "input":{
-     *                   "original_string":"Marie, Curie"
-     *                },
-     *                "output":{
-     *                   "ORIGINAL_STRING":"Marie, Curie"
-     *                },
-     *                "log":{
-     *                   "type":"info",
-     *                   "message":"success",
-     *                   "parserId":"61e99275-e076-46b6-aaed-8acce58cc0e4",
-     *                   "parserName":"Rename Field"
-     *                }
-     *             },
-     *             {
-     *                "input":{
-     *                   "ORIGINAL_STRING":"Marie, Curie"
-     *                },
-     *                "output":{
-     *                   "original_string":"Marie, Curie"
-     *                },
-     *                "log":{
-     *                   "type":"info",
-     *                   "message":"success",
-     *                   "parserId":"1ee889fc-7495-4b47-8243-c16e5e74bb82",
-     *                   "parserName":"Rename Field"
-     *                }
-     *             }
-     *          ]
-     *       }
-     *    ]
-     * }
-     */
-    @Multiline
-    static String test_chain_response;
+    static String test_chain_response = String.join("\n",
+        "{",
+        "\"results\":[",
+        "{",
+        "\"input\":{",
+        "\"original_string\":\"Marie, Curie\"",
+        "},",
+        "\"output\":{",
+        "\"original_string\":\"Marie, Curie\"",
+        "},",
+        "\"log\":{",
+        "\"type\":\"info\",",
+        "\"message\":\"success\",",
+        "\"parserId\":\"1ee889fc-7495-4b47-8243-c16e5e74bb82\",",
+        "\"parserName\":\"Rename Field\"",
+        "},",
+        "\"parserResults\":[",
+        "{",
+        "\"input\":{",
+        "\"original_string\":\"Marie, Curie\"",
+        "},",
+        "\"output\":{",
+        "\"ORIGINAL_STRING\":\"Marie, Curie\"",
+        "},",
+        "\"log\":{",
+        "\"type\":\"info\",",
+        "\"message\":\"success\",",
+        "\"parserId\":\"61e99275-e076-46b6-aaed-8acce58cc0e4\",",
+        "\"parserName\":\"Rename Field\"",
+        "}",
+        "},",
+        "{",
+        "\"input\":{",
+        "\"ORIGINAL_STRING\":\"Marie, Curie\"",
+        "},",
+        "\"output\":{",
+        "\"original_string\":\"Marie, Curie\"",
+        "},",
+        "\"log\":{",
+        "\"type\":\"info\",",
+        "\"message\":\"success\",",
+        "\"parserId\":\"1ee889fc-7495-4b47-8243-c16e5e74bb82\",",
+        "\"parserName\":\"Rename Field\"",
+        "}",
+        "}",
+        "]",
+        "}",
+        "]",
+        "}"
+        );
 
     @Test
     void test_chain() throws Exception {
@@ -313,147 +304,143 @@ public class ChainControllerTest {
         assertThat(actual, is(expected));
     }
 
-    /**
-     * {
-     *   "sampleData": {
-     *     "type": "manual",
-     *     "source": [
-     *          "Marie, Curie",
-     *          "Ada, Lovelace"
-     *      ]
-     *   },
-     *   "chainConfig": {
-     *     "id": "3b31e549-340f-47ce-8a71-d702685137f4",
-     *     "name": "My Parser Chain",
-     *     "parsers": [
-     *       {
-     *         "id": "61e99275-e076-46b6-aaed-8acce58cc0e4",
-     *         "name": "Rename Field",
-     *         "type": "com.cloudera.parserchains.parsers.RenameFieldParser",
-     *         "config": {
-     *           "fieldToRename": [
-     *             {
-     *               "from": "original_string",
-     *               "to": "ORIGINAL_STRING"
-     *             }
-     *           ]
-     *         }
-     *       }, {
-     *         "id": "1ee889fc-7495-4b47-8243-c16e5e74bb82",
-     *         "name": "Rename Field",
-     *         "type": "com.cloudera.parserchains.parsers.RenameFieldParser",
-     *         "config": {
-     *           "fieldToRename": [
-     *             {
-     *               "from": "ORIGINAL_STRING",
-     *               "to": "original_string"
-     *             }
-     *           ]
-     *         }
-     *       }
-     *     ]
-     *   }
-     * }
-     */
-    @Multiline
-    static String test_chain_with_2_samples_request;
+    static String test_chain_with_2_samples_request = String.join("\n",
+        "{",
+        "\"sampleData\": {",
+        "\"type\": \"manual\",",
+        "\"source\": [",
+        "\"Marie, Curie\",",
+        "\"Ada, Lovelace\"",
+        "]",
+        "},",
+        "\"chainConfig\": {",
+        "\"id\": \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\": \"My Parser Chain\",",
+        "\"parsers\": [",
+        "{",
+        "\"id\": \"61e99275-e076-46b6-aaed-8acce58cc0e4\",",
+        "\"name\": \"Rename Field\",",
+        "\"type\": \"com.cloudera.parserchains.parsers.RenameFieldParser\",",
+        "\"config\": {",
+        "\"fieldToRename\": [",
+        "{",
+        "\"from\": \"original_string\",",
+        "\"to\": \"ORIGINAL_STRING\"",
+        "}",
+        "]",
+        "}",
+        "}, {",
+        "\"id\": \"1ee889fc-7495-4b47-8243-c16e5e74bb82\",",
+        "\"name\": \"Rename Field\",",
+        "\"type\": \"com.cloudera.parserchains.parsers.RenameFieldParser\",",
+        "\"config\": {",
+        "\"fieldToRename\": [",
+        "{",
+        "\"from\": \"ORIGINAL_STRING\",",
+        "\"to\": \"original_string\"",
+        "}",
+        "]",
+        "}",
+        "}",
+        "]",
+        "}",
+        "}"
+        );
 
-    /**
-     * {
-     *    "results":[
-     *       {
-     *          "input":{
-     *             "original_string":"Marie, Curie"
-     *          },
-     *          "output":{
-     *             "original_string":"Marie, Curie"
-     *          },
-     *          "log":{
-     *             "type":"info",
-     *             "message":"success",
-     *             "parserId":"1ee889fc-7495-4b47-8243-c16e5e74bb82",
-     *             "parserName":"Rename Field"
-     *          },
-     *          "parserResults":[
-     *             {
-     *                "input":{
-     *                   "original_string":"Marie, Curie"
-     *                },
-     *                "output":{
-     *                   "ORIGINAL_STRING":"Marie, Curie"
-     *                },
-     *                "log":{
-     *                   "type":"info",
-     *                   "message":"success",
-     *                   "parserId":"61e99275-e076-46b6-aaed-8acce58cc0e4",
-     *                   "parserName":"Rename Field"
-     *                }
-     *             },
-     *             {
-     *                "input":{
-     *                   "ORIGINAL_STRING":"Marie, Curie"
-     *                },
-     *                "output":{
-     *                   "original_string":"Marie, Curie"
-     *                },
-     *                "log":{
-     *                   "type":"info",
-     *                   "message":"success",
-     *                   "parserId":"1ee889fc-7495-4b47-8243-c16e5e74bb82",
-     *                   "parserName":"Rename Field"
-     *                }
-     *             }
-     *          ]
-     *       },
-     *       {
-     *          "input":{
-     *             "original_string":"Ada, Lovelace"
-     *          },
-     *          "output":{
-     *             "original_string":"Ada, Lovelace"
-     *          },
-     *          "log":{
-     *             "type":"info",
-     *             "message":"success",
-     *             "parserId":"1ee889fc-7495-4b47-8243-c16e5e74bb82",
-     *             "parserName":"Rename Field"
-     *          },
-     *          "parserResults":[
-     *             {
-     *                "input":{
-     *                   "original_string":"Ada, Lovelace"
-     *                },
-     *                "output":{
-     *                   "ORIGINAL_STRING":"Ada, Lovelace"
-     *                },
-     *                "log":{
-     *                   "type":"info",
-     *                   "message":"success",
-     *                   "parserId":"61e99275-e076-46b6-aaed-8acce58cc0e4",
-     *                   "parserName":"Rename Field"
-     *                }
-     *             },
-     *             {
-     *                "input":{
-     *                   "ORIGINAL_STRING":"Ada, Lovelace"
-     *                },
-     *                "output":{
-     *                   "original_string":"Ada, Lovelace"
-     *                },
-     *                "log":{
-     *                   "type":"info",
-     *                   "message":"success",
-     *                   "parserId":"1ee889fc-7495-4b47-8243-c16e5e74bb82",
-     *                   "parserName":"Rename Field"
-     *                }
-     *             }
-     *          ]
-     *       }
-     *    ]
-     * }
-     */
-    @Multiline
-    static String test_chain_with_2_samples_response;
+    static String test_chain_with_2_samples_response = String.join("\n",
+        "{",
+        "\"results\":[",
+        "{",
+        "\"input\":{",
+        "\"original_string\":\"Marie, Curie\"",
+        "},",
+        "\"output\":{",
+        "\"original_string\":\"Marie, Curie\"",
+        "},",
+        "\"log\":{",
+        "\"type\":\"info\",",
+        "\"message\":\"success\",",
+        "\"parserId\":\"1ee889fc-7495-4b47-8243-c16e5e74bb82\",",
+        "\"parserName\":\"Rename Field\"",
+        "},",
+        "\"parserResults\":[",
+        "{",
+        "\"input\":{",
+        "\"original_string\":\"Marie, Curie\"",
+        "},",
+        "\"output\":{",
+        "\"ORIGINAL_STRING\":\"Marie, Curie\"",
+        "},",
+        "\"log\":{",
+        "\"type\":\"info\",",
+        "\"message\":\"success\",",
+        "\"parserId\":\"61e99275-e076-46b6-aaed-8acce58cc0e4\",",
+        "\"parserName\":\"Rename Field\"",
+        "}",
+        "},",
+        "{",
+        "\"input\":{",
+        "\"ORIGINAL_STRING\":\"Marie, Curie\"",
+        "},",
+        "\"output\":{",
+        "\"original_string\":\"Marie, Curie\"",
+        "},",
+        "\"log\":{",
+        "\"type\":\"info\",",
+        "\"message\":\"success\",",
+        "\"parserId\":\"1ee889fc-7495-4b47-8243-c16e5e74bb82\",",
+        "\"parserName\":\"Rename Field\"",
+        "}",
+        "}",
+        "]",
+        "},",
+        "{",
+        "\"input\":{",
+        "\"original_string\":\"Ada, Lovelace\"",
+        "},",
+        "\"output\":{",
+        "\"original_string\":\"Ada, Lovelace\"",
+        "},",
+        "\"log\":{",
+        "\"type\":\"info\",",
+        "\"message\":\"success\",",
+        "\"parserId\":\"1ee889fc-7495-4b47-8243-c16e5e74bb82\",",
+        "\"parserName\":\"Rename Field\"",
+        "},",
+        "\"parserResults\":[",
+        "{",
+        "\"input\":{",
+        "\"original_string\":\"Ada, Lovelace\"",
+        "},",
+        "\"output\":{",
+        "\"ORIGINAL_STRING\":\"Ada, Lovelace\"",
+        "},",
+        "\"log\":{",
+        "\"type\":\"info\",",
+        "\"message\":\"success\",",
+        "\"parserId\":\"61e99275-e076-46b6-aaed-8acce58cc0e4\",",
+        "\"parserName\":\"Rename Field\"",
+        "}",
+        "},",
+        "{",
+        "\"input\":{",
+        "\"ORIGINAL_STRING\":\"Ada, Lovelace\"",
+        "},",
+        "\"output\":{",
+        "\"original_string\":\"Ada, Lovelace\"",
+        "},",
+        "\"log\":{",
+        "\"type\":\"info\",",
+        "\"message\":\"success\",",
+        "\"parserId\":\"1ee889fc-7495-4b47-8243-c16e5e74bb82\",",
+        "\"parserName\":\"Rename Field\"",
+        "}",
+        "}",
+        "]",
+        "}",
+        "]",
+        "}"
+        );
 
     @Test
     void test_chain_with_2_samples() throws Exception {
@@ -471,67 +458,63 @@ public class ChainControllerTest {
         assertThat(actual, is(expected));
     }
 
-    /**
-     * {
-     *   "sampleData": {
-     *     "type": "manual",
-     *     "source": [
-     *          "Marie, Curie",
-     *          "Ada, Lovelace"
-     *      ]
-     *   },
-     *   "chainConfig": {
-     *     "id": "3b31e549-340f-47ce-8a71-d702685137f4",
-     *     "name": "Chain with Invalid Router",
-     *     "parsers": [
-     *       {
-     *         "id": "61e99275-e076-46b6-aaed-8acce58cc0e4",
-     *         "name": "Invalid Router",
-     *         "type": "Router",
-     *         "config": {
-     *         },
-     *         "routing":{
-     *           "routes":[
-     *            ]
-     *         }
-     *       }
-     *     ]
-     *   }
-     * }
-     */
-    @Multiline
-    static String test_invalid_chain_request;
+    static String test_invalid_chain_request = String.join("\n",
+        "{",
+        "\"sampleData\": {",
+        "\"type\": \"manual\",",
+        "\"source\": [",
+        "\"Marie, Curie\",",
+        "\"Ada, Lovelace\"",
+        "]",
+        "},",
+        "\"chainConfig\": {",
+        "\"id\": \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\": \"Chain with Invalid Router\",",
+        "\"parsers\": [",
+        "{",
+        "\"id\": \"61e99275-e076-46b6-aaed-8acce58cc0e4\",",
+        "\"name\": \"Invalid Router\",",
+        "\"type\": \"Router\",",
+        "\"config\": {",
+        "},",
+        "\"routing\":{",
+        "\"routes\":[",
+        "]",
+        "}",
+        "}",
+        "]",
+        "}",
+        "}"
+        );
 
-    /**
-     * {
-     *    "results":[
-     *       {
-     *          "input":{
-     *          },
-     *          "output":{
-     *          },
-     *          "log":{
-     *             "type":"error",
-     *             "message":"Invalid field name: 'null'",
-     *             "parserId":"61e99275-e076-46b6-aaed-8acce58cc0e4"
-     *          }
-     *       },
-     *       {
-     *          "input":{
-     *          },
-     *          "output":{
-     *          },
-     *          "log":{
-     *             "type":"error",
-     *             "message":"Invalid field name: 'null'",
-     *             "parserId":"61e99275-e076-46b6-aaed-8acce58cc0e4"
-     *          }
-     *       }
-     *    ]
-     * }
-     */
-    @Multiline
-    static String test_invalid_chain_response;
+    static String test_invalid_chain_response = String.join("\n",
+        "{",
+        "\"results\":[",
+        "{",
+        "\"input\":{",
+        "},",
+        "\"output\":{",
+        "},",
+        "\"log\":{",
+        "\"type\":\"error\",",
+        "\"message\":\"Invalid field name: 'null'\",",
+        "\"parserId\":\"61e99275-e076-46b6-aaed-8acce58cc0e4\"",
+        "}",
+        "},",
+        "{",
+        "\"input\":{",
+        "},",
+        "\"output\":{",
+        "},",
+        "\"log\":{",
+        "\"type\":\"error\",",
+        "\"message\":\"Invalid field name: 'null'\",",
+        "\"parserId\":\"61e99275-e076-46b6-aaed-8acce58cc0e4\"",
+        "}",
+        "}",
+        "]",
+        "}"
+        );
 
     @Test
     void test_invalid_chain() throws Exception {
@@ -568,31 +551,29 @@ public class ChainControllerTest {
                 .andExpect(jsonPath("$.results", hasSize(MAX_SAMPLES_PER_TEST)));
     }
 
-    /**
-     * {
-     *    "sampleData":{
-     *       "type":"manual",
-     *       "source":[
-     *          "ASas"
-     *       ]
-     *    },
-     *    "chainConfig":{
-     *       "id":"1",
-     *       "name":"hello",
-     *       "parsers":[
-     *          {
-     *             "name":"Syslog",
-     *             "type":"com.cloudera.parserchains.parsers.SyslogParser",
-     *             "id":"8f498980-5f13-11ea-9ea2-a3a38413c812",
-     *             "config":{
-     *             }
-     *          }
-     *       ]
-     *    }
-     * }
-     */
-    @Multiline
-    static String test_get_useful_error_message;
+    static String test_get_useful_error_message = String.join("\n",
+        "{",
+        "\"sampleData\":{",
+        "\"type\":\"manual\",",
+        "\"source\":[",
+        "\"ASas\"",
+        "]",
+        "},",
+        "\"chainConfig\":{",
+        "\"id\":\"1\",",
+        "\"name\":\"hello\",",
+        "\"parsers\":[",
+        "{",
+        "\"name\":\"Syslog\",",
+        "\"type\":\"com.cloudera.parserchains.parsers.SyslogParser\",",
+        "\"id\":\"8f498980-5f13-11ea-9ea2-a3a38413c812\",",
+        "\"config\":{",
+        "}",
+        "}",
+        "]",
+        "}",
+        "}"
+        );
 
     @Test
     void test_get_useful_error_message() throws Exception {
