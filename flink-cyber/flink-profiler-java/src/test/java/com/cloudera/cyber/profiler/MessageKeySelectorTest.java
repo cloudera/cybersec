@@ -16,8 +16,8 @@ package com.cloudera.cyber.profiler;
 import com.cloudera.cyber.MessageUtils;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,6 +49,6 @@ public class MessageKeySelectorTest {
 
         ProfileMessage message = new ProfileMessage(MessageUtils.getCurrentTimestamp(), extensions);
         MessageKeySelector selector = new MessageKeySelector(keyFields);
-        Assert.assertEquals(expectedKey, selector.getKey(message));
+        Assertions.assertEquals(expectedKey, selector.getKey(message));
     }
 }

@@ -15,9 +15,9 @@ package com.cloudera.cyber.enrichment.rest;
 import com.cloudera.cyber.enrichment.rest.impl.MockRestServer;
 import com.google.common.collect.Lists;
 import org.apache.http.client.methods.HttpPost;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
 import java.io.UnsupportedEncodingException;
@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
 // tests will run either with or without tls when junit runs derived classes
-@Ignore
+@Disabled
 public class PostRestRequestTest extends RestRequestTest {
     private static RestEnrichmentConfig modelResultPostRequest;
 
@@ -115,8 +115,8 @@ public class PostRestRequestTest extends RestRequestTest {
             put(MockRestServer.DOMAIN_EXTENSION_NAME, domainName);
         }};
         RestRequestResult result = makeRequest(config, variables);
-        Assert.assertEquals(legit.toString(), result.getExtensions().get(MockRestServer.LEGIT_RESPONSE));
-        Assert.assertTrue(result.getErrors().isEmpty());
+        Assertions.assertEquals(legit.toString(), result.getExtensions().get(MockRestServer.LEGIT_RESPONSE));
+        Assertions.assertTrue(result.getErrors().isEmpty());
     }
 
     protected void testDomain(RestEnrichmentConfig config, List<String> expectedErrors) throws Exception {
@@ -124,8 +124,8 @@ public class PostRestRequestTest extends RestRequestTest {
             put("wrong field name", "testdomain");
         }};
         RestRequestResult result = makeRequest(config, variables);
-        Assert.assertNull(result.getExtensions().get(MockRestServer.LEGIT_RESPONSE));
-        Assert.assertEquals(expectedErrors, result.getErrors());
+        Assertions.assertNull(result.getExtensions().get(MockRestServer.LEGIT_RESPONSE));
+        Assertions.assertEquals(expectedErrors, result.getErrors());
     }
 
 }

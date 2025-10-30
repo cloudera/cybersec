@@ -217,8 +217,8 @@
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
+        
     </dependencies>
-
 
     <build>
         <testResources>
@@ -245,7 +245,8 @@
                         <type>test-jar</type>
                         <scope>compile</scope>
                     </dependency>
-                </dependencies>
+                    
+    </dependencies>
             </plugin>
             <!-- We use the maven-shade plugin to create a fat jar that contains all necessary dependencies. -->
             <!-- Change the value of <mainClass>...</mainClass> if your program entry point changes. -->
@@ -298,7 +299,8 @@
                         <artifactId>classindex-transformer</artifactId>
                         <version>3.4</version>
                     </dependency>
-                </dependencies>
+                    
+    </dependencies>
                 </plugin>
         </plugins>
     </build>

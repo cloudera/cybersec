@@ -20,8 +20,8 @@ import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.typeutils.TypeSerializer;
 import org.apache.flink.formats.avro.typeutils.AvroTypeInfo;
 import org.apache.flink.util.InstantiationUtil;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -30,7 +30,7 @@ import java.util.UUID;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class SerializationTests {
 
@@ -42,7 +42,7 @@ public class SerializationTests {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testScoringRule() throws IOException {
         ScoringRule test = ScoringRule.builder()
                 .id(UUID.randomUUID().toString())

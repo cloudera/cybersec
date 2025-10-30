@@ -19,8 +19,8 @@ import com.cloudera.cyber.scoring.Scores;
 import com.cloudera.cyber.scoring.ScoringProcessFunction;
 import com.cloudera.cyber.scoring.ScoringSummarizationMode;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,12 +51,12 @@ public class ScoredMessageToProfileMessageMapTest {
         ScoredMessageToProfileMessageMap map = new ScoredMessageToProfileMessageMap(profileGroupConfig);
         ProfileMessage outputProfileMessage = map.map(inputScoredMessage);
 
-        Assert.assertEquals(inputMessage.getTs(), outputProfileMessage.getTs());
+        Assertions.assertEquals(inputMessage.getTs(), outputProfileMessage.getTs());
 
         Map<String, String> expectedExtensions = new HashMap<>(inputExtensions);
         expectedExtensions.remove(notRequiredFieldName);
         expectedExtensions.put(ScoredMessageToProfileMessageMap.CYBER_SCORE_FIELD, Double.toString(expectedScore));
-        Assert.assertEquals(expectedExtensions, outputProfileMessage.getExtensions());
+        Assertions.assertEquals(expectedExtensions, outputProfileMessage.getExtensions());
 
     }
 

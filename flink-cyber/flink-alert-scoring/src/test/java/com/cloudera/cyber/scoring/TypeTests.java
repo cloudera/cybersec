@@ -13,10 +13,10 @@
 package com.cloudera.cyber.scoring;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TypeTests {
     @Test

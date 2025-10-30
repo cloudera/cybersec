@@ -78,7 +78,6 @@
             <version>${global.httpclient.version}</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka</artifactId>
@@ -94,8 +93,8 @@
             <artifactId>flink-test-utils</artifactId>
             <scope>test</scope>
         </dependency>
+        
     </dependencies>
-
 
     <build>
         <plugins>

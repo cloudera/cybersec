@@ -12,8 +12,8 @@
 
 package com.cloudera.cyber.enrichment.rest;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,13 +33,13 @@ public class RestRequestCacheExpiryTest {
         RestRequestKey key = new RestRequestKey(Collections.emptyMap(), "http://host:1234/path");
 
         RestRequestResult successResult = new RestRequestResult();
-        Assert.assertEquals(TimeUnit.NANOSECONDS.convert(successHours, successUnit), expiry.expireAfterCreate(key, successResult, 0));
+        Assertions.assertEquals(TimeUnit.NANOSECONDS.convert(successHours, successUnit), expiry.expireAfterCreate(key, successResult, 0));
 
         RestRequestResult failureResult = new RestRequestResult(new HashMap<>(), Collections.singletonList("error message"));
-        Assert.assertEquals(TimeUnit.NANOSECONDS.convert(failureMinutes, failureUnit), expiry.expireAfterCreate(key, failureResult, 0));
+        Assertions.assertEquals(TimeUnit.NANOSECONDS.convert(failureMinutes, failureUnit), expiry.expireAfterCreate(key, failureResult, 0));
 
         long expectedDuration = 3;
-        Assert.assertEquals(expectedDuration, expiry.expireAfterRead(key, successResult, 0, expectedDuration));
-        Assert.assertEquals(expectedDuration, expiry.expireAfterUpdate(key, successResult, 0, expectedDuration));
+        Assertions.assertEquals(expectedDuration, expiry.expireAfterRead(key, successResult, 0, expectedDuration));
+        Assertions.assertEquals(expectedDuration, expiry.expireAfterUpdate(key, successResult, 0, expectedDuration));
     }
 }

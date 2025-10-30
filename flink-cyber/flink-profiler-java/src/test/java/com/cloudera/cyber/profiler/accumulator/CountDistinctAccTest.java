@@ -13,8 +13,8 @@
 package com.cloudera.cyber.profiler.accumulator;
 
 import org.apache.flink.api.common.accumulators.Accumulator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,15 +33,15 @@ public class CountDistinctAccTest {
 
         // add a null value - should not change value
         accumulator.add(null);
-        Assert.assertEquals(previousResult, accumulator.getEstimate(), 0.1);
+        Assertions.assertEquals(previousResult, accumulator.getEstimate(), 0.1);
 
         // clone should have same result as original
         Accumulator<String, SerializableUnion> copy = accumulator.clone();
-        Assert.assertEquals(previousResult, copy.getLocalValue().getUnion().getResult().getEstimate(), 0.1);
+        Assertions.assertEquals(previousResult, copy.getLocalValue().getUnion().getResult().getEstimate(), 0.1);
 
         // reset local reset union
         accumulator.resetLocal();
-        Assert.assertEquals(0, accumulator.getEstimate(),0.1);
+        Assertions.assertEquals(0, accumulator.getEstimate(),0.1);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class CountDistinctAccTest {
 
         acc1.merge(acc2);
 
-        Assert.assertEquals(3, acc1.getEstimate(), 0.1);
+        Assertions.assertEquals(3, acc1.getEstimate(), 0.1);
     }
 
     @Test
@@ -72,7 +72,7 @@ public class CountDistinctAccTest {
         double nonEmptyAccResult = nonEmptyAcc.getEstimate();
 
         emptyAcc.merge(nonEmptyAcc);
-        Assert.assertEquals(nonEmptyAccResult, emptyAcc.getEstimate(), 0.1);
+        Assertions.assertEquals(nonEmptyAccResult, emptyAcc.getEstimate(), 0.1);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class CountDistinctAccTest {
         CountDistinctAcc emptyAcc = testCountDistinctString(Collections.emptyList());
 
         emptyAcc.merge(null);
-        Assert.assertEquals(0, emptyAcc.getEstimate(), 0.1);
+        Assertions.assertEquals(0, emptyAcc.getEstimate(), 0.1);
     }
 
     @Test
@@ -91,7 +91,7 @@ public class CountDistinctAccTest {
         double nonEmptyAccResult = nonEmptyAcc.getEstimate();
 
         nonEmptyAcc.merge(emptyAcc);
-        Assert.assertEquals(nonEmptyAccResult, nonEmptyAcc.getEstimate(), 0.1);
+        Assertions.assertEquals(nonEmptyAccResult, nonEmptyAcc.getEstimate(), 0.1);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class CountDistinctAccTest {
         CountDistinctAcc empty2= testCountDistinctString(Collections.emptyList());
 
         empty1.merge(empty2);
-        Assert.assertEquals(0, empty1.getEstimate(), 0.1);
+        Assertions.assertEquals(0, empty1.getEstimate(), 0.1);
     }
 
     private CountDistinctAcc testCountDistinctString(List<String> strings) {
@@ -109,7 +109,7 @@ public class CountDistinctAccTest {
             acc.add(nextString);
         }
         long uniqueStringCount = strings.stream().filter(Objects::nonNull).distinct().count();
-        Assert.assertEquals(uniqueStringCount, acc.getEstimate(), 0.1);
+        Assertions.assertEquals(uniqueStringCount, acc.getEstimate(), 0.1);
         return acc;
     }
 }

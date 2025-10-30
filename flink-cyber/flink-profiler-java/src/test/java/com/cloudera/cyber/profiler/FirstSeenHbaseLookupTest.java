@@ -28,8 +28,8 @@ import org.apache.flink.metrics.SimpleCounter;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
@@ -112,21 +112,21 @@ public class FirstSeenHbaseLookupTest extends FirstSeenHbaseLookup {
             OneInputStreamOperatorTestHarness<ProfileMessage, ProfileMessage> testHarness = createTestHarness();
             testHarness.processElement(new StreamRecord<>(profileMessage));
             List<ProfileMessage> results = testHarness.extractOutputValues();
-            Assert.assertEquals(1, results.size());
+            Assertions.assertEquals(1, results.size());
             ProfileMessage result = results.get(0);
-            Assert.assertEquals(expectedFirstSeen, result.getExtensions().get(FIRST_SEEN_RESULT_NAME));
-            Assert.assertEquals(expectedFirstTimestamp, result.getExtensions().get(FIRST_SEEN_RESULT_NAME.concat(FIRST_SEEN_TIME_SUFFIX)));
+            Assertions.assertEquals(expectedFirstSeen, result.getExtensions().get(FIRST_SEEN_RESULT_NAME));
+            Assertions.assertEquals(expectedFirstTimestamp, result.getExtensions().get(FIRST_SEEN_RESULT_NAME.concat(FIRST_SEEN_TIME_SUFFIX)));
 
             EnrichmentCommand profileEnrichmentUpdate = Objects.requireNonNull(testHarness.getSideOutput(firstSeenUpdateOutput).poll()).getValue();
-            Assert.assertEquals(CommandType.ADD, profileEnrichmentUpdate.getType());
+            Assertions.assertEquals(CommandType.ADD, profileEnrichmentUpdate.getType());
             ImmutableMap<String, String> expectedEntries = ImmutableMap.of(
                     FirstSeenHbaseLookup.FIRST_SEEN_PROPERTY_NAME, expectedFirstTimestamp != null ? expectedFirstTimestamp : firstSeen,
                     FirstSeenHbaseLookup.LAST_SEEN_PROPERTY_NAME, currentTsString);
             EnrichmentEntry enrichmentEntry = profileEnrichmentUpdate.getPayload();
-            Assert.assertEquals(FIRST_SEEN_ENRICHMENT_TYPE, enrichmentEntry.getType());
-            Assert.assertEquals(expectedEntries, enrichmentEntry.getEntries());
+            Assertions.assertEquals(FIRST_SEEN_ENRICHMENT_TYPE, enrichmentEntry.getType());
+            Assertions.assertEquals(expectedEntries, enrichmentEntry.getEntries());
         } catch (Exception e) {
-            Assert.fail();
+            Assertions.fail();
         }
     }
 
@@ -147,9 +147,9 @@ public class FirstSeenHbaseLookupTest extends FirstSeenHbaseLookup {
     }
 
     protected Map<String, Object> fetch(LookupKey key) {
-        Assert.assertTrue(key instanceof SimpleLookupKey);
-        Assert.assertEquals(EXPECTED_HBASE_TABLE_NAME, key.getTableName());
-        Assert.assertEquals(EXPECTED_COLUMN_FAMILY, key.getCf());
+        Assertions.assertTrue(key instanceof SimpleLookupKey);
+        Assertions.assertEquals(EXPECTED_HBASE_TABLE_NAME, key.getTableName());
+        Assertions.assertEquals(EXPECTED_COLUMN_FAMILY, key.getCf());
         return mockHbaseResults.getOrDefault(key.getKey(), Collections.emptyMap());
     }
 

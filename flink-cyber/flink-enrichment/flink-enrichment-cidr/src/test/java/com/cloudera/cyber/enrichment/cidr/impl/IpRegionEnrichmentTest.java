@@ -29,8 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class IpRegionEnrichmentTest {
 
@@ -39,7 +39,7 @@ public class IpRegionEnrichmentTest {
     private static final String IP_FIELD_NAME_EXTENSION = IP_FIELD_NAME + Enrichment.DELIMITER + FEATURE_NAME;
     private IpRegionCidrEnrichment ipRegionCidrEnrichment;
 
-    @Before
+    @BeforeEach
     public void createCidrEnrichment() {
         Map<IPAddressString, String> map = ImmutableMap.of(
                 new IPAddressString(IpRegionCidrTestData.IPV4_MASK_REGION_1), IpRegionCidrTestData.IPV4_MASK_REGION_1_NAME,

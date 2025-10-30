@@ -27,11 +27,10 @@ import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
 import org.hamcrest.Matchers;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,7 +39,7 @@ import java.util.*;
 import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @Slf4j
 public class RestLookupJobTest extends RestLookupJob {
@@ -50,14 +49,14 @@ public class RestLookupJobTest extends RestLookupJob {
     private ManualSource<Message> source;
     private static MockRestServer mockRestServer;
 
-    @ClassRule
-    public static TemporaryFolder configTempFolder = new TemporaryFolder();
+    @TempDir
+    public static File configTempFolder;
     private static String configFilePath;
 
-    @BeforeClass
+    @BeforeAll
     public static void startMockRestServer() throws IOException {
         mockRestServer = new MockRestServer(true);
-        File configFile = configTempFolder.newFile("rest-job-test.json");
+        File configFile = new File(configTempFolder, "rest-job-test.json");
         List<RestEnrichmentConfig> modelRestConfig = new ArrayList<>();
         modelRestConfig.add(mockRestServer.configureModelPostRequest().build());
         modelRestConfig.add(mockRestServer.configureGetAssetRequest().build());
@@ -68,7 +67,7 @@ public class RestLookupJobTest extends RestLookupJob {
         configFilePath = configFile.getPath();
     }
 
-    @AfterClass
+    @AfterAll
     public static void stopMockRestServer() {
         mockRestServer.close();
     }
