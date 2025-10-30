@@ -206,7 +206,7 @@
             </exclusions>
         </dependency>
 
-    </dependencies>
+     </dependencies>
 
     <build>
         <testResources>
