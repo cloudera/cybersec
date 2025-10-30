@@ -4,7 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import com.cloudera.cyber.profiler.dto.MeasurementDto;
 import com.cloudera.cyber.profiler.dto.ProfileDto;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ProfileUtilsTest {
 

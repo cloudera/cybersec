@@ -25,7 +25,7 @@ import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 import org.apache.flink.streaming.util.ProcessFunctionTestHarnesses;
 import org.apache.flink.util.OutputTag;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.stream.Collectors;

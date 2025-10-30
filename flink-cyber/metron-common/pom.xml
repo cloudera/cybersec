@@ -199,7 +199,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
-            <version>4.1</version>
+            <version>${commons-collections4.version}</version>
         </dependency>
 
         <!-- Guava dependency -->
@@ -268,13 +268,11 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>${jupiter.junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-migrationsupport</artifactId>
-            <version>${jupiter.junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -299,6 +297,13 @@
             <version>${project.parent.version}</version>
             <scope>test</scope>
             <type>test-jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-vfs2</artifactId>
+            <version>${commons-vfs2.version}</version>
+            <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.adrianwalker/multiline-string -->
         <dependency>
@@ -330,7 +335,7 @@
                     <dependency>
                         <groupId>org.junit.jupiter</groupId>
                         <artifactId>junit-jupiter-engine</artifactId>
-                        <version>${jupiter.junit.version}</version>
+                        <version>${junit5.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>

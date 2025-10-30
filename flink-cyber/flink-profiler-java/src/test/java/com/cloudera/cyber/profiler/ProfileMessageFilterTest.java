@@ -19,8 +19,8 @@ import com.cloudera.cyber.scoring.ScoringProcessFunction;
 import com.cloudera.cyber.scoring.ScoringSummarizationMode;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -79,7 +79,7 @@ public class ProfileMessageFilterTest {
 
     private void verifyFilter(ProfileMessageFilter filter, String source, Map<String, String> fieldValues, boolean matches) {
         ScoredMessage scoredMessage = ScoringProcessFunction.scoreMessage(TestUtils.createMessage(MessageUtils.getCurrentTimestamp(), source, fieldValues), Collections.emptyList(), ScoringSummarizationMode.DEFAULT());
-        Assert.assertEquals(matches, filter.filter(scoredMessage));
+        Assertions.assertEquals(matches, filter.filter(scoredMessage));
     }
 
     private static ProfileGroupConfig createProfileGroupConfig(ArrayList<String> sources, boolean includeNullFieldMeasurements, boolean includeScoreMeasurement) {

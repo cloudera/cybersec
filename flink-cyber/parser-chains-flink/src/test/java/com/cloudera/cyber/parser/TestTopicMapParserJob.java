@@ -22,8 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.JobTester;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.time.Instant;
@@ -146,7 +146,7 @@ public class TestTopicMapParserJob extends AbstractParserJobTest {
             try {
                 verifyParsedMessage(expectedTopicToSource);
             } catch (TimeoutException e) {
-                Assert.fail(String.format("Timeout exception for message %d", i));
+                Assertions.fail(String.format("Timeout exception for message %d", i));
             }
         });
 
@@ -182,7 +182,7 @@ public class TestTopicMapParserJob extends AbstractParserJobTest {
             try {
                 verifyParsedMessage(expectedTopicToSource);
             } catch (TimeoutException e) {
-                Assert.fail(String.format("Timeout exception for message %d", i));
+                Assertions.fail(String.format("Timeout exception for message %d", i));
             }
         });
 
@@ -190,13 +190,13 @@ public class TestTopicMapParserJob extends AbstractParserJobTest {
             try {
                 verifyEnrichmentCommand();
             } catch (TimeoutException e) {
-                Assert.fail(String.format("Timeout exception for message %d", i));
+                Assertions.fail(String.format("Timeout exception for message %d", i));
             }
         });
 
         verifyErrorMessage();
 
-        Assert.assertTrue(enrichmentCommandSink.isEmpty());
+        Assertions.assertTrue(enrichmentCommandSink.isEmpty());
 
     }
 

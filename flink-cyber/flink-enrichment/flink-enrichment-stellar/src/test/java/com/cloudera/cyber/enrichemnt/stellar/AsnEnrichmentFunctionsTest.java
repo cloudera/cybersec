@@ -27,9 +27,9 @@ import org.apache.metron.stellar.dsl.Context;
 import org.apache.metron.stellar.dsl.DefaultVariableResolver;
 import org.apache.metron.stellar.dsl.StellarFunctions;
 import org.json.simple.JSONObject;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.Collections;
@@ -51,7 +51,7 @@ public class AsnEnrichmentFunctionsTest {
   private static final String TEST_NUMBER = "1221";
   private static final String TEST_NETWORK = "1.128.0.0/11";
 
-  @BeforeClass
+  @BeforeAll
   public static void setupOnce() {
     expectedMessage.put("autonomous_system_organization", TEST_ORG);
     expectedMessage.put("autonomous_system_number", TEST_NUMBER);
@@ -64,7 +64,7 @@ public class AsnEnrichmentFunctionsTest {
     asnHdfsFile = new File(file);
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     context = new Context.Builder().with(Context.Capabilities.GLOBAL_CONFIG,
         () -> ImmutableMap.of(IpGeoJob.PARAM_ASN_DATABASE_PATH, asnHdfsFile.getAbsolutePath())

@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 

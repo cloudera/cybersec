@@ -14,8 +14,8 @@ package com.cloudera.cyber.enrichment.hbase.config;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,9 +84,9 @@ public class EnrichmentsConfigTest {
     @Test
     public void testLoad() {
         EnrichmentsConfig config = testLoadJson(getJsonAbsPath("enrichments_config.json"));
-        Assert.assertEquals(2, config.getEnrichmentConfigs().size());
-        Assert.assertEquals(HBASE_METRON, config.getStorageForEnrichmentType("metron_enrich").getFormat());
-        Assert.assertEquals(HBASE_SIMPLE, config.getStorageForEnrichmentType("simple_enrich").getFormat());
+        Assertions.assertEquals(2, config.getEnrichmentConfigs().size());
+        Assertions.assertEquals(HBASE_METRON, config.getStorageForEnrichmentType("metron_enrich").getFormat());
+        Assertions.assertEquals(HBASE_SIMPLE, config.getStorageForEnrichmentType("simple_enrich").getFormat());
     }
 
     @Test
@@ -137,7 +137,7 @@ public class EnrichmentsConfigTest {
         enrichmentConfigs.put(enrichmentType4, createEnrichmentConfig(metronCf2Format,KEY_FIELDS, null, null));
 
         List<String> referencedTables = config.getReferencedTables();
-        Assert.assertEquals(Lists.newArrayList(table1, table2), referencedTables);
+        Assertions.assertEquals(Lists.newArrayList(table1, table2), referencedTables);
     }
 
     @Test
@@ -149,22 +149,22 @@ public class EnrichmentsConfigTest {
         config.getStorageConfigs().put(DEFAULT_ENRICHMENT_STORAGE_NAME, new EnrichmentStorageConfig(HBASE_METRON, "enrichments", "cf"));
         config.getEnrichmentConfigs().put("not_streaming", new EnrichmentConfig(null, new EnrichmentFieldsConfig(KEY_FIELDS, null, null, null)));
 
-        Assert.assertTrue(config.getStreamingEnrichmentSources().isEmpty());
+        Assertions.assertTrue(config.getStreamingEnrichmentSources().isEmpty());
 
         config.getEnrichmentConfigs().put("et1", new EnrichmentConfig(null, new EnrichmentFieldsConfig(KEY_FIELDS, null, null, Lists.newArrayList(firstSource))));
         config.getEnrichmentConfigs().put("et2", new EnrichmentConfig(null, new EnrichmentFieldsConfig(KEY_FIELDS, null, null, Lists.newArrayList(secondSource, duplicateSource))));
         config.getEnrichmentConfigs().put("duplicate", new EnrichmentConfig(null, new EnrichmentFieldsConfig(KEY_FIELDS, null, null, Lists.newArrayList(duplicateSource))));
 
-        Assert.assertEquals(Lists.newArrayList(secondSource, duplicateSource, firstSource), config.getStreamingEnrichmentSources());
+        Assertions.assertEquals(Lists.newArrayList(secondSource, duplicateSource, firstSource), config.getStreamingEnrichmentSources());
     }
 
     @Test
     public void testLoadStreamingConfig() {
         EnrichmentsConfig config = testLoadJson(getJsonAbsPath("streaming_enrichments_config.json"));
         List<String> streamingEnrichmentSources = config.getStreamingEnrichmentSources();
-        Assert.assertEquals(Lists.newArrayList("malicious_domain"), streamingEnrichmentSources);
+        Assertions.assertEquals(Lists.newArrayList("malicious_domain"), streamingEnrichmentSources);
         List<String> tables = config.getReferencedTablesForSource(streamingEnrichmentSources.get(0));
-        Assert.assertEquals(Lists.newArrayList("simple_enrich"), tables);
+        Assertions.assertEquals(Lists.newArrayList("simple_enrich"), tables);
     }
 
     private EnrichmentsConfig testLoadJson(String fullTestPath) {

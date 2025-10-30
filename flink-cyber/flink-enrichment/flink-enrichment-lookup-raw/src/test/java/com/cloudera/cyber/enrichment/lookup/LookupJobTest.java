@@ -29,7 +29,7 @@ import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.test.util.CollectingSink;
 import org.apache.flink.test.util.JobTester;
 import org.apache.flink.test.util.ManualSource;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 import java.util.concurrent.TimeoutException;

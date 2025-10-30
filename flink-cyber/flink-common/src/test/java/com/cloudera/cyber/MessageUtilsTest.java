@@ -13,9 +13,9 @@
 package com.cloudera.cyber;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.util.*;
@@ -43,7 +43,7 @@ public class MessageUtilsTest {
     private final List<DataQualityMessage> DATA_QUALITY_MESSAGES_2 = Collections.singletonList(new DataQualityMessage(DataQualityMessageLevel.ERROR.name(), TEST_FEATURE, TEST_FIELD_2, TEST_MESSAGE_2));
     private final List<DataQualityMessage> ALL_DATA_QUALITY_MESSAGES = Stream.concat(DATA_QUALITY_MESSAGES_1.stream(), DATA_QUALITY_MESSAGES_2.stream()).collect(toList());
 
-    @Before
+    @BeforeEach
     public void initTestExtensionMaps() {
         FIRST_FIELD_MAP.put(TEST_FIELD_1, TEST_VALUE_1);
         SECOND_FIELD_MAP.put(TEST_FIELD_2, TEST_VALUE_2);
@@ -56,11 +56,11 @@ public class MessageUtilsTest {
         Message input = TestUtils.createMessage();
 
         Message output1 = MessageUtils.addFields(input, FIRST_FIELD_MAP);
-        Assert.assertEquals(FIRST_FIELD_MAP, output1.getExtensions());
+        Assertions.assertEquals(FIRST_FIELD_MAP, output1.getExtensions());
 
         Message output2 = MessageUtils.addFields(output1, SECOND_FIELD_MAP);
-        Assert.assertNotSame(output1, output2);
-        Assert.assertEquals(ALL_FIELDS_MAP, output2.getExtensions());
+        Assertions.assertNotSame(output1, output2);
+        Assertions.assertEquals(ALL_FIELDS_MAP, output2.getExtensions());
     }
 
     @Test
@@ -68,7 +68,7 @@ public class MessageUtilsTest {
         Message input = TestUtils.createMessage();
 
         Message output = MessageUtils.addFields(input, Collections.emptyMap());
-        Assert.assertSame(input, output);
+        Assertions.assertSame(input, output);
     }
 
 
@@ -78,34 +78,34 @@ public class MessageUtilsTest {
 
         List<DataQualityMessage> expectedDataQualityMessages = new ArrayList<>();
         Message output1 = MessageUtils.enrich(input, FIRST_FIELD_MAP, expectedDataQualityMessages);
-       Assert.assertNotSame(input, output1);
-        Assert.assertEquals(FIRST_FIELD_MAP, output1.getExtensions());
-        Assert.assertEquals(Collections.emptyList(), output1.getDataQualityMessages());
+       Assertions.assertNotSame(input, output1);
+        Assertions.assertEquals(FIRST_FIELD_MAP, output1.getExtensions());
+        Assertions.assertEquals(Collections.emptyList(), output1.getDataQualityMessages());
 
         Message output2 = MessageUtils.enrich(output1, SECOND_FIELD_MAP, expectedDataQualityMessages);
-        Assert.assertEquals(ALL_FIELDS_MAP, output2.getExtensions());
-        Assert.assertEquals(Collections.emptyList(), output1.getDataQualityMessages());
+        Assertions.assertEquals(ALL_FIELDS_MAP, output2.getExtensions());
+        Assertions.assertEquals(Collections.emptyList(), output1.getDataQualityMessages());
     }
 
     @Test
     public void testEnrichExtensionsNoChanges() {
         Message input = TestUtils.createMessage();
         Message output = MessageUtils.enrich(input, new HashMap<>(), new ArrayList<>());
-        Assert.assertSame(input, output);
+        Assertions.assertSame(input, output);
     }
 
     @Test
     public void testEnrichDataQualityMessages() {
         Message input = TestUtils.createMessage();
         Message output1 = MessageUtils.enrich(input, Collections.emptyMap(), DATA_QUALITY_MESSAGES_1);
-        Assert.assertTrue(output1.getExtensions().isEmpty());
-        Assert.assertEquals(DATA_QUALITY_MESSAGES_1, output1.getDataQualityMessages());
+        Assertions.assertTrue(output1.getExtensions().isEmpty());
+        Assertions.assertEquals(DATA_QUALITY_MESSAGES_1, output1.getDataQualityMessages());
 
         Message output2 = MessageUtils.enrich(output1, Collections.emptyMap(), DATA_QUALITY_MESSAGES_1_DEEP_COPY);
-        Assert.assertEquals(DATA_QUALITY_MESSAGES_1, output2.getDataQualityMessages());
+        Assertions.assertEquals(DATA_QUALITY_MESSAGES_1, output2.getDataQualityMessages());
 
         Message output3 = MessageUtils.enrich(output2, Collections.emptyMap(), DATA_QUALITY_MESSAGES_2);
-        Assert.assertEquals(ALL_DATA_QUALITY_MESSAGES, output3.getDataQualityMessages());
+        Assertions.assertEquals(ALL_DATA_QUALITY_MESSAGES, output3.getDataQualityMessages());
     }
 
     @Test
@@ -113,7 +113,7 @@ public class MessageUtilsTest {
         long currentTime = MessageUtils.getCurrentTimestamp();
         long currentMillis = Instant.now().toEpochMilli();
 
-        Assert.assertTrue(currentMillis - currentTime < 1000);
+        Assertions.assertTrue(currentMillis - currentTime < 1000);
     }
 
     @Test
@@ -126,7 +126,7 @@ public class MessageUtilsTest {
         Message input = TestUtils.createMessage(ImmutableMap.of(extensionStaysSame, extensionStaysSameValue,
                                                                 extensionToChange, extensionsToChangeOriginalValue));
         Message output = MessageUtils.replaceFields(input, ImmutableMap.of(extensionToChange, extensionsToChangeNewValue));
-        Assert.assertEquals(ImmutableMap.of(extensionStaysSame, extensionStaysSameValue,
+        Assertions.assertEquals(ImmutableMap.of(extensionStaysSame, extensionStaysSameValue,
                 extensionToChange, extensionsToChangeNewValue), output.getExtensions());
     }
 
@@ -145,7 +145,7 @@ public class MessageUtilsTest {
         String extensionsToChangeNewValue = "new_value";
         Message input = TestUtils.createMessage(originalEventExtensions);
         Message output = MessageUtils.replaceFields(input, ImmutableMap.of(extensionToChange, extensionsToChangeNewValue));
-        Assert.assertEquals(ImmutableMap.of(extensionToChange, extensionsToChangeNewValue), output.getExtensions());
+        Assertions.assertEquals(ImmutableMap.of(extensionToChange, extensionsToChangeNewValue), output.getExtensions());
     }
 
     @Test
@@ -163,7 +163,7 @@ public class MessageUtilsTest {
                 "field_2", "value_2");
         Message input = TestUtils.createMessage(originalExtensions);
         Message output = MessageUtils.replaceFields(input, noReplaceValues);
-        Assert.assertEquals(originalExtensions, output.getExtensions());
+        Assertions.assertEquals(originalExtensions, output.getExtensions());
 
     }
 
