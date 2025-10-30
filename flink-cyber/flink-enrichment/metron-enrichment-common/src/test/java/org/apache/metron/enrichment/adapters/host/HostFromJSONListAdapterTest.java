@@ -17,7 +17,6 @@
  */
 package org.apache.metron.enrichment.adapters.host;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.enrichment.cache.CacheKey;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -30,26 +29,22 @@ import static org.junit.jupiter.api.Assertions.*;
 public class HostFromJSONListAdapterTest {
 
 
-  /**
-   * [
-   * {"ip":"10.1.128.236", "local":"YES", "type":"webserver", "asset_value" : "important"},
-   * {"ip":"10.1.128.237", "local":"UNKNOWN", "type":"unknown", "asset_value" : "important"},
-   * {"ip":"10.60.10.254", "local":"YES", "type":"printer", "asset_value" : "important"},
-   * {"ip":"10.0.2.15", "local":"YES", "type":"printer", "asset_value" : "important"}
-   * ]
-   */
-  @Multiline
-  private String expectedKnownHostsString;
+  private String expectedKnownHostsString = String.join("\n",
+        "[",
+        "{\"ip\":\"10.1.128.236\", \"local\":\"YES\", \"type\":\"webserver\", \"asset_value\" : \"important\"},",
+        "{\"ip\":\"10.1.128.237\", \"local\":\"UNKNOWN\", \"type\":\"unknown\", \"asset_value\" : \"important\"},",
+        "{\"ip\":\"10.60.10.254\", \"local\":\"YES\", \"type\":\"printer\", \"asset_value\" : \"important\"},",
+        "{\"ip\":\"10.0.2.15\", \"local\":\"YES\", \"type\":\"printer\", \"asset_value\" : \"important\"}",
+        "]"
+      );
 
-  /**
-   * {
-   * "known_info.local":"YES",
-   * "known_info.type":"printer",
-   * "known_info.asset_value" : "important"
-   * }
-   */
-  @Multiline
-  private String expectedMessageString;
+  private String expectedMessageString = String.join("\n",
+        "{",
+        "\"known_info.local\":\"YES\",",
+        "\"known_info.type\":\"printer\",",
+        "\"known_info.asset_value\" : \"important\"",
+        "}"
+      );
 
   private JSONObject expectedMessage;
   private String ip = "10.0.2.15";

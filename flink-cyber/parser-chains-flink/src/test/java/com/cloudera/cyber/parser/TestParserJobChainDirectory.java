@@ -15,7 +15,6 @@ package com.cloudera.cyber.parser;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.google.common.io.Resources;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -44,34 +43,32 @@ public class TestParserJobChainDirectory extends AbstractParserJobTest {
     public static final String CHAIN_DIR_SUCCESS = "chain-dir/success";
     public static final String CHAIN_DIR_DUPLICATE = "chain-dir/duplicate";
 
-    /**
-     * {"store":
-     * {"book":[
-     * {"category":"reference",
-     * "author":"	    Nigel \"Rees\", Stas 	",
-     * "title":"Sayings of the Century",
-     * "price":8.95},
-     * {"category":"fiction",
-     * "author":"Evelyn Waugh",
-     * "title":"Sword of Honour",
-     * "price":12.99},
-     * {"category":"fiction",
-     * "author":"Herman Melville",
-     * "title":"Moby Dick",
-     * "isbn":"0-553-21311-3",
-     * "price":8.99},
-     * {"category":"fiction",
-     * "author":"J. R. R. Tolkien",
-     * "title":"The Lord of the Rings",
-     * "isbn":"0-395-19395-8",
-     * "price":22.99}],
-     * "bicycle":
-     * {"color":"red",
-     * "price":19.95}},
-     * "expensive":10}
-     */
-    @Multiline
-    private String givenInput;
+    private String givenInput = String.join("\n",
+        "{\"store\":",
+        "{\"book\":[",
+        "{\"category\":\"reference\",",
+        "\"author\":\"	    Nigel \\\"Rees\\\", Stas 	\",",
+        "\"title\":\"Sayings of the Century\",",
+        "\"price\":8.95},",
+        "{\"category\":\"fiction\",",
+        "\"author\":\"Evelyn Waugh\",",
+        "\"title\":\"Sword of Honour\",",
+        "\"price\":12.99},",
+        "{\"category\":\"fiction\",",
+        "\"author\":\"Herman Melville\",",
+        "\"title\":\"Moby Dick\",",
+        "\"isbn\":\"0-553-21311-3\",",
+        "\"price\":8.99},",
+        "{\"category\":\"fiction\",",
+        "\"author\":\"J. R. R. Tolkien\",",
+        "\"title\":\"The Lord of the Rings\",",
+        "\"isbn\":\"0-395-19395-8\",",
+        "\"price\":22.99}],",
+        "\"bicycle\":",
+        "{\"color\":\"red\",",
+        "\"price\":19.95}},",
+        "\"expensive\":10}"
+        );
 
     public static Stream<Arguments> mutuallyExclusiveParams() {
         return Stream.of(

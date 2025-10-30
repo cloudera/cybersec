@@ -25,7 +25,6 @@ import com.cloudera.parserchains.parsers.TimestampParser;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummary;
 import com.cloudera.parserchains.queryservice.model.summary.ParserSummaryMapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,45 +33,43 @@ import static org.hamcrest.text.IsEqualCompressingWhiteSpace.equalToCompressingW
 public class ChainTestRequestTest {
     private ParserInfoBuilder parserInfoBuilder = new AnnotationBasedParserInfoBuilder();
 
-    /**
-     * {
-     *   "sampleData" : {
-     *     "type" : "manual",
-     *     "source" : [
-     *       "Marie, Curie"
-     *      ]
-     *   },
-     *   "chainConfig" : {
-     *     "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *     "name" : "My Parser Chain",
-     *     "parsers" : [ {
-     *       "id" : "3b31e549-340f-47ce-8a71-d702685137f4",
-     *       "name" : "Delimited Text",
-     *       "type" : "com.cloudera.parserchains.parsers.DelimitedTextParser",
-     *       "config" : {
-     *         "outputField" : [ {
-     *           "fieldIndex" : "0",
-     *           "fieldName" : "firstName"
-     *         }, {
-     *           "fieldIndex" : "1",
-     *           "fieldName" : "lastName"
-     *         } ]
-     *       }
-     *     }, {
-     *       "id" : "74d10881-ae37-4c90-95f5-ae0c10aae1f4",
-     *       "name" : "Timestamp",
-     *       "type" : "com.cloudera.parserchains.parsers.TimestampParser",
-     *       "config" : {
-     *         "outputField" : [ {
-     *           "outputField" : "timestamp"
-     *         } ]
-     *       }
-     *     } ]
-     *   }
-     * }
-     */
-    @Multiline
-    private String expected;
+    private String expected = String.join("\n",
+        "{",
+        "\"sampleData\" : {",
+        "\"type\" : \"manual\",",
+        "\"source\" : [",
+        "\"Marie, Curie\"",
+        "]",
+        "},",
+        "\"chainConfig\" : {",
+        "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\" : \"My Parser Chain\",",
+        "\"parsers\" : [ {",
+        "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
+        "\"name\" : \"Delimited Text\",",
+        "\"type\" : \"com.cloudera.parserchains.parsers.DelimitedTextParser\",",
+        "\"config\" : {",
+        "\"outputField\" : [ {",
+        "\"fieldIndex\" : \"0\",",
+        "\"fieldName\" : \"firstName\"",
+        "}, {",
+        "\"fieldIndex\" : \"1\",",
+        "\"fieldName\" : \"lastName\"",
+        "} ]",
+        "}",
+        "}, {",
+        "\"id\" : \"74d10881-ae37-4c90-95f5-ae0c10aae1f4\",",
+        "\"name\" : \"Timestamp\",",
+        "\"type\" : \"com.cloudera.parserchains.parsers.TimestampParser\",",
+        "\"config\" : {",
+        "\"outputField\" : [ {",
+        "\"outputField\" : \"timestamp\"",
+        "} ]",
+        "}",
+        "} ]",
+        "}",
+        "}"
+        );
 
     @Test
     void toJSON() throws JsonProcessingException {

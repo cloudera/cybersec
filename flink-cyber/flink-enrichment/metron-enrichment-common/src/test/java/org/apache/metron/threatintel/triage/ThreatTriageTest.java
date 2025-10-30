@@ -19,7 +19,6 @@
 package org.apache.metron.threatintel.triage;
 
 import com.google.common.collect.ImmutableList;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
 import org.apache.metron.common.configuration.enrichment.threatintel.RuleScore;
 import org.apache.metron.common.configuration.enrichment.threatintel.ThreatScore;
@@ -40,44 +39,42 @@ public class ThreatTriageTest {
 
   private static final double delta = 1e-10;
 
-  /**
-   * {
-   *  "threatIntel": {
-   *    "triageConfig": {
-   *      "riskLevelRules" : [
-   *        {
-   *          "name": "rule 1",
-   *          "rule": "user.type in [ 'admin', 'power' ] and asset.type == 'web'",
-   *          "score": 10
-   *        },
-   *        {
-   *          "name": "rule 2",
-   *          "comment": "web type!",
-   *          "rule": "asset.type == 'web'",
-   *          "score": 5
-   *        },
-   *        {
-   *          "name": "rule 3",
-   *          "rule": "user.type == 'normal' and asset.type == 'web'",
-   *          "score": 0
-   *        },
-   *        {
-   *          "name": "rule 4",
-   *          "rule": "user.type in whitelist",
-   *          "score": -1,
-   *          "reason": "user.type"
-   *        }
-   *      ],
-   *      "aggregator": "MAX"
-   *    },
-   *    "config": {
-   *      "whitelist": [ "abnormal" ]
-   *    }
-   *  }
-   * }
-   */
-  @Multiline
-  public static String smokeTestProcessorConfig;
+  public static String smokeTestProcessorConfig = String.join("\n",
+        "{",
+        "\"threatIntel\": {",
+        "\"triageConfig\": {",
+        "\"riskLevelRules\" : [",
+        "{",
+        "\"name\": \"rule 1\",",
+        "\"rule\": \"user.type in [ 'admin', 'power' ] and asset.type == 'web'\",",
+        "\"score\": 10",
+        "},",
+        "{",
+        "\"name\": \"rule 2\",",
+        "\"comment\": \"web type!\",",
+        "\"rule\": \"asset.type == 'web'\",",
+        "\"score\": 5",
+        "},",
+        "{",
+        "\"name\": \"rule 3\",",
+        "\"rule\": \"user.type == 'normal' and asset.type == 'web'\",",
+        "\"score\": 0",
+        "},",
+        "{",
+        "\"name\": \"rule 4\",",
+        "\"rule\": \"user.type in whitelist\",",
+        "\"score\": -1,",
+        "\"reason\": \"user.type\"",
+        "}",
+        "],",
+        "\"aggregator\": \"MAX\"",
+        "},",
+        "\"config\": {",
+        "\"whitelist\": [ \"abnormal\" ]",
+        "}",
+        "}",
+        "}"
+      );
 
   @Test
   public void smokeTest() throws Exception {
@@ -219,31 +216,29 @@ public class ThreatTriageTest {
     assertEquals(0, score.getRuleScores().size());
   }
 
-  /**
-   * {
-   *  "threatIntel": {
-   *  "triageConfig": {
-   *    "riskLevelRules" : [
-   *      {
-   *        "rule" : "user.type in [ 'admin', 'power' ] and asset.type == 'web'",
-   *        "score" : 10
-   *      },
-   *      {
-   *        "rule" : "asset.type == 'web'",
-   *        "score" : 5
-   *      },
-   *      {
-   *        "rule" : "user.type == 'normal' and asset.type == 'web'",
-   *        "score" : 0
-   *      }
-   *     ],
-   *     "aggregator" : "POSITIVE_MEAN"
-   *    }
-   *  }
-   * }
-   */
-  @Multiline
-  public static String positiveMeanProcessorConfig;
+  public static String positiveMeanProcessorConfig = String.join("\n",
+        "{",
+        "\"threatIntel\": {",
+        "\"triageConfig\": {",
+        "\"riskLevelRules\" : [",
+        "{",
+        "\"rule\" : \"user.type in [ 'admin', 'power' ] and asset.type == 'web'\",",
+        "\"score\" : 10",
+        "},",
+        "{",
+        "\"rule\" : \"asset.type == 'web'\",",
+        "\"score\" : 5",
+        "},",
+        "{",
+        "\"rule\" : \"user.type == 'normal' and asset.type == 'web'\",",
+        "\"score\" : 0",
+        "}",
+        "],",
+        "\"aggregator\" : \"POSITIVE_MEAN\"",
+        "}",
+        "}",
+        "}"
+      );
 
   @Test
   public void testPositiveMeanAggregationScores() throws Exception {
@@ -292,23 +287,21 @@ public class ThreatTriageTest {
         "Expected a score of 0");
   }
 
-  /**
-   * {
-   *    "threatIntel" : {
-   *      "triageConfig": {
-   *        "riskLevelRules": [
-   *          {
-   *            "rule" : "not(IN_SUBNET(ip_dst_addr, '192.168.0.0/24'))",
-   *            "score" : 10
-   *          }
-   *        ],
-   *        "aggregator" : "MAX"
-   *      }
-   *    }
-   * }
-   */
-  @Multiline
-  private static String testWithStellarFunction;
+  private static String testWithStellarFunction = String.join("\n",
+        "{",
+        "\"threatIntel\" : {",
+        "\"triageConfig\": {",
+        "\"riskLevelRules\": [",
+        "{",
+        "\"rule\" : \"not(IN_SUBNET(ip_dst_addr, '192.168.0.0/24'))\",",
+        "\"score\" : 10",
+        "}",
+        "],",
+        "\"aggregator\" : \"MAX\"",
+        "}",
+        "}",
+        "}"
+      );
 
   @Test
   public void testWithStellarFunction() throws Exception {
@@ -322,26 +315,24 @@ public class ThreatTriageTest {
             1e-10);
   }
 
-  /**
-   * {
-   *  "threatIntel": {
-   *    "triageConfig": {
-   *      "riskLevelRules" : [
-   *        {
-   *          "name": "Rule Name",
-   *          "comment": "Rule Comment",
-   *          "rule": "2 == 2",
-   *          "score": 10,
-   *          "reason": "variable.name"
-   *        }
-   *      ],
-   *      "aggregator": "MAX"
-   *    }
-   *  }
-   * }
-   */
-  @Multiline
-  public static String testReasonConfig;
+  public static String testReasonConfig = String.join("\n",
+        "{",
+        "\"threatIntel\": {",
+        "\"triageConfig\": {",
+        "\"riskLevelRules\" : [",
+        "{",
+        "\"name\": \"Rule Name\",",
+        "\"comment\": \"Rule Comment\",",
+        "\"rule\": \"2 == 2\",",
+        "\"score\": 10,",
+        "\"reason\": \"variable.name\"",
+        "}",
+        "],",
+        "\"aggregator\": \"MAX\"",
+        "}",
+        "}",
+        "}"
+      );
 
   /**
    * The 'reason' field contained within a rule is a Stellar expression that is
@@ -383,23 +374,21 @@ public class ThreatTriageTest {
     }
   }
 
-  /**
-   * {
-   *    "threatIntel" : {
-   *      "triageConfig": {
-   *        "riskLevelRules": [
-   *          {
-   *            "rule" : "true",
-   *            "score" : 10
-   *          }
-   *        ],
-   *        "aggregator" : "MAX"
-   *      }
-   *    }
-   * }
-   */
-  @Multiline
-  private static String shouldAllowNumericRuleScore;
+  private static String shouldAllowNumericRuleScore = String.join("\n",
+        "{",
+        "\"threatIntel\" : {",
+        "\"triageConfig\": {",
+        "\"riskLevelRules\": [",
+        "{",
+        "\"rule\" : \"true\",",
+        "\"score\" : 10",
+        "}",
+        "],",
+        "\"aggregator\" : \"MAX\"",
+        "}",
+        "}",
+        "}"
+      );
 
   @Test
   public void shouldAllowNumericRuleScore() throws Exception {
@@ -408,23 +397,21 @@ public class ThreatTriageTest {
     assertEquals(10d, threatTriageProcessor.apply(message).getScore(), 1e-10);
   }
 
-  /**
-   * {
-   *    "threatIntel" : {
-   *      "triageConfig": {
-   *        "riskLevelRules": [
-   *          {
-   *            "rule" : "true",
-   *            "score" : "priority * 10.1"
-   *          }
-   *        ],
-   *        "aggregator" : "MAX"
-   *      }
-   *    }
-   * }
-   */
-  @Multiline
-  private static String shouldAllowScoreAsStellarExpression;
+  private static String shouldAllowScoreAsStellarExpression = String.join("\n",
+        "{",
+        "\"threatIntel\" : {",
+        "\"triageConfig\": {",
+        "\"riskLevelRules\": [",
+        "{",
+        "\"rule\" : \"true\",",
+        "\"score\" : \"priority * 10.1\"",
+        "}",
+        "],",
+        "\"aggregator\" : \"MAX\"",
+        "}",
+        "}",
+        "}"
+      );
 
   @Test
   public void shouldAllowScoreAsStellarExpression() throws Exception {

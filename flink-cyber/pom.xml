@@ -76,7 +76,6 @@
         <log4j.version>2.17.2</log4j.version>
         <spring-boot.version>2.7.6</spring-boot.version>
         <springdoc-openapi.version>1.6.11</springdoc-openapi.version>
-        <multiline-string.version>0.1.2</multiline-string.version>
         <testcontainers.version>1.15.0</testcontainers.version>
         <solr.version>8.11.2.${cdh.version}</solr.version>
         <maxmind.version>2.13.1</maxmind.version>
@@ -137,10 +136,6 @@
         <repository>
             <id>cloudera</id>
             <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-        </repository>
-        <repository>
-            <id>multiline-release-repo</id>
-            <url>https://raw.github.com/benelog/multiline/master/maven-repository</url>
         </repository>
     </repositories>
 
@@ -615,20 +610,6 @@
                 <classifier>tests</classifier>
                 <version>${flink.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>org.adrianwalker</groupId>
-                <artifactId>multiline-string</artifactId>
-                <version>${multiline-string.version}</version>
-                <scope>test</scope>
-                <exclusions>
-                    <exclusion>
-                        <artifactId>tools</artifactId>
-                        <groupId>sun.jdk</groupId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-
             <!-- JUnit 5 Dependencies -->
             <dependency>
                 <groupId>org.junit</groupId>
@@ -637,7 +618,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 

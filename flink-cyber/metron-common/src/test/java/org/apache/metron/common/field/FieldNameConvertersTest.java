@@ -19,7 +19,6 @@
 package org.apache.metron.common.field;
 
 import java.nio.charset.StandardCharsets;
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.configuration.IndexingConfigurations;
 import org.apache.metron.common.configuration.writer.IndexingWriterConfiguration;
 import org.apache.metron.common.configuration.writer.WriterConfiguration;
@@ -39,20 +38,17 @@ public class FieldNameConvertersTest {
     return new IndexingWriterConfiguration(writer, indexingConfig);
   }
 
-  /**
-   * {
-   *  "elasticsearch": {
-   *
-   *    "index": "theIndex",
-   *    "batchSize": 100,
-   *    "batchTimeout": 1000,
-   *    "enabled": true,
-   *    "fieldNameConverter": "DEDOT"
-   *  }
-   * }
-   */
-  @Multiline
-  private static String jsonWithDedot;
+  private static String jsonWithDedot = String.join("\n",
+        "{",
+        "\"elasticsearch\": {",
+        "\"index\": \"theIndex\",",
+        "\"batchSize\": 100,",
+        "\"batchTimeout\": 1000,",
+        "\"enabled\": true,",
+        "\"fieldNameConverter\": \"DEDOT\"",
+        "}",
+        "}"
+      );
 
   /**
    * The factory should be able to create a {@link DeDotFieldNameConverter}.
@@ -69,20 +65,17 @@ public class FieldNameConvertersTest {
     assertEquals(FieldNameConverters.DEDOT, converter);
   }
 
-  /**
-   * {
-   *  "elasticsearch": {
-   *
-   *    "index": "theIndex",
-   *    "batchSize": 100,
-   *    "batchTimeout": 1000,
-   *    "enabled": true,
-   *    "fieldNameConverter": "NOOP"
-   *  }
-   * }
-   */
-  @Multiline
-  private static String jsonWithNoop;
+  private static String jsonWithNoop = String.join("\n",
+        "{",
+        "\"elasticsearch\": {",
+        "\"index\": \"theIndex\",",
+        "\"batchSize\": 100,",
+        "\"batchTimeout\": 1000,",
+        "\"enabled\": true,",
+        "\"fieldNameConverter\": \"NOOP\"",
+        "}",
+        "}"
+      );
 
   /**
    * The factory should be able to create a {@link NoopFieldNameConverter}.
@@ -99,19 +92,16 @@ public class FieldNameConvertersTest {
     assertEquals(FieldNameConverters.NOOP, converter);
   }
 
-  /**
-   * {
-   *  "elasticsearch": {
-   *
-   *    "index": "theIndex",
-   *    "batchSize": 100,
-   *    "batchTimeout": 1000,
-   *    "enabled": true
-   *  }
-   * }
-   */
-  @Multiline
-  private static String jsonWithNoConverter;
+  private static String jsonWithNoConverter = String.join("\n",
+        "{",
+        "\"elasticsearch\": {",
+        "\"index\": \"theIndex\",",
+        "\"batchSize\": 100,",
+        "\"batchTimeout\": 1000,",
+        "\"enabled\": true",
+        "}",
+        "}"
+      );
 
   /**
    * The factory should create a default {@link FieldNameConverter} if none has been defined
@@ -148,20 +138,17 @@ public class FieldNameConvertersTest {
     assertEquals(FieldNameConverters.NOOP, FieldNameConverters.create(sensor, newConfig));
   }
 
-  /**
-   * {
-   *  "elasticsearch": {
-   *
-   *    "index": "theIndex",
-   *    "batchSize": 100,
-   *    "batchTimeout": 1000,
-   *    "enabled": true,
-   *    "fieldNameConverter": "INVALID"
-   *  }
-   * }
-   */
-  @Multiline
-  private static String jsonWithInvalidConverter;
+  private static String jsonWithInvalidConverter = String.join("\n",
+        "{",
+        "\"elasticsearch\": {",
+        "\"index\": \"theIndex\",",
+        "\"batchSize\": 100,",
+        "\"batchTimeout\": 1000,",
+        "\"enabled\": true,",
+        "\"fieldNameConverter\": \"INVALID\"",
+        "}",
+        "}"
+      );
 
   /**
    * If an invalid field name converter is specified, it should fall-back to using the
@@ -179,20 +166,17 @@ public class FieldNameConvertersTest {
     assertEquals(FieldNameConverters.DEDOT, converter);
   }
 
-  /**
-   * {
-   *  "elasticsearch": {
-   *
-   *    "index": "theIndex",
-   *    "batchSize": 100,
-   *    "batchTimeout": 1000,
-   *    "enabled": true,
-   *    "fieldNameConverter": ""
-   *  }
-   * }
-   */
-  @Multiline
-  private static String jsonWithBlankConverter;
+  private static String jsonWithBlankConverter = String.join("\n",
+        "{",
+        "\"elasticsearch\": {",
+        "\"index\": \"theIndex\",",
+        "\"batchSize\": 100,",
+        "\"batchTimeout\": 1000,",
+        "\"enabled\": true,",
+        "\"fieldNameConverter\": \"\"",
+        "}",
+        "}"
+      );
 
   /**
    * If the field name converter field is blank, it should fall-back to using the

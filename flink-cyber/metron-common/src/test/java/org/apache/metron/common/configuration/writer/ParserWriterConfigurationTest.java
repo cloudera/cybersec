@@ -18,7 +18,6 @@
 
 package org.apache.metron.common.configuration.writer;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.apache.metron.common.configuration.ParserConfigurations;
 import org.junit.jupiter.api.Test;
 
@@ -43,20 +42,18 @@ public class ParserWriterConfigurationTest {
     assertEquals("foo", config.getIndex("foo"));
   }
 
-  /**
-   * {
-   *   "parserClassName":"some-parser",
-   *   "sensorTopic":"testtopic",
-   *   "parserConfig": {
-   *     "batchSize" : 5,
-   *     "batchTimeout" : "10000",
-   *     "index" : "modified-index",
-   *     "enabled" : "false"
-   *   }
-   * }
-   */
-  @Multiline
-  private static String configJson;
+  private static String configJson = String.join("\n",
+        "{",
+        "\"parserClassName\":\"some-parser\",",
+        "\"sensorTopic\":\"testtopic\",",
+        "\"parserConfig\": {",
+        "\"batchSize\" : 5,",
+        "\"batchTimeout\" : \"10000\",",
+        "\"index\" : \"modified-index\",",
+        "\"enabled\" : \"false\"",
+        "}",
+        "}"
+      );
 
   @Test
   public void pulls_writer_configuration_from_parserConfig() throws IOException {

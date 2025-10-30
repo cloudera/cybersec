@@ -18,7 +18,6 @@
 
 package org.apache.metron.common.utils;
 
-import org.adrianwalker.multilinestring.Multiline;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -41,11 +40,9 @@ public class JSONUtilsTest {
 
   private static File tmpDir;
 
-  /**
-   * { "a" : "hello", "b" : "world" }
-   */
-  @Multiline
-  private static String config;
+  private static String config = String.join("\n",
+        "{ \"a\" : \"hello\", \"b\" : \"world\" }"
+      );
   private static File configFile;
 
   @BeforeAll
@@ -107,23 +104,17 @@ public class JSONUtilsTest {
     }
   }
 
-  /**
-   * { "a": "b" }
-   */
-  @Multiline
-  public static String sourceJson;
+  public static String sourceJson = String.join("\n",
+        "{ \"a\": \"b\" }"
+      );
 
-  /**
-   * [{ "op": "move", "from": "/a", "path": "/c" }]
-   */
-  @Multiline
-  public static String patchJson;
+  public static String patchJson = String.join("\n",
+        "[{ \"op\": \"move\", \"from\": \"/a\", \"path\": \"/c\" }]"
+      );
 
-  /**
-   * { "c": "b" }
-   */
-  @Multiline
-  public static String expectedJson;
+  public static String expectedJson = String.join("\n",
+        "{ \"c\": \"b\" }"
+      );
 
   @Test
   public void applyPatch_modifies_source_json_doc() throws IOException {
@@ -132,35 +123,29 @@ public class JSONUtilsTest {
     assertThat(JSONUtils.INSTANCE.load(actual, JSONUtils.MAP_SUPPLIER), equalTo(JSONUtils.INSTANCE.load(expectedJson, JSONUtils.MAP_SUPPLIER)));
   }
 
-  /**
-   * {
-   *    "foo" : {
-   *      "bar" : {
-   *        "baz" : [ "val1", "val2" ]
-   *      }
-   *    }
-   * }
-   */
-  @Multiline
-  public static String complexJson;
+  public static String complexJson = String.join("\n",
+        "{",
+        "\"foo\" : {",
+        "\"bar\" : {",
+        "\"baz\" : [ \"val1\", \"val2\" ]",
+        "}",
+        "}",
+        "}"
+      );
 
-  /**
-   * [{ "op": "add", "path": "/foo/bar/baz", "value": [ "new1", "new2" ] }]
-   */
-  @Multiline
-  public static String patchComplexJson;
+  public static String patchComplexJson = String.join("\n",
+        "[{ \"op\": \"add\", \"path\": \"/foo/bar/baz\", \"value\": [ \"new1\", \"new2\" ] }]"
+      );
 
-  /**
-   * {
-   *    "foo" : {
-   *      "bar" : {
-   *        "baz" : [ "new1", "new2" ]
-   *      }
-   *    }
-   * }
-   */
-  @Multiline
-  public static String expectedComplexJson;
+  public static String expectedComplexJson = String.join("\n",
+        "{",
+        "\"foo\" : {",
+        "\"bar\" : {",
+        "\"baz\" : [ \"new1\", \"new2\" ]",
+        "}",
+        "}",
+        "}"
+      );
 
   @Test
   public void applyPatch_modifies_complex_source_json_doc() throws IOException {
