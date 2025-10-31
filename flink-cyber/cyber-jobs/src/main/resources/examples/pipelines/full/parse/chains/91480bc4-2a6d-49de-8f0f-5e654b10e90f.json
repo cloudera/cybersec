@@ -7,7 +7,7 @@
     "type" : "com.cloudera.parserchains.parsers.GrokTableParser",
     "config" : {
       "grokPatternPath" : [ {
-        "grokPatternPath" : "grok/cisco_asa"
+        "grokPatternPath" : "patterns/cisco_asa"
       } ],
       "initialGrokExpression" : [ {
         "initialGrokExpression" : "%{CISCO_TAGGED_SYSLOG}"
