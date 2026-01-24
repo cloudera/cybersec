@@ -24,7 +24,7 @@ public final class AvroSchemaUtil {
 
     //method that converts from flink Schema to avro Schema
     public static Schema convertToAvro(List<TableColumnDto> tableColumnList) {
-        return convertToAvro(FlinkSchemaUtil.getResolvedSchema(tableColumnList));
+        return convertToAvro(FlinkSchemaUtil.getResolvedSchema(tableColumnList, FlinkSchemaUtil.SerializationFormat.AVRO));
     }
 
     //method that converts from flink Schema to avro Schema

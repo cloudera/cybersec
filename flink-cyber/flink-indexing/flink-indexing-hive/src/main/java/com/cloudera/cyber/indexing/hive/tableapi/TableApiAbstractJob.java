@@ -60,9 +60,10 @@ public abstract class TableApiAbstractJob {
   protected final StreamExecutionEnvironment env;
   protected final ParameterTool params;
   protected final String connectorName;
+  protected final FlinkSchemaUtil.SerializationFormat serializationFormat;
 
   public TableApiAbstractJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source,
-      String connectorName, String baseTableJson) throws IOException {
+                             String connectorName, String baseTableJson, FlinkSchemaUtil.SerializationFormat serializationFormat) throws IOException {
     this.params = params;
     this.env = env;
     this.source = source;
@@ -73,6 +74,7 @@ public abstract class TableApiAbstractJob {
     defaultColumnList = Utils.readResourceFile(baseTableJson, getClass(),
         new TypeReference<List<TableColumnDto>>() {
         });
+    this.serializationFormat = serializationFormat;
   }
 
   public StreamExecutionEnvironment startJob() throws Exception {
@@ -259,7 +261,7 @@ public abstract class TableApiAbstractJob {
   protected ResolvedSchema createTable(StreamTableEnvironment tableEnv, String tableName,
                                        List<TableColumnDto> columnList) {
     System.out.printf("Creating %s table %s...%n", connectorName, tableName);
-    final ResolvedSchema resolvedSchema = FlinkSchemaUtil.getResolvedSchema(columnList);
+    final ResolvedSchema resolvedSchema = FlinkSchemaUtil.getResolvedSchema(columnList, serializationFormat);
     final Schema schema = FlinkSchemaUtil.buildSchema(resolvedSchema);
     final TableDescriptor tableDescriptor = buildTableDescriptor(schema);
     try {
@@ -275,7 +277,7 @@ public abstract class TableApiAbstractJob {
 
   protected ResolvedSchema handleExistingTable(StreamTableEnvironment tableEnv, String tableName,
       List<TableColumnDto> columnList) {
-    final ResolvedSchema existingTableSchema = tableEnv.from(tableName).getResolvedSchema();
+    ResolvedSchema existingTableSchema = tableEnv.from(tableName).getResolvedSchema();
     if (CollectionUtils.isEmpty(columnList)) {
       System.out.printf("%s table [%s] already exists and no table config provided. Skipping its creation.%n",
           connectorName,
@@ -284,33 +286,48 @@ public abstract class TableApiAbstractJob {
     }
 
     final List<Column> existingColumns = existingTableSchema.getColumns();
-    final List<Column> configColumns = FlinkSchemaUtil.getResolvedSchema(columnList).getColumns();
+    final List<Column> configColumns = FlinkSchemaUtil.getResolvedSchema(columnList, serializationFormat).getColumns();
+    final List<Column> missingColumns = new ArrayList<>();
     for (Column configColumn : configColumns) {
       final DataType dataType = configColumn.getDataType();
       final String columnName = configColumn.getName();
       final boolean matchingColumnExists = existingColumns.stream()
           .anyMatch(c -> c.getName().equals(columnName) && c.getDataType().equals(dataType));
       if (!matchingColumnExists) {
-        throw new RuntimeException(String.format(
-            "%s table [%s] already exists, but table config was provided for it as well. "
-            + "In this case all columns from table config should be present in the existing table, "
-            + "but we didn't find the [%s] column of type [%s].",
-            connectorName, tableName, columnName, dataType));
+        missingColumns.add(configColumn);
       }
     }
-    System.out.printf("%s table [%s] already exists and provided table config matches it. Skipping its creation.%n",
-        connectorName,
-        tableName);
+    if (!missingColumns.isEmpty()) {
+      existingTableSchema = handleMissingColumns(tableEnv, connectorName, tableName, missingColumns);
+    } else {
+      System.out.printf("%s table [%s] already exists and provided table config matches it. Skipping its creation.%n",
+              connectorName,
+              tableName);
+    }
     return existingTableSchema;
   }
 
+  protected ResolvedSchema handleMissingColumns(StreamTableEnvironment tableEnv, String connectorName, String tableName, List<Column> missingColumns) {
+
+      String missingColumnsMessage = missingColumns.stream().map(col -> String.join(":", col.getName(), col.getDataType().toString())).collect(Collectors.joining(","));
+      throw new RuntimeException(String.format(
+              "%s table [%s] already exists, but table config was provided for it as well. "
+                      + "In this case all columns from table config should be present in the existing table, "
+                      + "but we didn't find the columns [%s].",
+              connectorName, tableName, missingColumnsMessage));
+  }
+
   private TableDescriptor buildTableDescriptor(Schema schema) {
-    return fillTableOptions(TableDescriptor
-        .forConnector(getTableConnector())
-        .schema(schema)
-        .partitionedBy("dt", "hr")
-        .format(getFormatDescriptor()))
-        .build();
+
+      TableDescriptor.Builder tableDescriptorBuilder = TableDescriptor
+              .forConnector(getTableConnector())
+              .schema(schema)
+              .partitionedBy("dt", "hr");
+      FormatDescriptor formatDescriptor = getFormatDescriptor();
+      if (formatDescriptor != null) {
+          tableDescriptorBuilder.format(formatDescriptor);
+      }
+    return fillTableOptions(tableDescriptorBuilder).build();
   }
 
   protected abstract String getTableConnector();

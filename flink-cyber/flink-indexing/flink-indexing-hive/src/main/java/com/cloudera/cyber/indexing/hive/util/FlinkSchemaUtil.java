@@ -14,34 +14,41 @@ import java.util.stream.Collectors;
 
 public final class FlinkSchemaUtil {
 
+    public enum SerializationFormat {
+        HIVE,
+        AVRO,
+        ICEBERG
+    }
+
     public static Schema buildSchema(ResolvedSchema resolvedSchema) {
         return Schema.newBuilder()
             .fromResolvedSchema(resolvedSchema)
             .build();
     }
 
-    public static ResolvedSchema getResolvedSchema(List<TableColumnDto> columnList) {
+    public static ResolvedSchema getResolvedSchema(List<TableColumnDto> columnList, SerializationFormat serializationFormat) {
         final List<Column> flinkColumnList = columnList.stream()
-                .map(col -> Column.physical(col.getName(), getFlinkType(col.getType(), col.getNullable())))
+                .map(col -> Column.physical(col.getName(), getFlinkType(col.getType(), col.getNullable(), serializationFormat)))
                 .collect(Collectors.toList());
         return ResolvedSchema.of(flinkColumnList);
     }
 
-    private static DataType getFlinkType(String colType) {
-        return getFlinkType(colType, true);
+    private static DataType getFlinkType(String colType, SerializationFormat serializationFormat) {
+        return getFlinkType(colType, true, serializationFormat);
     }
 
     /**
      * Creates Flink Data Type from the config column type.
      *
-     * @param colType  config column type.
-     *                 Possible config column type values are:
-     *                 string, timestamp, date, int, bigint, float, double, boolean, bytes, null,
-     *                 array<type>, map<key,value>, struct<field:type, field2:type2>
-     * @param nullable whether column is nullable or not
+     * @param colType       config column type.
+     *                      Possible config column type values are:
+     *                      string, timestamp, date, int, bigint, float, double, boolean, bytes, null,
+     *                      array<type>, map<key,value>, struct<field:type, field2:type2>
+     * @param nullable      whether column is nullable or not
+     * @param serializationFormat Where the schema will be stored.  Databases and storage serialization formats differ in timestamp formats and other aspects.
      * @return Flink DataType that describes provided column type
      */
-    private static DataType getFlinkType(String colType, Boolean nullable) {
+    private static DataType getFlinkType(String colType, Boolean nullable, SerializationFormat serializationFormat) {
         if (colType == null) {
             throw new IllegalArgumentException("Column type cannot be null");
         }
@@ -49,8 +56,15 @@ public final class FlinkSchemaUtil {
         DataType result;
         if (type.equals("string")) {
             result = DataTypes.STRING();
+        } else if (type.equals("string not null")) {
+            result = DataTypes.STRING();
+            nullable = false;
         } else if (type.equals("timestamp")) {
-            result = DataTypes.TIMESTAMP(9);
+            int precision = 6;
+            if (serializationFormat.equals(SerializationFormat.HIVE)) {
+                precision = 9;
+            }
+            result = DataTypes.TIMESTAMP(precision);
         } else if (type.equals("date")) {
             result = DataTypes.DATE();
         } else if (type.equals("int")) {
@@ -68,11 +82,11 @@ public final class FlinkSchemaUtil {
         } else if (type.equals("null")) {
             result = DataTypes.NULL();
         } else if (type.startsWith("array")) {
-            result = parseArrayType(type);
+            result = parseArrayType(type, serializationFormat);
         } else if (type.startsWith("map")) {
-            result = parseMapType(type);
+            result = parseMapType(type, serializationFormat);
         } else if (type.startsWith("struct")) {
-            result = parseStructType(type);
+            result = parseStructType(type, serializationFormat);
         } else {
             throw new IllegalArgumentException("Unknown column type: " + type);
         }
@@ -85,9 +99,9 @@ public final class FlinkSchemaUtil {
      * @param type config column type. Supported format is: array<type>
      * @return Flink DataType that describes provided array type
      */
-    private static DataType parseArrayType(String type) {
+    private static DataType parseArrayType(String type, SerializationFormat serializationFormat) {
         final String body = getInnerBody(type, "Array");
-        return DataTypes.ARRAY(getFlinkType(body));
+        return DataTypes.ARRAY(getFlinkType(body, serializationFormat));
     }
 
     /**
@@ -96,13 +110,13 @@ public final class FlinkSchemaUtil {
      * @param type config column type. Supported format is: map<key,value>
      * @return Flink DataType that describes provided map type
      */
-    private static DataType parseMapType(String type) {
+    private static DataType parseMapType(String type, SerializationFormat serializationFormat) {
         final String body = getInnerBody(type, "Map");
         if (!body.contains(",")) {
             throw new IllegalArgumentException("Unknown column type for Map: " + type);
         }
         final List<String> split = splitTypes(body, ',');
-        return DataTypes.MAP(getFlinkType(split.get(0)), getFlinkType(split.get(1)));
+        return DataTypes.MAP(getFlinkType(split.get(0), serializationFormat), getFlinkType(split.get(1), serializationFormat));
     }
 
     /**
@@ -111,7 +125,7 @@ public final class FlinkSchemaUtil {
      * @param type config column type. Supported format is: struct<name:type, name2:type2>. The name can contain only alphanumeric characters and underscores.
      * @return Flink DataType that describes provided struct type
      */
-    private static DataType parseStructType(String type) {
+    private static DataType parseStructType(String type, SerializationFormat serializationFormat) {
         final String body = getInnerBody(type, "Struct");
         if (!body.contains(":")) {
             throw new IllegalArgumentException("Unknown column type for Struct: " + type);
@@ -124,7 +138,7 @@ public final class FlinkSchemaUtil {
                 throw new IllegalArgumentException("Unknown column type for Struct: " + type);
             }
             final String name = fieldSplit.get(0).replaceAll("[^a-zA-Z0-9_]", "");
-            final DataType value = getFlinkType(fieldSplit.get(1));
+            final DataType value = getFlinkType(fieldSplit.get(1), serializationFormat);
             fieldList.add(DataTypes.FIELD(name, value));
         }
         return DataTypes.ROW(fieldList.toArray(new DataTypes.Field[0]));
