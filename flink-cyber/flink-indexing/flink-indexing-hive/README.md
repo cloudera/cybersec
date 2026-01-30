@@ -98,6 +98,14 @@ flink.output-connector
 Supported values are: 
 1. hive - allows storing the data into Hive tables. This Connector is using the main Hive config that's provided for the indexing job;
 2. kafka - allows storing the data into other Kafka topics. At this moment we only allow to store output into the same Kafka cluster it's reading from.
+3. iceberg - allows storing the data into Iceberg tables managed by the Hive metastore.  Uses the main Hive config that's provided for the indexing job to find the metastore.
+4. filesystem - allows storing the data into json files.  To store as ORC, use the hive Table api writer.
+
+For the filesystem connector, set the following properties:
+```
+flink.files.path=hdfs:/path/to/written/files
+flink.files.format=json
+```
 
 Other than specifying the Output Connector you're required to provide the Output Tables init config, and Mappings for those Tables:
 ```
@@ -273,3 +281,17 @@ Custom functions:
 | Function Name                            | Description                                                                                                                                            | Example                                                                                                                                                                                                                                               |
 |------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | filterMap(Map<String, String>,String...) | Allows to filter map to not have any keys from the provided list. First argument - map to filter, second argument - list of field names to filter out. | let's say we have Message Extensions (which is a map) with the following keys: ```KeyA```, ```KeyB```, ```KeyC```. If we want to get rid of ```KeyB```, we need to use this function in the following way: ```filterMap(path_to_extensions,"KeyB")``` |
+
+### Schema evolution
+
+Each time indexing starts, the job compares the existing schema of the output table or topic.
+1. If the schemas are the same the job starts.
+2. If the schema has the same columns but the types are incompatible, the job fails.
+3. If the schema has new columns, some connector types can update the schema and others cannot.  If the schema can't be updated, the job fails to start.
+
+| Connector | New Field Added Behavior on Restart                                                                                                                                                                                     |
+|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| kafka    | A new version of the schema is added to the schema registry.  The job creates kafka entries with the new schema.                                                                                                        |
+ | hive    | The job does not start.  Adding new columns is time consuming.  Manually alter the tables or  create a new table and copy the data from the old table to the new table using default or null values for the new fields. |
+| iceberg  | The job alters the table and adds the new columns                                                                                                                                                                       |
+| filesystem | The job writes the new fields in the json records.                                                                                                                                                                      |
