@@ -11,9 +11,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericData;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
@@ -30,13 +28,13 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
 
   public TableApiKafkaJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source)
       throws IOException {
-    super(params, env, source, "Kafka", BASE_TABLE_JSON);
+    super(params, env, source, "Kafka", BASE_TABLE_JSON, FlinkSchemaUtil.SerializationFormat.AVRO);
   }
 
   @Override
   protected ResolvedSchema createTable(StreamTableEnvironment tableEnv, String tableName,
       List<TableColumnDto> columnList) {
-    return FlinkSchemaUtil.getResolvedSchema(columnList);
+    return FlinkSchemaUtil.getResolvedSchema(columnList, serializationFormat);
   }
 
   @Override

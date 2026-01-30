@@ -2,6 +2,7 @@ package com.cloudera.cyber.indexing.hive.tableapi;
 
 import com.cloudera.cyber.indexing.hive.tableapi.impl.TableApiFilesystemJob;
 import com.cloudera.cyber.indexing.hive.tableapi.impl.TableApiHiveJob;
+import com.cloudera.cyber.indexing.hive.tableapi.impl.TableApiIcebergJob;
 import com.cloudera.cyber.indexing.hive.tableapi.impl.TableApiKafkaJob;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import java.io.IOException;
@@ -18,6 +19,8 @@ public class TableApiJobFactory {
         switch (typeName.toLowerCase()) {
             case "hive":
                 return new TableApiHiveJob(params, env, source);
+            case "iceberg":
+                return new TableApiIcebergJob(params, env, source);
             case "kafka":
                 return new TableApiKafkaJob(params, env, source);
             case "filesystem":

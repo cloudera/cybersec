@@ -1,6 +1,7 @@
 package com.cloudera.cyber.indexing.hive.tableapi.impl;
 
 import com.cloudera.cyber.indexing.hive.tableapi.TableApiAbstractJob;
+import com.cloudera.cyber.indexing.hive.util.FlinkSchemaUtil;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import java.io.IOException;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -19,9 +20,22 @@ public class TableApiFilesystemJob extends TableApiAbstractJob {
 
     public TableApiFilesystemJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source)
           throws IOException {
-        super(params, env, source, "Filesystem", BASE_TABLE_JSON);
-        format = params.get("flink.files.format", "json");
+        super(params, env, source, "Filesystem", BASE_TABLE_JSON, getSerializationFormat(params));
+        format = getFileFormat(params);
         path = params.getRequired("flink.files.path");
+    }
+
+    private static String getFileFormat(ParameterTool params) {
+        return params.get("flink.files.format", "json");
+    }
+
+    private static FlinkSchemaUtil.SerializationFormat getSerializationFormat(ParameterTool params) {
+        String fileFormat = getFileFormat(params);
+        FlinkSchemaUtil.SerializationFormat serializationFormat = FlinkSchemaUtil.SerializationFormat.AVRO;
+        if (fileFormat.equalsIgnoreCase("orc") || fileFormat.equalsIgnoreCase("parquet")) {
+            serializationFormat =  FlinkSchemaUtil.SerializationFormat.HIVE;
+        }
+        return serializationFormat;
     }
 
     @Override

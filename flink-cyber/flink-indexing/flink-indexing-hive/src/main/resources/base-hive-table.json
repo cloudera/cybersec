@@ -9,7 +9,7 @@
   },
   {
     "name": "fields",
-    "type": "map<string,string>"
+    "type": "map<string not null,string>"
   },
   {
     "name": "source",
