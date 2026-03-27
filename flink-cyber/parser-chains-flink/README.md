@@ -258,12 +258,12 @@ The parser chain configuration file is a map from chain name to chain definition
 
 The topic map defines which topics the parser consumes and how the messages in the topic are converted to structured messages.
 
-| Json Map         | Type                              | Description  | Required/Default | Example
-| -----------------| --------                         | --------------------------                                                                                            | ---------------- | -------------------------------------- |
-| topic pattern key | [Java regex ](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) | Pattern specifying the topic or topics containing raw messages | Required | netflow.* |
-| chainKey          | String                           | Name of the chain key used to convert the raw messages to structured messages.   | Required | squid |
-| source            | String                           | The name of the source for messages produced by this mapping.  | Required | proxy |
-| broker            | String                           | The name of the broker hosting the topics. Define the broker connection parameters using <broker>.kafka.<parameter name>| Default - use same broker as parser | externalBroker | 
+| Json Map          | Type                                                                                  | Description                                                                                                              | Required/Default                    | Example        |
+|-------------------|---------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|-------------------------------------|----------------|
+| topic pattern key | [Java regex ](https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html) | Pattern specifying the topic or topics containing raw messages                                                           | Required                            | netflow.*      |
+| chainKey          | String                                                                                | Name of the chain key used to convert the raw messages to structured messages.                                           | Required                            | squid          |
+| source            | String                                                                                | The name of the source for messages produced by this mapping.                                                            | Required                            | proxy          |
+| broker            | String                                                                                | The name of the broker hosting the topics. Define the broker connection parameters using <broker>.kafka.<parameter name> | Default - use same broker as parser | externalBroker | 
 
 ## Creating the signing key
 Below are example openssl commands to create the private key for signing the messages.  Consult the cryptographic requirements of your organization before creating these files.
