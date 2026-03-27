@@ -6,7 +6,6 @@ import java.util.function.Function;
 
 /**
  * Pattern resolver that maps regex patterns to values.
- *
  * Use a caching to skip matching when the same key will be matched over and over.
  *
  * @param <T> The value type.

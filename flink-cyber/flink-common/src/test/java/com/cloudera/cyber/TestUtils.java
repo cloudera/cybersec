@@ -36,7 +36,7 @@ public class TestUtils {
     }
 
     public static String findDir(File startDir, String name) {
-        Stack<File> s = new Stack<File>();
+        Stack<File> s = new Stack<>();
         s.push(startDir);
         while (!s.empty()) {
             File parent = s.pop();
@@ -127,7 +127,7 @@ public class TestUtils {
      */
     public static File createTempDir(File dir, boolean cleanup) throws IOException {
         if (!dir.mkdirs() && !dir.exists()) {
-            throw new IOException(String.format("Failed to create directory structure '%s'", dir.toString()));
+            throw new IOException(String.format("Failed to create directory structure '%s'", dir));
         }
         if (cleanup) {
             addCleanupHook(dir.toPath());

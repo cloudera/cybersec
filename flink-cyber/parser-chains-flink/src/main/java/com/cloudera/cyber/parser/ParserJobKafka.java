@@ -149,7 +149,7 @@ public class ParserJobKafka extends ParserJob {
                     .setTopicPattern(topicNamePattern).setBootstrapServers(kafkaProperties.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG)).setDeserializer(new MessageToParseDeserializer()).setProperties(kafkaProperties).build();
             DataStreamSource<MessageToParse> streamSource = env.fromSource(rawMessages, WatermarkStrategy.noWatermarks(), "Kafka Raw Messages");
             SingleOutputStreamOperator<MessageToParse> newSource = streamSource
-                    .name(String.format("Kafka Source topic='%s' kafka prefix configuration='%s'", topicNamePattern.toString(), kafkaPrefixConf))
+                    .name(String.format("Kafka Source topic='%s' kafka prefix configuration='%s'", topicNamePattern, kafkaPrefixConf))
                     .uid("kafka.input." + kafkaPrefixConf);
 
             if (firstSource == null) {
