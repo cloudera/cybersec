@@ -57,6 +57,7 @@ public class DefaultChainRunnerTest {
         // validate
         Message expected0 = Message.builder()
                 .addField(Constants.DEFAULT_INPUT_FIELD, inputToParse)
+                .addField(Constants.DEFAULT_ORIGINAL_FILE_LINE_FIELD, "-1")
                 .createdBy(DefaultChainRunner.ORIGINAL_MESSAGE_NAME)
                 .build();
         Message expected1 = Message.builder()
@@ -89,6 +90,7 @@ public class DefaultChainRunnerTest {
         // validate
         Message expected0 = Message.builder()
                 .addField(newInputField, StringFieldValue.of(inputToParse))
+                .addField(Constants.DEFAULT_ORIGINAL_FILE_LINE_FIELD, "-1")
                 .createdBy(DefaultChainRunner.ORIGINAL_MESSAGE_NAME)
                 .build();
         Message expected1 = Message.builder()
@@ -113,6 +115,7 @@ public class DefaultChainRunnerTest {
         // validate
         Message expected0 = Message.builder()
                 .addField(Constants.DEFAULT_INPUT_FIELD, inputToParse)
+                .addField(Constants.DEFAULT_ORIGINAL_FILE_LINE_FIELD, "-1")
                 .createdBy(DefaultChainRunner.ORIGINAL_MESSAGE_NAME)
                 .build();
         assertThat("Expected 2 results, 1 original + 1 link1.",

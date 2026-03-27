@@ -1,0 +1,110 @@
+{
+  "vpcflow": {
+    "id": "556c30a5-bfd0-436c-90c0-cd138620be76",
+    "name": "vpcflow",
+    "parsers": [
+      {
+        "id": "635d8220-8ec8-11ee-8ee8-cb651d2493d6",
+        "name": "parse_columns",
+        "type": "com.cloudera.parserchains.parsers.CsvTextParser",
+        "config": {
+          "delimiter": [
+            {
+              "delimiter": " "
+            }
+          ],
+          "outputField": [
+            {
+              "fieldIndex": "1",
+              "fieldName": "aws_account_id"
+            },
+            {
+              "fieldIndex": "2",
+              "fieldName": "netflow_interface_id"
+            },
+            {
+              "fieldIndex": "3",
+              "fieldName": "ip_src_addr"
+            },
+            {
+              "fieldIndex": "4",
+              "fieldName": "ip_dst_addr"
+            },
+            {
+              "fieldIndex": "5",
+              "fieldName": "ip_src_port"
+            },
+            {
+              "fieldIndex": "6",
+              "fieldName": "ip_dst_port"
+            },
+            {
+              "fieldIndex": "7",
+              "fieldName": "netflow_protocol"
+            },
+            {
+              "fieldIndex": "8",
+              "fieldName": "netflow_packets"
+            },
+            {
+              "fieldIndex": "9",
+              "fieldName": "netflow_bytes"
+            },
+            {
+              "fieldIndex": "10",
+              "fieldName": "netflow_start_time"
+            },
+            {
+              "fieldIndex": "11",
+              "fieldName": "timestamp"
+            },
+            {
+              "fieldIndex": "12",
+              "fieldName": "netflow_action"
+            },
+            {
+              "fieldIndex": "13",
+              "fieldName": "netflow_log_status"
+            },
+            {
+              "fieldIndex": "14",
+              "fieldName": "aws_vpc_id"
+            },
+            {
+              "fieldIndex": "15",
+              "fieldName": "aws_instance_id"
+            },
+            {
+              "fieldIndex": "16",
+              "fieldName": "original_ip_src_addr"
+            },
+            {
+              "fieldIndex": "17",
+              "fieldName": "original_ip_dst_addr"
+            },
+            {
+              "fieldIndex": "18",
+              "fieldName": "aws_region"
+            },
+            {
+              "fieldIndex": "19",
+              "fieldName": "aws_src_service"
+            },
+            {
+              "fieldIndex": "20",
+              "fieldName": "aws_dst_service"
+            },
+            {
+              "fieldIndex": "21",
+              "fieldName": "netflow_flow_direction"
+            },
+            {
+              "fieldIndex": "22",
+              "fieldName": "netflow_traffic_path"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

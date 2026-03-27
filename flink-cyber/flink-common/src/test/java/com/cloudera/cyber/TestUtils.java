@@ -95,7 +95,8 @@ public class TestUtils {
                 .originalBytes(source.getBytes(StandardCharsets.UTF_8))
                 .topic(topic)
                 .offset(0)
-                .partition(0);
+                .partition(0)
+                .line(-1);
     }
 
     public static SignedSourceKey createOriginal(String topic) {

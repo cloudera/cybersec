@@ -1,0 +1,1 @@
+{"test_topic" : {"filePatternToParserMap": {".*vpc_flow.*" : {"chainKey": "vpcflow", "source" : "vpc_flow_from_file"}}}}

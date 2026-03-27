@@ -12,17 +12,32 @@
 
 package com.cloudera.cyber.parser;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.util.Preconditions;
 
 public class TopicPatternToChainMap extends HashMap<String, TopicParserConfig> {
 
     public static final String DEFAULT_PREFIX = "default";
+    public static final String TOPIC_MAP_HAS_NULL_TOPIC_PATTERN_MESSAGE = "Topic map has null topic pattern.";
+    public static final String TOPIC_MAP_HAS_NULL_PARSER_CONFIG_MESSAGE = "Topic map %s has null parser config.";
 
+    public void validate() {
+        // by default a topic name maps to a chain
+        if (!isEmpty()) {
+            forEach(this::validateTopicMappingEntry);
+        }
+    }
+
+    private void validateTopicMappingEntry(String topicPattern, TopicParserConfig topicParserConfig) {
+        Preconditions.checkArgument(StringUtils.isNotEmpty(topicPattern), TOPIC_MAP_HAS_NULL_TOPIC_PATTERN_MESSAGE);
+        Preconditions.checkNotNull(topicParserConfig, TOPIC_MAP_HAS_NULL_PARSER_CONFIG_MESSAGE, topicPattern);
+        topicParserConfig.validate();
+    }
 
     public Map<String, String> getBrokerPrefixTopicNameMap() {
         return this.entrySet().stream()
@@ -38,6 +53,15 @@ public class TopicPatternToChainMap extends HashMap<String, TopicParserConfig> {
     }
 
     public List<String> getSourcesProduced() {
-        return values().stream().map(TopicParserConfig::getSource).collect(Collectors.toList());
+        List<String> kafkaSources = values().stream().map(TopicParserConfig::getSource).collect(Collectors.toList());
+
+        List<String> fileSources =
+        values().stream().
+                map(TopicParserConfig::getFilePatternToParserMap).
+                filter(Objects::nonNull).
+                flatMap(m -> m.values().stream()).
+                map(ParserChainSource::getSource).collect(Collectors.toList());
+
+        return Stream.concat(kafkaSources.stream(), fileSources.stream()).distinct().collect(Collectors.toList());
     }
 }
