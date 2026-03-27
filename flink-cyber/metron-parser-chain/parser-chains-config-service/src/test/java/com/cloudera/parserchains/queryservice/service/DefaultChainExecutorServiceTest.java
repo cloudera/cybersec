@@ -49,7 +49,7 @@ public class DefaultChainExecutorServiceTest {
         return chainBuilderService.build(chainSchema);
     }
 
-    private String parserChain = String.join("\n",
+    private final String parserChain = String.join("\n",
         "{",
         "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
         "\"name\" : \"My Parser Chain\",",
@@ -76,12 +76,14 @@ public class DefaultChainExecutorServiceTest {
         "}"
         );
 
-    private String successExpectedJava11 = String.join("\n",
+    private final String successExpectedJava11 = String.join("\n",
         "{",
         "\"input\" : {",
+        "\"original_file_line\" : \"-1\",",
         "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\"",
         "},",
         "\"output\" : {",
+        "\"original_file_line\" : \"-1\",",
         "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\",",
         "\"address\" : \"1600 Pennsylvania Ave\",",
         "\"phone\" : \"614-867-5309\",",
@@ -95,9 +97,11 @@ public class DefaultChainExecutorServiceTest {
         "},",
         "\"parserResults\" : [ {",
         "\"input\" : {",
+        "\"original_file_line\" : \"-1\",",
         "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\"",
         "},",
         "\"output\" : {",
+        "\"original_file_line\" : \"-1\",",
         "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\",",
         "\"address\" : \"1600 Pennsylvania Ave\",",
         "\"phone\" : \"614-867-5309\",",
@@ -113,12 +117,14 @@ public class DefaultChainExecutorServiceTest {
         "}"
         );
 
-    private String successExpectedJava8 = String.join("\n",
+    private final String successExpectedJava8 = String.join("\n",
         "{",
         "\"input\" : {",
+        "\"original_file_line\" : \"-1\",",
         "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\"",
         "},",
         "\"output\" : {",
+        "\"original_file_line\" : \"-1\",",
         "\"address\" : \"1600 Pennsylvania Ave\",",
         "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\",",
         "\"phone\" : \"614-867-5309\",",
@@ -132,9 +138,11 @@ public class DefaultChainExecutorServiceTest {
         "},",
         "\"parserResults\" : [ {",
         "\"input\" : {",
+        "\"original_file_line\" : \"-1\",",
         "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\"",
         "},",
         "\"output\" : {",
+        "\"original_file_line\" : \"-1\",",
         "\"address\" : \"1600 Pennsylvania Ave\",",
         "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\",",
         "\"phone\" : \"614-867-5309\",",
@@ -329,9 +337,10 @@ public class DefaultChainExecutorServiceTest {
         ChainLink chain = buildChain(schema);
         ParserResult result = service.execute(chain, toParse);
 
-        assertThat("Expected to have 1 input field.", result.getInput().size(), is(1));
-        assertThat("Expected to have 5 output fields.", result.getOutput().size(), is(5));
+        assertThat("Expected to have 1 input field.", result.getInput().size(), is(2));
+        assertThat("Expected to have 5 output fields.", result.getOutput().size(), is(6));
         expectField(result.getInput(), "original_string", toParse);
+        expectField(result.getOutput(), "original_file_line", "-1");
         expectField(result.getOutput(), "original_string", toParse);
         expectField(result.getOutput(), "name", nameField);
         expectField(result.getOutput(), "address", addressField);

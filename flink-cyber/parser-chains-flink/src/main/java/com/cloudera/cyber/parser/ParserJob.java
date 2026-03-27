@@ -16,7 +16,6 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.flink.FlinkUtils;
-import com.cloudera.cyber.flink.Utils;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +30,6 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.OutputTag;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -81,7 +79,7 @@ public abstract class ParserJob {
 
         ParserChainMap chainSchema = JSONUtils.INSTANCE.load(chainConfig, ParserChainMap.class);
         TopicPatternToChainMap topicMap = JSONUtils.INSTANCE.load(topicConfig, TopicPatternToChainMap.class);
-        String defaultKafkaBootstrap = params.get(Utils.KAFKA_PREFIX + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG);
+        topicMap.validate();
 
         String enrichmentsConfigFile = params.get(PARAM_STREAMING_ENRICHMENTS_CONFIG);
         List<String> streamingSourcesProduced = Collections.emptyList();
@@ -112,7 +110,7 @@ public abstract class ParserJob {
         }
 
         SingleOutputStreamOperator<Message> results =
-                source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey, defaultKafkaBootstrap))
+                source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey))
                         .name("Parser " + source.getTransformation().getName()).uid("parser" + source.getTransformation().getUid());
         final OutputTag<Message> errorMessageSideOutput = new OutputTag<Message>(ERROR_MESSAGE_SIDE_OUTPUT) {
         };

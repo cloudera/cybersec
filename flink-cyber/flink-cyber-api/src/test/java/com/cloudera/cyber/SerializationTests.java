@@ -105,6 +105,7 @@ public class SerializationTests {
                 offset(3).partition(1).
                 originalBytes("this is a test".getBytes(UTF_8)).
                 topic("test_topic").
+                line(500L).
                 build();
         MessageToParse output = test(messageToParse);
         assertThat(output, equalTo(messageToParse));

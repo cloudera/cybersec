@@ -1,7 +1,7 @@
 # Chaining Parser
 
 ## Parsing raw text and converting to structured messages
-The chaining parser reads the raw text of an event, extracts fields into a consistent schema and constructs a cyber Message.  The cyber Message is passed on to the enrichment and triaging phase of the pipeline.
+The chaining parser reads the raw text of an event for a kafka topic or a file, extracts fields into a consistent schema and constructs a cyber Message.  The cyber Message is passed on to the enrichment and triaging phase of the pipeline.
 
 ## Extracting streaming enrichments from structured messages
 If chain.enrichments.file is set, the parser converts the message fields to enrichment keys and values and writes the enrichments to HBase. See [EnrichmentsConfiguration](../flink-enrichment/flink-enrichment-lookup-hbase/enrichment_json.md). 
@@ -81,8 +81,19 @@ The topic map determines which chain to use after reading a message from a topic
 
 The topic map can optionally define the broker hosting the topic.  If the broker is not specified, the topic is read from the default kafka broker.
 
-The example topic config below uses the netflow_type1 chain for all messages with topics starting with netflow_type1 and
-uses the netflow_type2 chain for all messages with topics starting with netflow_type2.  Both parser chains result in a message with source type netflow.
+Topics contain either a single raw message or a path to a file. The topic map may contain a mixture single message or file mappings.
+
+### Single Message Mapping
+
+Topics with single messages map directly to a parser chain and message source.  For example to specify the topic mapping:
+
+| Topic Name                   | Parser Chain Name | Source of Messages Produced |
+|------------------------------|-------------------|-----------------------------|
+| starting with netflow_type1_ | netflow_type1     | netflow                     |
+| starting with netflow_type2_ | netflow_type2     | netflow                     |
+
+
+Use the json below:
 
 ```json
 { 
@@ -94,6 +105,71 @@ uses the netflow_type2 chain for all messages with topics starting with netflow_
         "chainKey": "netflow_type2", 
          "source" : "netflow"
      }
+}
+```
+
+### Message File Mapping
+
+Topics with file name messages require a pattern match to the topic and then to the file name contained in the topic.
+
+For example, when the parser reads a file name from the "file_topic", the parser does as second match to the file name to 
+determine the parser chain and produced message source.    
+
+| Topic Name | File name         | Parser Chain Name | Source of Messages Produced |
+|------------|-------------------|-------------------|-----------------------------|
+| file_topic | contains vpcflow  | vpcflow           | vpc                         |
+| file_topic | contains dnsquery | dnsquery          | dns                         |
+
+```json
+{
+  "file_topic": {
+    "filePatternToParserMap": {
+      ".*vpc_flow.*": {
+        "chainKey": "vpcflow",
+        "source": "vpc"
+      },
+      ".*dnsquery.*": {
+        "chainKey": "dnsquery",
+        "source": "dns"
+      }
+    }
+  }
+}
+```
+
+### Combining Single Message and File Mapping
+
+Parsers can consume for both single message and file topics.  However, a topic name should be mapped to a single message or file.
+
+| Topic Name                   | File name            | Parser Chain Name | Source of Messages Produced |
+|------------------------------|----------------------|-------------------|-----------------------------|
+| starting with netflow_type1_ | N/A - single message | netflow_type1     | netflow                     |
+| starting with netflow_type2_ | N/A - single message | netflow_type2     | netflow                     |
+| file_topic                   | contains vpcflow     | vpcflow           | vpc                         |
+| file_topic                   | contains dnsquery    | dnsquery          | dns                         |
+
+```json
+{
+  "netflow_type1_.*": {
+    "chainKey": "netflow_type1",
+    "source": "netflow"
+  },
+  "netflow_type2_.*": {
+    "chainKey": "netflow_type2",
+    "source": "netflow"
+  },
+  "file_topic": {
+    "filePatternToParserMap": {
+      ".*vpc_flow.*": {
+        "chainKey": "vpcflow",
+        "source": "vpc"
+      },
+      ".*dnsquery.*": {
+        "chainKey": "dnsquery",
+        "source": "dns"
+      }
+    }
+  }
 }
 ```
 
