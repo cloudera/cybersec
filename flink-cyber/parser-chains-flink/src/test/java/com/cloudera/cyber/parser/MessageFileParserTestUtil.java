@@ -10,7 +10,6 @@ import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.InvalidParserException;
 import com.google.common.io.Resources;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;

@@ -33,7 +33,7 @@ public class PatternResolver<T> {
      * Compile a pattern adding context to any errors thrown.  The configs contain multiple patterns.
      * Add the text of the pattern that failed compilation so the user will be able to fix it.
      * @param patternString The string of the
-     * @return
+     * @return The pattern string compiled.
      */
     private static Pattern compilePattern(String patternString) {
         // there are multiple patterns in the configs

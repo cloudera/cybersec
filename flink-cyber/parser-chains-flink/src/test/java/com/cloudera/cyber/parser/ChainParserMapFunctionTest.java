@@ -123,12 +123,16 @@ public class ChainParserMapFunctionTest {
                 String actualMessageSource = actualMessage.getSource();
                 sourceToMessageCount.compute(actualMessageSource, (source, count) -> (count == null) ? 1 : count+1);
                 Map<String, String> extensions = actualMessage.getExtensions();
-                if (actualMessageSource.equals(timestampSource)) {
-                    assertThat(actualMessage.getTs()).isEqualTo(expectedEpochTimestamp * 1000);
-                } else if (actualMessageSource.equals(vpcLogSource)) {
-                    assertThat(Integer.parseInt(extensions.get(DEFAULT_ORIGINAL_FILE_LINE_FIELD))).isBetween(0, 3);
-                } else if (actualMessageSource.equals(MessageFileParser.MESSAGE_SOURCE_FILE_STATUS)) {
-                    assertThat(extensions.get("filePath")).isEqualTo(filePath);
+                switch (actualMessageSource) {
+                    case timestampSource:
+                        assertThat(actualMessage.getTs()).isEqualTo(expectedEpochTimestamp * 1000);
+                        break;
+                    case vpcLogSource:
+                        assertThat(Integer.parseInt(extensions.get(DEFAULT_ORIGINAL_FILE_LINE_FIELD))).isBetween(0, 3);
+                        break;
+                    case MessageFileParser.MESSAGE_SOURCE_FILE_STATUS:
+                        assertThat(extensions.get("filePath")).isEqualTo(filePath);
+                        break;
                 }
             }
             assertThat(harness.getSideOutput(ERROR_OUTPUT)).isNull();
