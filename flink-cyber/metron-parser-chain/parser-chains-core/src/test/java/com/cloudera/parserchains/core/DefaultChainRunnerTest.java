@@ -135,13 +135,11 @@ public class DefaultChainRunnerTest {
 
         assertEquals(DefaultChainRunner.ORIGINAL_MESSAGE_NAME, results.get(0).getCreatedBy(),
                 "Expected the 1st message to have 'createdBy' defined.");
-        Message expectedMessage = Message.builder()
-                .addField(runner.getInputField(), StringFieldValue.of(inputToParse))
-                .createdBy(DefaultChainRunner.ORIGINAL_MESSAGE_NAME)
-                .build();
         assertEquals(1, results.size(),
                 "Expected 1 message to be returned to indicate there was an error.");
-        assertTrue(results.get(0).getError().isPresent(),
+        Message result = results.get(0);
+        assertTrue(result.getError().isPresent(),
                 "Expected an error to be indicated on the message.");
+
     }
 }
