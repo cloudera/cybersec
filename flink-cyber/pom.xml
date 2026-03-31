@@ -55,11 +55,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
-        <csa.version>csa1.16.0.0</csa.version>
+        <csa.version>csa1.16.1.0</csa.version>
         <flink.version>1.20.1-${csa.version}</flink.version>
         <cloudera.registry>1.0-${csa.version}</cloudera.registry>
         <flink.hbase.version>2.4</flink.hbase.version>
-        <cdh.version>7.3.1.500-182</cdh.version>
+        <cdh.version>7.3.1.706-4</cdh.version>
         <lombok.version>1.18.30</lombok.version>
         <lombok.plugin.version>1.18.20.0</lombok.plugin.version>
         <guava.version>21.0</guava.version>
@@ -81,6 +81,7 @@
         <maxmind.version>2.13.1</maxmind.version>
         <hadoop.version>3.1.1.${cdh.version}</hadoop.version>
         <hbase.version>2.4.17.${cdh.version}</hbase.version>
+        <mockserver.version>5.15.0</mockserver.version>
         <mockito.version>4.11.0</mockito.version>
         <datasketches.version>1.3.0-incubating</datasketches.version>
         <assertj.version>3.17.2</assertj.version>
@@ -120,6 +121,7 @@
         <commons-cli.version>1.5.0</commons-cli.version>
         <commons-vfs2.version>2.6.0</commons-vfs2.version>
         <commons-collections4.version>4.4</commons-collections4.version>
+        <commons-compress.version>1.26.0</commons-compress.version>
 
         <!--Maven-->
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
