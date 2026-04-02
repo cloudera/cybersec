@@ -13,6 +13,7 @@
 package com.cloudera.cyber;
 
 import com.cloudera.cyber.parser.MessageToParse;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,8 +27,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Map;
 import java.util.Stack;
-
-import static java.lang.String.format;
 
 public class TestUtils {
 
@@ -95,8 +94,7 @@ public class TestUtils {
                 .originalBytes(source.getBytes(StandardCharsets.UTF_8))
                 .topic(topic)
                 .offset(0)
-                .partition(0)
-                .line(-1);
+                .partition(0);
     }
 
     public static SignedSourceKey createOriginal(String topic) {
@@ -174,7 +172,7 @@ public class TestUtils {
                 try {
                     cleanDir(dir);
                 } catch (IOException e) {
-                    System.out.println(format("Warning: Unable to clean folder '%s'", dir.toString()));
+                    System.out.printf("Warning: Unable to clean folder '%s'%n\n", dir.toString());
                 }
             }
         });
@@ -183,10 +181,10 @@ public class TestUtils {
     /**
      * Returns file passed in after writing
      *
-     * @param file
-     * @param contents
-     * @return
-     * @throws IOException
+     * @param file The file to be created.
+     * @param contents Contents of the file to create.
+     * @return The file created.
+     * @throws IOException If the file could not be created.
      */
     public static File write(File file, String contents) throws IOException {
         com.google.common.io.Files.createParentDirs(file);
@@ -208,7 +206,7 @@ public class TestUtils {
      *
      * @param in Input file
      * @return contents of input file
-     * @throws IOException
+     * @throws IOException If file doesn't exist or is unreadable.
      */
     public static String read(File in) throws IOException {
         return read(in, StandardCharsets.UTF_8);
@@ -220,7 +218,7 @@ public class TestUtils {
      * @param in Input file
      * @param charset charset to use for reading
      * @return contents of input file
-     * @throws IOException
+     * @throws IOException If file doesn't exist or is unreadable.
      */
     public static String read(File in, Charset charset) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(in.getPath()));
@@ -238,19 +236,19 @@ public class TestUtils {
         Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
 
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            public @NonNull FileVisitResult visitFile(@NonNull Path file, @NonNull BasicFileAttributes attrs) throws IOException {
                 Files.delete(file);
                 return FileVisitResult.CONTINUE;
             }
 
             @Override
-            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+            public @NonNull FileVisitResult visitFileFailed(@NonNull Path file, @NonNull IOException exc) throws IOException {
                 Files.delete(file);
                 return FileVisitResult.CONTINUE;
             }
 
             @Override
-            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            public @NonNull FileVisitResult postVisitDirectory(@NonNull Path dir, IOException exc) throws IOException {
                 if (exc == null) {
                     return FileVisitResult.CONTINUE;
                 } else {

@@ -50,7 +50,7 @@ public class StringFieldValue implements FieldValue {
     }
     @Override
     public MessageToParse toMessageToParse() {
-        return MessageToParse.builder().originalBytes(toBytes()).offset(0).partition(0).topic("none").line(-1).build();
+        return MessageToParse.builder().originalBytes(toBytes()).offset(0).partition(0).topic("none").build();
     }
 
 }

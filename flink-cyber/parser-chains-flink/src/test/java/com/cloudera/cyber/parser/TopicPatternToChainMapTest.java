@@ -12,6 +12,7 @@
 
 package com.cloudera.cyber.parser;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -28,6 +29,24 @@ public class TopicPatternToChainMapTest {
     private final String BROKER_NAME_2 = "broker2:8181";
     private final String CHAIN_KEY = "chainkey";
     private final String SOURCE = "source";
+
+    @Test
+    public void testHasFileParser() {
+        TopicPatternToChainMap map = new TopicPatternToChainMap();
+
+        // create a topic map with files
+        HashMap<String, ParserChainSource> fileMap = new HashMap<>();
+        fileMap.put("*/*/file*", new ParserChainSource(CHAIN_KEY, SOURCE));
+        map.put(TOPIC_NAME_1, new TopicParserConfig(null, null, null, fileMap));
+        map.put(TOPIC_NAME_2, new TopicParserConfig(CHAIN_KEY, SOURCE, null, null));
+        // check hasFileParser = true
+        assertThat(map.hasFileParser()).isTrue();
+
+        // remove the file from map
+        map.remove(TOPIC_NAME_1);
+        // hasFileParser should be false
+        assertThat(map.hasFileParser()).isFalse();
+    }
 
     @Test
     public void testGroupingTopicByBroker() {

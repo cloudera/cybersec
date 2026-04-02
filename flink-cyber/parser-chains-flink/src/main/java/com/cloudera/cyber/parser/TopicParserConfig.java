@@ -37,8 +37,12 @@ public class TopicParserConfig implements Serializable {
     private String broker;
     private HashMap<String, ParserChainSource> filePatternToParserMap;
 
+    public boolean hasFileParser() {
+        return (filePatternToParserMap != null);
+    }
+
     public void validate() {
-        if (filePatternToParserMap == null) {
+        if (!hasFileParser()) {
             Preconditions.checkArgument(StringUtils.isNotEmpty(chainKey), NULL_CHAIN_KEY_CONFIG);
             Preconditions.checkArgument(StringUtils.isNotEmpty(source), NULL_SOURCE_CONFIG);
         } else {

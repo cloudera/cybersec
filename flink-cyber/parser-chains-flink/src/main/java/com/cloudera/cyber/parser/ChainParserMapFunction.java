@@ -49,6 +49,7 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
     private final TopicPatternToChainMap topicMap;
 
     private final PrivateKey signKey;
+    private final String allowedMessageFilePaths;
 
     private transient Meter messageMeter;
     private transient CachedPatternResolver<ParserChainResolver> topicToParserResolver;
@@ -79,13 +80,26 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
         log.info( "Chain config {}", chainConfig);
         log.info( "Topic map {}", topicMap);
 
-        this.singleMessageParser = new SingleMessageParser(chainConfig, signKey);
-        MessageFileParser messageFileParser = new MessageFileParser(singleMessageParser);
+        this.singleMessageParser = SingleMessageParser.create(chainConfig, signKey);
+
+        MessageFileParser messageFileParser = createMessageFileParser();
         topicToParserResolver = new CachedPatternResolver<>(
                 topicMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
                         v -> getResolver(v.getValue(), messageFileParser, singleMessageParser))));
 
         messageMeter = getRuntimeContext().getMetricGroup().meter("messagesPerMinute", new MeterView(60));
+    }
+
+    private MessageFileParser createMessageFileParser() {
+        if (allowedMessageFilePaths == null || allowedMessageFilePaths.isEmpty()) {
+            if (topicMap.hasFileParser()) {
+                throw new IllegalArgumentException("Can't initialize MessageFileParser because allowed paths is null or empty");
+            }
+            return null;
+        } else {
+            List<String> allowedMessageFilePathList = Arrays.asList(allowedMessageFilePaths.split(","));
+            return MessageFileParser.create(allowedMessageFilePathList, singleMessageParser);
+        }
     }
 
     private static ParserChainResolver getResolver(TopicParserConfig topicConfig, MessageFileParser messageFileParser, SingleMessageParser singleMessageParser) {

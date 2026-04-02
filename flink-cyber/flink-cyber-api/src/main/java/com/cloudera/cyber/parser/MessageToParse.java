@@ -28,13 +28,16 @@ import java.nio.ByteBuffer;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageToParse extends SpecificRecordBase implements SpecificRecord {
+    public static long DEFAULT_LINE = -1;
+
     private byte[] originalBytes;
     private String topic;
     private int partition;
     private long offset;
     private byte[] key;
     /** if line number if message was read from file.  -1 otherwise.*/
-    private long line;
+    @Builder.Default
+    private long line = DEFAULT_LINE;
 
     public static final Schema SCHEMA$ = SchemaBuilder.record(MessageToParse.class.getName()).namespace(MessageToParse.class.getPackage().getName())
             .fields()
@@ -43,7 +46,7 @@ public class MessageToParse extends SpecificRecordBase implements SpecificRecord
             .requiredInt("partition")
             .requiredLong("offset")
             .optionalBytes("key")
-            .requiredLong("line")
+            .nullableLong("line", DEFAULT_LINE)
             .endRecord();
 
     public static Schema getClassSchema() { return SCHEMA$; }
@@ -73,7 +76,7 @@ public class MessageToParse extends SpecificRecordBase implements SpecificRecord
             case 2: partition = (int)value$; break;
             case 3: offset = (long)value$; break;
             case 4: key = (value$ == null) ? null : ((value$ instanceof byte[]) ? (byte[])value$: ((ByteBuffer) value$).array()); break;
-            case 5: line = (long)value$; break;
+            case 5: line = (value$ == null) ? DEFAULT_LINE : (long)value$; break;
             default: throw new org.apache.avro.AvroRuntimeException("Bad index");
         }
     }

@@ -66,6 +66,7 @@ public abstract class ParserJob {
     public static final String ERROR_MESSAGE_SIDE_OUTPUT = "error-message";
     public static final String SIGNATURE_ENABLED = "signature.enabled";
     public static final String PARAM_STREAMING_ENRICHMENTS_CONFIG = "chain.enrichments.file";
+    public static final String PARMA_ALLOWED_MESSAGE_FILE_PATHS = "message.file.allowed.paths";
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params)
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -96,6 +97,16 @@ public abstract class ParserJob {
             }
         }
 
+        String allowedPathsConfig = params.get(PARMA_ALLOWED_MESSAGE_FILE_PATHS, null);
+        boolean allowedPathsRequired = topicMap.hasFileParser();
+        boolean hasAllowedPaths = (allowedPathsConfig != null && !allowedPathsConfig.isEmpty());
+        if (allowedPathsRequired && !hasAllowedPaths) {
+            throw new RuntimeException(String.format("Topic map specifies file parsing but %s is not specified in the properties file.  Specify a comma delimited string of paths that the parser is allowed to read from.", PARMA_ALLOWED_MESSAGE_FILE_PATHS));
+        } else if (!allowedPathsRequired && hasAllowedPaths){
+            allowedPathsConfig = null;
+            log.info("Configuration {} is ignored because there are no file parsers specified in topic map.", PARMA_ALLOWED_MESSAGE_FILE_PATHS);
+        }
+
         DataStream<MessageToParse> source = createSource(env, params, topicMap);
 
         PrivateKey privateKey = null;
@@ -110,7 +121,7 @@ public abstract class ParserJob {
         }
 
         SingleOutputStreamOperator<Message> results =
-                source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey))
+                source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey, allowedPathsConfig))
                         .name("Parser " + source.getTransformation().getName()).uid("parser" + source.getTransformation().getUid());
         final OutputTag<Message> errorMessageSideOutput = new OutputTag<Message>(ERROR_MESSAGE_SIDE_OUTPUT) {
         };

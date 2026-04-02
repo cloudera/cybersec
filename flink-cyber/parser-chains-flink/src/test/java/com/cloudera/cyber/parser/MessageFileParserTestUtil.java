@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,9 +29,16 @@ import static org.assertj.core.api.Assertions.fail;
 
 public class MessageFileParserTestUtil {
 
+    private static final String VALID_MESSAGE_FILE_PATH = "message_file";
+
+    public static String getValidMessageFileAllowedPath() {
+        return ParserTestUtils.resolveResourcePath(VALID_MESSAGE_FILE_PATH);
+    }
+
     public static MessageFileParser createMessageFileParser() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
-        ParserChainMap chains = ParserTestUtils.readParserChainMap("message_file/VpcFlowChain.json");
-        return new MessageFileParser(new SingleMessageParser(chains, null));
+        ParserChainMap chains = ParserTestUtils.readParserChainMap(String.format("%s/VpcFlowChain.json", VALID_MESSAGE_FILE_PATH));
+        List<String> allowedPaths = Collections.singletonList(getValidMessageFileAllowedPath());
+        return MessageFileParser.create(allowedPaths, SingleMessageParser.create(chains, null));
     }
 
     public static MessageToParse createMessageToParse(String filename) {
@@ -42,7 +50,7 @@ public class MessageFileParserTestUtil {
             // if the file doesn't exist, it's an error case
             sampleFile = filename;
         }
-        return MessageToParse.builder().topic("test_topic").line(-1).offset(3).partition(100).
+        return MessageToParse.builder().topic("test_topic").offset(3).partition(100).
                 originalBytes(sampleFile.getBytes(StandardCharsets.UTF_8)).build();
     }
 

@@ -39,6 +39,10 @@ public class TopicPatternToChainMap extends HashMap<String, TopicParserConfig> {
         topicParserConfig.validate();
     }
 
+    public boolean hasFileParser() {
+        return this.entrySet().stream().anyMatch(e -> e.getValue().hasFileParser());
+    }
+
     public Map<String, String> getBrokerPrefixTopicNameMap() {
         return this.entrySet().stream()
                 .collect(Collectors.groupingBy(

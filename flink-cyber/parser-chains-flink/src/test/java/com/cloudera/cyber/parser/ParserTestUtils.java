@@ -25,6 +25,10 @@ public class ParserTestUtils {
         return Resources.toString(url, UTF_8);
     }
 
+    public static String resolveResourcePath(String resourcePath) {
+        return Resources.getResource(resourcePath).getPath();
+    }
+
     public static Signature loadSignature(PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeyException {
         Signature signature = null;
         if (privateKey != null) {

@@ -16,7 +16,6 @@ import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.parser.wrappers.MessageFileParser;
-import com.cloudera.parserchains.core.InvalidParserException;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import com.google.common.io.Resources;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -29,10 +28,7 @@ import org.junit.jupiter.api.Test;
 
 import java.security.PrivateKey;
 import java.security.Signature;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static com.cloudera.cyber.parser.ChainParserMapFunction.CHAIN_PARSER_FEATURE;
 import static com.cloudera.cyber.parser.ChainParserMapFunction.NO_TIMESTAMP_FIELD_MESSAGE;
@@ -63,20 +59,29 @@ public class ChainParserMapFunctionTest {
 
     @Test
     public void invalidTopicRegex() {
-       assertThatThrownBy(() ->testOpenError("GrokTimestampParserChain.json", "pattern_errors/BadTopicRegex.json")).
+       assertThatThrownBy(() -> testTopicChainConfigError("GrokTimestampParserChain.json", "pattern_errors/BadTopicRegex.json")).
                 isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Pattern '[' did not compile.");
     }
 
     @Test
     public void invalidFileRegex() {
-        assertThatThrownBy(() ->testOpenError("GrokTimestampParserChain.json", "pattern_errors/BadFileRegex.json")).
+        assertThatThrownBy(() -> testTopicChainConfigError("GrokTimestampParserChain.json", "pattern_errors/BadFileRegex.json")).
                 isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Pattern '[' did not compile.");
     }
     @Test
-    public void testMessageFile() throws Exception {
-        try (OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = createTestHarness("message_file/VpcFlowChain.json", "message_file/VpcTopicMap.json", null)) {
+    public void testMessageFileAllowedPathSuccess() throws Exception {
+        // single allowed directory in allowed directory string
+        testSuccessfulMessageFile(MessageFileParserTestUtil.getValidMessageFileAllowedPath());
+        // multiple allowed directories separated by delimiter
+        testSuccessfulMessageFile(String.join(",",
+                ParserTestUtils.resolveResourcePath("metron"),
+                MessageFileParserTestUtil.getValidMessageFileAllowedPath()));
+    }
+
+    private void testSuccessfulMessageFile(String allowedPaths) throws Exception {
+        try (OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = createTestHarness("message_file/VpcFlowChain.json", "message_file/VpcTopicMap.json", null, allowedPaths)) {
             String filePath = Resources.getResource("message_file/vpc_flow_samples.txt").getFile();
-            MessageToParse messageToParse = MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic(TEST_TOPIC).originalBytes(filePath.getBytes(UTF_8)).line(-1).build();
+            MessageToParse messageToParse = MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic(TEST_TOPIC).originalBytes(filePath.getBytes(UTF_8)).build();
             harness.processElement(new StreamRecord<>(messageToParse));
             List<Message> messages = harness.extractOutputValues();
             MessageFileParserTestUtil.verifyMessageFileOutput(messages, messageToParse);
@@ -85,9 +90,21 @@ public class ChainParserMapFunctionTest {
     }
 
     @Test
+    public void testMessageFileMissingRequiredAllowedPath() {
+        // null allowed paths
+        assertThatThrownBy(() ->testOpenError("message_file/VpcFlowChain.json", "message_file/VpcTopicMap.json", null)).
+                isInstanceOf(IllegalArgumentException.class).hasMessageContaining("allowed paths is null or empty");
+
+        // empty allowed paths
+        assertThatThrownBy(() ->testOpenError("message_file/VpcFlowChain.json", "message_file/VpcTopicMap.json", "")).
+                isInstanceOf(IllegalArgumentException.class).hasMessageContaining("allowed paths is null or empty");
+
+    }
+
+    @Test
     public void testMessageFileDoesntExist() throws Exception {
-        try (OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = createTestHarness("message_file/VpcFlowChain.json", "message_file/VpcTopicMap.json", null)) {
-            harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic(TEST_TOPIC).originalBytes("doesnt_exist".getBytes(UTF_8)).line(-1).build()));
+        try (OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = createTestHarness("message_file/VpcFlowChain.json", "message_file/VpcTopicMap.json", null, MessageFileParserTestUtil.getValidMessageFileAllowedPath())) {
+            harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic(TEST_TOPIC).originalBytes("doesnt_exist".getBytes(UTF_8)).build()));
             List<Message> messages = harness.extractOutputValues();
             assertThat(messages.isEmpty()).isTrue();
             assertThat(harness.getSideOutput(ERROR_OUTPUT).size()).isEqualTo(1);
@@ -109,12 +126,13 @@ public class ChainParserMapFunctionTest {
         final String timestampSource = "timestamp";
         final String vpcLogSource = "vpc_flow_from_file";
         topicMap.put("single_message_topic", new TopicParserConfig("timestamp_log", timestampSource,  null, null));
-        try(OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = ProcessFunctionTestHarnesses.forProcessFunction(new ChainParserMapFunction(chainMap, topicMap, null))) {
+        Resources.getResource("message_file");
+        try(OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = ProcessFunctionTestHarnesses.forProcessFunction(new ChainParserMapFunction(chainMap, topicMap, null, MessageFileParserTestUtil.getValidMessageFileAllowedPath()))) {
             String filePath = Resources.getResource("message_file/vpc_flow_samples.txt").getFile();
-            harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic(TEST_TOPIC).originalBytes(filePath.getBytes(UTF_8)).line(-1).build()));
+            harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic(TEST_TOPIC).originalBytes(filePath.getBytes(UTF_8)).build()));
 
             long expectedEpochTimestamp = 1616706642L;
-            harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(2).partition(TEST_PARTITION).topic(timestampTopic).originalBytes(Long.toString(expectedEpochTimestamp).getBytes(UTF_8)).line(-1).build()));
+            harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(2).partition(TEST_PARTITION).topic(timestampTopic).originalBytes(Long.toString(expectedEpochTimestamp).getBytes(UTF_8)).build()));
 
             List<Message> messages = harness.extractOutputValues();
             assertThat(messages.size()).isEqualTo(4);
@@ -144,9 +162,9 @@ public class ChainParserMapFunctionTest {
 
     @Test
     public void testMessageFiltered() throws Exception {
-        try (OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = createTestHarness("metron/parser_chain.json", "metron/topic_map.json", null)) {
+        try (OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = createTestHarness("metron/parser_chain.json", "metron/topic_map.json", null, MessageFileParserTestUtil.getValidMessageFileAllowedPath())) {
             String messageText = ParserTestUtils.readConfigFile("metron/samples/oraclelogon_filtered.txt");
-            harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic("oraclelogon").originalBytes(messageText.getBytes(UTF_8)).line(-1).build()));
+            harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic("oraclelogon").originalBytes(messageText.getBytes(UTF_8)).build()));
             List<Message> messages = harness.extractOutputValues();
             assertThat(messages.isEmpty()).isTrue();
             assertThat(harness.getSideOutput(ERROR_OUTPUT)).isNull();
@@ -155,9 +173,9 @@ public class ChainParserMapFunctionTest {
 
     @Test
     public void testMessageEmittedFromFilter() throws Exception {
-        try (OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = createTestHarness("metron/parser_chain.json", "metron/topic_map.json", null)) {
+        try (OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = createTestHarness("metron/parser_chain.json", "metron/topic_map.json", null, null)) {
             String messageText = ParserTestUtils.readConfigFile("metron/samples/oraclelogon.txt");
-            harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic("oraclelogon").originalBytes(messageText.getBytes(UTF_8)).line(-1).build()));
+            harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic("oraclelogon").originalBytes(messageText.getBytes(UTF_8)).build()));
             List<Message> messages = harness.extractOutputValues();
             assertThat(messages.size()).isEqualTo(1);
             assertThat(messages.get(0).getExtensions().get("oracle_user")).isEqualTo("SYSMAN");
@@ -167,13 +185,13 @@ public class ChainParserMapFunctionTest {
 
     @Test
     public void testExceptionThrownWhenPatternAbsent() {
-        assertThatExceptionOfType(InvalidParserException.class).isThrownBy(() -> testOpenError("metron/parser_chain_invalid.json", "metron/topic_map.json"));
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> testTopicChainConfigError("metron/parser_chain_invalid.json", "metron/topic_map.json"));
     }
 
     private void testMessageWithError(String messageText, String timestampNotEpoch) throws Exception {
         Message outputMessage;
         try (OneInputStreamOperatorTestHarness<MessageToParse, Message> harness = createTestHarness("JsonTimestampParserChain.json", null)) {
-            harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic(TEST_TOPIC).originalBytes(messageText.getBytes(UTF_8)).line(-1).build()));
+            harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(1).partition(TEST_PARTITION).topic(TEST_TOPIC).originalBytes(messageText.getBytes(UTF_8)).build()));
             outputMessage = Objects.requireNonNull(harness.getSideOutput(ERROR_OUTPUT).poll()).getValue();
         }
         assertThat(outputMessage.getExtensions().get("original_string")).isEqualTo(messageText);
@@ -186,8 +204,8 @@ public class ChainParserMapFunctionTest {
 
     @Test
     public void testInvalidParser() {
-        assertThatThrownBy(() ->testOpenError("ErrorParserChain.json", "TimestampTopicMap.json")).
-                isInstanceOf(InvalidParserException.class).hasMessageContaining("Unable to find parser in catalog");
+        assertThatThrownBy(() -> testTopicChainConfigError("ErrorParserChain.json", "TimestampTopicMap.json")).
+                isInstanceOf(IllegalArgumentException.class).hasMessage("The following parser chains did not parse: timestamp_log");
     }
 
     @Test
@@ -223,7 +241,7 @@ public class ChainParserMapFunctionTest {
 
 
     private void sendTimestampMessage(Map<Long, Tuple2<Long, byte[]>> expectedTimestamps, OneInputStreamOperatorTestHarness<MessageToParse, Message> harness, String messageText, long offset, long expectedTimestamp, Signature signature) throws Exception {
-        harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(offset).partition(TEST_PARTITION).topic(TEST_TOPIC).originalBytes(messageText.getBytes(UTF_8)).line(-1).build()));
+        harness.processElement(new StreamRecord<>(MessageToParse.builder().offset(offset).partition(TEST_PARTITION).topic(TEST_TOPIC).originalBytes(messageText.getBytes(UTF_8)).build()));
         Tuple2<Long, byte[]> expectedResult = new Tuple2<>(expectedTimestamp, null);
         if (signature != null) {
             signature.update(messageText.getBytes(UTF_8));
@@ -235,23 +253,26 @@ public class ChainParserMapFunctionTest {
     }
 
     private OneInputStreamOperatorTestHarness<MessageToParse, Message> createTestHarness(String chainConfigFile, PrivateKey privateKey) throws Exception {
-        return createTestHarness(chainConfigFile, "TimestampTopicMap.json", privateKey);
+        return createTestHarness(chainConfigFile, "TimestampTopicMap.json", privateKey, MessageFileParserTestUtil.getValidMessageFileAllowedPath());
     }
 
-    private OneInputStreamOperatorTestHarness<MessageToParse, Message> createTestHarness(String chainConfigFile, String topicMapFile, PrivateKey privateKey) throws Exception {
+    private OneInputStreamOperatorTestHarness<MessageToParse, Message> createTestHarness(String chainConfigFile, String topicMapFile, PrivateKey privateKey, String allowedPaths) throws Exception {
         ParserChainMap chainSchema = ParserTestUtils.readParserChainMap(chainConfigFile);
         TopicPatternToChainMap topicMap = ParserTestUtils.readTopicMap(topicMapFile);
 
-        return ProcessFunctionTestHarnesses.forProcessFunction(new ChainParserMapFunction(chainSchema, topicMap, privateKey));
+        return ProcessFunctionTestHarnesses.forProcessFunction(new ChainParserMapFunction(chainSchema, topicMap, privateKey, allowedPaths));
     }
 
-    private void testOpenError(String chainConfigFile, String topicMapFile) throws Exception {
+    private void testTopicChainConfigError(String chainConfigFile, String topicMapFile) throws Exception {
+        testOpenError(chainConfigFile, topicMapFile, MessageFileParserTestUtil.getValidMessageFileAllowedPath());
+    }
+
+    private void testOpenError(String chainConfigFile, String topicMapFile, String allowedPaths) throws Exception {
         String chainConfig = ParserTestUtils.readConfigFile(chainConfigFile);
         String topicConfig = ParserTestUtils.readConfigFile(topicMapFile);
         ParserChainMap chainSchema = JSONUtils.INSTANCE.load(chainConfig, ParserChainMap.class);
         TopicPatternToChainMap topicMap = JSONUtils.INSTANCE.load(topicConfig, TopicPatternToChainMap.class);
-        ChainParserMapFunction function = new ChainParserMapFunction(chainSchema, topicMap, null);
+        ChainParserMapFunction function = new ChainParserMapFunction(chainSchema, topicMap, null, allowedPaths);
         function.open(new Configuration());
     }
-
 }

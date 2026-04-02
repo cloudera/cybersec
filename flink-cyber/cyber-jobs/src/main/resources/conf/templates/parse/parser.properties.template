@@ -12,4 +12,6 @@ flink.job.name=BRANCH.PIPELINE.parse.PARSER_NAME
 
 signature.enabled=false
 original.enabled=false
+# add a comma delimited list of absolute paths where the parser can read files
+#message.file.allowed.paths=
 

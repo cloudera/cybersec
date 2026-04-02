@@ -14,6 +14,7 @@ package com.cloudera.cyber.parser;
 
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -28,8 +29,9 @@ import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
+@Slf4j
 public class TestParserJob extends AbstractParserJobTest {
-    private String chainWithRouting = String.join("\n",
+    private final String chainWithRouting = String.join("\n",
         "{ \"test\": {",
         "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
         "\"name\" : \"My Parser Chain\",",
@@ -110,12 +112,15 @@ public class TestParserJob extends AbstractParserJobTest {
     final String input = StringUtils.join(new String[]{nameField, addressField, phoneField, String.valueOf(timestamp), timezone}, ",");
 
     @Test
-    public void testParser() throws Exception {
-        ParameterTool params = ParameterTool.fromMap(new HashMap<String, String>() {{
+    public void testSingleMessageParserNoAllowedPaths() throws Exception {
+        ParameterTool noAllowedPaths = ParameterTool.fromMap(new HashMap<String, String>() {{
             put(PARAM_CHAIN_CONFIG, chainWithRouting);
             put(PARAM_PRIVATE_KEY, getKeyBase64());
         }});
+        testSuccessfulSingleMessage(noAllowedPaths);
+    }
 
+    private void testSuccessfulSingleMessage(ParameterTool params) throws Exception {
         StreamExecutionEnvironment env = createPipeline(params);
 
         JobTester.startTest(env);
@@ -131,4 +136,5 @@ public class TestParserJob extends AbstractParserJobTest {
         assertThat("name correct", out.getExtensions(), hasEntry(equalTo("name"), equalTo(nameField)));
 
     }
+
 }

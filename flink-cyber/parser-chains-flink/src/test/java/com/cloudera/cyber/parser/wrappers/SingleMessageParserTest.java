@@ -58,7 +58,10 @@ public class SingleMessageParserTest {
     @Test
     public void testInvalidParserChain() throws IOException {
         ParserChainMap chains = ParserTestUtils.readParserChainMap("metron/parser_chain_invalid.json");
-        assertThatThrownBy(() -> new SingleMessageParser(chains, null)).isInstanceOf(InvalidParserException.class).hasMessageContaining("Failed to invoke method configurationPath");
+        assertThatThrownBy(() -> SingleMessageParser.create(chains, null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining(String.format("The following parser chains did not parse: %s", String.join(", ", chains.keySet())));
+
+        chains.putAll(ParserTestUtils.readParserChainMap("ErrorParserChain.json"));
+        assertThatThrownBy(() -> SingleMessageParser.create(chains, null)).isInstanceOf(IllegalArgumentException.class).hasMessageContaining("The following parser chains did not parse: %s", String.join(", ", chains.keySet()));
     }
 
     @Test

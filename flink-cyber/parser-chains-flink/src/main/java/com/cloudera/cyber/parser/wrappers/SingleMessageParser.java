@@ -9,8 +9,8 @@ import com.cloudera.cyber.parser.ParserChainMap;
 import com.cloudera.cyber.parser.ParserChainSource;
 import com.cloudera.parserchains.core.*;
 import com.cloudera.parserchains.core.catalog.ClassIndexParserCatalog;
+import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.security.*;
@@ -46,34 +46,43 @@ public class SingleMessageParser implements ParserInterface {
     /**
      * Constructor
      *
-     * @param parserChainMap The chains available to this parser.
-     * @param signKey        Private key for signing messages.  Null if messages should not be signed.
+     * @param chains         Map from chain name to chain parser.
+     * @param signature      Signature for signing message content or null if no signature required.
      */
-    public SingleMessageParser(ParserChainMap parserChainMap, PrivateKey signKey) throws InvalidParserException, NoSuchAlgorithmException, InvalidKeyException {
-        this.chains = buildChainMap(parserChainMap);
-        this.signature = createSignature(signKey);
+    private SingleMessageParser(HashMap<String, ChainLink> chains, Signature signature) {
+        this.chains = chains;
+        this.signature = signature;
         this.chainRunner = new DefaultChainRunner();
         log.info("Parser chains {}", this.chains);
     }
 
-    private static HashMap<String, ChainLink> buildChainMap(ParserChainMap parserChainMap) throws InvalidParserException {
+    public static SingleMessageParser create(ParserChainMap parserChainMap, PrivateKey signKey) throws InvalidParserException, NoSuchAlgorithmException, InvalidKeyException {
+       return new SingleMessageParser(buildChainMap(parserChainMap), createSignature(signKey));
+    }
+
+    private static HashMap<String, ChainLink> buildChainMap(ParserChainMap parserChainMap) {
 
         HashMap<String, ChainLink> chains = new HashMap<>();
         ChainBuilder chainBuilder = new DefaultChainBuilder(new ReflectiveParserBuilder(),
                 new ClassIndexParserCatalog());
-        ArrayList<InvalidParserException> errors = new ArrayList<>();
 
-        parserChainMap.forEach((chainName, parserChainSchema) -> {
+        String chainsWithErrors = null;
+        for (Map.Entry<String, ParserChainSchema> entry : parserChainMap.entrySet()) {
+            String chainName = entry.getKey();
             try {
-                chains.put(chainName, chainBuilder.build(parserChainSchema));
+                chains.put(chainName, chainBuilder.build(entry.getValue()));
             } catch (InvalidParserException e) {
                 log.error("Cannot build parser chain '{}'", chainName, e);
-                errors.add(e);
+                if (chainsWithErrors == null) {
+                    chainsWithErrors = chainName;
+                } else {
+                    chainsWithErrors = chainsWithErrors.concat(", ").concat(chainName);
+                }
             }
-        });
+        }
 
-        if (CollectionUtils.isNotEmpty(errors)) {
-            throw errors.get(0);
+        if (chainsWithErrors != null) {
+            throw new IllegalArgumentException(String.format("The following parser chains did not parse: %s", chainsWithErrors));
         }
 
         return chains;

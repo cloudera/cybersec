@@ -35,11 +35,11 @@ public class SingleMessageParserTestUtil {
 
     public static SingleMessageParser createParser(String chainFile, PrivateKey signKey) throws NoSuchAlgorithmException, InvalidKeyException, InvalidParserException, IOException {
         ParserChainMap chains = ParserTestUtils.readParserChainMap(chainFile);
-        return new SingleMessageParser(chains, signKey);
+        return SingleMessageParser.create(chains, signKey);
     }
 
     public static MessageToParse createMessageToParse(String rawMessage) {
-        return MessageToParse.builder().offset(100).partition(3).line(-1).originalBytes(rawMessage.getBytes(StandardCharsets.UTF_8)).build();
+        return MessageToParse.builder().offset(100).partition(3).originalBytes(rawMessage.getBytes(StandardCharsets.UTF_8)).build();
     }
 
     public static MessageToParse createGoodMessage(long timestamp, Map<String, String> extensions) {

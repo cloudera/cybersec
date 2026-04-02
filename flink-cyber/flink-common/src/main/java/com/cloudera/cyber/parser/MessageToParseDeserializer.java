@@ -29,7 +29,6 @@ public class MessageToParseDeserializer implements KafkaRecordDeserializationSch
                 .offset(consumerRecord.offset())
                 .partition(consumerRecord.partition())
                 .key(consumerRecord.key())
-                .line(-1)
                 .build());
     }
 
