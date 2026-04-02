@@ -138,6 +138,24 @@ public class TopicPatternToChainMapTest {
     }
 
     @Test
+    public void testMixOfFileAndSingleMessageSourcesDoesNotReturnNull() {
+        TopicPatternToChainMap map = new TopicPatternToChainMap();
+        String source1 = "source 1";
+        String source2 = "source 2";
+        String source3 = "source 3";
+        String fileSource = "file source";
+
+        HashMap<String, ParserChainSource> fileMap = new HashMap<>();
+        fileMap.put("*/*/file*", new ParserChainSource(CHAIN_KEY, fileSource));
+
+        map.put(TOPIC_NAME_1, new TopicParserConfig(CHAIN_KEY, source1, null, null));
+        map.put(TOPIC_NAME_2, new TopicParserConfig(CHAIN_KEY, source2, null, null));
+        map.put(TOPIC_NAME_3, new TopicParserConfig(null, null, null, fileMap));
+
+        assertThat(map.getSourcesProduced()).containsOnly(source1, source2, fileSource);
+    }
+
+    @Test
     public void testEmptyMap() {
         TopicPatternToChainMap map = new TopicPatternToChainMap();
         assertThatCode(map::validate).doesNotThrowAnyException();

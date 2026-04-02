@@ -39,7 +39,7 @@ public class TestMessageFileJob extends AbstractParserJobTest {
             put(PARAM_TOPIC_MAP_CONFIG_FILE, ParserTestUtils.resolveResourcePath("message_file/VpcTopicMap.json"));
         }});
 
-        assertThatThrownBy(() ->setupErrorPipeline(params)).isInstanceOf(RuntimeException.class).hasMessageContaining(ParserJob.PARMA_ALLOWED_MESSAGE_FILE_PATHS).hasMessageContaining("paths that the parser is allowed");
+        assertThatThrownBy(() ->setupErrorPipeline(params)).isInstanceOf(RuntimeException.class).hasMessageContaining(ParserJob.PARAM_ALLOWED_MESSAGE_FILE_PATHS).hasMessageContaining("paths that the parser is allowed");
     }
 
     private void setupErrorPipeline(ParameterTool params) throws Exception {
@@ -53,7 +53,7 @@ public class TestMessageFileJob extends AbstractParserJobTest {
             put(SIGNATURE_ENABLED, "false");
             put(PARAM_CHAIN_CONFIG_FILE, ParserTestUtils.resolveResourcePath("message_file/VpcFlowChain.json"));
             put(PARAM_TOPIC_MAP_CONFIG_FILE, ParserTestUtils.resolveResourcePath("message_file/VpcTopicMap.json"));
-            put(PARMA_ALLOWED_MESSAGE_FILE_PATHS, MessageFileParserTestUtil.getValidMessageFileAllowedPath());
+            put(PARAM_ALLOWED_MESSAGE_FILE_PATHS, MessageFileParserTestUtil.getValidMessageFileAllowedPath());
         }});
 
         StreamExecutionEnvironment env = createPipeline(params);

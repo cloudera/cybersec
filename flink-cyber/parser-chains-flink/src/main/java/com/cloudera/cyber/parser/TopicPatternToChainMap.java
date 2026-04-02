@@ -57,7 +57,8 @@ public class TopicPatternToChainMap extends HashMap<String, TopicParserConfig> {
     }
 
     public List<String> getSourcesProduced() {
-        List<String> kafkaSources = values().stream().map(TopicParserConfig::getSource).collect(Collectors.toList());
+        List<String> kafkaSources = values().stream().map(TopicParserConfig::getSource).
+                filter(Objects::nonNull).collect(Collectors.toList());
 
         List<String> fileSources =
         values().stream().
