@@ -115,7 +115,6 @@ public class HBaseClientTest {
      * Should be able to read/write a single row.
      */
     @Test
-    @Disabled
     public void testWrite() throws Exception {
 
         startHBase();
