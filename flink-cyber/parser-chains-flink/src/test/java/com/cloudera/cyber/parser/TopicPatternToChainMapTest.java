@@ -142,7 +142,6 @@ public class TopicPatternToChainMapTest {
         TopicPatternToChainMap map = new TopicPatternToChainMap();
         String source1 = "source 1";
         String source2 = "source 2";
-        String source3 = "source 3";
         String fileSource = "file source";
 
         HashMap<String, ParserChainSource> fileMap = new HashMap<>();
