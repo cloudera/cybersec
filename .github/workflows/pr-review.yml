@@ -35,8 +35,8 @@ jobs:
             - name: Run PR Review
               uses: OpenHands/extensions/plugins/pr-review@main
               with:
-                  llm-model: anthropic/MiniMax-M2.7 
-                  llm-base-url: https://api.minimax.io/anthropic 
+                  llm-model: openhands/claude-sonnet-4-5-20250929
+                  llm-base-url: https://llm-proxy.app.all-hands.dev 
                   review-style: roasted
                   llm-api-key: ${{ secrets.LLM_API_KEY }}
                   github-token: ${{ secrets.GITHUB_TOKEN }}
