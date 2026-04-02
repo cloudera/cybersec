@@ -61,6 +61,8 @@ public class HashFunctionsTest {
     final HashFunctions.ListSupportedHashTypes listSupportedHashTypes = new HashFunctions.ListSupportedHashTypes();
     final HashFunctions.Hash hash = new HashFunctions.Hash();
 
+    private static final List<String> SKIP_HASHES = Arrays.asList("HARAKA-256", "HARAKA-512");
+
     @Test
     public void nullArgumentsShouldFail() {
         assertThrows(IllegalArgumentException.class, () -> listSupportedHashTypes.apply(null));
@@ -135,12 +137,17 @@ public class HashFunctionsTest {
 
         algorithms.forEach(algorithm -> {
             try {
-                final MessageDigest expected = MessageDigest.getInstance(algorithm);
-                expected.update(valueToHash.getBytes(StandardCharsets.UTF_8));
+                // skip the HARAKA hashes that require an exact content string length
+                if (!SKIP_HASHES.contains(algorithm)) {
+                    final MessageDigest expected = MessageDigest.getInstance(algorithm);
+                    expected.update(valueToHash.getBytes(StandardCharsets.UTF_8));
 
-                assertEquals(expectedHexString(expected), hash.apply(Arrays.asList(valueToHash, algorithm)));
+                    assertEquals(expectedHexString(expected), hash.apply(Arrays.asList(valueToHash, algorithm)));
+                }
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
+            } catch (Exception generalExc) {
+                throw new RuntimeException(String.format("Algorithm %s failed.", algorithm), generalExc);
             }
         });
     }
@@ -152,12 +159,14 @@ public class HashFunctionsTest {
 
         algorithms.forEach(algorithm -> {
             try {
-                final Object actual = run("HASH('" + valueToHash + "', '" + algorithm + "')", Collections.emptyMap());
+                if (!SKIP_HASHES.contains(algorithm)) {
+                    final Object actual = run("HASH('" + valueToHash + "', '" + algorithm + "')", Collections.emptyMap());
 
-                final MessageDigest expected = MessageDigest.getInstance(algorithm);
-                expected.update(valueToHash.getBytes(StandardCharsets.UTF_8));
+                    final MessageDigest expected = MessageDigest.getInstance(algorithm);
+                    expected.update(valueToHash.getBytes(StandardCharsets.UTF_8));
 
-                assertEquals(expectedHexString(expected), actual);
+                    assertEquals(expectedHexString(expected), actual);
+                }
             } catch (NoSuchAlgorithmException e) {
                 throw new RuntimeException(e);
             }

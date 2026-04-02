@@ -40,7 +40,6 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <slf4j.version>1.7.7</slf4j.version>
         <storm.hdfs.version>0.1.2</storm.hdfs.version>
-        <commons-compress.version>1.13</commons-compress.version>
         <geoip.version>${maxmind.version}</geoip.version>
         <guava_version>${guava.version}</guava_version>
     </properties>
@@ -98,6 +97,11 @@
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-hbase-common</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>${commons-compress.version}</version>
         </dependency>
 
         <!-- Other -->
