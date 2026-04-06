@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.*;
 
@@ -24,6 +25,7 @@ public class MessageFileParser implements ParserInterface {
     public static final String MESSAGE_FILE_PARSER_FEATURE = "message_file_parser";
     public static final String FILE_PATH_DID_NOT_MATCH_ANY_SPECIFIED_PATTERNS = "FilePath did not match any specified patterns.";
     public static final String FILE_NOT_IN_ALLOWED_PATHS = "File not in allowed paths.";
+    public static final String FILE_CONTAINS_SYMBOLIC_LINKS = "File path contains symbolic link.";
     public static final String UNMATCHED_FILE_SOURCE = "unmatched_file_source";
     public static final String MESSAGE_SOURCE_FILE_STATUS = "message_file_status";
     public static final String INVALID_PATHS_MESSAGE = "The following allowed paths are invalid: %s";
@@ -81,56 +83,72 @@ public class MessageFileParser implements ParserInterface {
     @Override
     public void parse(ParserChainSource parserChainSource, MessageToParse message, AbstractParserOutput output) {
         String fileToParse = new String(message.getOriginalBytes(), StandardCharsets.UTF_8);
-        if (parserChainSource != null) {
+        if (parserChainSource == null) {
+            sendErrorMessage(UNMATCHED_FILE_SOURCE, message, output, FILE_PATH_DID_NOT_MATCH_ANY_SPECIFIED_PATTERNS, fileToParse);
+        } else {
             try {
-                FileSystem fileSystem = new Path(fileToParse).getFileSystem();
-                Path fileToParsePath = new Path(fileToParse);
-                final String fileToParsePathString = fileToParsePath.toUri().toString();
-                if (allowedPaths.stream().anyMatch(fileToParsePathString::startsWith)) {
-                    try (FSDataInputStream is = fileSystem.open(fileToParsePath)) {
-                        try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-                            String line;
-                            int lineNumber = 1;
-                            while ((line = br.readLine()) != null) {
-
-                                MessageToParse messageToParse = MessageToParse.builder()
-                                        .originalBytes(line.getBytes(StandardCharsets.UTF_8))
-                                        .topic(message.getTopic())
-                                        .offset(message.getOffset())
-                                        .partition(message.getPartition())
-                                        .key(null)
-                                        .line(lineNumber++)
-                                        .build();
-                                singleMessageParser.parse(parserChainSource, messageToParse, output);
-                            }
-                        }
-                        Map<String, String> messageFileStatusExtension = new HashMap<>();
-                        messageFileStatusExtension.put("filePath", fileToParse);
-                        messageFileStatusExtension.put("modificationTime", String.valueOf(fileSystem.getFileStatus(fileToParsePath).getModificationTime()));
-                        messageFileStatusExtension.put("successMessageCount", String.valueOf(output.getSuccessfulMessages()));
-                        messageFileStatusExtension.put("errorMessageCount", String.valueOf(output.getErrorMessages()));
-                        output.outputMessage(Message.builder().
-                                ts(Instant.now().toEpochMilli()).
-                                source(MESSAGE_SOURCE_FILE_STATUS).
-                                originalSource(SignedSourceKey.builder().
-                                        topic(message.getTopic()).partition(message.getPartition()).
-                                        offset(message.getOffset()).signature(SingleMessageParser.EMPTY_SIGNATURE).build()).
-                                extensions(messageFileStatusExtension).
-                                build());
-                    }
+                Path fileToParsePath = checkForSymbolicLinks(fileToParse);
+                if (fileToParsePath == null) {
+                    sendErrorMessage(parserChainSource.getSource(), message, output, FILE_CONTAINS_SYMBOLIC_LINKS, fileToParse);
                 } else {
-                    sendErrorMessage(parserChainSource.getSource(), message, output, FILE_NOT_IN_ALLOWED_PATHS, fileToParse);
-                }
+                    String fileToParsePathString = fileToParsePath.toUri().toString();
+                    if (allowedPaths.stream().anyMatch(fileToParsePathString::startsWith)) {
+                        FileSystem fileSystem = fileToParsePath.getFileSystem();
+                        try (FSDataInputStream is = fileSystem.open(fileToParsePath)) {
+                            try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                                String line;
+                                int lineNumber = 1;
+                                while ((line = br.readLine()) != null) {
 
-            } catch (IOException fileSystemIOException) {
-                String errorMessage = String.format("IOException with message %s", fileSystemIOException.getMessage());
+                                    MessageToParse messageToParse = MessageToParse.builder()
+                                            .originalBytes(line.getBytes(StandardCharsets.UTF_8))
+                                            .topic(message.getTopic())
+                                            .offset(message.getOffset())
+                                            .partition(message.getPartition())
+                                            .key(null)
+                                            .line(lineNumber++)
+                                            .build();
+                                    singleMessageParser.parse(parserChainSource, messageToParse, output);
+                                }
+                            }
+                            Map<String, String> messageFileStatusExtension = new HashMap<>();
+                            messageFileStatusExtension.put("filePath", fileToParse);
+                            messageFileStatusExtension.put("modificationTime", String.valueOf(fileSystem.getFileStatus(fileToParsePath).getModificationTime()));
+                            messageFileStatusExtension.put("successMessageCount", String.valueOf(output.getSuccessfulMessages()));
+                            messageFileStatusExtension.put("errorMessageCount", String.valueOf(output.getErrorMessages()));
+                            output.outputMessage(Message.builder().
+                                    ts(Instant.now().toEpochMilli()).
+                                    source(MESSAGE_SOURCE_FILE_STATUS).
+                                    originalSource(SignedSourceKey.builder().
+                                            topic(message.getTopic()).partition(message.getPartition()).
+                                            offset(message.getOffset()).signature(SingleMessageParser.EMPTY_SIGNATURE).build()).
+                                    extensions(messageFileStatusExtension).
+                                    build());
+                        }
+                    } else {
+                        sendErrorMessage(parserChainSource.getSource(), message, output, FILE_NOT_IN_ALLOWED_PATHS, fileToParse);
+                    }
+                }
+            } catch (Exception e) {
+                String errorMessage = String.format("%s with message %s", e.getClass().getName(), e.getMessage());
                 sendErrorMessage(parserChainSource.getSource(), message, output, errorMessage, fileToParse);
             }
-        } else {
-            sendErrorMessage(UNMATCHED_FILE_SOURCE, message, output, FILE_PATH_DID_NOT_MATCH_ANY_SPECIFIED_PATTERNS, fileToParse);
         }
     }
 
+        private Path checkForSymbolicLinks(String fileToParse) throws IOException {
+            Path fileToParsePath = new Path(fileToParse);
+            FileSystem fileSystem = fileToParsePath.getFileSystem();
+            if (!fileSystem.isDistributedFS()) {
+
+                java.nio.file.Path nioPath = Paths.get(fileToParsePath.toUri().toString());
+                java.nio.file.Path realPath = nioPath.toRealPath();
+                if (!nioPath.toString().equalsIgnoreCase(realPath.toString())) {
+                    fileToParsePath = null;
+                }
+            }
+            return fileToParsePath;
+        }
     private void sendErrorMessage(String source, MessageToParse message, AbstractParserOutput output, String errorText, String fileToParse) {
         Map<String, String> extensions = new HashMap<>();
         extensions.put(Constants.DEFAULT_INPUT_FIELD, fileToParse);

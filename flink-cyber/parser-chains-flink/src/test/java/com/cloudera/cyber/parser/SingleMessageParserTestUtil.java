@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.cloudera.cyber.parser.wrappers.SingleMessageParser.EMPTY_SIGNATURE;
-import static com.cloudera.parserchains.core.Constants.DEFAULT_ORIGINAL_FILE_LINE_FIELD;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class SingleMessageParserTestUtil {
@@ -26,7 +25,6 @@ public class SingleMessageParserTestUtil {
 
     public static Map<String, String> createExtensions(String elapsed, String ipSrcAddr) {
         Map<String, String> extensions = new HashMap<>();
-        extensions.put(DEFAULT_ORIGINAL_FILE_LINE_FIELD, "-1");
         extensions.put(ELAPSED_EXTENSION, elapsed);
         extensions.put(IP_SRC_ADDR, ipSrcAddr);
 
@@ -68,7 +66,6 @@ public class SingleMessageParserTestUtil {
     public static void verifyErrorParserOutput(ParserTestUtils.TestParserOutput parserOutput, MessageToParse messageToParse, Map<String, String> extraExtensions, String expectedSource, String expectedErrorMessage) {
         Map<String, String> expectedExtensions = new HashMap<>();
         expectedExtensions.put(Constants.DEFAULT_INPUT_FIELD, new String(messageToParse.getOriginalBytes()));
-        expectedExtensions.put(Constants.DEFAULT_ORIGINAL_FILE_LINE_FIELD, "-1");
         expectedExtensions.putAll(extraExtensions);
 
         assertThat(parserOutput.getOutput().size()).isEqualTo(1);

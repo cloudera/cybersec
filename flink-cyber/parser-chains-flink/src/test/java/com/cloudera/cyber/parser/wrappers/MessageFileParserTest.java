@@ -3,8 +3,13 @@ package com.cloudera.cyber.parser.wrappers;
 import com.cloudera.cyber.parser.*;
 import com.cloudera.parserchains.core.InvalidParserException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -22,6 +27,9 @@ public class MessageFileParserTest {
     private static final String DOESNT_EXIST_INVALID_ALLOWED_PATH = MessageFileParserTestUtil.getValidMessageFileAllowedPath().concat("/does_not_exist");
     private static final String RELATIVE_INVALID_ALLOWED_PATH = "./relative_path_not_allowed";
 
+    @TempDir
+    File testTempDir;
+
     @Test
     public void testSuccessful() throws NoSuchAlgorithmException, InvalidKeyException, InvalidParserException, IOException {
         MessageFileParser parser = createMessageFileParserToTest(Collections.singletonList(MessageFileParserTestUtil.getValidMessageFileAllowedPath()));
@@ -36,6 +44,16 @@ public class MessageFileParserTest {
     @Test
     public void testCreateFailsWithRelativeAllowedPaths()  {
       testInvalidAllowedPath(RELATIVE_INVALID_ALLOWED_PATH);
+    }
+
+    @Test
+    public void testFileWithSymLinkFails() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        Path linkPath = Paths.get(testTempDir.toString(), "message_file");
+        Files.createSymbolicLink(linkPath, Paths.get(MessageFileParserTestUtil.getValidMessageFileAllowedPath()));
+
+        String fileContainsLink = Paths.get(linkPath.toString(), "vpc_flow_samples.txt").toString();
+        testErrorCase(fileContainsLink,  Collections.singletonList(testTempDir.toString()), new ParserChainSource("vpcflow", "netflow"), FILE_CONTAINS_SYMBOLIC_LINKS);
+
     }
 
     @Test
@@ -96,14 +114,19 @@ public class MessageFileParserTest {
     public void fileDoesntExistError() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
         String fileDoesntExist = MessageFileParserTestUtil.getValidMessageFileAllowedPath().concat("/doesnt_exist");
         testErrorCase(fileDoesntExist, new ParserChainSource("vpcflow", "netflow"),
-                String.format("IOException with message %s (No such file or directory)", fileDoesntExist));
+                String.format("java.nio.file.NoSuchFileException with message %s", fileDoesntExist));
     }
 
     private static void testErrorCase(String filePath, ParserChainSource parserChainSource,String expectedErrorMessage) throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        final List<String> defaultAllowedPaths = Collections.singletonList(MessageFileParserTestUtil.getValidMessageFileAllowedPath());
+        testErrorCase(filePath, defaultAllowedPaths, parserChainSource, expectedErrorMessage);
+    }
+
+    private static void testErrorCase(String filePath, List<String> allowedPaths, ParserChainSource parserChainSource,String expectedErrorMessage) throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
         ParserChainMap parserChainMap = ParserTestUtils.readParserChainMap("message_file/VpcFlowChain.json");
 
         SingleMessageParser singleMessageParser = SingleMessageParser.create(parserChainMap, null);
-        MessageFileParser parser = MessageFileParser.create(Collections.singletonList(MessageFileParserTestUtil.getValidMessageFileAllowedPath()), singleMessageParser);
+        MessageFileParser parser = MessageFileParser.create(allowedPaths, singleMessageParser);
 
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(filePath);
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
@@ -111,6 +134,5 @@ public class MessageFileParserTest {
         parser.parse(parserChainSource, messageToParse, parserOutput);
 
         MessageFileParserTestUtil.verifyErrorMessage(parserOutput, messageToParse, filePath, expectedSource, expectedErrorMessage, EMPTY_SIGNATURE);
-
     }
 }

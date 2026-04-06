@@ -88,17 +88,18 @@ public class DefaultChainRunner implements ChainRunner {
     public Message originalMessage(String toParse) {
         return Message.builder()
                 .addField(inputField, StringFieldValue.of(toParse))
-                .addField(originalFileLineField, StringFieldValue.of(String.valueOf(-1)))
                 .createdBy(ORIGINAL_MESSAGE_NAME)
                 .build();
     }
 
     @Override
     public Message originalMessage(MessageToParse toParse) {
-
-        return Message.builder()
+        Message.Builder builder = Message.builder();
+        if (toParse.getLine() != MessageToParse.DEFAULT_LINE) {
+            builder.addField(originalFileLineField, StringFieldValue.of(String.valueOf(toParse.getLine())));
+        }
+        return builder
                 .addField(inputField, MessageToParseFieldValue.of(toParse))
-                .addField(originalFileLineField, StringFieldValue.of(String.valueOf(toParse.getLine())))
                 .createdBy(ORIGINAL_MESSAGE_NAME)
                 .build();
     }
