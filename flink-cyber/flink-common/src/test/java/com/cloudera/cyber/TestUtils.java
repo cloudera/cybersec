@@ -172,7 +172,7 @@ public class TestUtils {
                 try {
                     cleanDir(dir);
                 } catch (IOException e) {
-                    System.out.printf("Warning: Unable to clean folder '%s'%n", dir.toString());
+                    System.out.printf("Warning: Unable to clean folder '%s'%n", dir);
                 }
             }
         });
