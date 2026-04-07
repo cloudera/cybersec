@@ -50,6 +50,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ParserJobKafka extends ParserJob {
 
+    private static final String NO_KAFKA_CONFIGURATIONS_FOR_BROKER_PREFIX = "No properties starting with %s.kafka found in properties file.";
     private final AtomicInteger atomicInteger = new AtomicInteger(0);
 
     public static final String PARAMS_ORIGINAL_LOGS_PATH = "original.basepath";
@@ -142,12 +143,13 @@ public class ParserJobKafka extends ParserJob {
                 Properties brokerSpecificProperties = Utils
                         .readProperties(params.getProperties(), kafkaPrefixConf + '.' + Utils.KAFKA_PREFIX);
                 kafkaProperties.putAll(brokerSpecificProperties);
+                Preconditions.checkArgument(!brokerSpecificProperties.isEmpty(), NO_KAFKA_CONFIGURATIONS_FOR_BROKER_PREFIX, kafkaPrefixConf);
             }
             KafkaSource<MessageToParse> rawMessages = KafkaSource.<MessageToParse>builder()
                     .setTopicPattern(topicNamePattern).setBootstrapServers(kafkaProperties.getProperty(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG)).setDeserializer(new MessageToParseDeserializer()).setProperties(kafkaProperties).build();
             DataStreamSource<MessageToParse> streamSource = env.fromSource(rawMessages, WatermarkStrategy.noWatermarks(), "Kafka Raw Messages");
             SingleOutputStreamOperator<MessageToParse> newSource = streamSource
-                    .name(String.format("Kafka Source topic='%s' kafka prefix configuration='%s'", topicNamePattern.toString(), kafkaPrefixConf))
+                    .name(String.format("Kafka Source topic='%s' kafka prefix configuration='%s'", topicNamePattern, kafkaPrefixConf))
                     .uid("kafka.input." + kafkaPrefixConf);
 
             if (firstSource == null) {
@@ -156,9 +158,7 @@ public class ParserJobKafka extends ParserJob {
                 firstSource.union(newSource);
             }
         }
-        if (firstSource == null) {
-            Preconditions.checkNotNull("No topics were read by the topic map configuration.");
-        }
+
         return firstSource;
     }
 

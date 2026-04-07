@@ -49,7 +49,7 @@ public class DefaultChainExecutorServiceTest {
         return chainBuilderService.build(chainSchema);
     }
 
-    private String parserChain = String.join("\n",
+    private final String parserChain = String.join("\n",
         "{",
         "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
         "\"name\" : \"My Parser Chain\",",
@@ -76,7 +76,7 @@ public class DefaultChainExecutorServiceTest {
         "}"
         );
 
-    private String successExpectedJava11 = String.join("\n",
+    private final String successExpectedJava11 = String.join("\n",
         "{",
         "\"input\" : {",
         "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\"",
@@ -113,7 +113,7 @@ public class DefaultChainExecutorServiceTest {
         "}"
         );
 
-    private String successExpectedJava8 = String.join("\n",
+    private final String successExpectedJava8 = String.join("\n",
         "{",
         "\"input\" : {",
         "\"original_string\" : \"Jane Doe,1600 Pennsylvania Ave,614-867-5309\"",

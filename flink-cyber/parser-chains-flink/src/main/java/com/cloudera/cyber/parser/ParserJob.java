@@ -16,7 +16,6 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
 import com.cloudera.cyber.flink.FlinkUtils;
-import com.cloudera.cyber.flink.Utils;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +30,6 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.OutputTag;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -68,6 +66,7 @@ public abstract class ParserJob {
     public static final String ERROR_MESSAGE_SIDE_OUTPUT = "error-message";
     public static final String SIGNATURE_ENABLED = "signature.enabled";
     public static final String PARAM_STREAMING_ENRICHMENTS_CONFIG = "chain.enrichments.file";
+    public static final String PARAM_ALLOWED_MESSAGE_FILE_PATHS = "message.file.allowed.paths";
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params)
             throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -81,7 +80,10 @@ public abstract class ParserJob {
 
         ParserChainMap chainSchema = JSONUtils.INSTANCE.load(chainConfig, ParserChainMap.class);
         TopicPatternToChainMap topicMap = JSONUtils.INSTANCE.load(topicConfig, TopicPatternToChainMap.class);
-        String defaultKafkaBootstrap = params.get(Utils.KAFKA_PREFIX + ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG);
+        if (topicMap == null || topicMap.isEmpty()) {
+            topicMap = TopicPatternToChainMap.createDefault(chainSchema.keySet());
+        }
+        topicMap.validate();
 
         String enrichmentsConfigFile = params.get(PARAM_STREAMING_ENRICHMENTS_CONFIG);
         List<String> streamingSourcesProduced = Collections.emptyList();
@@ -98,6 +100,16 @@ public abstract class ParserJob {
             }
         }
 
+        String allowedPathsConfig = params.get(PARAM_ALLOWED_MESSAGE_FILE_PATHS, null);
+        boolean allowedPathsRequired = topicMap.hasFileParser();
+        boolean hasAllowedPaths = (allowedPathsConfig != null && !allowedPathsConfig.isEmpty());
+        if (allowedPathsRequired && !hasAllowedPaths) {
+            throw new RuntimeException(String.format("Topic map specifies file parsing but %s is not specified in the properties file.  Specify a comma delimited string of paths that the parser is allowed to read from.", PARAM_ALLOWED_MESSAGE_FILE_PATHS));
+        } else if (!allowedPathsRequired && hasAllowedPaths){
+            allowedPathsConfig = null;
+            log.info("Configuration {} is ignored because there are no file parsers specified in topic map.", PARAM_ALLOWED_MESSAGE_FILE_PATHS);
+        }
+
         DataStream<MessageToParse> source = createSource(env, params, topicMap);
 
         PrivateKey privateKey = null;
@@ -112,7 +124,7 @@ public abstract class ParserJob {
         }
 
         SingleOutputStreamOperator<Message> results =
-                source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey, defaultKafkaBootstrap))
+                source.process(new ChainParserMapFunction(chainSchema, topicMap, privateKey, allowedPathsConfig))
                         .name("Parser " + source.getTransformation().getName()).uid("parser" + source.getTransformation().getUid());
         final OutputTag<Message> errorMessageSideOutput = new OutputTag<Message>(ERROR_MESSAGE_SIDE_OUTPUT) {
         };

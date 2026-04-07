@@ -27,9 +27,11 @@ import java.util.List;
 public class DefaultChainRunner implements ChainRunner {
     public static final LinkName ORIGINAL_MESSAGE_NAME = LinkName.of("original", ParserName.of("Test Parser Name"));
     private FieldName inputField;
+    private final FieldName originalFileLineField;
 
     public DefaultChainRunner() {
         inputField = FieldName.of(Constants.DEFAULT_INPUT_FIELD);
+        originalFileLineField = FieldName.of(Constants.DEFAULT_ORIGINAL_FILE_LINE_FIELD);
     }
 
     /**
@@ -92,7 +94,11 @@ public class DefaultChainRunner implements ChainRunner {
 
     @Override
     public Message originalMessage(MessageToParse toParse) {
-        return Message.builder()
+        Message.Builder builder = Message.builder();
+        if (toParse.getLine() != MessageToParse.DEFAULT_LINE) {
+            builder.addField(originalFileLineField, StringFieldValue.of(String.valueOf(toParse.getLine())));
+        }
+        return builder
                 .addField(inputField, MessageToParseFieldValue.of(toParse))
                 .createdBy(ORIGINAL_MESSAGE_NAME)
                 .build();

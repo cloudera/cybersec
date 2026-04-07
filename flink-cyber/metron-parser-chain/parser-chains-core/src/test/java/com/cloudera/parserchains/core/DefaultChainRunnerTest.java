@@ -12,6 +12,7 @@
 
 package com.cloudera.parserchains.core;
 
+import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.parserchains.core.model.define.ParserName;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static com.cloudera.parserchains.core.ChainLinkTestUtilities.makeEchoParser;
@@ -52,13 +54,38 @@ public class DefaultChainRunnerTest {
         ChainLink head = new NextChainLink(makeEchoParser(parser1), linkName1);
         ChainLink last = new NextChainLink(makeEchoParser(parser2), linkName2);
         head.setNext(last);
-        List<Message> results = new DefaultChainRunner().run(inputToParse, head);
 
-        // validate
+        // String original message
+        List<Message> results = new DefaultChainRunner().run(inputToParse, head);
         Message expected0 = Message.builder()
                 .addField(Constants.DEFAULT_INPUT_FIELD, inputToParse)
                 .createdBy(DefaultChainRunner.ORIGINAL_MESSAGE_NAME)
                 .build();
+        validateMessages(results, expected0);
+
+        // Message to parse original message with default line
+        MessageToParse inputMessageToParse = MessageToParse.builder().topic("test").partition(1).offset(2).originalBytes(inputToParse.getBytes(StandardCharsets.UTF_8)).build();
+        expected0 =  Message.builder()
+                .addField(FieldName.of(Constants.DEFAULT_INPUT_FIELD), MessageToParseFieldValue.of(inputMessageToParse))
+                .createdBy(DefaultChainRunner.ORIGINAL_MESSAGE_NAME)
+                .build();
+        results = new DefaultChainRunner().run(inputMessageToParse, head);
+        validateMessages(results, expected0);
+
+        // Message to parse original with specific line
+        final int testLine = 40;
+        inputMessageToParse = MessageToParse.builder().topic("test").partition(1).offset(2).line(testLine).originalBytes(inputToParse.getBytes(StandardCharsets.UTF_8)).build();
+        expected0 =  Message.builder()
+                .addField(FieldName.of(Constants.DEFAULT_INPUT_FIELD), MessageToParseFieldValue.of(inputMessageToParse))
+                .addField(Constants.DEFAULT_ORIGINAL_FILE_LINE_FIELD, String.valueOf(testLine))
+                .createdBy(DefaultChainRunner.ORIGINAL_MESSAGE_NAME)
+                .build();
+        results = new DefaultChainRunner().run(inputMessageToParse, head);
+        validateMessages(results, expected0);
+
+    }
+
+    private void validateMessages(List<Message> results, Message expected0) {
         Message expected1 = Message.builder()
                 .clone(expected0)
                 .createdBy(linkName1)
@@ -132,13 +159,11 @@ public class DefaultChainRunnerTest {
 
         assertEquals(DefaultChainRunner.ORIGINAL_MESSAGE_NAME, results.get(0).getCreatedBy(),
                 "Expected the 1st message to have 'createdBy' defined.");
-        Message expectedMessage = Message.builder()
-                .addField(runner.getInputField(), StringFieldValue.of(inputToParse))
-                .createdBy(DefaultChainRunner.ORIGINAL_MESSAGE_NAME)
-                .build();
         assertEquals(1, results.size(),
                 "Expected 1 message to be returned to indicate there was an error.");
-        assertTrue(results.get(0).getError().isPresent(),
+        Message result = results.get(0);
+        assertTrue(result.getError().isPresent(),
                 "Expected an error to be indicated on the message.");
+
     }
 }

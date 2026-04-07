@@ -24,12 +24,12 @@ import org.apache.flink.util.InstantiationUtil;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.cloudera.cyber.parser.MessageToParse.DEFAULT_LINE;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
@@ -86,7 +86,7 @@ public class SerializationTests {
                 .ts(0)
                 .originalSource(SignedSourceKey.builder().topic("test").offset(0).partition(0).signature(new byte[128]).build())
                 .extensions(map)
-                .dataQualityMessages(Arrays.asList(
+                .dataQualityMessages(Collections.singletonList(
                         DataQualityMessage.builder()
                                 .field("test")
                                 .level("INFO")
@@ -101,13 +101,25 @@ public class SerializationTests {
 
     @Test
     public void testMessageToParse() throws IOException {
-        MessageToParse messageToParse = MessageToParse.builder().
+        // message to parse with line specified
+        MessageToParse messageToParseWithLine = MessageToParse.builder().
+                offset(3).partition(1).
+                originalBytes("this is a test".getBytes(UTF_8)).
+                topic("test_topic").
+                line(500L).
+                build();
+        MessageToParse output = test(messageToParseWithLine);
+        assertThat(output, equalTo(messageToParseWithLine));
+
+        // message to parse with no line specified - defaults to -1
+        MessageToParse messageToParseDefaultLine = MessageToParse.builder().
                 offset(3).partition(1).
                 originalBytes("this is a test".getBytes(UTF_8)).
                 topic("test_topic").
                 build();
-        MessageToParse output = test(messageToParse);
-        assertThat(output, equalTo(messageToParse));
+        output = test(messageToParseDefaultLine);
+        assertThat(output, equalTo(messageToParseDefaultLine));
+        assertThat(output.getLine(), equalTo(DEFAULT_LINE));
     }
     
     @Test
@@ -134,7 +146,7 @@ public class SerializationTests {
         EnrichmentCommandResponse cr = EnrichmentCommandResponse.builder()
                 .success(true)
                 .message("")
-                .content(Arrays.asList(EnrichmentEntry.builder()
+                .content(Collections.singletonList(EnrichmentEntry.builder()
                         .type("test")
                         .ts(0)
                         .entries(entryMap)
@@ -148,7 +160,7 @@ public class SerializationTests {
     }
 
     private List<ThreatIntelligence> createTi(Map<String, String> tiFields) {
-        return Arrays.asList(ThreatIntelligence.builder()
+        return Collections.singletonList(ThreatIntelligence.builder()
                 .fields(tiFields)
                 .observable("ob")
                 .observableType("ip")

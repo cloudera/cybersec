@@ -14,7 +14,6 @@ package com.cloudera.parserchains.core;
 
 import com.cloudera.cyber.parser.MessageToParse;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
 
 import static java.nio.charset.StandardCharsets.UTF_8;

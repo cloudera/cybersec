@@ -15,14 +15,46 @@ package com.cloudera.cyber.parser;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang.StringUtils;
+import org.apache.flink.util.Preconditions;
 
 import java.io.Serializable;
+import java.util.HashMap;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class TopicParserConfig implements Serializable {
+    private static final String NULL_TOPIC_CONFIG = "TopicParserConfig is missing %s";
+    public static final String NULL_CHAIN_KEY_CONFIG = String.format(NULL_TOPIC_CONFIG, "chainKey");
+    public static final String NULL_SOURCE_CONFIG = String.format(NULL_TOPIC_CONFIG, "source");
+    public static final String EMPTY_FILE_PATTERN_TO_PARSER_MAP = "TopicParserConfig filePatternToParserMao is empty.  At least one file pattern must be mapped.";
+    private static final String NULL_FILE_PATTERN_TO_PARSER_MAP = "TopicParserConfig filePatternToParserMap entry has null %s.";
+    public static final String NULL_KEY_FILE_PATTERN_TO_PARSER_MAP = String.format(NULL_FILE_PATTERN_TO_PARSER_MAP, "key");
+    public static final String NULL_VALUE_FILE_PATTERN_TO_PARSER_MAP = String.format(NULL_FILE_PATTERN_TO_PARSER_MAP, "value");
     private String chainKey;
     private String source;
     private String broker;
+    private HashMap<String, ParserChainSource> filePatternToParserMap;
+
+    public boolean hasFileParser() {
+        return (filePatternToParserMap != null);
+    }
+
+    public void validate() {
+        if (!hasFileParser()) {
+            Preconditions.checkArgument(StringUtils.isNotEmpty(chainKey), NULL_CHAIN_KEY_CONFIG);
+            Preconditions.checkArgument(StringUtils.isNotEmpty(source), NULL_SOURCE_CONFIG);
+        } else {
+            Preconditions.checkArgument(!filePatternToParserMap.isEmpty(), EMPTY_FILE_PATTERN_TO_PARSER_MAP);
+            filePatternToParserMap.forEach(TopicParserConfig::validateFilePatternMapEntry);
+        }
+    }
+
+    private static void validateFilePatternMapEntry(String filePathPattern, ParserChainSource parserChainSource) {
+        Preconditions.checkArgument(StringUtils.isNotEmpty(filePathPattern), NULL_KEY_FILE_PATTERN_TO_PARSER_MAP);
+        Preconditions.checkNotNull(parserChainSource, NULL_VALUE_FILE_PATTERN_TO_PARSER_MAP);
+        parserChainSource.validate(filePathPattern);
+    }
+
 }

@@ -18,6 +18,7 @@ public class Constants {
      * <p>When a parser chain is executed the text to parse is added to a field by this name.
      */
     public static final String DEFAULT_INPUT_FIELD = "original_string";
+    public static final String DEFAULT_ORIGINAL_FILE_LINE_FIELD = "original_file_line";
 
     private Constants() {
         // do not use
