@@ -80,6 +80,9 @@ public abstract class ParserJob {
 
         ParserChainMap chainSchema = JSONUtils.INSTANCE.load(chainConfig, ParserChainMap.class);
         TopicPatternToChainMap topicMap = JSONUtils.INSTANCE.load(topicConfig, TopicPatternToChainMap.class);
+        if (topicMap == null || topicMap.isEmpty()) {
+            topicMap = TopicPatternToChainMap.createDefault(chainSchema.keySet());
+        }
         topicMap.validate();
 
         String enrichmentsConfigFile = params.get(PARAM_STREAMING_ENRICHMENTS_CONFIG);

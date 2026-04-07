@@ -15,6 +15,8 @@ package com.cloudera.cyber.parser;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 
@@ -155,9 +157,20 @@ public class TopicPatternToChainMapTest {
     }
 
     @Test
+    public void testGetDefaultMap() {
+        final String chain1 = "chain1";
+        final String chain2 = "chain2";
+
+        TopicPatternToChainMap expected = new TopicPatternToChainMap();
+        expected.put(chain1, new TopicParserConfig(chain1, chain1, null, null));
+        expected.put(chain2, new TopicParserConfig(chain2, chain2, null, null));
+        assertThat(TopicPatternToChainMap.createDefault(Stream.of(chain1, chain2).collect(Collectors.toSet()))).isEqualTo(expected);
+    }
+
+    @Test
     public void testEmptyMap() {
         TopicPatternToChainMap map = new TopicPatternToChainMap();
-        assertThatCode(map::validate).doesNotThrowAnyException();
+        assertThatThrownBy(map::validate).isInstanceOf(IllegalArgumentException.class).hasMessage(TopicPatternToChainMap.TOPIC_MAP_IS_EMPTY_MESSAGE);
     }
 
     @Test

@@ -25,12 +25,19 @@ public class TopicPatternToChainMap extends HashMap<String, TopicParserConfig> {
     public static final String DEFAULT_PREFIX = "default";
     public static final String TOPIC_MAP_HAS_NULL_TOPIC_PATTERN_MESSAGE = "Topic map has null topic pattern.";
     public static final String TOPIC_MAP_HAS_NULL_PARSER_CONFIG_MESSAGE = "Topic map %s has null parser config.";
+    public static final String TOPIC_MAP_IS_EMPTY_MESSAGE = "Topic map cannot be empty - at least one topic pattern must be configured";
 
     public void validate() {
-        // by default a topic name maps to a chain
-        if (!isEmpty()) {
-            forEach(this::validateTopicMappingEntry);
+        Preconditions.checkArgument(!isEmpty(), TOPIC_MAP_IS_EMPTY_MESSAGE);
+        forEach(this::validateTopicMappingEntry);
+    }
+
+    public static TopicPatternToChainMap createDefault(Set<String> parserChainNames) {
+        TopicPatternToChainMap defaultTopicMap = new TopicPatternToChainMap();
+        for(String chainName : parserChainNames) {
+            defaultTopicMap.put(chainName, new TopicParserConfig(chainName, chainName, null, null));
         }
+        return defaultTopicMap;
     }
 
     private void validateTopicMappingEntry(String topicPattern, TopicParserConfig topicParserConfig) {
