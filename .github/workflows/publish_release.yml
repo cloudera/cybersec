@@ -28,7 +28,7 @@ on:
 jobs:
   publish_release:
     runs-on: ubuntu-latest
-    container: maven:3-eclipse-temurin-8
+    container: maven:3-eclipse-temurin-17
     steps:
       - uses: actions/checkout@v3
 
