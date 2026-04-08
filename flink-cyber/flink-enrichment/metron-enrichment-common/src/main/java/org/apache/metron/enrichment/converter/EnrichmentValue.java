@@ -19,8 +19,8 @@ package org.apache.metron.enrichment.converter;
 
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.metron.enrichment.lookup.LookupValue;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.io.IOException;
 import java.util.Map;

@@ -158,7 +158,7 @@ public class GrokTableParserTest {
                 .messageFieldName("message");
 
         Message output = grokTableParser.parse(Message.builder().addField(grokTableParser.getInputField().get(), "1234 : this is a test").build());
-        checkErrorMessage(output, String.format(GrokTableParser.FAILED_MESSAGE_GROK_COMPILATION_ERROR_FORMAT, "1234", "Illegal repetition near index 0\n%{INT\n^"));
+        checkErrorMessage(output, String.format(GrokTableParser.FAILED_MESSAGE_GROK_COMPILATION_ERROR_FORMAT, "1234", "Illegal repetition near index 2\n%{INT\n  ^"));
     }
 
     @Test

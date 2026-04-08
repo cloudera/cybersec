@@ -19,10 +19,6 @@ package org.apache.metron.hbase.mock;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.Message;
-import com.google.protobuf.Service;
-import com.google.protobuf.ServiceException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -646,16 +642,6 @@ public class MockHTable implements Table {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public <T extends Service, R> Map<byte[], R> coprocessorService(Class<T> aClass, byte[] bytes, byte[] bytes1, Batch.Call<T, R> call) throws ServiceException, Throwable {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <T extends Service, R> void coprocessorService(Class<T> aClass, byte[] bytes, byte[] bytes1, Batch.Call<T, R> call, Batch.Callback<R> callback) throws ServiceException, Throwable {
-        throw new UnsupportedOperationException();
-    }
-
     boolean autoflush = true;
 
     /**
@@ -683,16 +669,6 @@ public class MockHTable implements Table {
 
     public void setWriteBufferSize(long l) throws IOException {
         writeBufferSize = l;
-    }
-
-    @Override
-    public <R extends Message> Map<byte[], R> batchCoprocessorService(Descriptors.MethodDescriptor methodDescriptor, Message message, byte[] bytes, byte[] bytes1, R r) throws ServiceException, Throwable {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <R extends Message> void batchCoprocessorService(Descriptors.MethodDescriptor methodDescriptor, Message message, byte[] bytes, byte[] bytes1, R r, Batch.Callback<R> callback) throws ServiceException, Throwable {
-        throw new UnsupportedOperationException();
     }
 
     /**
