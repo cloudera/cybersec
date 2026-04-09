@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.KafkaHeaders;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.handler.annotation.Header;
@@ -37,7 +38,7 @@ public class KafkaListenerController {
     //TODO:  Rewrite to Spring events. Probably split the events into separate types, such as cluster event, job event, pipeline event, etc.
     @KafkaListener(topics = "#{kafkaProperties.getRequestTopic()}", containerFactory = "kafkaListenerContainerFactory")
     @SendTo({"#{kafkaProperties.getReplyTopic()}"})
-    public Message<ResponseBody> handleMessage(RequestBody requestBody, @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String key, @Header(KafkaHeaders.REPLY_TOPIC) byte[] replyTo,
+    public Message<ResponseBody> handleMessage(RequestBody requestBody, @Header(KafkaHeaders.RECEIVED_KEY) String key, @Header(KafkaHeaders.REPLY_TOPIC) byte[] replyTo,
                                                @Header(KafkaHeaders.CORRELATION_ID) byte[] correlationId) {
         log.info("Start processing message\n Message key: '{}' \n value: '{}'", key, requestBody);
 
@@ -130,7 +131,7 @@ public class KafkaListenerController {
 
     private Message<ResponseBody> buildResponseMessage(ResponseBody body, ResponseType responseType, byte[] replyTo, byte[] correlationId) {
         MessageHeaderAccessor accessor = new MessageHeaderAccessor();
-        accessor.setHeader(KafkaHeaders.MESSAGE_KEY, responseType.name());
+        accessor.setHeader(KafkaHeaders.KEY, responseType.name());
         accessor.setHeader(KafkaHeaders.CORRELATION_ID, correlationId);
         MessageHeaders headers = accessor.getMessageHeaders();
         return MessageBuilder.createMessage(body, headers);

@@ -47,10 +47,7 @@
         <!-- main dependency versions -->
         <lombok.version>1.18.30</lombok.version>
         <evo-inflector.version>1.2.2</evo-inflector.version>
-        <slf4j.version>1.7.15</slf4j.version>
 
-        <log4j1.version>1.2.17</log4j1.version>
-        <log4j.version>2.17.2</log4j.version>
         <commons-io.version>2.6</commons-io.version>
         <commons-lang3.version>3.9</commons-lang3.version>
         <springdoc-openapi.version>1.6.11</springdoc-openapi.version>
@@ -71,6 +68,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
             <dependency>
                 <groupId>org.atteo</groupId>
                 <artifactId>evo-inflector</artifactId>
@@ -98,19 +96,9 @@
                 <version>${springdoc-openapi.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>org.json</groupId>
                 <artifactId>json</artifactId>
                 <version>${json.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.dataformat</groupId>
-                <artifactId>jackson-dataformat-csv</artifactId>
-                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.github.wnameless.json</groupId>

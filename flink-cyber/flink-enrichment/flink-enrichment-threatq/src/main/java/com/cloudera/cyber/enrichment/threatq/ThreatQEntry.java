@@ -14,13 +14,13 @@ package com.cloudera.cyber.enrichment.threatq;
 
 import com.cloudera.cyber.EnrichmentEntry;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.Joiner;
 import com.hortonworks.registries.schemaregistry.serdes.avro.exceptions.AvroException;
 import lombok.*;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.specific.SpecificRecordBase;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 import java.util.Date;
 import java.util.HashMap;

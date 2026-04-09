@@ -21,12 +21,12 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.nio.charset.StandardCharsets;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.metron.common.utils.JSONUtils;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -37,7 +37,7 @@ import java.util.Optional;
 /**
  * The configuration object for the Profiler, which may contain many Profile definitions.
  */
-@JsonSerialize(include=Inclusion.NON_NULL)
+@JsonSerialize(include= JsonSerialize.Inclusion.NON_NULL)
 public class ProfilerConfig implements Serializable {
 
   /**

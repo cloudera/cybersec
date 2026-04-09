@@ -92,7 +92,6 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -271,13 +270,6 @@
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
                 </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.junit.jupiter</groupId>
-                        <artifactId>junit-jupiter-engine</artifactId>
-                        <version>${junit5.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
         </plugins>
     </build>
