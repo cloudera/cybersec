@@ -153,17 +153,30 @@ public class MessageFileParserTest {
             gzipOut.write(sampleContent.getBytes(StandardCharsets.UTF_8));
         }
 
-        MessageFileParser parser = createMessageFileParserToTest(Collections.singletonList(testTempDir.toString()));
-        MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(gzipFile.toString());
-        ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
-        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
+        testCompressedFileParsing(gzipFile);
+    }
+
+    private void testCompressedFileParsing(Path compressedFile) throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        ParserTestUtils.TestParserOutput parserOutput = getFileParserOutput(compressedFile);
 
         // Should successfully parse 2 messages from the gzip file
         assertThat(parserOutput.getOutput().stream()
                 .filter(m -> !MESSAGE_SOURCE_FILE_STATUS.equals(m.getSource()))
                 .count()).isEqualTo(2);
 
-        Files.deleteIfExists(gzipFile);
+        Files.deleteIfExists(compressedFile);
+    }
+
+    private ParserTestUtils.TestParserOutput getFileParserOutput(Path compressedFile) throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        // resolve to real path - MACOS uses links for temp dir
+        compressedFile = compressedFile.toRealPath();
+
+        MessageFileParser parser = createMessageFileParserToTest(Collections.singletonList(compressedFile.getParent().toString()));
+        MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(compressedFile.toString());
+        ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
+        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
+
+        return parserOutput;
     }
 
     @Test
@@ -179,32 +192,7 @@ public class MessageFileParserTest {
             zipOut.closeEntry();
         }
 
-        MessageFileParser parser = createMessageFileParserToTest(Collections.singletonList(testTempDir.toString()));
-        MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(zipFile.toString());
-        ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
-        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
-
-        // Should successfully parse 2 messages from the zip file
-        assertThat(parserOutput.getOutput().stream()
-                .filter(m -> !MESSAGE_SOURCE_FILE_STATUS.equals(m.getSource()))
-                .count()).isEqualTo(2);
-
-        Files.deleteIfExists(zipFile);
-    }
-
-    @Test
-    public void testParsePlainFile() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
-        // Test that plain (uncompressed) files still work
-        MessageFileParser parser = createMessageFileParserToTest(Collections.singletonList(MessageFileParserTestUtil.getValidMessageFileAllowedPath()));
-
-        MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse("message_file/vpc_flow_samples.txt");
-        ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
-        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
-
-        // Should successfully parse 2 messages (same as testSuccessful)
-        assertThat(parserOutput.getOutput().stream()
-                .filter(m -> !MESSAGE_SOURCE_FILE_STATUS.equals(m.getSource()))
-                .count()).isEqualTo(2);
+        testCompressedFileParsing(zipFile);
     }
 
     @Test
@@ -218,16 +206,33 @@ public class MessageFileParserTest {
             gzipOut.write(sampleContent.getBytes(StandardCharsets.UTF_8));
         }
 
-        MessageFileParser parser = createMessageFileParserToTest(Collections.singletonList(testTempDir.toString()));
-        MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(gzipFile.toString());
-        ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
-        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
-
-        // Should successfully parse 2 messages from the .gzip file
-        assertThat(parserOutput.getOutput().stream()
-                .filter(m -> !MESSAGE_SOURCE_FILE_STATUS.equals(m.getSource()))
-                .count()).isEqualTo(2);
-
-        Files.deleteIfExists(gzipFile);
+        testCompressedFileParsing(gzipFile);
     }
+
+    @Test
+    public void testSendingInNonCompressedFileWithGzipExtension() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        testBadCompressedFileExtension(".gzip", "java.util.zip.ZipException with message Not in GZIP format");
+    }
+
+    @Test
+    public void testSendingInNonCompressedFileWithZipExtension() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        testBadCompressedFileExtension(".zip", "java.io.IOException with message ".concat(ZIP_FILE_CONTAINS_NO_ENTRIES_ERROR));
+    }
+
+    private void testBadCompressedFileExtension(String extension, String expectedErrorMessage) throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        // Create a temporary file with compressed extension but the file is not actually compressed
+        String sampleContent = "10.0.0.1 10.0.0.2 443 443 6 120 120 162 OK Ingress\n" +
+                "10.0.0.3 10.0.0.4 80 80 6 60 60 162 OK Egress";
+        Path tempDirPath = testTempDir.toPath();
+        Path uncompressedFileWithZippedExtension = Files.createTempFile(tempDirPath, "file_with_bad_ext", extension);
+        try (FileOutputStream uncompressedFile = new FileOutputStream(uncompressedFileWithZippedExtension.toFile())) {
+            uncompressedFile.write(sampleContent.getBytes(StandardCharsets.UTF_8));
+        }
+
+        ParserTestUtils.TestParserOutput parserOutput = getFileParserOutput(uncompressedFileWithZippedExtension);
+        assertThat(parserOutput.getOutput()).hasSize(1);
+        assertThat(parserOutput.getOutput().get(0).getDataQualityMessages().get(0).getMessage()).isEqualTo(expectedErrorMessage);
+
+    }
+
 }

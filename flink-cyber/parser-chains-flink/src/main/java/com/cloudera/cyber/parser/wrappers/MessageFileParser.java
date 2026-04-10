@@ -34,6 +34,7 @@ public class MessageFileParser implements ParserInterface {
     public static final String MESSAGE_SOURCE_FILE_STATUS = "message_file_status";
     public static final String INVALID_PATHS_MESSAGE = "The following allowed paths are invalid: %s";
     public static final String NO_ALLOWED_PATHS_SPECIFIED_FOR_MESSAGE_FILE_PARSER = "Null or empty allowed paths specified for message file parser.";
+    public static final String ZIP_FILE_CONTAINS_NO_ENTRIES_ERROR = "Zip file contains no entries.";
     private final List<String> allowedPaths;
     private final SingleMessageParser singleMessageParser;
 
@@ -172,7 +173,7 @@ public class MessageFileParser implements ParserInterface {
                 ZipInputStream zipIn = new ZipInputStream(inputStream, StandardCharsets.UTF_8);
                 ZipEntry entry = zipIn.getNextEntry();
                 if (entry == null) {
-                    throw new IOException("Zip file contains no entries: " + filePath);
+                    throw new IOException(ZIP_FILE_CONTAINS_NO_ENTRIES_ERROR);
                 }
                 return zipIn;
             }
