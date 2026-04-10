@@ -14,11 +14,15 @@ import org.apache.flink.core.fs.Path;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipInputStream;
 import java.time.Instant;
 import java.util.*;
+import java.util.zip.ZipEntry;
 
 @Slf4j
 public class MessageFileParser implements ParserInterface {
@@ -95,7 +99,8 @@ public class MessageFileParser implements ParserInterface {
                     if (allowedPaths.stream().anyMatch(fileToParsePathString::startsWith)) {
                         FileSystem fileSystem = fileToParsePath.getFileSystem();
                         try (FSDataInputStream is = fileSystem.open(fileToParsePath)) {
-                            try (BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                            try (InputStream decompressedStream = createDecompressionStream(is, fileToParsePath.toUri().toString());
+                                 BufferedReader br = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8))) {
                                 String line;
                                 int lineNumber = 1;
                                 while ((line = br.readLine()) != null) {
@@ -148,6 +153,30 @@ public class MessageFileParser implements ParserInterface {
                 }
             }
             return fileToParsePath;
+        }
+
+        /**
+         * Creates an input stream that handles decompression for gzip and zip compressed files,
+         * or returns the original stream if the file is not compressed.
+         *
+         * @param inputStream The input stream to decompress if needed
+         * @param filePath The file path (used to determine compression type from extension)
+         * @return A stream that provides decompressed data
+         * @throws IOException If decompression fails
+         */
+        private InputStream createDecompressionStream(InputStream inputStream, String filePath) throws IOException {
+            String pathLower = filePath.toLowerCase();
+            if (pathLower.endsWith(".gz") || pathLower.endsWith(".gzip")) {
+                return new GZIPInputStream(inputStream);
+            } else if (pathLower.endsWith(".zip")) {
+                ZipInputStream zipIn = new ZipInputStream(inputStream, StandardCharsets.UTF_8);
+                ZipEntry entry = zipIn.getNextEntry();
+                if (entry == null) {
+                    throw new IOException("Zip file contains no entries: " + filePath);
+                }
+                return zipIn;
+            }
+            return inputStream;
         }
     private void sendErrorMessage(String source, MessageToParse message, AbstractParserOutput output, String errorText, String fileToParse) {
         Map<String, String> extensions = new HashMap<>();
