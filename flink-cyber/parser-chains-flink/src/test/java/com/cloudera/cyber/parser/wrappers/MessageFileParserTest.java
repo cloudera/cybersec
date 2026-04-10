@@ -25,6 +25,7 @@ import java.util.zip.ZipOutputStream;
 
 import static com.cloudera.cyber.parser.wrappers.MessageFileParser.*;
 import static com.cloudera.cyber.parser.wrappers.SingleMessageParser.EMPTY_SIGNATURE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class MessageFileParserTest {
@@ -146,7 +147,8 @@ public class MessageFileParserTest {
         // Create a temporary gzipped file
         String sampleContent = "10.0.0.1 10.0.0.2 443 443 6 120 120 162 OK Ingress\n" +
                         "10.0.0.3 10.0.0.4 80 80 6 60 60 162 OK Egress";
-        Path gzipFile = Files.createTempFile(testTempDir, "test_data", ".gz");
+        Path tempDirPath = testTempDir.toPath();
+        Path gzipFile = Files.createTempFile(tempDirPath, "test_data", ".gz");
         try (GZIPOutputStream gzipOut = new GZIPOutputStream(new FileOutputStream(gzipFile.toFile()))) {
             gzipOut.write(sampleContent.getBytes(StandardCharsets.UTF_8));
         }
@@ -169,7 +171,8 @@ public class MessageFileParserTest {
         // Create a temporary zip file
         String sampleContent = "10.0.0.1 10.0.0.2 443 443 6 120 120 162 OK Ingress\n" +
                         "10.0.0.3 10.0.0.4 80 80 6 60 60 162 OK Egress";
-        Path zipFile = Files.createTempFile(testTempDir, "test_data", ".zip");
+        Path tempDirPath = testTempDir.toPath();
+        Path zipFile = Files.createTempFile(tempDirPath, "test_data", ".zip");
         try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile.toFile()))) {
             zipOut.putNextEntry(new ZipEntry("data.txt"));
             zipOut.write(sampleContent.getBytes(StandardCharsets.UTF_8));
@@ -209,7 +212,8 @@ public class MessageFileParserTest {
         // Create a temporary file with .gzip extension (different from .gz)
         String sampleContent = "10.0.0.1 10.0.0.2 443 443 6 120 120 162 OK Ingress\n" +
                         "10.0.0.3 10.0.0.4 80 80 6 60 60 162 OK Egress";
-        Path gzipFile = Files.createTempFile(testTempDir, "test_data", ".gzip");
+        Path tempDirPath = testTempDir.toPath();
+        Path gzipFile = Files.createTempFile(tempDirPath, "test_data", ".gzip");
         try (GZIPOutputStream gzipOut = new GZIPOutputStream(new FileOutputStream(gzipFile.toFile()))) {
             gzipOut.write(sampleContent.getBytes(StandardCharsets.UTF_8));
         }
