@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,9 +19,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static com.cloudera.cyber.parser.wrappers.MessageFileParser.*;
 import static com.cloudera.cyber.parser.wrappers.SingleMessageParser.EMPTY_SIGNATURE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class MessageFileParserTest {
@@ -135,4 +141,98 @@ public class MessageFileParserTest {
 
         MessageFileParserTestUtil.verifyErrorMessage(parserOutput, messageToParse, filePath, expectedSource, expectedErrorMessage, EMPTY_SIGNATURE);
     }
+
+    @Test
+    public void testParseGzippedFile() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        // Create a temporary gzipped file
+        String sampleContent = "10.0.0.1 10.0.0.2 443 443 6 120 120 162 OK Ingress\n" +
+                        "10.0.0.3 10.0.0.4 80 80 6 60 60 162 OK Egress";
+        Path tempDirPath = testTempDir.toPath();
+        Path gzipFile = Files.createTempFile(tempDirPath, "test_data", ".gz");
+        try (GZIPOutputStream gzipOut = new GZIPOutputStream(new FileOutputStream(gzipFile.toFile()))) {
+            gzipOut.write(sampleContent.getBytes(StandardCharsets.UTF_8));
+        }
+
+        testCompressedFileParsing(gzipFile);
+    }
+
+    private void testCompressedFileParsing(Path compressedFile) throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        ParserTestUtils.TestParserOutput parserOutput = getFileParserOutput(compressedFile);
+
+        // Should successfully parse 2 messages from the gzip file
+        assertThat(parserOutput.getOutput().stream()
+                .filter(m -> !MESSAGE_SOURCE_FILE_STATUS.equals(m.getSource()))
+                .count()).isEqualTo(2);
+
+        Files.deleteIfExists(compressedFile);
+    }
+
+    private ParserTestUtils.TestParserOutput getFileParserOutput(Path compressedFile) throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        // resolve to real path - MACOS uses links for temp dir
+        compressedFile = compressedFile.toRealPath();
+
+        MessageFileParser parser = createMessageFileParserToTest(Collections.singletonList(compressedFile.getParent().toString()));
+        MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(compressedFile.toString());
+        ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
+        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
+
+        return parserOutput;
+    }
+
+    @Test
+    public void testParseZippedFile() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        // Create a temporary zip file
+        String sampleContent = "10.0.0.1 10.0.0.2 443 443 6 120 120 162 OK Ingress\n" +
+                        "10.0.0.3 10.0.0.4 80 80 6 60 60 162 OK Egress";
+        Path tempDirPath = testTempDir.toPath();
+        Path zipFile = Files.createTempFile(tempDirPath, "test_data", ".zip");
+        try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile.toFile()))) {
+            zipOut.putNextEntry(new ZipEntry("data.txt"));
+            zipOut.write(sampleContent.getBytes(StandardCharsets.UTF_8));
+            zipOut.closeEntry();
+        }
+
+        testCompressedFileParsing(zipFile);
+    }
+
+    @Test
+    public void testParseGzipExtensionFile() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        // Create a temporary file with .gzip extension (different from .gz)
+        String sampleContent = "10.0.0.1 10.0.0.2 443 443 6 120 120 162 OK Ingress\n" +
+                        "10.0.0.3 10.0.0.4 80 80 6 60 60 162 OK Egress";
+        Path tempDirPath = testTempDir.toPath();
+        Path gzipFile = Files.createTempFile(tempDirPath, "test_data", ".gzip");
+        try (GZIPOutputStream gzipOut = new GZIPOutputStream(new FileOutputStream(gzipFile.toFile()))) {
+            gzipOut.write(sampleContent.getBytes(StandardCharsets.UTF_8));
+        }
+
+        testCompressedFileParsing(gzipFile);
+    }
+
+    @Test
+    public void testSendingInNonCompressedFileWithGzipExtension() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        testBadCompressedFileExtension(".gzip", "java.util.zip.ZipException with message Not in GZIP format");
+    }
+
+    @Test
+    public void testSendingInNonCompressedFileWithZipExtension() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        testBadCompressedFileExtension(".zip", "java.io.IOException with message ".concat(ZIP_FILE_CONTAINS_NO_ENTRIES_ERROR));
+    }
+
+    private void testBadCompressedFileExtension(String extension, String expectedErrorMessage) throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        // Create a temporary file with compressed extension but the file is not actually compressed
+        String sampleContent = "10.0.0.1 10.0.0.2 443 443 6 120 120 162 OK Ingress\n" +
+                "10.0.0.3 10.0.0.4 80 80 6 60 60 162 OK Egress";
+        Path tempDirPath = testTempDir.toPath();
+        Path uncompressedFileWithZippedExtension = Files.createTempFile(tempDirPath, "file_with_bad_ext", extension);
+        try (FileOutputStream uncompressedFile = new FileOutputStream(uncompressedFileWithZippedExtension.toFile())) {
+            uncompressedFile.write(sampleContent.getBytes(StandardCharsets.UTF_8));
+        }
+
+        ParserTestUtils.TestParserOutput parserOutput = getFileParserOutput(uncompressedFileWithZippedExtension);
+        assertThat(parserOutput.getOutput()).hasSize(1);
+        assertThat(parserOutput.getOutput().get(0).getDataQualityMessages().get(0).getMessage()).isEqualTo(expectedErrorMessage);
+
+    }
+
 }
