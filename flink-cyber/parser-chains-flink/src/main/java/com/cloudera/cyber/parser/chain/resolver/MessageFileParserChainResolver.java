@@ -42,4 +42,13 @@ public class MessageFileParserChainResolver extends ParserChainResolver {
         String filePath = new String(message.getOriginalBytes(), StandardCharsets.UTF_8);
         return filePathResolver.match(filePath, fp -> null);
     }
+
+    /**
+     * Returns the file path resolver for accessing header settings.
+     *
+     * @return the file path resolver
+     */
+    public PatternResolver<ParserChainSource> getFilePathResolver() {
+        return filePathResolver;
+    }
 }

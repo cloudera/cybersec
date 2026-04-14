@@ -235,4 +235,174 @@ public class MessageFileParserTest {
 
     }
 
+    @Test
+    public void testWithFixedHeaderLineCount() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        // Create a temporary file with header lines
+        String headerLine1 = "header1=value1";
+        String headerLine2 = "header2=value2";
+        String dataLine1 = "10.0.0.1 10.0.0.2 443 443 6 120 120 162 OK Ingress";
+        String dataLine2 = "10.0.0.3 10.0.0.4 80 80 6 60 60 162 OK Egress";
+        String contentWithHeaders = String.join("\n", Arrays.asList(headerLine1, headerLine2, dataLine1, dataLine2));
+
+        Path tempDirPath = testTempDir.toPath();
+        Path fileWithHeaders = Files.createTempFile(tempDirPath, "test_headers", ".txt");
+        Files.write(fileWithHeaders, contentWithHeaders.getBytes(StandardCharsets.UTF_8));
+
+        // resolve to real path
+        fileWithHeaders = fileWithHeaders.toRealPath();
+
+        MessageFileParser parser = MessageFileParser.create(
+                Collections.singletonList(fileWithHeaders.getParent().toString()),
+                createSingleMessageParser(),
+                new MessageFileHeader(2, null, null));
+
+        MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(fileWithHeaders.toString());
+        ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
+        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
+
+        // Should get 2 data lines (excluding 2 header lines)
+        assertThat(parserOutput.getOutput().stream()
+                .filter(m -> !MESSAGE_SOURCE_FILE_STATUS.equals(m.getSource()))
+                .count()).isEqualTo(2);
+
+        // Verify headerSkipped is in the status extension
+        assertThat(parserOutput.getOutput().stream()
+                .filter(m -> MESSAGE_SOURCE_FILE_STATUS.equals(m.getSource()))
+                .findFirst()
+                .get()
+                .getExtensions().get("headerSkipped")).isEqualTo("true");
+
+        Files.deleteIfExists(fileWithHeaders);
+    }
+
+    @Test
+    public void testWithHeaderPrefixes() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        // Create a temporary file with prefixed header lines
+        String headerLine1 = "#header1=value1";
+        String headerLine2 = "#header2=value2";
+        String dataLine1 = "10.0.0.1 10.0.0.2 443 443 6 120 120 162 OK Ingress";
+        String dataLine2 = "10.0.0.3 10.0.0.4 80 80 6 60 60 162 OK Egress";
+        String contentWithHeaders = String.join("\n", Arrays.asList(headerLine1, headerLine2, dataLine1, dataLine2));
+
+        Path tempDirPath = testTempDir.toPath();
+        Path fileWithHeaders = Files.createTempFile(tempDirPath, "test_prefix_headers", ".txt");
+        Files.write(fileWithHeaders, contentWithHeaders.getBytes(StandardCharsets.UTF_8));
+
+        // resolve to real path
+        fileWithHeaders = fileWithHeaders.toRealPath();
+
+        MessageFileParser parser = MessageFileParser.create(
+                Collections.singletonList(fileWithHeaders.getParent().toString()),
+                createSingleMessageParser(),
+                new MessageFileHeader(null, Collections.singletonList("#"), null));
+
+        MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(fileWithHeaders.toString());
+        ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
+        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
+
+        // Should get 2 data lines (excluding 2 header lines starting with #)
+        assertThat(parserOutput.getOutput().stream()
+                .filter(m -> !MESSAGE_SOURCE_FILE_STATUS.equals(m.getSource()))
+                .count()).isEqualTo(2);
+
+        Files.deleteIfExists(fileWithHeaders);
+    }
+
+    @Test
+    public void testWithRequiredHeaders() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        // Create a temporary file with header lines containing required headers
+        String headerLine1 = "requiredHeader=present";
+        String dataLine1 = "10.0.0.1 10.0.0.2 443 443 6 120 120 162 OK Ingress";
+        String contentWithHeaders = String.join("\n", Arrays.asList(headerLine1, dataLine1));
+
+        Path tempDirPath = testTempDir.toPath();
+        Path fileWithHeaders = Files.createTempFile(tempDirPath, "test_required", ".txt");
+        Files.write(fileWithHeaders, contentWithHeaders.getBytes(StandardCharsets.UTF_8));
+
+        // resolve to real path
+        fileWithHeaders = fileWithHeaders.toRealPath();
+
+        MessageFileParser parser = MessageFileParser.create(
+                Collections.singletonList(fileWithHeaders.getParent().toString()),
+                createSingleMessageParser(),
+                new MessageFileHeader(1, null, Collections.singletonList("requiredHeader")));
+
+        MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(fileWithHeaders.toString());
+        ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
+        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
+
+        // Should get 1 data line (excluding 1 header line)
+        assertThat(parserOutput.getOutput().stream()
+                .filter(m -> !MESSAGE_SOURCE_FILE_STATUS.equals(m.getSource()))
+                .count()).isEqualTo(1);
+
+        Files.deleteIfExists(fileWithHeaders);
+    }
+
+    @Test
+    public void testWithMissingRequiredHeaders() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        // Create a temporary file with header lines but missing required header
+        String headerLine1 = "otherHeader=present";
+        String dataLine1 = "10.0.0.1 10.0.0.2 443 443 6 120 120 162 OK Ingress";
+        String contentWithHeaders = String.join("\n", Arrays.asList(headerLine1, dataLine1));
+
+        Path tempDirPath = testTempDir.toPath();
+        Path fileWithHeaders = Files.createTempFile(tempDirPath, "test_missing", ".txt");
+        Files.write(fileWithHeaders, contentWithHeaders.getBytes(StandardCharsets.UTF_8));
+
+        // resolve to real path
+        fileWithHeaders = fileWithHeaders.toRealPath();
+
+        MessageFileParser parser = MessageFileParser.create(
+                Collections.singletonList(fileWithHeaders.getParent().toString()),
+                createSingleMessageParser(),
+                new MessageFileHeader(1, null, Collections.singletonList("requiredHeader")));
+
+        MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(fileWithHeaders.toString());
+        ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
+        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
+
+        // Should have an error message about missing required header
+        assertThat(parserOutput.getOutput()).hasSize(1);
+        assertThat(parserOutput.getOutput().get(0).getDataQualityMessages().get(0).getMessage())
+                .contains("File is missing required headers: requiredHeader");
+
+        Files.deleteIfExists(fileWithHeaders);
+    }
+
+    @Test
+    public void testWithoutHeaderEnabled() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        // Create a temporary file with pretended header lines (no header enabled)
+        String headerLine1 = "this looks like a header";
+        String headerLine2 = "but its just data";
+        String dataLine1 = "10.0.0.1 10.0.0.2 443 443 6 120 120 162 OK Ingress";
+        String content = String.join("\n", Arrays.asList(headerLine1, headerLine2, dataLine1));
+
+        Path tempDirPath = testTempDir.toPath();
+        Path file = Files.createTempFile(tempDirPath, "test_no_header", ".txt");
+        Files.write(file, content.getBytes(StandardCharsets.UTF_8));
+
+        // resolve to real path
+        file = file.toRealPath();
+
+        MessageFileParser parser = MessageFileParser.create(
+                Collections.singletonList(file.getParent().toString()),
+                createSingleMessageParser());
+
+        MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(file.toString());
+        ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
+        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
+
+        // Should get all 3 lines since header is not enabled
+        assertThat(parserOutput.getOutput().stream()
+                .filter(m -> !MESSAGE_SOURCE_FILE_STATUS.equals(m.getSource()))
+                .count()).isEqualTo(3);
+
+        Files.deleteIfExists(file);
+    }
+
+    private SingleMessageParser createSingleMessageParser() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        ParserChainMap parserChainMap = ParserTestUtils.readParserChainMap("message_file/VpcFlowChain.json");
+        return SingleMessageParser.create(parserChainMap, null);
+    }
 }

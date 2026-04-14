@@ -32,6 +32,7 @@ public class TopicParserConfig implements Serializable {
     private static final String NULL_FILE_PATTERN_TO_PARSER_MAP = "TopicParserConfig filePatternToParserMap entry has null %s.";
     public static final String NULL_KEY_FILE_PATTERN_TO_PARSER_MAP = String.format(NULL_FILE_PATTERN_TO_PARSER_MAP, "key");
     public static final String NULL_VALUE_FILE_PATTERN_TO_PARSER_MAP = String.format(NULL_FILE_PATTERN_TO_PARSER_MAP, "value");
+
     private String chainKey;
     private String source;
     private String broker;
@@ -56,5 +57,4 @@ public class TopicParserConfig implements Serializable {
         Preconditions.checkNotNull(parserChainSource, NULL_VALUE_FILE_PATTERN_TO_PARSER_MAP);
         parserChainSource.validate(filePathPattern);
     }
-
 }
