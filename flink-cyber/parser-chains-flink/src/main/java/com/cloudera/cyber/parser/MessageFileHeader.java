@@ -3,10 +3,10 @@ package com.cloudera.cyber.parser;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang.StringUtils;
 import org.apache.flink.util.Preconditions;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -16,9 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MessageFileHeader implements Serializable {
-    public static final String NULL_HEADER_PREFIX_CONFIG = "MessageFileHeader headerPrefixes has null entry.";
-    public static final String EMPTY_HEADER_PREFIX_CONFIG = "MessageFileHeader headerPrefixes has empty string entry.";
-    public static final String NULL_HEADER_REQUIRED_HEADERS_CONFIG = "MessageFileHeader has null or empty requiredHeaders when header is enabled.";
+    public static final String EMPTY_HEADER_PREFIX_CONFIG = "MessageFileHeader has at least one null or empty headerPrefixes when using prefixes to remove headers.";
     public static final String EMPTY_HEADER_REQUIRED_HEADERS_CONFIG = "MessageFileHeader has at least one null or empty requiredHeader in requiredHeaders when header is enabled.";
     public static final String HEADER_LINE_COUNT_AND_PREFIXES_CONFLICT = "Only one of headerLineCount or headerPrefixes can be specified, not both.";
     public static final String HEADER_LINE_COUNT_OR_PREFIXES_REQUIRED = "Either headerLineCount or headerPrefixes must be specified.";
@@ -42,27 +40,20 @@ public class MessageFileHeader implements Serializable {
      * Validates this header configuration.
      */
     public void validate() {
-        boolean hasLineCount = headerLineCount != null && headerLineCount > 0;
-        boolean hasPrefixes = headerPrefixes != null && !headerPrefixes.isEmpty();
-        
+        boolean usesLineCount = usesHeaderLineCount();
+        boolean usesPrefixes = usesHeaderPrefixes();
         // Must specify at least one method
-        Preconditions.checkArgument(hasLineCount || hasPrefixes, HEADER_LINE_COUNT_OR_PREFIXES_REQUIRED);
+        Preconditions.checkArgument(usesLineCount || usesPrefixes, HEADER_LINE_COUNT_OR_PREFIXES_REQUIRED);
         
         // Cannot use both methods
-        Preconditions.checkArgument(!(hasLineCount && hasPrefixes), HEADER_LINE_COUNT_AND_PREFIXES_CONFLICT);
+        Preconditions.checkArgument(!(usesLineCount && usesPrefixes), HEADER_LINE_COUNT_AND_PREFIXES_CONFLICT);
 
-        if (hasPrefixes) {
-            for (String prefix : headerPrefixes) {
-                Preconditions.checkNotNull(prefix, NULL_HEADER_PREFIX_CONFIG);
-                Preconditions.checkArgument(StringUtils.isNotEmpty(prefix), EMPTY_HEADER_PREFIX_CONFIG);
-            }
+        if (usesPrefixes) {
+            Preconditions.checkArgument(headerPrefixes.stream().noneMatch(p -> p == null || p.isEmpty()), EMPTY_HEADER_PREFIX_CONFIG);
         }
 
         if (requiredHeaders != null) {
-            Preconditions.checkArgument(!requiredHeaders.isEmpty(), NULL_HEADER_REQUIRED_HEADERS_CONFIG);
-            for (String requiredHeader : requiredHeaders) {
-                Preconditions.checkArgument(StringUtils.isNotEmpty(requiredHeader), EMPTY_HEADER_REQUIRED_HEADERS_CONFIG);
-            }
+            Preconditions.checkArgument(requiredHeaders.stream().noneMatch(p -> p == null || p.isEmpty()), EMPTY_HEADER_REQUIRED_HEADERS_CONFIG);
         }
     }
 
@@ -78,5 +69,13 @@ public class MessageFileHeader implements Serializable {
      */
     public boolean usesHeaderPrefixes() {
         return headerPrefixes != null && !headerPrefixes.isEmpty();
+    }
+
+    public HashSet<String> getRequiredHeaders() {
+        return requiredHeaders != null ? new HashSet<>(this.requiredHeaders) : null;
+    }
+
+    public int getHeaderLineCount() {
+        return headerLineCount != null ? headerLineCount : 0;
     }
 }

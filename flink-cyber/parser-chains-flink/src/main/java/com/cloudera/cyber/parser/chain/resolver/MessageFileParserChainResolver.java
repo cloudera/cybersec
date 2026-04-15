@@ -43,12 +43,4 @@ public class MessageFileParserChainResolver extends ParserChainResolver {
         return filePathResolver.match(filePath, fp -> null);
     }
 
-    /**
-     * Returns the file path resolver for accessing header settings.
-     *
-     * @return the file path resolver
-     */
-    public PatternResolver<ParserChainSource> getFilePathResolver() {
-        return filePathResolver;
-    }
 }

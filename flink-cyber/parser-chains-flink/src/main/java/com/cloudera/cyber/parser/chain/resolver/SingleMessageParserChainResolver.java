@@ -19,7 +19,7 @@ public class SingleMessageParserChainResolver extends ParserChainResolver {
      */
     public SingleMessageParserChainResolver(TopicParserConfig parserChainSource, SingleMessageParser parser) {
         super(parser);
-        this.parserChainSource = new ParserChainSource(parserChainSource.getChainKey(), parserChainSource.getSource());
+        this.parserChainSource = new ParserChainSource(parserChainSource.getChainKey(), parserChainSource.getSource(), null);
     }
 
     /**
