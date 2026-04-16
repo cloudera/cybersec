@@ -38,7 +38,7 @@ public class TopicPatternToChainMapTest {
 
         // create a topic map with files
         HashMap<String, ParserChainSource> fileMap = new HashMap<>();
-        fileMap.put("*/*/file*", new ParserChainSource(CHAIN_KEY, SOURCE));
+        fileMap.put("*/*/file*", new ParserChainSource(CHAIN_KEY, SOURCE, null));
         map.put(TOPIC_NAME_1, new TopicParserConfig(null, null, null, fileMap));
         map.put(TOPIC_NAME_2, new TopicParserConfig(CHAIN_KEY, SOURCE, null, null));
         // check hasFileParser = true
@@ -147,7 +147,7 @@ public class TopicPatternToChainMapTest {
         String fileSource = "file source";
 
         HashMap<String, ParserChainSource> fileMap = new HashMap<>();
-        fileMap.put("*/*/file*", new ParserChainSource(CHAIN_KEY, fileSource));
+        fileMap.put("*/*/file*", new ParserChainSource(CHAIN_KEY, fileSource, null));
 
         map.put(TOPIC_NAME_1, new TopicParserConfig(CHAIN_KEY, source1, null, null));
         map.put(TOPIC_NAME_2, new TopicParserConfig(CHAIN_KEY, source2, null, null));

@@ -42,4 +42,5 @@ public class MessageFileParserChainResolver extends ParserChainResolver {
         String filePath = new String(message.getOriginalBytes(), StandardCharsets.UTF_8);
         return filePathResolver.match(filePath, fp -> null);
     }
+
 }

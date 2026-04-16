@@ -140,6 +140,113 @@ determine the parser chain and produced message source.
 }
 ```
 
+### Header Configuration
+
+When parsing message files, you can configure the parser to skip header lines at the beginning of files. This is useful for files that contain metadata or column headers that should not be treated as data records. The header configuration is part of the file mapping in the topic map.
+
+The header feature supports two mutually exclusive methods for identifying header lines:
+
+1. **Header Line Count**: Skip a specific number of lines at the beginning of the file.
+2. **Header Prefixes**: Skip lines that start with specific prefix strings (e.g., `#` for comment lines).
+
+Additionally, you can optionally require certain headers to be present in the file.
+
+#### Header Line Count Example
+
+Use `headerLineCount` to skip the first N lines of a file:
+
+```json
+{
+  "file_topic": {
+    "filePatternToParserMap": {
+      ".*vpc_flow.*": {
+        "chainKey": "vpcflow",
+        "source": "vpc_flow_from_file",
+        "messageFileHeader": {
+          "headerLineCount": 1
+        }
+      }
+    }
+  }
+}
+```
+
+This configuration skips the first line of each file before parsing the data.
+
+#### Header Prefixes Example
+
+Use `headerPrefixes` to skip lines that start with specific prefixes:
+
+```json
+{
+  "file_topic": {
+    "filePatternToParserMap": {
+      ".*vpc_flow.*": {
+        "chainKey": "vpcflow",
+        "source": "vpc_flow_from_file",
+        "messageFileHeader": {
+          "headerPrefixes": ["#", "//"]
+        }
+      }
+    }
+  }
+}
+```
+
+This configuration skips all lines that start with `#` or `//` before parsing the data.
+
+#### Required Headers Example
+
+Use `requiredHeaders` to verify that certain header lines exist in the file:
+
+```json
+{
+  "file_topic": {
+    "filePatternToParserMap": {
+      ".*vpc_flow.*": {
+        "chainKey": "vpcflow",
+        "source": "vpc_flow_from_file",
+        "messageFileHeader": {
+          "headerLineCount": 1,
+          "requiredHeaders": ["version=1.0"]
+        }
+      }
+    }
+  }
+}
+```
+
+This configuration requires a header line containing `version=1.0` to be present in the file. The requiredHeader must match exactly.  It is whitespace and case sensitive.  If the required header is missing, an error message is published to the error topic.
+
+You can combine required headers with either method:
+
+```json
+{
+  "file_topic": {
+    "filePatternToParserMap": {
+      ".*vpc_flow.*": {
+        "chainKey": "vpcflow",
+        "source": "vpc_flow_from_file",
+        "messageFileHeader": {
+          "headerPrefixes": ["#"],
+          "requiredHeaders": ["#timestampcolumn"]
+        }
+      }
+    }
+  }
+}
+```
+
+### Header Configuration Fields
+
+| Field              | Type     | Description                                                                                      | Required | Example                          |
+|--------------------|----------|--------------------------------------------------------------------------------------------------|----------|----------------------------------|
+| headerLineCount    | Integer  | Number of header lines to skip at the beginning of the file. Mutually exclusive with headerPrefixes. | No       | 1                                |
+| headerPrefixes     | List     | List of prefix strings to identify header lines. All lines starting with these prefixes are skipped. Mutually exclusive with headerLineCount. | No       | ["#", "//"]                      |
+| requiredHeaders    | List     | List of header lines that must be present in the file. If not found, an error is published.    | No       | ["version=1.0", "#timestampcolumn"] |
+
+**Note**: Either `headerLineCount` or `headerPrefixes` must be specified to enable header processing. These two options are mutually exclusive.
+
 ### Combining Single Message and File Mapping
 
 Parsers can consume for both single message and file topics.  However, a topic name should be mapped to a single message or file.

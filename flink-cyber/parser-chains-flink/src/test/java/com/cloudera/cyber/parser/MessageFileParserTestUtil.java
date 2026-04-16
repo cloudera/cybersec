@@ -55,6 +55,10 @@ public class MessageFileParserTestUtil {
     }
 
     public static void verifyMessageFileOutput(List<Message> messages, MessageToParse messageToParse) throws IOException {
+        verifyMessageFileOutput(messages, messageToParse, 1);
+    }
+
+    public static void verifyMessageFileOutput(List<Message> messages, MessageToParse messageToParse, int messageStartLine) throws IOException {
         assertThat(messages.size()).isEqualTo(3);
         for (Message actualMessage : messages) {
             Map<String, String> extensions = actualMessage.getExtensions();
@@ -63,9 +67,9 @@ public class MessageFileParserTestUtil {
                 SignedSourceKey expectedOriginalSource = ParserTestUtils.createExpectedOriginalSource(messageToParse, EMPTY_SIGNATURE);
                 assertThat(actualMessage.getOriginalSource()).isEqualTo(expectedOriginalSource);
                 long originalLineNumber = Long.parseLong(extensions.get(DEFAULT_ORIGINAL_FILE_LINE_FIELD));
-                if (originalLineNumber == 1) {
+                if (originalLineNumber == messageStartLine) {
                     assertThat(extensions.get("netflow_flow_direction")).isEqualTo("ingress");
-                } else if (originalLineNumber == 2) {
+                } else if (originalLineNumber == messageStartLine + 1) {
                     assertThat(extensions.get("netflow_flow_direction")).isEqualTo("egress");
                 } else {
                     fail(String.format("line number %d extension is out of range ", originalLineNumber));
@@ -78,6 +82,9 @@ public class MessageFileParserTestUtil {
                 expectedExtensions.put("modificationTime", String.valueOf(modificationTime));
                 expectedExtensions.put("successMessageCount", String.valueOf(2));
                 expectedExtensions.put("errorMessageCount", String.valueOf(0));
+                if (messageStartLine > 1) {
+                    expectedExtensions.put("headerLines", String.valueOf(messageStartLine - 1));
+                }
                 assertThat(extensions).isEqualTo(expectedExtensions);
             }
         }

@@ -35,6 +35,8 @@ public class MessageFileParser implements ParserInterface {
     public static final String INVALID_PATHS_MESSAGE = "The following allowed paths are invalid: %s";
     public static final String NO_ALLOWED_PATHS_SPECIFIED_FOR_MESSAGE_FILE_PARSER = "Null or empty allowed paths specified for message file parser.";
     public static final String ZIP_FILE_CONTAINS_NO_ENTRIES_ERROR = "Zip file contains no entries.";
+    public static final String FILE_TOO_FEW_LINES_ERROR = "File has %d lines but required header line count is %d.";
+    public static final String FILE_MISSING_REQUIRED_HEADERS_ERROR = "File is missing required headers: %s.";
     private final List<String> allowedPaths;
     private final SingleMessageParser singleMessageParser;
 
@@ -43,8 +45,10 @@ public class MessageFileParser implements ParserInterface {
         this.singleMessageParser = singleMessageParser;
     }
 
+
+
     /**
-     * Verify and normalize allowed paths and create a new MessageFileParser.
+     * Verify and normalize allowed paths and create a new MessageFileParser with header support.
      *
      * @param allowedPaths        List of paths that the parser can read when it receives a file to parse.
      * @param singleMessageParser The single message parser used to parse each line in the file.
@@ -100,28 +104,47 @@ public class MessageFileParser implements ParserInterface {
                     if (allowedPaths.stream().anyMatch(fileToParsePathString::startsWith)) {
                         FileSystem fileSystem = fileToParsePath.getFileSystem();
                         try (FSDataInputStream is = fileSystem.open(fileToParsePath)) {
+                            int headerLinesRead = 0;
                             try (InputStream decompressedStream = createDecompressionStream(is, fileToParsePath.toUri().toString());
                                  BufferedReader br = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8))) {
-                                String line;
-                                int lineNumber = 1;
-                                while ((line = br.readLine()) != null) {
 
-                                    MessageToParse messageToParse = MessageToParse.builder()
-                                            .originalBytes(line.getBytes(StandardCharsets.UTF_8))
-                                            .topic(message.getTopic())
-                                            .offset(message.getOffset())
-                                            .partition(message.getPartition())
-                                            .key(null)
-                                            .line(lineNumber++)
-                                            .build();
-                                    singleMessageParser.parse(parserChainSource, messageToParse, output);
+                                int lineNumber = 0;
+                                boolean inHeader = parserChainSource.hasHeader();
+                                List<String> headersToBeFound = parserChainSource.getRequiredHeaders() != null ? new ArrayList<>(parserChainSource.getRequiredHeaders()) : null;
+                                // Now process remaining lines
+                                String currentLine;
+                                while ((currentLine = br.readLine()) != null) {
+                                    lineNumber++;
+                                    if (inHeader) {
+                                        inHeader = processHeader(parserChainSource, currentLine, lineNumber, headersToBeFound);
+                                    }
+                                    if (!inHeader) {
+                                        MessageToParse messageToParse = MessageToParse.builder()
+                                                .originalBytes(currentLine.getBytes(StandardCharsets.UTF_8))
+                                                .topic(message.getTopic())
+                                                .offset(message.getOffset())
+                                                .partition(message.getPartition())
+                                                .key(null)
+                                                .line(lineNumber)
+                                                .build();
+                                        singleMessageParser.parse(parserChainSource, messageToParse, output);
+                                    } else {
+                                        headerLinesRead++;
+                                    }
+                                }
+                                if (inHeader && parserChainSource.usesHeaderLineCount()) {
+                                    throw new IllegalArgumentException(String.format(FILE_TOO_FEW_LINES_ERROR, lineNumber, parserChainSource.getHeaderLineCount()));
                                 }
                             }
+
                             Map<String, String> messageFileStatusExtension = new HashMap<>();
                             messageFileStatusExtension.put("filePath", fileToParse);
                             messageFileStatusExtension.put("modificationTime", String.valueOf(fileSystem.getFileStatus(fileToParsePath).getModificationTime()));
                             messageFileStatusExtension.put("successMessageCount", String.valueOf(output.getSuccessfulMessages()));
                             messageFileStatusExtension.put("errorMessageCount", String.valueOf(output.getErrorMessages()));
+                            if (parserChainSource.hasHeader()) {
+                                messageFileStatusExtension.put("headerLines", String.valueOf(headerLinesRead));
+                            }
                             output.outputMessage(Message.builder().
                                     ts(Instant.now().toEpochMilli()).
                                     source(MESSAGE_SOURCE_FILE_STATUS).
@@ -135,6 +158,8 @@ public class MessageFileParser implements ParserInterface {
                         sendErrorMessage(parserChainSource.getSource(), message, output, FILE_NOT_IN_ALLOWED_PATHS, fileToParse);
                     }
                 }
+            } catch (IllegalArgumentException e) {
+                sendErrorMessage(parserChainSource.getSource(), message, output, e.getMessage(), fileToParse);
             } catch (Exception e) {
                 String errorMessage = String.format("%s with message %s", e.getClass().getName(), e.getMessage());
                 sendErrorMessage(parserChainSource.getSource(), message, output, errorMessage, fileToParse);
@@ -142,43 +167,87 @@ public class MessageFileParser implements ParserInterface {
         }
     }
 
-        private Path checkForSymbolicLinks(String fileToParse) throws IOException {
-            Path fileToParsePath = new Path(fileToParse);
-            FileSystem fileSystem = fileToParsePath.getFileSystem();
-            if (!fileSystem.isDistributedFS()) {
+    /**
+     * Determines if the next line read is part of the header and should be skipped.  Tracks whether required header
+     * have been found.
+     *
+     * @param lineText         The text of the next line.
+     * @param lineCount        The line number corresponding to the lineText.
+     * @param headersToBeFound The required headers that have not been found yet.
+     * @return true if the line is a header and should be skipped or false if the header should be parsed
+     */
+    private boolean processHeader(ParserChainSource parserChainSource, String lineText, int lineCount, List<String> headersToBeFound) {
+        boolean inHeader = true;
 
-                java.nio.file.Path nioPath = Paths.get(fileToParsePath.toUri().toString());
-                java.nio.file.Path realPath = nioPath.toRealPath();
-                if (!nioPath.toString().equalsIgnoreCase(realPath.toString())) {
-                    fileToParsePath = null;
-                }
-            }
-            return fileToParsePath;
+        if (parserChainSource.usesHeaderLineCount() && lineCount > parserChainSource.getHeaderLineCount()) {
+            inHeader = false;
+        } else if (parserChainSource.usesHeaderPrefixes() && !matchesHeaderPrefix(parserChainSource, lineText)) {
+            inHeader = false;
         }
 
-        /**
-         * Creates an input stream that handles decompression for gzip and zip compressed files,
-         * or returns the original stream if the file is not compressed.
-         *
-         * @param inputStream The input stream to decompress if needed
-         * @param filePath The file path (used to determine compression type from extension)
-         * @return A stream that provides decompressed data
-         * @throws IOException If decompression fails
-         */
-        private InputStream createDecompressionStream(InputStream inputStream, String filePath) throws IOException {
-            String pathLower = filePath.toLowerCase();
-            if (pathLower.endsWith(".gz") || pathLower.endsWith(".gzip")) {
-                return new GZIPInputStream(inputStream);
-            } else if (pathLower.endsWith(".zip")) {
-                ZipInputStream zipIn = new ZipInputStream(inputStream, StandardCharsets.UTF_8);
-                ZipEntry entry = zipIn.getNextEntry();
-                if (entry == null) {
-                    throw new IOException(ZIP_FILE_CONTAINS_NO_ENTRIES_ERROR);
-                }
-                return zipIn;
-            }
-            return inputStream;
+        if (inHeader && headersToBeFound != null && !headersToBeFound.isEmpty()) {
+            headersToBeFound.remove(lineText);
         }
+
+        // if this is the first line after the header, check if required headers were found
+        if (!inHeader && headersToBeFound != null && !headersToBeFound.isEmpty()) {
+            throw new IllegalArgumentException(String.format(FILE_MISSING_REQUIRED_HEADERS_ERROR, String.join(", ", headersToBeFound)));
+        }
+
+        return inHeader;
+    }
+
+    /**
+     * Check if a line matches any of the configured header prefixes.
+     * Matches exactly (no parsing).
+     */
+    private boolean matchesHeaderPrefix(ParserChainSource parserChainSource, String line) {
+        for (String prefix : parserChainSource.getHeaderPrefixes()) {
+            if (line.startsWith(prefix)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private Path checkForSymbolicLinks(String fileToParse) throws IOException {
+        Path fileToParsePath = new Path(fileToParse);
+        FileSystem fileSystem = fileToParsePath.getFileSystem();
+        if (!fileSystem.isDistributedFS()) {
+
+            java.nio.file.Path nioPath = Paths.get(fileToParsePath.toUri().toString());
+            java.nio.file.Path realPath = nioPath.toRealPath();
+            if (!nioPath.toString().equalsIgnoreCase(realPath.toString())) {
+                fileToParsePath = null;
+            }
+        }
+        return fileToParsePath;
+    }
+
+    /**
+     * Creates an input stream that handles decompression for gzip and zip compressed files,
+     * or returns the original stream if the file is not compressed.
+     *
+     * @param inputStream The input stream to decompress if needed
+     * @param filePath    The file path (used to determine compression type from extension)
+     * @return A stream that provides decompressed data
+     * @throws IOException If decompression fails
+     */
+    private InputStream createDecompressionStream(InputStream inputStream, String filePath) throws IOException {
+        String pathLower = filePath.toLowerCase();
+        if (pathLower.endsWith(".gz") || pathLower.endsWith(".gzip")) {
+            return new GZIPInputStream(inputStream);
+        } else if (pathLower.endsWith(".zip")) {
+            ZipInputStream zipIn = new ZipInputStream(inputStream, StandardCharsets.UTF_8);
+            ZipEntry entry = zipIn.getNextEntry();
+            if (entry == null) {
+                throw new IOException(ZIP_FILE_CONTAINS_NO_ENTRIES_ERROR);
+            }
+            return zipIn;
+        }
+        return inputStream;
+    }
+
     private void sendErrorMessage(String source, MessageToParse message, AbstractParserOutput output, String errorText, String fileToParse) {
         Map<String, String> extensions = new HashMap<>();
         extensions.put(Constants.DEFAULT_INPUT_FIELD, fileToParse);
