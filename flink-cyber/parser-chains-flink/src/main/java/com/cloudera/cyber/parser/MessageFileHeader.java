@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import org.apache.flink.util.Preconditions;
 
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -49,11 +48,15 @@ public class MessageFileHeader implements Serializable {
         Preconditions.checkArgument(!(usesLineCount && usesPrefixes), HEADER_LINE_COUNT_AND_PREFIXES_CONFLICT);
 
         if (usesPrefixes) {
-            Preconditions.checkArgument(headerPrefixes.stream().noneMatch(p -> p == null || p.isEmpty()), EMPTY_HEADER_PREFIX_CONFIG);
+            for(String headerPrefix : headerPrefixes) {
+                Preconditions.checkArgument(headerPrefix != null && !headerPrefix.isEmpty(), EMPTY_HEADER_PREFIX_CONFIG);
+            }
         }
 
         if (requiredHeaders != null) {
-            Preconditions.checkArgument(requiredHeaders.stream().noneMatch(p -> p == null || p.isEmpty()), EMPTY_HEADER_REQUIRED_HEADERS_CONFIG);
+            for(String requiredHeader : requiredHeaders) {
+                Preconditions.checkArgument(requiredHeader != null && !requiredHeader.isEmpty(), EMPTY_HEADER_REQUIRED_HEADERS_CONFIG);
+            }
         }
     }
 
@@ -69,10 +72,6 @@ public class MessageFileHeader implements Serializable {
      */
     public boolean usesHeaderPrefixes() {
         return headerPrefixes != null && !headerPrefixes.isEmpty();
-    }
-
-    public HashSet<String> getRequiredHeaders() {
-        return requiredHeaders != null ? new HashSet<>(this.requiredHeaders) : null;
     }
 
     public int getHeaderLineCount() {

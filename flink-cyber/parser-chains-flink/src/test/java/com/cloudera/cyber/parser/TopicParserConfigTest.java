@@ -36,7 +36,7 @@ public class TopicParserConfigTest {
 
     private void testValidFilePatterns(String broker) {
         HashMap<String, ParserChainSource> filePatternConfig = new HashMap<>();
-        filePatternConfig.put("*/log_file_name/*", new ParserChainSource(TEST_CHAIN, TEST_SOURCE));
+        filePatternConfig.put("*/log_file_name/*", new ParserChainSource(TEST_CHAIN, TEST_SOURCE, null));
         com.cloudera.cyber.parser.TopicParserConfig topicParserConfig = new TopicParserConfig(null, null, broker, filePatternConfig);
         assertThatCode(topicParserConfig::validate).doesNotThrowAnyException();
     }

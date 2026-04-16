@@ -216,7 +216,7 @@ Use `requiredHeaders` to verify that certain header lines exist in the file:
 }
 ```
 
-This configuration requires a header line containing `version=1.0` to be present in the file. If the required header is missing, an error message is published to the error topic.
+This configuration requires a header line containing `version=1.0` to be present in the file. The requiredHeader must match exactly.  It is whitespace and case sensitive.  If the required header is missing, an error message is published to the error topic.
 
 You can combine required headers with either method:
 

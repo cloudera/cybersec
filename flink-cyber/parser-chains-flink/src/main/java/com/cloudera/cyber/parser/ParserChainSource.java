@@ -7,7 +7,6 @@ import org.apache.flink.util.Preconditions;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Represents a parser chain source configuration.
@@ -15,19 +14,18 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@RequiredArgsConstructor
 public class ParserChainSource implements Serializable {
-    public static final String EMPTY_VALIDATION_ERROR = "%s for %s is empty";
+    public static final String NULL_OR_EMPTY_VALIDATION_ERROR = "%s for %s is null or empty";
 
     @NonNull
     private String chainKey;
     @NonNull
     private String source;
-    private MessageFileHeader messageFileHeader = null;
+    private MessageFileHeader messageFileHeader;
 
     public void validate(String context) {
-        Preconditions.checkArgument(StringUtils.isNotEmpty(chainKey), EMPTY_VALIDATION_ERROR, "chainKey", context);
-        Preconditions.checkArgument(StringUtils.isNotEmpty(source), EMPTY_VALIDATION_ERROR, "source", context);
+        Preconditions.checkArgument(StringUtils.isNotEmpty(chainKey), NULL_OR_EMPTY_VALIDATION_ERROR, "chainKey", context);
+        Preconditions.checkArgument(StringUtils.isNotEmpty(source), NULL_OR_EMPTY_VALIDATION_ERROR, "source", context);
         if (messageFileHeader != null) {
             messageFileHeader.validate();
         }
@@ -40,7 +38,7 @@ public class ParserChainSource implements Serializable {
         return messageFileHeader != null;
     }
 
-    public Set<String> getRequiredHeaders() {
+    public List<String> getRequiredHeaders() {
         return messageFileHeader != null ? messageFileHeader.getRequiredHeaders() : null;
     }
 

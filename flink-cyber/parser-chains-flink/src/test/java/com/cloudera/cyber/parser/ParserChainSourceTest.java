@@ -15,7 +15,7 @@ public class ParserChainSourceTest {
     public void testValidParserChainSourceWithoutHeader() {
         String expectedChainKey = "my_parser_chain";
         String expectedSource = "my_event_source";
-        ParserChainSource parserChainSource = new ParserChainSource(expectedChainKey, expectedSource);
+        ParserChainSource parserChainSource = new ParserChainSource(expectedChainKey, expectedSource, null);
 
         assertThatCode(() -> parserChainSource.validate(CONTEXT)).doesNotThrowAnyException();
         assertThat(parserChainSource.hasHeader()).isFalse();
@@ -84,15 +84,15 @@ public class ParserChainSourceTest {
     private void testNullValidationThrows(String expectedChainKey, String expectedSource) {
         String nullFieldName = (expectedChainKey == null ? "chainKey" : "source");
 
-        assertThatThrownBy(() -> new ParserChainSource(expectedChainKey, expectedSource)).isInstanceOf(NullPointerException.class).
+        assertThatThrownBy(() -> new ParserChainSource(expectedChainKey, expectedSource, null)).isInstanceOf(NullPointerException.class).
                 hasMessage(String.format("%s is marked non-null but is null", nullFieldName));
     }
 
     public void testEmptyValidationThrows(String expectedChainKey, String expectedSource) {
         String expectedNullFieldName = (StringUtils.isEmpty(expectedChainKey) ? "chainKey" : "source");
-        ParserChainSource parserChainSource = new ParserChainSource(expectedChainKey, expectedSource);
+        ParserChainSource parserChainSource = new ParserChainSource(expectedChainKey, expectedSource, null);
         assertThatThrownBy(() -> parserChainSource.validate(CONTEXT)).isInstanceOf(IllegalArgumentException.class).
-                hasMessage(String.format(ParserChainSource.EMPTY_VALIDATION_ERROR, expectedNullFieldName, CONTEXT));
+                hasMessage(String.format(ParserChainSource.NULL_OR_EMPTY_VALIDATION_ERROR, expectedNullFieldName, CONTEXT));
     }
 
 }

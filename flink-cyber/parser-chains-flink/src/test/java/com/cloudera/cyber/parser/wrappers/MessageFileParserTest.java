@@ -43,7 +43,7 @@ public class MessageFileParserTest {
 
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse("message_file/vpc_flow_samples.txt");
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
-        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
+        parser.parse(new ParserChainSource("vpcflow", "netflow", null), messageToParse, parserOutput);
 
         MessageFileParserTestUtil.verifyMessageFileOutput(parserOutput.getOutput(), messageToParse);
     }
@@ -59,7 +59,7 @@ public class MessageFileParserTest {
         Files.createSymbolicLink(linkPath, Paths.get(MessageFileParserTestUtil.getValidMessageFileAllowedPath()));
 
         String fileContainsLink = Paths.get(linkPath.toString(), "vpc_flow_samples.txt").toString();
-        testErrorCase(fileContainsLink,  Collections.singletonList(testTempDir.toString()), new ParserChainSource("vpcflow", "netflow"), FILE_CONTAINS_SYMBOLIC_LINKS);
+        testErrorCase(fileContainsLink,  Collections.singletonList(testTempDir.toString()), new ParserChainSource("vpcflow", "netflow", null), FILE_CONTAINS_SYMBOLIC_LINKS);
 
     }
 
@@ -109,7 +109,7 @@ public class MessageFileParserTest {
     @Test
     public void filePathNotInAllowedDirectory() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
         String fileNotInAllowedPath = ParserTestUtils.resolveResourcePath("metron/samples/oraclelogon.txt");
-        testErrorCase(fileNotInAllowedPath,  new ParserChainSource("vpcflow", "netflow"), FILE_NOT_IN_ALLOWED_PATHS);
+        testErrorCase(fileNotInAllowedPath,  new ParserChainSource("vpcflow", "netflow", null), FILE_NOT_IN_ALLOWED_PATHS);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class MessageFileParserTest {
     @Test
     public void fileDoesntExistError() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
         String fileDoesntExist = MessageFileParserTestUtil.getValidMessageFileAllowedPath().concat("/doesnt_exist");
-        testErrorCase(fileDoesntExist, new ParserChainSource("vpcflow", "netflow"),
+        testErrorCase(fileDoesntExist, new ParserChainSource("vpcflow", "netflow", null),
                 String.format("java.nio.file.NoSuchFileException with message %s", fileDoesntExist));
     }
 
@@ -175,7 +175,7 @@ public class MessageFileParserTest {
         MessageFileParser parser = createMessageFileParserToTest(Collections.singletonList(compressedFile.getParent().toString()));
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(compressedFile.toString());
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
-        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
+        parser.parse(new ParserChainSource("vpcflow", "netflow", null), messageToParse, parserOutput);
 
         return parserOutput;
     }
@@ -379,7 +379,7 @@ public class MessageFileParserTest {
 
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(file.toString());
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
-        parser.parse(new ParserChainSource("vpcflow", "netflow"), messageToParse, parserOutput);
+        parser.parse(new ParserChainSource("vpcflow", "netflow", null), messageToParse, parserOutput);
 
         // Should get all 3 lines since header is not enabled
         assertThat(parserOutput.getOutput().stream()

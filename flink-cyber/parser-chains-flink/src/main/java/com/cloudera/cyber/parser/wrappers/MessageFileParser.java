@@ -104,25 +104,19 @@ public class MessageFileParser implements ParserInterface {
                     if (allowedPaths.stream().anyMatch(fileToParsePathString::startsWith)) {
                         FileSystem fileSystem = fileToParsePath.getFileSystem();
                         try (FSDataInputStream is = fileSystem.open(fileToParsePath)) {
-                            int headerLineCount = 0;
+                            int headerLinesRead = 0;
                             try (InputStream decompressedStream = createDecompressionStream(is, fileToParsePath.toUri().toString());
                                  BufferedReader br = new BufferedReader(new InputStreamReader(decompressedStream, StandardCharsets.UTF_8))) {
 
                                 int lineNumber = 0;
                                 boolean inHeader = parserChainSource.hasHeader();
-                                Set<String> headersToBeFound = parserChainSource.getRequiredHeaders();
+                                List<String> headersToBeFound = parserChainSource.getRequiredHeaders() != null ? new ArrayList<>(parserChainSource.getRequiredHeaders()) : null;
                                 // Now process remaining lines
                                 String currentLine;
                                 while ((currentLine = br.readLine()) != null) {
                                     lineNumber++;
                                     if (inHeader) {
-                                        inHeader = checkIfLineIsHeader(parserChainSource, currentLine, lineNumber, headersToBeFound);
-                                        // if this is the first line after the header, check if required headers were found
-                                        if (!inHeader && headersToBeFound != null && !headersToBeFound.isEmpty()) {
-                                            throw new IllegalArgumentException(String.format(FILE_MISSING_REQUIRED_HEADERS_ERROR, String.join(", ", headersToBeFound)));
-                                        } else if (inHeader){
-                                            headerLineCount++;
-                                        }
+                                        inHeader = processHeader(parserChainSource, currentLine, lineNumber, headersToBeFound);
                                     }
                                     if (!inHeader) {
                                         MessageToParse messageToParse = MessageToParse.builder()
@@ -134,6 +128,8 @@ public class MessageFileParser implements ParserInterface {
                                                 .line(lineNumber)
                                                 .build();
                                         singleMessageParser.parse(parserChainSource, messageToParse, output);
+                                    } else {
+                                        headerLinesRead++;
                                     }
                                 }
                                 if (inHeader && parserChainSource.usesHeaderLineCount()) {
@@ -147,7 +143,7 @@ public class MessageFileParser implements ParserInterface {
                             messageFileStatusExtension.put("successMessageCount", String.valueOf(output.getSuccessfulMessages()));
                             messageFileStatusExtension.put("errorMessageCount", String.valueOf(output.getErrorMessages()));
                             if (parserChainSource.hasHeader()) {
-                                messageFileStatusExtension.put("headerLines", String.valueOf(headerLineCount));
+                                messageFileStatusExtension.put("headerLines", String.valueOf(headerLinesRead));
                             }
                             output.outputMessage(Message.builder().
                                     ts(Instant.now().toEpochMilli()).
@@ -180,7 +176,7 @@ public class MessageFileParser implements ParserInterface {
      * @param headersToBeFound The required headers that have not been found yet.
      * @return true if the line is a header and should be skipped or false if the header should be parsed
      */
-    private boolean checkIfLineIsHeader(ParserChainSource parserChainSource, String lineText, int lineCount, Set<String> headersToBeFound) {
+    private boolean processHeader(ParserChainSource parserChainSource, String lineText, int lineCount, List<String> headersToBeFound) {
         boolean inHeader = true;
 
         if (parserChainSource.usesHeaderLineCount() && lineCount > parserChainSource.getHeaderLineCount()) {
@@ -191,6 +187,11 @@ public class MessageFileParser implements ParserInterface {
 
         if (inHeader && headersToBeFound != null && !headersToBeFound.isEmpty()) {
             headersToBeFound.remove(lineText);
+        }
+
+        // if this is the first line after the header, check if required headers were found
+        if (!inHeader && headersToBeFound != null && !headersToBeFound.isEmpty()) {
+            throw new IllegalArgumentException(String.format(FILE_MISSING_REQUIRED_HEADERS_ERROR, String.join(", ", headersToBeFound)));
         }
 
         return inHeader;

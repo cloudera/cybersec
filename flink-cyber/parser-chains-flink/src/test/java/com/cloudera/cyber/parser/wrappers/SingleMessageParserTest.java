@@ -41,7 +41,7 @@ public class SingleMessageParserTest {
 
         final String testSource = "test_source";
         // Parser chain source references a chain that doesn't exist
-        testParser.parse(new ParserChainSource("DOES_NOT_EXIST", testSource), messageToParse, testParserOutput);
+        testParser.parse(new ParserChainSource("DOES_NOT_EXIST", testSource, null), messageToParse, testParserOutput);
         SingleMessageParserTestUtil.verifyErrorParserOutput(testParserOutput, messageToParse, testSource, "No parser chain defined for message");
     }
 
@@ -50,7 +50,7 @@ public class SingleMessageParserTest {
         SingleMessageParser testParser = SingleMessageParserTestUtil.createParser("metron/parser_chain.json", null);
         MessageToParse messageToParse = SingleMessageParserTestUtil.createMessageToParse(ParserTestUtils.readConfigFile("metron/samples/oraclelogon_filtered.txt"));
         ParserTestUtils.TestParserOutput testParserOutput = new ParserTestUtils.TestParserOutput();
-        testParser.parse(new ParserChainSource("oraclelogon", "oraclelogon"), messageToParse, testParserOutput);
+        testParser.parse(new ParserChainSource("oraclelogon", "oraclelogon", null), messageToParse, testParserOutput);
         // no output message because the metron parser is configured to filter out messages
         assertThat(testParserOutput.getOutput().isEmpty()).isTrue();
     }
@@ -76,7 +76,7 @@ public class SingleMessageParserTest {
         ParserTestUtils.TestParserOutput testParserOutput = new ParserTestUtils.TestParserOutput();
 
         final String testSource = "test_source";
-        testParser.parse(new ParserChainSource("simple_message", testSource), messageToParse, testParserOutput);
+        testParser.parse(new ParserChainSource("simple_message", testSource, null), messageToParse, testParserOutput);
 
         Map<String, String> extensionsFromGrok = SingleMessageParserTestUtil.createExtensions(elapsed, ipSrcAddr);
         SingleMessageParserTestUtil.verifyErrorParserOutput(testParserOutput, messageToParse, extensionsFromGrok, testSource, "Timestamp is not in epoch milliseconds or seconds. For input string: \"ABCD\"");
@@ -92,7 +92,7 @@ public class SingleMessageParserTest {
         ParserTestUtils.TestParserOutput testParserOutput = new ParserTestUtils.TestParserOutput();
 
         final String testSource = "test_source";
-        testParser.parse(new ParserChainSource("simple_message", testSource), messageToParse, testParserOutput);
+        testParser.parse(new ParserChainSource("simple_message", testSource, null), messageToParse, testParserOutput);
         SingleMessageParserTestUtil.verifyErrorParserOutput(testParserOutput, messageToParse, testSource, SingleMessageParser.NO_TIMESTAMP_FIELD_MESSAGE);
     }
 
@@ -116,7 +116,7 @@ public class SingleMessageParserTest {
         ParserTestUtils.TestParserOutput testParserOutput = new ParserTestUtils.TestParserOutput();
 
         final String testSource = "test_source";
-        testParser.parse(new ParserChainSource("simple_message", testSource), messageToParse, testParserOutput);
+        testParser.parse(new ParserChainSource("simple_message", testSource, null), messageToParse, testParserOutput);
         SingleMessageParserTestUtil.verifySuccessfulParserOutput(testParserOutput, messageToParse, expectedOutputTimestamp, testSource, expectedExtensions, signMessage(messageToParse, signKey));
     }
 
