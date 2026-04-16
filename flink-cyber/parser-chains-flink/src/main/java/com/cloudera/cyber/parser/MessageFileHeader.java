@@ -15,7 +15,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MessageFileHeader implements Serializable {
-    public static final String EMPTY_HEADER_PREFIX_CONFIG = "MessageFileHeader has at least one null or empty headerPrefixes when using prefixes to remove headers.";
+    public static final String EMPTY_HEADER_PREFIX_CONFIG = "MessageFileHeader has at least one headerPrefix that is null or empty when using prefixes to remove headers.";
+    public static final String EMPTY_HEADER_REQUIRED_HEADERS_CONFIG = "MessageFileHeader has at least one requiredHeader that is null or empty.";
     public static final String EMPTY_HEADER_REQUIRED_HEADERS_CONFIG = "MessageFileHeader has at least one null or empty requiredHeader in requiredHeaders when header is enabled.";
     public static final String HEADER_LINE_COUNT_AND_PREFIXES_CONFLICT = "Only one of headerLineCount or headerPrefixes can be specified, not both.";
     public static final String HEADER_LINE_COUNT_OR_PREFIXES_REQUIRED = "Either headerLineCount or headerPrefixes must be specified.";
