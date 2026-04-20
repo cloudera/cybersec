@@ -49,7 +49,7 @@ export class LiveViewService {
 
     // Standard text-based input
     const sampleDataRequest: SampleDataRequestModel = {
-      ...sampleData,
+      type: sampleData.type,
       source: sampleData.source.trimEnd().split('\n')
     };
     return this._http.post<{ results: EntryParsingResultModel[] }>(
