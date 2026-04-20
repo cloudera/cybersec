@@ -15,7 +15,7 @@ import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 
 import {EntryParsingResultModel, LiveViewRequestModel} from '../models/live-view.model';
-import {SampleDataModel, SampleDataRequestModel} from '../models/sample-data.model';
+import {SampleDataModel, SampleDataRequestModel, SampleDataType} from '../models/sample-data.model';
 import {getHttpParams} from "../../../../shared/service.utils";
 
 @Injectable({
@@ -34,6 +34,20 @@ export class LiveViewService {
     results: EntryParsingResultModel[]
   }> {
     const httpParams: HttpParams = getHttpParams(pipeline);
+
+    // Handle Avro binary data differently
+    if (sampleData.type === SampleDataType.AVRO && sampleData.sourceBinary) {
+      const sampleDataRequest: SampleDataRequestModel = {
+        type: sampleData.type,
+        source: [],
+        sourceBinary: this.uint8ArrayToMatrix(sampleData.sourceBinary)
+      };
+      return this._http.post<{ results: EntryParsingResultModel[] }>(
+        LiveViewService.BASE_URL,
+        {sampleData: sampleDataRequest, chainConfig} as LiveViewRequestModel, {params: httpParams});
+    }
+
+    // Standard text-based input
     const sampleDataRequest: SampleDataRequestModel = {
       ...sampleData,
       source: sampleData.source.trimEnd().split('\n')
@@ -41,5 +55,18 @@ export class LiveViewService {
     return this._http.post<{ results: EntryParsingResultModel[] }>(
       LiveViewService.BASE_URL,
       {sampleData: sampleDataRequest, chainConfig} as LiveViewRequestModel, {params: httpParams});
+  }
+
+  /**
+   * Convert Uint8Array to number matrix for JSON serialization.
+   * JSON doesn't support Uint8Array directly, so we convert to number[][]
+   */
+  private uint8ArrayToMatrix(uint8Array: Uint8Array): number[][] {
+    const arr: number[] = [];
+    for (let i = 0; i < uint8Array.length; i++) {
+      arr.push(uint8Array[i]);
+    }
+    // Wrap in array to represent a list of binary records (single record for now)
+    return [arr];
   }
 }

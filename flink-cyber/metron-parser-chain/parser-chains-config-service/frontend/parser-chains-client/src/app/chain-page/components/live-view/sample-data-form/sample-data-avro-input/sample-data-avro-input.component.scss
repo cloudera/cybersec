@@ -1,0 +1,54 @@
+/*
+ * Copyright 2020 - 2023 Cloudera. All Rights Reserved.
+ *
+ * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied. Refer to the License for the specific permissions and
+ * limitations governing your use of the file.
+ */
+
+.upload-btn-label {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 4px 12px;
+  background-color: #1890ff;
+  color: white;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 14px;
+
+  &:hover {
+    background-color: #40a9ff;
+  }
+
+  i {
+    margin-right: 4px;
+  }
+}
+
+.upload-btn {
+  display: none;
+}
+
+.avro-display-textarea {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  background-color: #f5f5f5;
+  color: #333;
+
+  &:focus {
+    background-color: #f5f5f5;
+    border-color: #d9d9d9;
+  }
+
+  &[readonly] {
+    background-color: #f5f5f5;
+  }
+}
+
+nz-form-item {
+  margin-bottom: 16px;
+}

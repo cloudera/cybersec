@@ -1,0 +1,47 @@
+<!--
+  ~ Copyright 2020 - 2023 Cloudera. All Rights Reserved.
+  ~
+  ~ This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
+  ~ except in compliance with the License. You may obtain a copy of the License at
+  ~ http://www.apache.org/licenses/LICENSE-2.0.
+  ~
+  ~ This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+  ~ either express or implied. Refer to the License for the specific permissions and
+  ~ limitations governing your use of the file.
+  -->
+
+<form nz-form>
+  <nz-form-item>
+    <label
+      class="upload-btn-label"
+      nz-button
+      for="uploadAvro"
+    ><i nz-icon nzType="upload" nzTheme="outline"></i>Upload .avro File
+    </label>
+    <input
+      data-qe-id="upload-avro-input"
+      class="upload-btn"
+      nz-input
+      id="uploadAvro"
+      name="uploadAvro"
+      type="file"
+      accept=".avro"
+      (change)="uploadToForm($event)"
+    />
+  </nz-form-item>
+  <nz-form-item>
+    <nz-form-label nzFor="avroDisplay">Avro Data (read-only)</nz-form-label>
+    <nz-form-control>
+      <textarea
+        data-qe-id="avro-display"
+        nz-input
+        placeholder="Upload an .avro file to display its contents..."
+        [value]="avroDisplayJson"
+        [nzAutosize]="{ minRows: 10, maxRows: 44 }"
+        [readonly]="true"
+        name="avroDisplay"
+        class="avro-display-textarea"
+      ></textarea>
+    </nz-form-control>
+  </nz-form-item>
+</form>

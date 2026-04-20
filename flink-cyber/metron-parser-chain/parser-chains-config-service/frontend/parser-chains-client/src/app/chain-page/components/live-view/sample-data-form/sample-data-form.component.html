@@ -24,6 +24,12 @@
                 (sampleDataForceChange)="sampleDataForceChange.emit($event)">
         </app-sample-data-text-folder-input>
     </nz-tab>
+    <nz-tab nzTitle="Avro Input">
+        <app-sample-data-avro-input
+                [sampleData]="sampleData"
+                (sampleDataChange)="sampleDataChange.emit($event)">
+        </app-sample-data-avro-input>
+    </nz-tab>
     <nz-tab nzTitle="Kafka Stream" nzDisabled>
         text
     </nz-tab>

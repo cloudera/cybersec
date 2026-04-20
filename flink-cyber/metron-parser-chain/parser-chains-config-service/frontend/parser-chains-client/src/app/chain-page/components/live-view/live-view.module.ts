@@ -39,6 +39,7 @@ import {NzResultModule} from 'ng-zorro-antd/result';
 import {NzCheckboxModule} from "ng-zorro-antd/checkbox";
 import {NzIconModule} from "ng-zorro-antd/icon";
 import {SampleDataTextInputComponent} from './sample-data-form/sample-data-text-input/sample-data-text-input.component';
+import {SampleDataAvroInputComponent} from './sample-data-form/sample-data-avro-input/sample-data-avro-input.component';
 import {
   SampleDataTextFolderInputComponent
 } from './sample-data-form/sample-data-text-folder-input/sample-data-text-folder-input.component';
@@ -63,6 +64,7 @@ import {DiffPopupModule} from "./diff-popup/diff-popup.module";
     StackTraceComponent,
     SampleDataTextInputComponent,
     SampleDataTextFolderInputComponent,
+    SampleDataAvroInputComponent,
     TextDiffViewComponent,
     DiffPopupComponent,
   ],

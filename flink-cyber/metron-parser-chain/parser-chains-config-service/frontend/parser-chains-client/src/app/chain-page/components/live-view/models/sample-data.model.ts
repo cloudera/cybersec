@@ -13,7 +13,8 @@
 export enum SampleDataType {
     MANUAL = 'manual',
     KAFKA = 'kafka',
-    HDFS = 'hdfs'
+    HDFS = 'hdfs',
+    AVRO = 'avro'
 }
 
 export enum SampleTestStatus {
@@ -34,9 +35,11 @@ export interface SampleDataInternalModel {
 export interface SampleDataModel {
     type: SampleDataType;
     source: string;
+    sourceBinary?: Uint8Array;
 }
 
 export interface SampleDataRequestModel {
     type: SampleDataType;
     source: string[];
+    sourceBinary?: number[][];
 }

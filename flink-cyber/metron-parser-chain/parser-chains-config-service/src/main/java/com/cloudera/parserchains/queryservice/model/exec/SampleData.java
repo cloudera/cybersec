@@ -25,7 +25,7 @@ import java.util.List;
 public class SampleData {
 
     /**
-     * The type of sample data, which by design could be "kafka", "hdfs" or "manual".  In
+     * The type of sample data, which by design could be "kafka", "hdfs", "avro" or "manual".  In
      * reality, this will only every be manual as Kafka and HDFS are not currently supported.
      */
     private String type;
@@ -35,8 +35,15 @@ public class SampleData {
      */
     private List<String> source;
 
+    /**
+     * Contains binary sample data (e.g., Avro files) that should be parsed by the parser chain.
+     * Used when type is "avro".
+     */
+    private List<byte[]> sourceBinary;
+
     public SampleData() {
         this.source = new ArrayList<>();
+        this.sourceBinary = new ArrayList<>();
     }
 
     public String getType() {
@@ -58,6 +65,19 @@ public class SampleData {
 
     public SampleData addSource(String toParse) {
         this.source.add(toParse);
+        return this;
+    }
+
+    public List<byte[]> getSourceBinary() {
+        return sourceBinary;
+    }
+
+    public void setSourceBinary(List<byte[]> sourceBinary) {
+        this.sourceBinary = sourceBinary;
+    }
+
+    public SampleData addSourceBinary(byte[] toParse) {
+        this.sourceBinary.add(toParse);
         return this;
     }
 }

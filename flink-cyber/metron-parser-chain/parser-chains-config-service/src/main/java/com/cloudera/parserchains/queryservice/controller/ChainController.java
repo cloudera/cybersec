@@ -269,11 +269,24 @@ public class ChainController {
         ParserChainSchema chain = testRun.getParserChainSchema();
         chain.setBasePath(configPath);
         ChainTestResponse results = new ChainTestResponse();
-        testRun.getSampleData().getSource()
-                .stream()
-                .limit(MAX_SAMPLES_PER_TEST)
-                .map(sample -> doTest(chain, sample))
-                .forEach(results::addResult);
+
+        // Handle Avro binary data
+        if ("avro".equalsIgnoreCase(testRun.getSampleData().getType())
+                && testRun.getSampleData().getSourceBinary() != null
+                && !testRun.getSampleData().getSourceBinary().isEmpty()) {
+            testRun.getSampleData().getSourceBinary()
+                    .stream()
+                    .limit(MAX_SAMPLES_PER_TEST)
+                    .map(binaryData -> doTestAvro(chain, binaryData))
+                    .forEach(results::addResult);
+        } else {
+            // Standard text-based input
+            testRun.getSampleData().getSource()
+                    .stream()
+                    .limit(MAX_SAMPLES_PER_TEST)
+                    .map(sample -> doTest(chain, sample))
+                    .forEach(results::addResult);
+        }
         return ResponseEntity.ok(results);
     }
 
@@ -294,6 +307,42 @@ public class ChainController {
             log.info("The parser chain is invalid as constructed.", e);
             ResultLog log = ResultLogBuilder.error()
                     .parserId(e.getBadParser().getLabel())
+                    .exception(e)
+                    .build();
+            result = new ParserResult()
+                    .setLog(log);
+        }
+        return result;
+    }
+
+    /**
+     * Parse Avro binary data using a parser chain.
+     *
+     * @param schema      Defines the parser chain that needs to be constructed.
+     * @param binaryData The binary (Avro) data to parse.
+     * @return The result of parsing the binary data.
+     */
+    private ParserResult doTestAvro(ParserChainSchema schema, byte[] binaryData) {
+        ParserResult result;
+        try {
+            // Convert Avro binary data to string representation for the parser
+            // The parser chain expects string input
+            String avroString = new String(binaryData, "ISO-8859-1");
+            ChainLink chain = chainBuilderService.build(schema);
+            result = chainExecutorService.execute(chain, avroString);
+
+        } catch (InvalidParserException e) {
+            log.info("The parser chain is invalid as constructed.", e);
+            ResultLog log = ResultLogBuilder.error()
+                    .parserId(e.getBadParser().getLabel())
+                    .exception(e)
+                    .build();
+            result = new ParserResult()
+                    .setLog(log);
+        } catch (Exception e) {
+            log.info("Error processing Avro binary data.", e);
+            ResultLog log = ResultLogBuilder.error()
+                    .parserId("avro")
                     .exception(e)
                     .build();
             result = new ParserResult()
