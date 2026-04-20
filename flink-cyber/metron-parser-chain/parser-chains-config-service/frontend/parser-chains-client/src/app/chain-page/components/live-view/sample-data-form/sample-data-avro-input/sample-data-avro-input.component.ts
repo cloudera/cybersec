@@ -11,7 +11,7 @@
  */
 
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {SampleDataModel} from "../../models/sample-data.model";
+import {SampleDataModel, SampleDataType} from "../../models/sample-data.model";
 import {NzMessageService} from "ng-zorro-antd/message";
 
 @Component({
@@ -56,10 +56,10 @@ export class SampleDataAvroInputComponent {
       const jsonDisplay = this.parseAvroToJson(this.avroBinaryData);
       this.avroDisplayJson = jsonDisplay;
 
-      // Emit the sample data with empty source (display is in JSON format)
-      // The binary data will be sent separately for live view
+      // Emit the sample data with AVRO type
+      // The binary data will be sent to the live view
       this.sampleDataChange.emit({
-        type: this.sampleData.type,
+        type: SampleDataType.AVRO,
         source: this.avroDisplayJson,
         sourceBinary: this.avroBinaryData
       });
