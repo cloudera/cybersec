@@ -36,9 +36,9 @@
         data-qe-id="sample-input"
         nz-input
         placeholder="Add sample data here..."
-        [value]="sampleData.source"
+        [(ngModel)]="sampleData.source"
         [nzAutosize]="{ minRows: 10, maxRows: 44 }"
-        (input)="sampleData.source=onApply($event)"
+        (ngModelChange)="onApply($event)"
         name="sampleDataInput"
       ></textarea>
     </nz-form-control>

@@ -15,13 +15,11 @@ export class SampleDataTextInputComponent {
 
   constructor(private _messageService: NzMessageService) {}
 
-  onApply(event: Event) {
-    const source = (event.target as HTMLInputElement).value;
+  onApply(source: string) {
     this.sampleDataChange.emit({
       type: this.sampleData.type,
       source
     });
-    return source;
   }
 
   uploadToForm(e) {
@@ -33,12 +31,15 @@ export class SampleDataTextInputComponent {
         return;
       }
       const fileContent = convertToString(reader.result);
+      this.sampleData.source = fileContent;
       this.sampleDataChange.emit({
         type: this.sampleData.type,
         source: fileContent
       });
     };
     reader.readAsText(file);
+    // Clear the input so the same file can be selected again
+    e.target.value = '';
   }
 
   private _checkFileType(file: File) {
