@@ -32,8 +32,11 @@ export class SampleDataTextInputComponent {
       if (fileTypeError) {
         return;
       }
-      this.sampleData.source = convertToString(reader.result);
-      this.sampleDataChange.emit(this.sampleData);
+      const fileContent = convertToString(reader.result);
+      this.sampleDataChange.emit({
+        type: this.sampleData.type,
+        source: fileContent
+      });
     };
     reader.readAsText(file);
   }
