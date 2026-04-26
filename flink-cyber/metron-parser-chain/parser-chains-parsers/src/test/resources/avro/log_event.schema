@@ -1,0 +1,57 @@
+{
+  "type": "record",
+  "name": "LogEvent",
+  "namespace": "com.cloudera.logprocessing",
+  "doc": "Schema representing a processed log event, including raw data, parsed variables, tags, and source information.",
+  "fields": [
+    {
+      "name": "rawLog",
+      "type": "string",
+      "doc": "The original, unparsed log message (required field)."
+    },
+    {
+      "name": "source",
+      "doc": "Embedded record containing log source information (Embedded Record).",
+      "type": {
+        "type": "record",
+        "name": "LogSource",
+        "doc": "Details about the source system that generated the log.",
+        "fields": [
+          {
+            "name": "hostName",
+            "type": "string",
+            "doc": "The hostname or IP address of the source system."
+          },
+          {
+            "name": "osVersion",
+            "type": ["null", "string"],
+            "default": null,
+            "doc": "Optional OS version of the source system."
+          }
+        ]
+      }
+    },
+    {
+      "name": "templateTags",
+      "doc": "Array of tags associated with the log template, such as severity or category (Array).",
+      "type": {
+        "type": "array",
+        "items": "string"
+      }
+    },
+    {
+      "name": "parsedVariables",
+      "doc": "Map of variable names (string keys) to their parsed values (Map).",
+      "type": {
+        "type": "map",
+        "values": ["null", "string", "long"]
+      }
+    },
+    {
+      "name": "eventStatus",
+      "doc": "The processing status of the event (Union). Can be a numeric code, a descriptive string, or null if unset.",
+      "type": ["null", "int", "string"],
+      "default": null
+    }
+  ]
+}
