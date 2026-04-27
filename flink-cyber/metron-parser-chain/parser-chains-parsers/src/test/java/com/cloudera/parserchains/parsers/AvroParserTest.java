@@ -12,7 +12,10 @@
 
 package com.cloudera.parserchains.parsers;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import com.cloudera.cyber.parser.MessageToParse;
@@ -65,6 +68,7 @@ class AvroParserTest {
                 entry(FieldName.of("number"), StringFieldValue.of("7")),
                 entry(FieldName.of("innerRecord"), StringFieldValue.of("{\"age\": 13}")),
                 entry(FieldName.of("tes3"), StringFieldValue.of("{td3=1}")));
+        assertFalse(parsedMessage.getError().isPresent());
     }
 
     @Test
@@ -89,6 +93,7 @@ class AvroParserTest {
                 entry(FieldName.of("number"), StringFieldValue.of("22")),
                 entry(FieldName.of("innerRecord"), StringFieldValue.of("{\"age\": 42}")),
                 entry(FieldName.of("tes3"), StringFieldValue.of("{key11=11, key22=22}")));
+        assertFalse(parsedMessage.getError().isPresent());
     }
 
     @Test
@@ -97,7 +102,7 @@ class AvroParserTest {
         AvroParser parser = new AvroParser();
 
         assertThatCode(() -> parser.schemaPath(schemaPath).inputField(INPUT_FIELD).normalizer("UNKNOWN")).
-                isInstanceOf(IllegalArgumentException.class).hasMessage("No enum constant com.cloudera.parserchains.parsers.AvroParser.Normalizers.UNKNOWN");
+                isInstanceOf(IllegalArgumentException.class).hasMessage("Invalid normalizer: 'UNKNOWN'. Valid values are: COLLAPSE_NESTED, DROP_NESTED, UNFOLD_NESTED");
     }
 
     @Test
@@ -134,6 +139,57 @@ class AvroParserTest {
     @Test
     public void testCollapsingNestedStructures() throws IOException {
         testNestedStructures(AvroParser.Normalizers.COLLAPSE_NESTED.name());
+    }
+
+    @Test
+    public void testCollapsingNestedStructuresWithNulls() throws IOException {
+        AvroParser parser = new AvroParser();
+        String schemaPath = getFileFromResource(NESTED_SCHEMA).getAbsolutePath();
+
+
+        parser.inputField(INPUT_FIELD).normalizer(AvroParser.Normalizers.UNFOLD_NESTED.name()).schemaPath(schemaPath);
+
+        Message parsedMessage = parser.parse(createStructuredMessageWithNulls());
+
+        assertFalse(parsedMessage.getError().isPresent());
+        assertThat(parsedMessage.getFields()).contains(
+                entry(FieldName.of("source.osVersion"), StringFieldValue.of("null")),
+                entry(FieldName.of("source.hostName"), StringFieldValue.of("web-gateway-03")),
+                entry(FieldName.of("parsedVariables.referrer"), StringFieldValue.of("null")),
+                entry(FieldName.of("parsedVariables.http_method"), StringFieldValue.of("GET")),
+                entry(FieldName.of("parsedVariables.request_size"), StringFieldValue.of("1024")),
+                entry(FieldName.of("templateTags[0]"), StringFieldValue.of("WEB")),
+                entry(FieldName.of("templateTags[1]"), StringFieldValue.of("INFO")),
+                entry(FieldName.of("rawLog"), StringFieldValue.of("2026-04-25T15:05:00 GET /index.html 200")),
+                entry(FieldName.of("eventStatus"), StringFieldValue.of("null"))
+        );
+    }
+
+    private Message createStructuredMessageWithNulls() throws IOException {
+        Schema schema = new Schema.Parser().parse(getFileFromResource(NESTED_SCHEMA));
+        // Nested Record: LogSource
+        GenericRecord source = new GenericData.Record(schema.getField("source").schema());
+        source.put("hostName", "web-gateway-03");
+        source.put("osVersion", null); // Explicitly setting optional field to null
+
+        // Map: parsedVariables
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("http_method", "GET");
+        variables.put("request_size", 1024L);
+        variables.put("referrer", null); // Using the 'null' type in the map value union
+
+        // Array: templateTags
+        List<String> tags = Arrays.asList("WEB", "INFO");
+
+        // Main Record: LogEvent
+        GenericRecord record = new GenericData.Record(schema);
+        record.put("rawLog", "2026-04-25T15:05:00 GET /index.html 200");
+        record.put("source", source);
+        record.put("templateTags", tags);
+        record.put("parsedVariables", variables);
+        record.put("eventStatus", null);
+
+        return serializeAvroToMessage(record, schema);
     }
 
     private void testNestedStructures(String normalizerName) throws IOException {

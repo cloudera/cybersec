@@ -45,7 +45,7 @@ import static java.lang.String.format;
 public class AvroParser implements Parser {
 
     public static final String DEFAULT_AVRO_SCHEMA = "netflow.schema";
-    // default differs from json parser - preserve backward compatibility with existing parsers
+    // default differs from JSON parser - preserve backward compatibility with existing parsers
     private static final String DEFAULT_NORMALIZER = "COLLAPSE_NESTED";
 
     private FieldName inputField;
@@ -77,10 +77,10 @@ public class AvroParser implements Parser {
     @Configurable(
             key = "schemaPath",
             label = "Schema Path",
-            description = "Path to schema of avro file. Default value: '" + DEFAULT_AVRO_SCHEMA + "'",
             defaultValue = DEFAULT_AVRO_SCHEMA,
             required = true)
-    public AvroParser schemaPath(@Parameter(key = "schemaPath", label = "Schema path", isPath = true) String pathToSchema) throws IOException {
+    public AvroParser schemaPath(@Parameter(key = "schemaPath", label = "Schema path",
+            description = "Path to schema of avro file. Default value: '" + DEFAULT_AVRO_SCHEMA + "'", isPath = true) String pathToSchema) throws IOException {
         FileSystem fileSystem = new Path(pathToSchema).getFileSystem();
         loadSchema(pathToSchema, fileSystem);
         return this;
@@ -89,7 +89,8 @@ public class AvroParser implements Parser {
     private void loadSchema(String pathToSchema, FileSystem fileSystem) throws IOException {
         try (FSDataInputStream fsDataInputStream = fileSystem.open(new Path(pathToSchema))) {
             this.schema = new Schema.Parser().parse(fsDataInputStream);
-            this.schemaHasNestedStructure = this.schema.getFields().stream().map(Schema.Field::schema).
+            this.schemaHasNestedStructure = this.schema.getFields().stream().
+                    map(Schema.Field::schema).
                     anyMatch(AvroParser::isComplex);
             log.info("Successfully loaded schema {} schemaHasNestedStructure {}", pathToSchema, schemaHasNestedStructure);
         } catch (IOException ioe) {
@@ -124,7 +125,16 @@ public class AvroParser implements Parser {
     )
     public AvroParser normalizer(String normalizer) {
         if(StringUtils.isNotBlank(normalizer)) {
-            this.normalizer = AvroParser.Normalizers.valueOf(normalizer);
+            try {
+                this.normalizer = AvroParser.Normalizers.valueOf(normalizer);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(
+                        "Invalid normalizer: '" + normalizer + "'. Valid values are: " +
+                                String.join(", ", Arrays.stream(Normalizers.values())
+                                        .map(Enum::name)
+                                        .toArray(String[]::new)),
+                        e);
+            }
         }
         return this;
     }
@@ -150,7 +160,7 @@ public class AvroParser implements Parser {
             BinaryDecoder binaryDecoder = DecoderFactory.get().binaryDecoder(byteArrayInputStream, null);
             GenericRecord genericRecord = genericDatumReader.read(null, binaryDecoder);
             if (!schemaHasNestedStructure) {
-                // use collapse because the record doesn't need the more complex logic because there is nothing to skip or unfold.
+                // use collapse to avoid overhead of drop and unfold where there is no structure
                Normalizers.COLLAPSE_NESTED.normalize(genericRecord, output);
             } else {
                 // use the normalizer selected in the UI
@@ -172,6 +182,12 @@ public class AvroParser implements Parser {
 
     /**
      * Defines available {@link AvroParser.Normalizer} types.
+     *
+     * <ul>
+     * <li>COLLAPSE_NESTED - Best for preserving all data as string representations. Maintains backward compatibility.</li>
+     * <li>DROP_NESTED - Use when nested data is irrelevant, and you only need top-level fields. Reduces output size.</li>
+     * <li>UNFOLD_NESTED - Use when you need to query/filter on nested field values. Creates flat structure with dot notation.</li>
+     * </ul>
      */
     public enum Normalizers implements AvroParser.Normalizer {
         COLLAPSE_NESTED(new CollapseNestedStructure()),
@@ -223,7 +239,9 @@ public class AvroParser implements Parser {
     private static class UnfoldNestedStructure implements AvroParser.Normalizer {
 
         private void unfold(Object value, Deque<String> path, Message.Builder output) {
-            if (value instanceof GenericRecord record) {
+            if (value == null) {
+                output.addField(getFullyQualifiedFieldName(path), "null");
+            } else if (value instanceof GenericRecord record) {
                 record.getSchema().getFields().forEach(field -> {
                     path.addLast(field.name());
                     unfold(record.get(field.name()), path, output);
@@ -251,7 +269,7 @@ public class AvroParser implements Parser {
         }
 
         private String getFullyQualifiedFieldName(Deque<String> path) {
-            // Remove extra dot in array file - "field.[0]" becomes "field[0]"
+            // Join path segments with dots, then normalize array notation: "field.[0]" -> "field[0]"
             return String.join(".", path).replace(".[", "[");
         }
 
