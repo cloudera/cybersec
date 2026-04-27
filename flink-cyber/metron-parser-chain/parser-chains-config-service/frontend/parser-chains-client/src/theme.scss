@@ -2,7 +2,8 @@
 
 @import "custom-palette";
 
-@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500&display=swap");
+// Use system fonts for airgapped environment support
+// (removed Google Fonts import: @import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500&display=swap"));
 
 // warn, error, success palettes
 $theming-material-components-primary: mat.define-palette($md-cyber-blue-primary);
@@ -18,8 +19,8 @@ $theming-material-components-theme: mat.define-light-theme(
     $theming-material-components-warn
 );
 
-// Define  a custom typography config
-$heading-font-family: "'Work Sans', sans-serif";
+// Define a custom typography config using system fonts
+$heading-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 $typography: mat.define-typography-config(
   $display-4: mat.define-typography-level(112px, $font-family: $heading-font-family),
   $display-3: mat.define-typography-level(56px, $font-family: $heading-font-family),
