@@ -33,7 +33,12 @@ import org.apache.flink.core.fs.Path;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.Map;
+import java.util.Optional;
 
 import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
 import static java.lang.String.format;
@@ -159,12 +164,13 @@ public class AvroParser implements Parser {
             GenericDatumReader<GenericRecord> genericDatumReader = new GenericDatumReader<>(schema);
             BinaryDecoder binaryDecoder = DecoderFactory.get().binaryDecoder(byteArrayInputStream, null);
             GenericRecord genericRecord = genericDatumReader.read(null, binaryDecoder);
-            if (!schemaHasNestedStructure) {
-                // use collapse to avoid overhead of drop and unfold where there is no structure
-               Normalizers.COLLAPSE_NESTED.normalize(genericRecord, output);
-            } else {
-                // use the normalizer selected in the UI
+            if (schemaHasNestedStructure) {
+                // use normalizer defined in the parser config
                 normalizer.normalize(genericRecord, output);
+            } else {
+                // All normalizers produce identical output for flat schemas,
+                // so use COLLAPSE_NESTED to avoid unnecessary overhead.
+                Normalizers.COLLAPSE_NESTED.normalize(genericRecord, output);
             }
         } catch (IOException | AvroRuntimeException exception) {
             output.withError(exception).build();
