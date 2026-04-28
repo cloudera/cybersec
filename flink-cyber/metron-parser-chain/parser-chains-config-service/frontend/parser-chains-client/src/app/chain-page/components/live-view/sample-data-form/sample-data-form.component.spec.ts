@@ -27,6 +27,7 @@ import {SampleDataTextInputComponent} from "./sample-data-text-input/sample-data
 import {
   SampleDataTextFolderInputComponent
 } from "./sample-data-text-folder-input/sample-data-text-folder-input.component";
+import {SampleDataAvroInputComponent} from "./sample-data-avro-input/sample-data-avro-input.component";
 
 
 describe('SampleDataFormComponent', () => {
@@ -45,7 +46,8 @@ describe('SampleDataFormComponent', () => {
       declarations: [
         SampleDataFormComponent,
         MockComponent(SampleDataTextInputComponent),
-        MockComponent(SampleDataTextFolderInputComponent)
+        MockComponent(SampleDataTextFolderInputComponent),
+        MockComponent(SampleDataAvroInputComponent)
       ],
       providers: [ NzMessageService]
     })
