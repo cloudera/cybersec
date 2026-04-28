@@ -270,24 +270,68 @@ public class ChainController {
         chain.setBasePath(configPath);
         ChainTestResponse results = new ChainTestResponse();
 
-        // Handle Avro binary data
-        if ("avro".equalsIgnoreCase(testRun.getSampleData().getType())
+        // Check if first parser is an AvroParser
+        boolean isAvroParser = isFirstParserAvro(chain);
+
+        // Handle binary Avro input if first parser is AvroParser and we have binary data,
+        // OR if sample data type is explicitly "avro"
+        boolean hasBinaryInput = "avro".equalsIgnoreCase(testRun.getSampleData().getType())
                 && testRun.getSampleData().getSourceBinary() != null
-                && !testRun.getSampleData().getSourceBinary().isEmpty()) {
-            testRun.getSampleData().getSourceBinary()
-                    .stream()
-                    .limit(MAX_SAMPLES_PER_TEST)
-                    .map(binaryData -> doTestAvro(chain, binaryData))
-                    .forEach(results::addResult);
+                && !testRun.getSampleData().getSourceBinary().isEmpty();
+
+        if ((isAvroParser && hasBinaryInput) || (!isAvroParser && !hasBinaryInput)) {
+            // Input type matches first parser - use appropriate processing
+            if (hasBinaryInput) {
+                testRun.getSampleData().getSourceBinary()
+                        .stream()
+                        .limit(MAX_SAMPLES_PER_TEST)
+                        .map(binaryData -> doTestAvro(chain, binaryData))
+                        .forEach(results::addResult);
+            } else {
+                // Standard text-based input
+                testRun.getSampleData().getSource()
+                        .stream()
+                        .limit(MAX_SAMPLES_PER_TEST)
+                        .map(sample -> doTest(chain, sample))
+                        .forEach(results::addResult);
+            }
+        } else if (!isAvroParser && hasBinaryInput) {
+            // Have Avro binary but first parser is not AvroParser - treat binary as text
+            log.info("First parser is not AvroParser, treating binary input as text");
+            for (byte[] binaryData : testRun.getSampleData().getSourceBinary()) {
+                if (results.getResults().size() >= MAX_SAMPLES_PER_TEST) {
+                    break;
+                }
+                results.addResult(doTest(chain, new String(binaryData, "ISO-8859-1")));
+            }
         } else {
-            // Standard text-based input
-            testRun.getSampleData().getSource()
-                    .stream()
-                    .limit(MAX_SAMPLES_PER_TEST)
-                    .map(sample -> doTest(chain, sample))
-                    .forEach(results::addResult);
+            // Have text input but first parser expects binary - return empty results
+            // with warning
+            log.warn("Input type mismatch: first parser is {}, but input is text",
+                    isFirstParserTypeName(chain));
         }
         return ResponseEntity.ok(results);
+    }
+
+    /**
+     * Check if the first parser in the chain is an AvroParser.
+     */
+    private boolean isFirstParserAvro(ParserChainSchema chain) {
+        if (chain == null || chain.getParsers() == null || chain.getParsers().isEmpty()) {
+            return false;
+        }
+        String firstParserType = isFirstParserTypeName(chain);
+        return firstParserType != null && firstParserType.toLowerCase().contains("avro");
+    }
+
+    /**
+     * Get the type name of the first parser in the chain.
+     */
+    private String isFirstParserTypeName(ParserChainSchema chain) {
+        if (chain == null || chain.getParsers() == null || chain.getParsers().isEmpty()) {
+            return null;
+        }
+        return chain.getParsers().get(0).getId().toString();
     }
 
     /**
