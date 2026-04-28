@@ -295,6 +295,16 @@ public class ChainController {
                         .map(sample -> doTest(chain, sample))
                         .forEach(results::addResult);
             }
+        } else if (isAvroParser && !hasBinaryInput) {
+            // First parser expects binary input but no avro data provided
+            log.warn("AvroParser requires binary input, but no avro input provided");
+            ParserResult errorResult = new ParserResult();
+            ResultLog errorLog = ResultLogBuilder.error()
+                    .parserId("avro")
+                    .message("No Avro input provided. Please upload an Avro file.")
+                    .build();
+            errorResult.setLog(errorLog);
+            results.addResult(errorResult);
         } else if (!isAvroParser && hasBinaryInput) {
             // Have Avro binary but first parser is not AvroParser - treat binary as text
             log.info("First parser is not AvroParser, treating binary input as text");

@@ -12,7 +12,7 @@
 
 import {AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {select, Store} from '@ngrx/store';
-import {combineLatest, Observable, Subject} from 'rxjs';
+import {combineLatest, Observable, of, Subject} from 'rxjs';
 import {debounceTime, filter, takeUntil} from 'rxjs/operators';
 
 import {InvestigateParserAction} from '../../chain-page.actions';
@@ -76,6 +76,29 @@ export class LiveViewComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit() {
     this._subscribeToRelevantChanges();
+    this._subscribeToChainConfigChanges();
+  }
+
+  /**
+   * Subscribe to chain config changes to auto-detect the first parser type
+   * and select the appropriate input tab.
+   */
+  private _subscribeToChainConfigChanges() {
+    this.chainConfig$.pipe(
+      takeUntil(this._unsubscribe$),
+      filter(chainConfig => chainConfig !== null && chainConfig.parsers !== null)
+    ).subscribe(chainConfig => {
+      const firstParser = chainConfig.parsers[0];
+      if (firstParser && firstParser.type && firstParser.type.toLowerCase().includes('avro')) {
+        // First parser is AvroParser - select Avro Input tab (index 2)
+        this.selectedTabIndex = 2;
+      } else {
+        // Non-AvroParser - ensure Text Input tab is selected (index 0)
+        this.selectedTabIndex = 0;
+      }
+      // Persist the auto-detected tab selection
+      this._persistSelectedTab(this.selectedTabIndex);
+    });
   }
 
   onInvestigateParserAction(parserId) {
