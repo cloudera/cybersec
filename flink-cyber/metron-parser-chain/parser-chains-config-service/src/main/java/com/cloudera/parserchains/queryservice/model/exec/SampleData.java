@@ -12,6 +12,8 @@
 
 package com.cloudera.parserchains.queryservice.model.exec;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,7 @@ import java.util.List;
  *  <p>See also {@link ChainTestRequest} which is the top-level class for the
  *  data model used for the "Live View" feature.
  */
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class SampleData {
 
     /**
