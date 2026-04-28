@@ -29,6 +29,11 @@
   font-display: block;
 }
 
+// Ensure mat-icon elements use the bundled Material Icons font
+.mat-icon {
+  font-family: 'Material Icons' !important;
+}
+
 @include mat.core();
 @import "./theme.scss";
 @import "./custom-component-theme";
