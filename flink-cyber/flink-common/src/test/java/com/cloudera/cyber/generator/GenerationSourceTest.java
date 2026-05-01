@@ -54,7 +54,7 @@ public class GenerationSourceTest {
     }
 
     private void testScenarioFile(String scenarioFilePath, Set<String> expectedKeys) throws IOException {
-        GenerationSource gs = new GenerationSource("file", "topic", null, 1.0, scenarioFilePath, null,  null );
+        GenerationSource gs = new GenerationSource("file", "topic", null, 1.0, scenarioFilePath, null,  GenerationSource.AvroEncodingType.RAW, null );
         gs.readScenarioFile("");
 
         Assertions.assertEquals(scenarioFilePath == null, gs.getScenario() == null);

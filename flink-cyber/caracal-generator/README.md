@@ -17,22 +17,22 @@ generator.eps=20
 ```
 The generator creates the following preconfigured topics:
 
-| Topic | Format | Template | Weight |
-|--------|-------|------------|--------|
-| netflow | JSON Text | [netflow_1](./src/main/resources/Netflow/netflow_sample_1.json) | 2.0 |
-|  | JSON Text | [netflow_2](./src/main/resources/Netflow/netflow_sample_2.json) | 4.0 |
-|  | JSON Text | [netflow_3](./src/main/resources/Netflow/netflow_sample_2.json) | 1.0 |
-| netflow_b |JSON Text |  [netflow_b](./src/main/resources/Netflow/netflow_sample_b.json) | 1.0 |
-|  | JSON Text | [netflow_b_error](./src/main/resources/Netflow/netflow_sample_b_error.json) | 1.0 |
-| dpi_http | JSON Text | [http_1](./src/main/resources/DPI_Logs/Metadata_Module/http/http_sample_1.json) |1.5|
-|  | JSON Text | [http_2](./src/main/resources/DPI_Logs/Metadata_Module/http/http_sample_2.json) |1.0|
-|  | JSON Text | [http_3](./src/main/resources/DPI_Logs/Metadata_Module/http/http_sample_3.json) |1.0|
-|  | JSON Text | [http_4](./src/main/resources/DPI_Logs/Metadata_Module/http/http_sample_4.json) |1.0|
-| dpi_dns | JSON Text | [dns_1](./src/main/resources/DPI_Logs/Metadata_Module/DNS/dns_sample_1.json)|1.0|
-|  | JSON Text | [dns_2](./src/main/resources/DPI_Logs/Metadata_Module/DNS/dns_sample_2.json)|1.0|
-|  | JSON Text | [dns_3](./src/main/resources/DPI_Logs/Metadata_Module/DNS/dns_sample_3.json)|1.0|
-| dpi_smtp |JSON Text | [smtp_1](./src/main/resources/DPI_Logs/Metadata_Module/SMTP/smtp_sample_1.json) |1.0|
-| threats | JSON Text | [threats](./src/main/resources/threats/threatq.json)|1.0|
+| Topic     | Format    | Template                                                                        | Weight |
+|-----------|-----------|---------------------------------------------------------------------------------|--------|
+| netflow   | JSON Text | [netflow_1](./src/main/resources/Netflow/netflow_sample_1.json)                 | 2.0    |
+|           | JSON Text | [netflow_2](./src/main/resources/Netflow/netflow_sample_2.json)                 | 4.0    |
+|           | JSON Text | [netflow_3](./src/main/resources/Netflow/netflow_sample_2.json)                 | 1.0    |
+| netflow_b | JSON Text | [netflow_b](./src/main/resources/Netflow/netflow_sample_b.json)                 | 1.0    |
+|           | JSON Text | [netflow_b_error](./src/main/resources/Netflow/netflow_sample_b_error.json)     | 1.0    |
+| dpi_http  | JSON Text | [http_1](./src/main/resources/DPI_Logs/Metadata_Module/http/http_sample_1.json) | 1.5    |
+|           | JSON Text | [http_2](./src/main/resources/DPI_Logs/Metadata_Module/http/http_sample_2.json) | 1.0    |
+|           | JSON Text | [http_3](./src/main/resources/DPI_Logs/Metadata_Module/http/http_sample_3.json) | 1.0    |
+|           | JSON Text | [http_4](./src/main/resources/DPI_Logs/Metadata_Module/http/http_sample_4.json) | 1.0    |
+| dpi_dns   | JSON Text | [dns_1](./src/main/resources/DPI_Logs/Metadata_Module/DNS/dns_sample_1.json)    | 1.0    |
+|           | JSON Text | [dns_2](./src/main/resources/DPI_Logs/Metadata_Module/DNS/dns_sample_2.json)    | 1.0    |
+|           | JSON Text | [dns_3](./src/main/resources/DPI_Logs/Metadata_Module/DNS/dns_sample_3.json)    | 1.0    |
+| dpi_smtp  | JSON Text | [smtp_1](./src/main/resources/DPI_Logs/Metadata_Module/SMTP/smtp_sample_1.json) | 1.0    |
+| threats   | JSON Text | [threats](./src/main/resources/threats/threatq.json)                            | 1.0    |
 
 The generator selects ip addresses included in the topics output and when creating the threatq threat intelligence entries in the threats topic. 
 
@@ -45,9 +45,9 @@ generator.avro.flag=true
 
 The generator creates the following preconfigured topics:
 
-| Topic | Format | Template | Weight |
-|--------|-------|----------|--------|
-| generator.avro | Avro [netflow](./src/main/resources/Netflow/netflow.schema)|[netflow_b](./src/main/resources/Netflow/netflow_avro_sample1.json) | 1.0 |
+| Topic          | Format                                                      | Template                                                            | Weight |
+|----------------|-------------------------------------------------------------|---------------------------------------------------------------------|--------|
+| generator.avro | Avro [netflow](./src/main/resources/Netflow/netflow.schema) | [netflow_b](./src/main/resources/Netflow/netflow_avro_sample1.json) | 1.0    |
 
 The generator does not create any threatq entries in this configuration. 
 
@@ -112,34 +112,53 @@ The parameters.csv file defines the combinations of values for the params macro.
 ```
 ip_src_addr,url,ip_dst_addr,action,code
 165.1.200.190,www.google.com:443,142.250.191.164,TCP_TUNNEL,200
-165.1.200.191,http://cnn.com/,151.101.3.5,TCP_MISS,301
+165.1.200.191,https://cnn.com/,151.101.3.5,TCP_MISS,301
+```
+
+#### Avro encoding setting
+By default, the generator creates raw Avro messages without any additional headers.  To generate Avro with [single object encoding headers](https://avro.apache.org/docs/1.11.1/specification/), set the outputAvroEncoder to BINARY in the generation sources as shown below: 
+
+```
+{
+  "baseDirectory": "config",
+  "generationSources" :
+    [
+      {
+        "file": "Netflow/netflow_avro_sample1.json",
+        "topic": "netflow_bb",
+        "outputAvroSchemaFile": "Netflow/netflow.schema",
+        "outputAvroEncoder": "BINARY",
+        "weight": 1.0
+      }
+  ]
+}
 ```
 # Error Handling
 Generator detects the following error conditions and will not start:
-1. The generator config file is not legal json.
+1. The generator config file is not legal JSON.
 2. The generator.avro.flag is true and generator.config is specified.
 
 # Configuration Properties
 
 ## General Properties Configuration
 
-| Property Name | Type                                    | Description                                  | Required/Default |Example             |
-|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
-| parallelism | integer | Number of parallel tasks to run.  | default=2 | 2 |
-| checkpoint.interval.ms | integer | Milliseconds between Flink state checkpoints | default=60000 | 10000|
-| schema.registry.url | url | Schema registry rest endpoint url | required | http://myregistryhost:7788/api/v1 |
-| kafka.bootstrap.servers | comma separated list | Kafka bootstrap server names and ports. | required | brokerhost1:9092,brokerhost2:9092 |
-| kafka.*setting name* | Kafka setting | Settings for [Kafka producers](https://kafka.apache.org/23/javadoc/index.html?org/apache/kafka/clients/producer/ProducerConfig.html) or [Kafka consumer](https://kafka.apache.org/23/javadoc/index.html?org/apache/kafka/clients/consumer/KafkaConsumer.html).| set as required by security and performance | |
-| flink.job.name | string | Set the Flink job name as it will appear in the Flink dashboard. | Triaging Job - default | my_pipeline.triage |
+| Property Name           | Type                 | Description                                                                                                                                                                                                                                                    | Required/Default                            | Example                           |
+|-------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|-----------------------------------|
+| parallelism             | integer              | Number of parallel tasks to run.                                                                                                                                                                                                                               | default=2                                   | 2                                 |
+| checkpoint.interval.ms  | integer              | Milliseconds between Flink state checkpoints                                                                                                                                                                                                                   | default=60000                               | 10000                             |
+| schema.registry.url     | url                  | Schema registry rest endpoint url                                                                                                                                                                                                                              | required                                    | http://myregistryhost:7788/api/v1 |
+| kafka.bootstrap.servers | comma separated list | Kafka bootstrap server names and ports.                                                                                                                                                                                                                        | required                                    | brokerhost1:9092,brokerhost2:9092 |
+| kafka.*setting name*    | Kafka setting        | Settings for [Kafka producers](https://kafka.apache.org/23/javadoc/index.html?org/apache/kafka/clients/producer/ProducerConfig.html) or [Kafka consumer](https://kafka.apache.org/23/javadoc/index.html?org/apache/kafka/clients/consumer/KafkaConsumer.html). | set as required by security and performance |                                   |
+| flink.job.name          | string               | Set the Flink job name as it will appear in the Flink dashboard.                                                                                                                                                                                               | Triaging Job - default                      | my_pipeline.triage                |
 
 ## Generation properties
 
-| Property Name | Type                                    | Description                                  | Required/Default |Example             |
-|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
-| generator.count | Integer > 0 | Maximum number of events to generate. | generates events continuously with no upper limite | 100 |
-| generator.eps | Integer > 0 | Events per second to generate for each template. | 0 | 10|
-| generator.metrics | topic name | Write number of events written to each topic per time period to this topic. | generator.metrics | events.generated |
-| generator.config | file name | File specifying which topics to generate and the format of each topic.  | no default - generates preconfigured topics | generator_config.json |
+| Property Name     | Type        | Description                                                                 | Required/Default                                   | Example               |
+|-------------------|-------------|-----------------------------------------------------------------------------|----------------------------------------------------|-----------------------|
+| generator.count   | Integer > 0 | Maximum number of events to generate.                                       | generates events continuously with no upper limite | 100                   |
+| generator.eps     | Integer > 0 | Events per second to generate for each template.                            | 0                                                  | 10                    |
+| generator.metrics | topic name  | Write number of events written to each topic per time period to this topic. | generator.metrics                                  | events.generated      |
+| generator.config  | file name   | File specifying which topics to generate and the format of each topic.      | no default - generates preconfigured topics        | generator_config.json |
 
 # Running the Generator Job
 * Construct a 'generator.properties' file using the configuration options above.
@@ -154,7 +173,7 @@ kafka.bootstrap.servers=cybersec-1.vpc.cloudera.com:9092,cybersec-1.vpc.cloudera
 kafka.acks=all
 kafka.client.id=my-pipeline-triage
 kafka.group.id=my-pipeline-triage
-schema.registry.url=http://cybersec-1.vpc.cloudera.com:7788/api/v1
+schema.registry.url=https://cybersec-1.vpc.cloudera.com:7788/api/v1
 
 # generator
 generator.eps=20

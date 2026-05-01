@@ -28,12 +28,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
+import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaParseException;
 import org.apache.avro.generic.GenericData;
@@ -42,6 +39,10 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.message.BinaryMessageEncoder;
+import org.apache.avro.message.MessageEncoder;
+import org.apache.avro.message.RawMessageEncoder;
+import org.apache.avro.message.SchemaStore;
 import org.apache.commons.io.FileUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.Test;
@@ -57,7 +58,7 @@ class AvroParserTest {
     private static final String SIMPLE_SCHEMA = "/avro/simple.schema";
     private static final String NESTED_SCHEMA = "/avro/log_event.schema";
     private static final String DATA_PATH = "/avro/avro-data.avro";
-    private static final String INPUT_FIELD = "source";
+    private static final String INPUT_FIELD = "avroSource";
 
     @Test
     public void testSchemaFileRead() throws IOException {
@@ -67,12 +68,12 @@ class AvroParserTest {
         parser.schemaPath(schemaPath).inputField(INPUT_FIELD);
         Message parsedMessage = parser.parse(buildMessageFromFile(DATA_PATH));
 
+        assertFalse(parsedMessage.getError().isPresent());
         assertThat(parsedMessage.getFields()).contains(
                 entry(FieldName.of("name"), StringFieldValue.of("Ben")),
                 entry(FieldName.of("number"), StringFieldValue.of("7")),
                 entry(FieldName.of("innerRecord"), StringFieldValue.of("{\"age\": 13}")),
                 entry(FieldName.of("tes3"), StringFieldValue.of("{td3=1}")));
-        assertFalse(parsedMessage.getError().isPresent());
     }
 
     @Test
@@ -92,12 +93,12 @@ class AvroParserTest {
 
         Message parsedMessage = parser.parse(buildMessage());
 
+        assertFalse(parsedMessage.getError().isPresent());
         assertThat(parsedMessage.getFields()).contains(
                 entry(FieldName.of("name"), StringFieldValue.of("Tom")),
                 entry(FieldName.of("number"), StringFieldValue.of("22")),
                 entry(FieldName.of("innerRecord"), StringFieldValue.of("{\"age\": 42}")),
                 entry(FieldName.of("tes3"), StringFieldValue.of("{key11=11, key22=22}")));
-        assertFalse(parsedMessage.getError().isPresent());
     }
 
     @Test
@@ -111,6 +112,12 @@ class AvroParserTest {
 
     @Test
     public void testIgnoreUnfoldingForSimpleRecords() throws IOException {
+        // test with single object and raw encoding
+        testIgnoreUnfoldingForSimpleRecords(true);
+        testIgnoreUnfoldingForSimpleRecords(false);
+    }
+
+    private void testIgnoreUnfoldingForSimpleRecords(boolean singleMessageEncoding) throws IOException {
         String schemaPath = getFileFromResource(SIMPLE_SCHEMA).getAbsolutePath();
         AvroParser parser = new AvroParser();
 
@@ -120,40 +127,53 @@ class AvroParserTest {
                 "email", "jdoe@acme.com",
                 "isActive", true,
                 "age", 42);
-        Message input = serializeMapToAvroMessage(recordFields);
+        Message input = serializeMapToAvroMessage(recordFields, singleMessageEncoding);
         Message parsedMessage = parser.parse(input);
 
 
+        assertFalse(parsedMessage.getError().isPresent());
         for(Map.Entry<String,Object> entry: recordFields.entrySet()) {
             assertThat(parsedMessage.getFields()).contains(entry(FieldName.of(entry.getKey()), StringFieldValue.of(String.valueOf(entry.getValue()))));
         }
-        assertFalse(parsedMessage.getError().isPresent());
     }
 
     @Test
     public void testUnfoldingNestedStructures() throws IOException {
-        testNestedStructures(AvroParser.Normalizers.UNFOLD_NESTED.name());
+        testNestedWithNormalizer(AvroParser.Normalizers.UNFOLD_NESTED.name());
     }
 
     @Test
     public void testDroppingNestedStructures() throws IOException {
-        testNestedStructures(AvroParser.Normalizers.DROP_NESTED.name());
+        testNestedWithNormalizer(AvroParser.Normalizers.DROP_NESTED.name());
+    }
+
+    private void testNestedWithNormalizer(String normalizerName) throws IOException {
+        testFullNestedStructures(normalizerName, true);
+        testFullNestedStructures(normalizerName, false);
+        testMinimalNestedStructures(normalizerName, true);
+        testMinimalNestedStructures(normalizerName, false);
     }
 
     @Test
     public void testCollapsingNestedStructures() throws IOException {
-        testNestedStructures(AvroParser.Normalizers.COLLAPSE_NESTED.name());
+        testNestedWithNormalizer(AvroParser.Normalizers.COLLAPSE_NESTED.name());
     }
 
     @Test
     public void testCollapsingNestedStructuresWithNulls() throws IOException {
+        // test with both single object and raw encoding
+        testCollapsingNestedStructuresWithNulls(true);
+        testCollapsingNestedStructuresWithNulls(false);
+    }
+
+    private void testCollapsingNestedStructuresWithNulls(boolean singleMessageEncoding) throws IOException {
         AvroParser parser = new AvroParser();
         String schemaPath = getFileFromResource(NESTED_SCHEMA).getAbsolutePath();
 
 
         parser.inputField(INPUT_FIELD).normalizer(AvroParser.Normalizers.UNFOLD_NESTED.name()).schemaPath(schemaPath);
 
-        Message parsedMessage = parser.parse(createStructuredMessageWithNulls());
+        Message parsedMessage = parser.parse(createStructuredMessageWithNulls(singleMessageEncoding));
 
         assertFalse(parsedMessage.getError().isPresent());
         assertThat(parsedMessage.getFields()).contains(
@@ -164,12 +184,12 @@ class AvroParserTest {
                 entry(FieldName.of("parsedVariables.request_size"), StringFieldValue.of("1024")),
                 entry(FieldName.of("templateTags[0]"), StringFieldValue.of("WEB")),
                 entry(FieldName.of("templateTags[1]"), StringFieldValue.of("INFO")),
-                entry(FieldName.of("rawLog"), StringFieldValue.of("2026-04-25T15:05:00 GET /index.html 200")),
+                 entry(FieldName.of("rawLog"), StringFieldValue.of("2026-04-25T15:05:00 GET /index.html 200")),
                 entry(FieldName.of("eventStatus"), StringFieldValue.of("null"))
         );
     }
 
-    private Message createStructuredMessageWithNulls() throws IOException {
+    private Message createStructuredMessageWithNulls(boolean singleObjectEncoding) throws IOException {
         Schema schema = new Schema.Parser().parse(getFileFromResource(NESTED_SCHEMA));
         // Nested Record: LogSource
         GenericRecord source = new GenericData.Record(schema.getField("source").schema());
@@ -193,10 +213,61 @@ class AvroParserTest {
         record.put("parsedVariables", variables);
         record.put("eventStatus", null);
 
-        return serializeAvroToMessage(record, schema);
+        return serializeAvroToMessage(record, schema, singleObjectEncoding);
     }
 
-    private void testNestedStructures(String normalizerName) throws IOException {
+    private void testMinimalNestedStructures(String normalizerName, boolean singleObjectEncoding) throws IOException {
+
+        AvroParser parser = new AvroParser();
+        String schemaPath = getFileFromResource(NESTED_SCHEMA).getAbsolutePath();
+
+        parser.inputField(INPUT_FIELD).normalizer(normalizerName).schemaPath(schemaPath);
+
+        Message input = createMinimalRecord(singleObjectEncoding);
+        Message parsedMessage = parser.parse(input);
+
+        assertFalse(parsedMessage.getError().isPresent());
+        assertThat(parsedMessage.getFields()).contains(
+                entry(FieldName.of("rawLog"), StringFieldValue.of("2026-04-25T15:05:00 GET /index.html 200")),
+                entry(FieldName.of("eventStatus"), StringFieldValue.of("null"))
+        );
+        if (normalizerName.equals(AvroParser.Normalizers.UNFOLD_NESTED.name())) {
+            assertThat(parsedMessage.getFields()).contains(
+                    entry(FieldName.of("source.osVersion"), StringFieldValue.of("null")),
+                    entry(FieldName.of("source.hostName"), StringFieldValue.of("web-gateway-03"))
+            );
+        } else if (normalizerName.equals(AvroParser.Normalizers.COLLAPSE_NESTED.name())) {
+            assertThat(parsedMessage.getFields()).contains(
+                    entry(FieldName.of("source"), StringFieldValue.of("{\"hostName\": \"web-gateway-03\", \"osVersion\": null}"))
+            );
+        }
+    }
+
+    private Message createMinimalRecord(boolean singleObjectEncoding) throws IOException {
+        Schema schema = new Schema.Parser().parse(getFileFromResource(NESTED_SCHEMA));
+        // Nested Record: LogSource
+        GenericRecord source = new GenericData.Record(schema.getField("source").schema());
+        source.put("hostName", "web-gateway-03");
+        source.put("osVersion", null); // Explicitly setting optional field to null
+
+        // Map: parsedVariables
+        Map<String, Object> variables = Collections.emptyMap();
+
+        // Array: templateTags
+        List<String> tags = Collections.emptyList();
+
+        // Main Record: LogEvent
+        GenericRecord record = new GenericData.Record(schema);
+        record.put("rawLog", "2026-04-25T15:05:00 GET /index.html 200");
+        record.put("source", source);
+        record.put("templateTags", tags);
+        record.put("parsedVariables", variables);
+        record.put("eventStatus", null);
+
+        return serializeAvroToMessage(record, schema, singleObjectEncoding);
+    }
+
+    private void testFullNestedStructures(String normalizerName, boolean singleObjectEncoding) throws IOException {
 
         AvroParser parser = new AvroParser();
         String schemaPath = getFileFromResource(NESTED_SCHEMA).getAbsolutePath();
@@ -206,7 +277,7 @@ class AvroParserTest {
         parser.inputField(INPUT_FIELD).normalizer(normalizerName).schemaPath(schemaPath);
 
         GenericRecord record = createFullNestedRecord(nestedSchema, parentSchema);
-        Message input = serializeAvroToMessage(record, parentSchema);
+        Message input = serializeAvroToMessage(record, parentSchema, singleObjectEncoding);
         Message parsedMessage = parser.parse(input);
 
         assertFalse(parsedMessage.getError().isPresent());
@@ -267,25 +338,32 @@ class AvroParserTest {
      * @return A byte array containing the Avro binary data.
      * @throws IOException If serialization fails.
      */
-    private static Message serializeAvroToMessage(GenericRecord record, Schema schema) throws IOException {
+    private static Message serializeAvroToMessage(GenericRecord record, Schema schema, boolean singleObjectEncoding) throws IOException {
 
-        GenericDatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>(schema);
+        SchemaStore.Cache schemaStore = new SchemaStore.Cache();
+        schemaStore.addSchema(schema);
+
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            BinaryEncoder encoder = EncoderFactory.get().binaryEncoder(outputStream, null);
+            MessageEncoder<GenericRecord> encoder;
 
-            datumWriter.write(record, encoder);
-            encoder.flush();
+            if (singleObjectEncoding) {
+                encoder = new BinaryMessageEncoder<>(new GenericData(), schema);
+            } else {
+                encoder = new RawMessageEncoder<>(new GenericData(), schema);
+            }
+
+            encoder.encode(record, outputStream);
             return getOriginalMessage(outputStream);
         }
     }
 
-    private static Message serializeMapToAvroMessage(Map<String, Object> fields) throws IOException {
+    private static Message serializeMapToAvroMessage(Map<String, Object> fields, boolean singleObjectEncoding) throws IOException {
         Schema schema = new Schema.Parser().parse(getFileFromResource(AvroParserTest.SIMPLE_SCHEMA));
 
         GenericRecord record = new GenericData.Record(schema);
         fields.forEach(record::put);
 
-        return serializeAvroToMessage(record, schema);
+        return serializeAvroToMessage(record, schema, singleObjectEncoding);
     }
 
     @Test
@@ -319,7 +397,8 @@ class AvroParserTest {
         AvroParser parser = new AvroParser();
         parser.schemaPath(schemaPath).inputField(INPUT_FIELD);
         Message message = parser.parse(buildMessageFromFile(BAD_AVRO_DATA));
-        assertThat(message.getError()).isNotEmpty().get().isInstanceOf(IOException.class);
+        assertThat(message.getError()).
+                hasValueSatisfying(ex -> assertThat(ex).isInstanceOf(AvroRuntimeException.class).hasMessage("Decoding datum failed"));
     }
 
     private static Message buildMessageFromFile(String path) throws IOException {
@@ -356,6 +435,5 @@ class AvroParserTest {
         MessageToParse originalMessage = MessageToParse.builder().originalBytes(out.toByteArray()).line(-1).partition(1).offset(1).build();
         return Message.builder().addField(FieldName.of(INPUT_FIELD), MessageToParseFieldValue.of(originalMessage)).build();
     }
-
 
 }

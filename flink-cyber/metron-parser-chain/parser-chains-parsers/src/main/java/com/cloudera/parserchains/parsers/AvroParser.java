@@ -20,18 +20,18 @@ import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.avro.AvroRuntimeException;
 import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericDatumReader;
+import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.BinaryDecoder;
-import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.message.BinaryMessageDecoder;
+import org.apache.avro.message.MessageDecoder;
+import org.apache.avro.message.RawMessageDecoder;
+import org.apache.avro.message.SchemaStore;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.core.fs.FSDataInputStream;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -56,6 +56,9 @@ public class AvroParser implements Parser {
     private FieldName inputField;
     private Schema schema;
     private boolean schemaHasNestedStructure;
+    private SchemaStore.Cache schemaStore;
+    MessageDecoder.BaseDecoder<GenericRecord> binaryMessageDecoder;
+    MessageDecoder.BaseDecoder<GenericRecord> rawMessageDecoder;
     private Normalizer normalizer;
 
 
@@ -64,6 +67,7 @@ public class AvroParser implements Parser {
         schema = null;
         normalizer = AvroParser.Normalizers.valueOf(DEFAULT_NORMALIZER);
         schemaHasNestedStructure = true;
+        schemaStore = null;
     }
 
     @Configurable(
@@ -97,6 +101,11 @@ public class AvroParser implements Parser {
             this.schemaHasNestedStructure = this.schema.getFields().stream().
                     map(Schema.Field::schema).
                     anyMatch(AvroParser::isComplex);
+            this.schemaStore = new SchemaStore.Cache();
+            this.schemaStore.addSchema(schema);
+            this.binaryMessageDecoder = new BinaryMessageDecoder<>(
+                    GenericData.get(), schema, schemaStore);
+            this.rawMessageDecoder = new RawMessageDecoder<>(GenericData.get(), schema);
             log.info("Successfully loaded schema {} schemaHasNestedStructure {}", pathToSchema, schemaHasNestedStructure);
         } catch (IOException ioe) {
             log.error("Exception while loading schema from file {}", pathToSchema, ioe);
@@ -159,11 +168,7 @@ public class AvroParser implements Parser {
 
     public Message doParse(FieldValue toParse, Message.Builder output) {
         try {
-            byte[] bytes = toParse.toBytes();
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-            GenericDatumReader<GenericRecord> genericDatumReader = new GenericDatumReader<>(schema);
-            BinaryDecoder binaryDecoder = DecoderFactory.get().binaryDecoder(byteArrayInputStream, null);
-            GenericRecord genericRecord = genericDatumReader.read(null, binaryDecoder);
+            GenericRecord genericRecord = decodeGenericRecord(toParse.toBytes());
             if (schemaHasNestedStructure) {
                 // use normalizer defined in the parser config
                 normalizer.normalize(genericRecord, output);
@@ -172,10 +177,23 @@ public class AvroParser implements Parser {
                 // so use COLLAPSE_NESTED to avoid unnecessary overhead.
                 Normalizers.COLLAPSE_NESTED.normalize(genericRecord, output);
             }
-        } catch (IOException | AvroRuntimeException exception) {
-            output.withError(exception).build();
+        } catch (Exception exception) {
+            output.withError(exception);
         }
         return output.build();
+    }
+
+    private GenericRecord decodeGenericRecord(byte[] bytes) throws IOException {
+        MessageDecoder.BaseDecoder<GenericRecord> decoder;
+        // single object encoding consists of 2 marker bytes followed by 8 bytes of schema fingerprint
+        // if the first 2 marker bytes match the single object encoding, use BinaryMessageDecoder
+        if (bytes.length >= 10 && bytes[0] == -61 && bytes[1] == 1) {
+            decoder = binaryMessageDecoder;
+        } else {
+            // otherwise, message does not have a header, use the raw decoder
+            decoder = rawMessageDecoder;
+        }
+        return decoder.decode(bytes);
     }
 
     /**
