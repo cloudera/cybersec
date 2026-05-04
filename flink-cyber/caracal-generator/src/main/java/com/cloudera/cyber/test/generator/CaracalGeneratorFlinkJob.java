@@ -38,13 +38,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 public abstract class CaracalGeneratorFlinkJob {
 
     public static final String PARAMS_RECORDS_LIMIT = "generator.count";
@@ -82,6 +75,7 @@ public abstract class CaracalGeneratorFlinkJob {
         boolean avroGeneratorFlag = params.getBoolean(PARAMS_SCHEMA, false);
         String generatorConfigFile = params.get(PARAMS_GENERATOR_CONFIG);
         GeneratorConfig generatorConfig = new GeneratorConfig();
+        Path configPath = null;
 
         if (avroGeneratorFlag && generatorConfigFile == null) {
            generatorConfig.setGenerationSources(Collections
@@ -91,7 +85,7 @@ public abstract class CaracalGeneratorFlinkJob {
             generatorConfig.setGenerationSources(getNetflowSampleMap());
         } else {
             Preconditions.checkState(!avroGeneratorFlag, AVRO_WITH_CUSTOM_CONFIG_ERROR);
-            Path configPath = new Path(generatorConfigFile);
+            configPath = new Path(generatorConfigFile);
             try (InputStream configStream = configPath.getFileSystem().open(configPath)) {
                 generatorConfig = new ObjectMapper().readValue(
                         configStream,
@@ -99,7 +93,7 @@ public abstract class CaracalGeneratorFlinkJob {
                         });
             }
         }
-        generatorConfig.open();
+        generatorConfig.open(configPath);
 
         return generatorConfig;
     }
