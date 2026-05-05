@@ -14,9 +14,9 @@ package com.cloudera.cyber.generator;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumReader;
-import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.*;
+import org.apache.avro.message.MessageEncoder;
 import org.apache.flink.core.fs.Path;
 
 import java.io.ByteArrayOutputStream;
@@ -37,13 +37,12 @@ public class Utils {
       }
    }
 
-   public static byte[] jsonDecodeToAvroByteArray(String json, Schema schema) {
+   public static byte[] jsonDecodeToAvroByteArray(String json, Schema schema, MessageEncoder<GenericRecord> encoder) {
       GenericRecord record = jsonDecodeToAvroGenericRecord(json, schema);
-      DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>(schema);
-      try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-         BinaryEncoder binaryEncoder = EncoderFactory.get().directBinaryEncoder(out, null);
-         datumWriter.write(record, binaryEncoder);
-         return out.toByteArray();
+
+       try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+           encoder.encode(record, outputStream);
+           return outputStream.toByteArray();
       } catch (IOException exception) {
          return null;
       }

@@ -36,8 +36,13 @@ public class GenerationSource implements Serializable {
     private Double weight;
     private String scenarioFile = null;
     private String outputAvroSchema = null;
+    private AvroEncodingType outputAvroEncoder = AvroEncodingType.RAW;
     private GeneratorScenario scenario = null;
 
+    public enum AvroEncodingType {
+        BINARY,
+        RAW
+    }
 
     public GenerationSource(String file, String topic, String outputAvroSchemaFile, Double weight) {
         this.file = file;

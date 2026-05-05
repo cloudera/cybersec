@@ -20,6 +20,12 @@ import freemarker.template.Template;
 import lombok.extern.java.Log;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Parser;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.message.BinaryMessageEncoder;
+import org.apache.avro.message.MessageEncoder;
+import org.apache.avro.message.RawMessageEncoder;
+import org.apache.avro.message.SchemaStore;
 import org.apache.commons.math3.distribution.EnumeratedDistribution;
 import org.apache.commons.math3.util.Pair;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -54,15 +60,24 @@ public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<S
     private static class JsonStringToAvro implements Function<String, byte[]> {
 
         private final Schema avroSchema;
+        private final MessageEncoder<GenericRecord> encoder;
 
-        JsonStringToAvro(String schemaString) {
+        JsonStringToAvro(String schemaString, GenerationSource.AvroEncodingType encodingType) {
             Parser avroSchemaParser = new Parser();
             this.avroSchema =  avroSchemaParser.parse(schemaString);
+
+            SchemaStore.Cache schemaStore = new SchemaStore.Cache();
+            schemaStore.addSchema(this.avroSchema);
+            if (encodingType.equals(GenerationSource.AvroEncodingType.BINARY)) {
+                encoder = new BinaryMessageEncoder<>(new GenericData(), this.avroSchema);
+            } else {
+                encoder = new RawMessageEncoder<>(new GenericData(), this.avroSchema);
+            }
         }
 
         @Override
         public byte[] apply(String s) {
-            return Utils.jsonDecodeToAvroByteArray(s, avroSchema);
+            return Utils.jsonDecodeToAvroByteArray(s, avroSchema, encoder);
         }
     }
 
@@ -114,7 +129,7 @@ public class FreemarkerTemplateSource implements ParallelSourceFunction<Tuple2<S
 
         for(GenerationSource generationSource : generationSources) {
             if (generationSource.getOutputAvroSchema() != null) {
-                topicOutputConverter.put(generationSource.getTopic(), new JsonStringToAvro(generationSource.getOutputAvroSchema()));
+                topicOutputConverter.put(generationSource.getTopic(), new JsonStringToAvro(generationSource.getOutputAvroSchema(), generationSource.getOutputAvroEncoder()));
             } else {
                 topicOutputConverter.put(generationSource.getTopic(), new TextToBytes());
             }
