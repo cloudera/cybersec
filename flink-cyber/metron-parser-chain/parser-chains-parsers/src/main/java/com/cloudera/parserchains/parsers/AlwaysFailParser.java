@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 @MessageParser(
     name="Error",
     description = "Always results in an error. Can be used with a router to flag unexpected data.")
-public class AlwaysFailParser implements Parser {
+public class AlwaysFailParser extends AbstractTextInputParser {
     private static final String DEFAULT_ERROR_MESSAGE = "Parsing error encountered";
     private Throwable error;
 

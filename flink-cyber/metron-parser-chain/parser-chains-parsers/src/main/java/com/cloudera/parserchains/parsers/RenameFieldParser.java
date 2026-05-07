@@ -14,7 +14,6 @@ package com.cloudera.parserchains.parsers;
 
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
@@ -29,8 +28,8 @@ import org.apache.commons.lang3.StringUtils;
 @MessageParser(
     name="Rename Field(s)", 
     description="Renames message field(s).")
-public class RenameFieldParser implements Parser {
-    private Map<FieldName, FieldName> fieldsToRename;
+public class RenameFieldParser extends AbstractTextInputParser {
+    private final Map<FieldName, FieldName> fieldsToRename;
 
     public RenameFieldParser() {
         this.fieldsToRename = new HashMap<>();
@@ -54,7 +53,7 @@ public class RenameFieldParser implements Parser {
     public Message parse(Message input) {
         Message.Builder output = Message.builder()
                 .withFields(input);
-        fieldsToRename.forEach((from, to) -> output.renameField(from, to));
+        fieldsToRename.forEach(output::renameField);
         return output.build();
     }
 

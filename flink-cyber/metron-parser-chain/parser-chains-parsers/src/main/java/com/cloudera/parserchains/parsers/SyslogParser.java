@@ -15,7 +15,6 @@ package com.cloudera.parserchains.parsers;
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
@@ -30,7 +29,7 @@ import static java.lang.String.format;
 @MessageParser(
     name="Syslog",
     description="Parses Syslog according to RFC 3164 and 5424.")
-public class SyslogParser implements Parser {
+public class SyslogParser extends AbstractTextInputParser {
     private static final String DEFAULT_SYSLOG_SPEC = "RFC_5424";
     private FieldName inputField;
     private SyslogSpecification specification;

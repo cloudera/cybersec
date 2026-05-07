@@ -26,7 +26,7 @@ import java.util.Objects;
 )
 public class TestParser implements Parser {
     private FieldName inputField;
-    private Map<FieldName, Integer> outputFields;
+    private final Map<FieldName, Integer> outputFields;
 
     public TestParser() {
         outputFields = new HashMap<>();
@@ -35,6 +35,11 @@ public class TestParser implements Parser {
     @Override
     public Message parse(Message message) {
         return message;
+    }
+
+    @Override
+    public byte[] getTestBytes(String testTextToParse) {
+        return new byte[0];
     }
 
     public TestParser withOutputField(FieldName fieldName, int index) {

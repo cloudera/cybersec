@@ -15,7 +15,6 @@ package com.cloudera.parserchains.parsers;
 import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
@@ -35,7 +34,7 @@ import static java.lang.String.format;
         name = "Grok",
         description = "Parses a message using Grok expressions."
 )
-public class GrokParser implements Parser {
+public class GrokParser extends AbstractTextInputParser {
     private static final String DEFAULT_ZONE_OFFSET = "+00:00";
     private FieldName inputField;
     private ZoneOffset zoneOffset;

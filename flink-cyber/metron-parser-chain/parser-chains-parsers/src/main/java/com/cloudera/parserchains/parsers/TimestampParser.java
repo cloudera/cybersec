@@ -15,7 +15,6 @@ package com.cloudera.parserchains.parsers;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
@@ -29,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 @MessageParser(
     name="Timestamp",
     description="Adds a timestamp to a message. Can be used to mark processing time.")
-public class TimestampParser implements Parser {
+public class TimestampParser extends AbstractTextInputParser {
     private static final String DEFAULT_OUTPUT_FIELD = "timestamp";
     private FieldName outputField;
     private Clock clock;

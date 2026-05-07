@@ -28,4 +28,12 @@ public interface Parser {
      * @return A parsed message.
      */
     Message parse(Message message);
+
+    /**
+     * Converts human-readable input into binary required by the parser.
+     *
+     * @param testTextToParse Human-readable text entered into the test UI.
+     * @return The binary encoding required to test the parser.
+     */
+    byte[] getTestBytes(String testTextToParse) throws Exception;
 }

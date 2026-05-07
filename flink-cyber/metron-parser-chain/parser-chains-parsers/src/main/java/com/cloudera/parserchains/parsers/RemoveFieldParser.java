@@ -14,7 +14,6 @@ package com.cloudera.parserchains.parsers;
 
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import org.apache.commons.lang3.StringUtils;
@@ -28,8 +27,8 @@ import java.util.List;
 @MessageParser(
     name="Remove Field(s)",
     description="Removes unwanted message field(s).")
-public class RemoveFieldParser implements Parser {
-    private List<FieldName> fieldsToRemove;
+public class RemoveFieldParser extends AbstractTextInputParser {
+    private final List<FieldName> fieldsToRemove;
 
     public RemoveFieldParser() {
         fieldsToRemove = new ArrayList<>();

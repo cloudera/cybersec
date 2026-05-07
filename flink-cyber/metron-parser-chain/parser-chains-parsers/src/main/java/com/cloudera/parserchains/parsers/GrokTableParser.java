@@ -40,7 +40,7 @@ import static java.lang.String.format;
         name = "Grok Table",
         description = "Extracts a key using an initial grok expression and parses the message using a grok expression mapped from a table."
 )
-public class GrokTableParser implements Parser {
+public class GrokTableParser extends AbstractTextInputParser {
     public static final String KEY_FIELD_NAME_CONFIGURATION = "Key Field Name";
     public static final String MESSAGE_FIELD_NAME_CONFIGURATION = "Message Field Name";
     public static final String INITIAL_GROK_EXPRESSION_CONFIGURATION = "Initial Grok Expression";

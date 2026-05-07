@@ -16,7 +16,6 @@ import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
@@ -40,7 +39,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
         description = "Flattens XML data."
 )
 @Slf4j
-public class XMLFlattener implements Parser {
+public class XMLFlattener extends AbstractTextInputParser {
     private static final String DEFAULT_SEPARATOR = ".";
     private static final String EMPTY_ELEMENT_REGEX = "\\{ *\\}";
     private static final XMLParserConfiguration XML_CONFIG = XMLParserConfiguration.KEEP_STRINGS.withcDataTagName("");

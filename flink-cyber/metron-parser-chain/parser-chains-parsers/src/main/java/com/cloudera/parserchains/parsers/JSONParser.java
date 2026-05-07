@@ -14,7 +14,6 @@ package com.cloudera.parserchains.parsers;
 
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.utils.JSONUtils;
@@ -38,11 +37,11 @@ import static java.lang.String.format;
 @MessageParser(
         name="Simple JSON",
         description="Parses JSON data by creating a field for each JSON element.")
-public class JSONParser implements Parser {
+public class JSONParser extends AbstractTextInputParser {
     private static final String DEFAULT_NORMALIZER = "UNFOLD_NESTED";
     private FieldName inputField;
-    private ObjectReader reader;
-    private List<Normalizer> normalizers;
+    private final ObjectReader reader;
+    private final List<Normalizer> normalizers;
 
     public JSONParser() {
         inputField = FieldName.of(DEFAULT_INPUT_FIELD);
@@ -88,7 +87,7 @@ public class JSONParser implements Parser {
     @Override
     public Message parse(Message input) {
         Message.Builder output = Message.builder().withFields(input);
-        if(!input.getField(inputField).isPresent()) {
+        if(input.getField(inputField).isEmpty()) {
             output.withError(format("Message missing expected input field '%s'", inputField.toString()));
         } else {
             input.getField(inputField).ifPresent(val -> doParse(val.toString(), output));
@@ -109,7 +108,7 @@ public class JSONParser implements Parser {
 
     private Map<String, Object> normalize(Map<String, Object> valueToNormalize, Message.Builder output) {
         // use the default normalizer, if none other specified
-        if(normalizers.size() == 0) {
+        if(normalizers.isEmpty()) {
             normalizer(DEFAULT_NORMALIZER);
         }
         try {
@@ -123,7 +122,7 @@ public class JSONParser implements Parser {
     }
 
     /**
-     * Defines all of the available {@link Normalizer} types.
+     * Defines all the available {@link Normalizer} types.
      */
     private enum Normalizers implements Normalizer {
         ALLOW_NESTED(new AllowNestedObjects()),
@@ -131,7 +130,7 @@ public class JSONParser implements Parser {
         DROP_NESTED(new DropNestedObjects()),
         UNFOLD_NESTED(new UnfoldNestedObjects());
 
-        private Normalizer normalizer;
+        private final Normalizer normalizer;
 
         Normalizers(Normalizer normalizer) {
             this.normalizer = normalizer;
@@ -210,7 +209,7 @@ public class JSONParser implements Parser {
             return input.entrySet()
                     .stream()
                     .filter(e -> !(e.getValue() instanceof Map) && !(e.getValue() instanceof List))
-                    .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
     }
 

@@ -16,7 +16,6 @@ import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
 import static java.lang.String.format;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
@@ -42,7 +41,7 @@ import org.xml.sax.SAXException;
         description="Parse XML using XPath expressions."
 )
 @Slf4j
-public class XPathParser implements Parser {
+public class XPathParser extends AbstractTextInputParser {
     private static final String DEFAULT_NAMESPACE_AWARE = "false";
     private LinkedHashMap<FieldName, XPathExpression> compiledExpressions;
     private LinkedHashMap<FieldName, String> expressions;

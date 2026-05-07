@@ -13,8 +13,8 @@
 package com.cloudera.parserchains.queryservice.service;
 
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.MessageParser;
+import com.cloudera.parserchains.parsers.AbstractTextInputParser;
 
 /**
  * This parser is used for testing only.  This will throw an unchecked exception, something that
@@ -23,10 +23,11 @@ import com.cloudera.parserchains.core.catalog.MessageParser;
 @MessageParser(
         name = "Misbehaving Parser",
         description = "A parser used for testing only.")
-public class MisbehavingParser implements Parser {
+public class MisbehavingParser extends AbstractTextInputParser {
 
     @Override
     public Message parse(Message message) {
         throw new RuntimeException("No parser should throw unchecked exceptions, but what if?");
     }
+
 }
