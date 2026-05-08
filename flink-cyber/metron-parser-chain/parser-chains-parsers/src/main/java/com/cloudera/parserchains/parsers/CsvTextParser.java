@@ -16,7 +16,6 @@ import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
@@ -45,7 +44,7 @@ import static java.lang.String.format;
 @MessageParser(
         name = "CSV/TSV Parser",
         description = "Parses delimited text like CSV or TSV.")
-public class CsvTextParser implements Parser {
+public class CsvTextParser extends AbstractTextInputParser {
 
     private static final String DEFAULT_DELIMITER = ",";
     private static final String DEFAULT_QUOTE_CHAR = "\"";

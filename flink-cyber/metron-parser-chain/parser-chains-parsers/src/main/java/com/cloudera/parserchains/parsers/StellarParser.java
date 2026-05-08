@@ -17,7 +17,6 @@ import com.cloudera.cyber.stellar.MetronCompatibilityParser;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
@@ -42,7 +41,7 @@ import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
         name = "Metron Stellar parser",
         description = "Metron compatibility parser.")
 @Slf4j
-public class StellarParser implements Parser {
+public class StellarParser extends AbstractTextInputParser {
 
     private FieldName inputField;
     private MetronCompatibilityParser metronCompatibilityParser;

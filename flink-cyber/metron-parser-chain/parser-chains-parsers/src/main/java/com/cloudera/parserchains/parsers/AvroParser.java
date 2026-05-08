@@ -22,8 +22,13 @@ import com.cloudera.parserchains.core.catalog.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.DatumReader;
+import org.apache.avro.io.DecoderFactory;
+import org.apache.avro.io.JsonDecoder;
 import org.apache.avro.message.BinaryMessageDecoder;
+import org.apache.avro.message.BinaryMessageEncoder;
 import org.apache.avro.message.MessageDecoder;
 import org.apache.avro.message.RawMessageDecoder;
 import org.apache.avro.message.SchemaStore;
@@ -32,13 +37,9 @@ import org.apache.flink.core.fs.FSDataInputStream;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.cloudera.parserchains.core.Constants.DEFAULT_INPUT_FIELD;
 import static java.lang.String.format;
@@ -163,6 +164,17 @@ public class AvroParser implements Parser {
             return builder
                     .withError(format("Message missing expected input field '%s'", inputField.toString()))
                     .build();
+        }
+    }
+
+    @Override
+    public byte[] getTestBytes(String testTextToParse) throws Exception {
+        GenericRecord record = jsonToAvro(testTextToParse, schema);
+
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            BinaryMessageEncoder<GenericRecord> encoder = new BinaryMessageEncoder<>(new GenericData(), schema);
+            encoder.encode(record, outputStream);
+            return outputStream.toByteArray();
         }
     }
 
@@ -300,6 +312,16 @@ public class AvroParser implements Parser {
         @Override
         public void normalize(GenericRecord record, Message.Builder output) {
             unfold(record, new ArrayDeque<>(), output);
+        }
+    }
+
+    private static GenericRecord jsonToAvro(String json, Schema schema) throws IOException {
+        try {
+            JsonDecoder jsonDecoder = DecoderFactory.get().jsonDecoder(schema, json);
+            DatumReader<GenericRecord> datumReader = new GenericDatumReader<>(schema);
+            return datumReader.read(null, jsonDecoder);
+        } catch (Exception e) {
+            throw new IOException(String.format("Could not convert message starting with '%s' from JSON to Avro due to '%s'", json.substring(0, Math.min(20, json.length())), e.getMessage()));
         }
     }
 

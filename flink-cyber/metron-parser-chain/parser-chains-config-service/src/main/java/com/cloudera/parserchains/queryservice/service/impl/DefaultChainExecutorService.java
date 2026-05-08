@@ -12,6 +12,7 @@
 
 package com.cloudera.parserchains.queryservice.service.impl;
 
+import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.parserchains.core.ChainLink;
 import com.cloudera.parserchains.core.ChainRunner;
 import com.cloudera.parserchains.core.Message;
@@ -32,7 +33,7 @@ import static com.cloudera.parserchains.queryservice.service.ResultLogBuilder.su
 @Service
 @Slf4j
 public class DefaultChainExecutorService implements ChainExecutorService {
-    private ChainRunner chainRunner;
+    private final ChainRunner chainRunner;
 
     public DefaultChainExecutorService(ChainRunner chainRunner) {
         this.chainRunner = chainRunner;
@@ -40,16 +41,16 @@ public class DefaultChainExecutorService implements ChainExecutorService {
 
     @Override
     public ParserResult execute(ChainLink chain, String textToParse) {
-        Message original = chainRunner.originalMessage(textToParse);
         try {
             if (chain != null) {
-                List<Message> messages = chainRunner.run(textToParse, chain);
+                byte[] testBytes = chain.getTestBytes(textToParse);
+                List<Message> messages = chainRunner.run(MessageToParse.builder().originalBytes(testBytes).offset(0).partition(0).topic("test").build(), chain);
                 return chainExecuted(messages);
             } else {
-                return chainNotDefined(original);
+                return chainNotDefined(chainRunner.originalMessage(textToParse));
             }
-        } catch(Throwable e) {
-            return chainFailed(original, e);
+        } catch (Throwable e) {
+            return chainFailed(chainRunner.originalMessage(textToParse), e);
         }
     }
 
@@ -139,6 +140,7 @@ public class DefaultChainExecutorService implements ChainExecutorService {
     /**
      * Return a {@link ParserResult} indicating that an unexpected error occurred
      * while executing the parser chain.
+     *
      * @param original The original message to parse.
      */
     private ParserResult chainFailed(Message original, Throwable t) {

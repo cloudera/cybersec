@@ -12,6 +12,7 @@
 
 package com.cloudera.parserchains.core;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -110,12 +111,12 @@ public class RouterLink implements ChainLink {
 
         // retrieve the last output from the route taken;
         Message output = input;
-        if(results.size() > 0) {
+        if(!results.isEmpty()) {
             output = results.get(results.size() - 1);
         }
 
         // if no errors, allow the next link in the chain to process the message
-        boolean noError = !output.getError().isPresent();
+        boolean noError = output.getError().isEmpty();
         if(noError && nextLink.isPresent()) {
             List<Message> nextResults = nextLink.get().process(output);
             results.addAll(nextResults);
@@ -126,5 +127,14 @@ public class RouterLink implements ChainLink {
     @Override
     public void setNext(ChainLink nextLink) {
         this.nextLink = Optional.of(nextLink);
+    }
+
+    @Override
+    public byte[] getTestBytes(String textToTest) {
+        if (textToTest != null) {
+            return textToTest.getBytes(StandardCharsets.UTF_8);
+        } else {
+            return null;
+        }
     }
 }

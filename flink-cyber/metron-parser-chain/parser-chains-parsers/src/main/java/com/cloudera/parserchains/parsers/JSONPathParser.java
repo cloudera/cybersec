@@ -17,7 +17,6 @@ import static java.lang.String.format;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
@@ -44,7 +43,7 @@ import org.apache.commons.lang3.StringUtils;
         name = "JSON Path",
         description = "Parse JSON using JSONPath expressions.")
 @Slf4j
-public class JSONPathParser implements Parser {
+public class JSONPathParser extends AbstractTextInputParser {
     private FieldName inputField;
     private LinkedHashMap<FieldName, JsonPath> expressions;
 

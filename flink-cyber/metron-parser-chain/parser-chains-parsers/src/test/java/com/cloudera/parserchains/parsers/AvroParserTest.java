@@ -39,6 +39,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.EncoderFactory;
+import org.apache.avro.io.JsonEncoder;
 import org.apache.avro.message.BinaryMessageEncoder;
 import org.apache.avro.message.MessageEncoder;
 import org.apache.avro.message.RawMessageEncoder;
@@ -353,17 +354,33 @@ class AvroParserTest {
             }
 
             encoder.encode(record, outputStream);
-            return getOriginalMessage(outputStream);
+            return getOriginalMessage(outputStream.toByteArray());
+        }
+    }
+
+    private static byte[] serializeAvroRecordToBytes(GenericRecord record, Schema schema) throws IOException {
+        SchemaStore.Cache schemaStore = new SchemaStore.Cache();
+        schemaStore.addSchema(schema);
+
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            MessageEncoder<GenericRecord> encoder = new BinaryMessageEncoder<>(new GenericData(), schema);
+            encoder.encode(record, outputStream);
+            return outputStream.toByteArray();
         }
     }
 
     private static Message serializeMapToAvroMessage(Map<String, Object> fields, boolean singleObjectEncoding) throws IOException {
         Schema schema = new Schema.Parser().parse(getFileFromResource(AvroParserTest.SIMPLE_SCHEMA));
 
-        GenericRecord record = new GenericData.Record(schema);
-        fields.forEach(record::put);
+        GenericRecord record = createGenericRecordFromMap(fields, schema);
 
         return serializeAvroToMessage(record, schema, singleObjectEncoding);
+    }
+
+    private static @NonNull GenericRecord createGenericRecordFromMap(Map<String, Object> fields, Schema schema) {
+        GenericRecord record = new GenericData.Record(schema);
+        fields.forEach(record::put);
+        return record;
     }
 
     @Test
@@ -389,6 +406,66 @@ class AvroParserTest {
 
         assertThat(message.getError()).hasValueSatisfying( ex -> assertThat(ex).isInstanceOf(IllegalStateException.class).
                 hasMessage("Message missing expected input field '"+ missingField + "'"));
+    }
+
+    @Test
+    public void testCreateAvroTestRecord() throws Exception {
+
+        Schema schema = new Schema.Parser().parse(getFileFromResource(AvroParserTest.SIMPLE_SCHEMA));
+
+        // create a test record
+        Map<String, Object> recordFields = ImmutableMap.of("userId", 1,
+                "username", "Jane Doe",
+                "email", "jdoe@acme.com",
+                "isActive", true,
+                "age", 42);
+        GenericRecord genericRecord = createGenericRecordFromMap(recordFields, schema);
+
+        // convert test record to JSON
+        String eventAsJson;
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            JsonEncoder jsonEncoder = EncoderFactory.get().jsonEncoder(schema, outputStream);
+            GenericDatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
+            writer.write(genericRecord, jsonEncoder);
+            jsonEncoder.flush();
+
+            eventAsJson =  outputStream.toString(StandardCharsets.UTF_8);
+
+            // encode the test record as bytes
+            byte[] messageBytes = serializeAvroRecordToBytes(genericRecord, schema);
+
+            String schemaPath = getFileFromResource(SIMPLE_SCHEMA).getAbsolutePath();
+            AvroParser parser = new AvroParser();
+
+            parser.schemaPath(schemaPath).inputField(INPUT_FIELD).normalizer(AvroParser.Normalizers.UNFOLD_NESTED.name());
+
+            // compare the expected teest bytes to the actual test bytes
+            assertThat(parser.getTestBytes(eventAsJson)).isEqualTo(messageBytes);
+        }
+
+    }
+
+    @Test
+    public void testBadJsonData() throws Exception {
+        String schemaPath = getFileFromResource(SIMPLE_SCHEMA).getAbsolutePath();
+        AvroParser parser = new AvroParser();
+
+        parser.schemaPath(schemaPath).inputField(INPUT_FIELD).normalizer(AvroParser.Normalizers.UNFOLD_NESTED.name());
+
+        String shortBadJson = "this is not";
+        assertThatCode(() -> parser.getTestBytes(shortBadJson)).isInstanceOf(IOException.class).
+                hasMessage(String.format("Could not convert message starting with '%s' from JSON to Avro due to 'Unrecognized token 'this': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')\n"  +
+                        " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]'", shortBadJson));
+
+        String longBadJson = shortBadJson + " valid json";
+        assertThatCode(() -> parser.getTestBytes(longBadJson)).isInstanceOf(IOException.class).
+                hasMessage(String.format("Could not convert message starting with '%s' from JSON to Avro due to 'Unrecognized token 'this': was expecting (JSON String, Number, Array, Object or token 'null', 'true' or 'false')\n"  +
+                        " at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 1]'", longBadJson.substring(0, 20)));
+
+        String goodJsonDoesntMatchSchema = "{\"not a field\": 500 }";
+        assertThatCode(() -> parser.getTestBytes(goodJsonDoesntMatchSchema)).isInstanceOf(IOException.class).
+                hasMessage(String.format("Could not convert message starting with '%s' from JSON to Avro due to 'Expected field name not found: userId'", goodJsonDoesntMatchSchema.substring(0, 20)));
+
     }
 
     @Test
@@ -428,11 +505,11 @@ class AvroParserTest {
         BinaryEncoder binaryEncoder = EncoderFactory.get().directBinaryEncoder(out, null);
         GenericDatumWriter<GenericRecord> writer = new GenericDatumWriter<>(schema);
         writer.write(record, binaryEncoder);
-        return getOriginalMessage(out);
+        return getOriginalMessage(out.toByteArray());
     }
 
-    private static Message getOriginalMessage(ByteArrayOutputStream out) {
-        MessageToParse originalMessage = MessageToParse.builder().originalBytes(out.toByteArray()).line(-1).partition(1).offset(1).build();
+    private static Message getOriginalMessage(byte[] messageBytes) {
+        MessageToParse originalMessage = MessageToParse.builder().originalBytes(messageBytes).line(-1).partition(1).offset(1).build();
         return Message.builder().addField(FieldName.of(INPUT_FIELD), MessageToParseFieldValue.of(originalMessage)).build();
     }
 

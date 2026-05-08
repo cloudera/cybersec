@@ -28,11 +28,16 @@ public class AnnotationBasedParserInfoBuilderTest {
     @MessageParser(
             name = "Valid Parser",
             description = "This is a valid parser.")
-    public class ValidParser implements Parser {
+    public static class ValidParser implements Parser {
         @Override
         public Message parse(Message message) {
             // do nothing
             return null;
+        }
+
+        @Override
+        public byte[] getTestBytes(String testTextToParse) {
+            return new byte[0];
         }
     }
 
@@ -49,11 +54,16 @@ public class AnnotationBasedParserInfoBuilderTest {
     /**
      * A parser used for testing that is missing the required {@link MessageParser} annotation.
      */
-    public class MissingAnnotationParser implements Parser {
+    public static class MissingAnnotationParser implements Parser {
         @Override
         public Message parse(Message message) {
             // do nothing
             return null;
+        }
+
+        @Override
+        public byte[] getTestBytes(String testTextToParse) {
+            return new byte[0];
         }
     }
 

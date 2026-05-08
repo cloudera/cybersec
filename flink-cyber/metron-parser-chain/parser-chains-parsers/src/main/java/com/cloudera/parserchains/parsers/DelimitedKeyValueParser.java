@@ -16,7 +16,6 @@ import com.cloudera.parserchains.core.Constants;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.Regex;
 import com.cloudera.parserchains.core.StringFieldValue;
 import com.cloudera.parserchains.core.catalog.Configurable;
@@ -33,7 +32,7 @@ import static java.lang.String.format;
         description="Parses delimited key-value pairs."
 )
 @Slf4j
-public class DelimitedKeyValueParser implements Parser {
+public class DelimitedKeyValueParser extends AbstractTextInputParser {
 
     /**
      * The default key-value delimiter are double pipes; ||.

@@ -1,7 +1,6 @@
 package com.cloudera.parserchains.parsers;
 
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
@@ -31,7 +30,7 @@ import java.util.stream.Collectors;
         name = "Simple Stellar parser",
         description = "Metron compatibility parser.")
 @Slf4j
-public class SimpleStellarParser implements Parser {
+public class SimpleStellarParser extends AbstractTextInputParser {
 
     private final StellarProcessor processor;
     private final Context stellarContext;
@@ -63,7 +62,7 @@ public class SimpleStellarParser implements Parser {
 
             updateExpressionList(expressionList);
         } catch (Exception e) {
-            log.error(String.format("Could not create simple stellar expressions from '%s'", pathToConfig), e);
+            log.error("Could not create simple stellar expressions from '{}'", pathToConfig, e);
             throw e;
         }
     }

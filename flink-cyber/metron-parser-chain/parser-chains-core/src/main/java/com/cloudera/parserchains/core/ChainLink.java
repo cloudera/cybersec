@@ -33,4 +33,11 @@ public interface ChainLink {
      * @param nextLink The next chain link.
      */
     void setNext(ChainLink nextLink);
+
+    /**
+     * Converts human-readable input into bytes required by parser input. For example converting json text into Avro binary.
+     * @param textToTest Human-readable parser input
+     * @return Binary encoding of the message input.
+     */
+    byte[] getTestBytes(String textToTest) throws Exception;
 }

@@ -18,9 +18,9 @@ import java.util.*;
  * A {@link ChainLink} that links directly to the next link in a chain.
  */
 public class NextChainLink implements ChainLink {
-    private Parser parser;
-    private Optional<ChainLink> nextLink;
-    private LinkName linkName;
+    private final Parser parser;
+    private ChainLink nextLink;
+    private final LinkName linkName;
 
     /**
      * @param parser The parser at this link in the chain.
@@ -28,7 +28,7 @@ public class NextChainLink implements ChainLink {
      */
     public NextChainLink(Parser parser, LinkName linkName) {
         this.parser = Objects.requireNonNull(parser, "A valid parser is required.");
-        this.nextLink = Optional.empty();
+        this.nextLink = null;
         this.linkName = Objects.requireNonNull(linkName, "A link name is required.");
     }
 
@@ -50,9 +50,9 @@ public class NextChainLink implements ChainLink {
         results.add(output);
 
         // if no errors, allow the next link in the chain to process the message
-        boolean noError = !output.getError().isPresent();
-        if (noError && emitMessage && nextLink.isPresent()) {
-            List<Message> nextResults = nextLink.get().process(output);
+        boolean noError = output.getError().isEmpty();
+        if (noError && emitMessage && nextLink != null) {
+            List<Message> nextResults = nextLink.process(output);
             results.addAll(nextResults);
         }
         return results;
@@ -60,6 +60,16 @@ public class NextChainLink implements ChainLink {
 
     @Override
     public void setNext(ChainLink nextLink) {
-        this.nextLink = Optional.of(nextLink);
+        this.nextLink = nextLink;
     }
+
+    @Override
+    public byte[] getTestBytes(String textToTest) throws Exception {
+        if (textToTest != null) {
+            return parser.getTestBytes(textToTest);
+        } else {
+            return null;
+        }
+    }
+
 }

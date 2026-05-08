@@ -29,6 +29,11 @@ public class ClassIndexParserCatalogTest {
             // do nothing
             return null;
         }
+
+        @Override
+        public byte[] getTestBytes(String testTextToParse) {
+            return new byte[0];
+        }
     }
 
     @Test
