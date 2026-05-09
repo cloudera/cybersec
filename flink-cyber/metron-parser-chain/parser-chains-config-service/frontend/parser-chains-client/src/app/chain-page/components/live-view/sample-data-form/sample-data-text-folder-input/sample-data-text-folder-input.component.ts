@@ -212,6 +212,20 @@ export class SampleDataTextFolderInputComponent implements OnInit, OnDestroy {
     })
   }
 
+  formatDiffValue(failure: boolean | undefined, result: string | undefined): string {
+    if (!result) {
+      return '';
+    }
+    try {
+      const prettyResult = JSON.stringify(JSON.parse(result), null, 2);
+      return `Failed: ${failure}
+Data ${prettyResult}`;
+    } catch {
+      return `Failed: ${failure}
+Data ${result}`;
+    }
+  }
+
   ngOnDestroy(): void {
     this._unsubscribe$.next();
     this._unsubscribe$.complete();
