@@ -513,4 +513,118 @@ class AvroParserTest {
         return Message.builder().addField(FieldName.of(INPUT_FIELD), MessageToParseFieldValue.of(originalMessage)).build();
     }
 
+    // ==================== Byte Array Tests ====================
+    private static final String BYTE_ARRAY_SCHEMA = "/avro/byte_array.schema";
+
+    @Test
+    public void testByteArrayWithCollapseNested() throws IOException {
+        testByteArrayWithNormalizer(AvroParser.Normalizers.COLLAPSE_NESTED.name());
+    }
+
+    @Test
+    public void testByteArrayWithDropNested() throws IOException {
+        testByteArrayWithNormalizer(AvroParser.Normalizers.DROP_NESTED.name());
+    }
+
+    @Test
+    public void testByteArrayWithUnfoldNested() throws IOException {
+        testByteArrayWithNormalizer(AvroParser.Normalizers.UNFOLD_NESTED.name());
+    }
+
+    private void testByteArrayWithNormalizer(String normalizerName) throws IOException {
+        String schemaPath = getFileFromResource(BYTE_ARRAY_SCHEMA).getAbsolutePath();
+        AvroParser parser = new AvroParser();
+        parser.inputField(INPUT_FIELD).normalizer(normalizerName).schemaPath(schemaPath);
+
+        // Test with both single object and raw encoding
+        testByteArrayWithNormalizer(parser, normalizerName, true);
+        testByteArrayWithNormalizer(parser, normalizerName, false);
+    }
+
+    private void testByteArrayWithNormalizer(AvroParser parser, String normalizerName, boolean singleObjectEncoding) throws IOException {
+        Message input = createByteArrayRecord(singleObjectEncoding);
+        Message parsedMessage = parser.parse(input);
+
+        assertFalse(parsedMessage.getError().isPresent());
+
+        // Common fields - should be present in all normalizers
+        assertThat(parsedMessage.getFields()).contains(
+                entry(FieldName.of("id"), StringFieldValue.of("event-001")));
+
+        if (normalizerName.equals(AvroParser.Normalizers.COLLAPSE_NESTED.name())) {
+            // COLLAPSE_NESTED: Arrays serialized as string representations
+            assertThat(parsedMessage.getFields()).contains(
+                    entry(FieldName.of("binaryData"), StringFieldValue.of("[0, 1, 2, 3, 4]")),
+                    entry(FieldName.of("intArray"), StringFieldValue.of("[10, 20, 30]")),
+                    entry(FieldName.of("longArray"), StringFieldValue.of("[100, 200]")),
+                    entry(FieldName.of("stringArray"), StringFieldValue.of("[\"a\", \"b\", \"c\"]")),
+                    entry(FieldName.of("doubleArray"), StringFieldValue.of("[1.5, 2.5, 3.5]")),
+                    entry(FieldName.of("nestedData"), StringFieldValue.of("{\"name\": \"test\", \"value\": 42}")));
+        } else if (normalizerName.equals(AvroParser.Normalizers.DROP_NESTED.name())) {
+            // DROP_NESTED: Complex types (arrays, maps, nested records) should be dropped
+            // Only simple fields like id should remain
+            assertThat(parsedMessage.getFields()).contains(
+                    entry(FieldName.of("id"), StringFieldValue.of("event-001")));
+            // The following should NOT be present (complex types are dropped)
+            assertThat(parsedMessage.getField("binaryData").isPresent()).isFalse();
+            assertThat(parsedMessage.getField("intArray").isPresent()).isFalse();
+            assertThat(parsedMessage.getField("longArray").isPresent()).isFalse();
+            assertThat(parsedMessage.getField("stringArray").isPresent()).isFalse();
+            assertThat(parsedMessage.getField("doubleArray").isPresent()).isFalse();
+            assertThat(parsedMessage.getField("nestedData").isPresent()).isFalse();
+        } else if (normalizerName.equals(AvroParser.Normalizers.UNFOLD_NESTED.name())) {
+            // UNFOLD_NESTED: Arrays unpacked with indices, nested records unfolded
+            assertThat(parsedMessage.getFields()).contains(
+                    entry(FieldName.of("binaryData[0]"), StringFieldValue.of("0")),
+                    entry(FieldName.of("binaryData[1]"), StringFieldValue.of("1")),
+                    entry(FieldName.of("binaryData[2]"), StringFieldValue.of("2")),
+                    entry(FieldName.of("binaryData[3]"), StringFieldValue.of("3")),
+                    entry(FieldName.of("binaryData[4]"), StringFieldValue.of("4")),
+                    entry(FieldName.of("intArray[0]"), StringFieldValue.of("10")),
+                    entry(FieldName.of("intArray[1]"), StringFieldValue.of("20")),
+                    entry(FieldName.of("intArray[2]"), StringFieldValue.of("30")),
+                    entry(FieldName.of("longArray[0]"), StringFieldValue.of("100")),
+                    entry(FieldName.of("longArray[1]"), StringFieldValue.of("200")),
+                    entry(FieldName.of("stringArray[0]"), StringFieldValue.of("a")),
+                    entry(FieldName.of("stringArray[1]"), StringFieldValue.of("b")),
+                    entry(FieldName.of("stringArray[2]"), StringFieldValue.of("c")),
+                    entry(FieldName.of("doubleArray[0]"), StringFieldValue.of("1.5")),
+                    entry(FieldName.of("doubleArray[1]"), StringFieldValue.of("2.5")),
+                    entry(FieldName.of("doubleArray[2]"), StringFieldValue.of("3.5")),
+                    entry(FieldName.of("nestedData.name"), StringFieldValue.of("test")),
+                    entry(FieldName.of("nestedData.value"), StringFieldValue.of("42")));
+        }
+    }
+
+    private Message createByteArrayRecord(boolean singleObjectEncoding) throws IOException {
+        Schema schema = new Schema.Parser().parse(getFileFromResource(BYTE_ARRAY_SCHEMA));
+
+        // Byte array
+        byte[] binaryData = new byte[]{0, 1, 2, 3, 4};
+
+        // Arrays of primitives
+        List<Integer> intArray = Arrays.asList(10, 20, 30);
+        List<Long> longArray = Arrays.asList(100L, 200L);
+        List<String> stringArray = Arrays.asList("a", "b", "c");
+        List<Double> doubleArray = Arrays.asList(1.5, 2.5, 3.5);
+
+        // Nested record
+        Schema nestedSchema = schema.getField("nestedData").schema();
+        GenericRecord nestedRecord = new GenericData.Record(nestedSchema);
+        nestedRecord.put("name", "test");
+        nestedRecord.put("value", 42);
+
+        // Main record
+        GenericRecord record = new GenericData.Record(schema);
+        record.put("id", "event-001");
+        record.put("binaryData", binaryData);
+        record.put("intArray", intArray);
+        record.put("longArray", longArray);
+        record.put("stringArray", stringArray);
+        record.put("doubleArray", doubleArray);
+        record.put("nestedData", nestedRecord);
+
+        return serializeAvroToMessage(record, schema, singleObjectEncoding);
+    }
+
 }

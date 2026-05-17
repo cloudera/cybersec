@@ -1,0 +1,68 @@
+{
+  "type": "record",
+  "name": "ByteArrayEvent",
+  "namespace": "com.cloudera.test",
+  "doc": "Schema with byte array at top level for testing various normalizers.",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string",
+      "doc": "Event identifier."
+    },
+    {
+      "name": "binaryData",
+      "type": "bytes",
+      "doc": "Binary data as byte array."
+    },
+    {
+      "name": "intArray",
+      "type": {
+        "type": "array",
+        "items": "int"
+      },
+      "doc": "Array of integers."
+    },
+    {
+      "name": "longArray",
+      "type": {
+        "type": "array",
+        "items": "long"
+      },
+      "doc": "Array of longs."
+    },
+    {
+      "name": "stringArray",
+      "type": {
+        "type": "array",
+        "items": "string"
+      },
+      "doc": "Array of strings."
+    },
+    {
+      "name": "doubleArray",
+      "type": {
+        "type": "array",
+        "items": "double"
+      },
+      "doc": "Array of doubles."
+    },
+    {
+      "name": "nestedData",
+      "type": {
+        "type": "record",
+        "name": "NestedRecord",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "value",
+            "type": "int"
+          }
+        ]
+      },
+      "doc": "Nested record for additional testing."
+    }
+  ]
+}
