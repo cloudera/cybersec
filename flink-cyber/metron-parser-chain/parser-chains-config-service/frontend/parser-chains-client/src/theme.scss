@@ -2,8 +2,6 @@
 
 @import "custom-palette";
 
-@import url("https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500&display=swap");
-
 // warn, error, success palettes
 $theming-material-components-primary: mat.define-palette($md-cyber-blue-primary);
 $theming-material-components-accent: mat.define-palette($md-cyber-gray-secondary);
