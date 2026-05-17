@@ -566,12 +566,12 @@ class AvroParserTest {
             assertThat(parsedMessage.getFields()).contains(
                     entry(FieldName.of("id"), StringFieldValue.of("event-001")));
             // The following should NOT be present (complex types are dropped)
-            assertThat(parsedMessage.getField("binaryData").isPresent()).isFalse();
-            assertThat(parsedMessage.getField("intArray").isPresent()).isFalse();
-            assertThat(parsedMessage.getField("longArray").isPresent()).isFalse();
-            assertThat(parsedMessage.getField("stringArray").isPresent()).isFalse();
-            assertThat(parsedMessage.getField("doubleArray").isPresent()).isFalse();
-            assertThat(parsedMessage.getField("nestedData").isPresent()).isFalse();
+            assertThat(parsedMessage.getField(FieldName.of("binaryData")).isPresent()).isFalse();
+            assertThat(parsedMessage.getField(FieldName.of("intArray")).isPresent()).isFalse();
+            assertThat(parsedMessage.getField(FieldName.of("longArray")).isPresent()).isFalse();
+            assertThat(parsedMessage.getField(FieldName.of("stringArray")).isPresent()).isFalse();
+            assertThat(parsedMessage.getField(FieldName.of("doubleArray")).isPresent()).isFalse();
+            assertThat(parsedMessage.getField(FieldName.of("nestedData")).isPresent()).isFalse();
         } else if (normalizerName.equals(AvroParser.Normalizers.UNFOLD_NESTED.name())) {
             // UNFOLD_NESTED: Arrays unpacked with indices, nested records unfolded
             assertThat(parsedMessage.getFields()).contains(
