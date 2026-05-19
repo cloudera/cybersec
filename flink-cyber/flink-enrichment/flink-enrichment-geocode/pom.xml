@@ -151,6 +151,11 @@
             <artifactId>geoip2</artifactId>
             <version>${maxmind.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.maxmind.db</groupId>
+            <artifactId>maxmind-db</artifactId>
+            <version>${maxmind-db.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>commons-validator</groupId>

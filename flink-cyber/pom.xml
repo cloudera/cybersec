@@ -80,6 +80,7 @@
         <testcontainers.version>1.15.0</testcontainers.version>
         <solr.version>8.11.2.${cdh.version}</solr.version>
         <maxmind.version>2.13.1</maxmind.version>
+        <maxmind-db.version>4.1.0</maxmind-db.version>
         <hadoop.version>3.4.2.${cdh.version}</hadoop.version>
         <hbase.version>2.6.3.${cdh.version}</hbase.version>
         <mockserver.version>5.15.0</mockserver.version>

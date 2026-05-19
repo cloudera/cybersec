@@ -17,6 +17,7 @@ import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.enrichment.Enrichment;
 import com.cloudera.cyber.enrichment.SingleValueEnrichment;
 import com.cloudera.cyber.enrichment.geocode.impl.types.GeoFields;
+import com.maxmind.db.Reader;
 import com.maxmind.geoip2.DatabaseProvider;
 import com.maxmind.geoip2.model.CityResponse;
 
@@ -34,6 +35,9 @@ import java.util.stream.Stream;
 /**
  * Looks up the locations of IPv4 or IPv6 addresses in MaxMind GeoLite2 city database and returns
  * the locations for that IP.
+ *
+ * This class supports both MaxMind GeoIP2 databases (via DatabaseProvider) and IPinfo databases
+ * (via the generic Reader from maxmind-db library).
  */
 public class IpGeoEnrichment extends MaxMindBase {
 
@@ -44,8 +48,79 @@ public class IpGeoEnrichment extends MaxMindBase {
         super(database);
     }
 
+    public IpGeoEnrichment(DatabaseProvider database, Reader maxmindDbReader) {
+        super(database, maxmindDbReader);
+    }
+
+    /**
+     * Constructor that accepts only a maxmind-db Reader.
+     * This supports IPinfo and other MMDB databases.
+     *
+     * @param maxmindDbReader The generic maxmind-db Reader
+     */
+    public IpGeoEnrichment(Reader maxmindDbReader) {
+        super(maxmindDbReader);
+    }
+
     public IpGeoEnrichment(String path) {
         super(path);
+    }
+
+    /**
+     * Lookup the IP using the generic maxmind-db Reader (supports IPinfo MMDB).
+     *
+     * @param fieldName The field name to use for enrichment
+     * @param ipFieldValue The IP address to look up
+     * @param ipInfoFields The list of IPinfo fields to retrieve
+     * @param geoEnrichments The map to populate with enrichment values
+     * @param qualityMessages The list to add quality messages to
+     * 
+     * IPinfo field names: city, region, country, lat, lng, postal_code, region_code, timezone, range
+     * MaxMind field names: city, region, country_name, latitude, longitude, postal_code, geoname_id
+     */
+    public void lookupIpInfo(String fieldName, Object ipFieldValue, List<String> ipInfoFields,
+                         Map<String, String> geoEnrichments, List<DataQualityMessage> qualityMessages) {
+        if (maxmindDbReader == null) {
+            throw new IllegalStateException("maxmindDbReader not initialized. Use constructor with maxmind-db Reader.");
+        }
+
+        Enrichment enrichment = new SingleValueEnrichment(fieldName, GEOCODE_FEATURE);
+        
+        if (ipFieldValue instanceof String) {
+            String ipValue = (String) ipFieldValue;
+            Map<String, Object> result = lookupGeneric(ipValue);
+            if (result != null) {
+                for (String fieldKey : ipInfoFields) {
+                    // Map IPinfo field names to standard enrichment field names
+                    String lookupKey = mapIpInfoFieldName(fieldKey);
+                    Object value = result.get(lookupKey);
+                    if (value != null) {
+                        String key = fieldName + "." + GEOCODE_FEATURE + "." + fieldKey;
+                        enrichment.enrich(geoEnrichments, key, value.toString());
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Maps IPinfo field names to MaxMind field names for compatibility.
+     * IPinfo uses: lat, lng, region_code
+     * MaxMind uses: latitude, longitude, region
+     */
+    private String mapIpInfoFieldName(String fieldName) {
+        switch (fieldName) {
+            case "lat":
+                return "latitude";
+            case "lng":
+                return "longitude";
+            case "region_code":
+                return "region";
+            case "postal":
+                return "postal_code";
+            default:
+                return fieldName;
+        }
     }
 
     /**
