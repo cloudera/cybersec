@@ -59,18 +59,18 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>${java.compiler.version}</java.version>
-        <csa.version>csa1.17.0.0</csa.version>
+        <csa.version>csa1.16.1.0</csa.version>
         <flink.version>1.20.1-${csa.version}</flink.version>
         <cloudera.registry>1.0-${csa.version}</cloudera.registry>
         <flink.hbase.version>2.4</flink.hbase.version>
-        <cdh.version>7.3.2.0-957</cdh.version>
+        <cdh.version>7.3.1.706-4</cdh.version>
         <lombok.version>1.18.30</lombok.version>
         <lombok.plugin.version>1.18.20.0</lombok.plugin.version>
         <guava.version>21.0</guava.version>
         <avro.version>1.11.4</avro.version>
         <log4j.kafka.version>3.4.1.${cdh.version}</log4j.kafka.version>
         <scala.binary.version>2.12</scala.binary.version>
-        <kafka.version>3.9.1.${cdh.version}</kafka.version>
+        <kafka.version>3.4.1.${cdh.version}</kafka.version>
         <nifi.version>1.11.4</nifi.version>
         <jackson.version>2.15.2</jackson.version>
         <smm.intercepter.version>2.3.0.${cdh.version}</smm.intercepter.version>
@@ -80,8 +80,8 @@
         <testcontainers.version>1.15.0</testcontainers.version>
         <solr.version>8.11.2.${cdh.version}</solr.version>
         <maxmind.version>2.13.1</maxmind.version>
-        <hadoop.version>3.4.2.${cdh.version}</hadoop.version>
-        <hbase.version>2.6.3.${cdh.version}</hbase.version>
+        <hadoop.version>3.1.1.${cdh.version}</hadoop.version>
+        <hbase.version>2.4.17.${cdh.version}</hbase.version>
         <mockserver.version>5.15.0</mockserver.version>
         <mockito.version>5.23.0</mockito.version>
         <mockito-inline.version>5.2.0</mockito-inline.version>
@@ -112,7 +112,7 @@
 
         <!-- required for tests with hbase-testing-util -->
         <legacy.junit.version>4.13.2</legacy.junit.version>
-        <orc.version>2.0.3.${cdh.version}</orc.version>
+        <orc.version>1.8.3.${cdh.version}</orc.version>
         <swagger-annotations.version>1.6.0</swagger-annotations.version>
 
         <!--Commons-->
