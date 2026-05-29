@@ -10,7 +10,9 @@
  * limitations governing your use of the file.
  */
 
-package org.apache.metron.enrichment.adapters.maxmind.asn;/*
+package org.apache.metron.enrichment.adapters.maxmind.asn;
+
+/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -28,10 +30,6 @@ package org.apache.metron.enrichment.adapters.maxmind.asn;/*
  * limitations under the License.
  */
 
-import com.maxmind.geoip2.DatabaseReader;
-import com.maxmind.geoip2.exception.AddressNotFoundException;
-import com.maxmind.geoip2.exception.GeoIp2Exception;
-import com.maxmind.geoip2.model.AsnResponse;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
@@ -42,6 +40,9 @@ import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
+
+import com.cloudera.cyber.enrichment.geocode.database.types.asn.AsnDatabase;
+import com.maxmind.db.DatabaseRecord;
 import org.apache.metron.enrichment.adapters.maxmind.MaxMindDatabase;
 import org.apache.metron.enrichment.adapters.maxmind.MaxMindDbUtilities;
 import org.slf4j.Logger;
@@ -53,22 +54,22 @@ import org.slf4j.LoggerFactory;
 public enum GeoLiteAsnDatabase implements MaxMindDatabase {
   INSTANCE;
 
-  protected static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   public static final String ASN_HDFS_FILE = "asn.hdfs.file";
   public static final String ASN_HDFS_FILE_DEFAULT = "/apps/metron/asn/default/GeoLite2-ASN.tar.gz";
 
-  private static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+  private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
   private static final Lock readLock = lock.readLock();
   private static final Lock writeLock = lock.writeLock();
   private static volatile String hdfsLoc = ASN_HDFS_FILE_DEFAULT;
-  private static DatabaseReader reader = null;
+  private static AsnDatabase database = null;
 
   public enum AsnProps {
     NETWORK("network"),
     ASN("autonomous_system_number"),
     ASO("autonomous_system_organization");
-    Function<Map<String, Object>, Object> getter;
-    String simpleName;
+    final Function<Map<String, Object>, Object> getter;
+    final String simpleName;
 
     AsnProps(String simpleName) {
       this(simpleName, m -> m.get(simpleName));
@@ -79,10 +80,6 @@ public enum GeoLiteAsnDatabase implements MaxMindDatabase {
     ) {
       this.simpleName = simpleName;
       this.getter = getter;
-    }
-
-    public String getSimpleName() {
-      return simpleName;
     }
 
     public Object get(Map<String, Object> map) {
@@ -115,13 +112,8 @@ public enum GeoLiteAsnDatabase implements MaxMindDatabase {
   }
 
   @Override
-  public DatabaseReader getReader() {
-    return reader;
-  }
-
-  @Override
-  public void setReader(DatabaseReader reader) {
-    GeoLiteAsnDatabase.reader = reader;
+  public void readDatabaseContents(String hdfsFile) {
+    GeoLiteAsnDatabase.database = new AsnDatabase(hdfsFile);
   }
 
   public synchronized void updateIfNecessary(Map<String, Object> globalConfig) {
@@ -133,7 +125,7 @@ public enum GeoLiteAsnDatabase implements MaxMindDatabase {
     }
 
     // Always update if we don't have a DatabaseReader
-    if (reader == null || !hdfsLoc.equals(hdfsFile)) {
+    if (database == null || !hdfsLoc.equals(hdfsFile)) {
       // Update
       hdfsLoc = hdfsFile;
       update(hdfsFile);
@@ -155,18 +147,20 @@ public enum GeoLiteAsnDatabase implements MaxMindDatabase {
     try {
       readLock.lock();
       InetAddress addr = InetAddress.getByName(ip);
-      AsnResponse asnResponse = reader.asn(addr);
-      HashMap<String, Object> asnInfo = new HashMap<>();
-      AsnProps.ASN.set(asnInfo, asnResponse.getAutonomousSystemNumber());
-      AsnProps.ASO
-          .set(asnInfo, MaxMindDbUtilities.convertNullToEmptyString(asnResponse.getAutonomousSystemOrganization()));
-      AsnProps.NETWORK
-          .set(asnInfo, MaxMindDbUtilities.convertNullToEmptyString(asnResponse.getIpAddress()));
-
-      return Optional.of(asnInfo);
-    } catch (UnknownHostException | AddressNotFoundException e) {
+        //noinspection rawtypes
+        DatabaseRecord<Map> asnResponse = database.lookup(addr);
+      if (asnResponse != null) {
+        HashMap<String, Object> asnInfo = new HashMap<>();
+        AsnProps.ASN.set(asnInfo, database.getAsnNumber(asnResponse));
+        AsnProps.ASO
+                .set(asnInfo, database.getAutonomousSystemOrganization(asnResponse));
+        AsnProps.NETWORK
+                .set(asnInfo, database.getNetworkMask(asnResponse));
+        return Optional.of(asnInfo);
+      }
+    } catch (UnknownHostException e) {
       LOG.debug("No result found for IP {}", ip);
-    } catch (GeoIp2Exception | IOException e) {
+    } catch (IOException e) {
       LOG.warn("GeoLite2 ASN DB encountered an error", e);
     } finally {
       readLock.unlock();

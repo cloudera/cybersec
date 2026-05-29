@@ -159,8 +159,8 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.maxmind.geoip2</groupId>
-            <artifactId>geoip2</artifactId>
+            <groupId>com.maxmind.db</groupId>
+            <artifactId>maxmind-db</artifactId>
             <version>${maxmind.version}</version>
         </dependency>
 

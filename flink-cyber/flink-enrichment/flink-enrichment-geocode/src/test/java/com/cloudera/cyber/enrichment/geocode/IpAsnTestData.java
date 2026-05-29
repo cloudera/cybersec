@@ -19,17 +19,17 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.cloudera.cyber.enrichment.geocode.impl.IpAsnEnrichment.*;
+import static com.cloudera.cyber.enrichment.geocode.database.IpAsnEnrichment.*;
 
 /**
  * Small test database downloaded from the maxmind github:
- * https://github.com/maxmind/MaxMind-DB/blob/main/test-data/GeoLite2-ASN-Test.mmdb
+ * <a href="https://github.com/maxmind/MaxMind-DB/blob/main/test-data/GeoLite2-ASN-Test.mmdb">...</a>
  *
  * The json file that describes the IP ranges encoded in the database:
- * https://github.com/maxmind/MaxMind-DB/blob/main/source-data/GeoLite2-ASN-Test.json
+ * <a href="https://github.com/maxmind/MaxMind-DB/blob/main/source-data/GeoLite2-ASN-Test.json">...</a>
  *
  * The article that describes how to use the test databases:
- * https://medium.com/@ivastly/how-to-use-test-versions-of-maxmind-geoip-databases-1a600fbd074c
+ * <a href="https://medium.com/@ivastly/how-to-use-test-versions-of-maxmind-geoip-databases-1a600fbd074c">...</a>
  */
 
 public class IpAsnTestData {

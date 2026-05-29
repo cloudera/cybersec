@@ -12,7 +12,7 @@
 
 package com.cloudera.cyber.enrichment.geocode;
 
-import com.cloudera.cyber.enrichment.geocode.impl.types.GeoEnrichmentFields;
+import com.cloudera.cyber.enrichment.geocode.database.types.GeoEnrichmentFields;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.*;
@@ -21,13 +21,13 @@ import static com.cloudera.cyber.enrichment.geocode.IpGeoMap.GEOCODE_FEATURE;
 
 /**
  * Small test database downloaded from the maxmind github:
- * https://github.com/maxmind/MaxMind-DB/blob/master/test-data/GeoIP2-City-Test.mmdb
+ * <a href="https://github.com/maxmind/MaxMind-DB/blob/master/test-data/GeoIP2-City-Test.mmdb">...</a>
  *
  * The json file that describes the IP ranges encoded in the database:
- * https://github.com/maxmind/MaxMind-DB/blob/master/source-data/GeoIP2-City-Test.json
+ * <a href="https://github.com/maxmind/MaxMind-DB/blob/master/source-data/GeoIP2-City-Test.json">...</a>
  *
  * The article that describes how to use the test databases:
- * https://medium.com/@ivastly/how-to-use-test-versions-of-maxmind-geoip-databases-1a600fbd074c
+ * <a href="https://medium.com/@ivastly/how-to-use-test-versions-of-maxmind-geoip-databases-1a600fbd074c">...</a>
  */
 public class IpGeoTestData {
     public static final String GEOCODE_DATABASE_PATH = "./src/test/resources/geolite/GeoIP2-City-Test.mmdb";

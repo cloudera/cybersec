@@ -15,8 +15,8 @@ package com.cloudera.cyber.enrichemnt.stellar;
 import com.cloudera.cyber.enrichemnt.stellar.functions.GeoEnrichmentFunctions;
 import com.cloudera.cyber.enrichment.Enrichment;
 import com.cloudera.cyber.enrichment.MetronGeoEnrichment;
-import com.cloudera.cyber.enrichment.geocode.impl.IpAsnEnrichment;
-import com.cloudera.cyber.enrichment.geocode.impl.types.MetronGeoEnrichmentFields;
+import com.cloudera.cyber.enrichment.geocode.database.IpAsnEnrichment;
+import com.cloudera.cyber.enrichment.geocode.database.types.MetronGeoEnrichmentFields;
 import com.google.common.collect.ImmutableList;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
@@ -192,7 +192,6 @@ public class AsnGetEnrichmentTest {
                 .asInstanceOf(InstanceOfAssertFactories.MAP)
                 .contains(entry(MetronEnrichmentCity, MetronEnrichmentCity + TEST_RESULT_VALUE),
                         entry(MetronEnrichmentCountry, MetronEnrichmentCountry + TEST_RESULT_VALUE));
-        ;
     }
 
 

@@ -28,23 +28,14 @@ package org.apache.metron.enrichment.adapters.maxmind;/*
  * limitations under the License.
  */
 
-import com.maxmind.geoip2.DatabaseReader;
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
-import java.util.zip.GZIPInputStream;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public interface MaxMindDatabase {
   Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  String EXTENSION_MMDB = ".mmdb";
   String EXTENSION_TAR_GZ = ".tar.gz";
   String EXTENSION_MMDB_GZ = ".mmdb.gz";
 
@@ -73,13 +64,6 @@ public interface MaxMindDatabase {
   void unlockIfNecessary();
 
   /**
-   * Gets the appropriate database reader for the underlying database that's been loaded
-   * @return The DatabaseReader for the MaxMind database.
-   */
-  DatabaseReader getReader();
-  void setReader(DatabaseReader reader);
-
-  /**
    * Updates the database file, if the configuration points to a new file.
    * Implementations may need to be synchronized to avoid issues querying during updates.
    *
@@ -87,6 +71,7 @@ public interface MaxMindDatabase {
    */
   void updateIfNecessary(Map<String, Object> globalConfig);
 
+  void readDatabaseContents(String hdfsFile);
   /**
    * Update the database being queried to one backed by the provided HDFS file.
    * Access to the database should be guarded by read locks to avoid disruption while updates are occurring.
@@ -99,47 +84,11 @@ public interface MaxMindDatabase {
       hdfsFile = getHdfsFileDefault();
     }
 
-    FileSystem fs = MaxMindDbUtilities.getFileSystem();
-
-    if (hdfsFile.endsWith(MaxMindDatabase.EXTENSION_MMDB)) {
-      lockIfNecessary();
-      try (BufferedInputStream is = new BufferedInputStream(fs.open(new Path(hdfsFile)))) {
-        setReader(MaxMindDbUtilities.readNewDatabase(getReader(), hdfsFile, is));
-      } catch (IOException e) {
-        MaxMindDbUtilities.handleDatabaseIOException(hdfsFile, e);
-      } finally {
-        unlockIfNecessary();
-      }
-    } else if (hdfsFile.endsWith(MaxMindDatabase.EXTENSION_MMDB_GZ)) {
-      lockIfNecessary();
-      try (GZIPInputStream is = new GZIPInputStream(fs.open(new Path(hdfsFile)))) {
-        setReader(MaxMindDbUtilities.readNewDatabase(getReader(), hdfsFile, is));
-      } catch (IOException e) {
-        MaxMindDbUtilities.handleDatabaseIOException(hdfsFile, e);
-      } finally {
-        unlockIfNecessary();
-      }
-    } else if (hdfsFile.endsWith(MaxMindDatabase.EXTENSION_TAR_GZ)) {
-      lockIfNecessary();
-      try (TarArchiveInputStream is = new TarArchiveInputStream(
-          new GZIPInputStream(fs.open(new Path(hdfsFile))))) {
-        // Need to find the mmdb entry.
-        TarArchiveEntry entry = is.getNextTarEntry();
-        while (entry != null) {
-          if (entry.isFile() && entry.getName().endsWith(MaxMindDatabase.EXTENSION_MMDB)) {
-            try(InputStream mmdb = new BufferedInputStream(is))
-            { // Read directly from tarInput
-              setReader(MaxMindDbUtilities.readNewDatabase(getReader(), hdfsFile, mmdb));
-              break; // Don't care about the other entries, leave immediately
-            }
-          }
-          entry = is.getNextTarEntry();
-        }
-      } catch (IOException e) {
-        MaxMindDbUtilities.handleDatabaseIOException(hdfsFile, e);
-      } finally {
-        unlockIfNecessary();
-      }
+    lockIfNecessary();
+    try {
+      readDatabaseContents(hdfsFile);
+    } finally {
+      unlockIfNecessary();
     }
   }
 }

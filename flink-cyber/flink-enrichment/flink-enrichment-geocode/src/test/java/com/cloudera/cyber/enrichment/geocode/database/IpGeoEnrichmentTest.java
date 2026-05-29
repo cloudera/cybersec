@@ -10,28 +10,22 @@
  * limitations governing your use of the file.
  */
 
-package com.cloudera.cyber.enrichment.geocode.impl;
+package com.cloudera.cyber.enrichment.geocode.database;
 
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.enrichment.geocode.IpGeoTestData;
-import com.cloudera.cyber.enrichment.geocode.impl.types.GeoEnrichmentFields;
-import com.maxmind.geoip2.DatabaseProvider;
-import com.maxmind.geoip2.exception.GeoIp2Exception;
+import com.cloudera.cyber.enrichment.geocode.database.types.GeoEnrichmentFields;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class IpGeoEnrichmentTest {
     private IpGeoEnrichment ipGeoEnrichment;
@@ -44,12 +38,7 @@ public class IpGeoEnrichmentTest {
 
     @Test
     public void throwsWithNullAsnDatabaseForNullPathDb() {
-        assertThrows(IllegalArgumentException.class, () -> new IpGeoEnrichment((String) null), "Expected IllegalArgumentException");
-    }
-
-    @Test
-    public void throwsWithNullCityDatabase() {
-        assertThrows(NullPointerException.class, () -> new IpGeoEnrichment((DatabaseProvider) null), "Expected NullPointerException");
+        assertThrows(IllegalArgumentException.class, () -> new IpGeoEnrichment(null), "Expected IllegalArgumentException");
     }
 
     @Test
@@ -81,17 +70,6 @@ public class IpGeoEnrichmentTest {
         ipGeoEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, null, GeoEnrichmentFields.values(), emptyEnrichments, emptyMessages);
         Assertions.assertTrue(emptyEnrichments.isEmpty());
         Assertions.assertTrue(emptyMessages.isEmpty());
-    }
-
-    @Test
-    public void testMaxmindThrows() throws IOException, GeoIp2Exception {
-        String testExceptionMessage = "this is a test message";
-        DatabaseProvider throwingMaxmind = mock(DatabaseProvider.class);
-        when(throwingMaxmind.tryCity(any()))
-                .thenThrow(new GeoIp2Exception(testExceptionMessage), new RuntimeException());
-
-        // use non-local ip to test throwing path
-        testGeoEnrichment("100.200.200.1", DataQualityMessageLevel.ERROR, String.format(IpGeoEnrichment.GEOCODE_FAILED_MESSAGE, testExceptionMessage), new IpGeoEnrichment(throwingMaxmind));
     }
 
     private void testGeoEnrichment(String ipAddress) {

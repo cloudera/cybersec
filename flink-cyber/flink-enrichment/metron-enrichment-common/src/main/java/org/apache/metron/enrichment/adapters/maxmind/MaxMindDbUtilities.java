@@ -28,10 +28,7 @@ package org.apache.metron.enrichment.adapters.maxmind;/*
  * limitations under the License.
  */
 
-import com.maxmind.db.CHMCache;
-import com.maxmind.geoip2.DatabaseReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -47,8 +44,8 @@ import org.slf4j.LoggerFactory;
 public enum MaxMindDbUtilities {
   INSTANCE;
 
-  static Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
-  static InetAddressValidator ipvalidator = new InetAddressValidator();
+  static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  static final InetAddressValidator ipvalidator = new InetAddressValidator();
 
   /**
    * Determines if an IP is ineligible. In particular, this is used to filter before querying the database, as that requires a readlock to be set.
@@ -81,36 +78,6 @@ public enum MaxMindDbUtilities {
     return addr.isAnyLocalAddress() || addr.isLoopbackAddress()
         || addr.isSiteLocalAddress() || addr.isMulticastAddress()
         || !ipvalidator.isValidInet4Address(ipStr);
-  }
-
-  /**
-   * Logs and rethrows an IOException in a common way across implementations.
-   * @param hdfsFile The hdfsFile we were trying to read from
-   * @param e The exception we saw
-   */
-  public static void handleDatabaseIOException(String hdfsFile, IOException e) {
-    LOG.error("Unable to open new database file {}", hdfsFile, e);
-    throw new IllegalStateException("Unable to update MaxMind database");
-  }
-
-  /**
-   * Reads a new Database from a given HDFS file
-   * @param reader The DatabaseReader to use to read the file
-   * @param hdfsFile The HDFS file to read
-   * @param is An InputStream for use with the reader
-   * @return The DatabaseReader that is set up with the new file
-   * @throws IOException If there is an issue reading the file.
-   */
-  public static DatabaseReader readNewDatabase(DatabaseReader reader, String hdfsFile, InputStream is) throws IOException {
-    LOG.info("Update to GeoIP data started with {}", hdfsFile);
-    // InputStream based DatabaseReaders are always in memory.
-    DatabaseReader newReader = new DatabaseReader.Builder(is).withCache(new CHMCache()).build();
-    // If we've never set a reader, don't close the old one
-    if (reader != null) {
-      reader.close();
-    }
-    LOG.info("Finished update to GeoIP data started with {}", hdfsFile);
-    return newReader;
   }
 
   /**

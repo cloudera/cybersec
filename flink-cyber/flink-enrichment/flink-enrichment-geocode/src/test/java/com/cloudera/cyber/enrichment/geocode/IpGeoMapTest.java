@@ -40,7 +40,7 @@ public class IpGeoMapTest {
 
     @Test
     public void testSingleIpAddress() {
-        Map<String, String> inputFields = new HashMap<String, String>() {{
+        Map<String, String> inputFields = new HashMap<>() {{
             put(SINGLE_IP_FIELD_NAME, IpGeoTestData.COUNTRY_ONLY_IPv6);
         }};
         Message output = testGeoMap(inputFields);
@@ -85,7 +85,7 @@ public class IpGeoMapTest {
 
     @Test
     public void testThrowsCityDatabaseEmptyFile() {
-        String emptyFilePath = "./src/test/resources/geolite/invalid_maxmind_db";
+        String emptyFilePath = "./src/test/resources/geolite/invalid_maxmind_db.mmdb";
         File databaseFile = new File(emptyFilePath);
         Assertions.assertTrue(databaseFile.exists());
         Assertions.assertTrue(databaseFile.length() > 0);
@@ -95,7 +95,7 @@ public class IpGeoMapTest {
 
     @Test
     public void testThrowsBadFilesystem() {
-        String badFilesystemPath = "bad:/src/test/resources/geolite/invalid_maxmind_db";
+        String badFilesystemPath = "bad:/src/test/resources/geolite/invalid_maxmind_db.mmdb";
         IpGeoMap map = new IpGeoMap(badFilesystemPath, ENRICH_FIELD_NAMES, null);
         assertThrows(IllegalStateException.class, () -> map.open(new Configuration()), "Expected IllegalStateException");
     }

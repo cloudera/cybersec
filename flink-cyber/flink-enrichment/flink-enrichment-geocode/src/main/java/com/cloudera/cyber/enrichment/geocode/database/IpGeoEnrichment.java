@@ -10,15 +10,14 @@
  * limitations governing your use of the file.
  */
 
-package com.cloudera.cyber.enrichment.geocode.impl;
+package com.cloudera.cyber.enrichment.geocode.database;
 
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.enrichment.Enrichment;
 import com.cloudera.cyber.enrichment.SingleValueEnrichment;
-import com.cloudera.cyber.enrichment.geocode.impl.types.GeoFields;
-import com.maxmind.geoip2.DatabaseProvider;
-import com.maxmind.geoip2.model.CityResponse;
+import com.cloudera.cyber.enrichment.geocode.database.types.GeoFields;
+import com.cloudera.cyber.enrichment.geocode.database.types.geo.GeoDatabase;
 
 import java.net.InetAddress;
 import java.util.AbstractMap;
@@ -26,7 +25,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -35,21 +33,18 @@ import java.util.stream.Stream;
  * Looks up the locations of IPv4 or IPv6 addresses in MaxMind GeoLite2 city database and returns
  * the locations for that IP.
  */
-public class IpGeoEnrichment extends MaxMindBase {
+public class IpGeoEnrichment extends IpEnrichment {
 
     public static final String GEOCODE_FEATURE = "geo";
     public static final String GEOCODE_FAILED_MESSAGE = "Geocode failed '%s'";
-
-    public IpGeoEnrichment(DatabaseProvider database) {
-        super(database);
-    }
+    GeoDatabase database;
 
     public IpGeoEnrichment(String path) {
-        super(path);
+       this.database = new GeoDatabase(path);
     }
 
     /**
-     * Lookup the IP in the city database and return the geo location enrichment fields.
+     * Lookup the IP in the city database and return the geolocation enrichment fields.
      *
      * @param ipFieldValue A valid IPv4 or IPv6 address represented in a string.
      * @param geoFieldSet  Only Geocoding fields specified are returned.
@@ -59,10 +54,12 @@ public class IpGeoEnrichment extends MaxMindBase {
         InetAddress ipAddress = convertToIpAddress(enrichment, ipFieldValue, qualityMessages);
         if (ipAddress != null) {
             try {
-                Optional<CityResponse> response = database.tryCity(ipAddress);
-                response.ifPresent(cityResponse -> Stream.of(geoFieldSet).map(field -> new AbstractMap.SimpleEntry<>(nameFunction.apply(field), field.getFunction().apply(cityResponse))).
+                Map<String, Object> ipGeoMap = this.database.lookup(ipAddress);
+                if (ipGeoMap != null) {
+                     Stream.of(geoFieldSet).map(field -> new AbstractMap.SimpleEntry<>(nameFunction.apply(field), field.getFunction().apply(database, ipGeoMap))).
                         filter(entry -> Objects.nonNull(entry.getValue())).
-                        forEach(entry -> enrichment.enrich(geoEnrichments, entry.getKey(), entry.getValue())));
+                        forEach(entry -> enrichment.enrich(geoEnrichments, entry.getKey(), entry.getValue()));
+                }
             } catch (Exception e) {
                 enrichment.addQualityMessage(qualityMessages, DataQualityMessageLevel.ERROR, String.format(GEOCODE_FAILED_MESSAGE, e.getMessage()));
             }
