@@ -1,6 +1,5 @@
 package com.cloudera.cyber.enrichment.geocode.database;
 
-import com.google.common.base.Preconditions;
 import com.maxmind.db.CHMCache;
 import com.maxmind.db.Reader;
 import lombok.NonNull;
@@ -15,6 +14,7 @@ import org.apache.flink.core.fs.Path;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
+import org.apache.flink.util.Preconditions;
 
 @Slf4j
 public class MaxmindDatabase {
