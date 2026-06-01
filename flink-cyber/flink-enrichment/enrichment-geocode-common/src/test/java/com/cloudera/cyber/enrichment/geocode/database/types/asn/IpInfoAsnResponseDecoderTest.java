@@ -24,7 +24,7 @@ public class IpInfoAsnResponseDecoderTest extends AsnDatabaseResponseBaseTest {
         assertEquals(500L, decoder.getAsnNumber(mapWithAsn));
 
         Map<String, Object> mapWithMalformedAsn = new HashMap<>();
-        mapWithAsn.put(IpInfoAsnResponseDecoder.AS_NUM_KEYWORD, "500");
+        mapWithMalformedAsn.put(IpInfoAsnResponseDecoder.AS_NUM_KEYWORD, "500");
         assertNull(decoder.getAsnNumber(mapWithMalformedAsn));
     }
 

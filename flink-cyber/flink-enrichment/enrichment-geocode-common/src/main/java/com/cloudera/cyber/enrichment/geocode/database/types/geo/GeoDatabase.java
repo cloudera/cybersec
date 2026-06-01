@@ -1,7 +1,6 @@
 package com.cloudera.cyber.enrichment.geocode.database.types.geo;
 
 import com.cloudera.cyber.enrichment.geocode.database.MaxmindDatabase;
-import com.maxmind.db.Reader;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -11,11 +10,6 @@ import static com.cloudera.cyber.enrichment.geocode.database.types.geo.ValueConv
 
 public class GeoDatabase extends MaxmindDatabase {
     private final GeoDatabaseResponseDecoder responseDecoder;
-
-    public GeoDatabase(Reader database) {
-        super(database);
-        this.responseDecoder = getDecoder();
-    }
 
     public GeoDatabase(String geocodeDatabasePath) {
         super(geocodeDatabasePath);

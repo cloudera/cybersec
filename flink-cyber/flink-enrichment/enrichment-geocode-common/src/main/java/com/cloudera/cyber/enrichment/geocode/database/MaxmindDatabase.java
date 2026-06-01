@@ -7,17 +7,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.BufferedInputStream;
 import java.util.zip.GZIPInputStream;
 import org.apache.flink.util.Preconditions;
 
 @Slf4j
-public class MaxmindDatabase {
+public class MaxmindDatabase implements AutoCloseable {
 
     private static final String EXTENSION_MMDB = ".mmdb";
     private static final String EXTENSION_TAR_GZ = ".tar.gz";
@@ -42,7 +42,7 @@ public class MaxmindDatabase {
     }
 
     private static com.maxmind.db.Reader getDatabaseProvider(String geocodeDatabasePath) {
-        Preconditions.checkArgument(StringUtils.isNotBlank(geocodeDatabasePath), "The path to Maxmind database is blank '%s'", geocodeDatabasePath);
+        Preconditions.checkArgument(geocodeDatabasePath != null && !geocodeDatabasePath.isBlank(), "The path to Maxmind database is blank '%s'", geocodeDatabasePath);
         return loadDatabaseProvider(geocodeDatabasePath);
     }
 
@@ -70,12 +70,12 @@ public class MaxmindDatabase {
 
     private static InputStream createDatabaseInputStream(String geocodeDatabasePath, FileSystem fileSystem) throws IOException {
         if (geocodeDatabasePath.endsWith(EXTENSION_MMDB)) {
-            return fileSystem.open(new Path(geocodeDatabasePath));
+            return new BufferedInputStream(fileSystem.open(new Path(geocodeDatabasePath)));
         } else if (geocodeDatabasePath.endsWith(EXTENSION_MMDB_GZ)) {
-            return new GZIPInputStream(fileSystem.open(new Path(geocodeDatabasePath)));
+            return new GZIPInputStream(new BufferedInputStream(fileSystem.open(new Path(geocodeDatabasePath))));
         } else if (geocodeDatabasePath.endsWith(EXTENSION_TAR_GZ)) {
             TarArchiveInputStream is = new TarArchiveInputStream(
-                new GzipCompressorInputStream(fileSystem.open(new Path(geocodeDatabasePath))));
+                new GzipCompressorInputStream(new BufferedInputStream(fileSystem.open(new Path(geocodeDatabasePath)))));
             // Need to find the mmdb entry.
             TarArchiveEntry entry = is.getNextEntry();
             while (entry != null) {

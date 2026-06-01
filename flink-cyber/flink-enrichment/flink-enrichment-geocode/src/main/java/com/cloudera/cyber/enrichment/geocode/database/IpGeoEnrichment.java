@@ -19,6 +19,7 @@ import com.cloudera.cyber.enrichment.SingleValueEnrichment;
 import com.cloudera.cyber.enrichment.geocode.database.types.GeoFields;
 import com.cloudera.cyber.enrichment.geocode.database.types.geo.GeoDatabase;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -80,4 +81,8 @@ public class IpGeoEnrichment extends IpEnrichment {
         }
     }
 
+    @Override
+    public void close() throws IOException {
+        this.database.close();
+    }
 }

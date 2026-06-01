@@ -48,8 +48,6 @@
         <lombok.version>1.18.30</lombok.version>
         <evo-inflector.version>1.2.2</evo-inflector.version>
 
-        <commons-io.version>2.6</commons-io.version>
-        <commons-lang3.version>3.9</commons-lang3.version>
         <springdoc-openapi.version>1.6.11</springdoc-openapi.version>
         <json.version>20220320</json.version>
 
@@ -78,7 +76,6 @@
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>${commons-io.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>

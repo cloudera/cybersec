@@ -61,4 +61,11 @@ public class IpAsnMap extends RichMapFunction<Message, Message> {
             throw new IllegalStateException(String.format("Could not read asn database %s", asnDatabasePath));
         }
     }
+
+    @Override
+    public void close() throws Exception {
+        if (this.asnEnrichment != null) {
+            asnEnrichment.close();
+        }
+    }
 }

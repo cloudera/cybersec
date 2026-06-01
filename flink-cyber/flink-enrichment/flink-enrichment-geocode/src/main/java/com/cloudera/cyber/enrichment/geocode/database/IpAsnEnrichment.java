@@ -19,6 +19,7 @@ import com.cloudera.cyber.enrichment.SingleValueEnrichment;
 import com.cloudera.cyber.enrichment.geocode.database.types.asn.AsnDatabase;
 import com.maxmind.db.DatabaseRecord;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.List;
@@ -72,5 +73,10 @@ public class IpAsnEnrichment extends IpEnrichment {
         if (ipFieldValue != null) {
             lookup(enrichmentBiFunction.apply(fieldName, ASN_FEATURE), ipFieldValue, extensions, qualityMessages);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.database.close();
     }
 }

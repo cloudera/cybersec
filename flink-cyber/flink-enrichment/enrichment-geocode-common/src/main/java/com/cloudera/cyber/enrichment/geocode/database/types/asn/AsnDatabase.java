@@ -2,7 +2,6 @@ package com.cloudera.cyber.enrichment.geocode.database.types.asn;
 
 import com.cloudera.cyber.enrichment.geocode.database.MaxmindDatabase;
 import com.maxmind.db.DatabaseRecord;
-import com.maxmind.db.Reader;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -11,11 +10,6 @@ import java.util.Map;
 @SuppressWarnings("rawtypes")
 public class AsnDatabase extends MaxmindDatabase {
     private final AsnDatabaseResponseDecoder responseDecoder;
-
-    public AsnDatabase(Reader database) {
-        super(database);
-        this.responseDecoder = getDecoder();
-    }
 
     public AsnDatabase(String geocodeDatabasePath) {
         super(geocodeDatabasePath);

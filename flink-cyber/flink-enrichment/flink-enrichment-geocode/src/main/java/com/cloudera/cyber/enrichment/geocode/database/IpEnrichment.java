@@ -18,6 +18,7 @@ import com.cloudera.cyber.enrichment.Enrichment;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.validator.routines.InetAddressValidator;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
@@ -28,6 +29,7 @@ public abstract class IpEnrichment {
     public static final String FIELD_VALUE_IS_NOT_A_VALID_IP_ADDRESS = "'%s' is not a valid IP address.";
     public static final String MAXMIND_FAILED_MESSAGE = "Maxmind lookup failed '%s'";
 
+    public abstract void close() throws IOException;
 
     protected InetAddress convertToIpAddress(Enrichment enrichment, Object ipValueObject, List<DataQualityMessage> qualityMessages) {
         InetAddress inetAddress = null;

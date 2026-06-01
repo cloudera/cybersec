@@ -123,7 +123,9 @@
         <commons-cli.version>1.5.0</commons-cli.version>
         <commons-vfs2.version>2.6.0</commons-vfs2.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-compress.version>1.26.0</commons-compress.version>
+        <commons-compress.version>1.26.2</commons-compress.version>
+        <commons-lang3.version>3.14.0</commons-lang3.version>
+        <commons-io.version>2.16.1</commons-io.version>
 
         <!--Maven-->
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
@@ -454,9 +456,17 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.10</version>
+                <version>${commons-lang3.version}</version>
                 <scope>compile</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-hdfs-client</artifactId>
