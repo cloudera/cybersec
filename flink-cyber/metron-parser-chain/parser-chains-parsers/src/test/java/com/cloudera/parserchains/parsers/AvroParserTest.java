@@ -19,20 +19,17 @@ import static org.assertj.core.api.Assertions.entry;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import com.cloudera.cyber.parser.MessageToParse;
-import com.cloudera.parserchains.core.FieldName;
-import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.MessageToParseFieldValue;
-import com.cloudera.parserchains.core.StringFieldValue;
+import com.cloudera.parserchains.core.*;
 import com.google.common.collect.ImmutableMap;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-import org.apache.avro.AvroRuntimeException;
-import org.apache.avro.Schema;
-import org.apache.avro.SchemaParseException;
+import org.apache.avro.*;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
@@ -47,6 +44,7 @@ import org.apache.avro.message.SchemaStore;
 import org.apache.commons.io.FileUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class AvroParserTest {
 
@@ -60,6 +58,14 @@ class AvroParserTest {
     private static final String NESTED_SCHEMA = "/avro/log_event.schema";
     private static final String DATA_PATH = "/avro/avro-data.avro";
     private static final String INPUT_FIELD = "avroSource";
+    public static final String AVRO_SINGLE_OBJECT_ENCODING_PARENT_FIELD = "avroSingleObjectEncoding";
+    public static final String AVRO_SINGLE_OBJECT_IDENTIFIER = "identifier";
+    public static final String AVRO_SINGLE_OBJECT_SCHEMA_FINGERPRINT = "schemaFingerprint";
+    public static final String AVRO_IDENTIFIER_PARSED_FIELD = String.join(".", AVRO_SINGLE_OBJECT_ENCODING_PARENT_FIELD, AVRO_SINGLE_OBJECT_IDENTIFIER);
+    public static final String AVRO_SCHEMA_FINGERPRINT_FIELD = String.join(".", AVRO_SINGLE_OBJECT_ENCODING_PARENT_FIELD, AVRO_SINGLE_OBJECT_SCHEMA_FINGERPRINT);
+
+    @TempDir
+    Path tempDir;
 
     @Test
     public void testSchemaFileRead() throws IOException {
@@ -75,6 +81,72 @@ class AvroParserTest {
                 entry(FieldName.of("number"), StringFieldValue.of("7")),
                 entry(FieldName.of("innerRecord"), StringFieldValue.of("{\"age\": 13}")),
                 entry(FieldName.of("tes3"), StringFieldValue.of("{td3=1}")));
+    }
+
+    /**
+     * Test single object encoding (2 byte id buffer followed by 8 byte fingerprint) followed
+     * by parsing with a schema that includes the single object encoding header.  Some customers are using older
+     * versions of tools that don't work with modern avro decoding.
+     *
+     * @throws IOException Fail test if any avro serialization or file operations fails.  No failures expected.
+     * @throws NoSuchAlgorithmException If creating the fingerprint fails. No failures expected.
+     */
+    @Test
+    public void testSingleObjectEncodedMessageWithoutEncodingDetection() throws IOException, NoSuchAlgorithmException {
+        testEncodingDetection("false", true);
+        testEncodingDetection(null, false);
+        testEncodingDetection("true", false);
+    }
+
+    private void testEncodingDetection(String detectEncoding, boolean includeSingleObjectInReadSchema) throws IOException, NoSuchAlgorithmException {
+        // create the schema without any encoding headers
+        Schema originalSchema = buildUserSchema(false);
+
+        // serialize the message using single object encoding
+        Map<String, Object> expectedValues = new HashMap<>();
+        expectedValues.put("userId", "ssmith");
+        expectedValues.put("username", "Sue Smith");
+        GenericRecord record = createGenericRecordFromMap(expectedValues, originalSchema);
+        Message input = serializeAvroToMessage(record, originalSchema, true);
+
+        // write the extended schema to a file
+        Schema readSchema = buildUserSchema(includeSingleObjectInReadSchema);
+        Path schemaPath = tempDir.resolve("schemaWithEncoding.schema").toAbsolutePath();
+        Files.writeString(schemaPath, readSchema.toString());
+
+        AvroParser parser = new AvroParser();
+        parser.schemaPath(schemaPath.toString()).inputField(INPUT_FIELD).detectEncoding(detectEncoding).
+                normalizer(AvroParser.Normalizers.UNFOLD_NESTED.name());
+        Message output = parser.parse(input);
+        expectedValues.forEach((k,v) -> assertThat(output.getField(FieldName.of(k))).isPresent().hasValue(StringFieldValue.of((String)v)));
+
+        if (includeSingleObjectInReadSchema) {
+            byte[] fingerPrint = SchemaNormalization.parsingFingerprint("CRC-64-AVRO", originalSchema);
+            assertThat(output.getField(FieldName.of(AVRO_IDENTIFIER_PARSED_FIELD))).isPresent().hasValue(StringFieldValue.of("[-61, 1]"));
+            assertThat(output.getField(FieldName.of(AVRO_SCHEMA_FINGERPRINT_FIELD))).isPresent().hasValue(StringFieldValue.of(Arrays.toString(fingerPrint)));
+        }
+    }
+
+    private Schema buildUserSchema(boolean includeSingleObjectEncoding) {
+        // single object encoding record
+        Schema singleObjectEncodingSchema = SchemaBuilder.record("AvroSingleObjectEncoding").fields().
+                name(AVRO_SINGLE_OBJECT_IDENTIFIER).type(Schema.createFixed("MagicMarker", "protocol id bytes", "com.example", 2)).noDefault().
+                name(AVRO_SINGLE_OBJECT_SCHEMA_FINGERPRINT).type(Schema.createFixed("CRC64Fingerprint", "writer schema fingerprint", "com.example", 8)).noDefault().
+                endRecord();
+        // create the beginning of the record
+        SchemaBuilder.FieldAssembler<Schema> schemaBuilder = SchemaBuilder.record("UserWithEncoding")
+                .namespace("com.example")
+                .fields();
+
+        // optionally add the single object encoding
+        if (includeSingleObjectEncoding) {
+            schemaBuilder = schemaBuilder.name(AVRO_SINGLE_OBJECT_ENCODING_PARENT_FIELD).type(singleObjectEncodingSchema).noDefault();
+        }
+        // return the rest of the schema
+        return schemaBuilder
+                .name("userId").type().stringType().noDefault()
+                .name("username").type().stringType().noDefault()
+                .endRecord();
     }
 
     @Test

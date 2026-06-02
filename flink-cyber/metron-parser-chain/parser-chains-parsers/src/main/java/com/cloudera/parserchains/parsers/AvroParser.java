@@ -61,6 +61,7 @@ public class AvroParser implements Parser {
     MessageDecoder.BaseDecoder<GenericRecord> binaryMessageDecoder;
     MessageDecoder.BaseDecoder<GenericRecord> rawMessageDecoder;
     private Normalizer normalizer;
+    private boolean detectEncoding;
 
 
     public AvroParser() {
@@ -69,9 +70,10 @@ public class AvroParser implements Parser {
         normalizer = AvroParser.Normalizers.valueOf(DEFAULT_NORMALIZER);
         schemaHasNestedStructure = true;
         schemaStore = null;
+        detectEncoding = true;
     }
 
-    @Configurable(
+       @Configurable(
             key = "input",
             label = "Input Field",
             description = "The input field to parse. Default value: '" + DEFAULT_INPUT_FIELD + "'",
@@ -154,6 +156,20 @@ public class AvroParser implements Parser {
         return this;
     }
 
+    @Configurable(
+            key="detectEncoding",
+            label="Detect Encoding",
+            description="If true, detect and decode single object encoding headers.  Check for schema fingerprint match." +
+                         "If false, do not detect or decode headers.  Use raw decoder to decode messages.",
+            defaultValue="true"
+    )
+    public AvroParser detectEncoding(String detectEncoding) {
+        if (StringUtils.isNotBlank(detectEncoding)) {
+            this.detectEncoding = Boolean.parseBoolean(detectEncoding);
+        }
+        return this;
+    }
+
     @Override
     public Message parse(Message input) {
         Message.Builder builder = Message.builder().withFields(input);
@@ -199,7 +215,7 @@ public class AvroParser implements Parser {
         MessageDecoder.BaseDecoder<GenericRecord> decoder;
         // single object encoding consists of 2 marker bytes followed by 8 bytes of schema fingerprint
         // if the first 2 marker bytes match the single object encoding, use BinaryMessageDecoder
-        if (bytes.length >= 10 && bytes[0] == -61 && bytes[1] == 1) {
+        if (detectEncoding && bytes.length >= 10 && bytes[0] == -61 && bytes[1] == 1) {
             decoder = binaryMessageDecoder;
         } else {
             // otherwise, message does not have a header, use the raw decoder
