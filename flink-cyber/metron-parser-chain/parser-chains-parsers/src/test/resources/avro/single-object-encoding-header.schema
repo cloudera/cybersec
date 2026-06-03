@@ -1,0 +1,26 @@
+{
+  "type": "record",
+  "name": "AvroSingleObjectEncoding",
+  "namespace": "com.example.schema",
+  "doc": "A schema representing the header used for Avro Single Object Encoding.",
+  "fields": [
+    {
+      "name": "identifier",
+      "type": {
+        "type": "fixed",
+        "name": "MagicMarker",
+        "size": 2
+      },
+      "doc": "The two-byte marker (C3 01) that indicates Avro Single Object Encoding."
+    },
+    {
+      "name": "schema_fingerprint",
+      "type": {
+        "type": "fixed",
+        "name": "CRC64Fingerprint",
+        "size": 8
+      },
+      "doc": "The 8-byte little-endian CRC-64-AVRO fingerprint of the writer's schema."
+    }
+  ]
+}
