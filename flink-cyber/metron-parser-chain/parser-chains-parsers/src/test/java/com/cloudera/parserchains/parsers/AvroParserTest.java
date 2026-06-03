@@ -435,7 +435,7 @@ class AvroParserTest {
         schemaStore.addSchema(schema);
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            MessageEncoder<GenericRecord> encoder = new BinaryMessageEncoder<>(new GenericData(), schema);
+            MessageEncoder<GenericRecord> encoder = new RawMessageEncoder<>(new GenericData(), schema);
             encoder.encode(record, outputStream);
             return outputStream.toByteArray();
         }

@@ -27,11 +27,7 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.JsonDecoder;
-import org.apache.avro.message.BinaryMessageDecoder;
-import org.apache.avro.message.BinaryMessageEncoder;
-import org.apache.avro.message.MessageDecoder;
-import org.apache.avro.message.RawMessageDecoder;
-import org.apache.avro.message.SchemaStore;
+import org.apache.avro.message.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.core.fs.FSDataInputStream;
 import org.apache.flink.core.fs.FileSystem;
@@ -188,7 +184,7 @@ public class AvroParser implements Parser {
         GenericRecord record = jsonToAvro(testTextToParse, schema);
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            BinaryMessageEncoder<GenericRecord> encoder = new BinaryMessageEncoder<>(new GenericData(), schema);
+            RawMessageEncoder<GenericRecord> encoder = new RawMessageEncoder<>(new GenericData(), schema);
             encoder.encode(record, outputStream);
             return outputStream.toByteArray();
         }
