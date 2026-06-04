@@ -70,7 +70,7 @@ public class IpAsnEnrichment extends IpEnrichment {
             //noinspection unchecked
             ((Collection<Object>) ipFieldValue).forEach(ip -> lookup(enrichment, ip, extensions, qualityMessages));
         }
-        if (ipFieldValue != null) {
+        else if (ipFieldValue != null) {
             lookup(enrichmentBiFunction.apply(fieldName, ASN_FEATURE), ipFieldValue, extensions, qualityMessages);
         }
     }

@@ -2,7 +2,6 @@ package com.cloudera.cyber.enrichment.geocode.database;
 
 import com.maxmind.db.CHMCache;
 import com.maxmind.db.Reader;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -13,37 +12,58 @@ import org.apache.flink.core.fs.Path;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPInputStream;
 import org.apache.flink.util.Preconditions;
 
 @Slf4j
 public class MaxmindDatabase implements AutoCloseable {
-
+    private static final ConcurrentHashMap<String, Reader> READER_CACHE = new ConcurrentHashMap<>();
     private static final String EXTENSION_MMDB = ".mmdb";
     private static final String EXTENSION_TAR_GZ = ".tar.gz";
     private static final String EXTENSION_MMDB_GZ = ".mmdb.gz";
 
-    @NonNull
-    protected final Reader database;
+    protected Reader database;
+    private final String databasePath;
     protected final MaxmindDatabaseVendor databaseVendor;
 
-    public MaxmindDatabase(Reader database) {
+    public MaxmindDatabase(Reader database, String databasePath) {
         Preconditions.checkNotNull(database);
         this.database = database;
+        this.databasePath = databasePath;
         this.databaseVendor = getVendor(database);
     }
 
     public MaxmindDatabase(String geocodeDatabasePath) {
-        this(getDatabaseProvider(geocodeDatabasePath));
+        this(getDatabaseProvider(geocodeDatabasePath), geocodeDatabasePath);
     }
 
     public void close() throws IOException {
-        this.database.close();
+        this.database = READER_CACHE.compute(databasePath, MaxmindDatabase::cleanupReader);
+    }
+
+    private static Reader cleanupReader(String databasePath, Reader reader) {
+        if (reader != null) {
+            try {
+                reader.close();
+            } catch (IOException ioe) {
+                log.error("Closing reader failed.");
+            }
+        }
+        return null;
     }
 
     private static com.maxmind.db.Reader getDatabaseProvider(String geocodeDatabasePath) {
         Preconditions.checkArgument(geocodeDatabasePath != null && !geocodeDatabasePath.isBlank(), "The path to Maxmind database is blank '%s'", geocodeDatabasePath);
-        return loadDatabaseProvider(geocodeDatabasePath);
+        return READER_CACHE.compute(geocodeDatabasePath, MaxmindDatabase::intializeReader);
+    }
+
+    private static Reader intializeReader(String databasePath, Reader reader) {
+        if (reader != null) {
+            return reader;
+        } else {
+            return loadDatabaseProvider(databasePath);
+        }
     }
 
     private static com.maxmind.db.Reader loadDatabaseProvider(String geocodeDatabasePath) {

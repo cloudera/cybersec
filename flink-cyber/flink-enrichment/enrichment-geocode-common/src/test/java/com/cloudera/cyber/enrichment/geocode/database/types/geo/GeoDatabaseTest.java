@@ -64,12 +64,6 @@ public class GeoDatabaseTest extends MaxmindDatabaseTest {
             assertNull(database.getLocationId(ipv6));
             assertNull(database.getPostalCode(ipv6));
             assertNull(database.getState(ipv6));
-        }
-    }
-
-    @Test
-    public void testLocationPointWithMissingLatOrLong() throws URISyntaxException, IOException {
-        try (GeoDatabase database = new GeoDatabase(resource.getFilePath(MAXMIND_GEO_MMDB))) {
 
             assertNull(database.getLocationPoint(Collections.emptyMap()));
 
