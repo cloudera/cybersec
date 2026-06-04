@@ -18,14 +18,6 @@
 package org.apache.metron.enrichment.adapters.maxmind.geo;
 
 import ch.hsr.geohash.WGS84Point;
-import com.maxmind.geoip2.DatabaseReader;
-import com.maxmind.geoip2.exception.AddressNotFoundException;
-import com.maxmind.geoip2.exception.GeoIp2Exception;
-import com.maxmind.geoip2.model.CityResponse;
-import com.maxmind.geoip2.record.City;
-import com.maxmind.geoip2.record.Country;
-import com.maxmind.geoip2.record.Location;
-import com.maxmind.geoip2.record.Postal;
 import java.io.IOException;
 import java.lang.invoke.MethodHandles;
 import java.net.InetAddress;
@@ -36,6 +28,8 @@ import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
+
+import com.cloudera.cyber.enrichment.geocode.database.types.geo.GeoDatabase;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.metron.enrichment.adapters.maxmind.MaxMindDatabase;
@@ -49,16 +43,16 @@ import org.slf4j.LoggerFactory;
 public enum GeoLiteCityDatabase implements MaxMindDatabase {
   INSTANCE;
 
-  protected static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
+  private static final Logger LOG = LoggerFactory.getLogger(MethodHandles.lookup().lookupClass());
   public static final String GEO_HDFS_FILE = "geo.hdfs.file";
   public static final String GEO_HDFS_FILE_DEFAULT = "/tmp/flink-cyber/reference-data/GeoLite2-City.mmdb";
   public static final String GEO_HDFS_FILE_DEFAULT_FALLBACK = "/tmp/flink-cyber/reference-data/GeoLite2-City.mmdb";
 
-  private static ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+  private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
   private static final Lock readLock = lock.readLock();
   private static final Lock writeLock = lock.writeLock();
   private static volatile String hdfsLoc = GEO_HDFS_FILE_DEFAULT;
-  private static DatabaseReader reader = null;
+  private static GeoDatabase database = null;
 
   public enum GeoProps {
     LOC_ID("locID"),
@@ -70,8 +64,8 @@ public enum GeoLiteCityDatabase implements MaxMindDatabase {
     LONGITUDE("longitude"),
     LOCATION_POINT("location_point"),
     ;
-    Function<Map<String, String>, String> getter;
-    String simpleName;
+    final Function<Map<String, String>, String> getter;
+    final String simpleName;
 
     GeoProps(String simpleName) {
       this(simpleName, m -> m.get(simpleName));
@@ -116,16 +110,6 @@ public enum GeoLiteCityDatabase implements MaxMindDatabase {
     writeLock.unlock();
   }
 
-  @Override
-  public DatabaseReader getReader() {
-    return reader;
-  }
-
-  @Override
-  public void setReader(DatabaseReader reader) {
-    GeoLiteCityDatabase.reader = reader;
-  }
-
   public synchronized void updateIfNecessary(Map<String, Object> globalConfig) {
     // Reload database if necessary (file changes on HDFS)
     LOG.trace("Determining if GeoIpDatabase update required");
@@ -136,7 +120,7 @@ public enum GeoLiteCityDatabase implements MaxMindDatabase {
     }
 
     // Always update if we don't have a DatabaseReader
-    if (reader == null || !hdfsLoc.equals(hdfsFile)) {
+    if (database == null || !hdfsLoc.equals(hdfsFile)) {
       // Update
       hdfsLoc = hdfsFile;
       update(hdfsFile);
@@ -145,7 +129,12 @@ public enum GeoLiteCityDatabase implements MaxMindDatabase {
     }
   }
 
-  protected String determineHdfsDirWithFallback(Map<String, Object> globalConfig, String hdfsFile, String hdfsFallbackFile) {
+  @Override
+  public void readDatabaseContents(String hdfsFile) {
+    GeoLiteCityDatabase.database = new GeoDatabase(hdfsFile);
+  }
+
+  String determineHdfsDirWithFallback(Map<String, Object> globalConfig, String hdfsFile, String hdfsFallbackFile) {
     // GeoLite2 City has the case where our new default isn't the old, but we want to fallback if needed.
     // Only consider fallback if the user hasn't specified a location via config.
     if (!globalConfig.containsKey(GEO_HDFS_FILE)) {
@@ -167,7 +156,7 @@ public enum GeoLiteCityDatabase implements MaxMindDatabase {
     return hdfsFile;
   }
 
-  protected boolean hdfsPathsExist(FileSystem fs, String hdfsFile, String fallbackFile) throws IOException {
+  private boolean hdfsPathsExist(FileSystem fs, String hdfsFile, String fallbackFile) throws IOException {
     return !fs.exists(new Path(hdfsFile)) && fs.exists(new Path(fallbackFile));
   }
 
@@ -184,38 +173,37 @@ public enum GeoLiteCityDatabase implements MaxMindDatabase {
     try {
       readLock.lock();
       InetAddress addr = InetAddress.getByName(ip);
-      CityResponse cityResponse = reader.city(addr);
-      HashMap<String, String> geoInfo = new HashMap<>();
+      Map<String, Object> response = database.lookup(addr);
+      if (response != null) {
+        HashMap<String, String> geoInfo = new HashMap<>();
 
-      Country country = cityResponse.getCountry();
-      City city = cityResponse.getCity();
-      Postal postal = cityResponse.getPostal();
-      Location location = cityResponse.getLocation();
+        GeoProps.LOC_ID.set(geoInfo, MaxMindDbUtilities.convertNullToEmptyString(database.getLocationId(response)));
+        GeoProps.COUNTRY.set(geoInfo, MaxMindDbUtilities.convertNullToEmptyString(database.getCountry(response)));
+        GeoProps.CITY.set(geoInfo, MaxMindDbUtilities.convertNullToEmptyString(database.getCity(response)));
+        GeoProps.POSTAL_CODE.set(geoInfo, MaxMindDbUtilities.convertNullToEmptyString(database.getPostalCode(response)));
+        GeoProps.DMA_CODE.set(geoInfo, MaxMindDbUtilities.convertNullToEmptyString(database.getDmaCode(response)));
 
-      GeoProps.LOC_ID.set(geoInfo, MaxMindDbUtilities.convertNullToEmptyString(city.getGeoNameId()));
-      GeoProps.COUNTRY.set(geoInfo, MaxMindDbUtilities.convertNullToEmptyString(country.getIsoCode()));
-      GeoProps.CITY.set(geoInfo, MaxMindDbUtilities.convertNullToEmptyString(city.getName()));
-      GeoProps.POSTAL_CODE.set(geoInfo, MaxMindDbUtilities.convertNullToEmptyString(postal.getCode()));
-      GeoProps.DMA_CODE.set(geoInfo, MaxMindDbUtilities.convertNullToEmptyString(location.getMetroCode()));
+        Double latitudeRaw = database.getLatitude(response);
+        String latitude = MaxMindDbUtilities.convertNullToEmptyString(latitudeRaw);
+        GeoProps.LATITUDE.set(geoInfo, latitude);
 
-      Double latitudeRaw = location.getLatitude();
-      String latitude = MaxMindDbUtilities.convertNullToEmptyString(latitudeRaw);
-      GeoProps.LATITUDE.set(geoInfo, latitude);
+        Double longitudeRaw = database.getLongitude(response);
+        String longitude = MaxMindDbUtilities.convertNullToEmptyString(longitudeRaw);
+        GeoProps.LONGITUDE.set(geoInfo, longitude);
 
-      Double longitudeRaw = location.getLongitude();
-      String longitude = MaxMindDbUtilities.convertNullToEmptyString(longitudeRaw);
-      GeoProps.LONGITUDE.set(geoInfo, longitude);
+        if (latitudeRaw == null || longitudeRaw == null) {
+          GeoProps.LOCATION_POINT.set(geoInfo, "");
+        } else {
+          GeoProps.LOCATION_POINT.set(geoInfo, latitude + "," + longitude);
+        }
 
-      if (latitudeRaw == null || longitudeRaw == null) {
-        GeoProps.LOCATION_POINT.set(geoInfo, "");
+        return Optional.of(geoInfo);
       } else {
-        GeoProps.LOCATION_POINT.set(geoInfo, latitude + "," + longitude);
+        LOG.debug("No result for IP {}", ip);
       }
-
-      return Optional.of(geoInfo);
-    } catch (UnknownHostException | AddressNotFoundException e) {
+    } catch (UnknownHostException e) {
       LOG.debug("No result found for IP {}", ip);
-    } catch (GeoIp2Exception | IOException e) {
+    } catch (IOException e) {
       LOG.warn("GeoLite2 City DB encountered an error", e);
     } finally {
       readLock.unlock();
@@ -235,7 +223,7 @@ public enum GeoLiteCityDatabase implements MaxMindDatabase {
       double longD = Double.parseDouble(longitude);
       return Optional.of(new WGS84Point(latD, longD));
     } catch (NumberFormatException nfe) {
-      LOG.warn(String.format("Invalid lat/long: %s/%s: %s", latitude, longitude, nfe.getMessage()), nfe);
+      LOG.warn("Invalid lat/long: {}/{}: {}", latitude, longitude, nfe.getMessage(), nfe);
       return Optional.empty();
     }
   }

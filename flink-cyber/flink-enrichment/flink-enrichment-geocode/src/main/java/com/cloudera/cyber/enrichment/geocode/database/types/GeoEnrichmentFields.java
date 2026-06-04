@@ -10,13 +10,15 @@
  * limitations governing your use of the file.
  */
 
-package com.cloudera.cyber.enrichment.geocode.impl.types;
+package com.cloudera.cyber.enrichment.geocode.database.types;
 
-import com.maxmind.geoip2.model.CityResponse;
+import com.cloudera.cyber.enrichment.geocode.database.types.geo.GeoDatabase;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.function.Function;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 /**
  * All geocode enrichments that could be returned for an IP.
@@ -24,16 +26,16 @@ import java.util.function.Function;
 @AllArgsConstructor
 @Getter
 public enum GeoEnrichmentFields implements GeoFields {
-    CITY(GeoFields::getCity, "city", "cities"),
-    COUNTRY(GeoFields::getCountry, "country", "countries"),
-    STATE(GeoFields::getState, "state", "states"),
-    LATITUDE(GeoFields::getLatitude, "latitude", "latitudes"),
-    LONGITUDE(GeoFields::getLongitude, "longitude", "longitudes");
+    CITY(GeoDatabase::getCity, "city", "cities"),
+    COUNTRY(GeoDatabase::getCountry, "country", "countries"),
+    STATE(GeoDatabase::getState, "state", "states"),
+    LATITUDE(GeoDatabase::getLatitude, "latitude", "latitudes"),
+    LONGITUDE(GeoDatabase::getLongitude, "longitude", "longitudes");
 
     /**
-     * Obtains the enrichment from the maxmind city response.
+     * Obtains the enrichment from ip to geolocation call.
      */
-    private final Function<CityResponse, Object> function;
+    private final BiFunction<GeoDatabase, Map<String, Object>, Object> function;
 
     /**
      * Enrichment name when used on a single IP.

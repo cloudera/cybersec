@@ -23,10 +23,6 @@
     <artifactId>parser-chains-core</artifactId>
     <name>Parser Chains Core</name>
 
-    <properties>
-        <commons-lang3.version>3.0.1</commons-lang3.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.apache.commons</groupId>

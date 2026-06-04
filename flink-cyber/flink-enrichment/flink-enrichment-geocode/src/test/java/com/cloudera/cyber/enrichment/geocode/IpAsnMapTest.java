@@ -63,7 +63,7 @@ public class IpAsnMapTest {
 
     @Test
     public void testIpAddress() {
-        Map<String, String> inputFields = new HashMap<String, String>() {{
+        Map<String, String> inputFields = new HashMap<>() {{
             put(IP_FIELD_NAME, IpAsnTestData.IP_WITH_NUMBER_AND_ORG);
         }};
         Message output = testAsnMap(inputFields);
@@ -92,7 +92,7 @@ public class IpAsnMapTest {
 
     @Test
     public void testThrowsAsnDatabaseEmptyFile() {
-        String emptyFilePath = "./src/test/resources/geolite/invalid_maxmind_db";
+        String emptyFilePath = "./src/test/resources/geolite/invalid_maxmind_db.mmdb";
         File databaseFile = new File(emptyFilePath);
         Assertions.assertTrue(databaseFile.exists());
         Assertions.assertTrue(databaseFile.length() > 0);
@@ -103,7 +103,7 @@ public class IpAsnMapTest {
 
     @Test
     public void testThrowsBadFilesystem() {
-        String badFilesystemPath = "bad:/src/test/resources/geolite/invalid_maxmind_db";
+        String badFilesystemPath = "bad:/src/test/resources/geolite/invalid_maxmind_db.mmdb";
         IpAsnMap map = new IpAsnMap(badFilesystemPath, ENRICH_FIELD_NAMES, null);
         assertThatThrownBy(() ->map.open(new Configuration())).isInstanceOfAny(IllegalStateException.class).
                 hasMessage("Could not read asn database %s", badFilesystemPath);

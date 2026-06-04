@@ -25,6 +25,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>enrichment-geocode-common</module>
         <module>flink-enrichment-lookup-raw</module>
         <module>flink-enrichment-lookup-hbase</module>
         <module>flink-enrichment-lookup-rest</module>

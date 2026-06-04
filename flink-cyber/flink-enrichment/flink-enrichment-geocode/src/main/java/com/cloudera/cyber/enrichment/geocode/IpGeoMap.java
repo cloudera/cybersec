@@ -15,8 +15,8 @@ package com.cloudera.cyber.enrichment.geocode;
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.enrichment.geocode.impl.IpGeoEnrichment;
-import com.cloudera.cyber.enrichment.geocode.impl.types.GeoEnrichmentFields;
+import com.cloudera.cyber.enrichment.geocode.database.IpGeoEnrichment;
+import com.cloudera.cyber.enrichment.geocode.database.types.GeoEnrichmentFields;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -70,5 +71,12 @@ public class IpGeoMap extends RichMapFunction<Message, Message> {
     @Override
     public void open(Configuration config) {
         this.geoEnrichment = new IpGeoEnrichment(geocodeDatabasePath);
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (this.geoEnrichment != null) {
+            this.geoEnrichment.close();
+        }
     }
 }

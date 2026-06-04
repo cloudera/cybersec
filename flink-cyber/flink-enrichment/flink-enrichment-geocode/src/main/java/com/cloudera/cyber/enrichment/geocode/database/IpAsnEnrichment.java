@@ -10,48 +10,49 @@
  * limitations governing your use of the file.
  */
 
-package com.cloudera.cyber.enrichment.geocode.impl;
+package com.cloudera.cyber.enrichment.geocode.database;
 
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.enrichment.Enrichment;
 import com.cloudera.cyber.enrichment.SingleValueEnrichment;
-import com.cloudera.cyber.enrichment.geocode.impl.types.GeoFields;
-import com.maxmind.geoip2.DatabaseProvider;
-import com.maxmind.geoip2.model.AsnResponse;
+import com.cloudera.cyber.enrichment.geocode.database.types.asn.AsnDatabase;
+import com.maxmind.db.DatabaseRecord;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiFunction;
 
-public class IpAsnEnrichment extends MaxMindBase {
+public class IpAsnEnrichment extends IpEnrichment {
     static final String ASN_FAILED_MESSAGE = "ASN lookup failed '%s'";
     public static final String ASN_FEATURE = "asn";
     public static final String ASN_NUMBER_PREFIX = "number";
     public static final String ASN_ORG_PREFIX = "org";
     public static final String ASN_MASK_PREFIX = "mask";
-
-    public IpAsnEnrichment(DatabaseProvider database) {
-        super(database);
-    }
+    private final AsnDatabase database;
 
     public IpAsnEnrichment(String path) {
-        super(path);
+        this.database = new AsnDatabase(path);
     }
 
+    @SuppressWarnings("unchecked")
     public void lookup(Enrichment enrichment, Object ipFieldValue, Map<String, String> extensions, List<DataQualityMessage> qualityMessages) {
         InetAddress ipAddress = convertToIpAddress(enrichment, ipFieldValue, qualityMessages);
         if (ipAddress != null) {
             try {
-                Optional<AsnResponse> response = database.tryAsn(ipAddress);
-                response.ifPresent(r -> {
-                    enrichment.enrich(extensions, ASN_NUMBER_PREFIX, r.getAutonomousSystemNumber());
-                    enrichment.enrich(extensions, ASN_ORG_PREFIX, r.getAutonomousSystemOrganization());
-                    enrichment.enrich(extensions, ASN_MASK_PREFIX, r.getNetwork().toString());
-                });
+                //noinspection rawtypes
+                DatabaseRecord<Map> response = database.lookup(ipAddress);
+                if (response != null) {
+                    Map<String, Object> data = response.data();
+                    if (data != null) {
+                        enrichment.enrich(extensions, ASN_NUMBER_PREFIX, this.database.getAsnNumber(response));
+                        enrichment.enrich(extensions, ASN_ORG_PREFIX, this.database.getAutonomousSystemOrganization(response));
+                        enrichment.enrich(extensions, ASN_MASK_PREFIX, this.database.getNetworkMask(response));
+                    }
+                }
             } catch (Exception e) {
                 enrichment.addQualityMessage(qualityMessages, DataQualityMessageLevel.ERROR, String.format(ASN_FAILED_MESSAGE, e.getMessage()));
             }
@@ -69,8 +70,13 @@ public class IpAsnEnrichment extends MaxMindBase {
             //noinspection unchecked
             ((Collection<Object>) ipFieldValue).forEach(ip -> lookup(enrichment, ip, extensions, qualityMessages));
         }
-        if (ipFieldValue != null) {
+        else if (ipFieldValue != null) {
             lookup(enrichmentBiFunction.apply(fieldName, ASN_FEATURE), ipFieldValue, extensions, qualityMessages);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.database.close();
     }
 }

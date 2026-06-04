@@ -79,7 +79,7 @@
         <springdoc-openapi.version>1.6.11</springdoc-openapi.version>
         <testcontainers.version>1.15.0</testcontainers.version>
         <solr.version>8.11.2.${cdh.version}</solr.version>
-        <maxmind.version>2.13.1</maxmind.version>
+        <maxmind.version>4.1.0</maxmind.version>
         <hadoop.version>3.4.2.${cdh.version}</hadoop.version>
         <hbase.version>2.6.3.${cdh.version}</hbase.version>
         <mockserver.version>5.15.0</mockserver.version>
@@ -123,7 +123,9 @@
         <commons-cli.version>1.5.0</commons-cli.version>
         <commons-vfs2.version>2.6.0</commons-vfs2.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-compress.version>1.26.0</commons-compress.version>
+        <commons-compress.version>1.26.2</commons-compress.version>
+        <commons-lang3.version>3.14.0</commons-lang3.version>
+        <commons-io.version>2.16.1</commons-io.version>
 
         <!--Maven-->
         <maven.build.timestamp.format>yyMMddHHmm</maven.build.timestamp.format>
@@ -454,9 +456,17 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.10</version>
+                <version>${commons-lang3.version}</version>
                 <scope>compile</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+                <scope>compile</scope>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-hdfs-client</artifactId>

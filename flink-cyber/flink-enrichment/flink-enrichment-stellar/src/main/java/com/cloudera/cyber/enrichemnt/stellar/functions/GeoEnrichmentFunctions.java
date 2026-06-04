@@ -19,10 +19,10 @@ package com.cloudera.cyber.enrichemnt.stellar.functions;
 
 import com.cloudera.cyber.enrichment.MetronGeoEnrichment;
 import com.cloudera.cyber.enrichment.geocode.IpGeoJob;
-import com.cloudera.cyber.enrichment.geocode.impl.IpAsnEnrichment;
-import com.cloudera.cyber.enrichment.geocode.impl.IpGeoEnrichment;
-import com.cloudera.cyber.enrichment.geocode.impl.types.GeoFields;
-import com.cloudera.cyber.enrichment.geocode.impl.types.MetronGeoEnrichmentFields;
+import com.cloudera.cyber.enrichment.geocode.database.IpAsnEnrichment;
+import com.cloudera.cyber.enrichment.geocode.database.IpGeoEnrichment;
+import com.cloudera.cyber.enrichment.geocode.database.types.GeoFields;
+import com.cloudera.cyber.enrichment.geocode.database.types.MetronGeoEnrichmentFields;
 import com.google.common.collect.ImmutableMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -68,10 +68,9 @@ public class GeoEnrichmentFunctions {
                 throw new IllegalArgumentException("GEO_GET received more arguments than expected: " + args.size());
             }
             HashMap<String, String> result = new HashMap<>();
-            if (args.size() == 1 && args.get(0) instanceof String) {
+            if (args.size() == 1 && args.get(0) instanceof String ip) {
                 // If no fields are provided, return everything
-                String ip = (String) args.get(0);
-                if (ip == null || ip.trim().isEmpty()) {
+                if (ip.trim().isEmpty()) {
                     return null;
                 }
                 ipGeoEnrichment.lookup(MetronGeoEnrichment::new, null, ip, MetronGeoEnrichmentFields.values(), result, Collections.emptyList());
@@ -142,10 +141,9 @@ public class GeoEnrichmentFunctions {
             }
             HashMap<String, String> result = new HashMap<>();
 
-            if (args.size() == 1 && args.get(0) instanceof String) {
+            if (args.size() == 1 && args.get(0) instanceof String ip) {
                 // If no fields are provided, return everything
-                String ip = (String) args.get(0);
-                if (ip == null || ip.trim().isEmpty()) {
+                if (ip.trim().isEmpty()) {
                     return null;
                 }
                 ipAsnEnrichment.lookup(MetronGeoEnrichment::new, null, ip, result, null);
@@ -155,7 +153,7 @@ public class GeoEnrichmentFunctions {
                 // If fields are provided, return just those fields.
                 String ip = (String) args.get(0);
                 @SuppressWarnings("unchecked")
-                List<String> fields = (List) args.get(1);
+                List<String> fields = (List<String>) args.get(1);
                 ipAsnEnrichment.lookup(MetronGeoEnrichment::new, null, ip, result, null);
                 result = convertToMetronKeys(result);
                 // If only one field is requested, just return it directly

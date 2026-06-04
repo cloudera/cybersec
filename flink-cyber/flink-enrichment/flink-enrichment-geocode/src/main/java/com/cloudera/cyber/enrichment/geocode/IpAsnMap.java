@@ -15,7 +15,7 @@ package com.cloudera.cyber.enrichment.geocode;
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.MessageUtils;
-import com.cloudera.cyber.enrichment.geocode.impl.IpAsnEnrichment;
+import com.cloudera.cyber.enrichment.geocode.database.IpAsnEnrichment;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -59,6 +59,13 @@ public class IpAsnMap extends RichMapFunction<Message, Message> {
             this.asnEnrichment = new IpAsnEnrichment(asnDatabasePath);
         } catch (Exception e) {
             throw new IllegalStateException(String.format("Could not read asn database %s", asnDatabasePath));
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        if (this.asnEnrichment != null) {
+            asnEnrichment.close();
         }
     }
 }
