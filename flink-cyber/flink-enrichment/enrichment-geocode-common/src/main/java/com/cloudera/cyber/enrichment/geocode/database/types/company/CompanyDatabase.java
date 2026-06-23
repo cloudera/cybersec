@@ -1,0 +1,75 @@
+package com.cloudera.cyber.enrichment.geocode.database.types.company;
+
+import com.cloudera.cyber.enrichment.geocode.database.MaxmindDatabase;
+import com.maxmind.db.DatabaseRecord;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.Map;
+
+@SuppressWarnings("rawtypes")
+public class CompanyDatabase extends MaxmindDatabase {
+    private final CompanyResponseDecoder responseDecoder;
+
+    public CompanyDatabase(String geocodeDatabasePath) {
+        super(geocodeDatabasePath);
+        this.responseDecoder = getDecoder();
+    }
+
+    private CompanyResponseDecoder getDecoder() {
+        CompanyResponseDecoder decoder = getDatabaseVendor().getCompanyDecoder();
+        if (decoder == null) {
+            throw new IllegalStateException("Company database is only supported for IPINFO vendor");
+        }
+        return decoder;
+    }
+
+    public DatabaseRecord<Map> lookup(InetAddress ipAddress) throws IOException {
+        if (ipAddress != null) {
+            DatabaseRecord<Map> response = database.getRecord(ipAddress, Map.class);
+            if (response.data() != null) {
+                return response;
+            }
+        }
+        return null;
+    }
+
+    public Object getCompany(DatabaseRecord<Map> response) {
+        if (response != null) {
+            //noinspection unchecked
+            return this.responseDecoder.getCompany(response.data());
+        } else {
+            return null;
+        }
+    }
+
+    public Object getAsnNumber(DatabaseRecord<Map> response) {
+        if (response != null) {
+            //noinspection unchecked
+            return this.responseDecoder.getAsnNumber(response.data());
+        } else {
+            return null;
+        }
+    }
+
+    public Object getAutonomousSystemOrganization(DatabaseRecord<Map> response) {
+        if (response != null) {
+            //noinspection unchecked
+            return this.responseDecoder.getAutonomousSystemOrganization(response.data());
+        } else {
+            return null;
+        }
+    }
+
+    public Object getOrganization(DatabaseRecord<Map> response) {
+        return getCompany(response);
+    }
+
+    public Object getNetworkMask(DatabaseRecord<Map> response) {
+        if (response != null) {
+            return response.network().toString();
+        } else {
+            return null;
+        }
+    }
+}
