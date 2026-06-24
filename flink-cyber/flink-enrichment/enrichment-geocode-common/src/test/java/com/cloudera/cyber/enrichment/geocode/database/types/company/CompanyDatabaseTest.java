@@ -32,7 +32,7 @@ public class CompanyDatabaseTest extends MaxmindDatabaseTest {
     Path tempDir;
 
     @Test
-    void testMaxmindDatabaseThrowsUnsupportedVendorException() {
+    void testMaxmindDatabaseThrowsUnsupportedVendorException() throws URISyntaxException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         
         assertThatThrownBy(() -> new CompanyDatabase(maxmindPath))
@@ -41,7 +41,7 @@ public class CompanyDatabaseTest extends MaxmindDatabaseTest {
     }
 
     @Test
-    void testInvalidDatabaseThrowsException() {
+    void testInvalidDatabaseThrowsException() throws URISyntaxException {
         String invalidPath = resource.getFilePath(INVALID_DATABASE);
         
         assertThatThrownBy(() -> new CompanyDatabase(invalidPath))
@@ -50,7 +50,7 @@ public class CompanyDatabaseTest extends MaxmindDatabaseTest {
     }
 
     @Test
-    void testUnsupportedExtensionThrowsException() {
+    void testUnsupportedExtensionThrowsException() throws URISyntaxException {
         String unsupportedPath = resource.getFilePath(UNSUPPORTED_EXTENSION);
         
         assertThatThrownBy(() -> new CompanyDatabase(unsupportedPath))
@@ -59,94 +59,67 @@ public class CompanyDatabaseTest extends MaxmindDatabaseTest {
     }
 
     @Test
-    void testGetCompanyWithNullResponseReturnsNull() {
-        // Use Maxmind database to create the database object (even though it will fail vendor check)
-        // We test the method directly with null
+    void testGetCompanyWithNullResponseReturnsNull() throws URISyntaxException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         try (CompanyDatabase database = new CompanyDatabase(maxmindPath)) {
-            // This should throw, so we use assertThrows pattern
             assertThatThrownBy(() -> database.getCompany(null))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("Company database is only supported for IPINFO vendor");
-        } catch (IOException e) {
-            // Expected for Maxmind database
-        } catch (IllegalStateException e) {
-            // Expected - Maxmind is not supported
         }
     }
 
     @Test
-    void testGetAsnNumberWithNullResponseReturnsNull() {
+    void testGetAsnNumberWithNullResponseReturnsNull() throws URISyntaxException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         try (CompanyDatabase database = new CompanyDatabase(maxmindPath)) {
             assertThatThrownBy(() -> database.getAsnNumber(null))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("Company database is only supported for IPINFO vendor");
-        } catch (IOException e) {
-            // Expected for Maxmind database
-        } catch (IllegalStateException e) {
-            // Expected - Maxmind is not supported
         }
     }
 
     @Test
-    void testGetAutonomousSystemOrganizationWithNullResponseReturnsNull() {
+    void testGetAutonomousSystemOrganizationWithNullResponseReturnsNull() throws URISyntaxException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         try (CompanyDatabase database = new CompanyDatabase(maxmindPath)) {
             assertThatThrownBy(() -> database.getAutonomousSystemOrganization(null))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("Company database is only supported for IPINFO vendor");
-        } catch (IOException e) {
-            // Expected for Maxmind database
-        } catch (IllegalStateException e) {
-            // Expected - Maxmind is not supported
         }
     }
 
     @Test
-    void testGetNetworkMaskWithNullResponseReturnsNull() {
+    void testGetNetworkMaskWithNullResponseReturnsNull() throws URISyntaxException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         try (CompanyDatabase database = new CompanyDatabase(maxmindPath)) {
             assertThatThrownBy(() -> database.getNetworkMask(null))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("Company database is only supported for IPINFO vendor");
-        } catch (IOException e) {
-            // Expected for Maxmind database
-        } catch (IllegalStateException e) {
-            // Expected - Maxmind is not supported
         }
     }
 
     @Test
-    void testGetOrganizationDelegatesToGetCompany() {
+    void testGetOrganizationDelegatesToGetCompany() throws URISyntaxException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         try (CompanyDatabase database = new CompanyDatabase(maxmindPath)) {
             assertThatThrownBy(() -> database.getOrganization(null))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("Company database is only supported for IPINFO vendor");
-        } catch (IOException e) {
-            // Expected for Maxmind database
-        } catch (IllegalStateException e) {
-            // Expected - Maxmind is not supported
         }
     }
 
     @Test
-    void testLookupWithNullIpAddressReturnsNull() {
+    void testLookupWithNullIpAddressReturnsNull() throws URISyntaxException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         try (CompanyDatabase database = new CompanyDatabase(maxmindPath)) {
             assertThatThrownBy(() -> database.lookup((InetAddress) null))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("Company database is only supported for IPINFO vendor");
-        } catch (IOException e) {
-            // Expected for Maxmind database
-        } catch (IllegalStateException e) {
-            // Expected - Maxmind is not supported
         }
     }
 
     @Test
-    void testLookupWithValidIpAddressThrowsForUnsupportedVendor() throws IOException {
+    void testLookupWithValidIpAddressThrowsForUnsupportedVendor() throws URISyntaxException, IOException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         try (CompanyDatabase database = new CompanyDatabase(maxmindPath)) {
             assertThatThrownBy(() -> database.lookup(InetAddress.getByName(CLOUDFLARE_IP)))
