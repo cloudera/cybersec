@@ -59,7 +59,7 @@ public class CompanyDatabaseTest extends MaxmindDatabaseTest {
     }
 
     @Test
-    void testGetCompanyWithNullResponseReturnsNull() throws URISyntaxException {
+    void testGetCompanyWithNullResponseReturnsNull() throws URISyntaxException, IOException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         try (CompanyDatabase database = new CompanyDatabase(maxmindPath)) {
             assertThatThrownBy(() -> database.getCompany(null))
@@ -69,7 +69,7 @@ public class CompanyDatabaseTest extends MaxmindDatabaseTest {
     }
 
     @Test
-    void testGetAsnNumberWithNullResponseReturnsNull() throws URISyntaxException {
+    void testGetAsnNumberWithNullResponseReturnsNull() throws URISyntaxException, IOException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         try (CompanyDatabase database = new CompanyDatabase(maxmindPath)) {
             assertThatThrownBy(() -> database.getAsnNumber(null))
@@ -79,7 +79,7 @@ public class CompanyDatabaseTest extends MaxmindDatabaseTest {
     }
 
     @Test
-    void testGetAutonomousSystemOrganizationWithNullResponseReturnsNull() throws URISyntaxException {
+    void testGetAutonomousSystemOrganizationWithNullResponseReturnsNull() throws URISyntaxException, IOException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         try (CompanyDatabase database = new CompanyDatabase(maxmindPath)) {
             assertThatThrownBy(() -> database.getAutonomousSystemOrganization(null))
@@ -89,7 +89,7 @@ public class CompanyDatabaseTest extends MaxmindDatabaseTest {
     }
 
     @Test
-    void testGetNetworkMaskWithNullResponseReturnsNull() throws URISyntaxException {
+    void testGetNetworkMaskWithNullResponseReturnsNull() throws URISyntaxException, IOException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         try (CompanyDatabase database = new CompanyDatabase(maxmindPath)) {
             assertThatThrownBy(() -> database.getNetworkMask(null))
@@ -99,7 +99,7 @@ public class CompanyDatabaseTest extends MaxmindDatabaseTest {
     }
 
     @Test
-    void testGetOrganizationDelegatesToGetCompany() throws URISyntaxException {
+    void testGetOrganizationDelegatesToGetCompany() throws URISyntaxException, IOException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         try (CompanyDatabase database = new CompanyDatabase(maxmindPath)) {
             assertThatThrownBy(() -> database.getOrganization(null))
@@ -109,7 +109,7 @@ public class CompanyDatabaseTest extends MaxmindDatabaseTest {
     }
 
     @Test
-    void testLookupWithNullIpAddressReturnsNull() throws URISyntaxException {
+    void testLookupWithNullIpAddressReturnsNull() throws URISyntaxException, IOException {
         String maxmindPath = resource.getFilePath(MAXMIND_ASN_MMDB);
         try (CompanyDatabase database = new CompanyDatabase(maxmindPath)) {
             assertThatThrownBy(() -> database.lookup((InetAddress) null))
