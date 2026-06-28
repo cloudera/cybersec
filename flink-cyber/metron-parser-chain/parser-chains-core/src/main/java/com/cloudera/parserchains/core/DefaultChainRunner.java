@@ -98,6 +98,7 @@ public class DefaultChainRunner implements ChainRunner {
         if (toParse.getLine() != MessageToParse.DEFAULT_LINE) {
             builder.addField(originalFileLineField, StringFieldValue.of(String.valueOf(toParse.getLine())));
         }
+        toParse.getMetadata().forEach((metaFieldName,metaFieldValue) -> builder.addField(Constants.METADATA_PREFIX.concat(metaFieldName), metaFieldValue));
         return builder
                 .addField(inputField, MessageToParseFieldValue.of(toParse))
                 .createdBy(ORIGINAL_MESSAGE_NAME)

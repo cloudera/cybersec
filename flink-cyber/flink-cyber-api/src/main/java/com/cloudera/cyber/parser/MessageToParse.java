@@ -22,6 +22,10 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.avro.specific.SpecificRecordBase;
 
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.cloudera.cyber.AvroTypes.utf8toStringMap;
 
 @Data
 @Builder
@@ -38,6 +42,8 @@ public class MessageToParse extends SpecificRecordBase implements SpecificRecord
     /** if line number if message was read from file.  -1 otherwise.*/
     @Builder.Default
     private long line = DEFAULT_LINE;
+    @Builder.Default
+    private Map<String, String> metadata = new HashMap<>();
 
     public static final Schema SCHEMA$ = SchemaBuilder.record(MessageToParse.class.getName()).namespace(MessageToParse.class.getPackage().getName())
             .fields()
@@ -47,6 +53,7 @@ public class MessageToParse extends SpecificRecordBase implements SpecificRecord
             .requiredLong("offset")
             .optionalBytes("key")
             .nullableLong("line", DEFAULT_LINE)
+            .name("metadata").type(Schema.createMap(Schema.create(Schema.Type.STRING))).withDefault(new HashMap<>())
             .endRecord();
 
     public static Schema getClassSchema() { return SCHEMA$; }
@@ -64,6 +71,7 @@ public class MessageToParse extends SpecificRecordBase implements SpecificRecord
             case 3: return offset;
             case 4: return (key != null) ? ByteBuffer.wrap(key) : null;
             case 5: return line;
+            case 6: return metadata;
             default: throw new org.apache.avro.AvroRuntimeException("Bad index");
         }
     }
@@ -77,6 +85,7 @@ public class MessageToParse extends SpecificRecordBase implements SpecificRecord
             case 3: offset = (long)value$; break;
             case 4: key = (value$ == null) ? null : ((value$ instanceof byte[]) ? (byte[])value$: ((ByteBuffer) value$).array()); break;
             case 5: line = (value$ == null) ? DEFAULT_LINE : (long)value$; break;
+            case 6: metadata = utf8toStringMap(value$); break;
             default: throw new org.apache.avro.AvroRuntimeException("Bad index");
         }
     }

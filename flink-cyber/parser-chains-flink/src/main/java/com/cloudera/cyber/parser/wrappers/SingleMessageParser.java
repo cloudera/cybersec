@@ -116,7 +116,7 @@ public class SingleMessageParser implements ParserInterface {
             Optional<String> errorMessage = m.getError().map(Throwable::getMessage);
             long messageTimestamp = Instant.now().toEpochMilli();
 
-            if (!errorMessage.isPresent()) {
+            if (errorMessage.isEmpty()) {
                 Optional<FieldValue> timestamp = m.getField(FieldName.of("timestamp"));
 
                 if (timestamp.isPresent()) {
@@ -196,9 +196,10 @@ public class SingleMessageParser implements ParserInterface {
      * @return The extension map.
      */
     private Map<String, String> fieldsFromChain(boolean hasError, Map<FieldName, FieldValue> fields) {
+        final String inputFieldName = this.chainRunner.getInputField().get();
         return fields.entrySet().stream().filter(mapEntry -> {
             String fieldName = mapEntry.getKey().get();
-            return (!StringUtils.equals(fieldName, this.chainRunner.getInputField().get()) || hasError) && !fieldName.equals("timestamp");
+            return ((!StringUtils.equals(fieldName, inputFieldName) && !fieldName.startsWith(Constants.METADATA_PREFIX)) || hasError) && !fieldName.equals("timestamp");
         }).collect(Collectors.toMap(entryMap -> entryMap.getKey().get(), entryMap -> entryMap.getValue().get()));
     }
 

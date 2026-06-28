@@ -49,6 +49,16 @@ public class MessageFileParserTest {
     }
 
     @Test
+    public void testHeaderMetadata() throws IOException, NoSuchAlgorithmException, InvalidKeyException, InvalidParserException {
+        MessageFileParser parser = createMessageFileParserToTest(Collections.singletonList(MessageFileParserTestUtil.getValidMessageFileAllowedPath()));
+        MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse("message_file/vpc_flow_samples_with_header.txt");
+        ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
+
+        parser.parse(new ParserChainSource("variable_vpcflow", "variable_netflow", new MessageFileHeader(1, null, null)), messageToParse, parserOutput);
+        MessageFileParserTestUtil.verifyMessageFileOutput(parserOutput.getOutput(), messageToParse, 2);
+    }
+
+    @Test
     public void testCreateFailsWithRelativeAllowedPaths()  {
       testInvalidAllowedPath(RELATIVE_INVALID_ALLOWED_PATH);
     }

@@ -40,7 +40,7 @@ public class SerializationTests {
 
     @Test
     public void testThreatIntelligence() throws IOException {
-        Map<String, String> map = new HashMap<String, String>() {{
+        Map<String, String> map = new HashMap<>() {{
             put("a", "a");
             put("b", "b");
         }};
@@ -53,7 +53,7 @@ public class SerializationTests {
 
     @Test
     public void testEnrichmentEntry() throws IOException {
-        Map<String, String> map = new HashMap<String, String>() {{
+        Map<String, String> map = new HashMap<>() {{
             put("a", "a");
             put("b", "b");
         }};
@@ -68,7 +68,7 @@ public class SerializationTests {
     }
 
     {
-        Map<String, String> map = new HashMap<String, String>() {{
+        Map<String, String> map = new HashMap<>() {{
             put("a", "a");
             put("b", "b");
         }};
@@ -101,25 +101,30 @@ public class SerializationTests {
 
     @Test
     public void testMessageToParse() throws IOException {
-        // message to parse with line specified
-        MessageToParse messageToParseWithLine = MessageToParse.builder().
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("fileHeader", "field1 field2 field3");
+        // message to parse with line and metadata specified
+        MessageToParse messageToParseWithOverriddenDefaults = MessageToParse.builder().
                 offset(3).partition(1).
                 originalBytes("this is a test".getBytes(UTF_8)).
                 topic("test_topic").
                 line(500L).
+                metadata(metadata).
                 build();
-        MessageToParse output = test(messageToParseWithLine);
-        assertThat(output, equalTo(messageToParseWithLine));
+        MessageToParse output = test(messageToParseWithOverriddenDefaults);
+        assertThat(output, equalTo(messageToParseWithOverriddenDefaults));
 
         // message to parse with no line specified - defaults to -1
-        MessageToParse messageToParseDefaultLine = MessageToParse.builder().
+        // metadata defaults to empty map
+        MessageToParse messageToParseDefault = MessageToParse.builder().
                 offset(3).partition(1).
                 originalBytes("this is a test".getBytes(UTF_8)).
                 topic("test_topic").
                 build();
-        output = test(messageToParseDefaultLine);
-        assertThat(output, equalTo(messageToParseDefaultLine));
+        output = test(messageToParseDefault);
+        assertThat(output, equalTo(messageToParseDefault));
         assertThat(output.getLine(), equalTo(DEFAULT_LINE));
+        assertThat(output.getMetadata().isEmpty(), equalTo(true));
     }
     
     @Test
