@@ -13,6 +13,7 @@
 package com.cloudera.cyber.enrichment.geocode;
 
 import com.cloudera.cyber.DataQualityMessage;
+import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import org.apache.flink.configuration.Configuration;
@@ -21,16 +22,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.assertj.core.api.Assertions.*;
+import static com.cloudera.cyber.enrichment.geocode.IpCompanyTestData.INVALID_DATABASE_PATH;
+import static com.cloudera.cyber.enrichment.geocode.IpCompanyTestData.IP_FIELD_NAME;
+import static com.cloudera.cyber.enrichment.geocode.IpCompanyTestData.LOCAL_IP;
+import static com.cloudera.cyber.enrichment.geocode.IpCompanyTestData.UNKNOWN_HOST_IP;
+import static com.cloudera.cyber.enrichment.geocode.database.IpCompanyEnrichment.COMPANY_FEATURE;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for IpCompanyMap.
  */
 public class IpCompanyMapTest {
 
-    private static final String IP_FIELD_NAME = "ip_dst_addr";
     private static final List<String> ENRICH_FIELD_NAMES = Collections.singletonList(IP_FIELD_NAME);
     
     private IpCompanyMap companyMap;
@@ -42,21 +50,53 @@ public class IpCompanyMapTest {
     }
 
     @Test
-    void testNoCompanyIpFieldsReturnsOriginalExtensions() {
-        IpCompanyMap emptyFields = new IpCompanyMap(
-            IpCompanyTestData.COMPANY_DATABASE_PATH, 
-            Collections.emptyList(), 
-            null
-        );
-        emptyFields.open(new Configuration());
-        
+    void testLookupMultipleFields() {
+        String srcAddr = "ip_src_addr";
+        String dstAddr = "ip_dst_addr";
+        List<String> enrichedFields = List.of(srcAddr, dstAddr);
+
         Map<String, String> inputFields = new HashMap<>();
-        inputFields.put(IP_FIELD_NAME, IpCompanyTestData.CLOUDFLARE_IP);
-        Message result = emptyFields.map(TestUtils.createMessage(inputFields));
-        
-        // With empty field names, original fields should be unchanged
+        inputFields.put(srcAddr, IpCompanyTestData.IP_COMPANY_ONLY);
+        inputFields.put(dstAddr, IpCompanyTestData.IP_WITH_NUMBER_AND_ORG);
+
+        testSuccessfulMessageMap(inputFields, enrichedFields);
+    }
+
+    @Test
+    void testLookupNotAnIp() {
+        // look up a string that is not an IP address
+        Map<String, String> inputFields = new HashMap<>();
+        inputFields.put(IP_FIELD_NAME, UNKNOWN_HOST_IP);
+
+        Message result = companyMap.map(TestUtils.createMessage(inputFields));
+        // no extension added
         Assertions.assertEquals(inputFields, result.getExtensions());
+        // verify data quality message
+        Assertions.assertEquals(Collections.singletonList(new DataQualityMessage(DataQualityMessageLevel.INFO.name(), COMPANY_FEATURE, IP_FIELD_NAME, String.format("'%s' is not a valid IP address.", UNKNOWN_HOST_IP))),
+                result.getDataQualityMessages());
+    }
+
+    @Test
+    void testLookupLocalIp() {
+        // look up a string that is not an IP address
+        Map<String, String> inputFields = new HashMap<>();
+        inputFields.put(IP_FIELD_NAME, LOCAL_IP);
+
+        Message result = companyMap.map(TestUtils.createMessage(inputFields));
+
+        // no extension added
+        Assertions.assertEquals(inputFields, result.getExtensions());
+
         assertNoErrorsOrInfos(result);
+    }
+
+    @Test
+    void testNoCompanyIpFieldsReturnsOriginalExtensions() {
+        // add an IP that doesn't have any results - returns original message fields
+        Map<String, String> inputFields = new HashMap<>();
+        inputFields.put(IP_FIELD_NAME, IpCompanyTestData.IP_WITH_NO_INFO);
+
+        testSuccessfulMessageMap(inputFields, ENRICH_FIELD_NAMES);
     }
 
     @Test
@@ -76,33 +116,18 @@ public class IpCompanyMapTest {
     }
 
     @Test
-    void testFieldNotSetReturnsNullExtensions() {
-        Message input = TestUtils.createMessage();
-        Message output = companyMap.map(input);
-        
-        Assertions.assertNull(output.getExtensions());
-        assertNoErrorsOrInfos(output);
-    }
+    void testThrowsOpenInvalidDatabase() {
+        File databaseFile = new File(INVALID_DATABASE_PATH);
+        Assertions.assertTrue(databaseFile.exists());
+        Assertions.assertTrue(databaseFile.length() > 0);
+        IpCompanyMap map = new IpCompanyMap(INVALID_DATABASE_PATH, ENRICH_FIELD_NAMES, null);
+        assertThatThrownBy(() ->map.open(new Configuration())).isInstanceOfAny(IllegalStateException.class).
+                hasMessage("Could not read company database %s", INVALID_DATABASE_PATH);
+   }
 
     @Test
-    void testIpAddressWithInvalidDatabaseAddsErrorMessage() {
-        Map<String, String> inputFields = new HashMap<>();
-        inputFields.put(IP_FIELD_NAME, IpCompanyTestData.CLOUDFLARE_IP);
-        
-        Message output = companyMap.map(TestUtils.createMessage(inputFields));
-        
-        // Invalid database should produce an error message
-        List<DataQualityMessage> qualityMessages = output.getDataQualityMessages();
-        Assertions.assertFalse(qualityMessages == null || qualityMessages.isEmpty());
-        
-        boolean hasError = qualityMessages.stream()
-            .anyMatch(msg -> "ERROR".equals(msg.getLevel()));
-        Assertions.assertTrue(hasError, "Expected at least one ERROR level message");
-    }
-
-    @Test
-    void testThrowsCompanyDatabaseDoesNotExist() {
-        String nonExistentPath = "./src/test/resources/geolite/doesntexist";
+    void testThrowsOpenCompanyDatabaseDoesNotExist() {
+        String nonExistentPath = "./src/test/resources/ipinfo/doesntexist";
         File databaseFile = new File(nonExistentPath);
         Assertions.assertFalse(databaseFile.exists());
         
@@ -111,20 +136,6 @@ public class IpCompanyMapTest {
         assertThatThrownBy(() -> map.open(new Configuration()))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Could not read company database %s", nonExistentPath);
-    }
-
-    @Test
-    void testThrowsCompanyDatabaseEmptyFile() {
-        String emptyFilePath = "./src/test/resources/geolite/invalid_maxmind_db.mmdb";
-        File databaseFile = new File(emptyFilePath);
-        Assertions.assertTrue(databaseFile.exists());
-        Assertions.assertTrue(databaseFile.length() > 0);
-        
-        IpCompanyMap map = new IpCompanyMap(emptyFilePath, ENRICH_FIELD_NAMES, null);
-        
-        assertThatThrownBy(() -> map.open(new Configuration()))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Could not read company database %s", emptyFilePath);
     }
 
     @Test
@@ -159,7 +170,7 @@ public class IpCompanyMapTest {
     @Test
     void testMessageWithMultipleFieldsProcessesOnlyConfiguredFields() {
         Map<String, String> inputFields = new HashMap<>();
-        inputFields.put(IP_FIELD_NAME, IpCompanyTestData.CLOUDFLARE_IP);
+        inputFields.put(IP_FIELD_NAME, IpCompanyTestData.IP_WITH_NUMBER_AND_ORG);
         inputFields.put("other_field", "other_value");
         
         List<String> onlyDstAddr = Collections.singletonList(IP_FIELD_NAME);
@@ -180,12 +191,24 @@ public class IpCompanyMapTest {
     void testEmptyInputFieldsMapDoesNotThrow() {
         Map<String, String> inputFields = new HashMap<>();
         inputFields.put(IP_FIELD_NAME, "");
-        
-        // Empty string is a valid field value (but not a valid IP)
-        Message output = companyMap.map(TestUtils.createMessage(inputFields));
-        
-        // Should complete without throwing
-        Assertions.assertNotNull(output);
+
+        Message result = companyMap.map(TestUtils.createMessage(inputFields));
+        Assertions.assertEquals(1, result.getDataQualityMessages().size());
+    }
+
+    private void testSuccessfulMessageMap(Map<String, String> inputFields, List<String> companyEnrichedFields) {
+        IpCompanyMap multipleFieldMap = new IpCompanyMap(
+                IpCompanyTestData.COMPANY_DATABASE_PATH,
+                companyEnrichedFields,
+                null);
+        multipleFieldMap.open(new Configuration());
+
+
+        Message result = multipleFieldMap.map(TestUtils.createMessage(inputFields));
+        Map<String, String> expectedExtensions = IpCompanyTestData.getExpectedExtension(inputFields, companyEnrichedFields);
+
+        assertNoErrorsOrInfos(result);
+        Assertions.assertEquals(expectedExtensions, result.getExtensions());
     }
 
     private void assertNoErrorsOrInfos(Message output) {

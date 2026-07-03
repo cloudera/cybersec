@@ -29,9 +29,9 @@ import java.util.function.BiFunction;
 public class IpCompanyEnrichment extends IpEnrichment {
     static final String COMPANY_FAILED_MESSAGE = "Company lookup failed '%s'";
     public static final String COMPANY_FEATURE = "company";
-    public static final String COMPANY_PREFIX = "company";
-    public static final String ASN_NUMBER_PREFIX = "number";
-    public static final String ASN_ORG_PREFIX = "org";
+    public static final String COMPANY_NAME_PREFIX = "name";
+    public static final String ASN_NUMBER_PREFIX = "asn.number";
+    public static final String ASN_ORG_PREFIX = "asn.org";
     public static final String COMPANY_MASK_PREFIX = "mask";
     private final CompanyDatabase database;
 
@@ -49,7 +49,7 @@ public class IpCompanyEnrichment extends IpEnrichment {
                 if (response != null) {
                     Map<String, Object> data = response.data();
                     if (data != null) {
-                        enrichment.enrich(extensions, COMPANY_PREFIX, this.database.getCompany(response));
+                        enrichment.enrich(extensions, COMPANY_NAME_PREFIX, this.database.getCompany(response));
                         enrichment.enrich(extensions, ASN_NUMBER_PREFIX, this.database.getAsnNumber(response));
                         enrichment.enrich(extensions, ASN_ORG_PREFIX, this.database.getAutonomousSystemOrganization(response));
                         enrichment.enrich(extensions, COMPANY_MASK_PREFIX, this.database.getNetworkMask(response));

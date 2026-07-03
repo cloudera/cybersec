@@ -24,17 +24,17 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 
 @Log
-public class IpGeoJobTest extends IpGeoTestBase {
+public class IpCompanyJobTest extends IpGeoTestBase {
 
     @Test
-    public void testIpGeoPipeline() throws Exception {
+    public void testIpCompanyPipeline() throws Exception {
         long ts = 0;
+
         try (StreamExecutionEnvironment env = createPipeline(ParameterTool.fromMap(ImmutableMap.of(
-                PARAM_GEO_FIELDS, String.join(",", STRING_IP_FIELD_NAME, IpGeoTestData.LIST_IP_FIELD_NAME),
-                PARAM_GEO_DATABASE_PATH, IpGeoTestData.GEOCODE_DATABASE_PATH,
-                PARAMS_ENABLE_ASN, "false",
-                PARAMS_ENABLE_COMPANY, "false"
-        ))).setParallelism(1)) {
+                PARAM_COMPANY_FIELDS, STRING_IP_FIELD_NAME,
+                PARAM_COMPANY_DATABASE_PATH, IpCompanyTestData.COMPANY_DATABASE_PATH,
+                PARAMS_ENABLE_GEO, "false",
+                PARAMS_ENABLE_ASN, "false"))).setParallelism(1)) {
             JobTester.startTest(env);
 
             createMessages(ts);
@@ -51,18 +51,23 @@ public class IpGeoJobTest extends IpGeoTestBase {
 
         messages.add(TestUtils.createMessage().toBuilder()
                 .extensions(new HashMap<>() {{
-                    put(STRING_IP_FIELD_NAME, IpGeoTestData.COUNTRY_ONLY_IPv6);
+                    put(STRING_IP_FIELD_NAME, IpCompanyTestData.IP_WITH_NUMBER_AND_ORG);
                 }}));
         messages.add(TestUtils.createMessage().toBuilder()
                 .extensions(new HashMap<>() {{
-                    put(STRING_IP_FIELD_NAME, IpGeoTestData.ALL_FIELDS_IPv4);
+                    put(STRING_IP_FIELD_NAME, IpCompanyTestData.IP_WITH_NO_INFO);
+                }}));
+        messages.add(TestUtils.createMessage().toBuilder()
+                .extensions(new HashMap<>() {{
+                    put(STRING_IP_FIELD_NAME, IpCompanyTestData.IP_COMPANY_ONLY);
                 }}));
 
         long offset = 100;
         for(Message.MessageBuilder nextBuilder: messages) {
             Map<String, String> inputFields = nextBuilder.build().getExtensions();
+            Map<String, String> expectedExtension = IpCompanyTestData.getExpectedExtension(inputFields, Collections.singletonList(STRING_IP_FIELD_NAME));
             long nextTimestamp = ts + offset;
-            expectedExtensions.put(nextTimestamp, IpGeoTestData.getExpectedExtension(inputFields, List.of(STRING_IP_FIELD_NAME, IpGeoTestData.LIST_IP_FIELD_NAME)));
+            expectedExtensions.put(nextTimestamp, expectedExtension);
             sendRecord(nextBuilder.ts(ts + offset));
             offset += 100;
         }

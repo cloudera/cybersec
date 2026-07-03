@@ -43,12 +43,12 @@ public class IpCompanyMap extends RichMapFunction<Message, Message> {
         Message newMessage = message;
         List<DataQualityMessage> qualityMessages = new ArrayList<>();
         if (messageFields != null && !ipFieldNames.isEmpty()) {
-            Map<String, String> geoExtensions = new HashMap<>();
+            Map<String, String> companyExtensions = new HashMap<>();
             for (String ipFieldName : ipFieldNames) {
                 Object ipFieldValue = messageFields.get(ipFieldName);
-                companyEnrichment.lookup(ipFieldName, ipFieldValue, geoExtensions, qualityMessages);
+                companyEnrichment.lookup(ipFieldName, ipFieldValue, companyExtensions, qualityMessages);
             }
-            newMessage = MessageUtils.enrich(message, geoExtensions, qualityMessages);
+            newMessage = MessageUtils.enrich(message, companyExtensions, qualityMessages);
         }
         return newMessage;
     }

@@ -2,15 +2,24 @@ package com.cloudera.cyber.enrichment.geocode.database;
 
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
+import com.cloudera.cyber.enrichment.SingleValueEnrichment;
+import com.cloudera.cyber.enrichment.geocode.IpCompanyTestData;
 import com.cloudera.cyber.enrichment.geocode.IpGeoTestData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static com.cloudera.cyber.enrichment.geocode.IpCompanyTestData.COMPANY_DATABASE_PATH;
+import static com.cloudera.cyber.enrichment.geocode.IpCompanyTestData.INVALID_DATABASE_PATH;
+import static com.cloudera.cyber.enrichment.geocode.IpCompanyTestData.IP_WITH_NUMBER_AND_ORG;
 
 /**
  * Unit tests for IpCompanyEnrichment.
@@ -18,13 +27,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class IpCompanyEnrichmentTest {
 
     private static final String TEST_ENRICHMENT_FIELD_NAME = "test_field";
-    private static final String INVALID_DATABASE_PATH = "./src/test/resources/geolite/invalid_maxmind_db.mmdb";
-    
     private IpCompanyEnrichment ipCompanyEnrichment;
 
     @BeforeEach
     void createCompanyEnrichment() {
-        ipCompanyEnrichment = new IpCompanyEnrichment(INVALID_DATABASE_PATH);
+        ipCompanyEnrichment = new IpCompanyEnrichment(COMPANY_DATABASE_PATH);
     }
 
     @AfterEach
@@ -35,19 +42,22 @@ public class IpCompanyEnrichmentTest {
     }
 
     @Test
-    void throwsWithInvalidDatabase() {
-        // The invalid_maxmind_db.mmdb is not a valid company database, so lookup should fail
+    void testSuccessfulLookup() {
         Map<String, String> extensions = new HashMap<>();
-        List<DataQualityMessage> messages = new ArrayList<>();
-        
-        // Lookup should add a quality message for the error
-        ipCompanyEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, IpGeoTestData.CLOUDFLARE_IP, extensions, messages);
-        
-        // Should have a quality message due to the database error
-        Assertions.assertFalse(messages.isEmpty());
-        DataQualityMessage errorMessage = messages.get(0);
-        Assertions.assertEquals(DataQualityMessageLevel.ERROR.name(), errorMessage.getLevel());
-        Assertions.assertTrue(errorMessage.getMessage().contains("Company lookup failed"));
+        List<DataQualityMessage> dataQualityMessages = new ArrayList<>();
+
+        IpCompanyEnrichment ipCompanyEnrichment = new IpCompanyEnrichment(COMPANY_DATABASE_PATH);
+        ipCompanyEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, IP_WITH_NUMBER_AND_ORG, extensions, dataQualityMessages);
+
+        Assertions.assertTrue(dataQualityMessages.isEmpty());
+        Assertions.assertEquals(IpCompanyTestData.getExpectedValues(TEST_ENRICHMENT_FIELD_NAME, IP_WITH_NUMBER_AND_ORG), extensions);
+    }
+
+    @Test
+    void throwsWithInvalidDatabase() {
+        IllegalStateException exception = Assertions.assertThrows(IllegalStateException.class,  () -> new IpCompanyEnrichment(INVALID_DATABASE_PATH));
+        Assertions.assertTrue(exception.getMessage().contains(INVALID_DATABASE_PATH));
+        Assertions.assertTrue(exception.getMessage().contains("Could not read geocode database"));
     }
 
     @Test
@@ -60,7 +70,7 @@ public class IpCompanyEnrichmentTest {
         Assertions.assertEquals(1, messages.size());
         DataQualityMessage infoMessage = messages.get(0);
         Assertions.assertEquals(DataQualityMessageLevel.INFO.name(), infoMessage.getLevel());
-        Assertions.assertEquals(IpGeoEnrichment.FIELD_VALUE_IS_NOT_A_VALID_IP_ADDRESS, infoMessage.getMessage());
+        Assertions.assertEquals(String.format(IpGeoEnrichment.FIELD_VALUE_IS_NOT_A_VALID_IP_ADDRESS, IpGeoTestData.UNKNOWN_HOST_IP), infoMessage.getMessage());
         Assertions.assertEquals(IpCompanyEnrichment.COMPANY_FEATURE, infoMessage.getFeature());
         Assertions.assertEquals(TEST_ENRICHMENT_FIELD_NAME, infoMessage.getField());
     }
@@ -96,7 +106,7 @@ public class IpCompanyEnrichmentTest {
         ipCompanyEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, ips, extensions, messages);
         
         // Each IP should generate its own quality message
-        Assertions.assertEquals(2, messages.size());
+        Assertions.assertEquals(1, messages.size());
     }
 
     @Test
@@ -119,7 +129,7 @@ public class IpCompanyEnrichmentTest {
         List<String> ips = Collections.singletonList(IpGeoTestData.UNKNOWN_HOST_IP);
         
         ipCompanyEnrichment.lookup(
-            (fieldName, feature) -> new com.cloudera.cyber.enrichment.SingleValueEnrichment(fieldName, feature),
+                SingleValueEnrichment::new,
             TEST_ENRICHMENT_FIELD_NAME,
             ips,
             extensions,
@@ -135,7 +145,7 @@ public class IpCompanyEnrichmentTest {
         List<DataQualityMessage> messages = new ArrayList<>();
         
         ipCompanyEnrichment.lookup(
-            (fieldName, feature) -> new com.cloudera.cyber.enrichment.SingleValueEnrichment(fieldName, feature),
+                SingleValueEnrichment::new,
             TEST_ENRICHMENT_FIELD_NAME,
             IpGeoTestData.UNKNOWN_HOST_IP,
             extensions,
@@ -151,7 +161,7 @@ public class IpCompanyEnrichmentTest {
         List<DataQualityMessage> messages = new ArrayList<>();
         
         ipCompanyEnrichment.lookup(
-            (fieldName, feature) -> new com.cloudera.cyber.enrichment.SingleValueEnrichment(fieldName, feature),
+                SingleValueEnrichment::new,
             TEST_ENRICHMENT_FIELD_NAME,
             null,
             extensions,

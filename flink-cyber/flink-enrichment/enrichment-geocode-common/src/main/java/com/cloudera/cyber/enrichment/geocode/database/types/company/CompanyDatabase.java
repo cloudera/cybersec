@@ -61,10 +61,6 @@ public class CompanyDatabase extends MaxmindDatabase {
         }
     }
 
-    public Object getOrganization(DatabaseRecord<Map> response) {
-        return getCompany(response);
-    }
-
     public Object getNetworkMask(DatabaseRecord<Map> response) {
         if (response != null) {
             return response.network().toString();

@@ -22,10 +22,8 @@ import static com.cloudera.cyber.enrichment.geocode.IpGeoMap.GEOCODE_FEATURE;
 /**
  * Small test database downloaded from the maxmind github:
  * <a href="https://github.com/maxmind/MaxMind-DB/blob/master/test-data/GeoIP2-City-Test.mmdb">...</a>
- *
  * The json file that describes the IP ranges encoded in the database:
  * <a href="https://github.com/maxmind/MaxMind-DB/blob/master/source-data/GeoIP2-City-Test.json">...</a>
- *
  * The article that describes how to use the test databases:
  * <a href="https://medium.com/@ivastly/how-to-use-test-versions-of-maxmind-geoip-databases-1a600fbd074c">...</a>
  */
@@ -36,6 +34,7 @@ public class IpGeoTestData {
     public static final String ALL_FIELDS_IPv4 = "2.125.160.216";
     public static final String UNKNOWN_HOST_IP = "this.is.not.ip";
     public static final String LOCAL_IP = "10.0.0.1";
+    static final String LIST_IP_FIELD_NAME = "list_ip_field";
 
     public static Map<String, Map<GeoEnrichmentFields, String>> createGeoExpectedValues() {
         Map<String, Map<GeoEnrichmentFields, String>> expectedValues = new HashMap<>();
@@ -65,5 +64,16 @@ public class IpGeoTestData {
         Map<GeoEnrichmentFields, String> expectedGeos = getExpectedGeoEnrichments(ipAddress);
         expectedGeos.forEach((field, value) -> expectedEnrichments.put(String.join(".", enrichmentFieldName, GEOCODE_FEATURE, field.getSingularName()), value));
     }
+
+    public static Map<String, String> getExpectedExtension(Map<String, String> inputFields, List<String> geoEnrichedFields) {
+        Map<String, String> expectedExtensions = new HashMap<>(inputFields);
+        inputFields.forEach((fieldName, fieldValue) -> {
+            if (geoEnrichedFields.contains(fieldName)) {
+                getExpectedEnrichmentValues(expectedExtensions, fieldName, fieldValue);
+            }
+        });
+        return expectedExtensions;
+    }
+
 
 }

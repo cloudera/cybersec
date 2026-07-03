@@ -13,7 +13,6 @@
 package com.cloudera.cyber.enrichment.geocode;
 
 import com.cloudera.cyber.Message;
-import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 
 import java.util.List;
@@ -31,4 +30,11 @@ public class IpGeo {
                 .map(new IpAsnMap(asnDatabasePath, ipFields, null))
                 .name("IP ASN").uid("maxmind-asn");
     }
+
+    public static SingleOutputStreamOperator<Message> company(SingleOutputStreamOperator<Message> source, List<String> ipFields, String companyDatabasePath) {
+        return source
+                .map(new IpCompanyMap(companyDatabasePath, ipFields, null))
+                .name("IP Company").uid("ip-company");
+    }
+
 }

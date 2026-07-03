@@ -1,5 +1,7 @@
 package com.cloudera.cyber.enrichment.geocode.database.types.geo;
 
+import com.cloudera.cyber.enrichment.geocode.database.types.ValueConversions;
+
 import java.util.List;
 import java.util.Map;
 
