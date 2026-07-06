@@ -58,7 +58,7 @@ public class IpCompanyMap extends RichMapFunction<Message, Message> {
         try {
             this.companyEnrichment = new IpCompanyEnrichment(companyDatabasePath);
         } catch (Exception e) {
-            throw new IllegalStateException(String.format("Could not read company database %s", companyDatabasePath));
+            throw new IllegalStateException(String.format("Could not read company database %s", companyDatabasePath), e);
         }
     }
 

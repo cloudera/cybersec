@@ -56,7 +56,7 @@ public class IpCompanyEnrichment extends IpEnrichment {
                     }
                 }
             } catch (Exception e) {
-                enrichment.addQualityMessage(qualityMessages, DataQualityMessageLevel.ERROR, String.format(COMPANY_FAILED_MESSAGE, e.getMessage()));
+                enrichment.addQualityMessage(qualityMessages, DataQualityMessageLevel.ERROR, String.format(COMPANY_FAILED_MESSAGE, e));
             }
         }
     }

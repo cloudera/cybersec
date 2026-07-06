@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,6 +52,16 @@ public class IpCompanyEnrichmentTest {
 
         Assertions.assertTrue(dataQualityMessages.isEmpty());
         Assertions.assertEquals(IpCompanyTestData.getExpectedValues(TEST_ENRICHMENT_FIELD_NAME, IP_WITH_NUMBER_AND_ORG), extensions);
+    }
+
+    @Test
+    void testLookupOnClosedDatabase() throws IOException {
+        Map<String, String> extensions = new HashMap<>();
+        List<DataQualityMessage> dataQualityMessages = new ArrayList<>();
+        IpCompanyEnrichment ipCompanyEnrichment = new IpCompanyEnrichment(COMPANY_DATABASE_PATH);
+        ipCompanyEnrichment.close();
+        ipCompanyEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, IP_WITH_NUMBER_AND_ORG, extensions, dataQualityMessages);
+        Assertions.assertFalse(dataQualityMessages.isEmpty());
     }
 
     @Test

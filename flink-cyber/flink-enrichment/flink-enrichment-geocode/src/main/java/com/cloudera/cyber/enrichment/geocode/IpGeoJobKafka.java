@@ -26,6 +26,9 @@ import org.apache.flink.util.Preconditions;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Test job for geocoding.  Do not use for production.
+ */
 public class IpGeoJobKafka extends IpGeoJob {
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
