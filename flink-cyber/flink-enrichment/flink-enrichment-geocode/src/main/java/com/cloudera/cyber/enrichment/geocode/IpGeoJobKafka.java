@@ -26,6 +26,9 @@ import org.apache.flink.util.Preconditions;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Test job for geocoding.  Do not use for production.
+ */
 public class IpGeoJobKafka extends IpGeoJob {
     public static void main(String[] args) throws Exception {
         Preconditions.checkArgument(args.length >= 1, "Arguments must consist of a properties files");
@@ -48,21 +51,19 @@ public class IpGeoJobKafka extends IpGeoJob {
      * Returns a consumer group id for the geocoder ensuring that each topic is only processed once with the same fields
      *
      * @param inputTopic topic to read from
-     * @param ipFields the ip fields to be geocoded
      * @return Kafka group id for geocoder
      */
-    private String createGroupId(String inputTopic, List<String> ipFields) {
+    private String createGroupId(String inputTopic) {
         List<String> parts = Arrays.asList("ipgeo",
-                inputTopic,
-                String.valueOf(ipFields.hashCode()));
+                inputTopic);
         return String.join(".", parts);
     }
 
     @Override
-    protected SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params, List<String> ipFields) {
+    protected SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params) {
         String inputTopic = params.getRequired("topic.input");
       return env.fromSource(FlinkUtils.createKafkaSource(inputTopic,
-                params,createGroupId(inputTopic, ipFields)), WatermarkStrategy.noWatermarks(), "Kafka Source")
+                params,createGroupId(inputTopic)), WatermarkStrategy.noWatermarks(), "Kafka Source")
                 .uid("kafka.input");
     }
 

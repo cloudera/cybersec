@@ -1,15 +1,3 @@
-/*
- * Copyright 2020 - 2022 Cloudera. All Rights Reserved.
- *
- * This file is licensed under the Apache License Version 2.0 (the "License"). You may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
- * http://www.apache.org/licenses/LICENSE-2.0.
- *
- * This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied. Refer to the License for the specific permissions and
- * limitations governing your use of the file.
- */
-
 package com.cloudera.cyber.enrichment.geocode;
 
 import com.cloudera.cyber.Message;
@@ -21,20 +9,23 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.test.util.JobTester;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Log
-public class IpGeoJobTest extends IpGeoTestBase {
+public class IpAsnJobTest extends IpGeoTestBase {
 
     @Test
-    public void testIpGeoPipeline() throws Exception {
+    public void testIpAsnPipeline() throws Exception {
         long ts = 0;
         try (StreamExecutionEnvironment env = createPipeline(ParameterTool.fromMap(ImmutableMap.of(
-                PARAM_GEO_FIELDS, String.join(",", STRING_IP_FIELD_NAME, IpGeoTestData.LIST_IP_FIELD_NAME),
-                PARAM_GEO_DATABASE_PATH, IpGeoTestData.GEOCODE_DATABASE_PATH,
-                PARAMS_ENABLE_ASN, "false",
-                PARAMS_ENABLE_COMPANY, "false"
-        ))).setParallelism(1)) {
+                PARAM_ASN_FIELDS, STRING_IP_FIELD_NAME,
+                PARAM_ASN_DATABASE_PATH, IpAsnTestData.ASN_DATABASE_PATH,
+                PARAMS_ENABLE_GEO, "false",
+                PARAMS_ENABLE_COMPANY, "false"))).setParallelism(1)) {
             JobTester.startTest(env);
 
             createMessages(ts);
@@ -51,18 +42,23 @@ public class IpGeoJobTest extends IpGeoTestBase {
 
         messages.add(TestUtils.createMessage().toBuilder()
                 .extensions(new HashMap<>() {{
-                    put(STRING_IP_FIELD_NAME, IpGeoTestData.COUNTRY_ONLY_IPv6);
+                    put(STRING_IP_FIELD_NAME, IpAsnTestData.IP_WITH_NUMBER_AND_ORG);
                 }}));
         messages.add(TestUtils.createMessage().toBuilder()
                 .extensions(new HashMap<>() {{
-                    put(STRING_IP_FIELD_NAME, IpGeoTestData.ALL_FIELDS_IPv4);
+                    put(STRING_IP_FIELD_NAME, IpAsnTestData.IP_V6_WITH_NUMBER_AND_ORG);
+                }}));
+        messages.add(TestUtils.createMessage().toBuilder()
+                .extensions(new HashMap<>() {{
+                    put(STRING_IP_FIELD_NAME, IpAsnTestData.IP_NOT_FOUND);
                 }}));
 
         long offset = 100;
         for(Message.MessageBuilder nextBuilder: messages) {
             Map<String, String> inputFields = nextBuilder.build().getExtensions();
+            Map<String, String> expectedExtension = IpAsnTestData.getExpectedExtension(inputFields, Collections.singletonList(STRING_IP_FIELD_NAME));
             long nextTimestamp = ts + offset;
-            expectedExtensions.put(nextTimestamp, IpGeoTestData.getExpectedExtension(inputFields, List.of(STRING_IP_FIELD_NAME, IpGeoTestData.LIST_IP_FIELD_NAME)));
+            expectedExtensions.put(nextTimestamp, expectedExtension);
             sendRecord(nextBuilder.ts(ts + offset));
             offset += 100;
         }
@@ -70,6 +66,7 @@ public class IpGeoJobTest extends IpGeoTestBase {
         source.sendWatermark(ts + 1000);
         source.markFinished();
     }
+
 }
 
 

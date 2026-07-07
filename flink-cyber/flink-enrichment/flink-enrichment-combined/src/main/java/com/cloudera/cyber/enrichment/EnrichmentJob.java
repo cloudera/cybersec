@@ -17,7 +17,7 @@ import com.cloudera.cyber.commands.EnrichmentCommand;
 import com.cloudera.cyber.commands.EnrichmentCommandResponse;
 import com.cloudera.cyber.enrichemnt.stellar.StellarEnrichmentJob;
 import com.cloudera.cyber.enrichment.cidr.IpRegionCidr;
-import com.cloudera.cyber.enrichment.geocode.IpGeo;
+import com.cloudera.cyber.enrichment.geocode.IpGeoJob;
 import com.cloudera.cyber.enrichment.hbase.HbaseJob;
 import com.cloudera.cyber.enrichment.hbase.HbaseJobRawKafka;
 import com.cloudera.cyber.enrichment.hbase.config.EnrichmentsConfig;
@@ -56,8 +56,6 @@ public abstract class EnrichmentJob {
     private static final String PARAMS_REST_CONFIG_FILE = "rest.config.file";
     private static final String PARAMS_THREATQ_CONFIG_FILE = "threatq.config.file";
 
-    private static final String PARAMS_ENABLE_GEO = "geo.enabled";
-    private static final String PARAMS_ENABLE_ASN = "asn.enabled";
     private static final String PARAMS_ENABLE_CIDR = "cidr.enabled";
     private static final String PARAMS_ENABLE_HBASE = "hbase.enabled";
     private static final String PARAMS_ENABLE_REST = "rest.enabled";
@@ -76,19 +74,12 @@ public abstract class EnrichmentJob {
         SingleOutputStreamOperator<EnrichmentCommand> localEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.LOCAL));
         SingleOutputStreamOperator<EnrichmentCommand> hbaseEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.HBASE));
 
-        SingleOutputStreamOperator<Message> geoEnriched = params.getBoolean(PARAMS_ENABLE_GEO, true) ?
-                IpGeo.geo(messages,
-                        Arrays.asList(params.getRequired(PARAM_GEO_FIELDS).split(",")),
-                        params.getRequired(PARAM_GEO_DATABASE_PATH)) : messages;
-        SingleOutputStreamOperator<Message> asnEnriched = params.getBoolean(PARAMS_ENABLE_ASN, true) ?
-                IpGeo.asn(geoEnriched,
-                        Arrays.asList(params.getRequired(PARAM_ASN_FIELDS).split(",")),
-                        params.getRequired(PARAM_ASN_DATABASE_PATH)) : geoEnriched;
+        SingleOutputStreamOperator<Message> geoEnriched = IpGeoJob.enrich(params, messages);
 
         SingleOutputStreamOperator<Message> cidrEnriched = params.getBoolean(PARAMS_ENABLE_CIDR, false) ?
-            IpRegionCidr.cidr(asnEnriched,
+            IpRegionCidr.cidr(geoEnriched,
                 Arrays.asList(params.getRequired(PARAM_CIDR_IP_FIELDS).split(",")),
-                params.getRequired(PARAM_CIDR_CONFIG_PATH)) : asnEnriched;
+                params.getRequired(PARAM_CIDR_CONFIG_PATH)) : geoEnriched;
 
         Tuple2<DataStream<Message>, DataStream<EnrichmentCommandResponse>> enriched = LookupJob.enrich(localEnrichments, cidrEnriched, enrichmentConfigs);
 

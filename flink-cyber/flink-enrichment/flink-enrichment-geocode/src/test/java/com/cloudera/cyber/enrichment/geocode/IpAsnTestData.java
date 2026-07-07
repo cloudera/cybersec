@@ -16,6 +16,8 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -24,10 +26,8 @@ import static com.cloudera.cyber.enrichment.geocode.database.IpAsnEnrichment.*;
 /**
  * Small test database downloaded from the maxmind github:
  * <a href="https://github.com/maxmind/MaxMind-DB/blob/main/test-data/GeoLite2-ASN-Test.mmdb">...</a>
- *
  * The json file that describes the IP ranges encoded in the database:
  * <a href="https://github.com/maxmind/MaxMind-DB/blob/main/source-data/GeoLite2-ASN-Test.json">...</a>
- *
  * The article that describes how to use the test databases:
  * <a href="https://medium.com/@ivastly/how-to-use-test-versions-of-maxmind-geoip-databases-1a600fbd074c">...</a>
  */
@@ -56,4 +56,15 @@ public class IpAsnTestData {
             return Collections.emptyMap();
         }
     }
+
+    public static Map<String, String> getExpectedExtension(Map<String, String> inputFields, List<String> asnEnrichedFields) {
+        Map<String, String> expectedExtensions = new HashMap<>(inputFields);
+        inputFields.forEach((fieldName, fieldValue) -> {
+            if (asnEnrichedFields.contains(fieldName)) {
+                expectedExtensions.putAll(IpAsnTestData.getExpectedValues(fieldName, fieldValue));
+            }
+        });
+        return expectedExtensions;
+    }
+
 }

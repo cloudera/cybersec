@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Map;
 
-import static com.cloudera.cyber.enrichment.geocode.database.types.geo.ValueConversions.convertNullToEmptyString;
+import static com.cloudera.cyber.enrichment.geocode.database.types.ValueConversions.convertNullToEmptyString;
 
 public class GeoDatabase extends MaxmindDatabase {
     private final GeoDatabaseResponseDecoder responseDecoder;
