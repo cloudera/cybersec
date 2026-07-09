@@ -35,7 +35,7 @@ public class MessageToParse extends SpecificRecordBase implements SpecificRecord
     private int partition;
     private long offset;
     private byte[] key;
-    /** if line number if message was read from file.  -1 otherwise.*/
+    /** if line number is message was read from file.  -1 otherwise.*/
     @Builder.Default
     private long line = DEFAULT_LINE;
 

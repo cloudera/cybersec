@@ -16,6 +16,7 @@ import com.cloudera.parserchains.core.Message;
 import com.cloudera.parserchains.core.Parser;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,6 +32,12 @@ public class AnnotationBasedParserInfoBuilderTest {
     public static class ValidParser implements Parser {
         @Override
         public Message parse(Message message) {
+            // do nothing
+            return null;
+        }
+
+        @Override
+        public Message parse(Message message, Map<String, Object> metadataCache) {
             // do nothing
             return null;
         }
@@ -57,6 +64,12 @@ public class AnnotationBasedParserInfoBuilderTest {
     public static class MissingAnnotationParser implements Parser {
         @Override
         public Message parse(Message message) {
+            // do nothing
+            return null;
+        }
+
+        @Override
+        public Message parse(Message message, Map<String, Object> metadataCache) {
             // do nothing
             return null;
         }

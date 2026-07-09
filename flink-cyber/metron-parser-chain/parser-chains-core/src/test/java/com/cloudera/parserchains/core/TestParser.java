@@ -38,6 +38,11 @@ public class TestParser implements Parser {
     }
 
     @Override
+    public Message parse(Message message, Map<String, Object> metadataCache) {
+        return parse(message);
+    }
+
+    @Override
     public byte[] getTestBytes(String testTextToParse) {
         return new byte[0];
     }

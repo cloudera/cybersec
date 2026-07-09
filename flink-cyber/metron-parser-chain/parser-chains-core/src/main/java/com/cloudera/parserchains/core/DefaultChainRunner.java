@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Parses a {@link Message} using a parser chain.
@@ -47,15 +48,15 @@ public class DefaultChainRunner implements ChainRunner {
     }
 
     @Override
-    public List<Message> run(String toParse, ChainLink chain) {
+    public List<Message> run(String toParse, Map<String, Object> metadata, ChainLink chain) {
         Message original = originalMessage(toParse);
-        return parseMessage(original, chain);
+        return parseMessage(original, metadata, chain);
     }
 
     @Override
-    public List<Message> run(Message original, ChainLink chain, List<Message> results) {
+    public List<Message> run(Message original, Map<String, Object> metadata, ChainLink chain, List<Message> results) {
         try {
-            List<Message> chainResults = chain.process(original);
+            List<Message> chainResults = chain.process(original, metadata);
             results.addAll(chainResults);
         } catch(Throwable t) {
             String msg = "An unexpected error occurred while running a parser chain. " +
@@ -67,21 +68,21 @@ public class DefaultChainRunner implements ChainRunner {
         return results;
     }
 
-    private List<Message> parseMessage(Message original, ChainLink chain) {
+    private List<Message> parseMessage(Message original, Map<String, Object> metadata, ChainLink chain) {
         List<Message> results = new ArrayList<>();
         results.add(original);
 
         if (chain != null) {
-            return run(original, chain, results);
+            return run(original, metadata, chain, results);
         } else {
             return getErrorResult(original, "No parser chain defined for message");
         }
     }
 
     @Override
-    public List<Message> run(MessageToParse toParse, ChainLink chain) {
+    public List<Message> run(MessageToParse toParse, Map<String, Object> metadata, ChainLink chain) {
         Message original = originalMessage(toParse);
-        return parseMessage(original, chain);
+        return parseMessage(original, metadata, chain);
     }
 
     @Override
