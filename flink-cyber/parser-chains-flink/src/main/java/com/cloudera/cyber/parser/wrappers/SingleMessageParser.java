@@ -107,10 +107,11 @@ public class SingleMessageParser implements ParserInterface {
      * @param message           The raw message to be parsed.
      * @param output            Sends parsed messages on to next processor.
      */
-    public void parse(ParserChainSource parserChainSource, MessageToParse message, AbstractParserOutput output) {
+    @Override
+    public void parse(ParserChainSource parserChainSource, Map<String, Object> metadataCache, MessageToParse message, AbstractParserOutput output) {
         final ChainLink chain = chains.get(parserChainSource.getChainKey());
 
-        final List<com.cloudera.parserchains.core.Message> run = chainRunner.run(message, chain);
+        final List<com.cloudera.parserchains.core.Message> run = chainRunner.run(message, metadataCache, chain);
         final com.cloudera.parserchains.core.Message m = run.get(run.size() - 1);
         if (m.getEmit()) {
             Optional<String> errorMessage = m.getError().map(Throwable::getMessage);

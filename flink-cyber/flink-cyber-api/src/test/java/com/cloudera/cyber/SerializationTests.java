@@ -101,30 +101,25 @@ public class SerializationTests {
 
     @Test
     public void testMessageToParse() throws IOException {
-        Map<String, String> metadata = new HashMap<>();
-        metadata.put("fileHeader", "field1 field2 field3");
-        // message to parse with line and metadata specified
-        MessageToParse messageToParseWithOverriddenDefaults = MessageToParse.builder().
+        // message to parse with line specified
+        MessageToParse messageToParseWithLine = MessageToParse.builder().
                 offset(3).partition(1).
                 originalBytes("this is a test".getBytes(UTF_8)).
                 topic("test_topic").
                 line(500L).
-                metadata(metadata).
                 build();
-        MessageToParse output = test(messageToParseWithOverriddenDefaults);
-        assertThat(output, equalTo(messageToParseWithOverriddenDefaults));
+        MessageToParse output = test(messageToParseWithLine);
+        assertThat(output, equalTo(messageToParseWithLine));
 
         // message to parse with no line specified - defaults to -1
-        // metadata defaults to empty map
-        MessageToParse messageToParseDefault = MessageToParse.builder().
+        MessageToParse messageToParseDefaultLine = MessageToParse.builder().
                 offset(3).partition(1).
                 originalBytes("this is a test".getBytes(UTF_8)).
                 topic("test_topic").
                 build();
-        output = test(messageToParseDefault);
-        assertThat(output, equalTo(messageToParseDefault));
+        output = test(messageToParseDefaultLine);
+        assertThat(output, equalTo(messageToParseDefaultLine));
         assertThat(output.getLine(), equalTo(DEFAULT_LINE));
-        assertThat(output.getMetadata().isEmpty(), equalTo(true));
     }
     
     @Test

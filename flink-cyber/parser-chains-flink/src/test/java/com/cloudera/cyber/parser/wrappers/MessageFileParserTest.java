@@ -43,7 +43,7 @@ public class MessageFileParserTest {
 
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse("message_file/vpc_flow_samples.txt");
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
-        parser.parse(new ParserChainSource("vpcflow", "netflow", null), messageToParse, parserOutput);
+        parser.parse(new ParserChainSource("vpcflow", "netflow", null), null, messageToParse, parserOutput);
 
         MessageFileParserTestUtil.verifyMessageFileOutput(parserOutput.getOutput(), messageToParse);
     }
@@ -54,7 +54,7 @@ public class MessageFileParserTest {
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse("message_file/vpc_flow_samples_with_header.txt");
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
 
-        parser.parse(new ParserChainSource("variable_vpcflow", "variable_netflow", new MessageFileHeader(1, null, null)), messageToParse, parserOutput);
+        parser.parse(new ParserChainSource("variable_vpcflow", "variable_netflow", new MessageFileHeader(1, null, null)), null, messageToParse, parserOutput);
         MessageFileParserTestUtil.verifyMessageFileOutput(parserOutput.getOutput(), messageToParse, 2);
     }
 
@@ -148,7 +148,7 @@ public class MessageFileParserTest {
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(filePath);
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
         String expectedSource = (parserChainSource != null) ? parserChainSource.getSource() : UNMATCHED_FILE_SOURCE;
-        parser.parse(parserChainSource, messageToParse, parserOutput);
+        parser.parse(parserChainSource, null, messageToParse, parserOutput);
 
         MessageFileParserTestUtil.verifyErrorMessage(parserOutput, messageToParse, filePath, expectedSource, expectedErrorMessage, EMPTY_SIGNATURE);
     }
@@ -185,7 +185,7 @@ public class MessageFileParserTest {
         MessageFileParser parser = createMessageFileParserToTest(Collections.singletonList(compressedFile.getParent().toString()));
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(compressedFile.toString());
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
-        parser.parse(new ParserChainSource("vpcflow", "netflow", null), messageToParse, parserOutput);
+        parser.parse(new ParserChainSource("vpcflow", "netflow", null), null, messageToParse, parserOutput);
 
         return parserOutput;
     }
@@ -272,7 +272,7 @@ public class MessageFileParserTest {
 
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(fileWithHeaders.toString());
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
-        parser.parse(new ParserChainSource("vpcflow", "netflow", messageFileHeader), messageToParse, parserOutput);
+        parser.parse(new ParserChainSource("vpcflow", "netflow", messageFileHeader), null, messageToParse, parserOutput);
 
         // Should get 2 data lines (excluding 2 header lines)
         assertThat(parserOutput.getOutput().stream()
@@ -358,7 +358,7 @@ public class MessageFileParserTest {
 
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(fileWithHeaders.toString());
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
-        parser.parse(new ParserChainSource("vpcflow", "netflow", messageFileHeader), messageToParse, parserOutput);
+        parser.parse(new ParserChainSource("vpcflow", "netflow", messageFileHeader), null, messageToParse, parserOutput);
 
         // Should have an error message about missing required header
         assertThat(parserOutput.getOutput()).hasSize(1);
@@ -389,7 +389,7 @@ public class MessageFileParserTest {
 
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(file.toString());
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
-        parser.parse(new ParserChainSource("vpcflow", "netflow", null), messageToParse, parserOutput);
+        parser.parse(new ParserChainSource("vpcflow", "netflow", null), null, messageToParse, parserOutput);
 
         // Should get all 3 lines since header is not enabled
         assertThat(parserOutput.getOutput().stream()
@@ -415,7 +415,7 @@ public class MessageFileParserTest {
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(file.toString());
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
         parser.parse(new ParserChainSource("vpcflow", "netflow",
-                new MessageFileHeader(null, Collections.singletonList("prefix"), null)), messageToParse, parserOutput);
+                new MessageFileHeader(null, Collections.singletonList("prefix"), null)), null, messageToParse, parserOutput);
 
         // Should get all 3 lines since header is not enabled
         assertThat(parserOutput.getOutput().stream()

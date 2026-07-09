@@ -1,20 +1,23 @@
 package com.cloudera.parserchains.parsers;
 
 import com.cloudera.parserchains.core.*;
-import com.fasterxml.jackson.dataformat.csv.CsvReadException;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.cloudera.parserchains.parsers.VariableSchemaCsvTextParser.DEFAULT_FIELD_NAME_HEADER;
+import static com.cloudera.parserchains.parsers.VariableSchemaCsvTextParser.OBJECT_MAPPER_KEY_NAME;
+import static com.cloudera.parserchains.parsers.VariableSchemaCsvTextParser.PARSED_HEADER_KEY_NAME;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class VariableSchemaCsvTextParserTest {
 
+    public static final String BAD_UNICODE_CHAR = "\\u00G";
     private static final String DEFAULT_SETTING_FIELD_NAME = "setting";
-    private static final String DEFAULT_FIELD_VALUE_PREFIX = "field:";
-    private static final String DEFAULT_SETTING_VALUE = DEFAULT_FIELD_VALUE_PREFIX.concat(DEFAULT_SETTING_FIELD_NAME);
+    private static final String DEFAULT_METADATA_VALUE_PREFIX = "metadata:";
+    private static final String DEFAULT_METADATA_PARSER_SETTING_VALUE = DEFAULT_METADATA_VALUE_PREFIX.concat(DEFAULT_SETTING_FIELD_NAME);
     
     @Test
     public void testDefaultParser() {
@@ -37,25 +40,50 @@ public class VariableSchemaCsvTextParserTest {
     }
 
     @Test
+    public void testParserWithNoMetadataAccess() {
+        String headerToParse = "first,second,third,fourth";
+        String csvToParse = "value1,(empty),\" value, 3 \", -";
+        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser().withFieldNameHeader(headerToParse);
+
+        Map<String, String> expectedFields = new HashMap<>();
+        expectedFields.put(Constants.DEFAULT_INPUT_FIELD, csvToParse);
+        expectedFields.put("first", "value1");
+        expectedFields.put("second", "");
+        expectedFields.put("third", "value, 3");
+        Message output = parser.parse(createInputMessage(csvToParse));
+        verifySuccessOutputMessage(output, expectedFields);
+    }
+
+    @Test
+    public void testParserAccessingNullMetadata() {
+        String csvToParse = "value1,(empty),\" value, 3 \", -";
+        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser();
+
+        Message output = parser.parse(createInputMessage(csvToParse));
+        verifyParserError(output, IllegalStateException.class, "Message missing metadata value for Field Name Header field 'header[1]'");
+    }
+
+    @Test
     public void testMissingFieldNameFromSetting() {
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> new VariableSchemaCsvTextParser().withFieldNameHeader(DEFAULT_FIELD_VALUE_PREFIX));
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> new VariableSchemaCsvTextParser().withFieldNameHeader(DEFAULT_METADATA_VALUE_PREFIX));
         assertEquals("Parser setting Field Name Header does not specify a field name.", e.getMessage());
     }
 
     @Test
     public void testRowWithNotEnoughColumns() {
         VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser();
-        Message input = createInputMessage(createMessageMap("1,2", "field1,field2,field3", null));
-        testParseWithError(parser, input, CsvReadException.class, "Not enough column values: expected 3, found 2\n at [Source: (StringReader); line: 2, column: 3]");
-    }
+        Map<String, Object> metadata = createMetadata("field1,field2,field3", null);
+
+        testParseWithError(parser, metadata, createInputMessage("1,2") , "Message contained 2 fields but header expected 3 fields.");
+     }
 
     @Test
     public void testRowWithNTooManyColumns() {
         VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser();
-        Message input = createInputMessage(createMessageMap("1,2,3", "field1,field2", null));
 
-        testParseWithError(parser, input, CsvReadException.class,
-                "Too many entries: expected at most 2 (value #2 (1 chars) \"3\")\n at [Source: (StringReader); line: 2, column: 5]");
+        testParseWithError(parser, createMetadata("field1,field2", null),
+                createInputMessage("1,2,3"),
+                "Message contained 3 fields but header expected 2 fields.");
     }
 
     @Test
@@ -63,15 +91,19 @@ public class VariableSchemaCsvTextParserTest {
         VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser();
         Message input = Message.builder().build();
 
-        testParseWithError(parser, input, String.format("Message missing expected input field '%s'", Constants.DEFAULT_INPUT_FIELD));
+        testParseWithError(parser, null, input, String.format("Message missing expected input field '%s'", Constants.DEFAULT_INPUT_FIELD));
     }
 
-    private void testParseWithError(VariableSchemaCsvTextParser parser, Message input, String expectedErrorMessage) {
-        testParseWithError(parser, input, IllegalStateException.class, expectedErrorMessage);
+    private void testParseWithError(VariableSchemaCsvTextParser parser, Map<String, Object> metadata, Message input, String expectedErrorMessage) {
+        testParseWithError(parser, metadata, input, IllegalStateException.class, expectedErrorMessage);
     }
 
-    private void testParseWithError(VariableSchemaCsvTextParser parser, Message input, Class<? extends Throwable> expectedException, String expectedErrorMessage) {
-        Message output = parser.parse(input);
+    private void testParseWithError(VariableSchemaCsvTextParser parser, Map<String, Object> metadata, Message input, Class<? extends Throwable> expectedException, String expectedErrorMessage) {
+        Message output = parser.parse(input, metadata);
+        verifyParserError(output, expectedException, expectedErrorMessage);
+    }
+
+    private void verifyParserError(Message output, Class<? extends Throwable> expectedException, String expectedErrorMessage) {
         Optional<Throwable> error = output.getError();
         assertTrue(error.isPresent(), "should return missing input field error");
         Throwable throwable = error.get();
@@ -81,18 +113,16 @@ public class VariableSchemaCsvTextParserTest {
 
     @Test
     public void testFailedLiteralCharacterConversion() {
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> new VariableSchemaCsvTextParser().withDelimiter("\\u00G"));
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> new VariableSchemaCsvTextParser().withDelimiter(BAD_UNICODE_CHAR));
         assertEquals("Parser setting Delimiter conversion failed due to 'Less than 4 hex digits in unicode value: '\\u00G' due to end of CharSequence'", e.getMessage());
     }
 
     @Test
     public void testFailedFieldValueCharacterConversion() {
-        String badUnicodeChar = "\\u00G";
-        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser().withDelimiter(DEFAULT_SETTING_VALUE);
+        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser().withDelimiter(DEFAULT_METADATA_PARSER_SETTING_VALUE);
 
-        Message input = createInputMessage(createMessageMap("1,2,3", "field1,field2,field3", badUnicodeChar));
-
-        testParseWithError(parser, input, RuntimeException.class,
+        testParseWithError(parser, createMetadata("field1,field2,field3", BAD_UNICODE_CHAR),
+                createInputMessage("field1,field2,field3"), RuntimeException.class,
                 "Could not convert value \\u00G for field setting to setting Delimiter.");
 
     }
@@ -103,7 +133,7 @@ public class VariableSchemaCsvTextParserTest {
         // override using literal
         testOverrideFieldDelimiter(delimiterOverrideValue, null);
         // override using field value
-        testOverrideFieldDelimiter(DEFAULT_SETTING_VALUE, delimiterOverrideValue);
+        testOverrideFieldDelimiter(DEFAULT_METADATA_PARSER_SETTING_VALUE, delimiterOverrideValue);
     }
 
     private void testOverrideFieldDelimiter(String delimiterParserSetting, String delimiterInputMapValue) {
@@ -117,16 +147,16 @@ public class VariableSchemaCsvTextParserTest {
         expectedFields.put("second", "");
         expectedFields.put("third", "value, 3");
 
-        testParser(parser, createMessageMap(csvToParse, headerToParse, delimiterInputMapValue), expectedFields);
+        testParser(parser, createMetadata(headerToParse, delimiterInputMapValue),  createInputMessage(csvToParse), expectedFields);
 
     }
     
     @Test
     public void testMissingDelimiterField() {
         String missingFieldName = "not_set";
-        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser().withDelimiter(DEFAULT_FIELD_VALUE_PREFIX.concat(missingFieldName));
-        Message input = createInputMessage(createMessageMap("a,b,c", "field1,field2,field3", null));
-        testParseWithError(parser, input, String.format("Message missing value for %s field '%s'", VariableSchemaCsvTextParser.DELIMITER, missingFieldName));
+        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser().withDelimiter(DEFAULT_METADATA_VALUE_PREFIX.concat(missingFieldName));
+
+        testParseWithError(parser, createMetadata("field1,field2,field3", null), createInputMessage("a,b,c"), String.format("Message missing metadata value for %s field '%s'", VariableSchemaCsvTextParser.DELIMITER, missingFieldName));
     }
 
     @Test
@@ -140,10 +170,7 @@ public class VariableSchemaCsvTextParserTest {
         expectedFields.put("first", "value1");
         expectedFields.put("second", "");
         expectedFields.put("third", "value, 3");
-        Map<String, String> messageInputFields = new HashMap<>();
-        messageInputFields.put(customInputField, csvToParse);
-        messageInputFields.put(VariableSchemaCsvTextParser.DEFAULT_FIELD_NAME_HEADER , headerToParse);
-        testParser(parser, messageInputFields, expectedFields);
+        testParser(parser, createMetadata(headerToParse, null), createInputMessage(customInputField, csvToParse), expectedFields);
     }
 
     @Test
@@ -152,7 +179,7 @@ public class VariableSchemaCsvTextParserTest {
         // override with literal
         testOverrideHeaderField(headerToParse, null);
         // override with field value
-        testOverrideHeaderField(DEFAULT_FIELD_VALUE_PREFIX.concat("custom_header"), headerToParse);
+        testOverrideHeaderField(DEFAULT_METADATA_VALUE_PREFIX.concat("custom_header"), headerToParse);
     }
 
     private void testOverrideHeaderField(String headerParserSetting, String headerMapSetting) {
@@ -163,20 +190,18 @@ public class VariableSchemaCsvTextParserTest {
         expectedFields.put("first", "value1");
         expectedFields.put("second", "");
         expectedFields.put("third", "value, 3");
-        Map<String, String> messageInputFields = new HashMap<>();
-        messageInputFields.put(Constants.DEFAULT_INPUT_FIELD, csvToParse);
-        if (headerMapSetting != null) {
-            messageInputFields.put(headerParserSetting, headerMapSetting);
+        Map<String, Object> metadata = new HashMap<>();
+        if (headerMapSetting != null && headerParserSetting.startsWith(DEFAULT_METADATA_VALUE_PREFIX)) {
+            metadata.put(headerParserSetting.split(":")[1], headerMapSetting);
         }
-        testParser(parser, messageInputFields, expectedFields);
+        testParser(parser, metadata, createInputMessage(csvToParse), expectedFields);
     }
 
     @Test
     public void testMissingHeaderField() {
         String missingFieldName = "not_set";
-        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser().withFieldNameHeader(DEFAULT_FIELD_VALUE_PREFIX.concat(missingFieldName));
-        Message input = Message.builder().addField(Constants.DEFAULT_INPUT_FIELD, "a,b,c").build();
-        testParseWithError(parser, input, String.format("Message missing value for %s field '%s'", VariableSchemaCsvTextParser.FIELD_NAME_HEADER, missingFieldName));
+        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser().withFieldNameHeader(DEFAULT_METADATA_VALUE_PREFIX.concat(missingFieldName));
+        testParseWithError(parser, new HashMap<>(), createInputMessage("a,b,c"), String.format("Message missing metadata value for %s field '%s'", VariableSchemaCsvTextParser.FIELD_NAME_HEADER, missingFieldName));
     }
 
 
@@ -187,7 +212,7 @@ public class VariableSchemaCsvTextParserTest {
         testOverrideQuoteChar(quoteCharOverride, null);
 
         // override with a field value
-        testOverrideQuoteChar(DEFAULT_SETTING_VALUE, quoteCharOverride);
+        testOverrideQuoteChar(DEFAULT_METADATA_PARSER_SETTING_VALUE, quoteCharOverride);
     }
 
     private void testOverrideQuoteChar(String quoteParserSetting, String quoteMapSetting) {
@@ -199,15 +224,14 @@ public class VariableSchemaCsvTextParserTest {
         expectedFields.put("first", "value1");
         expectedFields.put("second", "");
         expectedFields.put("third", "value, 3");
-        testParser(parser, createMessageMap(csvToParse, headerToParse, quoteMapSetting), expectedFields);
+        testParser(parser, createMetadata(headerToParse, quoteMapSetting), createInputMessage(csvToParse), expectedFields);
     }
 
     @Test
     public void testMissingQuoteChar() {
         String missingFieldName = "not_set";
-        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser().withQuoteChar(DEFAULT_FIELD_VALUE_PREFIX.concat(missingFieldName));
-        Message input = createInputMessage(createMessageMap("a,b,c", "field1,field2,field3", null));
-        testParseWithError(parser, input, String.format("Message missing value for %s field '%s'", VariableSchemaCsvTextParser.QUOTE_CHARACTER, missingFieldName));
+        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser().withQuoteChar(DEFAULT_METADATA_VALUE_PREFIX.concat(missingFieldName));
+        testParseWithError(parser, createMetadata("field1,field2,field3", null), createInputMessage("a,b,c"), String.format("Message missing metadata value for %s field '%s'", VariableSchemaCsvTextParser.QUOTE_CHARACTER, missingFieldName));
     }
 
     @Test
@@ -217,7 +241,7 @@ public class VariableSchemaCsvTextParserTest {
         testOverrideEmptyFieldValue(emptyFieldOverride, null);
 
         // override with a message field value
-        testOverrideEmptyFieldValue(DEFAULT_SETTING_VALUE, emptyFieldOverride);
+        testOverrideEmptyFieldValue(DEFAULT_METADATA_PARSER_SETTING_VALUE, emptyFieldOverride);
     }
 
     private void testOverrideEmptyFieldValue(String emptyFieldParserSetting, String emptyFieldMapSetting) {
@@ -229,22 +253,21 @@ public class VariableSchemaCsvTextParserTest {
         expectedFields.put("first", "value1");
         expectedFields.put("second", "");
         expectedFields.put("third", "value, 3");
-        testParser(parser, createMessageMap(csvToParse, headerToParse, emptyFieldMapSetting), expectedFields);
+        testParser(parser, createMetadata(headerToParse, emptyFieldMapSetting), createInputMessage(csvToParse), expectedFields);
     }
 
     @Test
     public void testMissingEmptyField() {
         String missingFieldName = "not_set";
-        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser().withEmptyFieldValue(DEFAULT_FIELD_VALUE_PREFIX.concat(missingFieldName));
-        Message input = createInputMessage(createMessageMap("a,b,c", "field1,field2,field3", null));
-        testParseWithError(parser, input, String.format("Message missing value for %s field '%s'", VariableSchemaCsvTextParser.EMPTY_FIELD_VALUE, missingFieldName));
+        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser().withEmptyFieldValue(DEFAULT_METADATA_VALUE_PREFIX.concat(missingFieldName));
+        testParseWithError(parser, createMetadata("field1,field2,field3", null), createInputMessage("a,b,c"), String.format("Message missing metadata value for %s field '%s'", VariableSchemaCsvTextParser.EMPTY_FIELD_VALUE, missingFieldName));
     }
 
     @Test
     public void testOverrideUnsetField() {
         String unsetFieldOverride = "x";
         testOverrideUnsetField(unsetFieldOverride, null);
-        testOverrideUnsetField(DEFAULT_SETTING_VALUE, unsetFieldOverride);
+        testOverrideUnsetField(DEFAULT_METADATA_PARSER_SETTING_VALUE, unsetFieldOverride);
     }
 
     private void testOverrideUnsetField(String unsetFieldParserSetting, String unsetFieldMapValue) {
@@ -256,15 +279,14 @@ public class VariableSchemaCsvTextParserTest {
         expectedFields.put("first", "value1");
         expectedFields.put("third", "value, 3");
         expectedFields.put("fourth", "-");
-        testParser(parser, createMessageMap(csvToParse, headerToParse, unsetFieldMapValue), expectedFields);
+        testParser(parser, createMetadata(headerToParse, unsetFieldMapValue), createInputMessage(csvToParse), expectedFields);
     }
 
     @Test
     public void testMissingUnset() {
         String missingFieldName = "not_set";
-        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser().withUnsetFieldValue(DEFAULT_FIELD_VALUE_PREFIX.concat(missingFieldName));
-        Message input = createInputMessage(createMessageMap("a,b,c", "field1,field2,field3", null));
-        testParseWithError(parser, input, String.format("Message missing value for %s field '%s'", VariableSchemaCsvTextParser.UNSET_FIELD_VALUE, missingFieldName));
+        VariableSchemaCsvTextParser parser = new VariableSchemaCsvTextParser().withUnsetFieldValue(DEFAULT_METADATA_VALUE_PREFIX.concat(missingFieldName));
+        testParseWithError(parser, createMetadata("field1,field2,field3", null), createInputMessage("a,b,c"), String.format("Message missing metadata value for %s field '%s'", VariableSchemaCsvTextParser.UNSET_FIELD_VALUE, missingFieldName));
     }
 
     @Test
@@ -281,15 +303,22 @@ public class VariableSchemaCsvTextParserTest {
     }
 
     private static void testParser(VariableSchemaCsvTextParser parser,  String csvToParse, String headerToParse, Map<String, String> expectedFields) {
-        Map<String, String> messageInputFields = new HashMap<>();
-        messageInputFields.put(Constants.DEFAULT_INPUT_FIELD, csvToParse);
-        messageInputFields.put(VariableSchemaCsvTextParser.DEFAULT_FIELD_NAME_HEADER, headerToParse);
-        testParser(parser, messageInputFields, expectedFields);
+        Map<String, Object> metadata = createMetadata(headerToParse, null);
+        Message input = createInputMessage(csvToParse);
+
+        // verify parser without cached metadata
+        testParser(parser, metadata, input, expectedFields);
+
+        // check the metadata cached entries are added
+        assertTrue(metadata.containsKey(OBJECT_MAPPER_KEY_NAME));
+        assertTrue(metadata.containsKey(PARSED_HEADER_KEY_NAME));
+
+        // verify that the same message produces the same results with cache
+        testParser(parser, metadata, input, expectedFields);
     }
 
-    private static void testParser(VariableSchemaCsvTextParser parser, Map<String, String> messageInputFields, Map<String, String> expectedFields) {
-        Message input = createInputMessage(messageInputFields);
-        Message output = parser.parse(input);
+    private static void testParser(VariableSchemaCsvTextParser parser, Map<String, Object> metadata, Message input, Map<String, String> expectedFields) {
+        Message output = parser.parse(input, metadata);
 
         Map<String, String> fullExpectedFields = copyMessageFieldsToMap(input, new HashMap<>());
         fullExpectedFields.putAll(expectedFields);
@@ -297,25 +326,21 @@ public class VariableSchemaCsvTextParserTest {
         verifySuccessOutputMessage(output, fullExpectedFields);
     }
 
-    private static Message createInputMessage(Map<String, String> messageInputFields) {
-        Message.Builder messageBuilder = Message.builder();
-        messageInputFields.forEach((name, value) -> {
-            String messageFieldName = name.startsWith(DEFAULT_FIELD_VALUE_PREFIX) ? name.split(":")[1] : name;
-            messageBuilder.addField(messageFieldName, value);
-        });
-        return messageBuilder.build();
+    private static Message createInputMessage(String stringToParse) {
+        return createInputMessage(Constants.DEFAULT_INPUT_FIELD, stringToParse);
     }
 
-    private static Map<String, String> createMessageMap(String csvToParse, String headerToParse, String settingValue) {
+    private static Message createInputMessage(String inputMessageFieldName, String stringToParse) {
+        return Message.builder().addField(inputMessageFieldName, stringToParse).build();
+    }
 
-        Map<String, String> messageInputFields = new HashMap<>();
-        messageInputFields.put(Constants.DEFAULT_INPUT_FIELD, csvToParse);
-        messageInputFields.put(VariableSchemaCsvTextParser.DEFAULT_FIELD_NAME_HEADER, headerToParse);
+    private static Map<String, Object> createMetadata(String headerToParse, String settingValue) {
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put(DEFAULT_FIELD_NAME_HEADER.split(":")[1], headerToParse);
         if (settingValue != null) {
-            messageInputFields.put("setting", settingValue);
+            metadata.put(DEFAULT_SETTING_FIELD_NAME, settingValue);
         }
-
-        return messageInputFields;
+        return metadata;
     }
 
     private static void verifySuccessOutputMessage(Message output, Map<String, String> expectedFields) {

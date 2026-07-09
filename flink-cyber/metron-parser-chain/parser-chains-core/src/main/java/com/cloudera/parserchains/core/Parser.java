@@ -12,6 +12,8 @@
 
 package com.cloudera.parserchains.core;
 
+import java.util.Map;
+
 /**
  * Parses a {@link Message}.
  *
@@ -28,6 +30,18 @@ public interface Parser {
      * @return A parsed message.
      */
     Message parse(Message message);
+
+    /**
+     * Parse a {@link Message} using metadata.
+     *
+     * <p>Parsers should not throw exceptions to indicate failure to parse conditions. Instead,
+     * use {@link Message.Builder#withError}.
+     *
+     * @param message The message to parse.
+     * @param metadataCache The metadata from the message container such as a file.
+     * @return A parsed message.
+     */
+    Message parse(Message message, Map<String, Object> metadataCache);
 
     /**
      * Converts human-readable input into binary required by the parser.

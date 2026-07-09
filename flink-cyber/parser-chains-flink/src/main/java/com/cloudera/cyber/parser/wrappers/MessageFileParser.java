@@ -90,7 +90,7 @@ public class MessageFileParser implements ParserInterface {
     }
 
     @Override
-    public void parse(ParserChainSource parserChainSource, MessageToParse message, AbstractParserOutput output) {
+    public void parse(ParserChainSource parserChainSource, Map<String, Object> metadataCache, MessageToParse message, AbstractParserOutput output) {
         String fileToParse = new String(message.getOriginalBytes(), StandardCharsets.UTF_8);
         if (parserChainSource == null) {
             sendErrorMessage(UNMATCHED_FILE_SOURCE, message, output, FILE_PATH_DID_NOT_MATCH_ANY_SPECIFIED_PATTERNS, fileToParse);
@@ -113,12 +113,12 @@ public class MessageFileParser implements ParserInterface {
                                 List<String> headersToBeFound = parserChainSource.getRequiredHeaders() != null ? new ArrayList<>(parserChainSource.getRequiredHeaders()) : null;
                                 // Now process remaining lines
                                 String currentLine;
-                                Map<String, String> metadata = new HashMap<>();
-                                metadata.put("file.name", fileToParsePathString);
+                                Map<String, Object> fileMetadata = new HashMap<>();
+                                fileMetadata.put("file.name", fileToParsePathString);
                                 while ((currentLine = br.readLine()) != null) {
                                     lineNumber++;
                                     if (inHeader) {
-                                        inHeader = processHeader(parserChainSource, currentLine, lineNumber, headersToBeFound, metadata);
+                                        inHeader = processHeader(parserChainSource, currentLine, lineNumber, headersToBeFound, fileMetadata);
                                     }
                                     if (!inHeader) {
                                         MessageToParse messageToParse = MessageToParse.builder()
@@ -128,9 +128,8 @@ public class MessageFileParser implements ParserInterface {
                                                 .partition(message.getPartition())
                                                 .key(null)
                                                 .line(lineNumber)
-                                                .metadata(metadata)
                                                 .build();
-                                        singleMessageParser.parse(parserChainSource, messageToParse, output);
+                                        singleMessageParser.parse(parserChainSource, fileMetadata, messageToParse, output);
                                     } else {
                                         headerLinesRead++;
                                     }
@@ -179,7 +178,7 @@ public class MessageFileParser implements ParserInterface {
      * @param headersToBeFound The required headers that have not been found yet.
      * @return true if the line is a header and should be skipped or false if the header should be parsed
      */
-    private boolean processHeader(ParserChainSource parserChainSource, String lineText, int lineCount, List<String> headersToBeFound, Map<String, String> metadata) {
+    private boolean processHeader(ParserChainSource parserChainSource, String lineText, int lineCount, List<String> headersToBeFound, Map<String, Object> metadata) {
         boolean inHeader = true;
 
         if (parserChainSource.usesHeaderLineCount()) {

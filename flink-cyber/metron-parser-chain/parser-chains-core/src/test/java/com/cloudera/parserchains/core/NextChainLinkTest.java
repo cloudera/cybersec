@@ -44,7 +44,7 @@ public class NextChainLinkTest {
         NextChainLink link1 = new NextChainLink(makeEchoParser(parser1), linkName1);
         NextChainLink link2 = new NextChainLink(makeEchoParser(parser2), linkName2);
         link1.setNext(link2);
-        List<Message> results = link1.process(message);
+        List<Message> results = link1.process(message, null);
 
         // validate
         Message expected1 = Message.builder()
@@ -66,7 +66,7 @@ public class NextChainLinkTest {
     @Test
     void noNextLink() {
         NextChainLink link1 = new NextChainLink(makeEchoParser(parser1), linkName1);
-        List<Message> results = link1.process(message);
+        List<Message> results = link1.process(message, null);
 
         // validate
         Message expected1 = Message.builder()
@@ -85,7 +85,7 @@ public class NextChainLinkTest {
         NextChainLink link1 = new NextChainLink(makeErrorParser(parser1), linkName1);
         NextChainLink link2 = new NextChainLink(parser2, linkName2);
         link1.setNext(link2);
-        List<Message> results = link1.process(message);
+        List<Message> results = link1.process(message, null);
 
         // validate
         assertThat("Expected only 1 result; processing stops on error.",
@@ -108,7 +108,7 @@ public class NextChainLinkTest {
                 .withRoute(Regex.of("route1"), new NextChainLink(parser1, linkName1));
 
         // validate
-        assertThrows(NullPointerException.class, () -> routerLink.process(input),
+        assertThrows(NullPointerException.class, () -> routerLink.process(input, null),
                 "Expected an exception because the parser returns a null message.");
     }
 }

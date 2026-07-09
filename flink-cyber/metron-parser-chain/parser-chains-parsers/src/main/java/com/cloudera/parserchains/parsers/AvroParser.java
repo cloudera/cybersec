@@ -15,7 +15,6 @@ package com.cloudera.parserchains.parsers;
 import com.cloudera.parserchains.core.FieldName;
 import com.cloudera.parserchains.core.FieldValue;
 import com.cloudera.parserchains.core.Message;
-import com.cloudera.parserchains.core.Parser;
 import com.cloudera.parserchains.core.catalog.Configurable;
 import com.cloudera.parserchains.core.catalog.MessageParser;
 import com.cloudera.parserchains.core.catalog.Parameter;
@@ -44,7 +43,7 @@ import static java.lang.String.format;
         name = "Simple Avro parser",
         description = "Parses Avro data by creating a field for each Avro element.")
 @Slf4j
-public class AvroParser implements Parser {
+public class AvroParser extends AbstractParser {
 
     public static final String DEFAULT_AVRO_SCHEMA = "netflow.schema";
     // default differs from JSON parser - preserve backward compatibility with existing parsers
