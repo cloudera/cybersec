@@ -8,8 +8,8 @@ Applies selected enrichments to a message in the following order:
 4. Local Flink state lookup.
 5. HBase key lookup.
 6. Rest service results.
-8. Threatq threat intelligence indicators.
-9. Stellar.
+7. Threatq threat intelligence indicators.
+8. Stellar.
 
 After applying all enrichments, the triaging job runs all scoring rules and attaches the scores to the event.
 The triaging job publishes the scored event to the output topic.
@@ -36,19 +36,19 @@ The triaging output topic should be monitored for data quality errors.
 
 ## General Properties Configuration
 
-| Property Name | Type                                    | Description                                  | Required/Default |Example             |
-|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
-| parallelism | integer | Number of parallel tasks to run.  | default=2 | 2 |
-| checkpoint.interval.ms | integer | Milliseconds between Flink state checkpoints | default=60000 | 10000|
-| schema.registry.url | url | Schema registry rest endpoint url | required | http://myregistryhost:7788/api/v1 |
-| kafka.bootstrap.servers | comma separated list | Kafka bootstrap server names and ports. | required | brokerhost1:9092,brokerhost2:9092 |
-| kafka.*setting name* | Kafka setting | Settings for [Kafka producers](https://kafka.apache.org/23/javadoc/index.html?org/apache/kafka/clients/producer/ProducerConfig.html) or [Kafka consumer](https://kafka.apache.org/23/javadoc/index.html?org/apache/kafka/clients/consumer/KafkaConsumer.html).| set as required by security and performance | |
-| flink.job.name | string | Set the Flink job name as it will appear in the Flink dashboard. | Triaging Job - default | my_pipeline.triage |
-| topic.input | string | Consumes input messages from this topic.   Topic should contain com.cloudera.cyber.Messages in avro format| required | my_pipeline.triaging.input |
-| topic.output | string | Publishes output messages to this topic.   The triaging job produces messages in com.cloudera.cyber.scoring.ScoredMessage avro format | required | my_pipeline.triaging.output |
-|query.input.topic| string | Consumes new or modified scoring rules from this topic in avro format using the com.cloudera.cyber.scoring.ScoringRuleCommand schema.   | required | my-pipeline.scoring.input |
-|query.output.topic|string | Produces responses to scoring rules in avro format using the com.cloudera.cyber.scoring.ScoringRuleCommandResult schema. | required | my-pipeline.scoring.output|
-
+| Property Name                                                            | Type                 | Description                                                                                                                                                                                                                                                    | Required/Default                            | Example                           |
+|--------------------------------------------------------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------|-----------------------------------|
+| parallelism                                                              | integer              | Number of parallel tasks to run.                                                                                                                                                                                                                               | default=2                                   | 2                                 |
+| checkpoint.interval.ms                                                   | integer              | Milliseconds between Flink state checkpoints                                                                                                                                                                                                                   | default=60000                               | 10000                             |
+| schema.registry.url                                                      | url                  | Schema registry rest endpoint url                                                                                                                                                                                                                              | required                                    | http://myregistryhost:7788/api/v1 |
+| kafka.bootstrap.servers                                                  | comma separated list | Kafka bootstrap server names and ports.                                                                                                                                                                                                                        | required                                    | brokerhost1:9092,brokerhost2:9092 |
+| kafka.*setting name*                                                     | Kafka setting        | Settings for [Kafka producers](https://kafka.apache.org/23/javadoc/index.html?org/apache/kafka/clients/producer/ProducerConfig.html) or [Kafka consumer](https://kafka.apache.org/23/javadoc/index.html?org/apache/kafka/clients/consumer/KafkaConsumer.html). | set as required by security and performance |                                   |
+| flink.job.name                                                           | string               | Set the Flink job name as it will appear in the Flink dashboard.                                                                                                                                                                                               | Triaging Job - default                      | my_pipeline.triage                |
+| topic.input                                                              | string               | Consumes input messages from this topic.   Topic should contain com.cloudera.cyber.Messages in avro format                                                                                                                                                     | required                                    | my_pipeline.triaging.input        |
+| topic.output                                                             | string               | Publishes output messages to this topic.   The triaging job produces messages in com.cloudera.cyber.scoring.ScoredMessage avro format                                                                                                                          | required                                    | my_pipeline.triaging.output       |
+| query.input.topic                                                        | string               | Consumes new or modified scoring rules from this topic in avro format using the com.cloudera.cyber.scoring.ScoringRuleCommand schema.                                                                                                                          | required                                    | my-pipeline.scoring.input         |
+| query.output.topic                                                       | string               | Produces responses to scoring rules in avro format using the com.cloudera.cyber.scoring.ScoringRuleCommandResult schema.                                                                                                                                       | required                                    | my-pipeline.scoring.output        |
+| [Common checkpoint settings](../../flink-common/README.md#checkpointing) | Long                 | Common settings for configuring tuning checkpoints on jobs.                                                                                                                                                                                                    |                                             |                                   ||
 ## HBase configurations
 If Flink, Yarn and HBase are running on the same cluster, the enrichment job will read the hbase-site.xml, core-site.xml, and hdfs-site.xml from the default Cloudera Manager location in /etc/hbase/conf.
 If Flink is accessing HBase on a different cluster, download the HBase client configuration files from the HBase cluster Cloudera Manager 
@@ -58,68 +58,68 @@ flink run -yt hbase-site.xml -yt hdfs-site.xml -yt core-site.xml flink-enrichmen
 
 ## Maxmind Geocoding properties
 
-| Property Name | Type                                    | Description                                  | Required/Default |Example             |
-|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
-|geo.enabled    | boolean | If true, look up the geolocation for the specified geo.ip_fields and add to the location to the message.  Otherwise, skip geocoding. | true | false |
-|geo.ip_fields | string | Comma separated list of field names to perform geocoding.  If the field is set to an IP address, look up the ip in the maxmind database.  Add the geolocation information to the event.   | required | ip_src_addr,ip_dst_addr|
-|geo.database.path | string | Path to the Maxmind geolocation .mmdb file.  If running in yarn, use an HDFS location so the flink job can access the file.  The flink job user must have read access to the file. | required | hdfs://cyber/geo/GeoLite2-City.mmdb |
+| Property Name     | Type    | Description                                                                                                                                                                             | Required/Default | Example                             |
+|-------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|-------------------------------------|
+| geo.enabled       | boolean | If true, look up the geolocation for the specified geo.ip_fields and add to the location to the message.  Otherwise, skip geocoding.                                                    | true             | false                               |
+| geo.ip_fields     | string  | Comma separated list of field names to perform geocoding.  If the field is set to an IP address, look up the ip in the maxmind database.  Add the geolocation information to the event. | required         | ip_src_addr,ip_dst_addr             |
+| geo.database.path | string  | Path to the Maxmind geolocation .mmdb file.  If running in yarn, use an HDFS location so the flink job can access the file.  The flink job user must have read access to the file.      | required         | hdfs://cyber/geo/GeoLite2-City.mmdb |
 
 ## Maxmind ASN properties               
 
-| Property Name | Type                                    | Description                                  | Required/Default |Example             |
-|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
-|asn.enabled    | boolean | If true, look up the ASN for the specified asn.ip_fields and add to the ASN to the message.  Otherwise, skip ASN enrichment. | true | false |
-|asn.ip_fields | string | Comma separated list of field names to perform ASN lookup.  If the field is set to an IP address, look up the ip in the Maxmind ASN database.  Add the ASN information to the event.   | required | ip_src_addr,ip_dst_addr|
-|asn.database.path | string | Path to the Maxmind ASN .mmdb file.  If running in yarn, use an HDFS location so the flink job can access the file.  The flink job user must have read access to the file. | required | hdfs://cyber/geo/GeoLite2-ASN.mmdb |
+| Property Name     | Type    | Description                                                                                                                                                                          | Required/Default | Example                            |
+|-------------------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|------------------------------------|
+| asn.enabled       | boolean | If true, look up the ASN for the specified asn.ip_fields and add to the ASN to the message.  Otherwise, skip ASN enrichment.                                                         | true             | false                              |
+| asn.ip_fields     | string  | Comma separated list of field names to perform ASN lookup.  If the field is set to an IP address, look up the ip in the Maxmind ASN database.  Add the ASN information to the event. | required         | ip_src_addr,ip_dst_addr            |
+| asn.database.path | string  | Path to the Maxmind ASN .mmdb file.  If running in yarn, use an HDFS location so the flink job can access the file.  The flink job user must have read access to the file.           | required         | hdfs://cyber/geo/GeoLite2-ASN.mmdb |
 
 ## IP Cidr 
 
-| Property Name | Type                                    | Description                                  | Required/Default |Example             |
-|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
-|cidr.enabled    | boolean | If true, enrich the specified message fields with matching Cidrs defined in the cidr.config_file_path.   Otherwise, skip cidr enrichment. | true | false |
-|cidr.ip_fields | string | Comma separated list of field names to perform Cidr lookup.  If the field is set to an IP address, add the names of any matching Cidr ranges. | required | ip_src_addr, ip_dst_addr |
-|cidr.config_file_path| string | Path to the [configuration file](../flink-enrichment-cidr/README.md) defining the Cidr ranges.  | required |hdfs:/user/flink/data/enrichments-cidr.json |
+| Property Name         | Type    | Description                                                                                                                                   | Required/Default | Example                                     |
+|-----------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------|------------------|---------------------------------------------|
+| cidr.enabled          | boolean | If true, enrich the specified message fields with matching Cidrs defined in the cidr.config_file_path.   Otherwise, skip cidr enrichment.     | true             | false                                       |
+| cidr.ip_fields        | string  | Comma separated list of field names to perform Cidr lookup.  If the field is set to an IP address, add the names of any matching Cidr ranges. | required         | ip_src_addr, ip_dst_addr                    |
+| cidr.config_file_path | string  | Path to the [configuration file](../flink-enrichment-cidr/README.md) defining the Cidr ranges.                                                | required         | hdfs:/user/flink/data/enrichments-cidr.json |
 
 ## Local Flink State Lookup
 
-| Property Name | Type                                    | Description                                  | Required/Default |Example             |
-|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
-|lookups.config.file | string | Path to the [json configuration file](../../flink-cyber-api/enrichment_config.md) specifying the enrichments to apply to each source. | required | enrichments.json |
-|enrichment.topic.input | string | Name of topic to consume local and hbase enrichment commands that create or update enrichment key value mappings.  Topic must contain messages of type com.cloudera.cyber.commands.EnrichmentCommand | required | my_pipeline.enrichments.input|
-|enrichment.topic.query.output | string | Publish enrichment command results to this topic.  | required | my_pipeline.enrichments.output |
+| Property Name                 | Type   | Description                                                                                                                                                                                          | Required/Default | Example                        |
+|-------------------------------|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|--------------------------------|
+| lookups.config.file           | string | Path to the [json configuration file](../../flink-cyber-api/enrichment_config.md) specifying the enrichments to apply to each source.                                                                | required         | enrichments.json               |
+| enrichment.topic.input        | string | Name of topic to consume local and hbase enrichment commands that create or update enrichment key value mappings.  Topic must contain messages of type com.cloudera.cyber.commands.EnrichmentCommand | required         | my_pipeline.enrichments.input  |
+| enrichment.topic.query.output | string | Publish enrichment command results to this topic.                                                                                                                                                    | required         | my_pipeline.enrichments.output |
 
 ## HBase Key Lookup
 
-| Property Name | Type                                    | Description                                  | Required/Default |Example             |
-|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
-|hbase.enabled | boolean | If true, enrich messages with key-value mappings stored in HBase | true | false |
-|lookups.config.file | string | Path to the [json configuration file](../../flink-cyber-api/enrichment_config.md) specifying the enrichments to apply to each source. | required | enrichments.json |
-|enrichment.topic.input | string | Name of topic to consume local and hbase enrichment commands that create or update enrichment key value mappings.  Topic must contain messages of type com.cloudera.cyber.commands.EnrichmentCommand | required | my_pipeline.enrichments.input|
-|enrichment.topic.query.output | string | Publish enrichment command results to this topic.  | required | my_pipeline.enrichments.output |
+| Property Name                 | Type    | Description                                                                                                                                                                                          | Required/Default | Example                        |
+|-------------------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|--------------------------------|
+| hbase.enabled                 | boolean | If true, enrich messages with key-value mappings stored in HBase                                                                                                                                     | true             | false                          |
+| lookups.config.file           | string  | Path to the [json configuration file](../../flink-cyber-api/enrichment_config.md) specifying the enrichments to apply to each source.                                                                | required         | enrichments.json               |
+| enrichment.topic.input        | string  | Name of topic to consume local and hbase enrichment commands that create or update enrichment key value mappings.  Topic must contain messages of type com.cloudera.cyber.commands.EnrichmentCommand | required         | my_pipeline.enrichments.input  |
+| enrichment.topic.query.output | string  | Publish enrichment command results to this topic.                                                                                                                                                    | required         | my_pipeline.enrichments.output |
 
 ## Rest Service Results
 
-| Property Name | Type                                    | Description                                  | Required/Default |Example             |
-|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
-|rest.enabled | boolean | If true, enrich messages with key-value mappings stored in HBase | true | false |
-|rest.config.file | string |Path to the [rest configuration file](../flink-enrichment-lookup-rest/README.md) specifying the res enrichments to apply to each source.  | required | rest-enrichments.json|
+| Property Name    | Type    | Description                                                                                                                              | Required/Default | Example               |
+|------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------|------------------|-----------------------|
+| rest.enabled     | boolean | If true, enrich messages with key-value mappings stored in HBase                                                                         | true             | false                 |
+| rest.config.file | string  | Path to the [rest configuration file](../flink-enrichment-lookup-rest/README.md) specifying the res enrichments to apply to each source. | required         | rest-enrichments.json |
 
 ## Threatq Threat Intelligence Indicators
     
-| Property Name | Type                                    | Description                                  | Required/Default |Example             |
-|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
-|threatq.enabled| boolean | If true, enrich message with Threatq threat intelligence | true | false|
-|threatq.config.file| string | Path to file defining which Threatq indicators to apply to message fields. | required | threatq.json|
-|threatq.topic.input| string | Publish new threatq indicators to this topic.  The job ingests the indicators, stores them in hbase, and then applies them to new messages. | required |
+| Property Name       | Type    | Description                                                                                                                                 | Required/Default | Example      |
+|---------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------|------------------|--------------|
+| threatq.enabled     | boolean | If true, enrich message with Threatq threat intelligence                                                                                    | true             | false        |
+| threatq.config.file | string  | Path to file defining which Threatq indicators to apply to message fields.                                                                  | required         | threatq.json |
+| threatq.topic.input | string  | Publish new threatq indicators to this topic.  The job ingests the indicators, stores them in hbase, and then applies them to new messages. | required         |
 
 ## Stellar 
 
-| Property Name | Type                                    | Description                                  | Required/Default |Example             |
-|---------------| ----------------------------------------| -------------------------------------------- | ------------------- | -----------------|
-|stellar.enabled| boolean | If true, enrich message with Metron Stellar enrichments | true | false|
-|stellar.config.dir | string | Directory with Metron enrichment configuration json files.   When running in yarn, directory must be shipped using the -yt parameter to the flink run command or stored in HDFS.  | required | enrichments|
-|geo.database.path | string | Path to the Maxmind geolocation .mmdb file for Metron geocode enrichments.  If running in yarn, use an HDFS location so the flink job can access the file.  The flink job user must have read access to the file. | required | hdfs://cyber/geo/GeoLite2-City.mmdb |
-|asn.database.path | string | Path to the Maxmind ASN .mmdb file for Metron ASN enrichments.  If running in yarn, use an HDFS location so the flink job can access the file.  The flink job user must have read access to the file. | required | hdfs://cyber/geo/GeoLite2-ASN.mmdb |
+| Property Name      | Type    | Description                                                                                                                                                                                                       | Required/Default | Example                             |
+|--------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------|-------------------------------------|
+| stellar.enabled    | boolean | If true, enrich message with Metron Stellar enrichments                                                                                                                                                           | true             | false                               |
+| stellar.config.dir | string  | Directory with Metron enrichment configuration json files.   When running in yarn, directory must be shipped using the -yt parameter to the flink run command or stored in HDFS.                                  | required         | enrichments                         |
+| geo.database.path  | string  | Path to the Maxmind geolocation .mmdb file for Metron geocode enrichments.  If running in yarn, use an HDFS location so the flink job can access the file.  The flink job user must have read access to the file. | required         | hdfs://cyber/geo/GeoLite2-City.mmdb |
+| asn.database.path  | string  | Path to the Maxmind ASN .mmdb file for Metron ASN enrichments.  If running in yarn, use an HDFS location so the flink job can access the file.  The flink job user must have read access to the file.             | required         | hdfs://cyber/geo/GeoLite2-ASN.mmdb  |
 
 #Running the Triaging Job
 * Construct a 'triage.properties' file using the configuration options above.
@@ -135,7 +135,7 @@ kafka.bootstrap.servers=cybersec-1.vpc.cloudera.com:9092,cybersec-1.vpc.cloudera
 kafka.acks=all
 kafka.client.id=my-pipeline-triage
 kafka.group.id=my-pipeline-triage
-schema.registry.url=http://cybersec-1.vpc.cloudera.com:7788/api/v1
+schema.registry.url=https://cybersec-1.vpc.cloudera.com:7790/api/v1
 
 # topics
 topic.output=my-pipeline.triage.output
