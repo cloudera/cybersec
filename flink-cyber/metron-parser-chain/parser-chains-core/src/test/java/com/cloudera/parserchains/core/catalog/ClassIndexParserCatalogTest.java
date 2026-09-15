@@ -17,6 +17,7 @@ import com.cloudera.parserchains.core.Parser;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,6 +27,12 @@ public class ClassIndexParserCatalogTest {
     private static class FakeParser implements Parser {
         @Override
         public Message parse(Message message) {
+            // do nothing
+            return null;
+        }
+
+        @Override
+        public Message parse(Message message, Map<String, Object> metadataCache) {
             // do nothing
             return null;
         }

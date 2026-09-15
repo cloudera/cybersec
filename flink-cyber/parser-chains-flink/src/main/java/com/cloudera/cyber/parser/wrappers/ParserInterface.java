@@ -3,6 +3,8 @@ package com.cloudera.cyber.parser.wrappers;
 import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.cyber.parser.ParserChainSource;
 
+import java.util.Map;
+
 /**
  * Base class for all parsers.
  */
@@ -19,7 +21,7 @@ public interface ParserInterface {
      * @param message The raw message to be parsed.
      * @param output The parser output that accepts a parsed message.
      */
-    void parse(ParserChainSource parserChainSource, MessageToParse message, AbstractParserOutput output);
+    void parse(ParserChainSource parserChainSource, Map<String, Object> metadataCache, MessageToParse message, AbstractParserOutput output);
 
 }
 

@@ -16,7 +16,6 @@ import com.cloudera.parserchains.core.catalog.ClassIndexParserCatalog;
 import com.cloudera.parserchains.core.model.define.ParserChainSchema;
 import com.cloudera.parserchains.core.model.define.ParserName;
 import com.cloudera.parserchains.core.utils.JSONUtils;
-import org.apache.flink.core.fs.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -37,7 +36,7 @@ public class DefaultChainBuilderTest {
         chainBuilder = new DefaultChainBuilder(new ReflectiveParserBuilder(), new ClassIndexParserCatalog());
     }
 
-    private String parserChain = String.join("\n",
+    private final String parserChain = String.join("\n",
         "{",
         "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
         "\"name\" : \"My Parser Chain\",",
@@ -71,7 +70,7 @@ public class DefaultChainBuilderTest {
                 .build();
         ParserChainSchema schema = JSONUtils.INSTANCE.load(parserChain, ParserChainSchema.class);
         ChainLink head = chainBuilder.build(schema);
-        List<Message> results = head.process(input);
+        List<Message> results = head.process(input, null);
 
         // validate
         assertThat("Expected 2 results; 1 from each parser in the chain.",
@@ -86,7 +85,7 @@ public class DefaultChainBuilderTest {
                 results.get(1).getFields().keySet(), hasItem(FieldName.of("original_string")));
     }
 
-    private String missingMatchingField = String.join("\n",
+    private final String missingMatchingField = String.join("\n",
         "{",
         "\"id\":\"1\",",
         "\"name\":\"Hello, Chain\",",
@@ -113,7 +112,7 @@ public class DefaultChainBuilderTest {
                 "Expected exception because the router required a matching field to be defined.");
     }
 
-    private String parserAfterRouter = String.join("\n",
+    private final String parserAfterRouter = String.join("\n",
         "{",
         "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
         "\"name\" : \"My Parser Chain\",",
@@ -185,7 +184,7 @@ public class DefaultChainBuilderTest {
                 .build();
         ParserChainSchema schema = JSONUtils.INSTANCE.load(parserAfterRouter, ParserChainSchema.class);
         ChainLink head = chainBuilder.build(schema);
-        List<Message> results = head.process(input);
+        List<Message> results = head.process(input, null);
 
         // validate
         assertThat("Expected 2 results; 1 from each parser in the chain.",
@@ -200,11 +199,4 @@ public class DefaultChainBuilderTest {
                 results.get(1).getFields().keySet(), hasItem(FieldName.of("original_string")));
     }
 
-    @Test
-    public void getSensorTypeName() {
-        String pathString = "parsers/squid.json";
-        Path path = new Path(pathString);
-        String fileName = path.getName();
-        String sensorType = fileName.substring(0, fileName.lastIndexOf('.'));
-    }
 }

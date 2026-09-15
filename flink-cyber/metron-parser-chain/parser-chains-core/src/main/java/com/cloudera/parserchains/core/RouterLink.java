@@ -15,6 +15,7 @@ package com.cloudera.parserchains.core;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -41,7 +42,7 @@ public class RouterLink implements ChainLink {
      * The name of the field whose value is used for routing.
      */
     private FieldName inputField;
-    private List<Route> routes;
+    private final List<Route> routes;
     private Optional<ChainLink> defaultRoute;
     private Optional<ChainLink> nextLink;
 
@@ -100,12 +101,12 @@ public class RouterLink implements ChainLink {
     }
 
     @Override
-    public List<Message> process(Message input) {
+    public List<Message> process(Message input, Map<String, Object> metadata) {
         List<Message> results = new ArrayList<>();
 
         // route the message to the correct sub-chain
         findRoute(input).ifPresent(next -> {
-            List<Message> nextResults = next.process(input);
+            List<Message> nextResults = next.process(input, metadata);
             results.addAll(nextResults);
         });
 
@@ -118,7 +119,7 @@ public class RouterLink implements ChainLink {
         // if no errors, allow the next link in the chain to process the message
         boolean noError = output.getError().isEmpty();
         if(noError && nextLink.isPresent()) {
-            List<Message> nextResults = nextLink.get().process(output);
+            List<Message> nextResults = nextLink.get().process(output, metadata);
             results.addAll(nextResults);
         }
         return results;

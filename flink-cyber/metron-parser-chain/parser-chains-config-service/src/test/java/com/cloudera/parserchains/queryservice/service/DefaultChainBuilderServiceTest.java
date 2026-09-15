@@ -39,7 +39,7 @@ public class DefaultChainBuilderServiceTest {
         service = new DefaultChainBuilderService(chainBuilder);
     }
 
-    private String parserChain = String.join("\n",
+    private final String parserChain = String.join("\n",
         "{",
         "\"id\" : \"3b31e549-340f-47ce-8a71-d702685137f4\",",
         "\"name\" : \"My Parser Chain\",",
@@ -85,7 +85,7 @@ public class DefaultChainBuilderServiceTest {
                 .createdBy(LinkName.of("original", parserName))
                 .addField(FieldName.of("original_string"), StringFieldValue.of("Homer Simpson, 740 Evergreen Terrace, (939)-555-0113"))
                 .build();
-        List<Message> results = head.process(input);
+        List<Message> results = head.process(input, null);
 
         assertThat("Expected 2 results; 1 from each parser in the chain.",
                 results.size(), is(2));
@@ -103,7 +103,7 @@ public class DefaultChainBuilderServiceTest {
                 results.get(1).getFields().keySet(), hasItem(FieldName.of("phone")));
     }
 
-    private String missingMatchingField = String.join("\n",
+    private final String missingMatchingField = String.join("\n",
         "{",
         "\"id\":\"1\",",
         "\"name\":\"Hello, Chain\",",

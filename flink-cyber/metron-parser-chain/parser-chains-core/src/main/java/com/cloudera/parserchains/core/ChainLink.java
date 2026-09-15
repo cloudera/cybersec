@@ -13,6 +13,7 @@
 package com.cloudera.parserchains.core;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * One link in a parser chain.
@@ -25,7 +26,7 @@ public interface ChainLink {
      * @param input The input message to parse.
      * @return One {@link Message} for every link in the parser chain.
      */
-    List<Message> process(Message input);
+    List<Message> process(Message input, Map<String, Object> metadata);
 
     /**
      * Define the next link in the chain.

@@ -5,6 +5,8 @@ import com.cloudera.cyber.parser.ParserChainSource;
 import com.cloudera.cyber.parser.wrappers.AbstractParserOutput;
 import com.cloudera.cyber.parser.wrappers.ParserInterface;
 
+import java.util.Map;
+
 /**
  * Abstract parent class for parser chain and source resolvers.
  */
@@ -41,7 +43,7 @@ public abstract class ParserChainResolver {
      * @param message   The message to parse.
      * @param output   Sends parsed message on to the next processor.
      */
-    public void parse(MessageToParse message, AbstractParserOutput output) {
-        parser.parse(getParserChainSource(message), message, output);
+    public void parse(MessageToParse message, Map<String, Object> metadataCache, AbstractParserOutput output) {
+        parser.parse(getParserChainSource(message), metadataCache, message, output);
     }
 }

@@ -33,9 +33,9 @@ public class NextChainLink implements ChainLink {
     }
 
     @Override
-    public List<Message> process(Message input) {
+    public List<Message> process(Message input, Map<String, Object> metadata) {
         // parse the input message
-        Message parsed = parser.parse(input);
+        Message parsed = parser.parse(input, metadata);
         Objects.requireNonNull(parsed, "Parser must not return a null message.");
 
         boolean emitMessage = parsed.getEmit();
@@ -52,7 +52,7 @@ public class NextChainLink implements ChainLink {
         // if no errors, allow the next link in the chain to process the message
         boolean noError = output.getError().isEmpty();
         if (noError && emitMessage && nextLink != null) {
-            List<Message> nextResults = nextLink.process(output);
+            List<Message> nextResults = nextLink.process(output, metadata);
             results.addAll(nextResults);
         }
         return results;

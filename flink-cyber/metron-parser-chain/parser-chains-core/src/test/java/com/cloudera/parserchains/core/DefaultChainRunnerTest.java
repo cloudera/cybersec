@@ -56,7 +56,7 @@ public class DefaultChainRunnerTest {
         head.setNext(last);
 
         // String original message
-        List<Message> results = new DefaultChainRunner().run(inputToParse, head);
+        List<Message> results = new DefaultChainRunner().run(inputToParse, null, head);
         Message expected0 = Message.builder()
                 .addField(Constants.DEFAULT_INPUT_FIELD, inputToParse)
                 .createdBy(DefaultChainRunner.ORIGINAL_MESSAGE_NAME)
@@ -69,7 +69,7 @@ public class DefaultChainRunnerTest {
                 .addField(FieldName.of(Constants.DEFAULT_INPUT_FIELD), MessageToParseFieldValue.of(inputMessageToParse))
                 .createdBy(DefaultChainRunner.ORIGINAL_MESSAGE_NAME)
                 .build();
-        results = new DefaultChainRunner().run(inputMessageToParse, head);
+        results = new DefaultChainRunner().run(inputMessageToParse, null, head);
         validateMessages(results, expected0);
 
         // Message to parse original with specific line
@@ -80,7 +80,7 @@ public class DefaultChainRunnerTest {
                 .addField(Constants.DEFAULT_ORIGINAL_FILE_LINE_FIELD, String.valueOf(testLine))
                 .createdBy(DefaultChainRunner.ORIGINAL_MESSAGE_NAME)
                 .build();
-        results = new DefaultChainRunner().run(inputMessageToParse, head);
+        results = new DefaultChainRunner().run(inputMessageToParse, null, head);
         validateMessages(results, expected0);
 
     }
@@ -111,7 +111,7 @@ public class DefaultChainRunnerTest {
         ChainLink chain = new NextChainLink(makeEchoParser(parser1), linkName1);
         List<Message> results = new DefaultChainRunner()
                 .withInputField(newInputField)
-                .run(inputToParse, chain);
+                .run(inputToParse, null, chain);
 
         // validate
         Message expected0 = Message.builder()
@@ -135,7 +135,7 @@ public class DefaultChainRunnerTest {
         ChainLink head = new NextChainLink(makeErrorParser(parser1), linkName1);
         ChainLink next = new NextChainLink(parser2, linkName2);
         head.setNext(next);
-        List<Message> results = new DefaultChainRunner().run(inputToParse, head);
+        List<Message> results = new DefaultChainRunner().run(inputToParse, null, head);
 
         // validate
         Message expected0 = Message.builder()
@@ -155,7 +155,7 @@ public class DefaultChainRunnerTest {
     @Test
     void nullChain() {
         DefaultChainRunner runner = new DefaultChainRunner();
-        List<Message> results = runner.run(inputToParse, null);
+        List<Message> results = runner.run(inputToParse, null, null);
 
         assertEquals(DefaultChainRunner.ORIGINAL_MESSAGE_NAME, results.get(0).getCreatedBy(),
                 "Expected the 1st message to have 'createdBy' defined.");

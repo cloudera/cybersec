@@ -106,5 +106,104 @@
         }
       }
     ]
+  },
+  "variable_vpcflow" : {
+    "id" : "27288ac5-a117-4008-b113-57eabe90ba17",
+    "name" : "variable_vpcflow",
+    "parsers" : [ {
+      "id" : "2ad14160-6ffa-11f1-b4a7-a32af6763e97",
+      "name" : "csv_parser_with_header",
+      "type" : "com.cloudera.parserchains.parsers.VariableSchemaCsvTextParser",
+      "config" : {
+        "delimiter" : [ {
+          "delimiter" : " "
+        } ]
+      }
+    }, {
+      "id" : "24626a60-6ffb-11f1-b4a7-a32af6763e97",
+      "name" : "normalize_field_names",
+      "type" : "com.cloudera.parserchains.parsers.RenameFieldParser",
+      "config" : {
+        "fieldToRename" : [ {
+          "from" : "account-id",
+          "to" : "aws_account_id"
+        }, {
+          "from" : "interface-id",
+          "to" : "aws_interface_id"
+        }, {
+          "from" : "srcaddr",
+          "to" : "ip_src_addr"
+        }, {
+          "from" : "dstaddr",
+          "to" : "ip_dst_addr"
+        }, {
+          "from" : "srcport",
+          "to" : "ip_src_port"
+        }, {
+          "from" : "dstport",
+          "to" : "ip_dst_port"
+        }, {
+          "from" : "protocol",
+          "to" : "network_protocol_number"
+        }, {
+          "from" : "packets",
+          "to" : "network_flow_packets"
+        }, {
+          "from" : "bytes",
+          "to" : "network_flow_bytes"
+        }, {
+          "from" : "start",
+          "to" : "timestamp"
+        }, {
+          "from" : "end",
+          "to" : "end_ts"
+        }, {
+          "from" : "action",
+          "to" : "network_action"
+        }, {
+          "from" : "log_status",
+          "to" : "platform_log_status"
+        }, {
+          "from" : "vpc-id",
+          "to" : "aws_vpc_id"
+        }, {
+          "from" : "subnet-id",
+          "to" : "aws_subnet_id"
+        }, {
+          "from" : "instance-id",
+          "to" : "aws_instance_id"
+        }, {
+          "from" : "pkt-srcaddr",
+          "to" : "ip_original_src_addr"
+        }, {
+          "from" : "pkt-dstaddr",
+          "to" : "ip_original_dst_addr"
+        }, {
+          "from" : "region",
+          "to" : "aws_region"
+        }, {
+          "from" : "pkt-src-aws-service",
+          "to" : "aws_src_service"
+        }, {
+          "from" : "pkt-dst-aws-service",
+          "to" : "aws_dst_service"
+        }, {
+          "from" : "flow-direction",
+          "to" : "netflow_flow_direction"
+        }, {
+          "from" : "traffic-path",
+          "to" : "network_traffic_path"
+        } ]
+      }
+    }, {
+      "id" : "c83c4c80-6ffd-11f1-b4a7-a32af6763e97",
+      "name" : "remove fields",
+      "type" : "com.cloudera.parserchains.parsers.RemoveFieldParser",
+      "config" : {
+        "fieldToRemove" : [ {
+          "fieldToRemove" : "version"
+        } ]
+      }
+    } ]
   }
 }

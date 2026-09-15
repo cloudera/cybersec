@@ -44,7 +44,7 @@ public class DefaultChainExecutorService implements ChainExecutorService {
         try {
             if (chain != null) {
                 byte[] testBytes = chain.getTestBytes(textToParse);
-                List<Message> messages = chainRunner.run(MessageToParse.builder().originalBytes(testBytes).offset(0).partition(0).topic("test").build(), chain);
+                List<Message> messages = chainRunner.run(MessageToParse.builder().originalBytes(testBytes).offset(0).partition(0).topic("test").build(), null, chain);
                 return chainExecuted(messages);
             } else {
                 return chainNotDefined(chainRunner.originalMessage(textToParse));
