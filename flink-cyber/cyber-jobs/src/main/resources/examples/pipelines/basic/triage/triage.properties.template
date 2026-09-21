@@ -8,6 +8,8 @@ asn.ip_fields=ip_src_addr,ip_dst_addr,not_defined,ip_dst,ip_src
 # default location is set with cloudera manager
 asn.database_path=hdfs:GEO_ASN_MMDB
 
+company.enabled=false
+
 lookups.config.file=basic/triage/enrichments-lookups.json
 
 hbase.enabled=false

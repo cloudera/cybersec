@@ -8,6 +8,8 @@ asn.ip_fields=ip_src_addr,ip_dst_addr
 # default location is set with cloudera manager
 asn.database_path=hdfs:GEO_ASN_MMDB
 
+company.enabled=false
+
 cidr.enabled=true
 cidr.ip_fields=ip_src_addr,ip_dst_addr
 cidr.config_file_path=full/triage/enrichments-cidr.json
