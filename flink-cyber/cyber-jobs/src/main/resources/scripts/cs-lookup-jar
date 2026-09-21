@@ -48,6 +48,9 @@ fi
 jar_paths+=("/opt/cloudera/parcels/CYBERSEC/jobs")
 jar_paths+=("/opt/cloudera/parcels/CYBERSEC/tools")
 jar_paths+=("/opt/cloudera/parcels/FLINK/lib/flink/lib/")
+jar_paths+=("/opt/cloudera/parcels/FLINK/lib/flink/opt/cloudera/iceberg")
+jar_paths+=("/opt/cloudera/parcels/CDH/lib/hadoop-mapreduce")
+jar_paths+=("/opt/cloudera/parcels/CDH/lib/hive/lib")
 
 for jar_path in "${jar_paths[@]}";
 do

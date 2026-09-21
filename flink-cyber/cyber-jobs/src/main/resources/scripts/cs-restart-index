@@ -55,6 +55,10 @@ if [ -d "$local_hive_conf_dir" ]; then
     echo "hive.confdir=$local_hive_conf_dir" >> "$generated_index_props"
 fi
 
+classpath_options=()
+classpath_config "-c" "iceberg-flink-runtime"
+
 cs-cancel-job ${job_name}
 
-cs-start-job -j flink-indexing-hive -p /etc/cybersec/conf/triage.properties -p kafka.properties -p "$generated_index_props" "${ship_configs[@]}"
+cs-start-job -j flink-indexing-hive -p /etc/cybersec/conf/triage.properties -p kafka.properties -p "$generated_index_props" "${ship_configs[@]}"  "${classpath_options[@]}"
+

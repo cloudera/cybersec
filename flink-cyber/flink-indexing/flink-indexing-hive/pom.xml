@@ -133,8 +133,9 @@
         <!-- Iceberg dependencies -->
         <dependency>
             <groupId>org.apache.iceberg</groupId>
-            <artifactId>iceberg-flink-1.18</artifactId>
-            <version>1.5.2.${cdh.version}</version>
+            <artifactId>iceberg-flink-1.20</artifactId>
+            <version>1.10.1.${cdh.version}</version>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.orc</groupId>
@@ -289,7 +290,7 @@
             <groupId>org.apache.hive</groupId>
             <artifactId>hive-streaming</artifactId>
             <version>${hive.version}</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -317,7 +318,7 @@
             <groupId>org.apache.hive</groupId>
             <artifactId>hive-metastore</artifactId>
             <version>${hive.version}</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -338,7 +339,7 @@
             <groupId>org.apache.hive.hcatalog</groupId>
             <artifactId>hive-hcatalog-core</artifactId>
             <version>${hive.version}</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>org.glassfish</groupId>
@@ -378,6 +379,12 @@
                     <artifactId>commons-cli</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.hive</groupId>
+            <artifactId>hive-common</artifactId>
+            <version>${hive.version}</version>
         </dependency>
 
         <dependency>

@@ -170,6 +170,11 @@ ship_config() {
   fi
 }
 
+classpath_config() {
+    jar_path=$(cs-lookup-jar "$2")
+    classpath_options+=("$1" "$jar_path")
+}
+
 override_hbase() {
   ship_config "-yt" "core-site.xml"
   ship_config "-yt" "hdfs-site.xml"
