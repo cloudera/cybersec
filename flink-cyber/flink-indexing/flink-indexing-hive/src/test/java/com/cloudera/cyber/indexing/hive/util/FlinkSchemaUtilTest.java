@@ -133,6 +133,22 @@ class FlinkSchemaUtilTest {
     assertThat(actualType).isEqualTo(DataTypes.TIMESTAMP(9));
   }
 
+  @Test
+  @DisplayName("getResolvedSchema converts string not null to string in hive maps")
+  void shouldRemoveRestrictionsForHiveMaps() {
+    DataType actualType = firstColumnDataType(column("fields", "map<string not null,string>", true), SerializationFormat.HIVE);
+
+    assertThat(actualType).isEqualTo(DataTypes.MAP(DataTypes.STRING(), DataTypes.STRING()));
+  }
+
+  @Test
+  @DisplayName("getResolvedSchema allows not null in hive maps")
+  void shouldAllowsRestrictionsForNonHiveMaps() {
+    DataType actualType = firstColumnDataType(column("fields", "map<string not null,string>", true), SerializationFormat.ICEBERG);
+
+    assertThat(actualType).isEqualTo(DataTypes.MAP(DataTypes.STRING().notNull(), DataTypes.STRING()));
+  }
+
   @ParameterizedTest(name = "{0}")
   @MethodSource("collectionTypeArguments")
   @DisplayName("getResolvedSchema parses array, map and struct types, including nested ones")
