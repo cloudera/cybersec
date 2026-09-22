@@ -37,6 +37,41 @@ function read_properties_into_variables() {
   done <$1
 }
 
+remove_hadoop_config_properties() {
+    local input_file="$1"
+    local output_file="$2"
+    shift 2
+
+    local props_to_remove="$*"
+
+    awk -v RS='<property>' -v ORS='' -v delete_list="$props_to_remove" '
+    BEGIN {
+        split(delete_list, temp_arr, " ")
+        for (i in temp_arr) {
+            to_remove[temp_arr[i]] = 1
+        }
+    }
+    {
+        # Check if the block contains a valid <name> tag
+        if ($0 ~ /<name>[^<]+<\/name>/) {
+            # Isolate the name block by stripping everything outside <name>...</name>
+            prop_name = $0
+            sub(/.*<name>/, "", prop_name)
+            sub(/<\/name>.*/, "", prop_name)
+
+            # Clean out any whitespace or newlines inside the name tags
+            gsub(/[[:space:]]/, "", prop_name)
+        } else {
+            prop_name = ""
+        }
+
+        # If the property name is not in our list, keep the block
+        if (!(prop_name in to_remove)) {
+            print (NR==1 ? "" : RS) $0
+        }
+    }' "$input_file" > "$output_file"
+}
+
 env_name=$1
 properties_file=$2
 
@@ -109,6 +144,17 @@ if [[ ! -z "${opdb_database_name}" ]]; then
         curl -S -s -f -o "$hbase_zip" -u "${workload_user}" "${opdb_client_url}"
         if [[ -f "$hbase_zip" ]]; then
            tar -zxvf "$hbase_zip" -C "$config_dir"
+           custom_hbase_site="$hbase_conf/hbase-site.xml"
+
+           remove_hadoop_config_properties \
+               "$custom_hbase_site" \
+               "$custom_hbase_site.clean" \
+               "hbase.rpc.tls.truststore.location" \
+               "hbase.rpc.tls.truststore.password" \
+               "hbase.zookeeper.property.ssl.trustStore.location" \
+               "hbase.zookeeper.property.ssl.trustStore.password"
+           mv "$custom_hbase_site.clean" "$custom_hbase_site"
+
         else
             report_fail "Could not get HBase configuration."
         fi
