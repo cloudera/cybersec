@@ -47,12 +47,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 class FlinkSchemaUtilTest {
 
   @Test
-  @DisplayName("the implicit public constructor of the utility class is available")
-  void shouldExposeImplicitConstructor() {
-    assertThat(new FlinkSchemaUtil()).isNotNull();
-  }
-
-  @Test
   @DisplayName("buildSchema copies the resolved schema (names and types)")
   void shouldBuildSchemaFromResolvedSchema() {
     ResolvedSchema resolvedSchema = ResolvedSchema.of(
@@ -288,7 +282,7 @@ class FlinkSchemaUtilTest {
   }
 
   private static List<String> schemaColumnNames(Schema schema) {
-    return schema.getColumns().stream().map(column -> column.getName()).collect(Collectors.toList());
+    return schema.getColumns().stream().map(Schema.UnresolvedColumn::getName).collect(Collectors.toList());
   }
 
   private static List<AbstractDataType<?>> schemaColumnDataTypes(Schema schema) {

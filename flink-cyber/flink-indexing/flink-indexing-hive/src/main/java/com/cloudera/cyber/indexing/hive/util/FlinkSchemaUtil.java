@@ -1,14 +1,12 @@
 package com.cloudera.cyber.indexing.hive.util;
 
 import com.cloudera.cyber.indexing.TableColumnDto;
-import org.apache.flink.api.java.typeutils.runtime.kryo.Serializers;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.catalog.Column;
 import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.table.types.DataType;
 
-import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
