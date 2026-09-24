@@ -26,7 +26,6 @@ import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
 import org.apache.flink.formats.registry.cloudera.avro.ClouderaRegistryAvroKafkaDeserializationSchema;
 import org.apache.flink.formats.registry.cloudera.avro.ClouderaRegistryAvroKafkaRecordSerializationSchema;
-import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
@@ -45,8 +44,14 @@ public class FlinkUtils<T> {
 
     private static final String PARAMS_CHECKPOINT_INTERVAL = "checkpoint.interval.ms";
     private static final int DEFAULT_CHECKPOINT_INTERVAL = 60000;
+    private static final String PARAMS_CHECKPOINT_MINIMUM_PAUSE = "checkpoint.minimum.pause.interval.ms";
+    private static final int DEFAULT_CHECKPOINT_MINIMUM_PAUSE = DEFAULT_CHECKPOINT_INTERVAL;
     public static final String PARAMS_PARALLELISM = "parallelism";
     private static final int DEFAULT_PARALLELISM = 2;
+    private static final String PARAMS_CHECKPOINT_TIMEOUT = "checkpoint.timeout.ms";
+    private static final long DEFAULT_CHECKPOINT_TIMEOUT = 600000;
+    private static final String PARAMS_CHECKPOINT_DURING_BACKLOG_INTERVAL = "checkpoint.backlog.interval.ms";
+    private static final long DEFAULT_CHECKPOINT_DURING_BACKLOG = 300000;
 
     private final Class<T> type;
 
@@ -55,7 +60,13 @@ public class FlinkUtils<T> {
     }
 
     public static void setupEnv(StreamExecutionEnvironment env, ParameterTool params) {
-        env.enableCheckpointing(params.getInt(PARAMS_CHECKPOINT_INTERVAL, DEFAULT_CHECKPOINT_INTERVAL), CheckpointingMode.EXACTLY_ONCE);
+
+        env.getCheckpointConfig().setCheckpointInterval(params.getLong(PARAMS_CHECKPOINT_INTERVAL, DEFAULT_CHECKPOINT_INTERVAL));
+        env.getCheckpointConfig().setCheckpointTimeout(params.getLong(PARAMS_CHECKPOINT_TIMEOUT, DEFAULT_CHECKPOINT_TIMEOUT));
+        env.getCheckpointConfig().setMinPauseBetweenCheckpoints(params.getLong(PARAMS_CHECKPOINT_MINIMUM_PAUSE, DEFAULT_CHECKPOINT_MINIMUM_PAUSE));
+        env.getCheckpointConfig().setCheckpointIntervalDuringBacklog(params.getLong(PARAMS_CHECKPOINT_DURING_BACKLOG_INTERVAL, DEFAULT_CHECKPOINT_DURING_BACKLOG));
+        env.getCheckpointConfig().setCheckpointingConsistencyMode(org.apache.flink.core.execution.CheckpointingMode.EXACTLY_ONCE);
+
         env.setParallelism(params.getInt(PARAMS_PARALLELISM, DEFAULT_PARALLELISM));
         env.getConfig().setGlobalJobParameters(params);
     }
@@ -91,7 +102,7 @@ public class FlinkUtils<T> {
         Preconditions.checkNotNull(groupId, "Must specific group id");
 
         Properties kafkaProperties = readKafkaProperties(params, groupId, true);
-        log.info(String.format("Creating Kafka Source for %s, using %s", topic, kafkaProperties));
+        log.info("Creating Kafka Source for {}, using {}", topic, kafkaProperties);
         KafkaDeserializationSchema<T> schema = ClouderaRegistryAvroKafkaDeserializationSchema
                 .builder(type)
                 .setConfig(readSchemaRegistryProperties(params))
@@ -135,7 +146,7 @@ public class FlinkUtils<T> {
         String inputTopic = params.get(ConfigConstants.PARAMS_TOPIC_INPUT,"");
         String pattern = params.get(ConfigConstants.PARAMS_TOPIC_PATTERN, "");
 
-        log.info(String.format("createRawKafkaSource topic: '%s', pattern: '%s', good: %b", inputTopic, pattern, !(inputTopic.isEmpty() && pattern.isEmpty())));
+        log.info("createRawKafkaSource topic: '{}', pattern: '{}', good: {}", inputTopic, pattern, !(inputTopic.isEmpty() && pattern.isEmpty()));
 
         Preconditions.checkArgument(!(inputTopic.isEmpty() && pattern.isEmpty()),
             String.format("Must specify at least one of %s or %s", ConfigConstants.PARAMS_TOPIC_INPUT, ConfigConstants.PARAMS_TOPIC_PATTERN));
