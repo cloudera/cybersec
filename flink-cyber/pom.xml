@@ -59,18 +59,18 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>${java.compiler.version}</java.version>
-        <csa.version>csa1.17.0.0</csa.version>
-        <flink.version>1.20.1-${csa.version}</flink.version>
+        <csa.version>csa1.18.0.0</csa.version>
+        <flink.version>1.20.5-${csa.version}</flink.version>
         <cloudera.registry>1.0-${csa.version}</cloudera.registry>
         <flink.hbase.version>2.4</flink.hbase.version>
-        <cdh.version>7.3.2.0-957</cdh.version>
+        <cdh.version>7.3.2.10000-317</cdh.version>
         <lombok.version>1.18.30</lombok.version>
         <lombok.plugin.version>1.18.20.0</lombok.plugin.version>
         <guava.version>21.0</guava.version>
         <avro.version>1.11.4</avro.version>
         <log4j.kafka.version>3.4.1.${cdh.version}</log4j.kafka.version>
         <scala.binary.version>2.12</scala.binary.version>
-        <kafka.version>3.9.1.${cdh.version}</kafka.version>
+        <kafka.version>3.9.2.${cdh.version}</kafka.version>
         <nifi.version>1.11.4</nifi.version>
         <jackson.version>2.15.2</jackson.version>
         <smm.intercepter.version>2.3.0.${cdh.version}</smm.intercepter.version>
@@ -357,22 +357,6 @@
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-hbase_${scala.binary.version}</artifactId>
                 <version>${flink.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.solr</groupId>
-                <artifactId>solr-solrj</artifactId>
-                <version>${solr.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>jcl-over-slf4j</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
 
             <!-- Hadoop -->

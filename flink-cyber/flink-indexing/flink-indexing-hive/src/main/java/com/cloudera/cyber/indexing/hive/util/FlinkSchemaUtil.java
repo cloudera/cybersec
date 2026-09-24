@@ -116,7 +116,15 @@ public final class FlinkSchemaUtil {
             throw new IllegalArgumentException("Unknown column type for Map: " + type);
         }
         final List<String> split = splitTypes(body, ',');
-        return DataTypes.MAP(getFlinkType(split.get(0), serializationFormat), getFlinkType(split.get(1), serializationFormat));
+        DataType keyType = getFlinkType(split.get(0), serializationFormat);
+        DataType valueType = getFlinkType(split.get(1), serializationFormat);
+
+        if (serializationFormat.equals(SerializationFormat.HIVE)) {
+            keyType = keyType.nullable();
+            valueType = valueType.nullable();
+        }
+
+        return DataTypes.MAP(keyType, valueType);
     }
 
     /**

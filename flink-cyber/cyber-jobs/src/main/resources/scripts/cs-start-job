@@ -134,6 +134,7 @@ job_properties=("/etc/cybersec/conf/kafka.properties" "${job_properties[@]}")
 ship_config "-yt" "configs"
 
 flink run \
+   -yD classloader.parent-first-patterns.additional="com.codahale.metrics" \
   "${savepoint_options[@]}" \
   "${classpath_options[@]}" \
   "${ship_options[@]}" \
