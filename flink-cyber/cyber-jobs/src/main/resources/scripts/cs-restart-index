@@ -58,7 +58,11 @@ fi
 classpath_options=()
 classpath_config "-c" "iceberg-flink-runtime"
 
-cs-cancel-job ${job_name}
+savepoint_options=()
+savepoint=$(cs-stop-job ${job_name})
+if [ ! -z "$savepoint" ]; then
+   savepoint_options+=("-s" "$savepoint")
+fi
 
-cs-start-job -j flink-indexing-hive -p /etc/cybersec/conf/triage.properties -p kafka.properties -p "$generated_index_props" "${ship_configs[@]}"  "${classpath_options[@]}"
+cs-start-job -j flink-indexing-hive -p /etc/cybersec/conf/triage.properties -p kafka.properties -p "$generated_index_props" "${ship_configs[@]}"  "${classpath_options[@]}" "${savepoint_options[@]}"
 
