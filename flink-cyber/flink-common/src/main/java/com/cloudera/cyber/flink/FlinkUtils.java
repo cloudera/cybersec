@@ -19,11 +19,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.configuration.CheckpointingOptions;
+import org.apache.flink.configuration.ConfigOption;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.GlobalConfiguration;
 import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.KafkaSourceBuilder;
 import org.apache.flink.connector.kafka.source.reader.deserializer.KafkaRecordDeserializationSchema;
+import org.apache.flink.core.fs.Path;
 import org.apache.flink.formats.registry.cloudera.avro.ClouderaRegistryAvroKafkaDeserializationSchema;
 import org.apache.flink.formats.registry.cloudera.avro.ClouderaRegistryAvroKafkaRecordSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -72,7 +77,25 @@ public class FlinkUtils<T> {
     }
 
     public static void executeEnv(StreamExecutionEnvironment env,  String defaultJobName, ParameterTool params) throws Exception {
-        env.execute(params.get("flink.job.name",defaultJobName));
+        String jobName = params.get("flink.job.name",defaultJobName);
+
+        Configuration clusterConfig = GlobalConfiguration.loadConfiguration();
+        Configuration runtimeConfig = new Configuration();
+        addJobToConfiguredDirectory(clusterConfig, runtimeConfig, CheckpointingOptions.CHECKPOINTS_DIRECTORY, jobName);
+        addJobToConfiguredDirectory(clusterConfig, runtimeConfig, CheckpointingOptions.SAVEPOINT_DIRECTORY, jobName);
+
+        env.configure(runtimeConfig);
+        env.execute(jobName);
+    }
+
+    private static void addJobToConfiguredDirectory(Configuration clusterConfig,  Configuration runtimeConfig, ConfigOption<String> configOption, String jobName) {
+        String baseCheckpointDir = clusterConfig.get(configOption);
+        if (baseCheckpointDir == null) {
+            log.warn("Directory {} not configured.  Unable to create job-specific directory config.", CheckpointingOptions.CHECKPOINTS_DIRECTORY);
+        } else {
+            String jobSpecificDir = new Path(baseCheckpointDir, jobName).toString();
+            runtimeConfig.set(configOption, jobSpecificDir);
+        }
     }
 
     public static KafkaSource<String> createKafkaStringSource(String topic, Properties kafkaProperties) {
