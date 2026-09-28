@@ -13,18 +13,26 @@
 package com.cloudera.cyber.enrichment.geocode;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.enrichment.Enrichment;
+import com.cloudera.cyber.enrichment.EnrichmentConfiguration;
+import com.cloudera.cyber.enrichment.geocode.database.IpAsnEnrichment;
+import com.cloudera.cyber.enrichment.geocode.database.IpCompanyEnrichment;
+import com.cloudera.cyber.enrichment.geocode.database.IpGeoEnrichment;
 import com.cloudera.cyber.flink.FlinkUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class IpGeoJob {
-    protected static final String PARAMS_ENABLE_GEO = "geo.enabled";
-    protected static final String PARAMS_ENABLE_ASN = "asn.enabled";
-    protected static final String PARAMS_ENABLE_COMPANY = "company.enabled";
+    public static final String PARAMS_ENABLE_GEO = "geo.enabled";
+    public static final String PARAMS_ENABLE_ASN = "asn.enabled";
+    public static final String PARAMS_ENABLE_COMPANY = "company.enabled";
 
     public static final String PARAM_GEO_FIELDS = "geo.ip_fields";
     public static final String PARAM_GEO_DATABASE_PATH = "geo.database_path";
@@ -50,19 +58,22 @@ public abstract class IpGeoJob {
     protected abstract SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
 
     public static SingleOutputStreamOperator<Message> enrich(ParameterTool params, SingleOutputStreamOperator<Message> messages) {
-        SingleOutputStreamOperator<Message> geoEnriched = params.getBoolean(PARAMS_ENABLE_GEO, true) ?
+        List<String> geoFields = EnrichmentConfiguration.getFieldsForGeoEnrichment(params, PARAMS_ENABLE_GEO, PARAM_GEO_FIELDS);
+        SingleOutputStreamOperator<Message> geoEnriched = !geoFields.isEmpty() ?
                 IpGeo.geo(messages,
-                        Arrays.asList(params.getRequired(PARAM_GEO_FIELDS).split(",")),
+                        geoFields,
                         params.getRequired(PARAM_GEO_DATABASE_PATH)) : messages;
 
-        SingleOutputStreamOperator<Message> asnEnriched = params.getBoolean(PARAMS_ENABLE_ASN, true) ?
+        List<String> asnFields = EnrichmentConfiguration.getFieldsForGeoEnrichment(params, PARAMS_ENABLE_ASN, PARAM_ASN_FIELDS);
+        SingleOutputStreamOperator<Message> asnEnriched = !asnFields.isEmpty() ?
                 IpGeo.asn(geoEnriched,
-                        Arrays.asList(params.getRequired(PARAM_ASN_FIELDS).split(",")),
+                        asnFields,
                         params.getRequired(PARAM_ASN_DATABASE_PATH)) : geoEnriched;
 
-        return params.getBoolean(PARAMS_ENABLE_COMPANY, true) ?
+        List<String> companyFields = EnrichmentConfiguration.getFieldsForGeoEnrichment(params, PARAMS_ENABLE_COMPANY, PARAM_COMPANY_FIELDS);
+        return !companyFields.isEmpty() ?
                 IpGeo.company(asnEnriched,
-                        Arrays.asList(params.getRequired(PARAM_COMPANY_FIELDS).split(",")),
+                        companyFields,
                         params.getRequired(PARAM_COMPANY_DATABASE_PATH)) : asnEnriched;
     }
 

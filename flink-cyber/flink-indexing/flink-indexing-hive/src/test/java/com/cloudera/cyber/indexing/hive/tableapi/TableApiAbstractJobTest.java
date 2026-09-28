@@ -2,20 +2,27 @@ package com.cloudera.cyber.indexing.hive.tableapi;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.indexing.MappingColumnDto;
 import com.cloudera.cyber.indexing.MappingDto;
+import com.cloudera.cyber.indexing.TableDto;
 import com.cloudera.cyber.indexing.hive.tableapi.impl.TableApiKafkaJob;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
+
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.catalog.Column;
 import org.apache.flink.table.catalog.ResolvedSchema;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -69,23 +76,23 @@ class TableApiAbstractJobTest {
     return Stream.of(
           Arguments.of("topic",
                 new MappingDto("tableName", Collections.emptyList(), Collections.emptyList()),
-                ResolvedSchema.of(),
-                "CREATE TEMPORARY VIEW  topic_tmpview(  )  AS \n" +
+               Collections.singletonMap("topic_tmpview", ResolvedSchema.of()),
+                Collections.singletonList("CREATE TEMPORARY VIEW  topic_tmpview(  )  AS \n" +
                 " SELECT   \n" +
                 " from KafkaTempView\n" +
-                " where `source`='topic'"),
+                " where `source`='topic'")),
           Arguments.of("topic",
                 new MappingDto("tableName", Collections.emptyList(), Arrays.asList(
                       new MappingColumnDto("column1", "column1,column2", null, "ROW(%s, %s)", false),
                       new MappingColumnDto("column2", "column3", null, null, false))),
-                ResolvedSchema.of(
+                Collections.singletonMap("topic_tmpview", ResolvedSchema.of(
                       Column.physical("column1", DataTypes.STRING()),
                       Column.physical("column2", DataTypes.STRING()),
-                      Column.physical("column3", DataTypes.STRING())),
-                "CREATE TEMPORARY VIEW  topic_tmpview( column1, column2 )  AS \n" +
+                      Column.physical("column3", DataTypes.STRING()))),
+                Collections.singletonList("CREATE TEMPORARY VIEW  topic_tmpview( column1, column2 )  AS \n" +
                 " SELECT  ROW((message.extensions.column1), (message.extensions.column2)), (message.extensions.column3) \n" +
                 " from KafkaTempView\n" +
-                " where `source`='topic'")
+                " where `source`='topic'"))
     );
   }
 
@@ -105,7 +112,7 @@ class TableApiAbstractJobTest {
 
         Arguments.of(Collections.singletonMap(GIVEN_TABLE_NAME, ResolvedSchema.of()),
             Collections.singletonMap(GIVEN_SOURCE,
-                new MappingDto(GIVEN_TABLE_NAME, new ArrayList<>(), Arrays.asList(
+                new MappingDto(GIVEN_TABLE_NAME,  new ArrayList<>(), Arrays.asList(
                     new MappingColumnDto(" ", null, null, null, false),
                     new MappingColumnDto("someName", null, null, null, false)))),
             RuntimeException.class,
@@ -137,8 +144,8 @@ class TableApiAbstractJobTest {
 
   @ParameterizedTest
   @MethodSource("insertSqlData")
-  void shouldGenerateInsertSql(String topic, MappingDto mappingDto, ResolvedSchema tableSchema, String expectedSql) {
-      String actualSql = job.buildInsertSql(topic, mappingDto, tableSchema);
+  void shouldGenerateInsertSql(String topic, MappingDto mappingDto, Map<String, ResolvedSchema> tableSchema, List<String> expectedSql) {
+      List<String> actualSql = job.buildInsertSql(topic, mappingDto, tableSchema);
       assertThat(actualSql).isEqualTo(expectedSql);
   }
 

@@ -16,7 +16,8 @@ import com.cloudera.cyber.Message;
 import com.cloudera.cyber.Message.MessageBuilder;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.enrichment.Enrichment;
-import com.cloudera.cyber.enrichment.cidr.impl.IpRegionCidrEnrichment;
+import com.cloudera.cyber.enrichment.EnrichmentConfiguration;
+import com.cloudera.cyber.enrichment.EnrichmentFeature;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.java.Log;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -61,7 +62,7 @@ public class IpRegionJobTest extends IpRegionCidrJob {
         long ts = 0;
 
         JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
-                PARAM_CIDR_IP_FIELDS, String.join(",", STRING_IP_FIELD_NAME, LIST_IP_FIELD_NAME),
+                EnrichmentConfiguration.PARAM_CIDR_IP_FIELDS, String.join(",", STRING_IP_FIELD_NAME, LIST_IP_FIELD_NAME),
                 PARAM_CIDR_CONFIG_PATH, CIDR_CONFIG_PATH
         ))).setParallelism(1));
 
@@ -86,7 +87,7 @@ public class IpRegionJobTest extends IpRegionCidrJob {
         long ts = 0;
 
         JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
-                PARAM_CIDR_IP_FIELDS, "",
+                EnrichmentConfiguration.PARAM_CIDR_IP_FIELDS, "",
                 PARAM_CIDR_CONFIG_PATH, CIDR_CONFIG_PATH
         ))).setParallelism(1));
 
@@ -114,7 +115,7 @@ public class IpRegionJobTest extends IpRegionCidrJob {
     @Test
     public void testIpGeoPipelineWithNotExistConfigFile() throws Exception {
         assertThatThrownBy(() -> JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
-                PARAM_CIDR_IP_FIELDS, "",
+                EnrichmentConfiguration.PARAM_CIDR_IP_FIELDS, "",
                 PARAM_CIDR_CONFIG_PATH, UN_EXIST_CIDR_CONFIG_PATH
         ))).setParallelism(1))).isInstanceOf(IOException.class)
                 .hasMessageContaining("No such file or directory")
@@ -124,7 +125,7 @@ public class IpRegionJobTest extends IpRegionCidrJob {
     @Test
     public void testIpGeoPipelineWithEmptyConfigFile() throws Exception {
         assertThatThrownBy(() -> JobTester.startTest(createPipeline(ParameterTool.fromMap(ImmutableMap.of(
-                PARAM_CIDR_IP_FIELDS, "",
+                EnrichmentConfiguration.PARAM_CIDR_IP_FIELDS, "",
                 PARAM_CIDR_CONFIG_PATH, EMPTY_CIDR_CONFIG_PATH
         ))).setParallelism(1))).isInstanceOf(IOException.class)
                 .hasMessageContaining("File is empty")
@@ -162,9 +163,9 @@ public class IpRegionJobTest extends IpRegionCidrJob {
         assertThat(results.stream().flatMap(m -> m.getExtensions().entrySet().stream()).collect(Collectors.toList()))
                 .contains(
                         entry(STRING_IP_FIELD_NAME, IpRegionCidrTestData.IPV4_10_ADDRESS),
-                        entry(STRING_IP_FIELD_NAME + Enrichment.DELIMITER + IpRegionCidrEnrichment.FEATURE_NAME, IpRegionCidrTestData.IPV4_MASK_REGION_1_NAME),
+                        entry(STRING_IP_FIELD_NAME + Enrichment.DELIMITER + EnrichmentFeature.IP_REGION_CIDR_FEATURE_NAME, IpRegionCidrTestData.IPV4_MASK_REGION_1_NAME),
                         entry(LIST_IP_FIELD_NAME, IpRegionCidrTestData.IPV6_15_ADDRESS),
-                        entry(LIST_IP_FIELD_NAME + Enrichment.DELIMITER + IpRegionCidrEnrichment.FEATURE_NAME, IpRegionCidrTestData.IPV6_MASK_REGION_2_NAME)
+                        entry(LIST_IP_FIELD_NAME + Enrichment.DELIMITER + EnrichmentFeature.IP_REGION_CIDR_FEATURE_NAME, IpRegionCidrTestData.IPV6_MASK_REGION_2_NAME)
                 );
     }
 

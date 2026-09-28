@@ -3,6 +3,7 @@ package com.cloudera.cyber.indexing.hive.tableapi.impl;
 import com.cloudera.cyber.flink.FlinkUtils;
 import com.cloudera.cyber.indexing.MappingDto;
 import com.cloudera.cyber.indexing.TableColumnDto;
+import com.cloudera.cyber.indexing.TableDto;
 import com.cloudera.cyber.indexing.hive.tableapi.TableApiAbstractJob;
 import com.cloudera.cyber.indexing.hive.util.AvroSchemaUtil;
 import com.cloudera.cyber.indexing.hive.util.FlinkSchemaUtil;
@@ -39,18 +40,19 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
 
   @Override
   protected void executeInsert(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping,
-                               Map<String, List<TableColumnDto>> tablesConfig, Map<String, ResolvedSchema> tableSchemaMap) {
+                               Map<String, TableDto> tablesConfig, Map<String, ResolvedSchema> tableSchemaMap) {
     topicMapping.forEach((topic, mappingDto) -> {
-      final String insertSql = buildInsertSql(topic, mappingDto, tableSchemaMap.get(mappingDto.getTableName()));
+      final List<String> insertSql = buildInsertSql(topic, mappingDto, tableSchemaMap);
       try {
         //create view
-        tableEnv.executeSql(insertSql);
+        // unenriched tables are not supported for kafka
+        tableEnv.executeSql(insertSql.get(0));
         final KafkaSink<GenericRecord> kafkaSink = new FlinkUtils<>(GenericRecord.class).createKafkaSink(
             mappingDto.getTableName(), "indexing-job", params);
 
         //read from view and write to kafka sink
         final Table table = tableEnv.from(getTableName(topic, mappingDto));
-        final String schemaString = AvroSchemaUtil.convertToAvro(tablesConfig.get(mappingDto.getTableName()))
+        final String schemaString = AvroSchemaUtil.convertToAvro(tablesConfig.get(mappingDto.getTableName()).getColumns())
             .toString();
 
         final DataStream<GenericRecord> stream = tableEnv.toDataStream(table).map(new MapRowToAvro(schemaString));

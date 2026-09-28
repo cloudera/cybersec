@@ -15,6 +15,7 @@ package com.cloudera.cyber.enrichment.geocode.database;
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.enrichment.Enrichment;
+import com.cloudera.cyber.enrichment.EnrichmentFeature;
 import com.cloudera.cyber.enrichment.SingleValueEnrichment;
 import com.cloudera.cyber.enrichment.geocode.database.types.asn.AsnDatabase;
 import com.maxmind.db.DatabaseRecord;
@@ -28,7 +29,6 @@ import java.util.function.BiFunction;
 
 public class IpAsnEnrichment extends IpEnrichment {
     static final String ASN_FAILED_MESSAGE = "ASN lookup failed '%s'";
-    public static final String ASN_FEATURE = "asn";
     public static final String ASN_NUMBER_PREFIX = "number";
     public static final String ASN_ORG_PREFIX = "org";
     public static final String ASN_MASK_PREFIX = "mask";
@@ -66,12 +66,12 @@ public class IpAsnEnrichment extends IpEnrichment {
 
     public void lookup(BiFunction<String, String, Enrichment> enrichmentBiFunction, String fieldName, Object ipFieldValue, Map<String, String> extensions, List<DataQualityMessage> qualityMessages) {
         if (ipFieldValue instanceof Collection) {
-            Enrichment enrichment = enrichmentBiFunction.apply(fieldName, ASN_FEATURE);
+            Enrichment enrichment = enrichmentBiFunction.apply(fieldName, EnrichmentFeature.ASN_FEATURE);
             //noinspection unchecked
             ((Collection<Object>) ipFieldValue).forEach(ip -> lookup(enrichment, ip, extensions, qualityMessages));
         }
         else if (ipFieldValue != null) {
-            lookup(enrichmentBiFunction.apply(fieldName, ASN_FEATURE), ipFieldValue, extensions, qualityMessages);
+            lookup(enrichmentBiFunction.apply(fieldName, EnrichmentFeature.ASN_FEATURE), ipFieldValue, extensions, qualityMessages);
         }
     }
 
