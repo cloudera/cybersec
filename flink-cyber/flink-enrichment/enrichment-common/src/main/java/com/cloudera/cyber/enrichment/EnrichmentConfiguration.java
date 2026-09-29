@@ -1,7 +1,6 @@
 package com.cloudera.cyber.enrichment;
 
 import com.cloudera.cyber.enrichment.lookup.config.EnrichmentConfig;
-import com.cloudera.cyber.enrichment.ConfigUtils;
 import org.apache.flink.api.java.utils.ParameterTool;
 
 import java.io.IOException;
