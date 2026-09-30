@@ -12,11 +12,9 @@
 
 package com.cloudera.cyber.enrichment.cidr.impl;
 
-import static com.cloudera.cyber.enrichment.cidr.impl.IpRegionCidrEnrichment.FEATURE_NAME;
+import static com.cloudera.cyber.enrichment.EnrichmentFeature.IP_REGION_CIDR_FEATURE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.enrichment.Enrichment;
@@ -36,7 +34,7 @@ public class IpRegionEnrichmentTest {
 
 
     private static final String IP_FIELD_NAME = "cidrTest";
-    private static final String IP_FIELD_NAME_EXTENSION = IP_FIELD_NAME + Enrichment.DELIMITER + FEATURE_NAME;
+    private static final String IP_FIELD_NAME_EXTENSION = IP_FIELD_NAME + Enrichment.DELIMITER + IP_REGION_CIDR_FEATURE_NAME;
     private IpRegionCidrEnrichment ipRegionCidrEnrichment;
 
     @BeforeEach

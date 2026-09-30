@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 @AllArgsConstructor
 public class MappingColumnDto {
 
+    public static final String EXTENSIONS_PATH = "extensions";
     @JsonProperty("name")
     private String name;
 
@@ -33,7 +35,7 @@ public class MappingColumnDto {
 
     @JsonIgnore
     public List<String> getKafkaNameList() {
-        final String properName = kafkaName == null ? name : kafkaName;
+        final String properName = getProperName();
         if (getIsMap()) {
             return Collections.singletonList(String.format("['%s']", properName));
         }
@@ -63,14 +65,33 @@ public class MappingColumnDto {
     @JsonIgnore
     public String getPath() {
         if (StringUtils.isEmpty(path)) {
-            return "extensions";
+            return EXTENSIONS_PATH;
         } else if (path.equals(".")) {
             return "";
         }
         return path;
     }
 
+    private String getProperName() {
+        return kafkaName == null ? name : kafkaName;
+    }
+
     public boolean getIsMap() {
         return isMap == null ? path == null : isMap;
+    }
+
+    public MappingColumnDto deriveUnenriched(List<String> enrichedFieldPrefixes, Set<String> sourceEnrichedPrefixes) {
+        MappingColumnDto unenrichedMapping = null;
+        if (EXTENSIONS_PATH.equals(getPath())) {
+            String properName = getProperName();
+            if ((enrichedFieldPrefixes == null || enrichedFieldPrefixes.stream().noneMatch(properName::startsWith)) &&
+                    (sourceEnrichedPrefixes == null || sourceEnrichedPrefixes.stream().noneMatch(properName::startsWith))) {
+                unenrichedMapping = new MappingColumnDto(name, kafkaName, path, transformation, isMap);
+            }
+        } else {
+            // enrichment fields will only be in the extensions
+            unenrichedMapping = new MappingColumnDto(name, kafkaName, path, transformation, isMap);
+        }
+        return unenrichedMapping;
     }
 }

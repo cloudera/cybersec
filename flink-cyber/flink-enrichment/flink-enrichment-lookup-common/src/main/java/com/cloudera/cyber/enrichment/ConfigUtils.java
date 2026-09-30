@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,6 +49,22 @@ public class ConfigUtils {
                 ));
     }
 
+    /**
+     * Return a list of field prefixes produced by the configured enrichments both local and hbase.
+     *
+     * @param allConfigs List of configured enrichments.
+     * @return Map of sources to prefixes of fields that are added by hbase and local enrichments.
+     */
+    public static Map<String, Set<String>> enrichmentFieldPrefixes(List<EnrichmentConfig> allConfigs) {
+        Map<String, Set<String>> sourceEnrichmentFieldPrefixes = new HashMap<>();
+        allConfigs.forEach(config -> {
+            config.getFields().forEach(field -> {
+                sourceEnrichmentFieldPrefixes.computeIfAbsent(config.getSource(), v -> new HashSet<>()).add(Enrichment.getEnrichmentPrefixForField(field.getName(), field.getEnrichmentType()));
+            });
+        });
+        return sourceEnrichmentFieldPrefixes;
+    }
+
     public static Set<String> enrichmentTypes(List<EnrichmentConfig> allConfigs, EnrichmentKind kind) {
         return allConfigs.stream()
                 .filter(f -> f.getKind() == kind)
@@ -59,4 +77,5 @@ public class ConfigUtils {
                 new TypeReference<List<EnrichmentConfig>>() {
                 });
     }
+
 }

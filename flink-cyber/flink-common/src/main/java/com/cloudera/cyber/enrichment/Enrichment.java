@@ -32,11 +32,11 @@ public abstract class Enrichment {
     public Enrichment(String fieldName, String feature) {
         this.fieldName = fieldName;
         this.feature = feature;
-        this.prefix = String.join(DELIMITER, fieldName, feature);
+        this.prefix = getEnrichmentPrefixForField(fieldName, feature);
     }
 
     protected String getName(String enrichmentName) {
-        return String.join(DELIMITER, prefix, enrichmentName);
+        return prefix.concat(enrichmentName);
     }
 
     public List<DataQualityMessage> addQualityMessage(List<DataQualityMessage> messages, DataQualityMessageLevel level, String message) {
@@ -53,4 +53,14 @@ public abstract class Enrichment {
     }
 
     public abstract void enrich(Map<String, String> extensions, String enrichmentName, Object enrichmentValue);
+
+    public static List<String> getEnrichmentPrefixesForFields(List<String> fields, String featureName) {
+        return fields.stream().
+                map(f -> getEnrichmentPrefixForField(f, featureName)).
+                toList();
+    }
+
+    public static String getEnrichmentPrefixForField(String fieldName, String featureName) {
+        return String.join(DELIMITER, fieldName, featureName).concat(DELIMITER);
+    }
 }

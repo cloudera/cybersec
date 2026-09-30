@@ -12,6 +12,7 @@
 
 package com.cloudera.cyber.enrichment.geocode;
 
+import com.cloudera.cyber.enrichment.EnrichmentFeature;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 
@@ -51,7 +52,7 @@ public class IpAsnTestData {
     public static Map<String, String> getExpectedValues(String ipFieldName, String ipFieldValue) {
         Map<String, String> asnValues = ipToAsnEnrichments.get(ipFieldValue);
         if (asnValues != null) {
-            return asnValues.entrySet().stream().collect(Collectors.toMap(e -> Joiner.on(".").join(ipFieldName, ASN_FEATURE,e.getKey()), Map.Entry::getValue));
+            return asnValues.entrySet().stream().collect(Collectors.toMap(e -> Joiner.on(".").join(ipFieldName, EnrichmentFeature.ASN_FEATURE,e.getKey()), Map.Entry::getValue));
         } else {
             return Collections.emptyMap();
         }

@@ -15,6 +15,7 @@ package com.cloudera.cyber.enrichment.geocode.database;
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.enrichment.Enrichment;
+import com.cloudera.cyber.enrichment.EnrichmentFeature;
 import com.cloudera.cyber.enrichment.SingleValueEnrichment;
 import com.cloudera.cyber.enrichment.geocode.database.types.company.CompanyDatabase;
 import com.maxmind.db.DatabaseRecord;
@@ -28,7 +29,6 @@ import java.util.function.BiFunction;
 
 public class IpCompanyEnrichment extends IpEnrichment {
     static final String COMPANY_FAILED_MESSAGE = "Company lookup failed '%s'";
-    public static final String COMPANY_FEATURE = "company";
     public static final String COMPANY_NAME_PREFIX = "name";
     public static final String ASN_NUMBER_PREFIX = "asn.number";
     public static final String ASN_ORG_PREFIX = "asn.org";
@@ -68,12 +68,12 @@ public class IpCompanyEnrichment extends IpEnrichment {
 
     public void lookup(BiFunction<String, String, Enrichment> enrichmentBiFunction, String fieldName, Object ipFieldValue, Map<String, String> extensions, List<DataQualityMessage> qualityMessages) {
         if (ipFieldValue instanceof Collection) {
-            Enrichment enrichment = enrichmentBiFunction.apply(fieldName, COMPANY_FEATURE);
+            Enrichment enrichment = enrichmentBiFunction.apply(fieldName, EnrichmentFeature.COMPANY_FEATURE);
             //noinspection unchecked
             ((Collection<Object>) ipFieldValue).forEach(ip -> lookup(enrichment, ip, extensions, qualityMessages));
         }
         else if (ipFieldValue != null) {
-            lookup(enrichmentBiFunction.apply(fieldName, COMPANY_FEATURE), ipFieldValue, extensions, qualityMessages);
+            lookup(enrichmentBiFunction.apply(fieldName, EnrichmentFeature.COMPANY_FEATURE), ipFieldValue, extensions, qualityMessages);
         }
     }
 

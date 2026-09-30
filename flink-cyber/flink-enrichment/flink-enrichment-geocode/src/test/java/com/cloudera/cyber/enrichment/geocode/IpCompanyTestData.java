@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.cloudera.cyber.enrichment.geocode.database.IpCompanyEnrichment.COMPANY_FEATURE;
+import static com.cloudera.cyber.enrichment.EnrichmentFeature.COMPANY_FEATURE;
 import static com.cloudera.cyber.enrichment.geocode.database.IpCompanyEnrichment.COMPANY_NAME_PREFIX;
 import static com.cloudera.cyber.enrichment.geocode.database.IpCompanyEnrichment.ASN_NUMBER_PREFIX;
 import static com.cloudera.cyber.enrichment.geocode.database.IpCompanyEnrichment.ASN_ORG_PREFIX;

@@ -42,26 +42,23 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.cloudera.cyber.enrichment.cidr.IpRegionCidrJob.PARAM_CIDR_CONFIG_PATH;
-import static com.cloudera.cyber.enrichment.cidr.IpRegionCidrJob.PARAM_CIDR_IP_FIELDS;
 import static com.cloudera.cyber.enrichment.geocode.IpGeoJob.*;
 import static com.cloudera.cyber.enrichment.hbase.HbaseJob.PARAMS_ENRICHMENT_CONFIG;
 
 @Slf4j
 public abstract class EnrichmentJob {
-    private static final String PARAMS_LOOKUPS_CONFIG_FILE = "lookups.config.file";
     private static final String PARAMS_REST_CONFIG_FILE = "rest.config.file";
     private static final String PARAMS_THREATQ_CONFIG_FILE = "threatq.config.file";
 
-    private static final String PARAMS_ENABLE_CIDR = "cidr.enabled";
     private static final String PARAMS_ENABLE_HBASE = "hbase.enabled";
     private static final String PARAMS_ENABLE_REST = "rest.enabled";
     private static final String PARAMS_ENABLE_THREATQ = "threatq.enabled";
     private static final String PARAMS_ENABLE_RULES = "rules.enabled";
     private static final String PARAMS_ENABLE_STELLAR = "stellar.enabled";
+
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws IOException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -70,15 +67,16 @@ public abstract class EnrichmentJob {
         SingleOutputStreamOperator<Message> messages = createSource(env, params);
         DataStream<EnrichmentCommand> enrichments = createEnrichmentSource(env, params);
 
-        List<EnrichmentConfig> enrichmentConfigs = ConfigUtils.allConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_LOOKUPS_CONFIG_FILE))));
+        List<EnrichmentConfig> enrichmentConfigs = ConfigUtils.allConfigs(Files.readAllBytes(Paths.get(params.getRequired(EnrichmentConfiguration.PARAMS_LOOKUPS_CONFIG_FILE))));
         SingleOutputStreamOperator<EnrichmentCommand> localEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.LOCAL));
         SingleOutputStreamOperator<EnrichmentCommand> hbaseEnrichments = enrichments.filter(new FilterEnrichmentType(enrichmentConfigs, EnrichmentKind.HBASE));
 
         SingleOutputStreamOperator<Message> geoEnriched = IpGeoJob.enrich(params, messages);
 
-        SingleOutputStreamOperator<Message> cidrEnriched = params.getBoolean(PARAMS_ENABLE_CIDR, false) ?
+        List<String> cidrEnrichmentFields = EnrichmentConfiguration.getCidrEnrichmentFields(params);
+        SingleOutputStreamOperator<Message> cidrEnriched = !cidrEnrichmentFields.isEmpty() ?
             IpRegionCidr.cidr(geoEnriched,
-                Arrays.asList(params.getRequired(PARAM_CIDR_IP_FIELDS).split(",")),
+                cidrEnrichmentFields,
                 params.getRequired(PARAM_CIDR_CONFIG_PATH)) : geoEnriched;
 
         Tuple2<DataStream<Message>, DataStream<EnrichmentCommandResponse>> enriched = LookupJob.enrich(localEnrichments, cidrEnriched, enrichmentConfigs);

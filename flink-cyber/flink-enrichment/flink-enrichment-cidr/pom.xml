@@ -47,6 +47,13 @@
 
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
+            <artifactId>enrichment-commmon</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-logging</artifactId>
             <version>${project.parent.version}</version>
             <scope>provided</scope>

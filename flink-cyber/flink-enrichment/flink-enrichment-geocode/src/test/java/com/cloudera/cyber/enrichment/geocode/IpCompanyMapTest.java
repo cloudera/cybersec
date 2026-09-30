@@ -31,7 +31,7 @@ import static com.cloudera.cyber.enrichment.geocode.IpCompanyTestData.INVALID_DA
 import static com.cloudera.cyber.enrichment.geocode.IpCompanyTestData.IP_FIELD_NAME;
 import static com.cloudera.cyber.enrichment.geocode.IpCompanyTestData.LOCAL_IP;
 import static com.cloudera.cyber.enrichment.geocode.IpCompanyTestData.UNKNOWN_HOST_IP;
-import static com.cloudera.cyber.enrichment.geocode.database.IpCompanyEnrichment.COMPANY_FEATURE;
+import static com.cloudera.cyber.enrichment.EnrichmentFeature.COMPANY_FEATURE;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
