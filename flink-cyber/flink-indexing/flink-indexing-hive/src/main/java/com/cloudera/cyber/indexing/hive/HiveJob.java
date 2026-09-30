@@ -25,11 +25,14 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 @Slf4j
 public abstract class HiveJob {
+    private static final String DEFAULT_JOB_NAME = "Indexing - Hive";
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         FlinkUtils.setupEnv(env, params);
+        // configure checkpoint directories now so the table env inherits the correct settings
+        FlinkUtils.configureCheckpointDirectories(env, FlinkUtils.getJobName(DEFAULT_JOB_NAME, params));
 
         DataStream<ScoredMessage> source = createSource(env, params);
         if (params.get("flink.writer", "").equalsIgnoreCase("TableAPI")) {
