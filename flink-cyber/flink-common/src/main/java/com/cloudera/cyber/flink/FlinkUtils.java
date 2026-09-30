@@ -15,7 +15,6 @@ package com.cloudera.cyber.flink;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.cyber.parser.MessageToParseDeserializer;
-import jdk.jshell.execution.StreamingExecutionControl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
