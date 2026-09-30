@@ -242,6 +242,7 @@ function lookup_savepoint_options {
         starting_savepoint=$latest_checkpoint
      fi
      if [ -n "$starting_savepoint" ]; then
+         echo "Configuring recovery savepoint or checkpoint: ${starting_savepoint%/_metadata}"
          savepoint_options+=("--allowNonRestoredState" "-s" "${starting_savepoint%/_metadata}")
      fi
 }

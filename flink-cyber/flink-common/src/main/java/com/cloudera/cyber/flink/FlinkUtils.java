@@ -15,6 +15,7 @@ package com.cloudera.cyber.flink;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.parser.MessageToParse;
 import com.cloudera.cyber.parser.MessageToParseDeserializer;
+import jdk.jshell.execution.StreamingExecutionControl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
@@ -77,15 +78,22 @@ public class FlinkUtils<T> {
     }
 
     public static void executeEnv(StreamExecutionEnvironment env,  String defaultJobName, ParameterTool params) throws Exception {
-        String jobName = params.get("flink.job.name",defaultJobName);
+        String jobName = getJobName(defaultJobName, params);
+        configureCheckpointDirectories(env, jobName);
+        env.execute(jobName);
+    }
 
+    public static String getJobName(String defaultJobName, ParameterTool params) {
+        return params.get("flink.job.name",defaultJobName);
+    }
+
+    public static void configureCheckpointDirectories(StreamExecutionEnvironment env,  String jobName) {
         Configuration clusterConfig = GlobalConfiguration.loadConfiguration();
         Configuration runtimeConfig = new Configuration();
         addJobToConfiguredDirectory(clusterConfig, runtimeConfig, CheckpointingOptions.CHECKPOINTS_DIRECTORY, jobName);
         addJobToConfiguredDirectory(clusterConfig, runtimeConfig, CheckpointingOptions.SAVEPOINT_DIRECTORY, jobName);
 
         env.configure(runtimeConfig);
-        env.execute(jobName);
     }
 
     private static void addJobToConfiguredDirectory(Configuration clusterConfig,  Configuration runtimeConfig, ConfigOption<String> configOption, String jobName) {
