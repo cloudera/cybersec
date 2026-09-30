@@ -124,6 +124,8 @@ if [ -z "$YARN_NAME" ]; then
   exit 1
 fi
 
+lookup_savepoint_options $FLINK_JOB_NAME
+
 init_key_store
 get_kerberos_config
 

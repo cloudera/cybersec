@@ -192,6 +192,61 @@ override_hbase() {
 
 }
 
+function get_flink_config {
+    fgrep "$1" /etc/flink/conf/flink-conf.yaml | awk '{print $2}'
+}
+
+function get_latest_file {
+    if hdfs dfs -test -d "$1" 2> /dev/null; then
+        hdfs dfs -ls "$2" 2>/dev/null \
+            | sort -k6,6 -k7,7 \
+            | tail -n 1 \
+            | awk '{print $8}'
+    fi
+}
+
+function lookup_savepoint_options {
+    if [ -n "$savepoint_options" ]; then
+        echo "Skip check for savepoint or checkpoint.  Savepoint is already set."
+        return 0
+    fi
+
+    echo "Checking for latest job savepoint or checkpoint."
+    local job_name=$1
+    checkpoint_dir=$(get_flink_config "state.checkpoints.dir")
+    savepoint_dir=$(get_flink_config "state.savepoints.dir")
+
+    job_checkpoint_dir="$checkpoint_dir/$job_name"
+    latest_checkpoint=$(get_latest_file "$job_checkpoint_dir" "$job_checkpoint_dir/*/*/_metadata")
+
+    job_savepoint_dir="$savepoint_dir/$job_name"
+    latest_savepoint=$(get_latest_file "$job_savepoint_dir" "$job_savepoint_dir/*/_metadata")
+
+    echo "Job checkpoint dir: $job_checkpoint_dir"
+    echo "Job savepoint dir: $job_savepoint_dir"
+    echo "Latest checkpoint: $latest_checkpoint"
+    echo "Latest savepoint: $latest_savepoint"
+
+    local starting_savepoint
+    if [[ -n "$latest_checkpoint" && -n "$latest_savepoint" ]]; then
+         checkpoint_time=$(hdfs dfs -stat "%Y" "$latest_checkpoint" 2>/dev/null)
+         savepoint_time=$(hdfs dfs -stat "%Y" "$latest_savepoint" 2>/dev/null)
+         if [ "$savepoint_time" -ge "$checkpoint_time" ]; then
+            starting_savepoint=$latest_savepoint
+         else
+            starting_savepoint=$latest_checkpoint
+         fi
+     elif [[ -n "$latest_savepoint" ]]; then
+         starting_savepoint=$latest_savepoint
+     elif [[ -n "$latest_checkpoint" ]]; then
+        starting_savepoint=$latest_checkpoint
+     fi
+     if [ -n "$starting_savepoint" ]; then
+         echo "Configuring recovery savepoint or checkpoint: ${starting_savepoint%/_metadata}"
+         savepoint_options+=("--allowNonRestoredState" "-s" "${starting_savepoint%/_metadata}")
+     fi
+}
+
 # Set environment variables
 export HADOOP_HOME=${HADOOP_HOME:-/usr/lib/hadoop}
 export HADOOP_CONF_DIR=${HADOOP_CONF_DIR:-/etc/hadoop/conf}
