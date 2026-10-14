@@ -93,10 +93,6 @@
             <artifactId>avro</artifactId>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-java</artifactId>
-        </dependency>
     </dependencies>
     <build>
         <plugins>

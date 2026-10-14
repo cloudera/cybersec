@@ -160,13 +160,6 @@
 
             <dependency>
                 <groupId>org.apache.flink</groupId>
-                <artifactId>flink-java</artifactId>
-                <version>${flink.version}</version>
-                <scope>provided</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.flink</groupId>
                 <artifactId>flink-streaming-java</artifactId>
                 <version>${flink.version}</version>
                 <scope>provided</scope>
@@ -671,7 +664,10 @@
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>${maven-enforcer-plugin.version}</version>
                     <configuration>
-                        <rules><dependencyConvergence/></rules>
+                        <rules>
+                            <dependencyConvergence/>
+                            <banDuplicatePomDependencyVersions/>
+                        </rules>
                     </configuration>
                 </plugin>
             </plugins>
