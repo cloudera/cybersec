@@ -247,6 +247,20 @@ function lookup_savepoint_options {
      fi
 }
 
+ensure_kerberos_auth() {
+    # Check if klist command exists on the system
+    if ! command -v klist &> /dev/null; then
+        echo "Error: 'klist' command not found. Kerberos utilities may not be installed." >&2
+        exit 1
+    fi
+
+    # klist -s checks silently for a valid Ticket Granting Ticket (TGT)
+    if ! klist -s; then
+        echo "Error: No active Kerberos ticket found. Please run 'kinit' first." >&2
+        exit 1
+    fi
+}
+
 # Set environment variables
 export HADOOP_HOME=${HADOOP_HOME:-/usr/lib/hadoop}
 export HADOOP_CONF_DIR=${HADOOP_CONF_DIR:-/etc/hadoop/conf}

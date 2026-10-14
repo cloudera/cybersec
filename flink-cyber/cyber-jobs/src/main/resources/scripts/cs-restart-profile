@@ -33,6 +33,8 @@ if [ "$#" -ne 3 ]; then
   exit 1
 fi
 
+ensure_kerberos_auth
+
 branch=$1
 pipeline=$2
 profile_name=$3
