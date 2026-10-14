@@ -36,4 +36,16 @@ public class MappingDto {
                         .map(String::toLowerCase)
                         .collect(Collectors.toSet());
     }
+
+    public MappingDto deriveUnenrichedMapping(String unenrichedTableName, List<String> enrichmentFieldPrefixes, Set<String> sourceToEnrichmentFieldPrefixes) {
+        List<MappingColumnDto> unenrichedColumnMappings = columnMapping.stream().
+                map(column -> column.deriveUnenriched(enrichmentFieldPrefixes, sourceToEnrichmentFieldPrefixes)).
+                filter(Objects::nonNull).toList();
+        if (!unenrichedColumnMappings.isEmpty()) {
+            return new MappingDto(unenrichedTableName, ignoreFields, unenrichedColumnMappings);
+        } else {
+            return null;
+        }
+    }
+
 }

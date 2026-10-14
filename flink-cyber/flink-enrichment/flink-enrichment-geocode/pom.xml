@@ -30,12 +30,20 @@
             <version>${project.parent.version}</version>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-common</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>
             <type>test-jar</type>
+        </dependency>
+
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
+            <artifactId>enrichment-commmon</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>

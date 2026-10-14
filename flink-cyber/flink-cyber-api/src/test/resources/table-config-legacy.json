@@ -1,0 +1,20 @@
+{
+  "examples_full_events": [
+    {
+      "name": "domain",
+      "type": "string"
+    },
+    {
+      "name": "domain_second_level",
+      "type": "string"
+    }
+  ],
+  "another_table": [
+    {
+      "name": "field_1",
+      "type": "string"
+    }
+  ]
+}
+
+

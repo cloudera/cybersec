@@ -1,0 +1,14 @@
+{
+  "examples_full_events": {
+    "columns": [
+      {
+        "name": "domain",
+        "type": "string"
+      },
+      {
+        "name": "domain_second_level",
+        "type": "string"
+      }
+    ]
+  }
+}

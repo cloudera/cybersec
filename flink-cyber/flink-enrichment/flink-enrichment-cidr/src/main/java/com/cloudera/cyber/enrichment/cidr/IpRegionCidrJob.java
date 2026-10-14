@@ -13,6 +13,7 @@
 package com.cloudera.cyber.enrichment.cidr;
 
 import com.cloudera.cyber.Message;
+import com.cloudera.cyber.enrichment.EnrichmentConfiguration;
 import com.cloudera.cyber.flink.FlinkUtils;
 import java.io.IOException;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -24,13 +25,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public abstract class IpRegionCidrJob {
-    public static final String PARAM_CIDR_IP_FIELDS = "cidr.ip_fields";
     public static final String PARAM_CIDR_CONFIG_PATH = "cidr.config_file_path";
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) throws IOException {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         FlinkUtils.setupEnv(env, params);
-        List<String> ipFields = Arrays.asList(params.getRequired(PARAM_CIDR_IP_FIELDS).split(","));
+        List<String> ipFields = Arrays.asList(params.getRequired(EnrichmentConfiguration.PARAM_CIDR_IP_FIELDS).split(","));
         String cidrConfigPath = params.getRequired(PARAM_CIDR_CONFIG_PATH);
 
         SingleOutputStreamOperator<Message> source = createSource(env, params, ipFields);

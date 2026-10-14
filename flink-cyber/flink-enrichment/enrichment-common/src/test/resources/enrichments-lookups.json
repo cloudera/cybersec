@@ -1,0 +1,26 @@
+[
+  {
+    "source": "squid",
+    "kind": "LOCAL",
+    "fields": [
+      {
+        "name": "domain",
+        "enrichmentType": "malicious_domain"
+      },
+      {
+        "name": "domain_no_subdomains",
+        "enrichmentType": "majestic_million"
+      }
+    ]
+  },
+  {
+    "source": "squid",
+    "kind": "HBASE",
+    "fields": [
+      {
+        "name": "domain_no_subdomains",
+        "enrichmentType": "domain_category"
+      }
+    ]
+  }
+]
