@@ -247,6 +247,15 @@ function lookup_savepoint_options {
      fi
 }
 
+function prepare_triage_properties {
+    local pipeline=$1
+    local template_file=$2
+    local generated_triage_props=$3
+
+    echo "# GENERATED FILE - EDITS WILL BE OVERWRITTEN - EDIT triage.properties.template instead." > $generated_triage_props
+    sed -e s/BRANCH/$branch/g $template_file >> $generated_triage_props
+}
+
 ensure_kerberos_auth() {
     # Check if klist command exists on the system
     if ! command -v klist &> /dev/null; then

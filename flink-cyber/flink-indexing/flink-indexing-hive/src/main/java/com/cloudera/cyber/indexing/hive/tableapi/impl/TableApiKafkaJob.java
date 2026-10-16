@@ -20,6 +20,7 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.FormatDescriptor;
 import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.bridge.java.StreamStatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.ResolvedSchema;
 
@@ -39,14 +40,13 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
   }
 
   @Override
-  protected void executeInsert(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping,
+  protected void createInserts(StreamTableEnvironment tableEnv, StreamStatementSet insertStatementSet, Map<String, MappingDto> topicMapping,
                                Map<String, TableDto> tablesConfig, Map<String, ResolvedSchema> tableSchemaMap) {
     topicMapping.forEach((topic, mappingDto) -> {
-      final List<String> insertSql = buildInsertSql(topic, mappingDto, tableSchemaMap);
+      final String insertSql = buildInsertSql(topic, mappingDto, tableSchemaMap.get(mappingDto.getTableName()));
       try {
         //create view
-        // unenriched tables are not supported for kafka
-        tableEnv.executeSql(insertSql.get(0));
+        tableEnv.executeSql(insertSql);
         final KafkaSink<GenericRecord> kafkaSink = new FlinkUtils<>(GenericRecord.class).createKafkaSink(
             mappingDto.getTableName(), "indexing-job", params);
 
@@ -64,6 +64,11 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
         throw e;
       }
     });
+  }
+
+  @Override
+  protected void executeInserts(Map<String, TableDto> tablesConfig, Map<String, TableDto> rawUnenrichedTablesConfig, StreamStatementSet insertStatementSet) {
+      // no op - kafka topic output is already routed in createInserts
   }
 
   @Override
