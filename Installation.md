@@ -51,15 +51,32 @@ sudo service cloudera-scm-server restart
 
 1. Open Cloudera Manager. Select **Parcels** from the lower left. Click **Check for New Parcels** on the upper right. Locate the `CYBERSEC` parcel in the list of parcels. Click **Distribute**.
 <img src="images/01_distribute_parcel.png" title="Distribute Parcel"/>
+
 2. After the Distribution completes, click **Activate**.
+<img src="images/02_activate_parcel.png" title="Activate Parcel"/>
+
 3. Click **OK** on the "Are you sure?" confirmation dialog.
 4. Verify that the `CYBERSEC` parcel status is **Distributed, Activated**.
+<img src="images/03_activated_parcel.png" title="Activated Parcel"/>
+
 5.Select the cluster where Flink and YARN are installed. Right-click on the `...` menu and select **Add Service**.
+<img src="images/04_start_add_service.png" title="Add Service"/>
+
+
 6.Select **Cybersec** and click **Continue**.
+<img src="images/05_add_service.png" title="Activated Parcel"/>
+
 7.Assign **Parser Chaining** to one node (hosts the parser UI service) and assign the **Cybersec Gateway** role to all Flink gateway hosts. Click **Continue**.
+<img src="images/06_assign_roles.png" title="Activated Parcel"/>
+
 8. Click **Continue** on the Review Changes page to begin service installation. 
 9. Click **Continue** on the Command Details page.
+   <img src="images/07_add_cybersec_service.png" title="Activated Parcel"/>
+
+
 10. Review the summary page to verify successful installation, then click **Finish**.
+11. <img src="images/08_cybersec_service_summary.png_activated_parcel.png" title="Activated Parcel"/>
+
 11. Select **Clusters \> Cybersec**. From the actions menu, execute each of the following:
     * Actions \> Create cybersec user directory
     * Actions \> Create cybersec data directory
