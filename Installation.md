@@ -50,7 +50,7 @@ sudo service cloudera-scm-server restart
 ## Add the Cyber Toolkit Service
 
 1. Open Cloudera Manager. Select **Parcels** from the lower left. Click **Check for New Parcels** on the upper right. Locate the `CYBERSEC` parcel in the list of parcels. Click **Distribute**.
-<img src="/Users/cduby/CYB-274/cybersec/images/01_distribute_parcel.png" title="Distribute Parcel"/>
+<img src="images/01_distribute_parcel.png" title="Distribute Parcel"/>
 2. After the Distribution completes, click **Activate**.
 3. Click **OK** on the "Are you sure?" confirmation dialog.
 4. Verify that the `CYBERSEC` parcel status is **Distributed, Activated**.
