@@ -42,10 +42,10 @@ public class MappingDtoTest {
         MappingDto mapping = createMapping();
 
         MappingDto derivedMapping = mapping.deriveUnenrichedMapping(UNENRICHED_TABLE_NAME, List.of(FIELD_2_NAME), Collections.emptySet());
-        assertEquals(new MappingDto(UNENRICHED_TABLE_NAME, List.of(IGNORED_FIELD_NAME), List.of(FIELD_1_MAPPING)), derivedMapping);
+        assertEquals(new MappingDto(UNENRICHED_TABLE_NAME, List.of(IGNORED_FIELD_NAME, FIELD_1_NAME, FIELD_2_NAME), List.of(FIELD_1_MAPPING)), derivedMapping);
 
         derivedMapping = mapping.deriveUnenrichedMapping(UNENRICHED_TABLE_NAME, Collections.emptyList(), Set.of(FIELD_2_NAME));
-        assertEquals(new MappingDto(UNENRICHED_TABLE_NAME, List.of(IGNORED_FIELD_NAME), List.of(FIELD_1_MAPPING)), derivedMapping);
+        assertEquals(new MappingDto(UNENRICHED_TABLE_NAME, List.of(IGNORED_FIELD_NAME, FIELD_1_NAME, FIELD_2_NAME), List.of(FIELD_1_MAPPING)), derivedMapping);
 
         derivedMapping = mapping.deriveUnenrichedMapping(UNENRICHED_TABLE_NAME, Collections.emptyList(), Collections.emptySet());
         assertEquals(new MappingDto(UNENRICHED_TABLE_NAME, List.of(IGNORED_FIELD_NAME), List.of(FIELD_1_MAPPING, FIELD_2_MAPPING)), derivedMapping);
@@ -63,7 +63,7 @@ public class MappingDtoTest {
     @Test
     public void testGetIgnoredFields() {
         MappingDto dto = new MappingDto(TABLE_NAME, null, List.of(FIELD_1_MAPPING, FIELD_2_MAPPING));
-        assertEquals(Set.of(""), dto.getIgnoreFields());
+        assertEquals(Set.of(FIELD_2_KAFKA_NAME, FIELD_1_NAME), dto.getIgnoreFields());
 
         dto.setIgnoreFields(List.of(FIELD_3_NAME));
         assertEquals(Set.of(FIELD_2_KAFKA_NAME, FIELD_1_NAME, FIELD_3_NAME), dto.getIgnoreFields());
@@ -71,6 +71,9 @@ public class MappingDtoTest {
         // add mapping to field outside extensions path - not added to ignored fields
         dto.setColumnMapping(List.of(FIELD_1_MAPPING, FIELD_2_MAPPING, new MappingColumnDto(FIELD_4_NAME, null, "..", null, false)));
         assertEquals(Set.of(FIELD_2_KAFKA_NAME, FIELD_1_NAME, FIELD_3_NAME), dto.getIgnoreFields());
+
+        MappingDto nullDto = new MappingDto(TABLE_NAME, null, null);
+        assertEquals(Set.of(""), nullDto.getIgnoreFields());
     }
 
 }

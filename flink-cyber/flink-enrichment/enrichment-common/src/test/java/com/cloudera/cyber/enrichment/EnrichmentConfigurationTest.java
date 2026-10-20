@@ -65,10 +65,10 @@ public class EnrichmentConfigurationTest {
     }
 
     @Test
-    public void testGetEnrichmentFieldPrefixes() throws IOException {
+    public void testGetEnrichmentFieldPrefixes() {
         Map<String, String> params = createDefaultMap();
         addFieldParams(params, PARAMS_ENABLE_CIDR, PARAM_CIDR_IP_FIELDS, "field1,field2");
-        assertEquals(List.of("field1.region.", "field2.region."), EnrichmentConfiguration.getEnrichmentFieldPrefixes(ParameterTool.fromMap(params)));
+        assertEquals(List.of("field1.region", "field2.region"), EnrichmentConfiguration.getEnrichmentFieldPrefixes(ParameterTool.fromMap(params)));
 
         params = createDefaultMap();
         addFieldParams(params, PARAMS_ENABLE_CIDR, PARAM_CIDR_IP_FIELDS, null);
@@ -77,7 +77,7 @@ public class EnrichmentConfigurationTest {
         params = createDefaultMap();
         addFieldParams(params, PARAMS_ENABLE_GEO, PARAM_GEO_FIELDS, "field1,field3");
         addFieldParams(params, PARAMS_ENABLE_CIDR, PARAM_CIDR_IP_FIELDS, "field1,field2");
-        assertEquals(List.of("field1.geo.", "field3.geo.", "field1.region.", "field2.region."), EnrichmentConfiguration.getEnrichmentFieldPrefixes(ParameterTool.fromMap(params)));
+        assertEquals(List.of("field1.geo.", "field3.geo.", "field1.region", "field2.region"), EnrichmentConfiguration.getEnrichmentFieldPrefixes(ParameterTool.fromMap(params)));
     }
 
     private Map<String, String> createDefaultMap() {

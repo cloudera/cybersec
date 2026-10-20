@@ -55,12 +55,24 @@ public abstract class Enrichment {
     public abstract void enrich(Map<String, String> extensions, String enrichmentName, Object enrichmentValue);
 
     public static List<String> getEnrichmentPrefixesForFields(List<String> fields, String featureName) {
+        return getEnrichmentPrefixesForFields(fields, featureName, true);
+    }
+
+    public static List<String> getEnrichmentPrefixesForFields(List<String> fields, String featureName, boolean addEndingDelimiter) {
         return fields.stream().
-                map(f -> getEnrichmentPrefixForField(f, featureName)).
+                map(f -> getEnrichmentPrefixForField(f, featureName, addEndingDelimiter)).
                 toList();
     }
 
     public static String getEnrichmentPrefixForField(String fieldName, String featureName) {
-        return String.join(DELIMITER, fieldName, featureName).concat(DELIMITER);
+        return getEnrichmentPrefixForField(fieldName, featureName, true);
+    }
+
+    public static String getEnrichmentPrefixForField(String fieldName, String featureName, boolean addEndingDelimiter) {
+        String enrichmentPrefix = String.join(DELIMITER, fieldName, featureName);
+        if (addEndingDelimiter) {
+            enrichmentPrefix = enrichmentPrefix.concat(DELIMITER);
+        }
+        return enrichmentPrefix;
     }
 }

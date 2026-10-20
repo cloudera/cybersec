@@ -15,10 +15,12 @@ import java.util.Set;
 public class MapRowToAvro implements ResultTypeQueryable<GenericRecord>, MapFunction<Row, GenericRecord> {
     private final GenericRecordAvroTypeInfo producedType;
     private final Schema schema;
+    private final Set<String> fieldsFilter;
 
-    public MapRowToAvro(String schemaString) {
+    public MapRowToAvro(String schemaString, Set<String> fieldsFilter) {
         this.schema = new Schema.Parser().parse(schemaString);
         this.producedType = new GenericRecordAvroTypeInfo(schema);
+        this.fieldsFilter = fieldsFilter;
     }
 
     @Override
@@ -32,7 +34,12 @@ public class MapRowToAvro implements ResultTypeQueryable<GenericRecord>, MapFunc
         final Set<String> fieldNames = row.getFieldNames(true);
         if (fieldNames != null) {
             for (String fieldName : fieldNames) {
-                AvroSchemaUtil.putRowIntoAvro(row, record, fieldName);
+                if (fieldName.equals("fields")) {
+                    // filter out enrichment fields from unenriched tables
+                    AvroSchemaUtil.putRowIntoAvro(row, record, fieldName, fieldsFilter);
+                } else {
+                    AvroSchemaUtil.putRowIntoAvro(row, record, fieldName, null);
+                }
             }
         }
         return record;

@@ -27,12 +27,12 @@ public class EnrichmentConfiguration {
     public static final String PARAMS_LOOKUPS_CONFIG_FILE = "lookups.config.file";
     public static final String PARAM_CIDR_IP_FIELDS = "cidr.ip_fields";
 
-    public static List<String> getEnrichmentFieldPrefixes(ParameterTool params) throws IOException {
+    public static List<String> getEnrichmentFieldPrefixes(ParameterTool params) {
         // get the geocoding job prefixes
         List<String> enrichmentPrefixes =getGeoEnrichmentFieldPrefixes(params);
 
         // get the cidr job prefixes
-        enrichmentPrefixes.addAll(Enrichment.getEnrichmentPrefixesForFields(getCidrEnrichmentFields(params), EnrichmentFeature.IP_REGION_CIDR_FEATURE_NAME));
+        enrichmentPrefixes.addAll(Enrichment.getEnrichmentPrefixesForFields(getCidrEnrichmentFields(params), EnrichmentFeature.IP_REGION_CIDR_FEATURE_NAME, false));
 
         return enrichmentPrefixes;
     }

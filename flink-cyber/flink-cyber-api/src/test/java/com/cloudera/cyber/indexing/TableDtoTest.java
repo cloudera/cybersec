@@ -41,7 +41,7 @@ public class TableDtoTest {
 
         List<String> enrichmentPrefixes = List.of(FIELD_2_KAFKA_NAME);
         TableDto expectedUnenrichedTable = new TableDto(null, List.of(TABLE_FIELD_1));
-        Map<String, MappingDto> expectedUnenrichedMapping = Map.of(LOG_SOURCE_1, new MappingDto(UNENRICHED_TABLE_NAME, null, List.of(FIELD_1_MAPPING)));
+        Map<String, MappingDto> expectedUnenrichedMapping = Map.of(LOG_SOURCE_1, new MappingDto(UNENRICHED_TABLE_NAME, List.of(FIELD_1_NAME, FIELD_2_KAFKA_NAME), List.of(FIELD_1_MAPPING)));
         TableDto unenrichedTable = tableDto.deriveUnenrichedTable(TABLE_NAME, ORIGINAL_MAPPING, unenrichedMapping, enrichmentPrefixes, Collections.emptyMap());
 
         assertEquals(expectedUnenrichedTable, unenrichedTable);

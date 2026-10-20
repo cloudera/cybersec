@@ -111,6 +111,9 @@ public abstract class TableApiAbstractJob {
       System.out.println("Getting enrichment field prefixes...");
       List<String> enrichmentPrefixes = EnrichmentConfiguration.getEnrichmentFieldPrefixes(triageParams);
       Map<String, Set<String>> sourceToEnrichmentPrefixes = EnrichmentConfiguration.getSourceEnrichmentFieldPrefixes(triageParams);
+      System.out.printf("Filtered field prefixes: %s\n", String.join(", ", enrichmentPrefixes));
+      System.out.println("Filtered source field prefixes:");
+      sourceToEnrichmentPrefixes.forEach((source, sourceFilteredPrefixes) -> System.out.printf("%s: %s\n", source, String.join(", ", sourceFilteredPrefixes)));
 
       System.out.println("Getting unenriched tables config...");
       createDerivedTablesAndMappings(rawTablesConfig, topicMapping,
@@ -137,22 +140,10 @@ public abstract class TableApiAbstractJob {
 
     System.out.printf("Executing %s insert...%n", connectorName);
 
-    final StreamStatementSet insertStatementSet = tableEnv.createStatementSet();
-    createInserts(tableEnv, insertStatementSet, topicMapping, tablesConfig, tableSchemaMap);
-    createInserts(tableEnv, insertStatementSet, unenrichedTopicMapping, rawUnenrichedTablesConfig, tableSchemaMap);
-    executeInserts(tablesConfig, rawUnenrichedTablesConfig, insertStatementSet);
+    createInserts(tableEnv, topicMapping, tablesConfig, unenrichedTopicMapping, tableSchemaMap);
 
     System.out.println("TableApiJob is done!");
     return jobReturnValue();
-  }
-
-  protected void executeInserts(Map<String, TableDto> tablesConfig, Map<String, TableDto> rawUnenrichedTablesConfig, StreamStatementSet insertStatementSet) {
-    if (!tablesConfig.isEmpty() || !rawUnenrichedTablesConfig.isEmpty()) {
-      System.out.println("Executing Insert statement list...");
-      insertStatementSet.execute();
-    } else {
-      System.out.println("No SQL statements to execute.");
-    }
   }
 
   protected boolean isNonDefaultColumn(String columnName) {
@@ -251,24 +242,33 @@ public abstract class TableApiAbstractJob {
     return env;
   }
 
-  protected void createInserts(StreamTableEnvironment tableEnv, StreamStatementSet insertStatementSet, Map<String, MappingDto> topicMapping,
-                               Map<String, TableDto> tablesConfig, Map<String, ResolvedSchema> tableSchemaMap) {
+  protected void createInserts(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping,
+                               Map<String, TableDto> tablesConfig, Map<String, MappingDto> unenrichedTopicMapping, Map<String, ResolvedSchema> tableSchemaMap) {
     if (!topicMapping.isEmpty()) {
       System.out.printf("Filling Insert statement list...%s%n", Arrays.toString(tableEnv.listTables()));
+      final StreamStatementSet insertStatementSet = tableEnv.createStatementSet();
 
       topicMapping.forEach((topic, mappingDto) -> {
-      ResolvedSchema tableSchema = tableSchemaMap.get(mappingDto.getTableName());
-      final String insertSql = buildInsertSql(topic, mappingDto, tableSchema);
-        try {
-        insertStatementSet.addInsertSql(insertSql);
-            System.out.printf("Insert SQL added to the queue for the table: %s%nSQL: %s%n", mappingDto.getTableName(),
-                    insertSql);
-        } catch (Exception e) {
-          System.err.printf("Error adding insert to the statement set: %s%n", insertSql);
-          throw e;
-        }
+        addInsertSqlStatement(tableSchemaMap, topic, mappingDto, insertStatementSet);
+        Optional.ofNullable(unenrichedTopicMapping.get(topic))
+                .ifPresent(unenrichedDto -> addInsertSqlStatement(tableSchemaMap, topic, unenrichedDto, insertStatementSet));
       });
 
+      System.out.println("Executing Insert statement list...");
+      insertStatementSet.execute();
+    }
+  }
+
+  private void addInsertSqlStatement(Map<String, ResolvedSchema> tableSchemaMap, String topic, MappingDto mappingDto, StreamStatementSet insertStatementSet) {
+    ResolvedSchema tableSchema = tableSchemaMap.get(mappingDto.getTableName());
+    final String insertSql = buildInsertSql(topic, mappingDto, tableSchema);
+    try {
+    insertStatementSet.addInsertSql(insertSql);
+        System.out.printf("Insert SQL added to the queue for the table: %s%nSQL: %s%n", mappingDto.getTableName(),
+                insertSql);
+    } catch (Exception e) {
+      System.err.printf("Error adding insert to the statement set: %s%n", insertSql);
+      throw e;
     }
   }
 
@@ -431,8 +431,6 @@ public abstract class TableApiAbstractJob {
 
   private String getFromColumns(MappingDto mappingDto, ResolvedSchema tableSchema) {
     System.out.println("Building from columns");
-    System.out.printf("MappingDto : %s\n", mappingDto.toString());
-    System.out.printf("Table schema : %s\n", tableSchema);
     return mappingDto.getColumnMapping().stream()
         .map(mappingColumnDto -> {
           final List<String> kafkaNameList = mappingColumnDto.getKafkaNameList();

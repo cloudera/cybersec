@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -20,9 +21,9 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.FormatDescriptor;
 import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.bridge.java.StreamStatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.ResolvedSchema;
+import org.apache.flink.types.Row;
 
 public class TableApiKafkaJob extends TableApiAbstractJob {
 
@@ -40,23 +41,22 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
   }
 
   @Override
-  protected void createInserts(StreamTableEnvironment tableEnv, StreamStatementSet insertStatementSet, Map<String, MappingDto> topicMapping,
-                               Map<String, TableDto> tablesConfig, Map<String, ResolvedSchema> tableSchemaMap) {
-    topicMapping.forEach((topic, mappingDto) -> {
-      final String insertSql = buildInsertSql(topic, mappingDto, tableSchemaMap.get(mappingDto.getTableName()));
+  protected void createInserts(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping,
+                               Map<String, TableDto> tablesConfig, Map<String, MappingDto> unenrichedTopicMapping, Map<String, ResolvedSchema> tableSchemaMap) {
+    topicMapping.forEach((source, mappingDto) -> {
+      final String insertSql = buildInsertSql(source, mappingDto, tableSchemaMap.get(mappingDto.getTableName()));
       try {
         //create view
         tableEnv.executeSql(insertSql);
-        final KafkaSink<GenericRecord> kafkaSink = new FlinkUtils<>(GenericRecord.class).createKafkaSink(
-            mappingDto.getTableName(), "indexing-job", params);
 
         //read from view and write to kafka sink
-        final Table table = tableEnv.from(getTableName(topic, mappingDto));
-        final String schemaString = AvroSchemaUtil.convertToAvro(tablesConfig.get(mappingDto.getTableName()).getColumns())
-            .toString();
+        final Table table = tableEnv.from(getTableName(source, mappingDto));
+        final DataStream<Row> tableStream = tableEnv.toDataStream(table);
 
-        final DataStream<GenericRecord> stream = tableEnv.toDataStream(table).map(new MapRowToAvro(schemaString));
-        stream.sinkTo(kafkaSink);
+        outputViewToKafka(tablesConfig, mappingDto, tableStream, mappingDto.getTableName());
+        Optional.ofNullable(unenrichedTopicMapping.get(source))
+                .ifPresent(unenrichedDto -> outputViewToKafka(tablesConfig, unenrichedDto, tableStream, unenrichedDto.getTableName()));
+
         System.out.printf("Insert SQL added to the queue for the table: %s%nSQL: %s%n", mappingDto.getTableName(),
             insertSql);
       } catch (Exception e) {
@@ -66,9 +66,18 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
     });
   }
 
-  @Override
-  protected void executeInserts(Map<String, TableDto> tablesConfig, Map<String, TableDto> rawUnenrichedTablesConfig, StreamStatementSet insertStatementSet) {
-      // no op - kafka topic output is already routed in createInserts
+  private void outputViewToKafka(Map<String, TableDto> tablesConfig, MappingDto mappingDto, DataStream<Row> tableStream, String topicName) {
+    final String schemaString = AvroSchemaUtil.convertToAvro(tablesConfig.get(mappingDto.getTableName()).getColumns())
+        .toString();
+
+    System.out.printf("Writing to topic %s\n", topicName);
+    System.out.printf("Schema %s\n\n", schemaString);
+    System.out.printf("Filtered Fields %s\n\n", mappingDto.getIgnoreFields());
+
+    final DataStream<GenericRecord> stream = tableStream.map(new MapRowToAvro(schemaString, mappingDto.getIgnoreFields()));
+    final KafkaSink<GenericRecord> kafkaSink = new FlinkUtils<>(GenericRecord.class).createKafkaSink(
+            topicName, "indexing-job", params);
+    stream.sinkTo(kafkaSink);
   }
 
   @Override

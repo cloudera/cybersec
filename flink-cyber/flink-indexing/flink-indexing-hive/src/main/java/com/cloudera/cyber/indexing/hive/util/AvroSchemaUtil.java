@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class AvroSchemaUtil {
 
@@ -38,20 +39,31 @@ public final class AvroSchemaUtil {
         return fieldAssembler.endRecord();
     }
 
-    public static void putRowIntoAvro(Row row, GenericRecord record, String fieldName) {
-        final Object value;
+    public static void putRowIntoAvro(Row row, GenericRecord record, String fieldName, Set<String> mapKeyFilter) {
+        Object value;
         final String avroFieldName = fieldName.toLowerCase();
+        Schema.Field avroRecordField = record.getSchema().getField(avroFieldName);
 
-        if (row == null) {
-            value = null;
-        } else {
-            try {
-            value = convertToAvroObject(record.getSchema().getField(avroFieldName).schema(), row.getField(fieldName));
-            } catch (Exception e) {
-                throw new RuntimeException(String.format("Error converting avro field %s", avroFieldName), e);
+        // if there is a corresponding field in output avro record, add the converted value
+        // there may not be a corresponding value if the output avro defines a subset of the
+        // Row fields.  This may happen when writing unenriched data to a kafka topic
+        if (avroRecordField != null) {
+            if (row == null) {
+                value = null;
+            } else {
+                try {
+                    value = convertToAvroObject(avroRecordField.schema(), row.getField(fieldName));
+                    if (value instanceof Map<?, ?> mapToFilter && mapKeyFilter != null) {
+                        value = mapToFilter.entrySet().stream().
+                                filter(entry -> !mapKeyFilter.contains((String)entry.getKey())).
+                                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(String.format("Error converting avro field %s", avroFieldName), e);
+                }
             }
+            record.put(avroFieldName, value);
         }
-        record.put(avroFieldName, value);
     }
 
     private static Object convertToAvroObject(Schema fieldSchema, Object value) {
@@ -59,8 +71,7 @@ public final class AvroSchemaUtil {
             return null;
         } else if (value instanceof Instant) {
             return ((Instant) value).toEpochMilli();
-        } else if (value instanceof Row) {
-            final Row nestedRow = (Row) value;
+        } else if (value instanceof Row nestedRow) {
             final Set<String> nestedFieldNames = nestedRow.getFieldNames(true);
             final GenericRecord nestedRecord = new GenericData.Record(fieldSchema);
             if (nestedFieldNames != null) {
@@ -83,7 +94,7 @@ public final class AvroSchemaUtil {
             //[null, list<>]
             final Schema elementSchema = fieldSchema.getTypes().get(1).getElementType();
             final List<Object> avroList = new ArrayList<>();
-            for (Object item : (List) value) {
+            for (Object item : (List<?>) value) {
                 avroList.add(convertToAvroObject(elementSchema, item));
             }
             return avroList;
