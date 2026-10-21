@@ -260,7 +260,7 @@ As with the Tables Init File, this config appends to the default mappings:
   {
     "name": "fields",
     "kafka_name": "extensions",
-    "transformation": "filterMap(%s, %s)",
+    "transformation": "filterMap(%s)",
     "path": "."
   }
 ]
@@ -272,7 +272,7 @@ The main Mapping fields are:
 |----------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------|------------------|
 | name           | Name of the column in the Output Table                                                                                                                                                                                                                                                                                                                          | false    |                  |
 | kafka_name     | Name of the Message object field. If left empty, value from the ```name``` is going to be used                                                                                                                                                                                                                                                                  | true     | *same as 'name'* |
-| transformation | Transformation that should be applied to the value before storing it to the Output Table. You can call Flink SQL Functions here as well as the custom ones provided below. Inside this field you can have two placeholders (%s). The first one is always replaced with the path(see below), and the second one is replaced with the list of fields to ignore.   | true     |                  |
+| transformation | Transformation that should be applied to the value before storing it to the Output Table. You can call Flink SQL Functions here as well as the custom ones provided below. Inside this field you can have placeholders (%s). The first one is always replaced with the path(see below). | true     |                  |
 | path           | Field path relatively to the Message objects' root. By default all values are taken from the Message Extensions. If you need to get data from some other Message field, provide ```.``` in the path. If the Message is a child of some parent object, you can specify the path as ```..```. Think of it as a UNIX path with your work directory in the Message. | true     | ```extensions``` |
 
 For the list of supported Transformation Functions, refer to the [Flink Documentation](https://nightlies.apache.org/flink/flink-docs-master/docs/dev/table/functions/systemfunctions/) and look for the SQL functions.
@@ -281,7 +281,7 @@ Custom functions:
 
 | Function Name                            | Description                                                                                                                                            | Example                                                                                                                                                                                                                                               |
 |------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| filterMap(Map<String, String>,String...) | Allows to filter map to not have any keys from the provided list. First argument - map to filter, second argument - list of field names to filter out. | let's say we have Message Extensions (which is a map) with the following keys: ```KeyA```, ```KeyB```, ```KeyC```. If we want to get rid of ```KeyB```, we need to use this function in the following way: ```filterMap(path_to_extensions,"KeyB")``` |
+| filterMap(Map<String, String>) | Filters the message extensions map. Each mapping registers its own instance of this function that knows the field names to remove by exact match and the enrichment prefixes to remove by prefix match. The only argument is the map to filter. | For a mapping whose ```fields``` column transformation is ```filterMap(%s)``` with ```kafka_name``` set to ```extensions```, the generated SQL calls the per-mapping function, e.g. ```filterMap<source><table>(message.extensions)```. |
 
 ### Schema evolution
 

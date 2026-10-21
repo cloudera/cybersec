@@ -86,6 +86,15 @@ class TableApiAbstractJobTest {
                 "CREATE TEMPORARY VIEW  topic_tmpview( column1, column2 )  AS \n" +
                 " SELECT  ROW((message.extensions.column1), (message.extensions.column2)), (message.extensions.column3) \n" +
                 " from KafkaTempView\n" +
+                " where `source`='topic'"),
+          Arguments.of("topic",
+                new MappingDto("tableName", Collections.emptyList(), Arrays.asList(
+                      new MappingColumnDto("fields", "extensions", ".", "filterMap(%s)", false))),
+                ResolvedSchema.of(
+                      Column.physical("fields", DataTypes.MAP(DataTypes.STRING(), DataTypes.STRING()))),
+                "CREATE TEMPORARY VIEW  topic_tmpview( fields )  AS \n" +
+                " SELECT  filterMaptopictableName((message.extensions)) \n" +
+                " from KafkaTempView\n" +
                 " where `source`='topic'")
     );
   }

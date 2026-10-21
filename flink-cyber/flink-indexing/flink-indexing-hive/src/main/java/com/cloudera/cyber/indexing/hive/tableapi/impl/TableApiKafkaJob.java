@@ -9,6 +9,7 @@ import com.cloudera.cyber.indexing.hive.util.AvroSchemaUtil;
 import com.cloudera.cyber.indexing.hive.util.FlinkSchemaUtil;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
   protected void createInserts(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping,
                                Map<String, TableDto> tablesConfig, Map<String, MappingDto> unenrichedTopicMapping, Map<String, ResolvedSchema> tableSchemaMap) {
     topicMapping.forEach((source, mappingDto) -> {
+      registerFilterMapFunction(tableEnv, source, mappingDto, Collections.emptySet());
       final String insertSql = buildInsertSql(source, mappingDto, tableSchemaMap.get(mappingDto.getTableName()));
       try {
         //create view

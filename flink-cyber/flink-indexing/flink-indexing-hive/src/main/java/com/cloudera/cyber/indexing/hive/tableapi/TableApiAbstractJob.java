@@ -65,6 +65,8 @@ public abstract class TableApiAbstractJob {
   protected final ParameterTool params;
   protected final String connectorName;
   protected final FlinkSchemaUtil.SerializationFormat serializationFormat;
+  protected List<String> enrichmentPrefixes = Collections.emptyList();
+  protected Map<String, Set<String>> sourceToEnrichmentPrefixes = Collections.emptyMap();
 
   public TableApiAbstractJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source,
                              String connectorName, String baseTableJson, FlinkSchemaUtil.SerializationFormat serializationFormat) throws IOException {
@@ -109,8 +111,8 @@ public abstract class TableApiAbstractJob {
       ParameterTool triageParams = Utils.getParamToolsFromProperties(new String[]{triageConfigPath});
 
       System.out.println("Getting enrichment field prefixes...");
-      List<String> enrichmentPrefixes = EnrichmentConfiguration.getEnrichmentFieldPrefixes(triageParams);
-      Map<String, Set<String>> sourceToEnrichmentPrefixes = EnrichmentConfiguration.getSourceEnrichmentFieldPrefixes(triageParams);
+      enrichmentPrefixes = EnrichmentConfiguration.getEnrichmentFieldPrefixes(triageParams);
+      sourceToEnrichmentPrefixes = EnrichmentConfiguration.getSourceEnrichmentFieldPrefixes(triageParams);
       System.out.printf("Filtered field prefixes: %s\n", String.join(", ", enrichmentPrefixes));
       System.out.println("Filtered source field prefixes:");
       sourceToEnrichmentPrefixes.forEach((source, sourceFilteredPrefixes) -> System.out.printf("%s: %s\n", source, String.join(", ", sourceFilteredPrefixes)));
@@ -249,14 +251,37 @@ public abstract class TableApiAbstractJob {
       final StreamStatementSet insertStatementSet = tableEnv.createStatementSet();
 
       topicMapping.forEach((topic, mappingDto) -> {
+        registerFilterMapFunction(tableEnv, topic, mappingDto, Collections.emptySet());
         addInsertSqlStatement(tableSchemaMap, topic, mappingDto, insertStatementSet);
         Optional.ofNullable(unenrichedTopicMapping.get(topic))
-                .ifPresent(unenrichedDto -> addInsertSqlStatement(tableSchemaMap, topic, unenrichedDto, insertStatementSet));
+                .ifPresent(unenrichedDto -> {
+                  registerFilterMapFunction(tableEnv, topic, unenrichedDto, getFilterMapIgnorePrefixes(topic));
+                  addInsertSqlStatement(tableSchemaMap, topic, unenrichedDto, insertStatementSet);
+                });
       });
 
       System.out.println("Executing Insert statement list...");
       insertStatementSet.execute();
     }
+  }
+
+  protected void registerFilterMapFunction(StreamTableEnvironment tableEnv, String source, MappingDto mappingDto, Set<String> ignorePrefixes) {
+    tableEnv.createTemporarySystemFunction(getFilterMapFunctionName(source, mappingDto.getTableName()),
+        new FilterMapFunction(mappingDto.getIgnoreFields(), ignorePrefixes));
+  }
+
+  protected String getFilterMapFunctionName(String source, String destTableName) {
+    return String.format("filterMap%s%s", source, destTableName);
+  }
+
+  /**
+   * Prefixes of enrichment fields that must be stripped from the message extensions for the given source.
+   * Enriched tables keep the enrichment fields; only the derived unenriched tables drop them.
+   */
+  protected Set<String> getFilterMapIgnorePrefixes(String source) {
+    final Set<String> prefixes = new HashSet<>(enrichmentPrefixes);
+    prefixes.addAll(sourceToEnrichmentPrefixes.getOrDefault(source, Collections.emptySet()));
+    return prefixes;
   }
 
   private void addInsertSqlStatement(Map<String, ResolvedSchema> tableSchemaMap, String topic, MappingDto mappingDto, StreamStatementSet insertStatementSet) {
@@ -399,14 +424,13 @@ public abstract class TableApiAbstractJob {
     final HashMap<String, String> conf = new HashMap<>();
     conf.put("pipeline.name", params.get("flink.job.name", String.format("Indexing - %s TableApi", connectorName)));
     tableEnv.getConfig().addConfiguration(Configuration.fromMap(conf));
-    tableEnv.createTemporarySystemFunction("filterMap", FilterMapFunction.class);
   }
 
   protected final String buildInsertSql(String source, MappingDto mappingDto, ResolvedSchema tableSchema) {
     return String.join("\n",
         getInsertSqlPrefix() + " " + getTableName(source, mappingDto) + "(" + getInsertColumns(mappingDto) + ") "
                     + getInsertSqlSuffix(),
-            " SELECT " + getFromColumns(mappingDto, tableSchema),
+            " SELECT " + getFromColumns(source, mappingDto, tableSchema),
             " from " + KAFKA_TABLE,
             String.format(" where `source`='%s'", source));
   }
@@ -429,8 +453,9 @@ public abstract class TableApiAbstractJob {
         .collect(Collectors.joining(", ", " ", " "));
   }
 
-  private String getFromColumns(MappingDto mappingDto, ResolvedSchema tableSchema) {
+  private String getFromColumns(String source, MappingDto mappingDto, ResolvedSchema tableSchema) {
     System.out.println("Building from columns");
+    final String filterMapFunctionName = getFilterMapFunctionName(source, mappingDto.getTableName());
     return mappingDto.getColumnMapping().stream()
         .map(mappingColumnDto -> {
           final List<String> kafkaNameList = mappingColumnDto.getKafkaNameList();
@@ -452,15 +477,10 @@ public abstract class TableApiAbstractJob {
                                               }).collect(Collectors.toList());
 
           Optional<Column> column = tableSchema.getColumn(mappingColumnDto.getName());
-          final String transformation = column.map(value -> getTransformation(value.getDataType(), mappingColumnDto)).orElse("");
+          String transformation = column.map(value -> getTransformation(value.getDataType(), mappingColumnDto)).orElse("");
 
-          if (!CollectionUtils.isEmpty(mappingDto.getIgnoreFields())) {
-            String fieldsToIgnore = mappingDto.getIgnoreFields().stream()
-                                       .filter(StringUtils::hasText)
-                                       .collect(Collectors.joining("','", "'", "'"));
-            if (StringUtils.hasText(transformation)) {
-              fullPathList.add(fieldsToIgnore);
-            }
+          if (StringUtils.hasText(transformation)) {
+            transformation = transformation.replace("filterMap", filterMapFunctionName);
           }
 
           return StringUtils.hasText(transformation)
