@@ -68,6 +68,20 @@ public abstract class EnrichmentJob {
         FlinkUtils.setupEnv(env, params);
 
         SingleOutputStreamOperator<Message> messages = createSource(env, params);
+        DataStream<ScoredMessage> scoring = enrich(env, params, messages);
+
+        return writeResults(env, params, scoring);
+    }
+
+    /**
+     * Runs the full combined enrichment pipeline (geo, asn, company, cidr, local, hbase, rest, threatq,
+     * stellar and scoring) over the provided message stream.
+     *
+     * <p>Extracted from {@link #createPipeline(ParameterTool)} so that alternate message sources, such as
+     * the on demand enrichment job, can reuse the exact same enrichment behaviour.
+     */
+    protected DataStream<ScoredMessage> enrich(StreamExecutionEnvironment env, ParameterTool params,
+                                               SingleOutputStreamOperator<Message> messages) throws IOException {
         DataStream<EnrichmentCommand> enrichments = createEnrichmentSource(env, params);
 
         List<EnrichmentConfig> enrichmentConfigs = ConfigUtils.allConfigs(Files.readAllBytes(Paths.get(params.getRequired(PARAMS_LOOKUPS_CONFIG_FILE))));
@@ -138,8 +152,7 @@ public abstract class EnrichmentJob {
 
         DataStream<ScoredMessage> scoring = doScoring(ruled, env, params);
 
-        writeResults(env, params, scoring);
-        return env;
+        return scoring;
     }
 
     private DataStream<EnrichmentCommandResponse> writeHbaseThreatQEnrichmentsToHbaseAndRespond(ParameterTool params, StreamExecutionEnvironment env,
@@ -177,7 +190,14 @@ public abstract class EnrichmentJob {
 
     protected abstract SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
 
-    protected abstract void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<ScoredMessage> results);
+    /**
+     * Writes the enriched and scored results and returns the environment that the caller should execute.
+     *
+     * <p>A writer may instead return {@code null} to signal that it already triggered execution itself.
+     * The table api writers do this through their statement set, so the on demand job can hand the stream
+     * to the {@code flink-indexing-hive} indexer without the pipeline being submitted twice.
+     */
+    protected abstract StreamExecutionEnvironment writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<ScoredMessage> results);
 
     protected abstract DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
 

@@ -66,6 +66,12 @@
 			<destName>flink-enrichment-loading-${cybersec.full.version}.jar</destName>
 			<fileMode>0644</fileMode>
 		</file>
+		<file>
+			<source>../flink-enrichment/flink-enrichment-ondemand/target/flink-enrichment-ondemand-${project.version}.jar</source>
+			<outputDirectory>jobs/</outputDirectory>
+			<destName>flink-enrichment-ondemand-${cybersec.full.version}.jar</destName>
+			<fileMode>0644</fileMode>
+		</file>
 
 		<file>
 			<source>../flink-profiler-java/target/flink-profiler-java-${project.version}.jar</source>
@@ -169,6 +175,11 @@
 		<fileSet>
 			<directory>src/main/resources/conf/templates/triage</directory>
 			<outputDirectory>conf/templates/triage</outputDirectory>
+			<fileMode>0644</fileMode>
+		</fileSet>
+		<fileSet>
+			<directory>src/main/resources/conf/templates/ondemand</directory>
+			<outputDirectory>conf/templates/ondemand</outputDirectory>
 			<fileMode>0644</fileMode>
 		</fileSet>
 		<fileSet>

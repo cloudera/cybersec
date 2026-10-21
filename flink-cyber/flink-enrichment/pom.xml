@@ -32,6 +32,7 @@
         <module>flink-enrichment-rules</module>
         <module>flink-enrichment-lookup-common</module>
         <module>flink-enrichment-combined</module>
+        <module>flink-enrichment-ondemand</module>
         <module>flink-enrichment-geocode</module>
         <module>flink-enrichment-threatq</module>
         <module>flink-enrichment-load</module>
