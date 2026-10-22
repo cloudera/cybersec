@@ -83,6 +83,7 @@
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.0.0",
     "karma-spec-reporter": "^0.0.36",
+    "lint-staged": "13.2.3",
     "msw": "^1.2.5",
     "ng-mocks": "^14.12.1",
     "ts-node": "~8.3.0",
@@ -90,8 +91,11 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run lint"
+      "pre-commit": "npx lint-staged"
     }
+  },
+  "lint-staged": {
+    "src/**/*.{ts,html}": "eslint"
   },
   "msw": {
     "workerDirectory": "src"
