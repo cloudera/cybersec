@@ -18,7 +18,6 @@ import com.cloudera.cyber.indexing.hive.tableapi.TableApiJobFactory;
 import com.cloudera.cyber.scoring.ScoredMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -29,24 +28,18 @@ public abstract class HiveJob {
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
         FlinkUtils.setupEnv(env, params);
         // configure checkpoint directories now so the table env inherits the correct settings
         FlinkUtils.configureCheckpointDirectories(env, FlinkUtils.getJobName(DEFAULT_JOB_NAME, params));
 
         DataStream<ScoredMessage> source = createSource(env, params);
-        if (params.get("flink.writer", "").equalsIgnoreCase("TableAPI")) {
-            try {
-                final String connectorName = params.get("flink.output-connector", "hive");
-                final TableApiAbstractJob job = TableApiJobFactory.getJobByConnectorName(connectorName, params, env, source);
-                return job.startJob();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            final String connectorName = params.get("flink.output-connector", "hive");
+            final TableApiAbstractJob job = TableApiJobFactory.getJobByConnectorName(connectorName, params, env, source);
+            return job.startJob();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        source.addSink(new StreamingHiveSink(params)).name("Hive Streaming Indexer");
-
-        return env;
     }
 
     protected abstract SingleOutputStreamOperator<ScoredMessage> createSource(StreamExecutionEnvironment env, ParameterTool params);

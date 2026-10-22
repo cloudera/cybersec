@@ -1,9 +1,3 @@
-hive.catalog=hive
-hive.schema=cyber
-hive.table=events
-
-#flink.writer=tableapi
-
 #Uncomment one of the following lines in case flink.writer=tableapi is specified
 #flink.output-connector=hive
 #flink.output-connector=iceberg
@@ -14,13 +8,13 @@ hive.table=events
 #flink.files.path=hdfs:/path/to/files
 #flink.files.format=json
 
-#Uncomment following two lines in case flink.writer=tableapi is specified
-#flink.tables-init-file=PIPELINE/index/table-config.json
-#flink.mapping-file=PIPELINE/index/mapping-config.json
+flink.tables-init-file=PIPELINE/index/table-config.json
+flink.mapping-file=PIPELINE/index/mapping-config.json
 
+## database name and config files for hive and iceberg tables
+## below are the default values
+#hive.dbname=cyber
 #hive.confdir=/etc/hive/conf/
-
-#hive.transaction.messages=500
 
 kafka.group.id=BRANCH.PIPELINE.index
 

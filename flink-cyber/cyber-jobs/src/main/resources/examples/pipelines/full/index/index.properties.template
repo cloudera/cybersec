@@ -1,20 +1,13 @@
-hive.catalog=hive
-hive.schema=cyber
-hive.table=events
-
-flink.writer=tableapi
-
-#Uncomment one of the following lines in case flink.writer=tableapi is specified
 flink.output-connector=iceberg
 #flink.output-connector=kafka
 
-#Uncomment following two lines in case flink.writer=tableapi is specified
+# Specify tables to be written
 flink.tables-init-file=full/index/table-config.json
+# Specify mappings and transformations from message extension to database column
 flink.mapping-file=full/index/mapping-config.json
 
+#hive.dbname=cyber
 #hive.confdir=/etc/hive/conf/
-
-#hive.transaction.messages=500
 
 kafka.group.id=BRANCH.full.index
 
