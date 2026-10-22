@@ -37,7 +37,7 @@
   {
     "name": "fields",
     "kafka_name": "extensions",
-    "transformation": "filterMap(%s, %s)",
+    "transformation": "filterMap(%s)",
     "path": "."
   }
 ]

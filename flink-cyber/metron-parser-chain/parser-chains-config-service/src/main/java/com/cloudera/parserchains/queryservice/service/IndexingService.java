@@ -2,6 +2,7 @@ package com.cloudera.parserchains.queryservice.service;
 
 import com.cloudera.cyber.indexing.MappingDto;
 import com.cloudera.cyber.indexing.TableColumnDto;
+import com.cloudera.cyber.indexing.TableDto;
 import com.cloudera.parserchains.core.utils.JSONUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -29,8 +30,8 @@ public class IndexingService {
     }
 
     public Object getTableConfigFromPath(String path) throws IOException {
-        final JSONUtils.ReferenceSupplier<Map<String, List<TableColumnDto>>> ref =
-              new JSONUtils.ReferenceSupplier<Map<String, List<TableColumnDto>>>() {
+        final JSONUtils.ReferenceSupplier<Map<String, TableDto>> ref =
+              new JSONUtils.ReferenceSupplier<Map<String, TableDto>>() {
               };
         return getDataMap(path, ref, Map.class);
     }

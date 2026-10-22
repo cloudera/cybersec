@@ -1,0 +1,6 @@
+{
+  "bad_syntax": [
+    {
+      "name": "this is an error",
+      "type": "string"
+    },

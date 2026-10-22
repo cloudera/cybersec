@@ -16,6 +16,7 @@ import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.Message;
 import com.cloudera.cyber.TestUtils;
 import com.cloudera.cyber.enrichment.Enrichment;
+import com.cloudera.cyber.enrichment.EnrichmentFeature;
 import com.cloudera.cyber.enrichment.cidr.impl.IpRegionCidrEnrichment;
 import com.cloudera.cyber.enrichment.cidr.impl.types.RegionCidrEnrichmentConfiguration;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -58,7 +59,7 @@ public class IpRegionCidrMapTest {
     public void testIpMappedSuccessfully() throws Exception {
         Map<String, String> inputFields = new HashMap<>();
         inputFields.put(SINGLE_IP_FIELD_NAME, IpRegionCidrTestData.IPV4_10_ADDRESS);
-        String key = SINGLE_IP_FIELD_NAME + Enrichment.DELIMITER + IpRegionCidrEnrichment.FEATURE_NAME;
+        String key = SINGLE_IP_FIELD_NAME + Enrichment.DELIMITER + EnrichmentFeature.IP_REGION_CIDR_FEATURE_NAME;
 
 
         doAnswer(invocationOnMock -> {

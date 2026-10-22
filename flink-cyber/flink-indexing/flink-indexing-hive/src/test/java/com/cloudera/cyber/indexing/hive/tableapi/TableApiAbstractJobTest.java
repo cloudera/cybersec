@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
+
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.catalog.Column;
 import org.apache.flink.table.catalog.ResolvedSchema;
@@ -85,6 +86,15 @@ class TableApiAbstractJobTest {
                 "CREATE TEMPORARY VIEW  topic_tmpview( column1, column2 )  AS \n" +
                 " SELECT  ROW((message.extensions.column1), (message.extensions.column2)), (message.extensions.column3) \n" +
                 " from KafkaTempView\n" +
+                " where `source`='topic'"),
+          Arguments.of("topic",
+                new MappingDto("tableName", Collections.emptyList(), Arrays.asList(
+                      new MappingColumnDto("fields", "extensions", ".", "filterMap(%s)", false))),
+                ResolvedSchema.of(
+                      Column.physical("fields", DataTypes.MAP(DataTypes.STRING(), DataTypes.STRING()))),
+                "CREATE TEMPORARY VIEW  topic_tmpview( fields )  AS \n" +
+                " SELECT  filterMaptopictableName((message.extensions)) \n" +
+                " from KafkaTempView\n" +
                 " where `source`='topic'")
     );
   }
@@ -105,7 +115,7 @@ class TableApiAbstractJobTest {
 
         Arguments.of(Collections.singletonMap(GIVEN_TABLE_NAME, ResolvedSchema.of()),
             Collections.singletonMap(GIVEN_SOURCE,
-                new MappingDto(GIVEN_TABLE_NAME, new ArrayList<>(), Arrays.asList(
+                new MappingDto(GIVEN_TABLE_NAME,  new ArrayList<>(), Arrays.asList(
                     new MappingColumnDto(" ", null, null, null, false),
                     new MappingColumnDto("someName", null, null, null, false)))),
             RuntimeException.class,

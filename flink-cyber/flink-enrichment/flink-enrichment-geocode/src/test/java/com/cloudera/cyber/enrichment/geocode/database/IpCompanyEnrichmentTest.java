@@ -2,6 +2,7 @@ package com.cloudera.cyber.enrichment.geocode.database;
 
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
+import com.cloudera.cyber.enrichment.EnrichmentFeature;
 import com.cloudera.cyber.enrichment.SingleValueEnrichment;
 import com.cloudera.cyber.enrichment.geocode.IpCompanyTestData;
 import com.cloudera.cyber.enrichment.geocode.IpGeoTestData;
@@ -82,7 +83,7 @@ public class IpCompanyEnrichmentTest {
         DataQualityMessage infoMessage = messages.get(0);
         Assertions.assertEquals(DataQualityMessageLevel.INFO.name(), infoMessage.getLevel());
         Assertions.assertEquals(String.format(IpGeoEnrichment.FIELD_VALUE_IS_NOT_A_VALID_IP_ADDRESS, IpGeoTestData.UNKNOWN_HOST_IP), infoMessage.getMessage());
-        Assertions.assertEquals(IpCompanyEnrichment.COMPANY_FEATURE, infoMessage.getFeature());
+        Assertions.assertEquals(EnrichmentFeature.COMPANY_FEATURE, infoMessage.getFeature());
         Assertions.assertEquals(TEST_ENRICHMENT_FIELD_NAME, infoMessage.getField());
     }
 
@@ -191,6 +192,6 @@ public class IpCompanyEnrichmentTest {
         ipCompanyEnrichment.lookup(TEST_ENRICHMENT_FIELD_NAME, IpGeoTestData.UNKNOWN_HOST_IP, extensions, messages);
         
         Assertions.assertFalse(messages.isEmpty());
-        Assertions.assertEquals(IpCompanyEnrichment.COMPANY_FEATURE, messages.get(0).getFeature());
+        Assertions.assertEquals(EnrichmentFeature.COMPANY_FEATURE, messages.get(0).getFeature());
     }
 }

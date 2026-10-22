@@ -15,6 +15,7 @@ package com.cloudera.cyber.enrichment.geocode.database;
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
 import com.cloudera.cyber.enrichment.Enrichment;
+import com.cloudera.cyber.enrichment.EnrichmentFeature;
 import com.cloudera.cyber.enrichment.SingleValueEnrichment;
 import com.cloudera.cyber.enrichment.geocode.database.types.GeoFields;
 import com.cloudera.cyber.enrichment.geocode.database.types.geo.GeoDatabase;
@@ -36,7 +37,6 @@ import java.util.stream.Stream;
  */
 public class IpGeoEnrichment extends IpEnrichment {
 
-    public static final String GEOCODE_FEATURE = "geo";
     public static final String GEOCODE_FAILED_MESSAGE = "Geocode failed '%s'";
     GeoDatabase database;
 
@@ -73,11 +73,11 @@ public class IpGeoEnrichment extends IpEnrichment {
 
     public void lookup(BiFunction<String, String, Enrichment> enrichmentBiFunction, String fieldName, Object ipFieldValue, GeoFields[] geoFieldSet, Map<String, String> geoEnrichments, List<DataQualityMessage> qualityMessages) {
         if (ipFieldValue instanceof Collection) {
-            Enrichment enrichment = enrichmentBiFunction.apply(fieldName, GEOCODE_FEATURE);
+            Enrichment enrichment = enrichmentBiFunction.apply(fieldName, EnrichmentFeature.GEOCODE_FEATURE);
             //noinspection unchecked
             ((Collection<Object>) ipFieldValue).forEach(ip -> lookup(enrichment, GeoFields::getPluralName, ip, geoFieldSet, geoEnrichments, qualityMessages));
         } else if (ipFieldValue != null) {
-            lookup(enrichmentBiFunction.apply(fieldName, GEOCODE_FEATURE), GeoFields::getSingularName, ipFieldValue, geoFieldSet, geoEnrichments, qualityMessages);
+            lookup(enrichmentBiFunction.apply(fieldName, EnrichmentFeature.GEOCODE_FEATURE), GeoFields::getSingularName, ipFieldValue, geoFieldSet, geoEnrichments, qualityMessages);
         }
     }
 

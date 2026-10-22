@@ -1,0 +1,15 @@
+{
+  "examples_full_events": {
+    "unenriched_table_name": "examples_full_events_raw",
+    "columns": [
+      {
+        "name": "domain",
+        "type": "string"
+      },
+      {
+        "name": "domain_second_level",
+        "type": "string"
+      }
+    ]
+  }
+}

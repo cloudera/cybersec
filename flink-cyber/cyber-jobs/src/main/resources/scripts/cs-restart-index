@@ -50,6 +50,9 @@ echo "# GENERATED FILE - EDITS WILL BE OVERWRITTEN - EDIT index.properties.templ
 sed -e s/BRANCH/$branch/g $pipeline/index/index.properties.template >> "$generated_index_props"
 job_name=${branch}.${pipeline}.index
 
+generated_triage_props=$generated_dir/triage.properties
+prepare_triage_properties $pipeline $pipeline/triage/triage.properties.template $generated_triage_props
+
 ship_configs=()
 local_hive_conf_dir="hive-conf"
 if [ -d "$local_hive_conf_dir" ]; then

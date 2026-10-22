@@ -14,6 +14,7 @@ package com.cloudera.cyber.enrichment.geocode.database;
 
 import com.cloudera.cyber.DataQualityMessage;
 import com.cloudera.cyber.DataQualityMessageLevel;
+import com.cloudera.cyber.enrichment.EnrichmentFeature;
 import com.cloudera.cyber.enrichment.geocode.IpGeoTestData;
 import com.cloudera.cyber.enrichment.geocode.database.types.GeoEnrichmentFields;
 import org.junit.jupiter.api.Assertions;
@@ -95,7 +96,7 @@ public class IpGeoEnrichmentTest {
         if (messageText != null) {
             dataQualityMessages.add(DataQualityMessage.builder()
                     .level(level.name())
-                    .feature(IpGeoEnrichment.GEOCODE_FEATURE)
+                    .feature(EnrichmentFeature.GEOCODE_FEATURE)
                     .field(IpGeoEnrichmentTest.TEST_ENRICHMENT_FIELD_NAME)
                     .message(messageText).build());
         }
