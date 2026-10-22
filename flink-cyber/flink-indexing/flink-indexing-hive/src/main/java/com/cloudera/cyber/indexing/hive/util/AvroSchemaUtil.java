@@ -2,6 +2,7 @@ package com.cloudera.cyber.indexing.hive.util;
 
 import com.cloudera.cyber.avro.AvroSchemas;
 import com.cloudera.cyber.indexing.TableColumnDto;
+import com.cloudera.cyber.indexing.hive.FilterMapFunction;
 import org.apache.avro.LogicalTypes;
 import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
@@ -19,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class AvroSchemaUtil {
 
@@ -39,7 +39,7 @@ public final class AvroSchemaUtil {
         return fieldAssembler.endRecord();
     }
 
-    public static void putRowIntoAvro(Row row, GenericRecord record, String fieldName, Set<String> mapKeyFilter) {
+    public static void putRowIntoAvro(Row row, GenericRecord record, String fieldName, FilterMapFunction prefixFilter) {
         Object value;
         final String avroFieldName = fieldName.toLowerCase();
         Schema.Field avroRecordField = record.getSchema().getField(avroFieldName);
@@ -53,10 +53,8 @@ public final class AvroSchemaUtil {
             } else {
                 try {
                     value = convertToAvroObject(avroRecordField.schema(), row.getField(fieldName));
-                    if (value instanceof Map<?, ?> mapToFilter && mapKeyFilter != null) {
-                        value = mapToFilter.entrySet().stream().
-                                filter(entry -> !mapKeyFilter.contains((String)entry.getKey())).
-                                collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    if (value instanceof Map<?, ?> mapToFilter && prefixFilter != null) {
+                        value = prefixFilter.eval((Map<String, String>) mapToFilter);
                     }
                 } catch (Exception e) {
                     throw new RuntimeException(String.format("Error converting avro field %s", avroFieldName), e);
@@ -102,7 +100,7 @@ public final class AvroSchemaUtil {
             //[null, map<>]
             final Schema valueSchema = fieldSchema.getTypes().get(1).getValueType();
             final Map<String, Object> avroMap = new HashMap<>();
-            for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) value).entrySet()) {
+            for (Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet()) {
                 avroMap.put(String.valueOf(entry.getKey()), convertToAvroObject(valueSchema, entry.getValue()));
             }
             return avroMap;

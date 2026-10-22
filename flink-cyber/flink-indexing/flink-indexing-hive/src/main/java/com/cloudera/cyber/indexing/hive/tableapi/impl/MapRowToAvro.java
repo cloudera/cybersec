@@ -1,5 +1,6 @@
 package com.cloudera.cyber.indexing.hive.tableapi.impl;
 
+import com.cloudera.cyber.indexing.hive.FilterMapFunction;
 import com.cloudera.cyber.indexing.hive.util.AvroSchemaUtil;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -10,17 +11,22 @@ import org.apache.flink.api.java.typeutils.ResultTypeQueryable;
 import org.apache.flink.formats.avro.typeutils.GenericRecordAvroTypeInfo;
 import org.apache.flink.types.Row;
 
+import java.util.Collections;
 import java.util.Set;
 
 public class MapRowToAvro implements ResultTypeQueryable<GenericRecord>, MapFunction<Row, GenericRecord> {
     private final GenericRecordAvroTypeInfo producedType;
     private final Schema schema;
-    private final Set<String> fieldsFilter;
+    private final FilterMapFunction prefixFilter;
 
-    public MapRowToAvro(String schemaString, Set<String> fieldsFilter) {
+    public MapRowToAvro(String schemaString, Set<String> filterPrefixes) {
         this.schema = new Schema.Parser().parse(schemaString);
         this.producedType = new GenericRecordAvroTypeInfo(schema);
-        this.fieldsFilter = fieldsFilter;
+        if (filterPrefixes == null) {
+            this.prefixFilter = null;
+        } else {
+            this.prefixFilter = new FilterMapFunction(Collections.emptySet(), filterPrefixes);
+        }
     }
 
     @Override
@@ -36,7 +42,7 @@ public class MapRowToAvro implements ResultTypeQueryable<GenericRecord>, MapFunc
             for (String fieldName : fieldNames) {
                 if (fieldName.equals("fields")) {
                     // filter out enrichment fields from unenriched tables
-                    AvroSchemaUtil.putRowIntoAvro(row, record, fieldName, fieldsFilter);
+                    AvroSchemaUtil.putRowIntoAvro(row, record, fieldName, prefixFilter);
                 } else {
                     AvroSchemaUtil.putRowIntoAvro(row, record, fieldName, null);
                 }

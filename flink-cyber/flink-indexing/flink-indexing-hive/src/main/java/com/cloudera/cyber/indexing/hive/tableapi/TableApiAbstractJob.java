@@ -129,7 +129,6 @@ public abstract class TableApiAbstractJob {
     setConnectorDialect(tableEnv);
 
     final Map<String, ResolvedSchema> tableSchemaMap = createTables(tableEnv, tablesConfig);
-    System.out.printf("Tables Schema map %s\n", tableSchemaMap.toString());
 
     System.out.println("Validating output tables mappings...");
     validateMappings(tableSchemaMap, topicMapping);
@@ -266,12 +265,20 @@ public abstract class TableApiAbstractJob {
   }
 
   protected void registerFilterMapFunction(StreamTableEnvironment tableEnv, String source, MappingDto mappingDto, Set<String> ignorePrefixes) {
-    tableEnv.createTemporarySystemFunction(getFilterMapFunctionName(source, mappingDto.getTableName()),
+    String filterMapFunctionName = getFilterMapFunctionName(source, mappingDto.getTableName());
+    Set<String> ignoreFields = mappingDto.getIgnoreFields();
+    System.out.printf("Registering %s\n", filterMapFunctionName);
+    System.out.printf("Ignoring fields %s\n", ignoreFields);
+    System.out.printf("Ignore prefixes %s\n", ignorePrefixes);
+
+    tableEnv.createTemporarySystemFunction(filterMapFunctionName,
         new FilterMapFunction(mappingDto.getIgnoreFields(), ignorePrefixes));
   }
 
   protected String getFilterMapFunctionName(String source, String destTableName) {
-    return String.format("filterMap%s%s", source, destTableName);
+    // create a unique filter for this source and destination Table.  Replace any special characters that
+    // are not legal in a function name with an underscore.  Prevents failures from invalid sql.
+    return String.format("filterMap%s%s", source, destTableName).replaceAll("[^a-zA-Z0-9_]", "");
   }
 
   /**
@@ -326,7 +333,6 @@ public abstract class TableApiAbstractJob {
 
   protected ResolvedSchema createTable(StreamTableEnvironment tableEnv, String tableName,
                                        List<TableColumnDto> columnList) {
-    System.out.printf("Creating %s table %s...%n", connectorName, tableName);
     final ResolvedSchema resolvedSchema = FlinkSchemaUtil.getResolvedSchema(columnList, serializationFormat);
     final Schema schema = FlinkSchemaUtil.buildSchema(resolvedSchema);
     final TableDescriptor tableDescriptor = buildTableDescriptor(schema);

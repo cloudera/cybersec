@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.flink.api.java.utils.ParameterTool;
@@ -57,7 +58,7 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
 
         outputViewToKafka(tablesConfig, mappingDto, tableStream, mappingDto.getTableName());
         Optional.ofNullable(unenrichedTopicMapping.get(source))
-                .ifPresent(unenrichedDto -> outputViewToKafka(tablesConfig, unenrichedDto, tableStream, unenrichedDto.getTableName()));
+                .ifPresent(unenrichedDto -> outputViewToKafka(tablesConfig, unenrichedDto, tableStream, unenrichedDto.getTableName(), getFilterMapIgnorePrefixes(source)));
 
         System.out.printf("Insert SQL added to the queue for the table: %s%nSQL: %s%n", mappingDto.getTableName(),
             insertSql);
@@ -68,15 +69,20 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
     });
   }
 
-  private void outputViewToKafka(Map<String, TableDto> tablesConfig, MappingDto mappingDto, DataStream<Row> tableStream, String topicName) {
+  private void outputViewToKafka(Map<String, TableDto> tablesConfig, MappingDto mappingDto, DataStream<Row> tableStream, String topicName){
+    outputViewToKafka(tablesConfig, mappingDto, tableStream, topicName, null);
+  }
+
+  private void outputViewToKafka(Map<String, TableDto> tablesConfig, MappingDto mappingDto, DataStream<Row> tableStream, String topicName, Set<String> filterPrefixes) {
     final String schemaString = AvroSchemaUtil.convertToAvro(tablesConfig.get(mappingDto.getTableName()).getColumns())
         .toString();
 
-    System.out.printf("Writing to topic %s\n", topicName);
-    System.out.printf("Schema %s\n\n", schemaString);
-    System.out.printf("Filtered Fields %s\n\n", mappingDto.getIgnoreFields());
+    System.out.printf("\nOutputting to topic: %s\n", topicName);
+    System.out.printf("Schema: %s\n\n", schemaString);
+    System.out.printf("Filtered Fields: %s\n", mappingDto.getIgnoreFields());
+    System.out.printf("Filtered Prefixes: %s\n", filterPrefixes != null ? filterPrefixes : "none");
 
-    final DataStream<GenericRecord> stream = tableStream.map(new MapRowToAvro(schemaString, mappingDto.getIgnoreFields()));
+    final DataStream<GenericRecord> stream = tableStream.map(new MapRowToAvro(schemaString, filterPrefixes));
     final KafkaSink<GenericRecord> kafkaSink = new FlinkUtils<>(GenericRecord.class).createKafkaSink(
             topicName, "indexing-job", params);
     stream.sinkTo(kafkaSink);
