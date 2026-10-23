@@ -1,0 +1,61 @@
+geo.enabled=true
+geo.ip_fields=ip_src_addr,ip_dst_addr
+# default location is set with cloudera manager
+#geo.database_path=hdfs:/path/to/GeoLite2-City.mmdb
+
+asn.enabled=true
+asn.ip_fields=ip_src_addr,ip_dst_addr
+# default location is set with cloudera manager
+#asn.database_path=hdfs:/path/to/GeoLite2-ASN.mmdb
+
+cidr.enabled=false
+cidr.ip_fields=ip_src_addr,ip_dst_addr
+cidr.config_file_path=PIPELINE/triage/enrichments-cidr.json
+
+lookups.config.file=PIPELINE/triage/enrichments-lookups.json
+
+hbase.enabled=false
+enrichments.config=generated/PIPELINE/triage/enrichments-storage.json
+
+rest.enabled=false
+rest.config.file=generated/PIPELINE/triage/enrichments-rest.json
+
+threatq.enabled=false
+threatq.config.file=PIPELINE/triage/enrichments-threatq.json
+
+stellar.enabled=false
+stellar.config.dir=PIPELINE/triage/stellar
+
+rules.enabled=false
+
+# The combined enrichment reads its enrichment commands and scoring rules from these topics.
+kafka.group.id=BRANCH.PIPELINE.ondemand
+enrichment.topic.input=BRANCH.PIPELINE.enrichments.input
+enrichment.topic.query.output=BRANCH.PIPELINE.enrichments.output
+query.input.topic=BRANCH.PIPELINE.scoring.input
+query.output.topic=BRANCH.PIPELINE.scoring.output
+threatq.topic.input=BRANCH.PIPELINE.threatq.input
+
+# The log events to re-enrich.
+logevents.table=cyber.events
+logevents.ts-column=ts
+logevents.source-column=source
+# Inclusive range, as epoch milliseconds.
+logevents.start-ts=0
+logevents.end-ts=0
+logevents.sources=squid
+
+# Write the enriched events back through the Hive TableApi indexer.
+flink.writer=tableapi
+flink.output-connector=hive
+flink.tables-init-file=PIPELINE/index/table-config.json
+flink.mapping-file=PIPELINE/index/mapping-config.json
+
+hive.catalog=hive
+hive.schema=cyber
+hive.table=events
+#hive.confdir=/etc/hive/conf/
+
+parallelism=1
+checkpoint.interval.ms=60000
+flink.job.name=BRANCH.PIPELINE.ondemand

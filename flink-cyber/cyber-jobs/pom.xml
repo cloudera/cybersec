@@ -69,6 +69,12 @@
         </dependency>
         <dependency>
             <groupId>com.cloudera.cyber</groupId>
+            <artifactId>flink-enrichment-ondemand</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.cloudera.cyber</groupId>
             <artifactId>flink-profiler-java</artifactId>
             <version>${project.parent.version}</version>
             <scope>provided</scope>

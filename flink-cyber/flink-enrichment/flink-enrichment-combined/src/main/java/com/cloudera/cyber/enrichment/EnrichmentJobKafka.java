@@ -53,9 +53,10 @@ public class EnrichmentJobKafka extends EnrichmentJob {
     }
 
     @Override
-    protected void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<ScoredMessage> reduction) {
+    protected StreamExecutionEnvironment writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<ScoredMessage> reduction) {
         reduction.sinkTo(new FlinkUtils<>(ScoredMessage.class).createKafkaSink(params.getRequired(PARAMS_TOPIC_OUTPUT), "enrichments-combined", params))
                 .name("Kafka Triaging Scored Sink").uid("kafka-sink");
+        return env;
     }
 
     @Override
