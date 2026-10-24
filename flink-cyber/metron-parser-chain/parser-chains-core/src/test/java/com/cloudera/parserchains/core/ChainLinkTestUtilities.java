@@ -22,7 +22,7 @@ public class ChainLinkTestUtilities {
      * @param mockParser The mock parser.
      */
     public static Parser makeEchoParser(Parser mockParser) {
-        when(mockParser.parse(any()))
+        when(mockParser.parse(any(), any()))
                 .thenAnswer(i -> i.getArguments()[0]);
         return mockParser;
     }
@@ -32,7 +32,7 @@ public class ChainLinkTestUtilities {
      * @param mockParser The mock parser
      */
     public static Parser makeErrorParser(Parser mockParser) {
-        when(mockParser.parse(any(Message.class)))
+        when(mockParser.parse(any(Message.class), any()))
                 .thenAnswer(i -> {
                     Message input = (Message) i.getArguments()[0];
                     return Message.builder()
@@ -50,7 +50,7 @@ public class ChainLinkTestUtilities {
      * @param fieldValue The value of the field.
      */
     public static Parser makeParser(Parser mockParser, String fieldName, String fieldValue) {
-        when(mockParser.parse(any(Message.class)))
+        when(mockParser.parse(any(Message.class), any()))
                 .thenAnswer(i -> {
                     Message input = (Message) i.getArguments()[0];
                     return Message.builder()

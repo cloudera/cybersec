@@ -1,10 +1,8 @@
 package com.cloudera.parserchains.parsers;
 
-import com.cloudera.parserchains.core.Parser;
-
 import java.nio.charset.StandardCharsets;
 
-public abstract class AbstractTextInputParser implements Parser {
+public abstract class AbstractTextInputParser extends AbstractParser {
     @Override
     public byte[] getTestBytes(String testTextToParse) {
         if (testTextToParse == null) {

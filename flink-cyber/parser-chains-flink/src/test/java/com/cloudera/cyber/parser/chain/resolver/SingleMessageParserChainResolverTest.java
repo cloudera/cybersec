@@ -24,7 +24,7 @@ public class SingleMessageParserChainResolverTest {
         MessageToParse messageToParse = SingleMessageParserTestUtil.createGoodMessage( expectedTimestamp, expectedExtensions);
 
         ParserTestUtils.TestParserOutput testParserOutput = new ParserTestUtils.TestParserOutput();
-        resolver.parse(messageToParse, testParserOutput);
+        resolver.parse(messageToParse, null, testParserOutput);
 
         // check the extracted fields to make sure the message was routed to the right parser
         SingleMessageParserTestUtil.verifySuccessfulParserOutput(testParserOutput, messageToParse, expectedTimestamp, "simple", expectedExtensions, SingleMessageParser.EMPTY_SIGNATURE);

@@ -40,7 +40,7 @@ public class SerializationTests {
 
     @Test
     public void testThreatIntelligence() throws IOException {
-        Map<String, String> map = new HashMap<String, String>() {{
+        Map<String, String> map = new HashMap<>() {{
             put("a", "a");
             put("b", "b");
         }};
@@ -53,7 +53,7 @@ public class SerializationTests {
 
     @Test
     public void testEnrichmentEntry() throws IOException {
-        Map<String, String> map = new HashMap<String, String>() {{
+        Map<String, String> map = new HashMap<>() {{
             put("a", "a");
             put("b", "b");
         }};
@@ -68,7 +68,7 @@ public class SerializationTests {
     }
 
     {
-        Map<String, String> map = new HashMap<String, String>() {{
+        Map<String, String> map = new HashMap<>() {{
             put("a", "a");
             put("b", "b");
         }};

@@ -56,7 +56,7 @@ public class RouterLinkTest {
                 .withInputField(FieldName.of("tag"))
                 .withRoute(Regex.of("route1"), route1)
                 .withRoute(Regex.of("route2"), route2);
-        List<Message> results = routerLink.process(input);
+        List<Message> results = routerLink.process(input, null);
 
         // validate
         Message expectedRoute1 = Message.builder()
@@ -82,7 +82,7 @@ public class RouterLinkTest {
                 .withInputField(FieldName.of("tag"))
                 .withRoute(Regex.of("route1"), route1)
                 .withRoute(Regex.of("route2"), route2);
-        List<Message> results = routerLink.process(input);
+        List<Message> results = routerLink.process(input, null);
 
         // validate
         assertThat("Expected 0 results since there is no valid route to take.",
@@ -106,7 +106,7 @@ public class RouterLinkTest {
                 .withRoute(Regex.of("route1"), route1)
                 .withRoute(Regex.of("route2"), route2);
         routerLink.setNext(nextLink);
-        List<Message> results = routerLink.process(input);
+        List<Message> results = routerLink.process(input, null);
 
         // validate
         Message expectedRoute1 = Message.builder()
@@ -143,7 +143,7 @@ public class RouterLinkTest {
                 .withRoute(Regex.of("route1"), route1)
                 .withRoute(Regex.of("route2"), route2);
         routerLink.setNext(new NextChainLink(makeEchoParser(parser3), linkName3));
-        List<Message> results = routerLink.process(input);
+        List<Message> results = routerLink.process(input, null);
 
         // validate
         Message expectedNext = Message.builder()
@@ -170,7 +170,7 @@ public class RouterLinkTest {
                 .withInputField(FieldName.of("tag"))
                 .withRoute(Regex.of("route1"), route1);
         routerLink.setNext(new NextChainLink(makeEchoParser(parser2), linkName2));
-        List<Message> results = routerLink.process(input);
+        List<Message> results = routerLink.process(input, null);
 
         // validate
         assertThat("Expected 1 result showing the error caused by the route taken. " +
@@ -193,7 +193,7 @@ public class RouterLinkTest {
                 .withRoute(Regex.of("route1"), route1)
                 .withRoute(Regex.of("route2"), route2)
                 .withDefault(route3);
-        List<Message> results = routerLink.process(input);
+        List<Message> results = routerLink.process(input, null);
 
         // validate
         Message expectedDefaultRoute = Message.builder()
@@ -222,14 +222,14 @@ public class RouterLinkTest {
                 .withDefault(route3);
 
         // validate
-        Assertions.assertThrows(IllegalStateException.class, () -> routerLink.process(input),
+        Assertions.assertThrows(IllegalStateException.class, () -> routerLink.process(input, null),
                 "Expected an exception since the input field was not defined.");
     }
 
     @Test
     void parserReturnsNull() {
         // the mock 'parser1' will return a null message
-        when(parser1.parse(any())).thenReturn(null);
+        when(parser1.parse(any(), any())).thenReturn(null);
         ChainLink route1 = new NextChainLink(parser1, linkName1);
         Message input = Message.builder()
                 .addField(FieldName.of("tag"), StringFieldValue.of("route1"))
@@ -240,7 +240,7 @@ public class RouterLinkTest {
                 .withRoute(Regex.of("route1"), route1);
 
         // validate
-        assertThrows(NullPointerException.class, () -> routerLink.process(input),
+        assertThrows(NullPointerException.class, () -> routerLink.process(input, null),
                 "Expected an exception because the parser returns a null message.");
     }
 }

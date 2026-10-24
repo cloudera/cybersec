@@ -53,7 +53,7 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
 
     private transient Meter messageMeter;
     private transient CachedPatternResolver<ParserChainResolver> topicToParserResolver;
-    private final OutputTag<Message> errorOutputTag = new OutputTag<Message>(ParserJob.ERROR_MESSAGE_SIDE_OUTPUT){};
+    private final OutputTag<Message> errorOutputTag = new OutputTag<>(ParserJob.ERROR_MESSAGE_SIDE_OUTPUT){};
     private transient SingleMessageParser singleMessageParser;
 
     @EqualsAndHashCode(callSuper = true)
@@ -114,7 +114,7 @@ public class ChainParserMapFunction extends ProcessFunction<MessageToParse, Mess
     public void processElement(MessageToParse message, Context context, Collector<Message> collector) {
         final String topic = message.getTopic();
         ParserChainResolver parserForTopic = topicToParserResolver.match(topic, t -> new SingleMessageParserChainResolver(new TopicParserConfig(topic, topic, null, null), singleMessageParser));
-        parserForTopic.parse(message, new ParserOutput(errorOutputTag, context, collector));
+        parserForTopic.parse(message, null, new ParserOutput(errorOutputTag, context, collector));
 
         messageMeter.markEvent();
     }

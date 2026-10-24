@@ -20,7 +20,7 @@ public class MessageFileParserChainResolverTest {
         MessageFileParserChainResolver testChainResolver = new MessageFileParserChainResolver(topicMap.get("test_topic"), parser);
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse("message_file/vpc_flow_samples.txt");
-        testChainResolver.parse(messageToParse, parserOutput);
+        testChainResolver.parse(messageToParse, null, parserOutput);
         MessageFileParserTestUtil.verifyMessageFileOutput(parserOutput.getOutput(), messageToParse);
     }
 
@@ -32,7 +32,7 @@ public class MessageFileParserChainResolverTest {
         ParserTestUtils.TestParserOutput parserOutput = new ParserTestUtils.TestParserOutput();
         String fileToParse = "doesnt_match";
         MessageToParse messageToParse = MessageFileParserTestUtil.createMessageToParse(fileToParse);
-        testChainResolver.parse(messageToParse, parserOutput);
+        testChainResolver.parse(messageToParse, null, parserOutput);
         MessageFileParserTestUtil.verifyErrorMessage(parserOutput, messageToParse, fileToParse, MessageFileParser.UNMATCHED_FILE_SOURCE, MessageFileParser.FILE_PATH_DID_NOT_MATCH_ANY_SPECIFIED_PATTERNS,  EMPTY_SIGNATURE);
     }
 

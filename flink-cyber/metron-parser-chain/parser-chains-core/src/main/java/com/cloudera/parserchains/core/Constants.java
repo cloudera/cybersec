@@ -19,6 +19,7 @@ public class Constants {
      */
     public static final String DEFAULT_INPUT_FIELD = "original_string";
     public static final String DEFAULT_ORIGINAL_FILE_LINE_FIELD = "original_file_line";
+    public static final String METADATA_PREFIX = "_metadata.";
 
     private Constants() {
         // do not use
