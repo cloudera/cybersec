@@ -21,16 +21,21 @@ import java.util.stream.Collectors;
 
 public class TableApiIcebergJob extends TableApiAbstractJob {
 
-    private static final String BASE_TABLE_JSON = "base-hive-table.json";
+    public static final String BASE_TABLE_JSON = "base-hive-table.json";
+    public static final String DATABASE_PARAM_KEY = "hive.dbname";
 
     public TableApiIcebergJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source) throws IOException {
         super(params, env, source, "Iceberg", BASE_TABLE_JSON, FlinkSchemaUtil.SerializationFormat.ICEBERG );
     }
 
+    public static String getDatabase(ParameterTool params) {
+        return params.get(DATABASE_PARAM_KEY, "cyber");
+    }
+
     @Override
     protected void registerCatalog(StreamTableEnvironment tableEnv) {
         String catalogName = "iceberg";
-        String defaultDatabase = params.get("hive.dbname", "cyber");
+        String defaultDatabase = getDatabase(params);
         String hiveConfDir = params.get("hive.confdir", "/etc/hive/conf");
 
         Configuration catalogConfig = new Configuration();

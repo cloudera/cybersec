@@ -1,7 +1,5 @@
 package com.cloudera.cyber.indexing.hive.tableapi;
 
-import com.cloudera.cyber.enrichment.EnrichmentConfiguration;
-import com.cloudera.cyber.flink.Utils;
 import com.cloudera.cyber.indexing.MappingColumnDto;
 import com.cloudera.cyber.indexing.MappingDto;
 import com.cloudera.cyber.indexing.TableColumnDto;
@@ -9,23 +7,19 @@ import com.cloudera.cyber.indexing.TableDto;
 import com.cloudera.cyber.indexing.hive.FilterMapFunction;
 import com.cloudera.cyber.indexing.hive.util.FlinkSchemaUtil;
 import com.cloudera.cyber.scoring.ScoredMessage;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.common.collect.Streams;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.configuration.Configuration;
@@ -44,22 +38,14 @@ import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.LogicalTypeFamily;
 import org.apache.flink.types.Row;
-import org.apache.flink.util.Preconditions;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 
 public abstract class TableApiAbstractJob {
 
-  private static final String TABLES_INIT_FILE_PARAM = "flink.tables-init-file";
-  private static final String MAPPING_FILE_PARAM = "flink.mapping-file";
-  private static final String TRIAGE_CONFIG_PARAM = "triage.config";
   protected static final String KAFKA_TABLE = "KafkaTempView";
 
-  protected static final String BASE_COLUMN_MAPPING_JSON = "base-column-mapping.json";
-
-  private final List<MappingColumnDto> defaultMappingList;
-  private final List<TableColumnDto> defaultColumnList;
   protected final DataStream<ScoredMessage> source;
   protected final StreamExecutionEnvironment env;
   protected final ParameterTool params;
@@ -67,6 +53,7 @@ public abstract class TableApiAbstractJob {
   protected final FlinkSchemaUtil.SerializationFormat serializationFormat;
   protected List<String> enrichmentPrefixes = Collections.emptyList();
   protected Map<String, Set<String>> sourceToEnrichmentPrefixes = Collections.emptyMap();
+  protected final IndexTableMappingConfiguration configuration;
 
   public TableApiAbstractJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source,
                              String connectorName, String baseTableJson, FlinkSchemaUtil.SerializationFormat serializationFormat) throws IOException {
@@ -74,16 +61,12 @@ public abstract class TableApiAbstractJob {
     this.env = env;
     this.source = source;
     this.connectorName = connectorName;
-    defaultMappingList = Utils.readResourceFile(BASE_COLUMN_MAPPING_JSON, getClass(),
-        new TypeReference<List<MappingColumnDto>>() {
-        });
-    defaultColumnList = Utils.readResourceFile(baseTableJson, getClass(),
-        new TypeReference<List<TableColumnDto>>() {
-        });
     this.serializationFormat = serializationFormat;
+    this.configuration = new IndexTableMappingConfiguration(baseTableJson);
   }
 
   public StreamExecutionEnvironment startJob() throws Exception {
+
     System.out.println("Creating Table env...");
     final StreamTableEnvironment tableEnv = getTableEnvironment();
 
@@ -93,46 +76,16 @@ public abstract class TableApiAbstractJob {
     System.out.printf("Registering %s catalog... %s%n", connectorName, String.join(", ", tableEnv.listCatalogs()));
     registerCatalog(tableEnv);
 
-    System.out.println("Getting topic mapping...");
-    final Map<String, MappingDto> topicMapping = getTopicMapping();
-
-    System.out.println("Getting tables config...");
-    final Map<String, TableDto> rawTablesConfig = getRawTablesConfig();
-    final Map<String, TableDto> rawUnenrichedTablesConfig = new HashMap<>();
-    final Map<String, MappingDto> unenrichedTopicMapping = new HashMap<>();
-
-    if (!params.has(TRIAGE_CONFIG_PARAM)) {
-      System.out.printf("No triage config file property %s specified.  Skipping unenriched tables", TRIAGE_CONFIG_PARAM);
-      Preconditions.checkState(rawTablesConfig.values().stream().noneMatch(dto -> (dto.getUnenrichedTableName() != null)),
-              "Table json contains unenriched tables but no triage config property is specified.");
-    } else {
-      String triageConfigPath = params.getRequired(TRIAGE_CONFIG_PARAM);
-      System.out.printf("Reading triage config file '%s'...\n", triageConfigPath);
-      ParameterTool triageParams = Utils.getParamToolsFromProperties(new String[]{triageConfigPath});
-
-      System.out.println("Getting enrichment field prefixes...");
-      enrichmentPrefixes = EnrichmentConfiguration.getEnrichmentFieldPrefixes(triageParams);
-      sourceToEnrichmentPrefixes = EnrichmentConfiguration.getSourceEnrichmentFieldPrefixes(triageParams);
-      System.out.printf("Filtered field prefixes: %s\n", String.join(", ", enrichmentPrefixes));
-      System.out.println("Filtered source field prefixes:");
-      sourceToEnrichmentPrefixes.forEach((source, sourceFilteredPrefixes) -> System.out.printf("%s: %s\n", source, String.join(", ", sourceFilteredPrefixes)));
-
-      System.out.println("Getting unenriched tables config...");
-      createDerivedTablesAndMappings(rawTablesConfig, topicMapping,
-              rawUnenrichedTablesConfig, unenrichedTopicMapping, enrichmentPrefixes, sourceToEnrichmentPrefixes);
-    }
-
-    final Map<String, TableDto> tablesConfig = appendDefaultTablesConfig(rawTablesConfig);
-    tablesConfig.putAll(appendDefaultTablesConfig(rawUnenrichedTablesConfig));
+    this.configuration.readConfiguration(params, null);
 
     System.out.println("Creating tables...");
     setConnectorDialect(tableEnv);
 
-    final Map<String, ResolvedSchema> tableSchemaMap = createTables(tableEnv, tablesConfig);
+    final Map<String, ResolvedSchema> tableSchemaMap = createTables(tableEnv, configuration.getTablesConfig());
 
     System.out.println("Validating output tables mappings...");
-    validateMappings(tableSchemaMap, topicMapping);
-    validateMappings(tableSchemaMap, unenrichedTopicMapping);
+    validateMappings(tableSchemaMap, configuration.getTopicMapping());
+    validateMappings(tableSchemaMap, configuration.getUnenrichedTopicMapping());
 
     tableEnv.getConfig().setSqlDialect(SqlDialect.DEFAULT);
 
@@ -141,14 +94,10 @@ public abstract class TableApiAbstractJob {
 
     System.out.printf("Executing %s insert...%n", connectorName);
 
-    createInserts(tableEnv, topicMapping, tablesConfig, unenrichedTopicMapping, tableSchemaMap);
+    createInserts(tableEnv, configuration.getTopicMapping(), configuration.getTablesConfig(), configuration.getUnenrichedTopicMapping(), tableSchemaMap);
 
     System.out.println("TableApiJob is done!");
     return jobReturnValue();
-  }
-
-  protected boolean isNonDefaultColumn(String columnName) {
-    return defaultColumnList.stream().noneMatch(c -> c.getName().equals(columnName));
   }
 
   /**
@@ -223,7 +172,7 @@ public abstract class TableApiAbstractJob {
               return columnName;
             })
             .filter(Objects::nonNull)
-            .filter(this::isNonDefaultColumn)
+            .filter(configuration::isNonDefaultColumn)
             .toList();
 
     if (!columnListWithoutTransformation.isEmpty()) {
@@ -322,7 +271,7 @@ public abstract class TableApiAbstractJob {
 
   protected String getTransformation(DataType tableColumnDataType, MappingColumnDto mapping) {
     String transformation = mapping.getTransformation();
-    if (transformation == null && isNonDefaultColumn(mapping.getName())
+    if (transformation == null && configuration.isNonDefaultColumn(mapping.getName())
             && (DataTypes.BOOLEAN().equals(tableColumnDataType)
             || tableColumnDataType.getLogicalType().is(LogicalTypeFamily.NUMERIC))) {
       transformation = String.format("TRY_CAST(%%s AS %s)", tableColumnDataType.getLogicalType().getTypeRoot().name());
@@ -494,91 +443,6 @@ public abstract class TableApiAbstractJob {
                 : String.join(", ", fullPathList);
         })
         .collect(Collectors.joining(", ", " ", " "));
-  }
-
-  protected Map<String, MappingDto> getTopicMapping() throws IOException {
-    TypeReference<HashMap<String, MappingDto>> typeRef
-        = new TypeReference<HashMap<String, MappingDto>>() {
-    };
-    final HashMap<String, MappingDto> columnMappingMap = Utils.readFile(params.getRequired(MAPPING_FILE_PARAM),
-        typeRef);
-
-    // adding the default column mappings to each topic
-    columnMappingMap.values().forEach(mapping -> {
-      final List<MappingColumnDto> customMappings = Optional.ofNullable(mapping.getColumnMapping())
-          .orElse(Collections.emptyList());
-      final Collection<MappingColumnDto> columnMapping = Streams.concat(
-              customMappings.stream(),
-              defaultMappingList.stream())
-          .collect(Collectors.toMap(MappingColumnDto::getName, Function.identity(), (f, s) -> f)).values();
-
-      mapping.setColumnMapping(new ArrayList<>(columnMapping));
-    });
-    return columnMappingMap;
-  }
-
-  /**
-   * Method provides contents of the tables config file.
-   *
-   * @return Map with table name as a key, and a list of columns as a value.
-   * @throws IOException in case it can't read the tables config file.
-   */
-  protected Map<String, TableDto> getRawTablesConfig() throws IOException {
-    TypeReference<HashMap<String, TableDto>> typeRef
-        = new TypeReference<HashMap<String, TableDto>>() {
-    };
-    final String filePath = params.get(TABLES_INIT_FILE_PARAM);
-    if (filePath == null) {
-      return Collections.emptyMap();
-    }
-    return Utils.readFile(filePath, typeRef);
-  }
-
-  protected void createDerivedTablesAndMappings(Map<String, TableDto> tables, Map<String, MappingDto> topicMapping,
-                                                Map<String, TableDto> unenrichedTables, Map<String, MappingDto> unenrichedTopicMapping,
-                                                List<String> enrichmentPrefixes, Map<String, Set<String>> sourceToEnrichmentPrefixes) {
-    // derive a set of unenriched tables
-    tables.forEach((originalTableName, tableDto) -> {
-      if (tableDto.getUnenrichedTableName() != null) {
-        TableDto unenrichedTable = tableDto.deriveUnenrichedTable(originalTableName, topicMapping, unenrichedTopicMapping, enrichmentPrefixes, sourceToEnrichmentPrefixes);
-        if (unenrichedTable != null) {
-          unenrichedTables.put(tableDto.getUnenrichedTableName(), unenrichedTable);
-        }
-      }
-    });
-
-  }
-  /**
-   * Method appends default and partition columns to the raw tables config.
-   *
-   * @return Map with table name as a key, and a list of columns as a value.
-   */
-  protected Map<String, TableDto> appendDefaultTablesConfig(
-      Map<String, TableDto> rawTablesConfig) {
-    if (rawTablesConfig == null || rawTablesConfig.isEmpty()) {
-      return Collections.emptyMap();
-    }
-    final Map<String, TableDto> columnMap = new HashMap<>(rawTablesConfig);
-    final List<TableColumnDto> partitionColumns = Arrays.asList(TableColumnDto.builder()
-        .name("dt")
-        .type("string")
-        .build(), TableColumnDto.builder()
-        .name("hr")
-        .type("string")
-        .build());
-    //adding the default columns to each table
-    columnMap.forEach((tableName, tableDto) -> {
-      final List<TableColumnDto> customColumns = Optional.ofNullable(tableDto.getColumns())
-          .orElse(Collections.emptyList());
-      final Map<String, TableColumnDto> combinedColumnMap = Streams.concat(customColumns.stream(),
-              defaultColumnList.stream(), partitionColumns.stream())
-          .collect(Collectors.toMap(TableColumnDto::getName, Function.identity(), (f, s) -> f, LinkedHashMap::new));
-      //partition columns should be placed last
-      partitionColumns.forEach(col -> combinedColumnMap.put(col.getName(), col));
-
-      columnMap.put(tableName, new TableDto(tableDto.getUnenrichedTableName(), new ArrayList<>(combinedColumnMap.values())));
-    });
-    return columnMap;
   }
 
 }

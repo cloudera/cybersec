@@ -24,7 +24,11 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 @Slf4j
 public abstract class HiveJob {
-    private static final String DEFAULT_JOB_NAME = "Indexing - Hive";
+    private static final String DEFAULT_JOB_NAME = "Indexing";
+
+    public static String getIndexOutputConnectorType(ParameterTool params) {
+        return params.get("flink.output-connector", "hive");
+    }
 
     protected StreamExecutionEnvironment createPipeline(ParameterTool params) {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
@@ -34,7 +38,7 @@ public abstract class HiveJob {
 
         DataStream<ScoredMessage> source = createSource(env, params);
         try {
-            final String connectorName = params.get("flink.output-connector", "hive");
+            final String connectorName = getIndexOutputConnectorType(params);
             final TableApiAbstractJob job = TableApiJobFactory.getJobByConnectorName(connectorName, params, env, source);
             return job.startJob();
         } catch (Exception e) {
