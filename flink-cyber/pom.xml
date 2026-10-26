@@ -50,6 +50,7 @@
         <module>cyber-csd</module>
         <module>cyber-parcel</module>
         <module>cyber-services</module>
+        <module>flink-ondemand-pipeline</module>
     </modules>
 
     <properties>
@@ -90,7 +91,7 @@
         <json.simple.version>1.1.1</json.simple.version>
         <phoenix.version>5.1.1.${cdh.version}</phoenix.version>
         <phoenix.queryserver>6.0.0.${cdh.version}</phoenix.queryserver>
-        <classindex.version>3.4</classindex.version>
+        <classindex.version>3.13</classindex.version>
         <antlr.version>4.9.3</antlr.version>
         <metrics.version>3.0.2</metrics.version>
         <pcap.version>1.7.1</pcap.version>

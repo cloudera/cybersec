@@ -12,22 +12,20 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 public class TableApiJobFactory {
 
+    public static final String ICEBERG_INDEX_JOB_CONNECTOR = "iceberg";
+
     public static TableApiAbstractJob getJobByConnectorName(String typeName, ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source) throws IOException {
         if (typeName == null) {
             throw new RuntimeException("Null job type name provided while the Flink writer is selected as TableAPI");
         }
-        switch (typeName.toLowerCase()) {
-            case "hive":
-                return new TableApiHiveJob(params, env, source);
-            case "iceberg":
-                return new TableApiIcebergJob(params, env, source);
-            case "kafka":
-                return new TableApiKafkaJob(params, env, source);
-            case "filesystem":
-                return new TableApiFilesystemJob(params, env, source);
-            default:
-                throw new RuntimeException(String.format("Unknown job type name [%s] provided while the Flink writer is selected as TableAPI", typeName));
-        }
+        return switch (typeName.toLowerCase()) {
+            case "hive" -> new TableApiHiveJob(params, env, source);
+            case ICEBERG_INDEX_JOB_CONNECTOR -> new TableApiIcebergJob(params, env, source);
+            case "kafka" -> new TableApiKafkaJob(params, env, source);
+            case "filesystem" -> new TableApiFilesystemJob(params, env, source);
+            default ->
+                    throw new RuntimeException(String.format("Unknown job type name [%s] provided while the Flink writer is selected as TableAPI", typeName));
+        };
     }
 
 }
