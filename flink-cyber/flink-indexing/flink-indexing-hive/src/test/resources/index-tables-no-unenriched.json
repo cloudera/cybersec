@@ -1,0 +1,8 @@
+{
+  "plain_table": {
+    "columns": [
+      { "name": "id", "type": "string" }
+    ]
+  },
+  "no_columns_table": {}
+}

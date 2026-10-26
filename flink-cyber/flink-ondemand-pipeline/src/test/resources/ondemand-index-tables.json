@@ -1,0 +1,9 @@
+{
+  "examples_full_events": {
+    "unenriched_table_name": "examples_full_events_raw",
+    "columns": [
+      { "name": "id", "type": "string" },
+      { "name": "domain", "type": "string" }
+    ]
+  }
+}

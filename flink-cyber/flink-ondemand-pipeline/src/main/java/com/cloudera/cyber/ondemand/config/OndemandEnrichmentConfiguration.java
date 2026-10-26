@@ -59,7 +59,7 @@ public record OndemandEnrichmentConfiguration(LocalDateTime startTime, LocalDate
         Map<String, MappingDto> unenrichedTopicMapping = indexTableMappingConfiguration.getUnenrichedTopicMapping();
 
         List<String> unmappedSources = sourcesToEnrich.stream().filter(sourceToEnrich -> !(unenrichedTopicMapping.containsKey(sourceToEnrich))).toList();
-        Preconditions.checkArgument(!unmappedSources.isEmpty(),
+        Preconditions.checkArgument(unmappedSources.isEmpty(),
                 String.format("The %s configuration specifies '%s' as sources for ondemand enrichment but there are no mappings defined in the index configuration.",
                         SOURCES_PARAM_KEY, String.join(", ", unmappedSources)));
         return sourcesToEnrich;

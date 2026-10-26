@@ -1,0 +1,7 @@
+[
+  {
+    "source": "squid",
+    "kind": "LOCAL",
+    "fields": [ { "name": "domain", "enrichmentType": "malicious_domain" } ]
+  }
+]

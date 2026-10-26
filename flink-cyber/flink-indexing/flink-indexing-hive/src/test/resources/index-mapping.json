@@ -1,0 +1,18 @@
+{
+  "squid": {
+    "table_name": "examples_full_events",
+    "column_mapping": [
+      { "name": "id", "path": "." },
+      { "name": "domain" }
+    ]
+  },
+  "test": {
+    "table_name": "plain_table"
+  },
+  "enriched_only": {
+    "table_name": "enriched_only_table",
+    "column_mapping": [
+      { "name": "domain_malicious", "kafka_name": "domain.malicious_domain.source" }
+    ]
+  }
+}
