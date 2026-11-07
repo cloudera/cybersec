@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,8 @@ public class IndexTableMappingConfiguration {
     private Map<String, TableDto> tablesConfig;
     private Map<String, MappingDto> unenrichedTopicMapping;
     private final String baseTableJson;
+    private Map<String, Set<String>> sourceToEnrichmentPrefixes;
+    private List<String> enrichmentPrefixes;
 
     public IndexTableMappingConfiguration(String baseTableJson) throws IOException {
         this.baseTableJson = baseTableJson;
@@ -75,8 +78,8 @@ public class IndexTableMappingConfiguration {
             }
 
             System.out.println("Getting enrichment field prefixes...");
-            List<String> enrichmentPrefixes = EnrichmentConfiguration.getEnrichmentFieldPrefixes(triageParams);
-            Map<String, Set<String>> sourceToEnrichmentPrefixes = EnrichmentConfiguration.getSourceEnrichmentFieldPrefixes(triageParams);
+            enrichmentPrefixes = EnrichmentConfiguration.getEnrichmentFieldPrefixes(triageParams);
+            sourceToEnrichmentPrefixes = EnrichmentConfiguration.getSourceEnrichmentFieldPrefixes(triageParams);
             System.out.printf("Filtered field prefixes: %s\n", String.join(", ", enrichmentPrefixes));
             System.out.println("Filtered source field prefixes:");
             sourceToEnrichmentPrefixes.forEach((source, sourceFilteredPrefixes) -> System.out.printf("%s: %s\n", source, String.join(", ", sourceFilteredPrefixes)));
@@ -114,6 +117,17 @@ public class IndexTableMappingConfiguration {
         });
         return columnMappingMap;
     }
+
+    /**
+     * Prefixes of enrichment fields that must be stripped from the message extensions for the given source.
+     * Enriched tables keep the enrichment fields; only the derived unenriched tables drop them.
+     */
+    public Set<String> getFilterMapIgnorePrefixes(String source) {
+        final Set<String> prefixes = new HashSet<>(enrichmentPrefixes);
+        prefixes.addAll(sourceToEnrichmentPrefixes.getOrDefault(source, Collections.emptySet()));
+        return prefixes;
+    }
+
 
     /**
      * Method provides contents of the tables config file.

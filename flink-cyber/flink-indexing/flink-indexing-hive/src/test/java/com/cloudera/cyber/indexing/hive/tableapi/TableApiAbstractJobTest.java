@@ -25,7 +25,7 @@ class TableApiAbstractJobTest {
 
   public static final String GIVEN_SOURCE = "source";
   public static final String GIVEN_TABLE_NAME = "tableName";
-  private final TableApiAbstractJob job = new TableApiKafkaJob(null, null, null);
+  private final TableApiAbstractJob job = new TableApiKafkaJob(null, null, null, null);
 
   TableApiAbstractJobTest() throws IOException {
   }

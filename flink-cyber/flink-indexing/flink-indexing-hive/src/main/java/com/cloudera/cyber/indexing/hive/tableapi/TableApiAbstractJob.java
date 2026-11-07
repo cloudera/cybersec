@@ -48,27 +48,32 @@ public abstract class TableApiAbstractJob {
 
   protected final DataStream<ScoredMessage> source;
   protected final StreamExecutionEnvironment env;
+  protected StreamTableEnvironment tableEnv;
   protected final ParameterTool params;
   protected final String connectorName;
   protected final FlinkSchemaUtil.SerializationFormat serializationFormat;
-  protected List<String> enrichmentPrefixes = Collections.emptyList();
-  protected Map<String, Set<String>> sourceToEnrichmentPrefixes = Collections.emptyMap();
   protected final IndexTableMappingConfiguration configuration;
 
-  public TableApiAbstractJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source,
+  public TableApiAbstractJob(ParameterTool params, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv, DataStream<ScoredMessage> source,
                              String connectorName, String baseTableJson, FlinkSchemaUtil.SerializationFormat serializationFormat) throws IOException {
+   this(params, env, tableEnv, source, connectorName, serializationFormat, new IndexTableMappingConfiguration(baseTableJson));
+  }
+
+  public TableApiAbstractJob(ParameterTool params, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv, DataStream<ScoredMessage> source,
+                             String connectorName, FlinkSchemaUtil.SerializationFormat serializationFormat,
+                             IndexTableMappingConfiguration configuration) {
     this.params = params;
     this.env = env;
+    this.tableEnv = tableEnv;
     this.source = source;
     this.connectorName = connectorName;
     this.serializationFormat = serializationFormat;
-    this.configuration = new IndexTableMappingConfiguration(baseTableJson);
+    this.configuration = configuration;
   }
 
   public StreamExecutionEnvironment startJob() throws Exception {
 
-    System.out.println("Creating Table env...");
-    final StreamTableEnvironment tableEnv = getTableEnvironment();
+    createTableEnvIfNeeded();
 
     System.out.println("Configuring Table env...");
     configure(tableEnv);
@@ -99,6 +104,7 @@ public abstract class TableApiAbstractJob {
     System.out.println("TableApiJob is done!");
     return jobReturnValue();
   }
+
 
   /**
    * Creates tables in the tableEnv based on the tablesConfig. If table already exists, its schema is fetched.
@@ -203,7 +209,7 @@ public abstract class TableApiAbstractJob {
         addInsertSqlStatement(tableSchemaMap, topic, mappingDto, insertStatementSet);
         Optional.ofNullable(unenrichedTopicMapping.get(topic))
                 .ifPresent(unenrichedDto -> {
-                  registerFilterMapFunction(tableEnv, topic, unenrichedDto, getFilterMapIgnorePrefixes(topic));
+                  registerFilterMapFunction(tableEnv, topic, unenrichedDto, configuration.getFilterMapIgnorePrefixes(topic));
                   addInsertSqlStatement(tableSchemaMap, topic, unenrichedDto, insertStatementSet);
                 });
       });
@@ -228,16 +234,6 @@ public abstract class TableApiAbstractJob {
     // create a unique filter for this source and destination Table.  Replace any special characters that
     // are not legal in a function name with an underscore.  Prevents failures from invalid sql.
     return String.format("filterMap%s%s", source, destTableName).replaceAll("[^a-zA-Z0-9_]", "");
-  }
-
-  /**
-   * Prefixes of enrichment fields that must be stripped from the message extensions for the given source.
-   * Enriched tables keep the enrichment fields; only the derived unenriched tables drop them.
-   */
-  protected Set<String> getFilterMapIgnorePrefixes(String source) {
-    final Set<String> prefixes = new HashSet<>(enrichmentPrefixes);
-    prefixes.addAll(sourceToEnrichmentPrefixes.getOrDefault(source, Collections.emptySet()));
-    return prefixes;
   }
 
   private void addInsertSqlStatement(Map<String, ResolvedSchema> tableSchemaMap, String topic, MappingDto mappingDto, StreamStatementSet insertStatementSet) {
@@ -364,8 +360,13 @@ public abstract class TableApiAbstractJob {
         .option("sink.partition-commit.policy.kind", "metastore,success-file");
   }
 
-  private StreamTableEnvironment getTableEnvironment() {
-    return StreamTableEnvironment.create(env);
+  private void createTableEnvIfNeeded() {
+    if (tableEnv != null) {
+      System.out.println("Using exising Table env...");
+    } else {
+      System.out.println("Creating Table env...");
+      this.tableEnv = StreamTableEnvironment.create(env);
+    }
   }
 
   private void createKafkaTable(StreamTableEnvironment tableEnv) {

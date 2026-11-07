@@ -289,7 +289,7 @@
                     <dependency>
                         <groupId>org.atteo.classindex</groupId>
                         <artifactId>classindex-transformer</artifactId>
-                        <version>3.4</version>
+                        <version>${classindex.version}</version>
                     </dependency>
                     
     </dependencies>

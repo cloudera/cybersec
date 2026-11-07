@@ -31,9 +31,9 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
 
   private static final String BASE_TABLE_JSON = "base-hive-table.json";
 
-  public TableApiKafkaJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source)
+  public TableApiKafkaJob(ParameterTool params, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv, DataStream<ScoredMessage> source)
       throws IOException {
-    super(params, env, source, "Kafka", BASE_TABLE_JSON, FlinkSchemaUtil.SerializationFormat.AVRO);
+    super(params, env, tableEnv, source, "Kafka", BASE_TABLE_JSON, FlinkSchemaUtil.SerializationFormat.AVRO);
   }
 
   @Override
@@ -58,7 +58,7 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
 
         outputViewToKafka(tablesConfig, mappingDto, tableStream, mappingDto.getTableName());
         Optional.ofNullable(unenrichedTopicMapping.get(source))
-                .ifPresent(unenrichedDto -> outputViewToKafka(tablesConfig, unenrichedDto, tableStream, unenrichedDto.getTableName(), getFilterMapIgnorePrefixes(source)));
+                .ifPresent(unenrichedDto -> outputViewToKafka(tablesConfig, unenrichedDto, tableStream, unenrichedDto.getTableName(), configuration.getFilterMapIgnorePrefixes(source)));
 
         System.out.printf("Insert SQL added to the queue for the table: %s%nSQL: %s%n", mappingDto.getTableName(),
             insertSql);

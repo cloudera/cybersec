@@ -39,7 +39,7 @@ public abstract class HiveJob {
         DataStream<ScoredMessage> source = createSource(env, params);
         try {
             final String connectorName = getIndexOutputConnectorType(params);
-            final TableApiAbstractJob job = TableApiJobFactory.getJobByConnectorName(connectorName, params, env, source);
+            final TableApiAbstractJob job = TableApiJobFactory.getJobByConnectorName(connectorName, params, env, null, source);
             return job.startJob();
         } catch (Exception e) {
             throw new RuntimeException(e);

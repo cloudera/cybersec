@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 public record OndemandEnrichmentConfiguration(LocalDateTime startTime, LocalDateTime endTime,
                                               List<String> sourcesToEnrich,
                                               IndexTableMappingConfiguration indexTableMappingConfiguration,
-                                              String destinationDatabase) {
+                                              String destinationDatabase, String errorReportPath, ParameterTool triageParams, ParameterTool indexParams) {
 
     private static final String DESTINATION_DATABASE_PARAM_KEY = "destination.hive.dbname";
     public static final String SOURCES_PARAM_KEY = "sources";
@@ -37,12 +37,16 @@ public record OndemandEnrichmentConfiguration(LocalDateTime startTime, LocalDate
         // get the start and end timestamp strings and validate format is correct
         LocalDateTime startTime = TimestampConfig.getConfiguration(params, "start.timestamp");
         LocalDateTime endTime = TimestampConfig.getConfiguration(params, "end.timestamp");
+        Preconditions.checkArgument(startTime.isBefore(endTime), String.format("The start time '%s' must be earlier than the end time '%s'.", startTime, endTime));
 
         List<String> sourcesToEnrich = getSourcesToEnrich(params, indexTableMappingConfiguration);
 
         String destinationDatabase = getDestinationDatabase(params, indexParams);
 
-        return new OndemandEnrichmentConfiguration(startTime, endTime, sourcesToEnrich, indexTableMappingConfiguration, destinationDatabase);
+        String errorReportPath = params.getRequired("report.errors.path");
+
+        return new OndemandEnrichmentConfiguration(startTime, endTime, sourcesToEnrich,
+                indexTableMappingConfiguration, destinationDatabase, errorReportPath, triageParams, indexParams);
     }
 
     private static String getDestinationDatabase(ParameterTool params, ParameterTool indexParams) {

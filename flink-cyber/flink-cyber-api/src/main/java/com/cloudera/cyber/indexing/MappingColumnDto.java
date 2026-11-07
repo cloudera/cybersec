@@ -72,7 +72,7 @@ public class MappingColumnDto {
         return path;
     }
 
-    private String getProperName() {
+    public String getProperName() {
         return kafkaName == null ? name : kafkaName;
     }
 
