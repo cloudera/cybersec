@@ -21,6 +21,7 @@ import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.apache.flink.annotation.VisibleForTesting;
 
 import javax.script.*;
+import java.util.Locale;
 
 
 @Slf4j
@@ -29,6 +30,25 @@ public class JavaScriptNashornEngine extends JavaScriptEngine {
 
     static final String ENGINE_NAME = "javascript";
     static final ScriptEngineManager mgr = new ScriptEngineManager();
+
+    /**
+     * The "javascript" engine name is shared by Nashorn and GraalJS. Since this engine is meant to
+     * run on Nashorn only, the resolved engine is verified to actually be Nashorn. Otherwise the
+     * deprecated Nashorn path would silently execute on GraalJS' JSR-223 script engine.
+     */
+    static boolean isNashornAvailable() {
+        return isNashorn(mgr.getEngineByName(ENGINE_NAME));
+    }
+
+    private static boolean isNashorn(ScriptEngine engine) {
+        if (engine == null || engine.getFactory() == null) {
+            return false;
+        }
+        // JDK Nashorn (Java <= 14) reports "Oracle Nashorn", standalone nashorn-core reports
+        // "OpenJDK Nashorn"; GraalJS reports "Graal.js" and must not be treated as Nashorn.
+        String engineName = engine.getFactory().getEngineName();
+        return engineName != null && engineName.toLowerCase(Locale.ROOT).contains("nashorn");
+    }
 
     @AllArgsConstructor
     @Getter
@@ -52,9 +72,9 @@ public class JavaScriptNashornEngine extends JavaScriptEngine {
 
     private static ValidatedScriptEngine create(String functionName, String script) {
         ScriptEngine engine = mgr.getEngineByName(ENGINE_NAME);
-        if (engine == null) {
+        if (!isNashorn(engine)) {
             log.error("Wasn't able to create Nashorn JavaScript engine. It's likely related to the Java version being higher than 14.");
-            new ValidatedScriptEngine(false, null);
+            return new ValidatedScriptEngine(false, null);
         }
         boolean isValid = true;
         try {

@@ -31,6 +31,6 @@ public class JavaScriptNashornEngineBuilder extends RuleEngineBuilder<JavaScript
 
     @Override
     public boolean isValid() {
-        return JavaScriptNashornEngine.mgr.getEngineByName(JavaScriptNashornEngine.ENGINE_NAME) != null;
+        return JavaScriptNashornEngine.isNashornAvailable();
     }
 }
