@@ -490,6 +490,17 @@
                 <version>${graalvm.version}</version>
                 <scope>runtime</scope>
             </dependency>
+            <!--
+              hive-exec (and iceberg) pull in a newer js-scriptengine transitively. Left unmanaged it
+              disagrees with the js language pinned above: the newer script engine sets the js.charset
+              option, which the older language does not define, so any JSR-223 use fails with
+              "Could not find option with name js.charset". Keep the whole GraalVM stack on one version.
+            -->
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js-scriptengine</artifactId>
+                <version>${graalvm.version}</version>
+            </dependency>
 
             <!-- Logging and Metrics -->
 
