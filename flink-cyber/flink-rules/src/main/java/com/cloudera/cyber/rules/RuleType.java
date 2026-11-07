@@ -18,20 +18,11 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.Getter;
 
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
 
 public enum RuleType {
     JS_GRAAL(new JavaScriptGraaljsEngineBuilder()),
-    //JS_NASHORN is going to be removed after switch to JDK 17.
-    // It's recommended to switch to JS_GRAAL instead, or rely on the JS that will get replaced with JS_GRAAL once JS_NASHORN is removed
-    @Deprecated
-    JS_NASHORN(new JavaScriptNashornEngineBuilder()),
-    //will use the first valid engine
-    JS(Stream.of(JS_NASHORN, JS_GRAAL)
-            .map(RuleType::getEngineBuilder)
-            .filter(RuleEngineBuilder::isValid)
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("No valid JS engine was found!"))),
+    // Nashorn was removed with the switch to JDK 17; JS now maps to GraalJS.
+    JS(new JavaScriptGraaljsEngineBuilder()),
     PYTHON(new PythonEngineBuilder()),
     STELLAR(new StellarEngineBuilder());
 

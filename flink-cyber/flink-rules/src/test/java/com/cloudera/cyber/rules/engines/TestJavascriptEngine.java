@@ -33,7 +33,7 @@ public class TestJavascriptEngine {
     private static final String scoreScript = "return { local: ip_local(message.local), remote: ip_local(message.remote) }";
 
     public static Stream<Arguments> jsBuilders() {
-        return Stream.of(RuleType.JS, RuleType.JS_GRAAL, RuleType.JS_NASHORN)
+        return Stream.of(RuleType.JS, RuleType.JS_GRAAL)
                 .map(RuleType::getEngineBuilder)
                 .filter(RuleEngineBuilder::isValid)
                 .map(Arguments::of);
