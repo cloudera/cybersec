@@ -28,6 +28,7 @@ import org.apache.flink.util.Preconditions;
 import org.apache.flink.table.api.Table;
 
 import java.time.Duration;
+import java.util.HashSet;
 import java.util.Map;
 
 public class OnDemandPipelineJob extends EnrichmentJobKafka {
@@ -90,7 +91,9 @@ public class OnDemandPipelineJob extends EnrichmentJobKafka {
             final TableApiAbstractJob job = TableApiJobFactory.getJobByConnectorName(connectorName, indexOndemandResultsParams, env, tableEnv, results);
             // Attach the inserts to the pipeline instead of executing them, so that the single
             // env.execute() in main() submits the source read, enrichment and inserts as one job.
-            return job.startJob(false);
+            // On-demand enrichment only writes the primary tables for the sources being enriched;
+            // the derived unenriched tables are left to the indexing job.
+            return job.startJob(false, false, new HashSet<>(configuration.sourcesToEnrich()));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

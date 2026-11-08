@@ -5,18 +5,23 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.cloudera.cyber.indexing.MappingColumnDto;
 import com.cloudera.cyber.indexing.MappingDto;
+import com.cloudera.cyber.indexing.TableColumnDto;
+import com.cloudera.cyber.indexing.TableDto;
 import com.cloudera.cyber.indexing.hive.tableapi.impl.TableApiKafkaJob;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.catalog.Column;
 import org.apache.flink.table.catalog.ResolvedSchema;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -160,5 +165,53 @@ class TableApiAbstractJobTest {
     assertThatThrownBy(() -> job.validateMappings(givenTableSchemaMap, givenTopicMapping))
         .isInstanceOf(expectedException)
         .hasMessage(expectedExceptionMessage);
+  }
+
+  @Test
+  void selectMappingsKeepsEverythingWhenNoSourcesRequested() {
+    Map<String, MappingDto> mappings = new HashMap<>();
+    mappings.put("squid", new MappingDto("examples_full_events", Collections.emptyList(), Collections.emptyList()));
+    mappings.put("dns", new MappingDto("dns_table", Collections.emptyList(), Collections.emptyList()));
+
+    assertThat(job.selectMappings(mappings, null)).isSameAs(mappings);
+  }
+
+  @Test
+  void selectMappingsKeepsOnlyRequestedSources() {
+    Map<String, MappingDto> mappings = new HashMap<>();
+    mappings.put("squid", new MappingDto("examples_full_events", Collections.emptyList(), Collections.emptyList()));
+    mappings.put("dns", new MappingDto("dns_table", Collections.emptyList(), Collections.emptyList()));
+
+    assertThat(job.selectMappings(mappings, new HashSet<>(Set.of("squid"))))
+        .containsOnlyKeys("squid");
+  }
+
+  @Test
+  void selectTablesKeepsOnlyTablesReferencedByMappings() {
+    Map<String, TableDto> tables = new HashMap<>();
+    tables.put("examples_full_events", new TableDto(null, Collections.emptyList()));
+    tables.put("examples_full_events_raw", new TableDto(null, Collections.emptyList()));
+    tables.put("dns_table", new TableDto(null, Collections.emptyList()));
+
+    Map<String, MappingDto> topicMapping = new HashMap<>();
+    topicMapping.put("squid", new MappingDto("examples_full_events", Collections.emptyList(), Collections.emptyList()));
+    Map<String, MappingDto> unenrichedTopicMapping = new HashMap<>();
+    unenrichedTopicMapping.put("squid", new MappingDto("examples_full_events_raw", Collections.emptyList(), Collections.emptyList()));
+
+    assertThat(job.selectTables(tables, topicMapping, unenrichedTopicMapping))
+        .containsOnlyKeys("examples_full_events", "examples_full_events_raw");
+  }
+
+  @Test
+  void selectTablesDropsUnenrichedTablesWhenTheyAreNotWritten() {
+    Map<String, TableDto> tables = new HashMap<>();
+    tables.put("examples_full_events", new TableDto(null, Collections.emptyList()));
+    tables.put("examples_full_events_raw", new TableDto(null, Collections.emptyList()));
+
+    Map<String, MappingDto> topicMapping = new HashMap<>();
+    topicMapping.put("squid", new MappingDto("examples_full_events", Collections.emptyList(), Collections.emptyList()));
+
+    assertThat(job.selectTables(tables, topicMapping, Collections.emptyMap()))
+        .containsOnlyKeys("examples_full_events");
   }
 }

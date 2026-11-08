@@ -88,6 +88,19 @@ public abstract class TableApiAbstractJob {
    *                       so the caller's single {@code env.execute()} runs the whole pipeline.
    */
   public StreamExecutionEnvironment startJob(boolean executeInserts) throws Exception {
+    return startJob(executeInserts, true, null);
+  }
+
+  /**
+   * @param executeInserts when {@code true} the insert statement set is submitted as its own job;
+   *                       when {@code false} it is attached to the environment without executing.
+   * @param writeUnenrichedTables when {@code true} the derived unenriched tables are written in
+   *                              addition to the primary tables; when {@code false} only the
+   *                              primary tables are written.
+   * @param sourcesToWrite restricts the tables written to these sources; {@code null} writes every
+   *                       source defined in the mapping configuration.
+   */
+  public StreamExecutionEnvironment startJob(boolean executeInserts, boolean writeUnenrichedTables, Set<String> sourcesToWrite) throws Exception {
 
     createTableEnvIfNeeded();
 
@@ -99,14 +112,25 @@ public abstract class TableApiAbstractJob {
 
     this.configuration.readConfiguration(params, null);
 
+    // Restrict what is written to the requested sources and, optionally, drop the derived unenriched tables.
+    final Map<String, MappingDto> topicMapping = selectMappings(configuration.getTopicMapping(), sourcesToWrite);
+    final Map<String, MappingDto> unenrichedTopicMapping = writeUnenrichedTables
+            ? selectMappings(configuration.getUnenrichedTopicMapping(), sourcesToWrite)
+            : Collections.emptyMap();
+    // Only trim the table config when the write scope is restricted, so the indexing job keeps
+    // creating every table declared in its config.
+    final Map<String, TableDto> tablesConfig = sourcesToWrite == null
+            ? configuration.getTablesConfig()
+            : selectTables(configuration.getTablesConfig(), topicMapping, unenrichedTopicMapping);
+
     System.out.println("Creating tables...");
     setConnectorDialect(tableEnv);
 
-    final Map<String, ResolvedSchema> tableSchemaMap = createTables(tableEnv, configuration.getTablesConfig());
+    final Map<String, ResolvedSchema> tableSchemaMap = createTables(tableEnv, tablesConfig);
 
     System.out.println("Validating output tables mappings...");
-    validateMappings(tableSchemaMap, configuration.getTopicMapping());
-    validateMappings(tableSchemaMap, configuration.getUnenrichedTopicMapping());
+    validateMappings(tableSchemaMap, topicMapping);
+    validateMappings(tableSchemaMap, unenrichedTopicMapping);
 
     tableEnv.getConfig().setSqlDialect(SqlDialect.DEFAULT);
 
@@ -115,10 +139,35 @@ public abstract class TableApiAbstractJob {
 
     System.out.printf("Executing %s insert...%n", connectorName);
 
-    createInserts(tableEnv, configuration.getTopicMapping(), configuration.getTablesConfig(), configuration.getUnenrichedTopicMapping(), tableSchemaMap, executeInserts);
+    createInserts(tableEnv, topicMapping, tablesConfig, unenrichedTopicMapping, tableSchemaMap, executeInserts);
 
     System.out.println("TableApiJob is done!");
     return jobReturnValue();
+  }
+
+  /**
+   * Restricts mappings to the requested sources.  A null {@code sourcesToWrite} keeps every source.
+   */
+  Map<String, MappingDto> selectMappings(Map<String, MappingDto> mappings, Set<String> sourcesToWrite) {
+    if (sourcesToWrite == null) {
+      return mappings;
+    }
+    return mappings.entrySet().stream()
+            .filter(entry -> sourcesToWrite.contains(entry.getKey()))
+            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+  }
+
+  /**
+   * Keeps only the tables that are referenced by the mappings that are going to be written.
+   */
+  Map<String, TableDto> selectTables(Map<String, TableDto> tablesConfig, Map<String, MappingDto> topicMapping,
+                                     Map<String, MappingDto> unenrichedTopicMapping) {
+    final Set<String> tableNames = new HashSet<>();
+    topicMapping.values().forEach(mapping -> tableNames.add(mapping.getTableName()));
+    unenrichedTopicMapping.values().forEach(mapping -> tableNames.add(mapping.getTableName()));
+    return tablesConfig.entrySet().stream()
+            .filter(entry -> tableNames.contains(entry.getKey()))
+            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
   }
 
 
