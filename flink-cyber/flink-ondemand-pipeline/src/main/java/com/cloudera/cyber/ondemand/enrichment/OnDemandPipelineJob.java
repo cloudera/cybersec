@@ -88,7 +88,9 @@ public class OnDemandPipelineJob extends EnrichmentJobKafka {
             final String connectorName = HiveJob.getIndexOutputConnectorType(indexOndemandResultsParams);
             tableEnv.executeSql("CREATE DATABASE IF NOT EXISTS " + configuration.destinationDatabase());
             final TableApiAbstractJob job = TableApiJobFactory.getJobByConnectorName(connectorName, indexOndemandResultsParams, env, tableEnv, results);
-            return job.startJob();
+            // Attach the inserts to the pipeline instead of executing them, so that the single
+            // env.execute() in main() submits the source read, enrichment and inserts as one job.
+            return job.startJob(false);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

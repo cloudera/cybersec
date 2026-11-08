@@ -44,7 +44,8 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
 
   @Override
   protected void createInserts(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping,
-                               Map<String, TableDto> tablesConfig, Map<String, MappingDto> unenrichedTopicMapping, Map<String, ResolvedSchema> tableSchemaMap) {
+                               Map<String, TableDto> tablesConfig, Map<String, MappingDto> unenrichedTopicMapping, Map<String, ResolvedSchema> tableSchemaMap,
+                               boolean executeInserts) {
     topicMapping.forEach((source, mappingDto) -> {
       registerFilterMapFunction(tableEnv, source, mappingDto, Collections.emptySet());
       final String insertSql = buildInsertSql(source, mappingDto, tableSchemaMap.get(mappingDto.getTableName()));

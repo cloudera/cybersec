@@ -71,7 +71,23 @@ public abstract class TableApiAbstractJob {
     this.configuration = configuration;
   }
 
+  /**
+   * Registers tables and inserts, then submits them as a standalone Flink job.
+   *
+   * <p>Use {@link #startJob(boolean)} with {@code executeInserts = false} when the inserts should
+   * instead be attached to the caller's {@link StreamExecutionEnvironment} so that a single {@code
+   * env.execute()} submits the whole pipeline as one job.
+   */
   public StreamExecutionEnvironment startJob() throws Exception {
+    return startJob(true);
+  }
+
+  /**
+   * @param executeInserts when {@code true} the insert statement set is submitted as its own job;
+   *                       when {@code false} it is attached to the environment without executing,
+   *                       so the caller's single {@code env.execute()} runs the whole pipeline.
+   */
+  public StreamExecutionEnvironment startJob(boolean executeInserts) throws Exception {
 
     createTableEnvIfNeeded();
 
@@ -99,7 +115,7 @@ public abstract class TableApiAbstractJob {
 
     System.out.printf("Executing %s insert...%n", connectorName);
 
-    createInserts(tableEnv, configuration.getTopicMapping(), configuration.getTablesConfig(), configuration.getUnenrichedTopicMapping(), tableSchemaMap);
+    createInserts(tableEnv, configuration.getTopicMapping(), configuration.getTablesConfig(), configuration.getUnenrichedTopicMapping(), tableSchemaMap, executeInserts);
 
     System.out.println("TableApiJob is done!");
     return jobReturnValue();
@@ -200,6 +216,19 @@ public abstract class TableApiAbstractJob {
 
   protected void createInserts(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping,
                                Map<String, TableDto> tablesConfig, Map<String, MappingDto> unenrichedTopicMapping, Map<String, ResolvedSchema> tableSchemaMap) {
+    createInserts(tableEnv, topicMapping, tablesConfig, unenrichedTopicMapping, tableSchemaMap, true);
+  }
+
+  /**
+   * Registers the insert pipelines for each mapped topic.
+   *
+   * @param executeInserts when {@code true} the statement set is executed as its own job; when
+   *                       {@code false} it is attached to the environment so the caller's {@code
+   *                       env.execute()} submits everything as a single job.
+   */
+  protected void createInserts(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping,
+                               Map<String, TableDto> tablesConfig, Map<String, MappingDto> unenrichedTopicMapping, Map<String, ResolvedSchema> tableSchemaMap,
+                               boolean executeInserts) {
     if (!topicMapping.isEmpty()) {
       System.out.printf("Filling Insert statement list...%s%n", Arrays.toString(tableEnv.listTables()));
       final StreamStatementSet insertStatementSet = tableEnv.createStatementSet();
@@ -214,8 +243,15 @@ public abstract class TableApiAbstractJob {
                 });
       });
 
-      System.out.println("Executing Insert statement list...");
-      insertStatementSet.execute();
+      if (executeInserts) {
+        System.out.println("Executing Insert statement list...");
+        insertStatementSet.execute();
+      } else {
+        // Attach the inserts to the environment instead of executing them, so that the caller's
+        // single env.execute() submits the whole pipeline (source, processing and inserts) as one job.
+        System.out.println("Attaching Insert statement list to the environment...");
+        insertStatementSet.attachAsDataStream();
+      }
     }
   }
 
