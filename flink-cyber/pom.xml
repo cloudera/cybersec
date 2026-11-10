@@ -50,6 +50,7 @@
         <module>cyber-csd</module>
         <module>cyber-parcel</module>
         <module>cyber-services</module>
+        <module>flink-ondemand-pipeline</module>
     </modules>
 
     <properties>
@@ -90,7 +91,7 @@
         <json.simple.version>1.1.1</json.simple.version>
         <phoenix.version>5.1.1.${cdh.version}</phoenix.version>
         <phoenix.queryserver>6.0.0.${cdh.version}</phoenix.queryserver>
-        <classindex.version>3.4</classindex.version>
+        <classindex.version>3.13</classindex.version>
         <antlr.version>4.9.3</antlr.version>
         <metrics.version>3.0.2</metrics.version>
         <pcap.version>1.7.1</pcap.version>
@@ -488,6 +489,17 @@
                 <artifactId>js</artifactId>
                 <version>${graalvm.version}</version>
                 <scope>runtime</scope>
+            </dependency>
+            <!--
+              hive-exec (and iceberg) pull in a newer js-scriptengine transitively. Left unmanaged it
+              disagrees with the js language pinned above: the newer script engine sets the js.charset
+              option, which the older language does not define, so any JSR-223 use fails with
+              "Could not find option with name js.charset". Keep the whole GraalVM stack on one version.
+            -->
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js-scriptengine</artifactId>
+                <version>${graalvm.version}</version>
             </dependency>
 
             <!-- Logging and Metrics -->

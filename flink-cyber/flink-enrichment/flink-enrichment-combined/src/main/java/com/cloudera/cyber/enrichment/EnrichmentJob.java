@@ -175,7 +175,7 @@ public abstract class EnrichmentJob {
 
     protected abstract SingleOutputStreamOperator<Message> createSource(StreamExecutionEnvironment env, ParameterTool params);
 
-    protected abstract void writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<ScoredMessage> results);
+    protected abstract StreamExecutionEnvironment writeResults(StreamExecutionEnvironment env, ParameterTool params, DataStream<ScoredMessage> results);
 
     protected abstract DataStream<EnrichmentCommand> createEnrichmentSource(StreamExecutionEnvironment env, ParameterTool params);
 

@@ -18,9 +18,9 @@ public class TableApiFilesystemJob extends TableApiAbstractJob {
     private final String format;
     private final String path;
 
-    public TableApiFilesystemJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source)
+    public TableApiFilesystemJob(ParameterTool params, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv, DataStream<ScoredMessage> source)
           throws IOException {
-        super(params, env, source, "Filesystem", BASE_TABLE_JSON, getSerializationFormat(params));
+        super(params, env, tableEnv, source, "Filesystem", BASE_TABLE_JSON, getSerializationFormat(params));
         format = getFileFormat(params);
         path = params.getRequired("flink.files.path");
     }

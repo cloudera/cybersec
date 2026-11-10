@@ -18,8 +18,8 @@ public class TableApiHiveJob extends TableApiAbstractJob {
 
     private static final String BASE_TABLE_JSON = "base-hive-table.json";
 
-    public TableApiHiveJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source) throws IOException {
-        super(params, env, source, "Hive", BASE_TABLE_JSON, FlinkSchemaUtil.SerializationFormat.HIVE);
+    public TableApiHiveJob(ParameterTool params, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv, DataStream<ScoredMessage> source) throws IOException {
+        super(params, env, tableEnv, source, "Hive", BASE_TABLE_JSON, FlinkSchemaUtil.SerializationFormat.HIVE);
     }
 
     @Override

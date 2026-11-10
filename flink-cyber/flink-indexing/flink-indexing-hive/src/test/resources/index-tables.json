@@ -1,0 +1,21 @@
+{
+  "examples_full_events": {
+    "unenriched_table_name": "examples_full_events_raw",
+    "columns": [
+      { "name": "id", "type": "string" },
+      { "name": "domain", "type": "string" }
+    ]
+  },
+  "enriched_only_table": {
+    "unenriched_table_name": "enriched_only_table_raw",
+    "columns": [
+      { "name": "domain_malicious", "type": "string" }
+    ]
+  },
+  "plain_table": {
+    "columns": [
+      { "name": "id", "type": "string" }
+    ]
+  },
+  "no_columns_table": {}
+}

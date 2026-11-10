@@ -31,9 +31,9 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
 
   private static final String BASE_TABLE_JSON = "base-hive-table.json";
 
-  public TableApiKafkaJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source)
+  public TableApiKafkaJob(ParameterTool params, StreamExecutionEnvironment env, StreamTableEnvironment tableEnv, DataStream<ScoredMessage> source)
       throws IOException {
-    super(params, env, source, "Kafka", BASE_TABLE_JSON, FlinkSchemaUtil.SerializationFormat.AVRO);
+    super(params, env, tableEnv, source, "Kafka", BASE_TABLE_JSON, FlinkSchemaUtil.SerializationFormat.AVRO);
   }
 
   @Override
@@ -44,7 +44,8 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
 
   @Override
   protected void createInserts(StreamTableEnvironment tableEnv, Map<String, MappingDto> topicMapping,
-                               Map<String, TableDto> tablesConfig, Map<String, MappingDto> unenrichedTopicMapping, Map<String, ResolvedSchema> tableSchemaMap) {
+                               Map<String, TableDto> tablesConfig, Map<String, MappingDto> unenrichedTopicMapping, Map<String, ResolvedSchema> tableSchemaMap,
+                               boolean executeInserts) {
     topicMapping.forEach((source, mappingDto) -> {
       registerFilterMapFunction(tableEnv, source, mappingDto, Collections.emptySet());
       final String insertSql = buildInsertSql(source, mappingDto, tableSchemaMap.get(mappingDto.getTableName()));
@@ -58,7 +59,7 @@ public class TableApiKafkaJob extends TableApiAbstractJob {
 
         outputViewToKafka(tablesConfig, mappingDto, tableStream, mappingDto.getTableName());
         Optional.ofNullable(unenrichedTopicMapping.get(source))
-                .ifPresent(unenrichedDto -> outputViewToKafka(tablesConfig, unenrichedDto, tableStream, unenrichedDto.getTableName(), getFilterMapIgnorePrefixes(source)));
+                .ifPresent(unenrichedDto -> outputViewToKafka(tablesConfig, unenrichedDto, tableStream, unenrichedDto.getTableName(), configuration.getFilterMapIgnorePrefixes(source)));
 
         System.out.printf("Insert SQL added to the queue for the table: %s%nSQL: %s%n", mappingDto.getTableName(),
             insertSql);

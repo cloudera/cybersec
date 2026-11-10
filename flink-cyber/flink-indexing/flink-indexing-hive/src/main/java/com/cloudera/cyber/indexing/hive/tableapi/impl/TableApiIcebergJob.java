@@ -21,27 +21,39 @@ import java.util.stream.Collectors;
 
 public class TableApiIcebergJob extends TableApiAbstractJob {
 
-    private static final String BASE_TABLE_JSON = "base-hive-table.json";
+    public static final String BASE_TABLE_JSON = "base-hive-table.json";
+    public static final String DATABASE_PARAM_KEY = "hive.dbname";
 
     public TableApiIcebergJob(ParameterTool params, StreamExecutionEnvironment env, DataStream<ScoredMessage> source) throws IOException {
-        super(params, env, source, "Iceberg", BASE_TABLE_JSON, FlinkSchemaUtil.SerializationFormat.ICEBERG );
+        super(params, env, null, source, "Iceberg", BASE_TABLE_JSON, FlinkSchemaUtil.SerializationFormat.ICEBERG );
+    }
+
+    public static String getDatabase(ParameterTool params) {
+        return params.get(DATABASE_PARAM_KEY, "cyber");
     }
 
     @Override
     protected void registerCatalog(StreamTableEnvironment tableEnv) {
+        registerCatalog(tableEnv, params);
+    }
+
+    public static String registerCatalog(StreamTableEnvironment tableEnv, ParameterTool params) {
         String catalogName = "iceberg";
-        String defaultDatabase = params.get("hive.dbname", "cyber");
-        String hiveConfDir = params.get("hive.confdir", "/etc/hive/conf");
+        if (tableEnv.getCatalog(catalogName).isEmpty()) {
+            String defaultDatabase = getDatabase(params);
+            String hiveConfDir = params.get("hive.confdir", "/etc/hive/conf");
 
-        Configuration catalogConfig = new Configuration();
-        catalogConfig.setString("type", catalogName);
-        catalogConfig.setString("catalog-type", "hive");
-        catalogConfig.setString("engine.hive.enabled", "true");
-        catalogConfig.setString("default-database", defaultDatabase);
-        catalogConfig.setString("hive-conf-dir", hiveConfDir);
+            Configuration catalogConfig = new Configuration();
+            catalogConfig.setString("type", catalogName);
+            catalogConfig.setString("catalog-type", "hive");
+            catalogConfig.setString("engine.hive.enabled", "true");
+            catalogConfig.setString("default-database", defaultDatabase);
+            catalogConfig.setString("hive-conf-dir", hiveConfDir);
 
-        tableEnv.createCatalog(catalogName, CatalogDescriptor.of(catalogName, catalogConfig));
+            tableEnv.createCatalog(catalogName, CatalogDescriptor.of(catalogName, catalogConfig));
+        }
         tableEnv.useCatalog(catalogName);
+        return catalogName;
     }
 
     @Override
