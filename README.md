@@ -24,3 +24,4 @@ The Cyber Toolkit is flexible and configurable so the ingestion can be changed w
 1. [Batch Enrichment Load](flink-cyber/flink-enrichment/flink-enrichment-load/README.md)
 2. [Upsert Scoring Command](flink-cyber/flink-commands/scoring-commands/README.md)
 3. [Event Generation](flink-cyber/caracal-generator/README.md)
+4. [On-Demand Enrichment](flink-cyber/flink-ondemand-pipeline/README.md)
